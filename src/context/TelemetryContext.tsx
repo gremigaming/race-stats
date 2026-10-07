@@ -39,12 +39,28 @@ import {
   type LeagueIndex,
   type LeagueRace,
 } from "../league/league";
+import {
+  allowedFiles,
+  buildStreams,
+  describeFilter,
+  readStoredFilter,
+  storeFilter,
+  type LeagueFilter,
+  type Stream,
+} from "../league/filter";
 
 export interface LeagueState {
+  /** Races inside the site-wide filter. */
   races: LeagueRace[];
+  /** Every race, whatever the filter says. */
+  allRaces: LeagueRace[];
   drivers: LeagueDriver[];
   selectedDriver: string;
   setSelectedDriver: (key: string) => void;
+  filter: LeagueFilter;
+  setFilter: (filter: LeagueFilter) => void;
+  filterLabel: string;
+  streams: Stream[];
 }
 
 const LEAGUE_DRIVER_STORAGE_KEY = "league-driver";
@@ -157,6 +173,22 @@ export function TelemetryProvider({ children }: { children: ReactNode }) {
     structuralSharing: false,
   });
   const [pickedDriver, setPickedDriver] = useState<string | null>(initialDriver);
+  const [filter, setFilterState] = useState<LeagueFilter>(readStoredFilter);
+  const setFilter = useCallback((next: LeagueFilter) => {
+    setFilterState(next);
+    storeFilter(next);
+  }, []);
+  const streams = useMemo(
+    () => (leagueQuery.data ? buildStreams(leagueQuery.data.races) : []),
+    [leagueQuery.data],
+  );
+  const filteredRaces = useMemo(() => {
+    if (!leagueQuery.data) return [];
+    const allowed = allowedFiles(filter, leagueQuery.data.races, streams);
+    return allowed
+      ? leagueQuery.data.races.filter((r) => allowed.has(r.file))
+      : leagueQuery.data.races;
+  }, [leagueQuery.data, filter, streams]);
   const leagueDrivers = useMemo(
     () => (leagueQuery.data ? listDrivers(leagueQuery.data.races) : []),
     [leagueQuery.data],
@@ -180,7 +212,9 @@ export function TelemetryProvider({ children }: { children: ReactNode }) {
   }, []);
   // Every page reads summaries/details as "the player", so build them from
   // each race as seen by the chosen driver.
-  const leagueSessions = useMemo(() => {
+  // Built for every race so session pages and game scopes keep working outside
+  // the filter; the filtered list is what pages show.
+  const allLeagueSessions = useMemo(() => {
     if (mode !== "league" || !leagueQuery.data || !selectedDriver) return null;
     const built: LoadedSessionSummary[] = [];
     const data = new Map<string, TelemetrySession>();
@@ -204,13 +238,24 @@ export function TelemetryProvider({ children }: { children: ReactNode }) {
     });
     return kept as SessionSummary[];
   }, [mode, leagueQuery.data, selectedDriver, sessionStore, queryClient]);
+  const leagueSessions = useMemo(() => {
+    if (!allLeagueSessions) return null;
+    if (filteredRaces.length === leagueQuery.data?.races.length) return allLeagueSessions;
+    const files = new Set(filteredRaces.map((r) => r.file));
+    return allLeagueSessions.filter((s) => files.has(s.relativePath));
+  }, [allLeagueSessions, filteredRaces, leagueQuery.data]);
   const league: LeagueState | null =
     mode === "league" && leagueQuery.data
       ? {
-          races: leagueQuery.data.races,
+          races: filteredRaces,
+          allRaces: leagueQuery.data.races,
           drivers: leagueDrivers,
           selectedDriver,
           setSelectedDriver,
+          filter,
+          setFilter,
+          filterLabel: describeFilter(filter, streams),
+          streams,
         }
       : null;
 
@@ -249,14 +294,17 @@ export function TelemetryProvider({ children }: { children: ReactNode }) {
       ? sessionListQuery.error.message
       : null;
 
+  // Game scopes come from every league race so a quiet filter period never
+  // makes the current scope (and its URLs) disappear.
+  const scopeSessions = allLeagueSessions ?? sessions;
   const formulaOptions = useMemo(
-    () => getFormulaScopeOptions(sessions),
-    [sessions],
+    () => getFormulaScopeOptions(scopeSessions),
+    [scopeSessions],
   );
   const isRouteRoot = isRootPath(location.pathname);
   const routeFormulaKey = getFormulaScopeCandidateFromPath(location.pathname);
   const routeFormulaKeyResolved = resolveFormulaScopeAlias(
-    sessions,
+    scopeSessions,
     routeFormulaKey,
   );
   // Root is the only path that defaults to the newest available scope. Every
@@ -267,9 +315,9 @@ export function TelemetryProvider({ children }: { children: ReactNode }) {
   const activeFormulaKey = useMemo(
     () =>
       isRouteRoot
-        ? resolveFormulaScopeKey(sessions, null)
+        ? resolveFormulaScopeKey(scopeSessions, null)
         : routeFormulaKeyResolved,
-    [isRouteRoot, routeFormulaKeyResolved, sessions],
+    [isRouteRoot, routeFormulaKeyResolved, scopeSessions],
   );
   const activeFormula = useMemo(
     () => formulaOptions.find((option) => option.key === activeFormulaKey),

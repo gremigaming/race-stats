@@ -62,25 +62,20 @@ export function namedDrivers(session: TelemetrySession): DriverData[] {
   return (session["classification-data"] ?? []).filter(isNamedDriver);
 }
 
-/** Everyone with a profile, most races first. */
+/** Everyone with a profile, newest member (first race most recent) first. */
 export function listDrivers(races: LeagueRace[]): LeagueDriver[] {
-  const counts = new Map<string, { name: string; races: number }>();
-  for (const { session } of races) {
-    const seen = new Set<string>();
+  const firstSeen = new Map<string, { name: string; first: number }>();
+  for (const { session, file } of races) {
+    const when = raceDate(file)?.getTime() ?? 0;
     for (const d of namedDrivers(session)) {
       const key = driverKey(d["driver-name"]);
-      if (seen.has(key)) continue;
-      seen.add(key);
-      const entry = counts.get(key) ?? {
-        name: displayName(d["driver-name"]),
-        races: 0,
-      };
-      entry.races += 1;
-      counts.set(key, entry);
+      const entry = firstSeen.get(key);
+      if (!entry) firstSeen.set(key, { name: displayName(d["driver-name"]), first: when });
+      else if (when < entry.first) entry.first = when;
     }
   }
-  return [...counts.entries()]
-    .sort((a, b) => b[1].races - a[1].races || a[1].name.localeCompare(b[1].name))
+  return [...firstSeen.entries()]
+    .sort((a, b) => b[1].first - a[1].first || a[1].name.localeCompare(b[1].name))
     .map(([key, v]) => ({ key, name: v.name }));
 }
 
@@ -151,45 +146,6 @@ function racePace(d: DriverData): number | null {
 export function raceDate(file: string): Date | null {
   const m = file.match(/(\d{4})_(\d{2})_(\d{2})_(\d{2})_(\d{2})/);
   return m ? new Date(+m[1], +m[2] - 1, +m[3], +m[4], +m[5]) : null;
-}
-
-export type LeaderboardRange = "month" | "last-month" | "3-months" | "year" | "all";
-
-export const LEADERBOARD_RANGES: { value: LeaderboardRange; label: string }[] = [
-  { value: "month", label: "This month" },
-  { value: "last-month", label: "Last month" },
-  { value: "3-months", label: "Last 3 months" },
-  { value: "year", label: "This year" },
-  { value: "all", label: "All time" },
-];
-
-/** [from, to) for a range, in local time; null bounds are open. */
-export function rangeBounds(
-  range: LeaderboardRange,
-  now = new Date(),
-): { from: Date | null; to: Date | null } {
-  const y = now.getFullYear();
-  const m = now.getMonth();
-  switch (range) {
-    case "month":
-      return { from: new Date(y, m, 1), to: null };
-    case "last-month":
-      return { from: new Date(y, m - 1, 1), to: new Date(y, m, 1) };
-    case "3-months":
-      return { from: new Date(y, m - 2, 1), to: null };
-    case "year":
-      return { from: new Date(y, 0, 1), to: null };
-    default:
-      return { from: null, to: null };
-  }
-}
-
-export function inRange(file: string, range: LeaderboardRange, now = new Date()): boolean {
-  if (range === "all") return true;
-  const d = raceDate(file);
-  if (!d) return false;
-  const { from, to } = rangeBounds(range, now);
-  return (!from || d >= from) && (!to || d < to);
 }
 
 function sessionDate(file: string): string {

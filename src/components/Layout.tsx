@@ -9,7 +9,6 @@ import {
   Menu,
   Swords,
   Trophy,
-  User,
   X,
   type LucideIcon,
 } from "lucide-react";
@@ -38,7 +37,8 @@ import { BrandHomeLink } from "./BrandHomeLink";
 import { cardHighlight } from "./Card";
 import { ChangelogModal } from "./ChangelogModal";
 import { FormulaScopeSelect } from "./FormulaScopeSelect";
-import { PillSelect } from "./ui/PillSelect";
+import { DriverSearchSelect } from "./DriverSearchSelect";
+import { LeagueFilterPanel } from "./LeagueFilterPanel";
 import { SessionList } from "./SessionList";
 import {
   scrollAxisClass,
@@ -219,19 +219,13 @@ export function Layout() {
             </div>
           )}
           {league && league.drivers.length > 0 && (
-            <div className="mt-3">
-              <PillSelect
+            <div className="mt-3 space-y-1.5">
+              <DriverSearchSelect
+                drivers={league.drivers}
                 value={league.selectedDriver}
                 onChange={league.setSelectedDriver}
-                options={league.drivers.map((d) => ({
-                  value: d.key,
-                  label: d.name,
-                }))}
-                ariaLabel="Driver"
-                leadingIcon={User}
-                width="full"
-                size="sm"
               />
+              <LeagueFilterPanel />
             </div>
           )}
         </div>

@@ -50,6 +50,28 @@ for (const path of walk(SRC)) {
   writeFileSync(join(OUT, "sessions", name), JSON.stringify(data));
   files.push(name);
 }
+// Pits n' Giggles writes a "Just_in_case" save when a session looks like it
+// ended without results, and often the real save follows a minute later.
+// Keep the backup only when no real save of the same event came after it.
+const parseName = (name) => {
+  const m = name.match(/^(.+?)_(?:Just_in_case_)?(\d{4})_(\d{2})_(\d{2})_(\d{2})_(\d{2})_(\d{2})\.json$/);
+  return m ? { event: m[1], at: Date.UTC(+m[2], +m[3] - 1, +m[4], +m[5], +m[6], +m[7]) } : null;
+};
+const backups = files.filter((f) => f.includes("_Just_in_case_"));
+for (const backup of backups) {
+  const b = parseName(backup);
+  if (!b) continue;
+  const replaced = files.some((f) => {
+    if (f.includes("_Just_in_case_")) return false;
+    const r = parseName(f);
+    return r && r.event === b.event && r.at >= b.at && r.at - b.at <= 15 * 60 * 1000;
+  });
+  if (replaced) {
+    files.splice(files.indexOf(backup), 1);
+    rmSync(join(OUT, "sessions", backup));
+    console.log(`skipped (real save exists): ${backup}`);
+  }
+}
 files.sort((a, b) => dateKey(b).localeCompare(dateKey(a)));
 writeFileSync(join(OUT, "index.json"), JSON.stringify({ files, defaultDriver: DEFAULT_DRIVER }, null, 2));
 console.log(`league data: ${files.length} session files`);

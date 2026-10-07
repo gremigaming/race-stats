@@ -141,7 +141,7 @@ function getTrackListBestLap(
  */
 export function SessionList({ section }: { section?: SidebarTab } = {}) {
   const { sessions, loading, error } = useSessionList();
-  const { activeFormulaKey, formulaOptions } = useTelemetry();
+  const { activeFormulaKey, formulaOptions, league } = useTelemetry();
   const [storedTab, setTab] = useState<SidebarTab>(() =>
     readStoredString(SESSION_LIST_TAB_STORAGE_KEY, "session") === "tracks"
       ? "tracks"
@@ -176,7 +176,9 @@ export function SessionList({ section }: { section?: SidebarTab } = {}) {
 
   if (sessions.length === 0) {
     return (
-      <div className="p-4 text-sm text-zinc-500">No telemetry files found.</div>
+      <div className="p-4 text-sm text-zinc-500">
+        {league ? "No sessions in this period." : "No telemetry files found."}
+      </div>
     );
   }
 

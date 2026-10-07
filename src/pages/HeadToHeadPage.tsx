@@ -1,8 +1,8 @@
-import { Swords, User } from "lucide-react";
+import { Swords } from "lucide-react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { cardClass, cardClassFeature } from "../components/Card";
 import { TrackFlag } from "../components/TrackFlag";
-import { PillSelect } from "../components/ui/PillSelect";
+import { DriverSearchSelect } from "../components/DriverSearchSelect";
 import { SectionHeader } from "../components/ui/SectionHeader";
 import {
   tableCellClass,
@@ -41,7 +41,6 @@ export function HeadToHeadPage() {
   const b = keys.includes(wantedB) && wantedB !== a ? wantedB : fallbackB;
   const nameOf = (k: string) =>
     league.drivers.find((d) => d.key === k)?.name ?? k;
-  const options = league.drivers.map((d) => ({ value: d.key, label: d.name }));
   const set = (which: "a" | "b", value: string) => {
     if (which === "a") {
       league.setSelectedDriver(value);
@@ -67,25 +66,25 @@ export function HeadToHeadPage() {
           Head to head
         </h2>
         <p className="text-sm text-zinc-500">
-          {total} {total === 1 ? "race" : "races"} together
+          {league.filterLabel} · {total} {total === 1 ? "race" : "races"} together
         </p>
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
-        <PillSelect
+        <DriverSearchSelect
+          drivers={league.drivers}
           value={a}
           onChange={(v) => set("a", v)}
-          options={options}
           ariaLabel="First driver"
-          leadingIcon={User}
+          className="w-56"
         />
         <span className="font-mono text-xs uppercase text-zinc-500">vs</span>
-        <PillSelect
+        <DriverSearchSelect
+          drivers={league.drivers}
           value={b}
           onChange={(v) => set("b", v)}
-          options={options}
           ariaLabel="Second driver"
-          leadingIcon={User}
+          className="w-56"
         />
       </div>
 
@@ -93,7 +92,7 @@ export function HeadToHeadPage() {
         <p className="text-sm text-zinc-500">Pick two different drivers.</p>
       ) : total === 0 ? (
         <section className={cn(cardClass, "text-center text-sm text-zinc-400")}>
-          {nameOf(a)} and {nameOf(b)} haven't raced each other yet.
+          {nameOf(a)} and {nameOf(b)} didn't race each other in this period.
         </section>
       ) : (
         <>

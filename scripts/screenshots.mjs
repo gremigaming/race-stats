@@ -24,6 +24,10 @@ const base = "http://localhost:4173/race-stats/";
 mkdirSync(outDir, { recursive: true });
 const browser = await chromium.launch();
 const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+// The default filter (this month) can be empty; most shots use all time
+await page.addInitScript(() => {
+  if (!sessionStorage.getItem("league-filter")) sessionStorage.setItem("league-filter", JSON.stringify({ kind: "all" }));
+});
 await page.goto(base);
 await page.waitForTimeout(5000);
 const scope = new URL(page.url()).pathname.replace(/^\/race-stats\//, "").split("/")[0];
@@ -34,8 +38,22 @@ const shoot = async (name, path, fullPage = false) => {
   console.log(`saved ${name} (${page.url()})`);
 };
 await shoot("dashboard", "");
-await shoot("leaderboard", "drivers?range=all");
-await shoot("leaderboard-month", "drivers");
+// the driver search, typed into
+await page.click('button[aria-label="Driver"]');
+await page.keyboard.type("co");
+await page.waitForTimeout(500);
+await page.screenshot({ path: `${outDir}/driver-search.jpg`, type: "jpeg", quality: 75 });
+await page.keyboard.press("Escape");
+// the last 3 streams
+await page.selectOption('select[aria-label="Time range"]', "streams");
+await page.waitForTimeout(1500);
+await page.screenshot({ path: `${outDir}/filter-streams.jpg`, type: "jpeg", quality: 75 });
+await page.selectOption('select[aria-label="Time range"]', "all");
+await shoot("leaderboard", "drivers");
+await page.selectOption('select[aria-label="Time range"]', "month");
+await page.waitForTimeout(1500);
+await page.screenshot({ path: `${outDir}/leaderboard-month.jpg`, type: "jpeg", quality: 75 });
+await page.selectOption('select[aria-label="Time range"]', "all");
 await shoot("head-to-head", "head-to-head", true);
 // a race opened from head to head keeps both drivers compared
 const row = await page.$("tbody tr");

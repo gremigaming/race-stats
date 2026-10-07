@@ -139,12 +139,17 @@ export function DashboardPage() {
   const subtitle = hasScopedData
     ? `${formulaLabelText} · ${scopedSessions.length} ${isFiltered ? "filtered " : ""}${scopedSessions.length === 1 ? "session" : "sessions"} across ${uniqueTracks.length} ${uniqueTracks.length === 1 ? "track" : "tracks"}`
     : `${formulaLabelText} form across your saved sessions`;
-  const emptyTitle =
-    isFiltered && hasUnfilteredScopedData
+  const leagueSubtitle = league
+    ? `${formulaLabelText} · ${league.filterLabel} · ${scopedSessions.length} ${scopedSessions.length === 1 ? "session" : "sessions"} across ${uniqueTracks.length} ${uniqueTracks.length === 1 ? "track" : "tracks"}`
+    : null;
+  const emptyTitle = league
+    ? `No sessions for ${leagueDriverName ?? "this driver"} in this period`
+    : isFiltered && hasUnfilteredScopedData
       ? "No sessions match these filters"
       : "No sessions in this scope";
-  const emptyHint =
-    isFiltered && hasUnfilteredScopedData
+  const emptyHint = league
+    ? `${league.filterLabel}. Pick a longer time range in the filter at the top left.`
+    : isFiltered && hasUnfilteredScopedData
       ? "Reset filters or choose a different game scope."
       : "Try a different formula or load more telemetry files.";
 
@@ -155,7 +160,7 @@ export function DashboardPage() {
           <h2 className="mb-1 text-xl font-bold">
             {isDemoMode ? "Demo" : (leagueDriverName ?? "Dashboard")}
           </h2>
-          <p className="text-sm text-zinc-500">{subtitle}</p>
+          <p className="text-sm text-zinc-500">{leagueSubtitle ?? subtitle}</p>
         </div>
       </div>
 
@@ -168,6 +173,16 @@ export function DashboardPage() {
         >
           <h3 className="text-sm font-semibold text-zinc-300">{emptyTitle}</h3>
           <p className="mt-1 text-sm text-zinc-500">{emptyHint}</p>
+          {league && league.filter.kind !== "all" && (
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() => league.setFilter({ kind: "all" })}
+              className="mt-4"
+            >
+              Show all time
+            </Button>
+          )}
           {isFiltered && (
             <Button
               size="sm"
