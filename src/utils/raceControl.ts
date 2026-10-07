@@ -1,0 +1,475 @@
+import type {
+  DriverData,
+  OvertakeRecord,
+  RaceControlDriverInfo,
+  RaceControlEvent,
+  TelemetrySession,
+} from "../types/telemetry";
+import { msToLapTime } from "./format";
+
+const BASE_DETAIL_KEYS = new Set([
+  "id",
+  "lap-number",
+  "timestamp",
+  "message-type",
+  "involved-drivers",
+  "lap-distance",
+  "sector",
+  "segment-info",
+]);
+
+const NESTED_INFO_KEYS = new Set([
+  "driver-info",
+  "driver-1-info",
+  "driver-2-info",
+  "other-driver-info",
+  "overtaker-info",
+  "overtaken-info",
+  "session-fastest-driver-info",
+]);
+
+export const KEY_RACE_CONTROL_TYPES = new Set([
+  "PENALTY",
+  "COLLISION",
+  "CAR_DAMAGE",
+  "RETIREMENT",
+  "PITTING",
+  "WING_CHANGE",
+  "TYRE_CHANGE",
+  "FASTEST_LAP",
+  "RACE_WINNER",
+  "CHEQUERED_FLAG",
+  "OVERTAKE",
+]);
+
+export function getRaceControlEvents(
+  session: TelemetrySession,
+): RaceControlEvent[] {
+  const topLevel = session["race-control"];
+  if (topLevel?.length) return sortRaceControlEvents(topLevel);
+
+  const deduped = new Map<string, RaceControlEvent>();
+  for (const driver of session["classification-data"] ?? []) {
+    for (const event of driver["race-control"] ?? []) {
+      deduped.set(raceControlEventKey(event), event);
+    }
+  }
+
+  return sortRaceControlEvents([...deduped.values()]);
+}
+
+export function sortRaceControlEvents(
+  events: RaceControlEvent[],
+): RaceControlEvent[] {
+  return [...events].sort((a, b) => {
+    const timestampDelta = (a.timestamp ?? 0) - (b.timestamp ?? 0);
+    if (timestampDelta !== 0) return timestampDelta;
+    return (a.id ?? 0) - (b.id ?? 0);
+  });
+}
+
+export function raceControlEventKey(event: RaceControlEvent): string {
+  if (Number.isFinite(event.id)) return String(event.id);
+  return `${event.timestamp}-${event["message-type"]}-${event["lap-number"] ?? "session"}`;
+}
+
+export function isKeyRaceControlEvent(event: RaceControlEvent): boolean {
+  return KEY_RACE_CONTROL_TYPES.has(event["message-type"]);
+}
+
+export function isGlobalRaceControlEvent(event: RaceControlEvent): boolean {
+  return !event["involved-drivers"]?.length;
+}
+
+export function isDriverInvolvedInRaceControlEvent(
+  event: RaceControlEvent,
+  driver: DriverData,
+): boolean {
+  if (event["involved-drivers"]?.includes(driver.index)) return true;
+
+  const driverInfos = getRaceControlDriverInfos(event);
+  return driverInfos.some((info) => info.name === driver["driver-name"]);
+}
+
+export function eventMatchesRaceControlFocus(
+  event: RaceControlEvent,
+  driver: DriverData | undefined,
+): boolean {
+  if (!driver) return true;
+  return (
+    isGlobalRaceControlEvent(event) ||
+    isDriverInvolvedInRaceControlEvent(event, driver)
+  );
+}
+
+/**
+ * A pit-lane overtake is a position swap that only happened because exactly one
+ * of the two drivers was in the pits — not a real on-track pass. When both are
+ * pitting (or neither is), the change is treated as a genuine overtake.
+ *
+ * Both flags must be present: older exports omit them, and PnG writes null when
+ * it cannot resolve a driver. Either way there is not enough information to call
+ * it a pit-lane pass, so it stays visible as a normal overtake.
+ */
+export function isPitLaneOvertake(event: RaceControlEvent): boolean {
+  if (event["message-type"] !== "OVERTAKE") return false;
+  const overtakerPitting = event["overtaker-pitting"];
+  const overtakenPitting = event["overtaken-pitting"];
+  if (
+    typeof overtakerPitting !== "boolean" ||
+    typeof overtakenPitting !== "boolean"
+  ) {
+    return false;
+  }
+  return overtakerPitting !== overtakenPitting;
+}
+
+export function raceControlEventsToOvertakes(
+  events: RaceControlEvent[],
+): OvertakeRecord[] {
+  return events.flatMap((event) => {
+    if (event["message-type"] !== "OVERTAKE") return [];
+    const lap = event["lap-number"];
+    const overtaker = event["overtaker-info"];
+    const overtaken = event["overtaken-info"];
+    if (typeof lap !== "number" || !overtaker?.name || !overtaken?.name) {
+      return [];
+    }
+
+    return [
+      {
+        "overtake-id": event.id,
+        "overtaking-driver-name": overtaker.name,
+        "overtaken-driver-name": overtaken.name,
+        "overtaking-driver-lap": lap,
+        "overtaking-driver-index": event["overtaker-index"],
+        "overtaken-driver-index": event["overtaken-index"],
+      },
+    ];
+  });
+}
+
+export function formatRaceControlLap(event: RaceControlEvent): string {
+  return typeof event["lap-number"] === "number"
+    ? `Lap ${event["lap-number"]}`
+    : "Session";
+}
+
+export function formatRaceControlClock(
+  event: RaceControlEvent,
+  firstTimestamp: number | undefined,
+): string | null {
+  if (firstTimestamp == null || !Number.isFinite(event.timestamp)) return null;
+  const seconds = Math.max(0, Math.round(event.timestamp - firstTimestamp));
+  const minutes = Math.floor(seconds / 60);
+  const remainder = seconds % 60;
+  return `+${minutes}:${String(remainder).padStart(2, "0")}`;
+}
+
+export function formatRaceControlLocation(
+  event: RaceControlEvent,
+): string | null {
+  if (!("lap-distance" in event)) return null;
+
+  const sectorLabel = formatRaceControlSector(event.sector);
+  const segmentLabel = formatRaceControlSegment(event["segment-info"]);
+  return segmentLabel ?? sectorLabel;
+}
+
+export function formatRaceControlEvent(event: RaceControlEvent): string {
+  switch (event["message-type"]) {
+    case "OVERTAKE":
+      return `${driverName(event["overtaker-info"])} passed ${driverName(event["overtaken-info"])}`;
+    case "SPEED_TRAP_RECORD": {
+      const prefix = event["is-session-fastest"]
+        ? "set the session speed trap"
+        : event["is-personal-fastest"]
+          ? "set a personal speed trap"
+          : "speed trap";
+      return `${driverName(event["driver-info"])} ${prefix} at ${formatSpeed(event.speed)}`;
+    }
+    case "COLLISION":
+      return `${driverName(event["driver-1-info"])} and ${driverName(event["driver-2-info"])} collided`;
+    case "PENALTY":
+      return formatPenaltyEvent(event);
+    case "CAR_DAMAGE":
+      return `${driverName(event["driver-info"])} damaged ${formatDamagedPart(event["damaged-part"])}${formatDamageChange(event)}`;
+    case "RETIREMENT":
+      return `${driverName(event["driver-info"])} retired${event.reason ? `: ${event.reason}` : ""}`;
+    case "PITTING":
+      return `${driverName(event["driver-info"])} pitted`;
+    case "WING_CHANGE":
+      return `${driverName(event["driver-info"])} changed front wing`;
+    case "TYRE_CHANGE":
+      return `${driverName(event["driver-info"])} changed tyres from ${event["old-tyre-compound"] ?? "unknown"} to ${event["new-tyre-compound"] ?? "unknown"}`;
+    case "FASTEST_LAP":
+      return `${driverName(event["driver-info"])} set fastest lap${typeof event["lap-time-ms"] === "number" ? ` (${msToLapTime(event["lap-time-ms"])})` : ""}`;
+    case "RACE_WINNER":
+      return `${driverName(event["driver-info"])} won the race`;
+    case "CHEQUERED_FLAG":
+      return "Chequered flag";
+    case "START_LIGHTS": {
+      const lights = event["num-lights"];
+      return typeof lights === "number"
+        ? `${lights} light${lights === 1 ? "" : "s"}`
+        : "Start lights";
+    }
+    case "LIGHTS_OUT":
+      return "Lights out";
+    case "FLASHBACK":
+      return "Flashback used";
+    case "SESSION_START":
+      return "Session started";
+    case "SESSION_END":
+      return "Session ended";
+    case "RED_FLAG":
+      return "Red flag";
+    case "SAFETY_CAR":
+      return formatSafetyCarEvent(event);
+    case "DRIVE_THROUGH_SERVED":
+      return `${driverName(event["driver-info"])} served a drive-through penalty`;
+    case "STOP_GO_SERVED":
+      return `${driverName(event["driver-info"])} served a stop-go penalty${formatStopTime(event["stop-time"])}`;
+    case "DRS_ENABLED":
+      return "DRS enabled";
+    case "DRS_DISABLED":
+      return withReason("DRS disabled", event.reason);
+    case "PARTIAL_AERO_MODE_ENABLED":
+      return withReason("Partial aero mode enabled", event.reason);
+    case "PARTIAL_AERO_MODE_DISABLED":
+      return "Partial aero mode disabled";
+    case "OVERTAKE_MODE_ENABLED":
+      return "Overtake mode enabled";
+    case "OVERTAKE_MODE_DISABLED":
+      return "Overtake mode disabled";
+    case "DRIVER_AI_STATUS_CHANGE":
+      return formatAiStatusChangeEvent(event);
+    default:
+      return humanizeRaceControlType(event["message-type"]);
+  }
+}
+
+export function formatPenaltySummary(event: RaceControlEvent): string {
+  return `${formatRaceControlLap(event)}: ${formatPenaltyEvent(event)}`;
+}
+
+export function getRaceControlDriverInfos(
+  event: RaceControlEvent,
+): RaceControlDriverInfo[] {
+  const infos = [
+    event["driver-info"],
+    event["driver-1-info"],
+    event["driver-2-info"],
+    event["other-driver-info"],
+    event["overtaker-info"],
+    event["overtaken-info"],
+  ].filter((info): info is RaceControlDriverInfo => Boolean(info?.name));
+
+  const seen = new Set<string>();
+  return infos.filter((info) => {
+    const key = `${info.name}-${info.team}-${info["driver-number"]}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+export function getRaceControlSearchText(
+  event: RaceControlEvent,
+  firstTimestamp: number | undefined,
+  lapLabel = formatRaceControlLap(event),
+): string {
+  const driverInfos = getRaceControlDriverInfos(event);
+  const location = formatRaceControlLocation(event);
+  const segment = event["segment-info"];
+  const scalarDetails = Object.entries(event)
+    .filter(([key, value]) => {
+      if (BASE_DETAIL_KEYS.has(key) || NESTED_INFO_KEYS.has(key)) return false;
+      return ["string", "number", "boolean"].includes(typeof value);
+    })
+    .map(([, value]) => String(value));
+
+  return [
+    event.id,
+    event["message-type"],
+    humanizeRaceControlType(event["message-type"]),
+    lapLabel,
+    formatRaceControlClock(event, firstTimestamp),
+    formatRaceControlEvent(event),
+    location,
+    event.sector,
+    event["lap-distance"],
+    segment?.name,
+    formatRaceControlSegmentTurns(segment),
+    ...driverInfos.flatMap((info) => [
+      info.name,
+      info.team,
+      info["driver-number"],
+    ]),
+    ...scalarDetails,
+  ]
+    .filter((part) => part != null && part !== "")
+    .join(" ");
+}
+
+export function raceControlEventMatchesSearch(
+  event: RaceControlEvent,
+  query: string,
+  firstTimestamp: number | undefined,
+  lapLabel?: string,
+): boolean {
+  const terms = normalizeRaceControlSearchText(query)
+    .split(/\s+/)
+    .filter(Boolean);
+  if (terms.length === 0) return true;
+
+  const haystack = normalizeRaceControlSearchText(
+    getRaceControlSearchText(event, firstTimestamp, lapLabel),
+  );
+  return terms.every((term) => haystack.includes(term));
+}
+
+function normalizeRaceControlSearchText(value: string): string {
+  return value
+    .trim()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+}
+
+export function humanizeRaceControlType(type: string): string {
+  return type
+    .replace(/^m_/, "")
+    .replace(/[-_]/g, " ")
+    .replace(/([a-z])([A-Z])/g, "$1 $2")
+    .toLowerCase()
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+function withReason(base: string, reason: unknown): string {
+  if (typeof reason !== "string" || !reason.trim()) return base;
+  // Older PnG exports stringify an absent reason as "None".
+  if (reason.trim().toLowerCase() === "none") return base;
+
+  // PnG renders an unhandled enum value as "Unknown (99)". The raw wire number
+  // is debug detail, so drop it and keep the plain "Unknown".
+  const text = reason.trim().replace(/^Unknown\s*\(\d+\)$/i, "Unknown");
+  return `${base}: ${text}`;
+}
+
+function formatStopTime(stopTime: unknown): string {
+  return typeof stopTime === "number" && stopTime > 0 ? ` (${stopTime}s)` : "";
+}
+
+/**
+ * The AI-controlled flag flips when a player hands their car over and takes it
+ * back, so the two transitions read as the driver pausing and resuming:
+ * false -> true is a pause, true -> false is a resume.
+ */
+function formatAiStatusChangeEvent(event: RaceControlEvent): string {
+  const name = driverName(event["driver-info"]);
+  if (typeof event["new-state"] !== "boolean")
+    return `${name} changed AI status`;
+  return event["new-state"]
+    ? `${name} paused (AI took over)`
+    : `${name} resumed (back in control)`;
+}
+
+function formatSafetyCarEvent(event: RaceControlEvent): string {
+  const scType = event["sc-type"];
+  const eventType = event["event-type"];
+  const label =
+    typeof scType === "string" && scType
+      ? humanizeRaceControlType(scType)
+      : "Safety car";
+  return typeof eventType === "string" && eventType
+    ? `${label}: ${humanizeRaceControlType(eventType).toLowerCase()}`
+    : label;
+}
+
+function formatPenaltyEvent(event: RaceControlEvent): string {
+  const penalty = event["penalty-type"] ?? "Penalty";
+  const infringement = event["infringement-type"];
+  const otherDriver = event["other-driver-info"]?.name;
+  const time = formatPenaltyTime(event.time);
+  return [
+    `${driverName(event["driver-info"])}: ${penalty}`,
+    infringement ? `for ${infringement}` : null,
+    otherDriver ? `with ${otherDriver}` : null,
+    time,
+  ]
+    .filter(Boolean)
+    .join(" ");
+}
+
+function formatPenaltyTime(time: number | undefined): string | null {
+  if (time == null || time === 255 || time <= 0) return null;
+  return `(+${time}s)`;
+}
+
+function formatSpeed(speed: number | undefined): string {
+  return speed == null ? "unknown speed" : `${speed.toFixed(1)} km/h`;
+}
+
+function formatDamagedPart(part: string | undefined): string {
+  if (!part) return "car";
+  return humanizeRaceControlType(part)
+    .replace(/\bDamage\b/g, "")
+    .trim()
+    .toLowerCase();
+}
+
+function formatDamageChange(event: RaceControlEvent): string {
+  if (
+    typeof event["old-value"] !== "number" ||
+    typeof event["new-value"] !== "number"
+  ) {
+    return "";
+  }
+  return ` (${event["old-value"]}% -> ${event["new-value"]}%)`;
+}
+
+function formatRaceControlSector(
+  sector: RaceControlEvent["sector"],
+): string | null {
+  if (!sector) return null;
+  const match = /^S([1-3])$/.exec(sector);
+  return match ? `Sector ${match[1]}` : sector;
+}
+
+function formatRaceControlSegment(
+  segment: RaceControlEvent["segment-info"],
+): string | null {
+  if (!segment) return null;
+
+  const name = typeof segment.name === "string" ? segment.name.trim() : "";
+  if (segment.type === "straight") return name || null;
+
+  const turns = formatRaceControlSegmentTurns(segment);
+  if (turns && name) return `${turns} - ${name}`;
+  return turns ?? (name || null);
+}
+
+function formatRaceControlSegmentTurns(
+  segment: RaceControlEvent["segment-info"],
+): string | null {
+  if (!segment) return null;
+
+  // PnG complex corners currently use `type: "corner"` too, so the corner
+  // number keys are the stable discriminator for single vs sequence labels.
+  if (typeof segment.corner_number === "number") {
+    return `T${segment.corner_number}`;
+  }
+
+  const corners = segment.corner_numbers?.filter((corner) =>
+    Number.isFinite(corner),
+  );
+  if (!corners?.length) return null;
+  const first = corners[0];
+  const last = corners[corners.length - 1];
+  return first === last ? `T${first}` : `T${first}-${last}`;
+}
+
+function driverName(info: RaceControlDriverInfo | undefined): string {
+  return info?.name ?? "Unknown driver";
+}

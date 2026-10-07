@@ -1,0 +1,62 @@
+name: Build and publish the site
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # the "What's new" list reads the git history
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Turn race files into site data
+        run: node scripts/build-league-data.mjs
+      - name: Build
+        env:
+          VITE_BASE_PATH: /race-stats/
+          VITE_APP_NAME: GreMi Gang Race Stats
+          VITE_DISABLE_ANALYTICS: "true"
+          VITE_SKIP_API: "true"
+        run: |
+          pnpm build
+          # GitHub Pages has no app routing: serve the app for every unknown path
+          cp dist/index.html dist/404.html
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+      # Screenshots of the main pages, printed into the log for a quick check
+      - name: Screenshots
+        continue-on-error: true
+        run: |
+          npx --yes serve@14 -s dist -l 4173 >/dev/null 2>&1 &
+          mkdir -p /tmp/shots && cd /tmp/shots && npm init -y >/dev/null && npm i --silent playwright@1 && npx playwright install --with-deps chromium >/dev/null
+          node "$GITHUB_WORKSPACE/scripts/screenshots.mjs" http://localhost:4173/race-stats/
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

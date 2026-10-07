@@ -1,0 +1,698 @@
+import { useState, useMemo, type KeyboardEvent } from "react";
+import {
+  buildFallbackRaceRows,
+  buildPenaltiesByDriver,
+  buildRaceDriverStats,
+  buildRaceResultHighlights,
+  formatRaceGap,
+  formatRaceStrategy,
+  raceDriverStatsForEntry,
+  resolveRaceResultDriverIndex,
+  sortRaceStintHistoryRows,
+  type RaceResultSortKey,
+  type SortDirection,
+  type RaceDriverStats,
+} from "../analysis/resultsAnalysis";
+import type { SessionSpeedAnalysis } from "../analysis/speedAnalysis";
+import type { RaceControlEvent, TelemetrySession } from "../types/telemetry";
+import { getTeamColor, getTeamName } from "../utils/colors";
+import { msToLapTime } from "../utils/format";
+import {
+  ERS_HARVEST_UTILIZATION_TOOLTIP,
+  RACE_PACE_TOOLTIP,
+} from "../utils/stats/insightTypes";
+import { usePlayerOnly } from "../hooks/usePlayerOnly";
+import { cn } from "../utils/cn";
+import { AlertTriangle, ChevronUp, ChevronDown } from "lucide-react";
+import { Tooltip } from "./Tooltip";
+import { Badge } from "./ui/Badge";
+import { FocusToggle } from "./ui/FocusToggle";
+import { ScrollArea } from "./ui/ScrollArea";
+import { SectionHeader } from "./ui/SectionHeader";
+import {
+  tableCellClass,
+  tableClass,
+  tableHeadCellClass,
+  tableHeadClass,
+  tableRowClass,
+} from "./ui/table";
+import { formatPenaltySummary } from "../utils/raceControl";
+
+interface RaceResultsTableProps {
+  session: TelemetrySession;
+  speedAnalysis?: SessionSpeedAnalysis;
+  focusedDriverIndex: number;
+  raceControlEvents?: RaceControlEvent[];
+}
+
+const HIGH_VALUE_FIRST_SORT_KEYS = new Set<RaceResultSortKey>([
+  "sessionPeak",
+  "speedTrap",
+  "ers",
+  "ersHarv",
+  "ersHarvestPct",
+]);
+
+function SortIcon({
+  column,
+  sortKey,
+  sortDir,
+  side = "right",
+}: {
+  column: RaceResultSortKey;
+  sortKey: RaceResultSortKey;
+  sortDir: SortDirection;
+  side?: "left" | "right";
+}) {
+  const margin = side === "left" ? "mr-1" : "ml-1";
+  if (column !== sortKey)
+    return (
+      <ChevronDown
+        className={cn(
+          "inline w-3 h-3",
+          margin,
+          "opacity-0 group-hover:opacity-30",
+        )}
+      />
+    );
+  return sortDir === "asc" ? (
+    <ChevronDown className={cn("inline w-3 h-3", margin, "text-active")} />
+  ) : (
+    <ChevronUp className={cn("inline w-3 h-3", margin, "text-active")} />
+  );
+}
+
+function racePaceEvidenceLabel(stats: RaceDriverStats | undefined): string {
+  const sampleCount = stats?.racePaceLapCount ?? 0;
+  const laps = `${sampleCount} ${sampleCount === 1 ? "lap" : "laps"}`;
+
+  if (!stats || stats.racePace <= 0) {
+    return sampleCount > 0 ? `${laps} · need 3` : "0 clean laps";
+  }
+  if (!stats.racePaceRankEligible) {
+    return `${laps} · need ${stats.racePaceRankingSampleThreshold}`;
+  }
+  return `${laps} · ${stats.racePaceConfidence}`;
+}
+
+function SessionPeakValue({
+  kmh,
+  limited,
+}: {
+  kmh: number | null;
+  limited: boolean;
+}) {
+  return (
+    <span className="inline-flex items-center justify-end gap-1.5">
+      {kmh != null ? Math.round(kmh) : "–"}
+      {limited && (
+        <Badge size="xs" shape="square" tone="zinc">
+          Limited
+        </Badge>
+      )}
+    </span>
+  );
+}
+
+/**
+ * Final classification table for race sessions.
+ * Uses tyre-stint-history-v2 when available, falls back to classification-data.
+ */
+export function RaceResultsTable({
+  session,
+  speedAnalysis,
+  focusedDriverIndex,
+  raceControlEvents = [],
+}: RaceResultsTableProps) {
+  const [focusedOnly, toggleFocusedOnly] = usePlayerOnly();
+  const [sortKey, setSortKey] = useState<RaceResultSortKey>("pos");
+  const [sortDir, setSortDir] = useState<SortDirection>("asc");
+  const stintHistory = session["tyre-stint-history-v2"];
+  const drivers = session["classification-data"];
+
+  const focusedDriver = drivers.find((d) => d.index === focusedDriverIndex);
+  const focusedName = focusedDriver?.["driver-name"];
+
+  const driverStats = useMemo(
+    () => buildRaceDriverStats(session, speedAnalysis),
+    [session, speedAnalysis],
+  );
+  const penaltiesByDriver = useMemo(
+    () => buildPenaltiesByDriver(raceControlEvents),
+    [raceControlEvents],
+  );
+
+  const sortedStintHistory = useMemo(() => {
+    if (!stintHistory?.length) return [];
+    return sortRaceStintHistoryRows({
+      entries: stintHistory,
+      focusedOnly,
+      focusedName,
+      focusedDriverIndex,
+      sortKey,
+      sortDir,
+      drivers,
+      driverStats,
+    });
+  }, [
+    driverStats,
+    drivers,
+    focusedDriverIndex,
+    focusedName,
+    focusedOnly,
+    sortDir,
+    sortKey,
+    stintHistory,
+  ]);
+
+  function toggleSort(key: RaceResultSortKey) {
+    if (sortKey === key) {
+      if (sortDir === "asc") {
+        setSortDir("desc");
+      } else {
+        // Third click: reset to default (position)
+        setSortKey("pos");
+        setSortDir("asc");
+      }
+    } else {
+      setSortKey(key);
+      setSortDir("asc");
+    }
+  }
+
+  function sortableHeaderProps(key: RaceResultSortKey) {
+    const highValueFirst = HIGH_VALUE_FIRST_SORT_KEYS.has(key);
+    const visuallyAscending = highValueFirst
+      ? sortDir === "desc"
+      : sortDir === "asc";
+    const ariaSort: "none" | "ascending" | "descending" =
+      sortKey === key
+        ? visuallyAscending
+          ? "ascending"
+          : "descending"
+        : "none";
+    return {
+      tabIndex: 0,
+      "aria-sort": ariaSort,
+      onClick: () => toggleSort(key),
+      onKeyDown: (event: KeyboardEvent<HTMLTableCellElement>) => {
+        if (event.key !== "Enter" && event.key !== " ") return;
+        event.preventDefault();
+        toggleSort(key);
+      },
+    };
+  }
+
+  const thClass = (align: "left" | "right" = "left") =>
+    tableHeadCellClass({ align, sortable: true });
+  const highlights = buildRaceResultHighlights(driverStats);
+
+  // Use tyre-stint-history-v2 if available (has clean per-driver race results)
+  if (stintHistory?.length) {
+    return (
+      <div>
+        <SectionHeader
+          size="sm"
+          title="Classification"
+          action={
+            <FocusToggle value={focusedOnly} onChange={toggleFocusedOnly} />
+          }
+        />
+        <ScrollArea axis="x">
+          <table className={tableClass}>
+            <thead className={tableHeadClass}>
+              <tr>
+                <th className={thClass()} {...sortableHeaderProps("pos")}>
+                  Pos
+                  <SortIcon column="pos" sortKey={sortKey} sortDir={sortDir} />
+                </th>
+                <th className={tableHeadCellClass()}>Driver</th>
+                <th className={tableHeadCellClass()}>Team</th>
+                <th
+                  className={thClass("right")}
+                  {...sortableHeaderProps("gap")}
+                >
+                  <SortIcon
+                    column="gap"
+                    sortKey={sortKey}
+                    sortDir={sortDir}
+                    side="left"
+                  />
+                  Gap
+                </th>
+                <th
+                  className={thClass("right")}
+                  {...sortableHeaderProps("bestLap")}
+                >
+                  <SortIcon
+                    column="bestLap"
+                    sortKey={sortKey}
+                    sortDir={sortDir}
+                    side="left"
+                  />
+                  Best Lap
+                </th>
+                <th
+                  className={thClass("right")}
+                  {...sortableHeaderProps("racePace")}
+                >
+                  <Tooltip text={RACE_PACE_TOOLTIP}>
+                    <span>
+                      <SortIcon
+                        column="racePace"
+                        sortKey={sortKey}
+                        sortDir={sortDir}
+                        side="left"
+                      />
+                      Race Pace
+                    </span>
+                  </Tooltip>
+                </th>
+                <th
+                  className={thClass("right")}
+                  {...sortableHeaderProps("sessionPeak")}
+                >
+                  <Tooltip text="Highest credible speed recorded anywhere in the session. Session-only fallback values remain visible but are not ranked.">
+                    <span>
+                      <SortIcon
+                        column="sessionPeak"
+                        sortKey={sortKey}
+                        sortDir={sortDir}
+                        side="left"
+                      />
+                      Peak (km/h)
+                    </span>
+                  </Tooltip>
+                </th>
+                {highlights.hasSpeedTrap && (
+                  <th
+                    className={thClass("right")}
+                    {...sortableHeaderProps("speedTrap")}
+                  >
+                    <Tooltip text="Best speed recorded at the circuit's fixed speed-trap point.">
+                      <span>
+                        <SortIcon
+                          column="speedTrap"
+                          sortKey={sortKey}
+                          sortDir={sortDir}
+                          side="left"
+                        />
+                        Trap (km/h)
+                      </span>
+                    </Tooltip>
+                  </th>
+                )}
+                <th
+                  className={thClass("right")}
+                  {...sortableHeaderProps("ers")}
+                >
+                  <Tooltip text="Average ERS energy deployed per lap. Green-flag laps only; pre-race baseline and final reset snapshot excluded.">
+                    <span>
+                      <SortIcon
+                        column="ers"
+                        sortKey={sortKey}
+                        sortDir={sortDir}
+                        side="left"
+                      />
+                      ERS Dep
+                    </span>
+                  </Tooltip>
+                </th>
+                {highlights.hasErsHarv && (
+                  <th
+                    className={thClass("right")}
+                    {...sortableHeaderProps("ersHarv")}
+                  >
+                    <Tooltip text="Average ERS energy recovered per lap, MGU-K + MGU-H combined. Green-flag laps only; pre-race baseline and final reset snapshot excluded.">
+                      <span aria-label="ERS harvested energy">
+                        <SortIcon
+                          column="ersHarv"
+                          sortKey={sortKey}
+                          sortDir={sortDir}
+                          side="left"
+                        />
+                        ERS Harv
+                      </span>
+                    </Tooltip>
+                  </th>
+                )}
+                {highlights.hasErsHarvestPct && (
+                  <th
+                    className={thClass("right")}
+                    {...sortableHeaderProps("ersHarvestPct")}
+                  >
+                    <Tooltip text={ERS_HARVEST_UTILIZATION_TOOLTIP}>
+                      <span aria-label="ERS harvest utilization percentage">
+                        <SortIcon
+                          column="ersHarvestPct"
+                          sortKey={sortKey}
+                          sortDir={sortDir}
+                          side="left"
+                        />
+                        Harv %
+                      </span>
+                    </Tooltip>
+                  </th>
+                )}
+                <th className={tableHeadCellClass({ align: "right" })}>
+                  Strategy
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {sortedStintHistory.map((entry) => {
+                const entryDriverIndex = resolveRaceResultDriverIndex(
+                  entry,
+                  drivers,
+                );
+                const isFocused =
+                  entryDriverIndex != null
+                    ? entryDriverIndex === focusedDriverIndex
+                    : entry.name === focusedName;
+                const status = entry["result-status"];
+                const gapStr = formatRaceGap(entry);
+                const stintStr = formatRaceStrategy(
+                  entry["tyre-stint-history"] ?? [],
+                );
+
+                const stats = raceDriverStatsForEntry(
+                  entry,
+                  drivers,
+                  driverStats,
+                );
+                const bestLap = stats?.bestLap ?? 0;
+                const racePace = stats?.racePace ?? 0;
+                const sessionPeakKmh = stats?.sessionPeakKmh ?? null;
+                const speedTrapKmh = stats?.speedTrapKmh ?? null;
+                const ers = stats?.ers ?? 0;
+                const ersHarv = stats?.ersHarv ?? 0;
+                const ersHarvestPct = stats?.ersHarvestPct ?? null;
+                const isBestLap =
+                  bestLap > 0 && Math.abs(bestLap - highlights.bestLapMs) < 1;
+                const isBestPace =
+                  stats?.racePaceRankEligible === true &&
+                  racePace > 0 &&
+                  Math.abs(racePace - highlights.bestPaceMs) < 1;
+                const isBestSessionPeak = stats?.sessionPeakRank === 1;
+                const isBestSpeedTrap = stats?.speedTrapRank === 1;
+                const isBestErs =
+                  ers > 0 && Math.abs(ers - highlights.bestErs) < 0.1;
+                const isBestErsHarv =
+                  ersHarv > 0 &&
+                  Math.abs(ersHarv - highlights.bestErsHarv) < 0.1;
+                const penalties = penaltiesByDriver.get(entry.name) ?? [];
+
+                return (
+                  <tr
+                    key={`${entry.name}-${entry.team}`}
+                    className={cn(
+                      tableRowClass,
+                      isFocused && "bg-zinc-800/40 text-white font-medium",
+                    )}
+                  >
+                    <td className={tableCellClass()}>{entry.position}</td>
+                    <td className={tableCellClass()}>
+                      <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
+                        <span
+                          className="h-3 w-1 shrink-0 rounded-sm"
+                          style={{ backgroundColor: getTeamColor(entry.team) }}
+                        />
+                        <span>{entry.name}</span>
+                        <PenaltyBadge penalties={penalties} />
+                      </span>
+                    </td>
+                    <td
+                      className={tableCellClass({ className: "text-zinc-400" })}
+                    >
+                      {getTeamName(entry.team)}
+                    </td>
+                    <td
+                      className={cn(
+                        tableCellClass({ align: "right", mono: true }),
+                        (status === "DNF" || status === "DSQ") && "text-behind",
+                      )}
+                    >
+                      {gapStr}
+                    </td>
+                    <td
+                      className={cn(
+                        tableCellClass({ align: "right", mono: true }),
+                        isBestLap && "text-best",
+                      )}
+                    >
+                      {bestLap > 0 ? msToLapTime(bestLap) : "–"}
+                    </td>
+                    <td
+                      className={cn(
+                        tableCellClass({ align: "right", mono: true }),
+                        isBestPace && "text-best",
+                        racePace > 0 &&
+                          !stats?.racePaceRankEligible &&
+                          "text-zinc-500",
+                      )}
+                    >
+                      <div>{racePace > 0 ? msToLapTime(racePace) : "–"}</div>
+                      <div className="mt-0.5 whitespace-nowrap font-sans text-2xs font-normal text-zinc-500">
+                        {racePaceEvidenceLabel(stats)}
+                      </div>
+                    </td>
+                    <td
+                      className={cn(
+                        tableCellClass({ align: "right", mono: true }),
+                        isBestSessionPeak && "text-best",
+                        stats?.sessionPeakQuality === "limited" &&
+                          "text-zinc-500",
+                      )}
+                      title={
+                        stats?.sessionPeakQuality === "limited"
+                          ? "Limited: only the session-level speed was available, so this value is not ranked."
+                          : undefined
+                      }
+                    >
+                      <SessionPeakValue
+                        kmh={sessionPeakKmh}
+                        limited={stats?.sessionPeakQuality === "limited"}
+                      />
+                    </td>
+                    {highlights.hasSpeedTrap && (
+                      <td
+                        className={cn(
+                          tableCellClass({ align: "right", mono: true }),
+                          isBestSpeedTrap && "text-best",
+                        )}
+                      >
+                        {speedTrapKmh != null ? speedTrapKmh.toFixed(1) : "–"}
+                      </td>
+                    )}
+                    <td
+                      className={cn(
+                        tableCellClass({ align: "right", mono: true }),
+                        isBestErs && "text-best",
+                      )}
+                    >
+                      {ers > 0 ? ers.toFixed(1) : "–"}
+                    </td>
+                    {highlights.hasErsHarv && (
+                      <td
+                        className={cn(
+                          tableCellClass({ align: "right", mono: true }),
+                          isBestErsHarv && "text-best",
+                        )}
+                      >
+                        {ersHarv > 0 ? ersHarv.toFixed(1) : "–"}
+                      </td>
+                    )}
+                    {highlights.hasErsHarvestPct && (
+                      <td
+                        className={tableCellClass({
+                          align: "right",
+                          mono: true,
+                        })}
+                      >
+                        {ersHarvestPct != null
+                          ? `${(ersHarvestPct * 100).toFixed(1)}%`
+                          : "–"}
+                      </td>
+                    )}
+                    <td
+                      className={tableCellClass({
+                        align: "right",
+                        className: "text-zinc-400",
+                      })}
+                    >
+                      {stintStr}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </ScrollArea>
+      </div>
+    );
+  }
+
+  // Fallback: use classification-data with final-classification
+  const fallbackSorted = buildFallbackRaceRows({
+    drivers,
+    focusedOnly,
+    focusedDriverIndex,
+    sortKey,
+    sortDir,
+    driverStats,
+  });
+
+  return (
+    <div>
+      <SectionHeader
+        size="sm"
+        title="Classification"
+        action={
+          <FocusToggle value={focusedOnly} onChange={toggleFocusedOnly} />
+        }
+      />
+      <ScrollArea axis="x">
+        <table className={tableClass}>
+          <thead className={tableHeadClass}>
+            <tr>
+              <th className={thClass()} {...sortableHeaderProps("pos")}>
+                Pos
+                <SortIcon column="pos" sortKey={sortKey} sortDir={sortDir} />
+              </th>
+              <th className={tableHeadCellClass()}>Driver</th>
+              <th className={tableHeadCellClass()}>Team</th>
+              <th
+                className={thClass("right")}
+                {...sortableHeaderProps("bestLap")}
+              >
+                <SortIcon
+                  column="bestLap"
+                  sortKey={sortKey}
+                  sortDir={sortDir}
+                  side="left"
+                />
+                Best Lap
+              </th>
+              <th
+                className={thClass("right")}
+                {...sortableHeaderProps("sessionPeak")}
+              >
+                <Tooltip text="Highest credible speed recorded anywhere in the session. Session-only fallback values remain visible but are not ranked.">
+                  <span>
+                    <SortIcon
+                      column="sessionPeak"
+                      sortKey={sortKey}
+                      sortDir={sortDir}
+                      side="left"
+                    />
+                    Peak (km/h)
+                  </span>
+                </Tooltip>
+              </th>
+              {highlights.hasSpeedTrap && (
+                <th
+                  className={thClass("right")}
+                  {...sortableHeaderProps("speedTrap")}
+                >
+                  <Tooltip text="Best speed recorded at the circuit's fixed speed-trap point.">
+                    <span>
+                      <SortIcon
+                        column="speedTrap"
+                        sortKey={sortKey}
+                        sortDir={sortDir}
+                        side="left"
+                      />
+                      Trap (km/h)
+                    </span>
+                  </Tooltip>
+                </th>
+              )}
+            </tr>
+          </thead>
+          <tbody>
+            {fallbackSorted.map((d) => {
+              const fc = d["final-classification"]!;
+              const penalties = penaltiesByDriver.get(d["driver-name"]) ?? [];
+              const stats = driverStats.get(d.index);
+              const sessionPeakKmh = stats?.sessionPeakKmh ?? null;
+              const speedTrapKmh = stats?.speedTrapKmh ?? null;
+              return (
+                <tr
+                  key={d.index}
+                  className={cn(
+                    tableRowClass,
+                    d.index === focusedDriverIndex &&
+                      "bg-zinc-800/40 text-white font-medium",
+                  )}
+                >
+                  <td className={tableCellClass()}>{fc.position}</td>
+                  <td className={tableCellClass()}>
+                    <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
+                      <span
+                        className="h-3 w-1 shrink-0 rounded-sm"
+                        style={{ backgroundColor: getTeamColor(d.team) }}
+                      />
+                      <span>{d["driver-name"]}</span>
+                      <PenaltyBadge penalties={penalties} />
+                    </span>
+                  </td>
+                  <td
+                    className={tableCellClass({ className: "text-zinc-400" })}
+                  >
+                    {getTeamName(d.team)}
+                  </td>
+                  <td
+                    className={tableCellClass({ align: "right", mono: true })}
+                  >
+                    {fc["best-lap-time-str"] || "–"}
+                  </td>
+                  <td
+                    className={cn(
+                      tableCellClass({ align: "right", mono: true }),
+                      stats?.sessionPeakRank === 1 && "text-best",
+                      stats?.sessionPeakQuality === "limited" &&
+                        "text-zinc-500",
+                    )}
+                    title={
+                      stats?.sessionPeakQuality === "limited"
+                        ? "Limited: only the session-level speed was available, so this value is not ranked."
+                        : undefined
+                    }
+                  >
+                    <SessionPeakValue
+                      kmh={sessionPeakKmh}
+                      limited={stats?.sessionPeakQuality === "limited"}
+                    />
+                  </td>
+                  {highlights.hasSpeedTrap && (
+                    <td
+                      className={cn(
+                        tableCellClass({ align: "right", mono: true }),
+                        stats?.speedTrapRank === 1 && "text-best",
+                      )}
+                    >
+                      {speedTrapKmh != null ? speedTrapKmh.toFixed(1) : "–"}
+                    </td>
+                  )}
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </ScrollArea>
+    </div>
+  );
+}
+
+function PenaltyBadge({ penalties }: { penalties: RaceControlEvent[] }) {
+  if (penalties.length === 0) return null;
+
+  return (
+    <Tooltip text={penalties.map(formatPenaltySummary).join(" | ")}>
+      <Badge size="xs" shape="square" tone="amber" className="gap-0.5">
+        <AlertTriangle className="size-2.5" />
+        {penalties.length}
+      </Badge>
+    </Tooltip>
+  );
+}

@@ -1,0 +1,180 @@
+@import "@fontsource-variable/geist";
+@import "tailwindcss";
+
+/* Fontsource only ships Quattro as static 400/700 files. Self-host the
+ * official iA variable font so font-medium/font-semibold get true weights. */
+@font-face {
+  font-family: "iA Writer Quattro";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400 700;
+  src: url("./assets/fonts/iAWriterQuattroV.woff2") format("woff2");
+}
+
+@theme {
+  --font-sans: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-mono:
+    "iA Writer Quattro", ui-monospace, "SF Mono", Menlo, Consolas,
+    "Liberation Mono", monospace;
+
+  /* Typography
+   * Tweak app-wide type here. The comments show px values at the default
+   * 16px browser root; the variables stay in rem so user zoom still works.
+   *
+   * text-3xs   9 / 12  micro labels inside dense badges and tiny charts
+   * text-2xs  11 / 14  eyebrows, compact chips, tiny metadata
+   * text-xs   13 / 18  captions, footnotes, dense tables
+   * text-sm   14 / 20  secondary body, controls
+   * text-md   15 / 22  compact headings and mono values
+   * text-base 16 / 24  base body copy
+   * text-lg   18 / 28  compact stat values
+   * text-xl   20 / 28  prominent stat values
+   * text-2xl  24 / 32  page titles
+   */
+  --text-3xs: 0.65rem;
+  --text-3xs--line-height: calc(0.75 / 0.65);
+  --text-2xs: 0.7rem;
+  --text-2xs--line-height: calc(0.875 / 0.7);
+  --text-xs: 0.8125rem;
+  --text-xs--line-height: calc(1.125 / 0.8125);
+  --text-sm: 0.875rem;
+  --text-sm--line-height: calc(1.25 / 0.875);
+  --text-md: 0.9375rem;
+  --text-md--line-height: calc(1.375 / 0.9375);
+  --text-base: 1rem;
+  --text-base--line-height: 1.5;
+  --text-lg: 1.125rem;
+  --text-lg--line-height: calc(1.75 / 1.125);
+  --text-xl: 1.25rem;
+  --text-xl--line-height: 1.4;
+  --text-2xl: 1.5rem;
+  --text-2xl--line-height: calc(2 / 1.5);
+
+  /* Surfaces */
+  --color-shell: #000000;
+  --color-canvas: hsl(240deg, 14.3%, 3.75%);
+  --color-card-surface: color-mix(
+    in oklab,
+    var(--color-canvas) 30%,
+    theme("--color-zinc-900") 70%
+  );
+
+  /* Semantic colors
+   * Use text-best, bg-ahead/10, ring-behind/15, etc. for meaning-bearing UI.
+   * Chart equivalents live in CHART_THEME (utils/colors.ts), where Recharts
+   * often needs brighter shades for contrast.
+   */
+  --color-best: #c084fc; /* purple-400 — session best, records */
+  --color-active: #22d3ee; /* cyan-400 — current/active driver */
+  --color-ahead: #4ade80; /* green-400 — gains, improvement, valid */
+  --color-behind: #f87171; /* red-400 — losses, errors, invalid */
+  --color-warning: #fb923c; /* orange-400 — caution, rival, pit */
+}
+
+html,
+body {
+  background-color: var(--color-shell);
+  color-scheme: dark;
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: var(--text-base--line-height);
+}
+
+@media (max-width: 639px) {
+  html {
+    /* Smaller size at the default browser root: a slight phone-density nudge while
+       still respecting user font scaling. */
+    font-size: 90%;
+  }
+}
+
+/* Focus */
+.recharts-wrapper:focus,
+.recharts-surface:focus {
+  outline: none;
+}
+
+:focus-visible {
+  outline: 1px solid theme("--color-zinc-600");
+  outline-offset: 1px;
+}
+
+/* Scroll-driven masks hide the fade at the edge you're already touching. */
+@property --scroll-mask-top-fade {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0;
+}
+
+@property --scroll-mask-bottom-fade {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0;
+}
+
+@keyframes scroll-mask-vertical {
+  0% {
+    --scroll-mask-top-fade: 0;
+  }
+  10%,
+  100% {
+    --scroll-mask-top-fade: var(--scroll-mask-fade-distance, 1rem);
+  }
+  0%,
+  90% {
+    --scroll-mask-bottom-fade: var(--scroll-mask-fade-distance, 1rem);
+  }
+  100% {
+    --scroll-mask-bottom-fade: 0;
+  }
+}
+
+@utility scroll-mask-vertical {
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: scroll()) {
+      --scroll-mask-fade-distance: 1rem;
+      mask-image: linear-gradient(
+        to bottom,
+        transparent,
+        black var(--scroll-mask-top-fade, 1rem),
+        black calc(100% - var(--scroll-mask-bottom-fade, 1rem)),
+        transparent
+      );
+      animation: scroll-mask-vertical linear;
+      animation-timeline: scroll(self block);
+    }
+  }
+}
+
+@utility scroll-mask-vertical-* {
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: scroll()) {
+      --scroll-mask-fade-distance: --value([ *]);
+      mask-image: linear-gradient(
+        to bottom,
+        transparent,
+        black var(--scroll-mask-top-fade, --value([ *])),
+        black calc(100% - var(--scroll-mask-bottom-fade, --value([ *]))),
+        transparent
+      );
+      animation: scroll-mask-vertical linear;
+      animation-timeline: scroll(self block);
+    }
+  }
+}
+
+@utility scroll-mask-down-* {
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: scroll()) {
+      --scroll-mask-fade-distance: --value([ *]);
+      mask-image: linear-gradient(
+        to top,
+        transparent,
+        black var(--scroll-mask-bottom-fade, --value([ *])),
+        black
+      );
+      animation: scroll-mask-vertical linear;
+      animation-timeline: scroll(self block);
+    }
+  }
+}
