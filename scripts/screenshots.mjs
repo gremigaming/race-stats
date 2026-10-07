@@ -1,23 +1,34 @@
-// Takes screenshots of the main pages and prints them as base64 in the log,
-// so changes can be checked without opening the site.
+// Saves screenshots of the main pages into the given folder (previews/), so
+// changes can be checked without opening the site.
+import { mkdirSync } from "node:fs";
 import { createRequire } from "node:module";
 const require = createRequire(process.cwd() + "/");
 const { chromium } = require("playwright");
 
-const base = process.argv[2];
+const [base, outDir] = process.argv.slice(2);
+mkdirSync(outDir, { recursive: true });
 const browser = await chromium.launch();
-const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
 await page.goto(base);
-await page.waitForTimeout(4000);
+await page.waitForTimeout(5000);
 const scope = new URL(page.url()).pathname.replace(/^\/race-stats\//, "").split("/")[0];
-const pages = { dashboard: "", drivers: "drivers", h2h: "head-to-head" };
-for (const [name, path] of Object.entries(pages)) {
+const shoot = async (name, path) => {
   await page.goto(`${base}${scope}/${path}`);
-  await page.waitForTimeout(3000);
-  const png = await page.screenshot({ type: "jpeg", quality: 70 });
-  const b64 = png.toString("base64");
-  console.log(`SHOT-BEGIN ${name}`);
-  for (let i = 0; i < b64.length; i += 1000) console.log(`SHOT ${b64.slice(i, i + 1000)}`);
-  console.log(`SHOT-END ${name}`);
+  await page.waitForTimeout(4000);
+  await page.screenshot({ path: `${outDir}/${name}.jpg`, type: "jpeg", quality: 75 });
+  console.log(`saved ${name} (${page.url()})`);
+};
+await shoot("dashboard", "");
+await shoot("leaderboard", "drivers");
+await shoot("head-to-head", "head-to-head");
+// the newest race, as seen by the default driver
+await page.goto(`${base}${scope}/`);
+await page.waitForTimeout(3000);
+const href = await page.$eval(`a[href*="/sessions/"]`, (a) => a.getAttribute("href")).catch(() => null);
+if (href) {
+  await page.goto(new URL(href, base).toString());
+  await page.waitForTimeout(5000);
+  await page.screenshot({ path: `${outDir}/race.jpg`, type: "jpeg", quality: 75, fullPage: true });
+  console.log(`saved race (${page.url()})`);
 }
 await browser.close();
