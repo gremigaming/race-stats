@@ -138,6 +138,34 @@ function finished(status: string): boolean {
   return status === "FINISHED" || status === "ACTIVE" || status === "";
 }
 
+const RACE_POINTS = [25, 18, 15, 12, 10, 8, 6, 4, 2, 1];
+
+/**
+ * "Just in case" autosaves are written before the game sends the final
+ * classification, so it is null there. The live lap data still has each
+ * car's position, grid slot and status, and the lap history has their laps,
+ * so the result is rebuilt from those (points by the standard F1 table).
+ */
+function resultFromLapData(d: DriverData) {
+  const ld = (d["lap-data"] ?? {}) as unknown as Record<string, unknown>;
+  const num = (v: unknown) => (typeof v === "number" && v > 0 ? v : null);
+  const position = num(ld["car-position"]);
+  const status = typeof ld["result-status"] === "string" ? ld["result-status"] : "";
+  const laps = d["session-history"]?.["lap-history-data"] ?? [];
+  const times = laps
+    .filter((l) => (l["lap-valid-bit-flags"] & 1) === 1)
+    .map((l) => l["lap-time-in-ms"])
+    .filter((t) => t > 0);
+  return {
+    position,
+    grid: num(ld["grid-position"]),
+    status,
+    points:
+      position != null && finished(status) ? (RACE_POINTS[position - 1] ?? 0) : 0,
+    best: times.length ? Math.min(...times) : 0,
+  };
+}
+
 /** One result per named driver per race. */
 export function raceResults(race: LeagueRace): Map<string, DriverResult> {
   const { session, file } = race;
@@ -149,20 +177,28 @@ export function raceResults(race: LeagueRace): Map<string, DriverResult> {
     const key = driverKey(d["driver-name"]);
     if (out.has(key)) continue;
     const fc = d["final-classification"];
-    const best = fc?.["best-lap-time-ms"] ?? 0;
+    const r = fc
+      ? {
+          position: fc.position ?? null,
+          grid: fc["grid-position"] || null,
+          status: fc["result-status"] ?? "",
+          points: fc.points ?? 0,
+          best: fc["best-lap-time-ms"] ?? 0,
+        }
+      : resultFromLapData(d);
     out.set(key, {
       file,
       track: session["session-info"]?.["track-id"] ?? "",
       date: sessionDate(file),
-      position: fc?.position ?? null,
-      grid: fc?.["grid-position"] ?? null,
-      status: fc?.["result-status"] ?? "",
-      points: fc?.points ?? 0,
-      bestLapMs: best > 0 ? best : null,
+      position: r.position,
+      grid: r.grid,
+      status: r.status,
+      points: r.points,
+      bestLapMs: r.best > 0 ? r.best : null,
       fastestLap:
         fastest != null &&
         driverKey(fastest["driver-name"] ?? "") === key,
-      pole: fc?.["grid-position"] === 1,
+      pole: r.grid === 1,
       field: drivers.length,
     });
   }
