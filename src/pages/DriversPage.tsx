@@ -55,6 +55,7 @@ export function DriversPage() {
   return (
     <div
       id="leaderboard-card"
+      data-races={races.length}
       className={cn("mx-auto max-w-5xl space-y-8 p-6", embed && "space-y-6 p-8")}
     >
       <div>

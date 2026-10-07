@@ -36,8 +36,12 @@ await page.waitForTimeout(3000);
 const card = await page.$("#leaderboard-card");
 await card.screenshot({ path: join(out, "leaderboard.png") });
 const text = await card.innerText();
+const races = Number(await card.getAttribute("data-races")) || 0;
 const hash = createHash("sha256").update(text).digest("hex").slice(0, 16);
-writeFileSync(join(out, "leaderboard.json"), JSON.stringify({ hash, scope, title: text.split("\n")[1] ?? "" }, null, 2));
+// The month the standings are for, in GreMi's time zone ("2026-10")
+const month = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Amsterdam", year: "numeric", month: "2-digit" })
+  .format(new Date());
+writeFileSync(join(out, "leaderboard.json"), JSON.stringify({ hash, scope, month, races }, null, 2));
 console.log(`discord card: ${hash} (${scope})`);
 await browser.close();
 server.close();
