@@ -173,3 +173,35 @@ export function DriversPage() {
     </div>
   );
 }
+
+function Num({
+  v,
+  strong,
+  purple,
+  green,
+  red,
+}: {
+  v: number | string;
+  strong?: boolean;
+  purple?: boolean;
+  green?: boolean;
+  red?: boolean;
+}) {
+  return (
+    <td
+      className={tableCellClass({
+        align: "right",
+        mono: true,
+        className: cn(
+          "tabular-nums",
+          strong ? "font-semibold text-zinc-100" : "text-zinc-300",
+          purple && "text-purple-300",
+          green && "text-emerald-300",
+          red && "text-red-300",
+        ),
+      })}
+    >
+      {v}
+    </td>
+  );
+}
