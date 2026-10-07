@@ -212,19 +212,19 @@ export function Layout() {
               <LeagueNavLink
                 to={dashboardPath(activeFormulaKey)}
                 active={!leaguePage}
-                icon={<User className="h-3.5 w-3.5" />}
+                icon={<User className="h-4 w-4" />}
                 label="Driver"
               />
               <LeagueNavLink
                 to={`/${activeFormulaKey}/drivers`}
                 active={leaguePage === "drivers"}
-                icon={<Trophy className="h-3.5 w-3.5" />}
+                icon={<Trophy className="h-4 w-4" />}
                 label="Leaderboard"
               />
               <LeagueNavLink
                 to={`/${activeFormulaKey}/head-to-head`}
                 active={leaguePage === "head-to-head"}
-                icon={<Swords className="h-3.5 w-3.5" />}
+                icon={<Swords className="h-4 w-4" />}
                 label="Head to head"
               />
             </nav>
@@ -362,14 +362,14 @@ function LeagueNavLink({
     <NavLink
       to={to}
       className={cn(
-        "flex min-w-0 items-center justify-center gap-1 rounded-lg px-1.5 py-1.5 text-[11px] font-medium whitespace-nowrap transition-colors",
+        "flex min-w-0 flex-col items-center justify-center gap-1 rounded-lg px-1 py-2 text-[11px] font-medium whitespace-nowrap transition-colors",
         active
           ? "bg-red-500/15 text-red-300 ring-1 ring-inset ring-red-400/25"
           : "text-zinc-400 hover:bg-zinc-800/70 hover:text-zinc-200",
       )}
     >
       {icon}
-      <span className="truncate">{label}</span>
+      <span>{label}</span>
     </NavLink>
   );
 }
