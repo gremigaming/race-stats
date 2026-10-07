@@ -68,6 +68,11 @@ export function Layout() {
   );
   const dragging = useRef(false);
   const filtersActive = !areSessionFiltersDefault(sessionFilters);
+  const section = location.pathname.split("/").filter(Boolean)[1];
+  const leaguePage =
+    league && (section === "drivers" || section === "head-to-head")
+      ? section
+      : null;
 
   // Close sidebar on navigation (mobile)
   useEffect(() => {
@@ -202,8 +207,30 @@ export function Layout() {
               />
             </div>
           )}
-          {league && league.drivers.length > 0 && (
-            <div className="mt-3 space-y-2">
+          {league && league.drivers.length > 0 && activeFormulaKey && (
+            <nav className="mt-3 grid grid-cols-3 gap-1 rounded-xl bg-zinc-900/60 p-1">
+              <LeagueNavLink
+                to={dashboardPath(activeFormulaKey)}
+                active={!leaguePage}
+                icon={<User className="h-3.5 w-3.5" />}
+                label="Driver"
+              />
+              <LeagueNavLink
+                to={`/${activeFormulaKey}/drivers`}
+                active={leaguePage === "drivers"}
+                icon={<Trophy className="h-3.5 w-3.5" />}
+                label="Leaderboard"
+              />
+              <LeagueNavLink
+                to={`/${activeFormulaKey}/head-to-head`}
+                active={leaguePage === "head-to-head"}
+                icon={<Swords className="h-3.5 w-3.5" />}
+                label="Head to head"
+              />
+            </nav>
+          )}
+          {league && league.drivers.length > 0 && !leaguePage && (
+            <div className="mt-3">
               <PillSelect
                 value={league.selectedDriver}
                 onChange={league.setSelectedDriver}
@@ -216,24 +243,12 @@ export function Layout() {
                 width="full"
                 size="sm"
               />
-              {activeFormulaKey && (
-                <div className="grid grid-cols-2 gap-1.5">
-                  <LeagueNavLink
-                    to={`/${activeFormulaKey}/drivers`}
-                    icon={<Trophy className="h-3.5 w-3.5" />}
-                    label="Leaderboard"
-                  />
-                  <LeagueNavLink
-                    to={`/${activeFormulaKey}/head-to-head`}
-                    icon={<Swords className="h-3.5 w-3.5" />}
-                    label="Head to head"
-                  />
-                </div>
-              )}
             </div>
           )}
         </div>
-        <SessionList />
+        {/* Leaderboard and head to head are league-wide, so the driver's
+            own sessions and tracks only show under "Driver". */}
+        {!leaguePage && <SessionList />}
       </aside>
 
       {/* Resize handle — desktop only */}
@@ -334,27 +349,27 @@ export function Layout() {
 
 function LeagueNavLink({
   to,
+  active,
   icon,
   label,
 }: {
   to: string;
+  active: boolean;
   icon: React.ReactNode;
   label: string;
 }) {
   return (
     <NavLink
       to={to}
-      className={({ isActive }) =>
-        cn(
-          "flex items-center justify-center gap-1.5 rounded-lg px-2 py-1.5 text-xs font-medium transition-colors",
-          isActive
-            ? "bg-red-500/15 text-red-300 ring-1 ring-inset ring-red-400/25"
-            : "bg-zinc-900/60 text-zinc-400 hover:bg-zinc-800/70 hover:text-zinc-200",
-        )
-      }
+      className={cn(
+        "flex min-w-0 items-center justify-center gap-1 rounded-lg px-1.5 py-1.5 text-[11px] font-medium whitespace-nowrap transition-colors",
+        active
+          ? "bg-red-500/15 text-red-300 ring-1 ring-inset ring-red-400/25"
+          : "text-zinc-400 hover:bg-zinc-800/70 hover:text-zinc-200",
+      )}
     >
       {icon}
-      {label}
+      <span className="truncate">{label}</span>
     </NavLink>
   );
 }

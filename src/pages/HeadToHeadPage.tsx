@@ -108,17 +108,70 @@ export function HeadToHeadPage() {
                 right
               />
             </div>
-            <div className="mt-4 grid grid-cols-[1fr_auto_1fr] items-center gap-4 border-t border-white/[0.06] pt-4">
-              <div className="font-mono text-lg tabular-nums text-purple-300">
-                {h2h.aFasterLap}
-              </div>
-              <div className="text-center font-mono text-xs uppercase tracking-wider text-zinc-500">
-                Faster best lap
-              </div>
-              <div className="text-right font-mono text-lg tabular-nums text-purple-300">
-                {h2h.bFasterLap}
-              </div>
+          </section>
+
+          <section className={cardClass}>
+            <SectionHeader
+              title="Tale of the tape"
+              hint="Only the races they were both in"
+            />
+            <div className="divide-y divide-white/[0.04]">
+              <StatRow label="Qualified ahead" a={h2h.a.qualiAhead} b={h2h.b.qualiAhead} />
+              <StatRow label="Faster best lap" a={h2h.a.fasterLap} b={h2h.b.fasterLap} purple />
+              <StatRow
+                label="Better race pace"
+                hint="Median clean lap"
+                a={h2h.a.betterPace}
+                b={h2h.b.betterPace}
+              />
+              <StatRow label="Points" a={h2h.a.points} b={h2h.b.points} />
+              <StatRow label="Wins" a={h2h.a.wins} b={h2h.b.wins} />
+              <StatRow label="Podiums" a={h2h.a.podiums} b={h2h.b.podiums} />
+              <StatRow
+                label="Average finish"
+                a={h2h.a.avgFinish}
+                b={h2h.b.avgFinish}
+                lowerWins
+                format={(v) => `P${v.toFixed(1)}`}
+              />
+              <StatRow
+                label="Average grid"
+                a={h2h.a.avgGrid}
+                b={h2h.b.avgGrid}
+                lowerWins
+                format={(v) => `P${v.toFixed(1)}`}
+              />
+              <StatRow
+                label="Places gained"
+                a={h2h.a.gained}
+                b={h2h.b.gained}
+                format={(v) => `${v > 0 ? "+" : ""}${v}`}
+              />
+              <StatRow label="Overtakes made" a={h2h.a.overtakes} b={h2h.b.overtakes} />
+              <StatRow
+                label="Passed each other"
+                a={h2h.a.passedRival}
+                b={h2h.b.passedRival}
+              />
+              <StatRow
+                label="Top speed"
+                a={h2h.a.topSpeed}
+                b={h2h.b.topSpeed}
+                format={(v) => `${v} km/h`}
+              />
+              <StatRow
+                label="Warnings & penalties"
+                a={h2h.a.incidents}
+                b={h2h.b.incidents}
+                lowerWins
+              />
+              <StatRow label="DNFs" a={h2h.a.dnfs} b={h2h.b.dnfs} lowerWins />
             </div>
+            <p className="mt-4 text-center text-xs text-zinc-500">
+              {h2h.contact === 0
+                ? "No contact between these two yet. Clean racing."
+                : `They touched ${h2h.contact} ${h2h.contact === 1 ? "time" : "times"}.`}
+            </p>
           </section>
 
           <section className={cardClass}>
@@ -148,9 +201,12 @@ export function HeadToHeadPage() {
                       <tr
                         key={r.file}
                         onClick={() => {
+                          // Open the race as driver a, already compared with b
                           league.setSelectedDriver(a);
                           if (activeFormulaKey)
-                            navigate(sessionPath(activeFormulaKey, toSlug(r.file)));
+                            navigate(
+                              `${sessionPath(activeFormulaKey, toSlug(r.file))}?vs=${encodeURIComponent(b)}`,
+                            );
                         }}
                         className={cn(
                           tableRowClass,
@@ -239,5 +295,68 @@ function Result({
     >
       {text}
     </td>
+  );
+}
+
+function StatRow({
+  label,
+  hint,
+  a,
+  b,
+  lowerWins,
+  purple,
+  format = (v) => String(v),
+}: {
+  label: string;
+  hint?: string;
+  a: number | null;
+  b: number | null;
+  lowerWins?: boolean;
+  purple?: boolean;
+  format?: (v: number) => string;
+}) {
+  const both = a != null && b != null && a !== b;
+  const aWins = both && (lowerWins ? a < b : a > b);
+  const bWins = both && !aWins;
+  // Share of the bar for a; even split when there's nothing to compare
+  const base = Math.min(0, a ?? 0, b ?? 0);
+  const va = (a ?? 0) - base;
+  const vb = (b ?? 0) - base;
+  const total = va + vb;
+  let share = total ? va / total : 0.5;
+  if (lowerWins && total) share = 1 - share;
+  const win = purple ? "text-purple-300" : "text-emerald-300";
+  return (
+    <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4 py-2.5">
+      <div
+        className={cn(
+          "font-mono text-sm tabular-nums",
+          aWins ? cn("font-semibold", win) : "text-zinc-400",
+        )}
+      >
+        {a == null ? "—" : format(a)}
+      </div>
+      <div className="w-40 text-center sm:w-56">
+        <div className="text-xs text-zinc-300">{label}</div>
+        {hint && <div className="text-[10px] text-zinc-600">{hint}</div>}
+        <div className="mt-1.5 flex h-1 overflow-hidden rounded-full bg-zinc-800">
+          <div
+            className={cn("h-full", aWins ? "bg-emerald-400/70" : "bg-zinc-600")}
+            style={{ width: `${share * 100}%` }}
+          />
+          <div
+            className={cn("h-full flex-1", bWins ? "bg-emerald-400/70" : "bg-zinc-700")}
+          />
+        </div>
+      </div>
+      <div
+        className={cn(
+          "text-right font-mono text-sm tabular-nums",
+          bWins ? cn("font-semibold", win) : "text-zinc-400",
+        )}
+      >
+        {b == null ? "—" : format(b)}
+      </div>
+    </div>
   );
 }

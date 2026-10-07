@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useSearchParams } from "react-router-dom";
+import { driverKey, isNamedDriver } from "../league/league";
 import { buildDamageIncreaseLaps } from "../analysis/damageAnalysis";
 import { curateSessionInsights } from "../analysis/sessionInsightCuration";
 import {
@@ -149,8 +151,19 @@ export function RaceSessionView({
   const [focusedDriverIndex, setFocusedDriverIndex] = useState<number>(
     defaultFocused?.index ?? 0,
   );
+  // Head to head links open a race with ?vs=<driver> to keep the comparison
+  const [searchParams] = useSearchParams();
+  const vs = searchParams.get("vs");
+  const rivalFromUrl = useMemo(() => {
+    if (!vs) return null;
+    const key = vs.toLowerCase();
+    return (
+      drivers.find((d) => isNamedDriver(d) && driverKey(d["driver-name"]) === key)
+        ?.index ?? null
+    );
+  }, [drivers, vs]);
   const [selectedRivalIndex, setSelectedRivalIndex] = useState<number | null>(
-    null,
+    rivalFromUrl,
   );
 
   // Reset when session data actually changes (handles cached fast-resolve)
@@ -159,8 +172,8 @@ export function RaceSessionView({
       (isSpectator ? selectableDrivers[0] : findFocusedDriver(session))
         ?.index ?? 0,
     );
-    setSelectedRivalIndex(null);
-  }, [session, isSpectator, selectableDrivers]);
+    setSelectedRivalIndex(isSpectator ? null : rivalFromUrl);
+  }, [session, isSpectator, selectableDrivers, rivalFromUrl]);
 
   const handleFocusedDriverChange = (index: number) => {
     setFocusedDriverIndex(index);

@@ -27,15 +27,23 @@ const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
 await page.goto(base);
 await page.waitForTimeout(5000);
 const scope = new URL(page.url()).pathname.replace(/^\/race-stats\//, "").split("/")[0];
-const shoot = async (name, path) => {
+const shoot = async (name, path, fullPage = false) => {
   await page.goto(`${base}${scope}/${path}`);
   await page.waitForTimeout(4000);
-  await page.screenshot({ path: `${outDir}/${name}.jpg`, type: "jpeg", quality: 75 });
+  await page.screenshot({ path: `${outDir}/${name}.jpg`, type: "jpeg", quality: 75, fullPage });
   console.log(`saved ${name} (${page.url()})`);
 };
 await shoot("dashboard", "");
 await shoot("leaderboard", "drivers");
-await shoot("head-to-head", "head-to-head");
+await shoot("head-to-head", "head-to-head", true);
+// a race opened from head to head keeps both drivers compared
+const row = await page.$("tbody tr");
+if (row) {
+  await row.click();
+  await page.waitForTimeout(5000);
+  await page.screenshot({ path: `${outDir}/race-compare.jpg`, type: "jpeg", quality: 75 });
+  console.log(`saved race-compare (${page.url()})`);
+}
 // the newest race, as seen by the default driver
 await page.goto(`${base}${scope}/`);
 await page.waitForTimeout(3000);

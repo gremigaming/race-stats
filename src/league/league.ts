@@ -127,6 +127,24 @@ export interface DriverResult {
   fastestLap: boolean;
   pole: boolean;
   field: number;
+  /** Median clean lap: lap 1 and laps 7% off the driver's best are left out. */
+  racePaceMs: number | null;
+  overtakes: number;
+  topSpeed: number | null;
+  /** Warnings and penalties the game handed out. */
+  incidents: number;
+}
+
+function racePace(d: DriverData): number | null {
+  const laps = (d["session-history"]?.["lap-history-data"] ?? [])
+    .slice(1)
+    .filter((l) => (l["lap-valid-bit-flags"] & 1) === 1 && l["lap-time-in-ms"] > 0)
+    .map((l) => l["lap-time-in-ms"]);
+  if (!laps.length) return null;
+  const best = Math.min(...laps);
+  const clean = laps.filter((t) => t <= best * 1.07).sort((x, y) => x - y);
+  const mid = Math.floor(clean.length / 2);
+  return clean.length % 2 ? clean[mid] : (clean[mid - 1] + clean[mid]) / 2;
 }
 
 function sessionDate(file: string): string {
@@ -171,6 +189,7 @@ export function raceResults(race: LeagueRace): Map<string, DriverResult> {
   const { session, file } = race;
   const drivers = session["classification-data"] ?? [];
   const fastest = session.records?.fastest?.lap;
+  const overtakes = session.overtakes?.records ?? [];
   const out = new Map<string, DriverResult>();
   for (const d of drivers) {
     if (!isNamedDriver(d)) continue;
@@ -200,6 +219,12 @@ export function raceResults(race: LeagueRace): Map<string, DriverResult> {
         driverKey(fastest["driver-name"] ?? "") === key,
       pole: r.grid === 1,
       field: drivers.length,
+      racePaceMs: racePace(d),
+      overtakes: overtakes.filter(
+        (o) => driverKey(o["overtaking-driver-name"] ?? "") === key,
+      ).length,
+      topSpeed: d["top-speed-kmph"] || null,
+      incidents: (d["warning-penalty-history"] ?? []).length,
     });
   }
   return out;
@@ -286,6 +311,29 @@ export interface HeadToHeadRace {
   date: string;
   a: DriverResult;
   b: DriverResult;
+  /** On-track passes of one on the other. */
+  aPassedB: number;
+  bPassedA: number;
+  contact: number;
+}
+
+/** Totals for one side of a head to head. */
+export interface HeadToHeadSide {
+  ahead: number;
+  qualiAhead: number;
+  fasterLap: number;
+  betterPace: number;
+  points: number;
+  wins: number;
+  podiums: number;
+  avgFinish: number | null;
+  avgGrid: number | null;
+  gained: number;
+  overtakes: number;
+  passedRival: number;
+  topSpeed: number | null;
+  incidents: number;
+  dnfs: number;
 }
 
 export interface HeadToHead {
@@ -294,6 +342,39 @@ export interface HeadToHead {
   bAhead: number;
   aFasterLap: number;
   bFasterLap: number;
+  a: HeadToHeadSide;
+  b: HeadToHeadSide;
+  contact: number;
+}
+
+function pairStats(session: TelemetrySession, a: string, b: string) {
+  let aPassedB = 0;
+  let bPassedA = 0;
+  for (const o of session.overtakes?.records ?? []) {
+    const by = driverKey(o["overtaking-driver-name"] ?? "");
+    const on = driverKey(o["overtaken-driver-name"] ?? "");
+    if (by === a && on === b) aPassedB += 1;
+    if (by === b && on === a) bPassedA += 1;
+  }
+  // Each driver carries the same pair list, so count it from one side only
+  let contact = 0;
+  const holder = (session["classification-data"] ?? []).find(
+    (d) => isNamedDriver(d) && driverKey(d["driver-name"]) === a,
+  );
+  const collisions = (holder as unknown as {
+    collisions?: {
+      "collision-pairs"?: {
+        "driver-1-name": string;
+        "driver-2-name": string;
+        "num-collisions": number;
+      }[];
+    };
+  })?.collisions?.["collision-pairs"];
+  for (const p of collisions ?? []) {
+    const pair = [driverKey(p["driver-1-name"]), driverKey(p["driver-2-name"])];
+    if (pair.includes(a) && pair.includes(b)) contact += p["num-collisions"] ?? 0;
+  }
+  return { aPassedB, bPassedA, contact };
 }
 
 /** Races both drivers were in, and who came out ahead. */
@@ -305,24 +386,73 @@ export function headToHead(races: LeagueRace[], a: string, b: string): HeadToHea
     const ra = results.get(a);
     const rb = results.get(b);
     if (!ra || !rb) continue;
-    shared.push({ file: race.file, track: ra.track, date: ra.date, a: ra, b: rb });
+    shared.push({
+      file: race.file,
+      track: ra.track,
+      date: ra.date,
+      a: ra,
+      b: rb,
+      ...pairStats(race.session, a, b),
+    });
   }
   shared.sort((x, y) => y.date.localeCompare(x.date));
   const rank = (r: DriverResult) =>
     finished(r.status) && r.position != null ? r.position : 1000;
-  let aAhead = 0;
-  let bAhead = 0;
-  let aFasterLap = 0;
-  let bFasterLap = 0;
-  for (const r of shared) {
-    if (rank(r.a) < rank(r.b)) aAhead += 1;
-    else if (rank(r.b) < rank(r.a)) bAhead += 1;
-    if (r.a.bestLapMs && r.b.bestLapMs) {
-      if (r.a.bestLapMs < r.b.bestLapMs) aFasterLap += 1;
-      else if (r.b.bestLapMs < r.a.bestLapMs) bFasterLap += 1;
-    }
-  }
-  return { races: shared, aAhead, bAhead, aFasterLap, bFasterLap };
+  const avg = (xs: number[]) =>
+    xs.length ? xs.reduce((x, y) => x + y, 0) / xs.length : null;
+  const side = (me: "a" | "b"): HeadToHeadSide => {
+    const other = me === "a" ? "b" : "a";
+    const mine = shared.map((r) => r[me]);
+    const finishes = mine
+      .filter((r) => finished(r.status) && r.position != null)
+      .map((r) => r.position as number);
+    const grids = mine.filter((r) => r.grid != null).map((r) => r.grid as number);
+    const speeds = mine.filter((r) => r.topSpeed != null).map((r) => r.topSpeed as number);
+    const beats = (pick: (r: DriverResult) => number | null) =>
+      shared.filter((r) => {
+        const x = pick(r[me]);
+        const y = pick(r[other]);
+        return x != null && y != null && x < y;
+      }).length;
+    return {
+      ahead: shared.filter((r) => rank(r[me]) < rank(r[other])).length,
+      qualiAhead: beats((r) => r.grid),
+      fasterLap: beats((r) => r.bestLapMs),
+      betterPace: beats((r) => r.racePaceMs),
+      points: mine.reduce((n, r) => n + r.points, 0),
+      wins: finishes.filter((p) => p === 1).length,
+      podiums: finishes.filter((p) => p <= 3).length,
+      avgFinish: avg(finishes),
+      avgGrid: avg(grids),
+      gained: mine.reduce(
+        (n, r) =>
+          finished(r.status) && r.position != null && r.grid != null
+            ? n + (r.grid - r.position)
+            : n,
+        0,
+      ),
+      overtakes: mine.reduce((n, r) => n + r.overtakes, 0),
+      passedRival: shared.reduce(
+        (n, r) => n + (me === "a" ? r.aPassedB : r.bPassedA),
+        0,
+      ),
+      topSpeed: speeds.length ? Math.max(...speeds) : null,
+      incidents: mine.reduce((n, r) => n + r.incidents, 0),
+      dnfs: mine.filter((r) => !finished(r.status)).length,
+    };
+  };
+  const sa = side("a");
+  const sb = side("b");
+  return {
+    races: shared,
+    aAhead: sa.ahead,
+    bAhead: sb.ahead,
+    aFasterLap: sa.fasterLap,
+    bFasterLap: sb.fasterLap,
+    a: sa,
+    b: sb,
+    contact: shared.reduce((n, r) => n + r.contact, 0),
+  };
 }
 
 export function formatLap(ms: number | null): string {

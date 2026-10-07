@@ -14,7 +14,9 @@ export function BrandHomeLink({ className }: BrandHomeLinkProps) {
   const location = useLocation();
   const { mode, activeFormulaKey } = useTelemetry();
   const homePath = dashboardPath(activeFormulaKey);
-  const isDashboard = location.pathname === homePath;
+  // League mode has its own Driver / Leaderboard / Head to head menu, so the
+  // brand never turns into a back link there.
+  const isDashboard = mode === "league" || location.pathname === homePath;
   // In the prod no-data demo, the home page is positioned as a preview rather
   // than the user's own dashboard — so the back-link reads "Demo" to match.
   const homeLabel = mode === "demo" ? "Demo" : "Dashboard";
