@@ -9,4 +9,6 @@ on GitHub Pages by `.github/workflows/site.yml`.
 - Race files go in `races/`; `scripts/build-league-data.mjs` writes
   `public/league/` at build time (not committed).
 - Push to `main` only; this repo keeps one branch.
-- The build log prints base64 screenshots (`scripts/screenshots.mjs`).
+- Run the site workflow by hand with `previews` on to get screenshots of the
+  main pages committed to `previews/` (`scripts/screenshots.mjs`).
+- New race files arrive from `uploader/RaceUploader.ps1` on the racing PC.
