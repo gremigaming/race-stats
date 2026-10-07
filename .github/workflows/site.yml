@@ -44,6 +44,11 @@ jobs:
           pnpm build
           # GitHub Pages has no app routing: serve the app for every unknown path
           cp dist/index.html dist/404.html
+      # The leaderboard picture Race Control posts in Discord
+      - name: Discord leaderboard picture
+        run: |
+          mkdir -p /tmp/shots && cd /tmp/shots && npm init -y >/dev/null && npm i --silent playwright@1 && npx playwright install --with-deps chromium >/dev/null
+          cd /tmp/shots && node "$GITHUB_WORKSPACE/scripts/discord-card.mjs" "$GITHUB_WORKSPACE/dist"
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
@@ -52,11 +57,11 @@ jobs:
       - name: Screenshots
         if: inputs.previews
         run: |
-          mkdir -p /tmp/shots && cd /tmp/shots && npm init -y >/dev/null && npm i --silent playwright@1 && npx playwright install --with-deps chromium >/dev/null
           cd /tmp/shots && node "$GITHUB_WORKSPACE/scripts/screenshots.mjs" "$GITHUB_WORKSPACE/dist" "$GITHUB_WORKSPACE/previews"
           cd "$GITHUB_WORKSPACE"
           git config user.name "github-actions"
           git config user.email "github-actions@users.noreply.github.com"
+          cp dist/discord/leaderboard.png previews/discord-leaderboard.png
           git add previews
           git commit -m "chore: page previews [skip ci]" && git pull --rebase origin main && git push || true
 

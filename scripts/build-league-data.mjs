@@ -20,6 +20,26 @@ function dateKey(name) {
   return m ? m.slice(1).join("") : "";
 }
 
+// Drivers who changed their online name: races/aliases.json maps an old name
+// to the current one, so all their races land on one profile.
+const norm = (n) => n.replace(/[\s\u00a0]+/g, " ").trim().toLowerCase();
+let aliases = new Map();
+try {
+  const raw = JSON.parse(readFileSync(join(SRC, "aliases.json"), "utf8"));
+  aliases = new Map(Object.entries(raw).map(([from, to]) => [norm(from), to]));
+} catch {
+  // no aliases file
+}
+const renameDrivers = (value) => {
+  if (Array.isArray(value)) return value.map(renameDrivers);
+  if (value && typeof value === "object") {
+    for (const k of Object.keys(value)) value[k] = renameDrivers(value[k]);
+    return value;
+  }
+  if (typeof value === "string" && aliases.size) return aliases.get(norm(value)) ?? value;
+  return value;
+};
+
 rmSync(OUT, { recursive: true, force: true });
 mkdirSync(join(OUT, "sessions"), { recursive: true });
 
@@ -27,7 +47,7 @@ const seen = new Set();
 const files = [];
 for (const path of walk(SRC)) {
   const name = path.split(/[\\/]/).pop();
-  if (seen.has(name)) continue;
+  if (name === "aliases.json" || seen.has(name)) continue;
   let data;
   try {
     data = JSON.parse(readFileSync(path, "utf8"));
@@ -35,10 +55,11 @@ for (const path of walk(SRC)) {
     console.warn(`skipped (not valid JSON): ${name}`);
     continue;
   }
-  if (!Array.isArray(data["classification-data"]) || !data["session-info"]) {
+  if (!data || !Array.isArray(data["classification-data"]) || !data["session-info"]) {
     console.warn(`skipped (not a Pits n' Giggles save): ${name}`);
     continue;
   }
+  renameDrivers(data);
   for (const d of data["classification-data"]) {
     const p = d["participant-data"];
     if (p) {

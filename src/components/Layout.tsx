@@ -155,6 +155,15 @@ export function Layout() {
     [activeFormulaKey, location.pathname, location.search, navigate],
   );
 
+  // ?embed renders just the page, for the Discord leaderboard picture
+  if (new URLSearchParams(location.search).has("embed")) {
+    return (
+      <main className="min-h-screen bg-canvas">
+        <Outlet />
+      </main>
+    );
+  }
+
   return (
     <div className="flex h-screen overflow-hidden relative">
       {/* Mobile backdrop */}

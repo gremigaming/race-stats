@@ -1,5 +1,5 @@
 import { Trophy } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { cardClass } from "../components/Card";
 import { SectionHeader } from "../components/ui/SectionHeader";
 import {
@@ -18,12 +18,17 @@ import {
 import { cn } from "../utils/cn";
 import { dashboardPath } from "../utils/routes";
 
+const EMBED_ROWS = 15;
+
 const fmt = (n: number | null, digits = 1) =>
   n == null ? "—" : n.toFixed(digits);
 
 export function DriversPage() {
   const { league, activeFormulaKey, activeFormula } = useTelemetry();
   const navigate = useNavigate();
+  const location = useLocation();
+  // The Discord picture: same table, top 15, with the site address
+  const embed = new URLSearchParams(location.search).has("embed");
   if (!league) {
     return (
       <div className="flex h-full items-center justify-center text-zinc-500">
@@ -37,7 +42,8 @@ export function DriversPage() {
       (!activeFormulaKey || raceFormulaKey(r.session) === activeFormulaKey),
   );
   const rangeLabel = league.filterLabel;
-  const rows = leaderboard(races);
+  const allRows = leaderboard(races);
+  const rows = embed ? allRows.slice(0, EMBED_ROWS) : allRows;
   const hidden = races.reduce(
     (n, r) =>
       n +
@@ -47,15 +53,18 @@ export function DriversPage() {
   );
 
   return (
-    <div className="mx-auto max-w-5xl space-y-8 p-6">
+    <div
+      id="leaderboard-card"
+      className={cn("mx-auto max-w-5xl space-y-8 p-6", embed && "space-y-6 p-8")}
+    >
       <div>
         <h2 className="mb-1 flex items-center gap-2 text-xl font-bold">
           <Trophy className="h-5 w-5 text-amber-400" />
-          Leaderboard
+          {embed ? "GreMi Gang Leaderboard" : "Leaderboard"}
         </h2>
         <p className="text-sm text-zinc-500">
           {activeFormula?.label ?? "All"} · {rangeLabel} · {races.length}{" "}
-          {races.length === 1 ? "race" : "races"} · {rows.length} drivers
+          {races.length === 1 ? "race" : "races"} · {allRows.length} drivers
         </p>
       </div>
 
@@ -76,7 +85,13 @@ export function DriversPage() {
       <section className={cardClass}>
         <SectionHeader
           title="Drivers"
-          hint="Points as awarded in the lobby · click a driver to see their stats"
+          hint={
+            embed
+              ? allRows.length > rows.length
+                ? `Top ${rows.length} · full standings at gremigaming.github.io/race-stats`
+                : "Full stats at gremigaming.github.io/race-stats"
+              : "Points as awarded in the lobby · click a driver to see their stats"
+          }
         />
         <div className="overflow-x-auto">
           <table className={tableClassLoose}>
@@ -104,7 +119,7 @@ export function DriversPage() {
             </thead>
             <tbody>
               {rows.map((row, i) => {
-                const isSelected = row.key === league.selectedDriver;
+                const isSelected = !embed && row.key === league.selectedDriver;
                 return (
                   <tr
                     key={row.key}
@@ -161,7 +176,7 @@ export function DriversPage() {
             </tbody>
           </table>
         </div>
-        {hidden > 0 && (
+        {hidden > 0 && !embed && (
           <p className="mt-4 text-xs text-zinc-500">
             {hidden} {hidden === 1 ? "entry is" : "entries are"} left out
             because those drivers hide their online name in the game. Turn on
