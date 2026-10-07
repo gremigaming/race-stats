@@ -1,5 +1,5 @@
 import { Trophy } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { cardClass } from "../components/Card";
 import { SectionHeader } from "../components/ui/SectionHeader";
 import {
@@ -10,10 +10,14 @@ import {
 } from "../components/ui/table";
 import { useTelemetry } from "../context/TelemetryContext";
 import {
+  inRange,
   isNamedDriver,
   isRaceSession,
+  LEADERBOARD_RANGES,
   leaderboard,
   raceFormulaKey,
+  rangeBounds,
+  type LeaderboardRange,
 } from "../league/league";
 import { cn } from "../utils/cn";
 import { dashboardPath } from "../utils/routes";
@@ -24,6 +28,16 @@ const fmt = (n: number | null, digits = 1) =>
 export function DriversPage() {
   const { league, activeFormulaKey, activeFormula } = useTelemetry();
   const navigate = useNavigate();
+  const [params, setParams] = useSearchParams();
+  const range: LeaderboardRange =
+    LEADERBOARD_RANGES.find((r) => r.value === params.get("range"))?.value ??
+    "month";
+  const setRange = (next: LeaderboardRange) => {
+    const p = new URLSearchParams(params);
+    if (next === "month") p.delete("range");
+    else p.set("range", next);
+    setParams(p, { replace: true });
+  };
   if (!league) {
     return (
       <div className="flex h-full items-center justify-center text-zinc-500">
@@ -34,8 +48,10 @@ export function DriversPage() {
   const races = league.races.filter(
     (r) =>
       isRaceSession(r.session) &&
-      (!activeFormulaKey || raceFormulaKey(r.session) === activeFormulaKey),
+      (!activeFormulaKey || raceFormulaKey(r.session) === activeFormulaKey) &&
+      inRange(r.file, range),
   );
+  const rangeLabel = describeRange(range);
   const rows = leaderboard(races);
   const hidden = races.reduce(
     (n, r) =>
@@ -53,11 +69,47 @@ export function DriversPage() {
           Leaderboard
         </h2>
         <p className="text-sm text-zinc-500">
-          {activeFormula?.label ?? "All"} · {races.length}{" "}
+          {activeFormula?.label ?? "All"} · {rangeLabel} · {races.length}{" "}
           {races.length === 1 ? "race" : "races"} · {rows.length} drivers
         </p>
       </div>
 
+      <div className="flex flex-wrap gap-1.5" role="group" aria-label="Time range">
+        {LEADERBOARD_RANGES.map((r) => (
+          <button
+            key={r.value}
+            type="button"
+            onClick={() => setRange(r.value)}
+            aria-pressed={range === r.value}
+            className={cn(
+              "rounded-full px-3 py-1 text-xs font-medium transition-colors",
+              range === r.value
+                ? "bg-red-500/15 text-red-300 ring-1 ring-inset ring-red-400/25"
+                : "bg-zinc-900/60 text-zinc-400 hover:bg-zinc-800/70 hover:text-zinc-200",
+            )}
+          >
+            {r.label}
+          </button>
+        ))}
+      </div>
+
+      {rows.length === 0 ? (
+        <section className={cn(cardClass, "text-center text-sm text-zinc-400")}>
+          {rangeLabel.startsWith("Since")
+            ? `No races s${rangeLabel.slice(1)}`
+            : `No races in ${rangeLabel}`}{" "}
+          yet.{" "}
+          {range !== "all" && (
+            <button
+              type="button"
+              onClick={() => setRange("all")}
+              className="font-medium text-red-300 hover:text-red-200"
+            >
+              Show all time
+            </button>
+          )}
+        </section>
+      ) : (
       <section className={cardClass}>
         <SectionHeader
           title="Drivers"
@@ -154,8 +206,20 @@ export function DriversPage() {
           </p>
         )}
       </section>
+      )}
     </div>
   );
+}
+
+/** "October 2026", "September 2026", "Since August 2026", "2026", "All time" */
+function describeRange(range: LeaderboardRange): string {
+  const { from } = rangeBounds(range);
+  const month = (d: Date) =>
+    d.toLocaleDateString("en-GB", { month: "long", year: "numeric" });
+  if (!from) return "All time";
+  if (range === "month" || range === "last-month") return month(from);
+  if (range === "year") return String(from.getFullYear());
+  return `Since ${month(from)}`;
 }
 
 function Num({

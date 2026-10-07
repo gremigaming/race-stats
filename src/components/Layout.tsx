@@ -1,17 +1,22 @@
 import {
   Bell,
+  CalendarDays,
+  ChevronDown,
   ChevronRight,
+  LayoutDashboard,
+  Route,
   FolderUp,
   Menu,
   Swords,
   Trophy,
   User,
   X,
+  type LucideIcon,
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import changelog from "virtual:changelog";
-import { SESSIONS_ROUTE_SEGMENT } from "../constants/routes";
+import { SESSIONS_ROUTE_SEGMENT, TRACKS_ROUTE_SEGMENT } from "../constants/routes";
 import {
   CHANGELOG_SEEN_STORAGE_KEY,
   SIDEBAR_WIDTH_STORAGE_KEY,
@@ -69,10 +74,16 @@ export function Layout() {
   const dragging = useRef(false);
   const filtersActive = !areSessionFiltersDefault(sessionFilters);
   const section = location.pathname.split("/").filter(Boolean)[1];
-  const leaguePage =
-    league && (section === "drivers" || section === "head-to-head")
-      ? section
-      : null;
+  // League menu folds: open the one for the page you're on
+  const [openFolds, setOpenFolds] = useState({ sessions: false, tracks: false });
+  const toggleFold = (key: "sessions" | "tracks") =>
+    setOpenFolds((f) => ({ ...f, [key]: !f[key] }));
+  useEffect(() => {
+    if (section === SESSIONS_ROUTE_SEGMENT)
+      setOpenFolds((f) => (f.sessions ? f : { ...f, sessions: true }));
+    if (section === TRACKS_ROUTE_SEGMENT)
+      setOpenFolds((f) => (f.tracks ? f : { ...f, tracks: true }));
+  }, [section]);
 
   // Close sidebar on navigation (mobile)
   useEffect(() => {
@@ -207,29 +218,7 @@ export function Layout() {
               />
             </div>
           )}
-          {league && league.drivers.length > 0 && activeFormulaKey && (
-            <nav className="mt-3 grid grid-cols-3 gap-1 rounded-xl bg-zinc-900/60 p-1">
-              <LeagueNavLink
-                to={dashboardPath(activeFormulaKey)}
-                active={!leaguePage}
-                icon={<User className="h-4 w-4" />}
-                label="Driver"
-              />
-              <LeagueNavLink
-                to={`/${activeFormulaKey}/drivers`}
-                active={leaguePage === "drivers"}
-                icon={<Trophy className="h-4 w-4" />}
-                label="Leaderboard"
-              />
-              <LeagueNavLink
-                to={`/${activeFormulaKey}/head-to-head`}
-                active={leaguePage === "head-to-head"}
-                icon={<Swords className="h-4 w-4" />}
-                label="Head to head"
-              />
-            </nav>
-          )}
-          {league && league.drivers.length > 0 && !leaguePage && (
+          {league && league.drivers.length > 0 && (
             <div className="mt-3">
               <PillSelect
                 value={league.selectedDriver}
@@ -246,9 +235,48 @@ export function Layout() {
             </div>
           )}
         </div>
-        {/* Leaderboard and head to head are league-wide, so the driver's
-            own sessions and tracks only show under "Driver". */}
-        {!leaguePage && <SessionList />}
+        {league && activeFormulaKey ? (
+          <nav className="space-y-0.5 px-2 pb-4 pt-2">
+            <MenuLink
+              to={dashboardPath(activeFormulaKey)}
+              active={section === undefined}
+              icon={LayoutDashboard}
+              label="Dashboard"
+            />
+            <MenuFold
+              icon={CalendarDays}
+              label="Sessions"
+              open={openFolds.sessions}
+              active={section === SESSIONS_ROUTE_SEGMENT}
+              onToggle={() => toggleFold("sessions")}
+            >
+              <SessionList section="sessions" />
+            </MenuFold>
+            <MenuFold
+              icon={Route}
+              label="Tracks"
+              open={openFolds.tracks}
+              active={section === TRACKS_ROUTE_SEGMENT}
+              onToggle={() => toggleFold("tracks")}
+            >
+              <SessionList section="tracks" />
+            </MenuFold>
+            <MenuLink
+              to={`/${activeFormulaKey}/drivers`}
+              active={section === "drivers"}
+              icon={Trophy}
+              label="Leaderboard"
+            />
+            <MenuLink
+              to={`/${activeFormulaKey}/head-to-head`}
+              active={section === "head-to-head"}
+              icon={Swords}
+              label="Head to head"
+            />
+          </nav>
+        ) : (
+          <SessionList />
+        )}
       </aside>
 
       {/* Resize handle — desktop only */}
@@ -347,29 +375,68 @@ export function Layout() {
   );
 }
 
-function LeagueNavLink({
+const menuItemClass = (active: boolean) =>
+  cn(
+    "flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm font-medium transition-colors",
+    active
+      ? "bg-red-500/10 text-red-300"
+      : "text-zinc-400 hover:bg-zinc-900/70 hover:text-zinc-200",
+  );
+
+function MenuLink({
   to,
   active,
-  icon,
+  icon: Icon,
   label,
 }: {
   to: string;
   active: boolean;
-  icon: React.ReactNode;
+  icon: LucideIcon;
   label: string;
 }) {
   return (
-    <NavLink
-      to={to}
-      className={cn(
-        "flex min-w-0 flex-col items-center justify-center gap-1 rounded-lg px-1 py-2 text-[11px] font-medium whitespace-nowrap transition-colors",
-        active
-          ? "bg-red-500/15 text-red-300 ring-1 ring-inset ring-red-400/25"
-          : "text-zinc-400 hover:bg-zinc-800/70 hover:text-zinc-200",
-      )}
-    >
-      {icon}
-      <span>{label}</span>
+    <NavLink to={to} className={menuItemClass(active)}>
+      <Icon className="h-4 w-4 shrink-0" />
+      {label}
     </NavLink>
+  );
+}
+
+function MenuFold({
+  icon: Icon,
+  label,
+  open,
+  active,
+  onToggle,
+  children,
+}: {
+  icon: LucideIcon;
+  label: string;
+  open: boolean;
+  active: boolean;
+  onToggle: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <div>
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-expanded={open}
+        className={menuItemClass(active && !open)}
+      >
+        <Icon className="h-4 w-4 shrink-0" />
+        <span className="flex-1 text-left">{label}</span>
+        <ChevronDown
+          className={cn(
+            "h-3.5 w-3.5 text-zinc-500 transition-transform",
+            !open && "-rotate-90",
+          )}
+        />
+      </button>
+      {open && (
+        <div className="ml-3 border-l border-white/[0.06] pl-1">{children}</div>
+      )}
+    </div>
   );
 }

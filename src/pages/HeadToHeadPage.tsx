@@ -34,20 +34,22 @@ export function HeadToHeadPage() {
     );
   }
   const keys = league.drivers.map((d) => d.key);
-  const a = keys.includes(params.get("a") ?? "")
-    ? (params.get("a") as string)
-    : league.selectedDriver;
+  // The first driver is always the one picked at the top of the sidebar
+  const a = league.selectedDriver;
   const fallbackB = keys.find((k) => k !== a) ?? a;
-  const b = keys.includes(params.get("b") ?? "")
-    ? (params.get("b") as string)
-    : fallbackB;
+  const wantedB = params.get("b") ?? "";
+  const b = keys.includes(wantedB) && wantedB !== a ? wantedB : fallbackB;
   const nameOf = (k: string) =>
     league.drivers.find((d) => d.key === k)?.name ?? k;
   const options = league.drivers.map((d) => ({ value: d.key, label: d.name }));
   const set = (which: "a" | "b", value: string) => {
+    if (which === "a") {
+      league.setSelectedDriver(value);
+      return;
+    }
     const next = new URLSearchParams(params);
-    next.set("a", which === "a" ? value : a);
-    next.set("b", which === "b" ? value : b);
+    next.delete("a");
+    next.set("b", value);
     setParams(next, { replace: true });
   };
 

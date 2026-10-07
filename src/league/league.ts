@@ -147,6 +147,51 @@ function racePace(d: DriverData): number | null {
   return clean.length % 2 ? clean[mid] : (clean[mid - 1] + clean[mid]) / 2;
 }
 
+/** Local start time from the save's file name, e.g. ..._2026_09_30_19_49_22.json */
+export function raceDate(file: string): Date | null {
+  const m = file.match(/(\d{4})_(\d{2})_(\d{2})_(\d{2})_(\d{2})/);
+  return m ? new Date(+m[1], +m[2] - 1, +m[3], +m[4], +m[5]) : null;
+}
+
+export type LeaderboardRange = "month" | "last-month" | "3-months" | "year" | "all";
+
+export const LEADERBOARD_RANGES: { value: LeaderboardRange; label: string }[] = [
+  { value: "month", label: "This month" },
+  { value: "last-month", label: "Last month" },
+  { value: "3-months", label: "Last 3 months" },
+  { value: "year", label: "This year" },
+  { value: "all", label: "All time" },
+];
+
+/** [from, to) for a range, in local time; null bounds are open. */
+export function rangeBounds(
+  range: LeaderboardRange,
+  now = new Date(),
+): { from: Date | null; to: Date | null } {
+  const y = now.getFullYear();
+  const m = now.getMonth();
+  switch (range) {
+    case "month":
+      return { from: new Date(y, m, 1), to: null };
+    case "last-month":
+      return { from: new Date(y, m - 1, 1), to: new Date(y, m, 1) };
+    case "3-months":
+      return { from: new Date(y, m - 2, 1), to: null };
+    case "year":
+      return { from: new Date(y, 0, 1), to: null };
+    default:
+      return { from: null, to: null };
+  }
+}
+
+export function inRange(file: string, range: LeaderboardRange, now = new Date()): boolean {
+  if (range === "all") return true;
+  const d = raceDate(file);
+  if (!d) return false;
+  const { from, to } = rangeBounds(range, now);
+  return (!from || d >= from) && (!to || d < to);
+}
+
 function sessionDate(file: string): string {
   const m = file.match(/(\d{4})_(\d{2})_(\d{2})_(\d{2})_(\d{2})/);
   return m ? `${m[1]}-${m[2]}-${m[3]}T${m[4]}:${m[5]}` : "";

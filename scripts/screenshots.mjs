@@ -34,7 +34,8 @@ const shoot = async (name, path, fullPage = false) => {
   console.log(`saved ${name} (${page.url()})`);
 };
 await shoot("dashboard", "");
-await shoot("leaderboard", "drivers");
+await shoot("leaderboard", "drivers?range=all");
+await shoot("leaderboard-month", "drivers");
 await shoot("head-to-head", "head-to-head", true);
 // a race opened from head to head keeps both drivers compared
 const row = await page.$("tbody tr");

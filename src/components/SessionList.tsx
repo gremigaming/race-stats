@@ -135,22 +135,27 @@ function getTrackListBestLap(
   };
 }
 
-export function SessionList() {
+/**
+ * `section` pins the list to sessions or tracks and hides the tabs; the
+ * league sidebar shows each one under its own folding menu item.
+ */
+export function SessionList({ section }: { section?: SidebarTab } = {}) {
   const { sessions, loading, error } = useSessionList();
   const { activeFormulaKey, formulaOptions } = useTelemetry();
-  const [tab, setTab] = useState<SidebarTab>(() =>
+  const [storedTab, setTab] = useState<SidebarTab>(() =>
     readStoredString(SESSION_LIST_TAB_STORAGE_KEY, "session") === "tracks"
       ? "tracks"
       : "sessions",
   );
+  const tab = section ?? storedTab;
   const [filters, setFilters] = useSessionFilters();
   const [page, setPage] = useState(0);
 
   // Keep the active tab scoped to this browser tab; filters are a longer-lived
   // preference shared with the dashboard via useSessionFilters().
   useEffect(() => {
-    writeStoredString(SESSION_LIST_TAB_STORAGE_KEY, tab, "session");
-  }, [tab]);
+    writeStoredString(SESSION_LIST_TAB_STORAGE_KEY, storedTab, "session");
+  }, [storedTab]);
 
   useEffect(() => {
     setPage(0);
@@ -237,15 +242,17 @@ export function SessionList() {
     <nav className="flex flex-col">
       {/* Sticky header: tabs + filter */}
       <div className="sticky top-0 z-10 bg-black/85 backdrop-blur">
-        <HStack className="px-2 pt-2">
-          <Tabs
-            className="flex-1"
-            options={SIDEBAR_TABS}
-            value={tab}
-            onChange={setTab}
-            ariaLabel="Sidebar section"
-          />
-          <div className="pb-[7px] pl-2">
+        <HStack className="px-2 pt-2" justify={section ? "end" : undefined}>
+          {!section && (
+            <Tabs
+              className="flex-1"
+              options={SIDEBAR_TABS}
+              value={tab}
+              onChange={setTab}
+              ariaLabel="Sidebar section"
+            />
+          )}
+          <div className={cn("pl-2", section ? "pb-1" : "pb-[7px]")}>
             <SessionListFilterMenu value={filters} onChange={updateFilters} />
           </div>
         </HStack>
