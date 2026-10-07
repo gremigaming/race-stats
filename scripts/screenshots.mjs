@@ -1,11 +1,26 @@
 // Saves screenshots of the main pages into the given folder (previews/), so
 // changes can be checked without opening the site.
-import { mkdirSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, statSync } from "node:fs";
+import { createServer } from "node:http";
 import { createRequire } from "node:module";
+import { extname, join } from "node:path";
 const require = createRequire(process.cwd() + "/");
 const { chromium } = require("playwright");
 
-const [base, outDir] = process.argv.slice(2);
+// argv: <dist folder> <output folder>. Serves dist like GitHub Pages does,
+// under /race-stats/ with the app for every unknown path.
+const [dist, outDir] = process.argv.slice(2);
+const TYPES = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css",
+  ".json": "application/json", ".png": "image/png", ".ico": "image/x-icon", ".svg": "image/svg+xml",
+  ".woff2": "font/woff2" };
+const server = createServer((req, res) => {
+  const path = decodeURIComponent(new URL(req.url, "http://x").pathname).replace(/^\/race-stats\//, "");
+  let file = join(dist, path);
+  if (!existsSync(file) || statSync(file).isDirectory()) file = join(dist, "index.html");
+  res.writeHead(200, { "Content-Type": TYPES[extname(file)] ?? "application/octet-stream" });
+  res.end(readFileSync(file));
+}).listen(4173);
+const base = "http://localhost:4173/race-stats/";
 mkdirSync(outDir, { recursive: true });
 const browser = await chromium.launch();
 const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
@@ -32,3 +47,4 @@ if (href) {
   console.log(`saved race (${page.url()})`);
 }
 await browser.close();
+server.close();
