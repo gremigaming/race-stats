@@ -49,19 +49,33 @@ export interface LeagueState {
 
 const LEAGUE_DRIVER_STORAGE_KEY = "league-driver";
 
+// Session files never change once published, so they are fetched once; only
+// the index is re-read to pick up new races while the page is open.
+const leagueSessionCache = new Map<string, TelemetrySession>();
+let lastLeague: { index: LeagueIndex; races: LeagueRace[] } | null = null;
+
 async function fetchLeague(): Promise<{ index: LeagueIndex; races: LeagueRace[] }> {
   const base = `${import.meta.env.BASE_URL}league/`;
-  const res = await fetch(`${base}index.json`);
+  const res = await fetch(`${base}index.json?t=${Date.now()}`, { cache: "no-store" });
   if (!res.ok) throw new Error("Failed to load league index");
   const index = (await res.json()) as LeagueIndex;
+  if (lastLeague && lastLeague.index.files.join("\n") === index.files.join("\n")) {
+    return lastLeague;
+  }
   const races = await Promise.all(
     index.files.map(async (file) => {
-      const r = await fetch(`${base}sessions/${encodeURIComponent(file)}`);
-      if (!r.ok) throw new Error(`Failed to load ${file}`);
-      return { file, session: (await r.json()) as TelemetrySession };
+      let session = leagueSessionCache.get(file);
+      if (!session) {
+        const r = await fetch(`${base}sessions/${encodeURIComponent(file)}`);
+        if (!r.ok) throw new Error(`Failed to load ${file}`);
+        session = (await r.json()) as TelemetrySession;
+        leagueSessionCache.set(file, session);
+      }
+      return { file, session };
     }),
   );
-  return { index, races };
+  lastLeague = { index, races };
+  return lastLeague;
 }
 
 function initialDriver(): string | null {
@@ -138,6 +152,9 @@ export function TelemetryProvider({ children }: { children: ReactNode }) {
     staleTime: Infinity,
     gcTime: Infinity,
     refetchOnWindowFocus: false,
+    // New races show up without a reload; unchanged data keeps its identity
+    refetchInterval: 60_000,
+    structuralSharing: false,
   });
   const [pickedDriver, setPickedDriver] = useState<string | null>(initialDriver);
   const leagueDrivers = useMemo(
