@@ -28,21 +28,34 @@ export function PerformanceDeltaChart({
 }: PerformanceDeltaChartProps) {
   if (!deltas.length) return null;
 
-  // Split into positive (behind) and negative (ahead) for dual-color fill
-  const data = deltas.map((d) => ({
-    lap: d.lap,
-    delta: +d.delta.toFixed(3),
-    behind: d.delta > 0 ? +d.delta.toFixed(3) : 0,
-    ahead: d.delta < 0 ? +d.delta.toFixed(3) : 0,
-    lapDelta: d.lapDelta,
-    s1Delta: d.s1Delta,
-    s2Delta: d.s2Delta,
-    s3Delta: d.s3Delta,
-    playerPit: d.playerPit,
-    rivalPit: d.rivalPit,
-  }));
+  // One point per sector: the gap after S1, after S2 and at the line, from
+  // each lap's sector times. x runs in laps, so 2.33 is lap 3 after S1.
+  const point = (x: number, delta: number, d: CumulativeDelta | null, sector: string) => ({
+    x: +x.toFixed(3),
+    lap: d?.lap ?? 0,
+    sector,
+    delta: +delta.toFixed(3),
+    behind: delta > 0 ? +delta.toFixed(3) : 0,
+    ahead: delta < 0 ? +delta.toFixed(3) : 0,
+    lapDelta: d?.lapDelta ?? 0,
+    s1Delta: d?.s1Delta ?? 0,
+    s2Delta: d?.s2Delta ?? 0,
+    s3Delta: d?.s3Delta ?? 0,
+    playerPit: d?.playerPit ?? false,
+    rivalPit: d?.rivalPit ?? false,
+  });
+  const data = [point(0, 0, null, "Start")];
+  for (const d of deltas) {
+    const before = d.delta - d.lapDelta;
+    data.push(
+      point(d.lap - 2 / 3, before + d.s1Delta, d, "after S1"),
+      point(d.lap - 1 / 3, before + d.s1Delta + d.s2Delta, d, "after S2"),
+      point(d.lap, d.delta, d, "at the line"),
+    );
+  }
+  const lastLap = deltas[deltas.length - 1].lap;
 
-  const maxAbs = Math.max(...deltas.map((d) => Math.abs(d.delta)), 1);
+  const maxAbs = Math.max(...data.map((d) => Math.abs(d.delta)), 1);
   const domainPad = maxAbs * 1.15;
 
   // Find pit laps for markers
@@ -59,7 +72,7 @@ export function PerformanceDeltaChart({
             <span className="font-normal text-zinc-500">vs {rivalName}</span>
           </>
         }
-        hint={`Above zero = behind ${rivalName} / Below zero = ahead`}
+        hint={`Gap after every sector · above zero = behind ${rivalName}, below zero = ahead`}
       />
       <ResponsiveContainer width="100%" height={240}>
         <AreaChart
@@ -94,7 +107,11 @@ export function PerformanceDeltaChart({
           </defs>
           <CartesianGrid strokeDasharray="3 3" stroke={CHART_THEME.grid} />
           <XAxis
-            dataKey="lap"
+            dataKey="x"
+            type="number"
+            domain={[0, lastLap]}
+            ticks={Array.from({ length: lastLap + 1 }, (_, i) => i)}
+            allowDecimals={false}
             stroke={CHART_THEME.axis}
             fontSize={11}
             label={{
@@ -117,7 +134,7 @@ export function PerformanceDeltaChart({
               // Custom content via labelFormatter instead
               return [null, name];
             }}
-            content={({ active, payload, label }) => {
+            content={({ active, payload }) => {
               if (!active || !payload?.length) return null;
               const d = payload[0]?.payload;
               if (!d) return null;
@@ -130,7 +147,7 @@ export function PerformanceDeltaChart({
                   }}
                 >
                   <div className="text-zinc-400 mb-1">
-                    Lap {label}
+                    {d.lap ? `Lap ${d.lap} · ${d.sector}` : d.sector}
                     {d.playerPit && (
                       <span className="ml-1 text-active">PIT</span>
                     )}
@@ -145,8 +162,9 @@ export function PerformanceDeltaChart({
                     )}
                   >
                     {d.delta > 0 ? "+" : ""}
-                    {d.delta.toFixed(3)}s cumulative
+                    {d.delta.toFixed(3)}s gap
                   </div>
+                  {d.lap > 0 && (
                   <div className="text-zinc-500 mt-1 space-y-0.5">
                     <div>
                       Lap: {d.lapDelta > 0 ? "+" : ""}
@@ -161,6 +179,7 @@ export function PerformanceDeltaChart({
                       {d.s3Delta.toFixed(3)}s
                     </div>
                   </div>
+                  )}
                 </div>
               );
             }}
