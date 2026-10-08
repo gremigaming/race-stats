@@ -39,6 +39,7 @@ import {
   type LeagueIndex,
   type LeagueRace,
 } from "../league/league";
+import { safetyRatings, type SafetyRow } from "../league/safety";
 import {
   allowedFiles,
   buildStreams,
@@ -61,6 +62,8 @@ export interface LeagueState {
   setFilter: (filter: LeagueFilter) => void;
   filterLabel: string;
   streams: Stream[];
+  /** Safety rating per driver key, over every race. */
+  safety: Map<string, SafetyRow>;
 }
 
 const LEAGUE_DRIVER_STORAGE_KEY = "league-driver";
@@ -178,6 +181,10 @@ export function TelemetryProvider({ children }: { children: ReactNode }) {
     setFilterState(next);
     storeFilter(next);
   }, []);
+  const safety = useMemo(
+    () => (leagueQuery.data ? safetyRatings(leagueQuery.data.races) : new Map<string, SafetyRow>()),
+    [leagueQuery.data],
+  );
   const streams = useMemo(
     () => (leagueQuery.data ? buildStreams(leagueQuery.data.races) : []),
     [leagueQuery.data],
@@ -256,6 +263,7 @@ export function TelemetryProvider({ children }: { children: ReactNode }) {
           setFilter,
           filterLabel: describeFilter(filter, streams),
           streams,
+          safety,
         }
       : null;
 

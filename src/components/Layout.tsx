@@ -6,6 +6,7 @@ import {
   LayoutDashboard,
   Route,
   FolderUp,
+  ShieldCheck,
   Menu,
   Swords,
   Trophy,
@@ -269,6 +270,12 @@ export function Layout() {
               active={section === "drivers"}
               icon={Trophy}
               label="Leaderboard"
+            />
+            <MenuLink
+              to={`/${activeFormulaKey}/safety`}
+              active={section === "safety"}
+              icon={ShieldCheck}
+              label="Safety rating"
             />
             <MenuLink
               to={`/${activeFormulaKey}/head-to-head`}
