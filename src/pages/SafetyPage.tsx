@@ -29,7 +29,6 @@ const signed = (n: number) => `${n > 0 ? "+" : ""}${n.toFixed(1)}`;
 
 export function SafetyPage() {
   const { league } = useTelemetry();
-  const navigate = useNavigate();
   if (!league) {
     return (
       <div className="flex h-full items-center justify-center text-zinc-500">
