@@ -54,7 +54,6 @@ await page.selectOption('select[aria-label="Time range"]', "month");
 await page.waitForTimeout(1500);
 await page.screenshot({ path: `${outDir}/leaderboard-month.jpg`, type: "jpeg", quality: 75 });
 await page.selectOption('select[aria-label="Time range"]', "all");
-await shoot("safety", "safety", true);
 await shoot("head-to-head", "head-to-head", true);
 // a race opened from head to head keeps both drivers compared
 const row = await page.$("tbody tr");
