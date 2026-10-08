@@ -62,6 +62,14 @@ if (row) {
   await page.waitForTimeout(5000);
   await page.screenshot({ path: `${outDir}/race-compare.jpg`, type: "jpeg", quality: 75 });
   console.log(`saved race-compare (${page.url()})`);
+  const gap = page.locator("section", { hasText: "Performance Delta" }).last();
+  if (await gap.count()) {
+    await gap.scrollIntoViewIfNeeded();
+    await gap.hover({ position: { x: 300, y: 140 } }).catch(() => {});
+    await page.waitForTimeout(500);
+    await gap.screenshot({ path: `${outDir}/race-gap.jpg`, type: "jpeg", quality: 80 });
+    console.log("saved race-gap");
+  }
 }
 // the newest race, as seen by the default driver
 await page.goto(`${base}${scope}/`);
