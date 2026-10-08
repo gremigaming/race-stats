@@ -20,7 +20,7 @@ interface PerformanceDeltaChartProps {
 
 /**
  * Area chart showing cumulative time delta vs a rival.
- * Green (below 0) = player ahead, Red (above 0) = player behind.
+ * Green (above 0) = player ahead, Red (below 0) = player behind.
  */
 export function PerformanceDeltaChart({
   deltas,
@@ -30,20 +30,24 @@ export function PerformanceDeltaChart({
 
   // One point per sector: the gap after S1, after S2 and at the line, from
   // each lap's sector times. x runs in laps, so 2.33 is lap 3 after S1.
-  const point = (x: number, delta: number, d: CumulativeDelta | null, sector: string) => ({
+  // Flipped so ahead is up: positive = ahead of / faster than the rival.
+  const point = (x: number, raw: number, d: CumulativeDelta | null, sector: string) => {
+    const delta = -raw;
+    return {
     x: +x.toFixed(3),
     lap: d?.lap ?? 0,
     sector,
     delta: +delta.toFixed(3),
-    behind: delta > 0 ? +delta.toFixed(3) : 0,
-    ahead: delta < 0 ? +delta.toFixed(3) : 0,
-    lapDelta: d?.lapDelta ?? 0,
-    s1Delta: d?.s1Delta ?? 0,
-    s2Delta: d?.s2Delta ?? 0,
-    s3Delta: d?.s3Delta ?? 0,
+    ahead: delta > 0 ? +delta.toFixed(3) : 0,
+    behind: delta < 0 ? +delta.toFixed(3) : 0,
+    lapDelta: -(d?.lapDelta ?? 0),
+    s1Delta: -(d?.s1Delta ?? 0),
+    s2Delta: -(d?.s2Delta ?? 0),
+    s3Delta: -(d?.s3Delta ?? 0),
     playerPit: d?.playerPit ?? false,
     rivalPit: d?.rivalPit ?? false,
-  });
+    };
+  };
   const data = [point(0, 0, null, "Start")];
   for (const d of deltas) {
     const before = d.delta - d.lapDelta;
@@ -72,7 +76,7 @@ export function PerformanceDeltaChart({
             <span className="font-normal text-zinc-500">vs {rivalName}</span>
           </>
         }
-        hint={`Gap after every sector · above zero = behind ${rivalName}, below zero = ahead`}
+        hint={`Gap after every sector · above zero = ahead of ${rivalName}, below zero = behind · + means you gained time`}
       />
       <ResponsiveContainer width="100%" height={240}>
         <AreaChart
@@ -80,7 +84,7 @@ export function PerformanceDeltaChart({
           margin={{ top: 5, right: 20, bottom: 5, left: 0 }}
         >
           <defs>
-            <linearGradient id="behindGrad" x1="0" y1="0" x2="0" y2="1">
+            <linearGradient id="behindGrad" x1="0" y1="1" x2="0" y2="0">
               <stop
                 offset="0%"
                 stopColor={CHART_THEME.behind}
@@ -92,7 +96,7 @@ export function PerformanceDeltaChart({
                 stopOpacity={0.05}
               />
             </linearGradient>
-            <linearGradient id="aheadGrad" x1="0" y1="1" x2="0" y2="0">
+            <linearGradient id="aheadGrad" x1="0" y1="0" x2="0" y2="1">
               <stop
                 offset="0%"
                 stopColor={CHART_THEME.ahead}
@@ -158,11 +162,11 @@ export function PerformanceDeltaChart({
                   <div
                     className={cn(
                       "font-mono font-medium",
-                      d.delta > 0 ? "text-behind" : "text-ahead",
+                      d.delta >= 0 ? "text-ahead" : "text-behind",
                     )}
                   >
-                    {d.delta > 0 ? "+" : ""}
-                    {d.delta.toFixed(3)}s gap
+                    {Math.abs(d.delta).toFixed(3)}s{" "}
+                    {d.delta >= 0 ? "ahead" : "behind"}
                   </div>
                   {d.lap > 0 && (
                   <div className="text-zinc-500 mt-1 space-y-0.5">
