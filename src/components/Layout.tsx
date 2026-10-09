@@ -7,13 +7,15 @@ import {
   Route,
   FolderUp,
   Menu,
+  ShieldCheck,
   Swords,
   Trophy,
   X,
   type LucideIcon,
+  TimerOff,
 } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { NavLink, Outlet, useLocation } from "react-router-dom";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import changelog from "virtual:changelog";
 import { SESSIONS_ROUTE_SEGMENT, TRACKS_ROUTE_SEGMENT } from "../constants/routes";
 import {
@@ -37,6 +39,7 @@ import { AppBrand } from "./AppBrand";
 import { BrandHomeLink } from "./BrandHomeLink";
 import { cardHighlight } from "./Card";
 import { ChangelogModal } from "./ChangelogModal";
+import { RankTile } from "./safety/RankTile";
 import { DriverSearchSelect } from "./DriverSearchSelect";
 import { LeagueFilterPanel } from "./LeagueFilterPanel";
 import { SessionList } from "./SessionList";
@@ -52,6 +55,7 @@ const DEFAULT_WIDTH = 288; // 72 * 4 (w-72)
 
 export function Layout() {
   const { mode, setShowUploadModal, scopeKey, league } = useTelemetry();
+  const mySafety = league?.safety.get(league.selectedDriver);
   const [sessionFilters] = useSessionFilters();
   const game = useGameScope();
   const [width, setWidth] = useState(() =>
@@ -189,11 +193,24 @@ export function Layout() {
           </div>
           {league && league.drivers.length > 0 && (
             <div className="mt-3 space-y-1.5">
-              <DriverSearchSelect
-                drivers={league.drivers}
-                value={league.selectedDriver}
-                onChange={league.setSelectedDriver}
-              />
+              <div className="flex items-center gap-2">
+                <div className="min-w-0 flex-1">
+                  <DriverSearchSelect
+                    drivers={league.drivers}
+                    value={league.selectedDriver}
+                    onChange={league.setSelectedDriver}
+                  />
+                </div>
+                {mySafety && scopeKey && (
+                  <Link
+                    to={`/${scopeKey}/safety`}
+                    title={`Safety rating ${mySafety.sr.toFixed(1)} (not filtered by date)`}
+                    className="shrink-0"
+                  >
+                    <RankTile sr={mySafety.sr} size={30} />
+                  </Link>
+                )}
+              </div>
               <LeagueFilterPanel />
             </div>
           )}
@@ -230,6 +247,15 @@ export function Layout() {
               icon={Trophy}
               label="Leaderboard"
             />
+            {league.safetyData && (
+              <MenuLink
+                to={`/${scopeKey}/safety`}
+                active={section === "safety"}
+                icon={ShieldCheck}
+                label="Safety rating"
+                note={<TimerOff className="ml-auto h-3.5 w-3.5 text-zinc-600" aria-label="not filtered by date" />}
+              />
+            )}
             <MenuLink
               to={`/${scopeKey}/head-to-head`}
               active={section === "head-to-head"}
@@ -351,16 +377,19 @@ function MenuLink({
   active,
   icon: Icon,
   label,
+  note,
 }: {
   to: string;
   active: boolean;
   icon: LucideIcon;
   label: string;
+  note?: ReactNode;
 }) {
   return (
     <NavLink to={to} className={menuItemClass(active)}>
       <Icon className="h-4 w-4 shrink-0" />
       {label}
+      {note}
     </NavLink>
   );
 }

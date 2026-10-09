@@ -40,7 +40,7 @@ import {
   type LeagueIndex,
   type LeagueRace,
 } from "../league/league";
-import { safetyRatings, type SafetyRow } from "../league/safety";
+import { safetyByKey, type SafetyData, type SafetyDriver } from "../league/safety";
 import {
   allowedFiles,
   buildStreams,
@@ -63,8 +63,9 @@ export interface LeagueState {
   setFilter: (filter: LeagueFilter) => void;
   filterLabel: string;
   streams: Stream[];
-  /** Safety rating per driver key, over every race. */
-  safety: Map<string, SafetyRow>;
+  /** Safety rating per driver key. Never date-filtered. */
+  safety: Map<string, SafetyDriver>;
+  safetyData: SafetyData | null;
 }
 
 const LEAGUE_DRIVER_STORAGE_KEY = "league-driver";
@@ -72,9 +73,13 @@ const LEAGUE_DRIVER_STORAGE_KEY = "league-driver";
 // Session files never change once published, so they are fetched once; only
 // the index is re-read to pick up new races while the page is open.
 const leagueSessionCache = new Map<string, TelemetrySession>();
-let lastLeague: { index: LeagueIndex; races: LeagueRace[] } | null = null;
+let lastLeague: { index: LeagueIndex; races: LeagueRace[]; safety: SafetyData | null } | null = null;
 
-async function fetchLeague(): Promise<{ index: LeagueIndex; races: LeagueRace[] }> {
+async function fetchLeague(): Promise<{
+  index: LeagueIndex;
+  races: LeagueRace[];
+  safety: SafetyData | null;
+}> {
   const base = `${import.meta.env.BASE_URL}league/`;
   const res = await fetch(`${base}index.json?t=${Date.now()}`, { cache: "no-store" });
   if (!res.ok) throw new Error("Failed to load league index");
@@ -94,7 +99,11 @@ async function fetchLeague(): Promise<{ index: LeagueIndex; races: LeagueRace[] 
       return { file, session };
     }),
   );
-  lastLeague = { index, races };
+  // The rating is built alongside the race files; a missing file just hides it
+  const safety = await fetch(`${base}safety.json?t=${Date.now()}`, { cache: "no-store" })
+    .then((r) => (r.ok ? (r.json() as Promise<SafetyData>) : null))
+    .catch(() => null);
+  lastLeague = { index, races, safety };
   return lastLeague;
 }
 
@@ -185,10 +194,8 @@ export function TelemetryProvider({ children }: { children: ReactNode }) {
     setFilterState(next);
     storeFilter(next);
   }, []);
-  const safety = useMemo(
-    () => (leagueQuery.data ? safetyRatings(leagueQuery.data.races) : new Map<string, SafetyRow>()),
-    [leagueQuery.data],
-  );
+  const safetyData = leagueQuery.data?.safety ?? null;
+  const safety = useMemo(() => safetyByKey(safetyData), [safetyData]);
   const streams = useMemo(
     () => (leagueQuery.data ? buildStreams(leagueQuery.data.races) : []),
     [leagueQuery.data],
@@ -268,6 +275,7 @@ export function TelemetryProvider({ children }: { children: ReactNode }) {
           filterLabel: describeFilter(filter, streams),
           streams,
           safety,
+          safetyData,
         }
       : null;
 

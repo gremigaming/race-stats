@@ -16,6 +16,7 @@ import {
   buildTrackRecords,
 } from "../components/dashboard/helpers";
 import { SectionHeader } from "../components/ui/SectionHeader";
+import { SafetySummary } from "../components/safety/SafetySummary";
 import { useTelemetry } from "../context/TelemetryContext";
 import { buildDashboardActivity } from "../analysis/dashboardActivity";
 import { buildTrackInsights } from "../analysis/dashboardInsights";
@@ -157,13 +158,14 @@ export function DashboardPage() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-8 p-6">
-      <div>
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <h2 className="mb-1 text-xl font-bold">
             {isDemoMode ? "Demo" : (leagueDriverName ?? "Dashboard")}
           </h2>
           <p className="text-sm text-zinc-500">{leagueSubtitle ?? subtitle}</p>
         </div>
+        <SafetySummary />
       </div>
 
       {!hasScopedData ? (

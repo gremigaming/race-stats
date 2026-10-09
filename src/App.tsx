@@ -14,6 +14,7 @@ import { SessionPage } from "./pages/SessionPage";
 import { TrackProgressPage } from "./pages/TrackProgressPage";
 import { DriversPage } from "./pages/DriversPage";
 import { HeadToHeadPage } from "./pages/HeadToHeadPage";
+import { SafetyPage } from "./pages/SafetyPage";
 import { TelemetryProvider, useTelemetry } from "./context/TelemetryContext";
 import { ZipUploadScreen } from "./components/ZipUploadScreen";
 import { GlobalDropZone } from "./components/GlobalDropZone";
@@ -74,6 +75,14 @@ function AppRoutes() {
             element={
               <ScopedFormulaRoute>
                 <DriversPage />
+              </ScopedFormulaRoute>
+            }
+          />
+          <Route
+            path=":formulaKey/safety"
+            element={
+              <ScopedFormulaRoute>
+                <SafetyPage />
               </ScopedFormulaRoute>
             }
           />
