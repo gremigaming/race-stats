@@ -24,7 +24,7 @@ const fmt = (n: number | null, digits = 1) =>
   n == null ? "—" : n.toFixed(digits);
 
 export function DriversPage() {
-  const { league, activeFormulaKey, activeFormula } = useTelemetry();
+  const { league, scopeKey, activeFormulaKey, activeFormula } = useTelemetry();
   const navigate = useNavigate();
   const location = useLocation();
   // The Discord picture: same table, top 15, with the site address
@@ -64,7 +64,7 @@ export function DriversPage() {
           {embed ? "GreMi Gang Leaderboard" : "Leaderboard"}
         </h2>
         <p className="text-sm text-zinc-500">
-          {activeFormula?.label ?? "All"} · {rangeLabel} · {races.length}{" "}
+          {activeFormula?.label ?? "All games"} · {rangeLabel} · {races.length}{" "}
           {races.length === 1 ? "race" : "races"} · {allRows.length} drivers
         </p>
       </div>
@@ -126,7 +126,7 @@ export function DriversPage() {
                     key={row.key}
                     onClick={() => {
                       league.setSelectedDriver(row.key);
-                      navigate(dashboardPath(activeFormulaKey));
+                      navigate(dashboardPath(scopeKey));
                     }}
                     className={cn(
                       tableRowClass,

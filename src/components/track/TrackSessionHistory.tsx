@@ -4,6 +4,7 @@ import type {
   TrackSessionKind,
 } from "../../analysis/trackAnalysis";
 import type { SpeedQuality } from "../../analysis/speedAnalysis";
+import { useTelemetry } from "../../context/TelemetryContext";
 import type { SessionSummary } from "../../types/telemetry";
 import {
   formatRelativeDate,
@@ -134,6 +135,7 @@ export function TrackSessionHistory({
   spectatorSessions = [],
   activeKind,
 }: TrackSessionHistoryProps) {
+  const { scopeKey } = useTelemetry();
   // `null` keeps the history following the page's active analysis tab. Once
   // the user chooses All or another kind, that explicit local choice wins.
   const [filterOverride, setFilterOverride] = useState<HistoryFilter | null>(
@@ -257,7 +259,7 @@ export function TrackSessionHistory({
               to={
                 session.summary.isSynthetic
                   ? null
-                  : sessionSummaryPath(session.summary)
+                  : sessionSummaryPath(session.summary, scopeKey)
               }
               leading={
                 <>
@@ -324,7 +326,11 @@ export function TrackSessionHistory({
           return (
             <SessionRow
               key={summary.relativePath}
-              to={summary.isSynthetic ? null : sessionSummaryPath(summary)}
+              to={
+                summary.isSynthetic
+                  ? null
+                  : sessionSummaryPath(summary, scopeKey)
+              }
               leading={
                 <>
                   <HistoryDateTime date={summary.date} />

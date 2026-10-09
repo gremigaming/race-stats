@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useTelemetry } from "../../context/TelemetryContext";
 import type { SessionSummary } from "../../types/telemetry";
 import { cn } from "../../utils/cn";
 import { formatShortDate } from "../../utils/format";
@@ -173,6 +174,7 @@ function ProgressionBar({
 }
 
 function ProgressionColumn({ session }: { session: SessionSummary }) {
+  const { scopeKey } = useTelemetry();
   const result = session.playerRaceResult;
   if (!result) return <div className="min-w-0 flex-1" />;
 
@@ -197,7 +199,7 @@ function ProgressionColumn({ session }: { session: SessionSummary }) {
   const finishLabelClass = isDnf ? "text-behind" : "text-zinc-200";
   const gridLabel = grid ? `P${grid}` : "—";
   const title = `${getTrackDisplayName(session.track)} · ${formatShortDate(session.date)}\nGrid ${gridLabel} → Finish ${isDnf ? "DNF" : `P${result.position}`}`;
-  const to = sessionSummaryPath(session);
+  const to = sessionSummaryPath(session, scopeKey);
 
   return (
     <Link

@@ -118,12 +118,12 @@ function RaceMetric({ record }: { record: TrackRaceRecord | undefined }) {
 export function TrackOverviewCard({
   track,
   sessions,
-  activeFormulaKey,
+  scopeKey,
   records,
 }: {
   track: string;
   sessions: SessionSummary[];
-  activeFormulaKey: string | undefined;
+  scopeKey: string | undefined;
   records: TrackRecords;
 }) {
   const trackName = getTrackDisplayName(track);
@@ -189,7 +189,7 @@ export function TrackOverviewCard({
     );
   }
 
-  if (!activeFormulaKey) {
+  if (!scopeKey) {
     return (
       <div
         className={cn(
@@ -204,7 +204,7 @@ export function TrackOverviewCard({
 
   return (
     <Link
-      to={trackFormulaPath(track, activeFormulaKey)}
+      to={trackFormulaPath(track, scopeKey)}
       className={cn(
         cardClass,
         "group relative min-h-40 overflow-hidden transition-colors hover:bg-zinc-800/50",

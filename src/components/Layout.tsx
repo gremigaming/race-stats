@@ -13,7 +13,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { NavLink, Outlet, useLocation } from "react-router-dom";
 import changelog from "virtual:changelog";
 import { SESSIONS_ROUTE_SEGMENT, TRACKS_ROUTE_SEGMENT } from "../constants/routes";
 import {
@@ -25,8 +25,9 @@ import {
   areSessionFiltersDefault,
   useSessionFilters,
 } from "../hooks/useSessionFilters";
+import { useGameScope } from "../hooks/useGameScope";
 import { cn } from "../utils/cn";
-import { dashboardPath, replaceFormulaScopeInPath } from "../utils/routes";
+import { dashboardPath } from "../utils/routes";
 import {
   readStoredNumber,
   readStoredString,
@@ -36,7 +37,6 @@ import { AppBrand } from "./AppBrand";
 import { BrandHomeLink } from "./BrandHomeLink";
 import { cardHighlight } from "./Card";
 import { ChangelogModal } from "./ChangelogModal";
-import { FormulaScopeSelect } from "./FormulaScopeSelect";
 import { DriverSearchSelect } from "./DriverSearchSelect";
 import { LeagueFilterPanel } from "./LeagueFilterPanel";
 import { SessionList } from "./SessionList";
@@ -51,9 +51,9 @@ const MAX_WIDTH = 480;
 const DEFAULT_WIDTH = 288; // 72 * 4 (w-72)
 
 export function Layout() {
-  const { mode, setShowUploadModal, formulaOptions, activeFormulaKey, league } =
-    useTelemetry();
+  const { mode, setShowUploadModal, scopeKey, league } = useTelemetry();
   const [sessionFilters] = useSessionFilters();
+  const game = useGameScope();
   const [width, setWidth] = useState(() =>
     readStoredNumber(SIDEBAR_WIDTH_STORAGE_KEY, {
       fallback: DEFAULT_WIDTH,
@@ -64,7 +64,6 @@ export function Layout() {
   const [showChangelog, setShowChangelog] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
-  const navigate = useNavigate();
   const latestHash = changelog[0]?.hash ?? "";
   const [hasUnseen, setHasUnseen] = useState(
     () =>
@@ -72,7 +71,8 @@ export function Layout() {
       readStoredString(CHANGELOG_SEEN_STORAGE_KEY) !== latestHash,
   );
   const dragging = useRef(false);
-  const filtersActive = !areSessionFiltersDefault(sessionFilters);
+  const filtersActive =
+    !areSessionFiltersDefault(sessionFilters) || game.isFiltered;
   const section = location.pathname.split("/").filter(Boolean)[1];
   // League menu folds: open the one for the page you're on
   const [openFolds, setOpenFolds] = useState({ sessions: false, tracks: false });
@@ -123,37 +123,6 @@ export function Layout() {
     document.addEventListener("mousemove", onMouseMove);
     document.addEventListener("mouseup", onMouseUp);
   }, []);
-
-  const handleFormulaScopeChange = useCallback(
-    (nextKey: string) => {
-      if (nextKey === activeFormulaKey) return;
-
-      const [, section] = location.pathname.split("/").filter(Boolean);
-
-      // Sessions are atomic telemetry records, not cross-scope resources. When
-      // the user changes game scope from a session detail page, send them to
-      // the selected dashboard instead of inventing a missing session URL.
-      if (section === SESSIONS_ROUTE_SEGMENT) {
-        navigate(dashboardPath(nextKey));
-        return;
-      }
-
-      if (activeFormulaKey) {
-        const nextParams = new URLSearchParams(location.search);
-        nextParams.delete("raceLaps");
-        const nextSearch = nextParams.toString();
-        navigate(
-          `${replaceFormulaScopeInPath(location.pathname, nextKey)}${
-            nextSearch ? `?${nextSearch}` : ""
-          }`,
-        );
-        return;
-      }
-
-      navigate(dashboardPath(nextKey));
-    },
-    [activeFormulaKey, location.pathname, location.search, navigate],
-  );
 
   // ?embed renders just the page, for the Discord leaderboard picture
   if (new URLSearchParams(location.search).has("embed")) {
@@ -218,15 +187,6 @@ export function Layout() {
               </button>
             </div>
           </div>
-          {formulaOptions.length > 1 && activeFormulaKey && (
-            <div className="mt-2">
-              <FormulaScopeSelect
-                options={formulaOptions}
-                value={activeFormulaKey}
-                onChange={handleFormulaScopeChange}
-              />
-            </div>
-          )}
           {league && league.drivers.length > 0 && (
             <div className="mt-3 space-y-1.5">
               <DriverSearchSelect
@@ -238,10 +198,10 @@ export function Layout() {
             </div>
           )}
         </div>
-        {league && activeFormulaKey ? (
+        {league && scopeKey ? (
           <nav className="space-y-0.5 px-2 pb-4 pt-2">
             <MenuLink
-              to={dashboardPath(activeFormulaKey)}
+              to={dashboardPath(scopeKey)}
               active={section === undefined}
               icon={LayoutDashboard}
               label="Dashboard"
@@ -265,13 +225,13 @@ export function Layout() {
               <SessionList section="tracks" />
             </MenuFold>
             <MenuLink
-              to={`/${activeFormulaKey}/drivers`}
+              to={`/${scopeKey}/drivers`}
               active={section === "drivers"}
               icon={Trophy}
               label="Leaderboard"
             />
             <MenuLink
-              to={`/${activeFormulaKey}/head-to-head`}
+              to={`/${scopeKey}/head-to-head`}
               active={section === "head-to-head"}
               icon={Swords}
               label="Head to head"

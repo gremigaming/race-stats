@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import { useTelemetry } from "../context/TelemetryContext";
 import { cn } from "../utils/cn";
 import { formatDate, formatSessionType, msToLapTime } from "../utils/format";
 import { sessionSummaryPath } from "../utils/routes";
@@ -153,10 +154,11 @@ function pluralizeRace(count: number): string {
 
 function SourceLink({ candidate }: { candidate: RaceSetupCandidate }) {
   const { summary, bestLapMs } = candidate.source;
+  const { scopeKey } = useTelemetry();
 
   return (
     <Link
-      to={sessionSummaryPath(summary)}
+      to={sessionSummaryPath(summary, scopeKey)}
       className="text-zinc-400 hover:text-zinc-200 transition-colors"
     >
       {formatSessionType(summary.sessionType, summary.formula)} ·{" "}

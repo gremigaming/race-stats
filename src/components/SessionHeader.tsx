@@ -2,13 +2,18 @@ import type { ReactNode } from "react";
 import { ExternalLink } from "lucide-react";
 import { Link } from "react-router-dom";
 import type { TelemetrySession } from "../types/telemetry";
+import { useTelemetry } from "../context/TelemetryContext";
 import { formatSessionType } from "../utils/format";
 import {
   getFormulaComparisonKey,
   getFormulaLabel,
   shouldShowFormulaLabel,
 } from "../utils/sessionTypes";
-import { trackPath, trackTabForSessionType } from "../utils/routes";
+import {
+  linkScopeKey,
+  trackPath,
+  trackTabForSessionType,
+} from "../utils/routes";
 import { getTrackDisplayName } from "../utils/tracks";
 import { TrackFlag } from "./TrackFlag";
 import { TrackLayout } from "./TrackLayout";
@@ -43,6 +48,7 @@ export function SessionHeader({
   showTrackLayout = true,
 }: SessionHeaderProps) {
   const info = session["session-info"];
+  const { scopeKey } = useTelemetry();
 
   const sessionType = formatSessionType(info["session-type"], info.formula);
   const TypeIcon = getSessionTypeMeta(sessionType).icon;
@@ -64,7 +70,11 @@ export function SessionHeader({
         <HStack className="gap-3">
           <h2 className="text-xl font-bold">
             <Link
-              to={trackPath(formulaKey, info["track-id"], trackTab)}
+              to={trackPath(
+                linkScopeKey(scopeKey, formulaKey),
+                info["track-id"],
+                trackTab,
+              )}
               className="hover:text-best transition-colors"
             >
               <TrackFlag track={info["track-id"]} className="mr-1" />{" "}

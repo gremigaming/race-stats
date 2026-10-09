@@ -20,9 +20,9 @@ export function SessionPage() {
   const slug = params["*"] ?? "";
 
   const { session, loading, error } = useSession(slug);
-  const { mode, sessions, setShowUploadModal, activeFormulaKey } =
+  const { mode, sessions, setShowUploadModal, scopeKey, activeFormulaKey } =
     useTelemetry();
-  const backToDashboardPath = dashboardPath(activeFormulaKey);
+  const backToDashboardPath = dashboardPath(scopeKey);
 
   if (loading) {
     return (
@@ -110,7 +110,7 @@ export function SessionPage() {
     session["session-info"].formula,
     session["game-year"],
   );
-  if (sessionFormulaKey !== activeFormulaKey) {
+  if (activeFormulaKey && sessionFormulaKey !== activeFormulaKey) {
     return <Navigate to={sessionPath(sessionFormulaKey, slug)} replace />;
   }
 

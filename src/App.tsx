@@ -18,6 +18,7 @@ import { TelemetryProvider, useTelemetry } from "./context/TelemetryContext";
 import { ZipUploadScreen } from "./components/ZipUploadScreen";
 import { GlobalDropZone } from "./components/GlobalDropZone";
 import { PNG_VERSION_TITLE_PREFIX } from "./config/branding";
+import { ALL_FORMULA_SCOPE_KEY } from "./utils/formulaScope";
 import { dashboardPath, replaceFormulaScopeInPath } from "./utils/routes";
 
 const UiDebugPage = import.meta.env.DEV
@@ -125,29 +126,29 @@ function UiDebugLoading() {
 }
 
 function DefaultScopeRedirect() {
-  const { activeFormulaKey } = useTelemetry();
-  if (!activeFormulaKey) return null;
-  return <Navigate to={dashboardPath(activeFormulaKey)} replace />;
+  const { scopeKey } = useTelemetry();
+  if (!scopeKey) return null;
+  return <Navigate to={dashboardPath(scopeKey)} replace />;
 }
 
 function ScopedFormulaRoute({ children }: { children: ReactNode }) {
   const { formulaKey } = useParams<{ formulaKey: string }>();
   const location = useLocation();
-  const { activeFormulaKey, formulaOptions } = useTelemetry();
+  const { scopeKey, formulaOptions } = useTelemetry();
   const matchedFormula = formulaOptions.find(
     (option) => option.key === formulaKey,
   );
 
-  if (formulaKey && activeFormulaKey && formulaKey !== activeFormulaKey) {
+  if (formulaKey && scopeKey && formulaKey !== scopeKey) {
     return (
       <Navigate
-        to={`${replaceFormulaScopeInPath(location.pathname, activeFormulaKey)}${location.search}`}
+        to={`${replaceFormulaScopeInPath(location.pathname, scopeKey)}${location.search}`}
         replace
       />
     );
   }
 
-  if (!formulaKey || formulaKey !== activeFormulaKey) {
+  if (!formulaKey || formulaKey !== scopeKey) {
     return (
       <EmptyRouteState
         title={
@@ -173,7 +174,7 @@ function RouteNotFound() {
   return (
     <EmptyRouteState
       title="Page not found"
-      description="This app uses scoped URLs like /f1-26, /f1-26/tracks/sakhir, and /f1-26/sessions/session-slug."
+      description="This app uses scoped URLs like /all, /f1-26/tracks/sakhir, and /f1-26/sessions/session-slug."
     />
   );
 }
@@ -193,6 +194,12 @@ function EmptyRouteState({
         <p className="mt-2 text-sm text-zinc-500">{description}</p>
         {formulaOptions.length > 0 && (
           <div className="mt-4 flex flex-wrap justify-center gap-2">
+            <Link
+              to={dashboardPath(ALL_FORMULA_SCOPE_KEY)}
+              className="inline-flex rounded-lg bg-zinc-800 px-4 py-2 text-sm font-medium text-zinc-200 transition-colors hover:bg-zinc-700"
+            >
+              All games
+            </Link>
             {formulaOptions.map((option) => (
               <Link
                 key={option.key}

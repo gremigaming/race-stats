@@ -121,6 +121,7 @@ export function TrackProgressPage() {
     getSession,
     mode,
     setShowUploadModal,
+    scopeKey,
     activeFormulaKey,
     activeFormula,
     formulaOptions,
@@ -137,7 +138,7 @@ export function TrackProgressPage() {
 
   useEffect(() => {
     if (
-      !activeFormulaKey ||
+      !scopeKey ||
       !trackId ||
       !canonicalTrackId ||
       trackId === canonicalTrackId
@@ -149,12 +150,12 @@ export function TrackProgressPage() {
     // circuit id so NavLink state and copied URLs stay consistent.
     navigate(
       {
-        pathname: trackPath(activeFormulaKey, canonicalTrackId),
+        pathname: trackPath(scopeKey, canonicalTrackId),
         search: search ? `?${search}` : "",
       },
       { replace: true },
     );
-  }, [activeFormulaKey, canonicalTrackId, navigate, search, trackId]);
+  }, [scopeKey, canonicalTrackId, navigate, search, trackId]);
 
   useEffect(() => {
     if (isTrackSessionTab(requestedTab)) {
@@ -188,7 +189,7 @@ export function TrackProgressPage() {
   const trackSourceName =
     allTrackSessions.length > 0 ? allTrackSessions[0].track : (trackId ?? "");
   const displayTrackName = getTrackDisplayName(trackSourceName);
-  const backToDashboardPath = dashboardPath(activeFormulaKey);
+  const backToDashboardPath = dashboardPath(scopeKey);
 
   useEffect(() => {
     if (!playerTrackSessions.length) {
@@ -547,7 +548,10 @@ export function TrackProgressPage() {
               <>
                 {" · "}
                 <Link
-                  to={sessionSummaryPath(bestTimeTrialSession.summary)}
+                  to={sessionSummaryPath(
+                    bestTimeTrialSession.summary,
+                    scopeKey,
+                  )}
                   className="inline-flex items-center gap-1 whitespace-nowrap text-zinc-400 transition-colors hover:text-cyan-200"
                 >
                   <Gauge className="size-3 text-cyan-300" />
@@ -885,7 +889,10 @@ export function TrackProgressPage() {
                   <>
                     From{" "}
                     <Link
-                      to={sessionSummaryPath(bestQualiSession.summary)}
+                      to={sessionSummaryPath(
+                        bestQualiSession.summary,
+                        scopeKey,
+                      )}
                       className="text-zinc-400 hover:text-zinc-200 transition-colors"
                     >
                       {formatSessionType(
@@ -1234,7 +1241,10 @@ export function TrackProgressPage() {
                   <>
                     From{" "}
                     <Link
-                      to={sessionSummaryPath(bestTimeTrialSession.summary)}
+                      to={sessionSummaryPath(
+                        bestTimeTrialSession.summary,
+                        scopeKey,
+                      )}
                       className="text-zinc-400 hover:text-zinc-200 transition-colors"
                     >
                       {formatSessionType(

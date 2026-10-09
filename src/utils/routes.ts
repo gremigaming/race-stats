@@ -6,7 +6,11 @@ import {
   TRACKS_ROUTE_SEGMENT,
   type TrackSessionTab,
 } from "../constants/routes";
-import { getSessionFormulaScopeKey } from "./formulaScope";
+import {
+  ALL_FORMULA_SCOPE_KEY,
+  getSessionFormulaScopeKey,
+  isAllFormulaScope,
+} from "./formulaScope";
 import { toTrackSlug } from "./tracks";
 import {
   isQualifyingSessionType,
@@ -19,6 +23,7 @@ import {
  *   /f1-26
  *   /f1-26/tracks/sakhir
  *   /f1-26/sessions/<session-slug>
+ *   /all/...   every game together
  *
  * Keep path construction centralized here. The product model may evolve again,
  * but call sites should only need to express intent: dashboard, track, session.
@@ -57,8 +62,22 @@ export function sessionPath(formulaKey: string, slug: string): string {
   return `/${encodeURIComponent(formulaKey)}/${SESSIONS_ROUTE_SEGMENT}/${slug}`;
 }
 
-export function sessionSummaryPath(session: SessionSummary): string {
-  return sessionPath(getSessionFormulaScopeKey(session), session.slug);
+/** Links stay inside "all" while browsing every game; otherwise use the record's game. */
+export function linkScopeKey(
+  scopeKey: string | null | undefined,
+  formulaKey: string,
+): string {
+  return isAllFormulaScope(scopeKey) ? ALL_FORMULA_SCOPE_KEY : formulaKey;
+}
+
+export function sessionSummaryPath(
+  session: SessionSummary,
+  scopeKey?: string,
+): string {
+  return sessionPath(
+    linkScopeKey(scopeKey, getSessionFormulaScopeKey(session)),
+    session.slug,
+  );
 }
 
 export function isRootPath(pathname: string): boolean {

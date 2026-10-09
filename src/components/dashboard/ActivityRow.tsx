@@ -1,4 +1,5 @@
 import type { DashboardActivityGroup } from "../../analysis/dashboardActivity";
+import { useTelemetry } from "../../context/TelemetryContext";
 import { formatTime } from "../../utils/format";
 import { sessionSummaryPath } from "../../utils/routes";
 import { getTrackDisplayName } from "../../utils/tracks";
@@ -30,6 +31,7 @@ export function ActivityRow({
 }: {
   activity: DashboardActivityGroup;
 }) {
+  const { scopeKey } = useTelemetry();
   const session = activity.representative;
   const result = session.playerRaceResult;
   const attempt = attemptLabel(activity);
@@ -51,7 +53,7 @@ export function ActivityRow({
 
   return (
     <SessionRow
-      to={session.isSynthetic ? null : sessionSummaryPath(session)}
+      to={session.isSynthetic ? null : sessionSummaryPath(session, scopeKey)}
       leading={
         <>
           <TrackFlag track={session.track} />

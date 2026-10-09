@@ -25,9 +25,10 @@ import {
 } from "./zipLoader";
 import { deduplicateSessions } from "../utils/deduplicateSessions";
 import {
+  ALL_FORMULA_SCOPE_KEY,
   getFormulaScopeOptions,
+  isAllFormulaScope,
   resolveFormulaScopeAlias,
-  resolveFormulaScopeKey,
   type FormulaScopeOption,
 } from "../utils/formulaScope";
 import { getFormulaScopeCandidateFromPath, isRootPath } from "../utils/routes";
@@ -113,6 +114,9 @@ interface TelemetryContextValue {
   sessionsLoading: boolean;
   sessionsError: string | null;
   formulaOptions: FormulaScopeOption[];
+  /** First URL segment: a game key or "all". */
+  scopeKey: string | undefined;
+  /** The game being filtered to; undefined when the scope is "all". */
   activeFormulaKey: string | undefined;
   activeFormula: FormulaScopeOption | undefined;
   getSession: (slug: string) => Promise<TelemetrySession>;
@@ -315,18 +319,24 @@ export function TelemetryProvider({ children }: { children: ReactNode }) {
     scopeSessions,
     routeFormulaKey,
   );
-  // Root is the only path that defaults to the newest available scope. Every
-  // other URL must carry an exact first-segment scope, otherwise stale legacy
-  // links or typos would quietly display data for the wrong game generation.
-  // Known legacy scope aliases, such as `f1-modern`, resolve to their canonical
-  // key so the route wrapper can replace the URL with `/f1-25/...`.
-  const activeFormulaKey = useMemo(
-    () =>
-      isRouteRoot
-        ? resolveFormulaScopeKey(scopeSessions, null)
-        : routeFormulaKeyResolved,
-    [isRouteRoot, routeFormulaKeyResolved, scopeSessions],
-  );
+  // Root defaults to every game. Every other URL must carry an exact
+  // first-segment scope, otherwise stale legacy links or typos would quietly
+  // display data for the wrong game generation. Known legacy scope aliases,
+  // such as `f1-modern`, resolve to their canonical key so the route wrapper
+  // can replace the URL with `/f1-25/...`.
+  const scopeKey = useMemo(() => {
+    if (formulaOptions.length === 0) return undefined;
+    if (isRouteRoot || isAllFormulaScope(routeFormulaKey)) {
+      return ALL_FORMULA_SCOPE_KEY;
+    }
+    return routeFormulaKeyResolved;
+  }, [
+    formulaOptions.length,
+    isRouteRoot,
+    routeFormulaKey,
+    routeFormulaKeyResolved,
+  ]);
+  const activeFormulaKey = isAllFormulaScope(scopeKey) ? undefined : scopeKey;
   const activeFormula = useMemo(
     () => formulaOptions.find((option) => option.key === activeFormulaKey),
     [activeFormulaKey, formulaOptions],
@@ -403,6 +413,7 @@ export function TelemetryProvider({ children }: { children: ReactNode }) {
         sessionsLoading,
         sessionsError,
         formulaOptions,
+        scopeKey,
         activeFormulaKey,
         activeFormula,
         getSession,

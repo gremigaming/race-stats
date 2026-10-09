@@ -7,9 +7,11 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { useTelemetry } from "../../context/TelemetryContext";
 import { cn } from "../../utils/cn";
 import { CHART_THEME } from "../../constants/colors";
 import { msToLapTime } from "../../utils/format";
+import { linkScopeKey } from "../../utils/routes";
 import { getTrackDisplayName } from "../../utils/tracks";
 import { cardClassCompact } from "../Card";
 import { TrackFlag } from "../TrackFlag";
@@ -27,9 +29,10 @@ export interface QualifyingPaceData {
 export function QualifyingPaceCard({ data }: { data: QualifyingPaceData }) {
   const { track, formulaKey, points, pbMs } = data;
   const trackName = getTrackDisplayName(track);
+  const { scopeKey } = useTelemetry();
   return (
     <Link
-      to={trackFormulaPath(track, formulaKey)}
+      to={trackFormulaPath(track, linkScopeKey(scopeKey, formulaKey))}
       className={cn(cardClassCompact, "transition-colors hover:bg-zinc-800/50")}
     >
       <HStack justify="between" className="mb-2 gap-3">

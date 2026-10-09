@@ -12,8 +12,8 @@ interface BrandHomeLinkProps {
 
 export function BrandHomeLink({ className }: BrandHomeLinkProps) {
   const location = useLocation();
-  const { mode, activeFormulaKey } = useTelemetry();
-  const homePath = dashboardPath(activeFormulaKey);
+  const { mode, scopeKey } = useTelemetry();
+  const homePath = dashboardPath(scopeKey);
   // League mode has its own Driver / Leaderboard / Head to head menu, so the
   // brand never turns into a back link there.
   const isDashboard = mode === "league" || location.pathname === homePath;

@@ -23,7 +23,7 @@ import { getTrackDisplayName } from "../utils/tracks";
 import { toSlug } from "../utils/parseFilename";
 
 export function HeadToHeadPage() {
-  const { league, activeFormulaKey } = useTelemetry();
+  const { league, scopeKey, activeFormulaKey } = useTelemetry();
   const [params, setParams] = useSearchParams();
   const navigate = useNavigate();
   if (!league || league.drivers.length < 2) {
@@ -204,9 +204,9 @@ export function HeadToHeadPage() {
                         onClick={() => {
                           // Open the race as driver a, already compared with b
                           league.setSelectedDriver(a);
-                          if (activeFormulaKey)
+                          if (scopeKey)
                             navigate(
-                              `${sessionPath(activeFormulaKey, toSlug(r.file))}?vs=${encodeURIComponent(b)}`,
+                              `${sessionPath(scopeKey, toSlug(r.file))}?vs=${encodeURIComponent(b)}`,
                             );
                         }}
                         className={cn(

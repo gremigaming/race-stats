@@ -19,6 +19,7 @@ import {
   Zap,
   type LucideIcon,
 } from "lucide-react";
+import { useTelemetry } from "../../context/TelemetryContext";
 import { cn } from "../../utils/cn";
 import { getTrackDisplayName } from "../../utils/tracks";
 import type {
@@ -26,7 +27,7 @@ import type {
   InsightScope,
   TrackInsight,
 } from "../../analysis/dashboardInsights";
-import { sessionPath } from "../../utils/routes";
+import { linkScopeKey, sessionPath } from "../../utils/routes";
 import { ACCENT_TOKENS, type AccentColor } from "../../constants/accents";
 import { TrackFlag } from "../TrackFlag";
 import { TrackLayout } from "../TrackLayout";
@@ -115,9 +116,11 @@ export function InsightCard({ insight }: { insight: TrackInsight }) {
   const trackName = getTrackDisplayName(insight.track);
   const style = INSIGHT_STYLES[insight.kind];
   const tokens = ACCENT_TOKENS[style.accent];
+  const { scopeKey } = useTelemetry();
+  const formulaKey = linkScopeKey(scopeKey, insight.formulaKey);
   const to = insight.sessionSlug
-    ? sessionPath(insight.formulaKey, insight.sessionSlug)
-    : trackFormulaPath(insight.track, insight.formulaKey);
+    ? sessionPath(formulaKey, insight.sessionSlug)
+    : trackFormulaPath(insight.track, formulaKey);
   const scopeBadge = SCOPE_LABEL[insight.scope];
 
   return (

@@ -39,7 +39,8 @@ const RECENT_ACTIVITY_COLLAPSED = 3;
 
 export function DashboardPage() {
   const { sessions, loading } = useSessionList();
-  const { mode, activeFormulaKey, activeFormula, league } = useTelemetry();
+  const { mode, scopeKey, activeFormulaKey, activeFormula, league } =
+    useTelemetry();
   const leagueDriverName = league?.drivers.find(
     (d) => d.key === league.selectedDriver,
   )?.name;
@@ -135,7 +136,8 @@ export function DashboardPage() {
     dashboardStats.starts >= 3 &&
     dashboardStats.cleanFinishSessions.length >= 1;
   const hasRecentActivity = recentActivity.length > 0;
-  const formulaLabelText = activeFormula?.label ?? "Telemetry";
+  const formulaLabelText =
+    activeFormula?.label ?? (scopeKey ? "All games" : "Telemetry");
   const subtitle = hasScopedData
     ? `${formulaLabelText} · ${scopedSessions.length} ${isFiltered ? "filtered " : ""}${scopedSessions.length === 1 ? "session" : "sessions"} across ${uniqueTracks.length} ${uniqueTracks.length === 1 ? "track" : "tracks"}`
     : `${formulaLabelText} form across your saved sessions`;
@@ -311,7 +313,7 @@ export function DashboardPage() {
                       key={trackId}
                       track={track}
                       sessions={trackSessions}
-                      activeFormulaKey={activeFormulaKey}
+                      scopeKey={scopeKey}
                       records={buildTrackRecords(trackSessions)}
                     />
                   );

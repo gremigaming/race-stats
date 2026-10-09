@@ -6,6 +6,7 @@ import { HStack } from "./ui/Stack";
 
 interface Props {
   value: SessionListFilters;
+  gameLabel?: string;
   matchingCount: number;
   totalCount: number;
   onReset: () => void;
@@ -13,11 +14,13 @@ interface Props {
 
 export function SessionListActiveFilters({
   value,
+  gameLabel,
   matchingCount,
   totalCount,
   onReset,
 }: Props) {
   const labels = [
+    gameLabel ?? null,
     value.type === "all" ? null : SESSION_TYPE_FILTER_META[value.type].label,
     value.mode === "all" ? null : SESSION_MODE_META[value.mode].label,
   ].filter((label): label is string => label !== null);

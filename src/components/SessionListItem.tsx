@@ -1,5 +1,6 @@
 import { NavLink } from "react-router-dom";
 import type { SessionSummary } from "../types/telemetry";
+import { useTelemetry } from "../context/TelemetryContext";
 import { cn } from "../utils/cn";
 import { formatSessionType, formatTime } from "../utils/format";
 import { sessionSummaryPath } from "../utils/routes";
@@ -17,6 +18,7 @@ export function SessionListItem({
   isTrackBest,
   hideMode,
 }: SessionListItemProps) {
+  const { scopeKey } = useTelemetry();
   const card = (
     <SessionCard
       sessionType={formatSessionType(session.sessionType, session.formula)}
@@ -45,7 +47,7 @@ export function SessionListItem({
 
   return (
     <NavLink
-      to={sessionSummaryPath(session)}
+      to={sessionSummaryPath(session, scopeKey)}
       className={({ isActive }) =>
         cn(
           "block rounded-xl px-2 py-2 transition-colors",

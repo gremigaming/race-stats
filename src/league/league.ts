@@ -62,20 +62,23 @@ export function namedDrivers(session: TelemetrySession): DriverData[] {
   return (session["classification-data"] ?? []).filter(isNamedDriver);
 }
 
-/** Everyone with a profile, newest member (first race most recent) first. */
+/** Everyone with a profile: who raced most recently first (by day), then A-Z. */
 export function listDrivers(races: LeagueRace[]): LeagueDriver[] {
-  const firstSeen = new Map<string, { name: string; first: number }>();
+  const lastSeen = new Map<string, { name: string; last: number }>();
   for (const { session, file } of races) {
-    const when = raceDate(file)?.getTime() ?? 0;
+    const date = raceDate(file);
+    const day = date
+      ? new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime()
+      : 0;
     for (const d of namedDrivers(session)) {
       const key = driverKey(d["driver-name"]);
-      const entry = firstSeen.get(key);
-      if (!entry) firstSeen.set(key, { name: displayName(d["driver-name"]), first: when });
-      else if (when < entry.first) entry.first = when;
+      const entry = lastSeen.get(key);
+      if (!entry) lastSeen.set(key, { name: displayName(d["driver-name"]), last: day });
+      else if (day > entry.last) entry.last = day;
     }
   }
-  return [...firstSeen.entries()]
-    .sort((a, b) => b[1].first - a[1].first || a[1].name.localeCompare(b[1].name))
+  return [...lastSeen.entries()]
+    .sort((a, b) => b[1].last - a[1].last || a[1].name.localeCompare(b[1].name))
     .map(([key, v]) => ({ key, name: v.name }));
 }
 

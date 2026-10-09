@@ -8,15 +8,20 @@ import {
   matchesSessionFilters,
   useSessionFilters,
 } from "../hooks/useSessionFilters";
+import { useGameScope } from "../hooks/useGameScope";
 import { useSessionList } from "../hooks/useSessionList";
 import type { SessionSummary } from "../types/telemetry";
 import { cn } from "../utils/cn";
 import { formatRelativeDate, msToLapTime } from "../utils/format";
-import { getSessionFormulaScopeKey } from "../utils/formulaScope";
+import {
+  ALL_FORMULA_SCOPE_KEY,
+  getSessionFormulaScopeKey,
+} from "../utils/formulaScope";
 import {
   isQualifyingSessionType,
   isTimeTrialSessionType,
 } from "../utils/sessionTypes";
+import { linkScopeKey } from "../utils/routes";
 import { readStoredString, writeStoredString } from "../utils/storage";
 import { getTrackId, sortTracksByCalendar } from "../utils/tracks";
 import { SessionListActiveFilters } from "./SessionListActiveFilters";
@@ -141,7 +146,8 @@ function getTrackListBestLap(
  */
 export function SessionList({ section }: { section?: SidebarTab } = {}) {
   const { sessions, loading, error } = useSessionList();
-  const { activeFormulaKey, formulaOptions, league } = useTelemetry();
+  const { scopeKey, activeFormulaKey, formulaOptions, league } = useTelemetry();
+  const game = useGameScope();
   const [storedTab, setTab] = useState<SidebarTab>(() =>
     readStoredString(SESSION_LIST_TAB_STORAGE_KEY, "session") === "tracks"
       ? "tracks"
@@ -182,7 +188,7 @@ export function SessionList({ section }: { section?: SidebarTab } = {}) {
     );
   }
 
-  if (!activeFormulaKey && formulaOptions.length > 0) {
+  if (!scopeKey && formulaOptions.length > 0) {
     return (
       <div className="p-4 text-sm text-zinc-500">
         Choose a game scope to view sessions.
@@ -200,7 +206,11 @@ export function SessionList({ section }: { section?: SidebarTab } = {}) {
   const filteredSessions = scopedSessions.filter((s) =>
     matchesSessionFilters(s, filters),
   );
-  const filtersActive = !areSessionFiltersDefault(filters);
+  const filtersActive = !areSessionFiltersDefault(filters) || game.isFiltered;
+  const resetFilters = () => {
+    updateFilters(DEFAULT_FILTERS);
+    game.setGame(ALL_FORMULA_SCOPE_KEY);
+  };
 
   const pageCount = Math.ceil(filteredSessions.length / PAGE_SIZE);
   const safePage = Math.min(page, Math.max(0, pageCount - 1));
@@ -255,16 +265,22 @@ export function SessionList({ section }: { section?: SidebarTab } = {}) {
             />
           )}
           <div className={cn("pl-2", section ? "pb-1" : "pb-[7px]")}>
-            <SessionListFilterMenu value={filters} onChange={updateFilters} />
+            <SessionListFilterMenu
+              value={filters}
+              onChange={updateFilters}
+              game={game}
+              onReset={resetFilters}
+            />
           </div>
         </HStack>
 
         {filtersActive && (
           <SessionListActiveFilters
             value={filters}
+            gameLabel={game.isFiltered ? game.label : undefined}
             matchingCount={filteredSessions.length}
-            totalCount={scopedSessions.length}
-            onReset={() => updateFilters(DEFAULT_FILTERS)}
+            totalCount={sessions.length}
+            onReset={resetFilters}
           />
         )}
 
@@ -362,7 +378,7 @@ export function SessionList({ section }: { section?: SidebarTab } = {}) {
               <TrackListItem
                 key={trackId}
                 track={track}
-                formulaKey={formulaKey}
+                formulaKey={formulaKey && linkScopeKey(scopeKey, formulaKey)}
                 totalSessionCount={count}
                 bestLapTime={bestLap?.time}
                 bestLapKind={bestLap?.kind}

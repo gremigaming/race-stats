@@ -7,6 +7,12 @@ import {
   shouldShowFormulaLabel,
 } from "./sessionTypes";
 
+export const ALL_FORMULA_SCOPE_KEY = "all";
+
+export function isAllFormulaScope(key: string | null | undefined): boolean {
+  return key === ALL_FORMULA_SCOPE_KEY;
+}
+
 export interface FormulaScopeOption {
   key: string;
   label: string;
