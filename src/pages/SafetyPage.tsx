@@ -250,7 +250,7 @@ export function SafetyPage() {
       )}
 
       <section className={cardClass}>
-        <SectionHeader title="How it works" hint="Tap a topic to open it" />
+        <SectionHeader title="How it works" />
         <div className="space-y-1.5">
           {HOW_IT_WORKS.map((topic) => (
             <details
