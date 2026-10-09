@@ -12,9 +12,8 @@ import {
   Trophy,
   X,
   type LucideIcon,
-  TimerOff,
 } from "lucide-react";
-import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import changelog from "virtual:changelog";
 import { SESSIONS_ROUTE_SEGMENT, TRACKS_ROUTE_SEGMENT } from "../constants/routes";
@@ -201,13 +200,23 @@ export function Layout() {
                     onChange={league.setSelectedDriver}
                   />
                 </div>
-                {mySafety && scopeKey && (
+                {league.safetyData && scopeKey && (
                   <Link
                     to={`/${scopeKey}/safety`}
-                    title={`Safety rating ${mySafety.sr.toFixed(1)} (not filtered by date)`}
+                    title={
+                      mySafety
+                        ? `Safety rating ${mySafety.sr.toFixed(1)} (not filtered by date)`
+                        : "Safety rating (not filtered by date)"
+                    }
                     className="shrink-0"
                   >
-                    <RankTile sr={mySafety.sr} size={30} />
+                    {mySafety ? (
+                      <RankTile sr={mySafety.sr} size={30} />
+                    ) : (
+                      <span className="inline-flex h-[30px] w-[30px] items-center justify-center rounded-[8px] bg-zinc-800 text-zinc-400">
+                        <ShieldCheck className="h-4 w-4" />
+                      </span>
+                    )}
                   </Link>
                 )}
               </div>
@@ -247,15 +256,6 @@ export function Layout() {
               icon={Trophy}
               label="Leaderboard"
             />
-            {league.safetyData && (
-              <MenuLink
-                to={`/${scopeKey}/safety`}
-                active={section === "safety"}
-                icon={ShieldCheck}
-                label="Safety rating"
-                note={<TimerOff className="ml-auto h-3.5 w-3.5 text-zinc-600" aria-label="not filtered by date" />}
-              />
-            )}
             <MenuLink
               to={`/${scopeKey}/head-to-head`}
               active={section === "head-to-head"}
@@ -377,19 +377,16 @@ function MenuLink({
   active,
   icon: Icon,
   label,
-  note,
 }: {
   to: string;
   active: boolean;
   icon: LucideIcon;
   label: string;
-  note?: ReactNode;
 }) {
   return (
     <NavLink to={to} className={menuItemClass(active)}>
       <Icon className="h-4 w-4 shrink-0" />
       {label}
-      {note}
     </NavLink>
   );
 }
