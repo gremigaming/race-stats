@@ -363,6 +363,13 @@ tax = collections.defaultdict(float)
 history = collections.defaultdict(list)    # driver -> [{stream, date, sr}]
 flags = collections.defaultdict(list)
 
+def weights(n):
+    out = []; races_after = 0
+    for e in reversed(entries[n]):
+        out.append(next((wt for lim, wt in WINDOW if races_after < lim), 0.0))
+        if e["race"]: races_after += 1
+    return out[::-1]
+
 def weighted(n):
     es = entries[n]; total = 0.0; races_after = 0
     for e in reversed(es):
@@ -387,8 +394,8 @@ for si, stream in enumerate(streams):
                 n = nm_(c["driver-name"])
                 if AI.search(n) or n in seen_stream: continue
                 seen_stream.add(n); pub = c.get("telemetry-settings") == "Public"
-                items[n].append({"pts": 1, "text": "First race of the stream", "lap": None})
-                if pub: items[n].append({"pts": 1, "text": "Shares full telemetry", "lap": None})
+                items[n].append({"pts": 1, "text": "First race of the stream", "lap": None, "cat": "stream"})
+                if pub: items[n].append({"pts": 1, "text": "Shares full telemetry", "lap": None, "cat": "stream"})
         for item in pp:
             n, v, what = item[:3]
             if AI.search(n) or not v: continue
@@ -399,21 +406,24 @@ for si, stream in enumerate(streams):
                 if rep and v > 1.5:
                     v = 1.5; what += f"; capped at 1.5 (close with {', '.join(rep)} in 3 of the last 5 races)"
                     flags[n].append(f"{short(f)}: close racing capped, often close with {', '.join(rep)}")
-            items[n].append({"pts": v, "text": what[0].upper() + what[1:], "lap": None})
+            cat = ("close" if "close racing" in what else "overtakes" if "overtakes" in what
+                   else "quali" if "qualifying" in what else "clean")
+            items[n].append({"pts": v, "text": what[0].upper() + what[1:], "lap": None, "cat": cat})
         for r in rows:
             for n, (pts, parts) in r["lines"].items():
                 if AI.search(n): continue
                 pts = half(pts)
                 if not pts: continue
-                items[n].append({"pts": -pts, "text": f"{r['where']}, with {r['vs'][n]}: " + "; ".join(parts), "lap": r["lap"]})
+                items[n].append({"pts": -pts, "text": f"{r['where']}, with {r['vs'][n]}: " + "; ".join(parts), "lap": r["lap"], "cat": "contact"})
         for n, v, what, lap, _fl in other:
             if not n or AI.search(n) or not v: continue
-            items[n].append({"pts": -v, "text": what[0].upper() + what[1:], "lap": lap if isinstance(lap, int) else None})
+            cat = "retirement" if "retired" in what else "penalty"
+            items[n].append({"pts": -v, "text": what[0].upper() + what[1:], "lap": lap if isinstance(lap, int) else None, "cat": cat})
         for n in set(present) | set(items):
             loss = -sum(i["pts"] for i in items[n] if i["pts"] < 0)
             stream_loss[n] += loss
             if is_race and loss >= 20: flags[n].append(f"{short(f)}: lost {loss:g} in one race (kick line 20)")
-            entries[n].append({"file": name, "race": is_race, "items": items[n]})
+            entries[n].append({"file": name, "race": is_race, "items": items[n], "stream": si})
     for n, loss in stream_loss.items():
         if loss >= 40: flags[n].append(f"Stream of {when(stream[0]):%d %b %Y}: lost {loss:g} (kick line 40)")
     # end of the stream: everyone above 50 loses 10% of the part above 50
@@ -430,9 +440,11 @@ for n, es in entries.items():
     prev = h[-2]["sr"] if len(h) > 1 else 50.0
     drivers.append({
         "name": n, "sr": sr, "change": half(sr - prev), "races": races,
-        "provisional": races < 3, "banned": sr < 0,
+        "provisional": races < 3, "banned": sr < 0, "aging": half(tax[n]),
         "history": [x for x in h],
-        "sessions": [{"file": e["file"], "race": e["race"], "total": half(sum(i["pts"] for i in e["items"])), "items": e["items"]} for e in es],
+        "sessions": [{"file": e["file"], "race": e["race"], "stream": e["stream"], "weight": w,
+                      "total": half(sum(i["pts"] for i in e["items"])), "items": e["items"]}
+                     for e, w in zip(es, weights(n))],
         "flags": flags[n],
     })
 drivers.sort(key=lambda x: (-x["sr"], x["name"].lower()))

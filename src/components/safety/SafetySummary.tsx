@@ -22,7 +22,7 @@ export function SafetySummary() {
   }
   return (
     <Link
-      to={`/${scopeKey ?? "all"}/safety`}
+      to={`/${scopeKey ?? "all"}/safety?tab=personal`}
       className="flex items-center gap-3 rounded-xl bg-zinc-900/70 px-3 py-2 transition-colors hover:bg-zinc-900"
       title="Safety rating (not filtered by date)"
     >

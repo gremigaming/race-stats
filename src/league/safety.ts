@@ -6,15 +6,30 @@ import { driverKey } from "./league";
  * only describes that data and the rank letters.
  */
 
+export type SafetyCategory =
+  | "contact"
+  | "penalty"
+  | "retirement"
+  | "clean"
+  | "quali"
+  | "overtakes"
+  | "close"
+  | "stream";
+
 export interface SafetyItem {
   pts: number;
   text: string;
   lap: number | null;
+  cat: SafetyCategory;
 }
 
 export interface SafetySession {
   file: string;
   race: boolean;
+  /** Index into SafetyData.streams. */
+  stream: number;
+  /** How much this session counts now (1, .75, .5 or .25; 0 when too old). */
+  weight: number;
   total: number;
   items: SafetyItem[];
 }
@@ -27,6 +42,8 @@ export interface SafetyDriver {
   races: number;
   provisional: boolean;
   banned: boolean;
+  /** SR lost so far to the top rule (10% of the part above 50 per stream). */
+  aging?: number;
   history: { stream: number; date: string; sr: number; raced: boolean }[];
   sessions: SafetySession[];
   flags: string[];
@@ -71,3 +88,14 @@ export function safetyByKey(data: SafetyData | null): Map<string, SafetyDriver> 
 
 export const signedHalf = (n: number) =>
   `${n > 0 ? "+" : n < 0 ? "−" : "±"}${Math.abs(n).toFixed(1)}`;
+
+export const SAFETY_CATEGORIES: { cat: SafetyCategory; label: string }[] = [
+  { cat: "contact", label: "Contacts" },
+  { cat: "penalty", label: "Penalties" },
+  { cat: "retirement", label: "Retirements" },
+  { cat: "clean", label: "Clean races" },
+  { cat: "quali", label: "Clean qualifying" },
+  { cat: "overtakes", label: "Clean overtakes" },
+  { cat: "close", label: "Close racing" },
+  { cat: "stream", label: "Showing up" },
+];
