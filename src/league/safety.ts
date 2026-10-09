@@ -14,13 +14,19 @@ export type SafetyCategory =
   | "quali"
   | "overtakes"
   | "close"
-  | "stream";
+  | "stream"
+  | "staff";
 
 export interface SafetyItem {
   pts: number;
   text: string;
   lap: number | null;
   cat: SafetyCategory;
+  id?: string;
+  /** Set when staff changed or added this item: their reason. */
+  staff?: string;
+  /** The points before staff changed them. */
+  orig?: number;
 }
 
 export interface SafetySession {
@@ -98,4 +104,5 @@ export const SAFETY_CATEGORIES: { cat: SafetyCategory; label: string }[] = [
   { cat: "overtakes", label: "Clean overtakes" },
   { cat: "close", label: "Close racing" },
   { cat: "stream", label: "Showing up" },
+  { cat: "staff", label: "Staff decisions" },
 ];

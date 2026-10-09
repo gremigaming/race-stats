@@ -291,22 +291,25 @@ def analyse(path):
         for n, (p_, _) in r["lines"].items(): neg[n] += p_
     for n, v, *_ in other: neg[n] += v
     fl = path.split("/")[-1].rsplit("_2026", 1)[0]; pos_pts = []
+    would = {}  # the clean race / qualifying bonus each driver gets once nothing counts against them
     if quali:
         best = {i: (c.get("final-classification") or {}).get("best-lap-time-ms") or 0 for i, c in cls.items()}
         ok = {i: b for i, b in best.items() if b > 0 and (cls[i].get("final-classification") or {}).get("result-status") != "DISQUALIFIED"}
         pole = min(ok.values()) if ok else None
         for i in cls:
             n = names[i]
-            if neg[n] == 0 and i in ok and ok[i] <= pole * 1.07:
-                pos_pts.append((n, 0.5, f"clean qualifying, lap {ok[i] / pole * 100:.1f}% of pole"))
+            if i in ok and ok[i] <= pole * 1.07:
+                would[n] = (0.5, f"clean qualifying, lap {ok[i] / pole * 100:.1f}% of pole")
+                if neg[n] == 0: pos_pts.append((n, *would[n]))
     else:
         warned = {p["vehicle-index"] for p in pens}
         for i in cls:
             n = names[i]
+            if not joke[i]:
+                would[n] = (1, "race with 0 penalty points (had a warning)") if i in warned else (2, "race with no warnings at all")
             if neg[n] > 0: continue
             if joke[i]: pos_pts.append((n, 0, "ran wrong tyres for the weather, no clean-race bonus")); continue
-            if i in warned: pos_pts.append((n, 1, "race with 0 penalty points (had a warning)"))
-            else: pos_pts.append((n, 2, "race with no warnings at all"))
+            pos_pts.append((n, *would[n]))
         # close racing: within 0.5 s of another car at both ends of a clean sector
         T = {}
         for j, c in cls.items():
@@ -339,7 +342,7 @@ def analyse(path):
                     if len(streak) == 3: got += 0.5; streak = set()
             got = min(got, 1.5)
             if got: pos_pts.append((names[i], got, f"{int(got * 6)} clean overtakes in a row on different cars (+0.5 per 3)"))
-    return rows, other, {names[i]: dmg_why.get(i) or ("front wing 50%+" if i in dmg_time else None) for i in cls}, pos_pts
+    return rows, other, would, pos_pts
 
 
 FIRST_DAY = "2026_10_07"  # older files have no blame data
@@ -356,6 +359,43 @@ for f in files:
     if not streams or (when(f) - when(streams[-1][-1])).total_seconds() > STREAM_GAP_H * 3600:
         streams.append([])
     streams[-1].append(f)
+
+# Staff corrections (races/corrections.json, written by the staff page): change
+# the points of one item, or add a penalty or bonus by hand. Items are matched
+# by an id built from the file, the car index and the kind of item, so a later
+# name change doesn't lose the correction.
+try:
+    CHANGES = json.load(open(os.path.join("races", "corrections.json"))).get("changes", [])
+except FileNotFoundError:
+    CHANGES = []
+FIX = {c["id"]: c for c in CHANGES if c.get("type") == "incident"}
+ADD = collections.defaultdict(list)
+for c in CHANGES:
+    if c.get("type") == "add": ADD[c["file"]].append(c)
+
+def apply_staff(name, items, car, is_race, would):
+    """Gives every item its id and applies the staff corrections for this file."""
+    for n, its in items.items():
+        k = collections.Counter()
+        for it in its:
+            key = f"{name}|{car.get(n, '?')}|{it['cat']}|{it['lap'] or 0}"
+            it["id"] = f"{key}|{k[key]}"; k[key] += 1
+            fx = FIX.get(it["id"])
+            if fx:
+                it["orig"] = it["pts"]; it["pts"] = half(float(fx["pts"])); it["staff"] = fx.get("reason") or "changed by staff"
+    by_car = {v: n for n, v in car.items()}
+    for c in ADD[name]:
+        n = by_car.get(c.get("car"))
+        if n is None or AI.search(n): continue
+        items[n].append({"pts": half(float(c["pts"])), "text": c.get("text") or "Staff decision", "lap": c.get("lap"),
+                         "cat": "staff", "id": c["id"], "staff": c.get("reason") or ""})
+    # a driver cleared by staff still gets the clean race or qualifying bonus
+    for n, its in items.items():
+        if not any(i.get("staff") for i in its) or any(i["cat"] in ("clean", "quali") for i in its): continue
+        if any(i["pts"] < 0 for i in its) or n not in would: continue
+        v, what = would[n]
+        its.append({"pts": v, "text": what[0].upper() + what[1:] + " (after a staff decision)", "lap": None,
+                    "cat": "clean" if is_race else "quali", "id": f"{name}|{car.get(n, '?')}|bonus|0|0"})
 
 entries = collections.defaultdict(list)   # driver -> [{file, race, items}]
 close_hist = collections.defaultdict(list)
@@ -385,7 +425,7 @@ for si, stream in enumerate(streams):
     seen_stream = set(); stream_loss = collections.defaultdict(float)
     for f in stream:
         name = os.path.basename(f); is_race = name.startswith("Race_")
-        rows, other, _dm, pp = analyse(f)
+        rows, other, would, pp = analyse(f)
         items = collections.defaultdict(list)
         d = json.load(open(f))
         present = [nm_(c["driver-name"]) for c in d["classification-data"] if not AI.search(nm_(c["driver-name"]))]
@@ -419,6 +459,8 @@ for si, stream in enumerate(streams):
             if not n or AI.search(n) or not v: continue
             cat = "retirement" if "retired" in what else "penalty"
             items[n].append({"pts": -v, "text": what[0].upper() + what[1:], "lap": lap if isinstance(lap, int) else None, "cat": cat})
+        car = {nm_(c["driver-name"]): c["index"] for c in d["classification-data"]}
+        apply_staff(name, items, car, is_race, would)
         for n in set(present) | set(items):
             loss = -sum(i["pts"] for i in items[n] if i["pts"] < 0)
             stream_loss[n] += loss

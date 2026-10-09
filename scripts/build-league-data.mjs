@@ -30,6 +30,69 @@ try {
 } catch {
   // no aliases file
 }
+// Staff corrections from the staff page (races/corrections.json): name links
+// ("alias", "split") and result fixes ("result"). The SR ones are applied in
+// scripts/safety_rating.py.
+let changes = [];
+try {
+  changes = JSON.parse(readFileSync(join(SRC, "corrections.json"), "utf8")).changes ?? [];
+} catch {
+  // no corrections yet
+}
+for (const c of changes) {
+  if (c.type === "alias" && c.from && c.to) aliases.set(norm(c.from), c.to);
+  if (c.type === "split" && c.from) aliases.delete(norm(c.from));
+}
+const POINTS = [25, 18, 15, 12, 10, 8, 6, 4, 2, 1];
+const OUT_STATUSES = ["DISQUALIFIED", "DID_NOT_FINISH", "RETIRED", "NOT_CLASSIFIED"];
+
+// Applies the staff's result fixes for one file: a time penalty (seconds,
+// re-sorts the finishers by race time), a new status (DSQ or DNF go to the
+// back) or a new position. Cars are matched by their index in the file.
+function fixResults(name, data) {
+  const fixes = changes.filter((c) => c.type === "result" && c.file === name);
+  if (!fixes.length) return;
+  const rows = data["classification-data"].filter((d) => d["final-classification"]);
+  const byCar = new Map(rows.map((d) => [d.index, d]));
+  const hadPoints = rows.some((d) => d["final-classification"].points > 0);
+  let resort = false;
+  for (const f of fixes) {
+    const fc = byCar.get(f.car)?.["final-classification"];
+    if (!fc) continue;
+    if (f.kind === "time") {
+      fc["penalties-time"] = (fc["penalties-time"] ?? 0) + Number(f.value);
+      fc["num-penalties"] = (fc["num-penalties"] ?? 0) + 1;
+      resort = true;
+    } else if (f.kind === "status") {
+      fc["result-status"] = f.value;
+      resort = true;
+    }
+  }
+  let order = [...rows].sort((a, b) => a["final-classification"].position - b["final-classification"].position);
+  if (resort) {
+    const out = (d) => OUT_STATUSES.includes(d["final-classification"]["result-status"]);
+    const time = (d) => d["final-classification"]["total-race-time"] + (d["final-classification"]["penalties-time"] ?? 0);
+    const laps = (d) => d["final-classification"]["num-laps"] ?? 0;
+    order = [
+      ...order.filter((d) => !out(d)).sort((a, b) => laps(b) - laps(a) || time(a) - time(b)),
+      ...order.filter(out),
+    ];
+  }
+  for (const f of fixes) {
+    if (f.kind !== "position") continue;
+    const d = byCar.get(f.car);
+    if (!d) continue;
+    order.splice(order.indexOf(d), 1);
+    order.splice(Math.max(0, Math.min(order.length, Number(f.value) - 1)), 0, d);
+  }
+  order.forEach((d, i) => {
+    const fc = d["final-classification"];
+    fc.position = i + 1;
+    d["track-position"] = i + 1;
+    if (hadPoints) fc.points = OUT_STATUSES.includes(fc["result-status"]) ? 0 : (POINTS[i] ?? 0);
+  });
+  console.log(`staff result fixes: ${name} (${fixes.length})`);
+}
 const renameDrivers = (value) => {
   if (Array.isArray(value)) return value.map(renameDrivers);
   if (value && typeof value === "object") {
@@ -47,7 +110,7 @@ const seen = new Set();
 const files = [];
 for (const path of walk(SRC)) {
   const name = path.split(/[\\/]/).pop();
-  if (name === "aliases.json" || seen.has(name)) continue;
+  if (name === "aliases.json" || name === "corrections.json" || seen.has(name)) continue;
   let data;
   try {
     data = JSON.parse(readFileSync(path, "utf8"));
@@ -60,6 +123,7 @@ for (const path of walk(SRC)) {
     continue;
   }
   renameDrivers(data);
+  if (data["session-info"]) fixResults(name, data);
   for (const d of data["classification-data"]) {
     const p = d["participant-data"];
     if (p) {

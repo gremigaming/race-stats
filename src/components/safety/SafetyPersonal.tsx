@@ -62,6 +62,7 @@ const CAT_COLOR: Record<SafetyCategory, string> = {
   overtakes: "#c084fc",
   close: "#2dd4bf",
   stream: "#facc15",
+  staff: "#e4e4e7",
 };
 
 type ItemFilter = "all" | "lost" | "gained";
@@ -502,6 +503,12 @@ function SessionRow({ session }: { session: SafetySession }) {
               <span className="text-zinc-400">
                 {it.lap != null && <span className="text-zinc-300">Lap {it.lap} · </span>}
                 {it.text}
+                {it.staff != null && (
+                  <span className="mt-0.5 block text-sky-300/90">
+                    {it.orig != null ? `Changed by staff (was ${signedHalf(it.orig)})` : "Added by staff"}
+                    {it.staff ? `: ${it.staff}` : ""}
+                  </span>
+                )}
               </span>
             </p>
           ))}
