@@ -161,10 +161,26 @@ rmSync(OUT, { recursive: true, force: true });
 rmSync(KICKED_DIR, { recursive: true, force: true });
 mkdirSync(join(OUT, "sessions"), { recursive: true });
 
+// A "Manual" save is written by hand, often hours after the race (even the
+// next day). Name it after the race's own last event instead, in Dutch time
+// like the automatic saves, so it lands in the right stream.
+function realName(name, data) {
+  const m = name.match(/^(.+?)_Manual_\d{4}_\d{2}_\d{2}_\d{2}_\d{2}_\d{2}\.json$/);
+  const last = Math.max(...(data["race-control"] ?? []).map((e) => e.timestamp ?? 0));
+  if (!m || !(last > 0)) return name;
+  const p = Object.fromEntries(
+    new Intl.DateTimeFormat("en-GB", {
+      timeZone: "Europe/Amsterdam", year: "numeric", month: "2-digit", day: "2-digit",
+      hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23",
+    }).formatToParts(new Date(last * 1000)).map((x) => [x.type, x.value]),
+  );
+  return `${m[1]}_${p.year}_${p.month}_${p.day}_${p.hour}_${p.minute}_${p.second}.json`;
+}
+
 const seen = new Set();
 const files = [];
 for (const path of walk(SRC)) {
-  const name = path.split(/[\\/]/).pop();
+  let name = path.split(/[\\/]/).pop();
   if (name === "aliases.json" || name === "corrections.json" || seen.has(name)) continue;
   let data;
   try {
@@ -177,6 +193,8 @@ for (const path of walk(SRC)) {
     console.warn(`skipped (not a Pits n' Giggles save): ${name}`);
     continue;
   }
+  name = realName(name, data);
+  if (seen.has(name)) continue;
   renameDrivers(data);
   if (data["session-info"]) fixResults(name, data);
   kickCars(name, data);

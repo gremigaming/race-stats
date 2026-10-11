@@ -49,6 +49,10 @@
         {
           "file": "Race_Las_Vegas_2026_10_11_20_46_43.json",
           "car": 9
+        },
+        {
+          "file": "Race_Austria_2026_10_11_20_58_59.json",
+          "car": 8
         }
       ],
       "reason": "Kicked from the lobby for dirty driving",

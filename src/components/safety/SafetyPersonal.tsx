@@ -29,6 +29,7 @@ import {
 import { cn } from "../../utils/cn";
 import { toSlug } from "../../utils/parseFilename";
 import { sessionPath } from "../../utils/routes";
+import { ProtestForm } from "./ProtestForm";
 import { RankTile } from "./RankTile";
 
 const half = (n: number) => Math.floor(n * 2 + 0.5) / 2;
@@ -448,6 +449,7 @@ function StreamGroup({
 function SessionRow({ session }: { session: SafetySession }) {
   const { scopeKey } = useTelemetry();
   const [open, setOpen] = useState(false);
+  const [protest, setProtest] = useState<string | null>(null);
   const { quali, track, time } = parseSessionFile(session.file);
   const lost = session.items.filter((i) => i.pts < 0).length;
   return (
@@ -492,7 +494,8 @@ function SessionRow({ session }: { session: SafetySession }) {
         <div className="space-y-1.5 border-t border-white/[0.04] px-3 py-2.5 text-xs">
           {session.items.length === 0 && <p className="text-zinc-500">No points in this session.</p>}
           {session.items.map((it, i) => (
-            <p key={i} className="flex items-start gap-2.5">
+            <div key={i}>
+            <p className="flex items-start gap-2.5">
               <span
                 className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full"
                 style={{ background: CAT_COLOR[it.cat] }}
@@ -510,7 +513,23 @@ function SessionRow({ session }: { session: SafetySession }) {
                   </span>
                 )}
               </span>
+              {it.pts < 0 && it.id && it.staff == null && protest !== it.id && (
+                <button
+                  type="button"
+                  onClick={() => setProtest(it.id ?? null)}
+                  title="Don't agree? Tell the stewards what happened"
+                  className="ml-auto shrink-0 text-zinc-500 hover:text-red-300"
+                >
+                  Protest
+                </button>
+              )}
             </p>
+            {protest === it.id && it.id && (
+              <div className="mt-1.5 pl-[4.25rem]">
+                <ProtestForm itemId={it.id} onClose={() => setProtest(null)} />
+              </div>
+            )}
+            </div>
           ))}
           <div className="flex items-center justify-between pt-1">
             <Link

@@ -17,6 +17,9 @@ export type SafetyCategory =
   | "stream"
   | "staff";
 
+/** The staff page; protests from the site go to its /api/protest. */
+export const STAFF_URL = "https://104-154-182-45.sslip.io";
+
 export interface SafetyItem {
   pts: number;
   text: string;
