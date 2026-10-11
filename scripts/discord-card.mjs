@@ -1,6 +1,7 @@
-// Renders the leaderboard (this month, top 15) as a picture for Discord:
-// <dist>/discord/leaderboard.png plus leaderboard.json, whose "hash" only
-// changes when the standings do. Race Control's hourly job posts or edits the
+// Renders the leaderboard (this month, top 15) and the safety rating ranking
+// as pictures for Discord: <dist>/discord/leaderboard.png and safety.png, plus
+// leaderboard.json and safety.json, whose "hash" only changes when the
+// standings do. Race Control's hourly job posts or edits the
 // Discord message when that hash changes.
 import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
@@ -43,5 +44,15 @@ const month = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Amsterdam", y
   .format(new Date());
 writeFileSync(join(out, "leaderboard.json"), JSON.stringify({ hash, scope, month, races }, null, 2));
 console.log(`discord card: ${hash} (${scope})`);
+
+// The safety rating ranking (everyone) for the safety rating channel
+await page.goto(`${base}${scope}/safety?embed=1`);
+await page.waitForSelector("#safety-card table");
+await page.waitForTimeout(3000);
+const sr = await page.$("#safety-card");
+await sr.screenshot({ path: join(out, "safety.png") });
+const srHash = createHash("sha256").update(await sr.innerText()).digest("hex").slice(0, 16);
+writeFileSync(join(out, "safety.json"), JSON.stringify({ hash: srHash }, null, 2));
+console.log(`discord safety card: ${srHash}`);
 await browser.close();
 server.close();

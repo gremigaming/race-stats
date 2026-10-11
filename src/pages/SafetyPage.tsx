@@ -96,11 +96,13 @@ export function SafetyPage() {
   const { league } = useTelemetry();
   const [params, setParams] = useSearchParams();
   const highlightRef = useRef<HTMLTableRowElement>(null);
-  const tab: Tab = params.get("tab") === "personal" ? "personal" : "ranking";
+  // ?embed: the Discord picture, the full ranking with the site address
+  const embed = params.has("embed");
+  const tab: Tab = !embed && params.get("tab") === "personal" ? "personal" : "ranking";
 
   useEffect(() => {
-    if (tab === "ranking") highlightRef.current?.scrollIntoView({ block: "center", behavior: "smooth" });
-  }, [tab]);
+    if (tab === "ranking" && !embed) highlightRef.current?.scrollIntoView({ block: "center", behavior: "smooth" });
+  }, [tab, embed]);
 
   if (!league?.safetyData) {
     return (
@@ -119,21 +121,27 @@ export function SafetyPage() {
   };
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6 p-6">
+    <div
+      id="safety-card"
+      className={cn("mx-auto max-w-5xl space-y-6 p-6", embed && "p-8")}
+    >
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h2 className="mb-1 flex items-center gap-2 text-xl font-bold">
             <ShieldCheck className="h-5 w-5 text-emerald-400" />
-            Safety rating
+            {embed ? "GreMi Gang Safety Rating" : "Safety rating"}
           </h2>
           <p className="flex flex-wrap items-center gap-2 text-sm text-zinc-500">
+            {!embed && (
             <span className="inline-flex items-center gap-1 rounded-full border border-zinc-700 px-2 py-0.5 text-[11px] text-zinc-400">
               <TimerOff className="h-3 w-3" />
               not filtered by date
             </span>
+            )}
             Live rating over each driver's last 80 races · {rows.length} drivers
           </p>
         </div>
+        {!embed && (
         <SegmentedControl
           value={tab}
           onChange={(t) =>
@@ -145,6 +153,7 @@ export function SafetyPage() {
             { value: "personal", label: "Personal", icon: UserRound },
           ]}
         />
+        )}
       </div>
 
       {tab === "personal" ? (
@@ -181,7 +190,14 @@ export function SafetyPage() {
         </>
       ) : (
         <section className={cardClass}>
-          <SectionHeader title="Ranking" hint="Click a driver to open their personal page" />
+          <SectionHeader
+            title="Ranking"
+            hint={
+              embed
+                ? "Your own rating and every incident at gremigaming.github.io/race-stats"
+                : "Click a driver to open their personal page"
+            }
+          />
           <div className="overflow-x-auto">
             <table className={tableClassLoose}>
               <thead className={tableHeadClass}>
@@ -197,7 +213,7 @@ export function SafetyPage() {
               <tbody>
                 {rows.map((d, i) => {
                   const key = driverKey(d.name);
-                  const isMe = key === league.selectedDriver;
+                  const isMe = !embed && key === league.selectedDriver;
                   return (
                     <tr
                       key={key}
@@ -249,6 +265,7 @@ export function SafetyPage() {
         </section>
       )}
 
+      {!embed && (
       <section className={cardClass}>
         <SectionHeader title="How it works" />
         <div className="space-y-1.5">
@@ -268,6 +285,7 @@ export function SafetyPage() {
           ))}
         </div>
       </section>
+      )}
     </div>
   );
 }
