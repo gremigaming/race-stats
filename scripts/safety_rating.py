@@ -8,7 +8,7 @@ and writes public/league/safety.json. The rules are in the GreMi Gang SR rules
 import json, glob, re, sys, os, collections, statistics, math
 AI = re.compile(r" #\d+$")  # AI and hidden names, e.g. "Ferrari '26 #28", "RB #46"
 SEV = {"LOW": 0, "MEDIUM": 1, "HIGH": 2}
-BASE = {"LOW": 0, "MEDIUM": 2, "HIGH": 6}
+BASE = {"LOW": 0, "MEDIUM": 2, "HIGH": 4}
 NAME = {"LOW": "light", "MEDIUM": "medium", "HIGH": "heavy"}
 CAP = 25
 SESSIONS = os.path.join("public", "league", "sessions")  # written by build-league-data.mjs (aliases applied, backups dropped)
@@ -212,9 +212,17 @@ def analyse(path):
         a, b = inc["pair"]; t, te = inc["t"], inc["t_end"]
         repeat = pair_count[inc["pair"]] > 0; pair_count[inc["pair"]] += 1
         votes = collections.Counter(); why = collections.defaultdict(list); game = None
-        for p in pens:
-            if "collision" in p["infringement-type"].lower() and p["vehicle-index"] in (a, b) and p["id"] not in used and t - 1 <= p["timestamp"] <= te + 10:
-                game = p["vehicle-index"]; votes[game] += 1; used.add(p["id"]); why[game].append(f"game gave a {p['penalty-type'].lower()}"); break
+        # The game's collision calls for this pair: a real penalty is the game's blame;
+        # a warning is one hint (the game often warns both cars), both warned = no hint
+        hitp = [p for p in pens if "collision" in p["infringement-type"].lower() and p["vehicle-index"] in (a, b) and p["id"] not in used
+                and p.get("other-vehicle-index") in (a, b, None) and t - 1 <= p["timestamp"] <= te + 10]
+        real = [p for p in hitp if p["penalty-type"] != "Warning"]
+        warned = {p["vehicle-index"] for p in hitp if p["penalty-type"] == "Warning"}
+        for p in hitp: used.add(p["id"])
+        if real:
+            game = real[0]["vehicle-index"]; votes[game] += 2; why[game].append(f"game gave a {real[0]['penalty-type'].lower()}")
+        elif len(warned) == 1:
+            w = next(iter(warned)); votes[w] += 1; why[w].append("game gave a warning")
         da, db = damage_to(a, inc), damage_to(b, inc)
         if da is not None and db is not None:
             if da and not db: votes[a] += 1; why[a].append("only this car broke its front wing")
