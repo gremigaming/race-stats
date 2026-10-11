@@ -159,4 +159,42 @@ for (const backup of backups) {
 }
 files.sort((a, b) => dateKey(b).localeCompare(dateKey(a)));
 writeFileSync(join(OUT, "index.json"), JSON.stringify({ files, defaultDriver: DEFAULT_DRIVER }, null, 2));
+
+// Championship standings per month (the site's default "This month" view),
+// for the live championship board the Discord bot keeps. Same sums as the
+// site's leaderboard: race sessions, named drivers, points as saved.
+const display = (n) => n.replace(/[\s\u00a0]+/g, " ").trim();
+const finishedStatus = (s) => s === "FINISHED" || s === "ACTIVE" || s === "";
+const months = {};
+for (const name of files) {
+  const m = name.match(/(\d{4})_(\d{2})_\d{2}_\d{2}_\d{2}/);
+  const data = JSON.parse(readFileSync(join(OUT, "sessions", name), "utf8"));
+  if (!m || !/race/i.test(data["session-info"]?.["session-type"] ?? "")) continue;
+  const rows = (months[`${m[1]}-${m[2]}`] ??= {});
+  const seenHere = new Set();
+  for (const d of data["classification-data"]) {
+    const shown = display(d["driver-name"] ?? "");
+    const key = shown.toLowerCase();
+    if (!shown || d["participant-data"]?.["show-online-names"] === false || /^\d+ #\d+$/.test(shown)) continue;
+    if (seenHere.has(key)) continue;
+    seenHere.add(key);
+    const fc = d["final-classification"];
+    const ld = d["lap-data"] ?? {};
+    const status = fc ? fc["result-status"] ?? "" : ld["result-status"] ?? "";
+    const position = fc ? fc.position ?? null : ld["car-position"] > 0 ? ld["car-position"] : null;
+    const points = fc ? fc.points ?? 0 : position && finishedStatus(status) ? POINTS[position - 1] ?? 0 : 0;
+    const row = (rows[key] ??= { name: shown, points: 0, races: 0, wins: 0, podiums: 0 });
+    row.races += 1;
+    row.points += points;
+    if (finishedStatus(status) && position === 1) row.wins += 1;
+    if (finishedStatus(status) && position && position <= 3) row.podiums += 1;
+  }
+}
+const standings = Object.fromEntries(
+  Object.entries(months).map(([month, rows]) => [
+    month,
+    Object.values(rows).sort((a, b) => b.points - a.points || b.wins - a.wins || b.podiums - a.podiums || a.name.localeCompare(b.name)),
+  ]),
+);
+writeFileSync(join(OUT, "championship.json"), JSON.stringify({ months: standings }));
 console.log(`league data: ${files.length} session files`);
