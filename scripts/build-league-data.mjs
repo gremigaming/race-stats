@@ -31,8 +31,8 @@ try {
   // no aliases file
 }
 // Staff corrections from the staff page (races/corrections.json): name links
-// ("alias", "split") and result fixes ("result"). The SR ones are applied in
-// scripts/safety_rating.py.
+// ("alias", "split"), result fixes ("result") and kicks ("kick"). The SR ones
+// are applied in scripts/safety_rating.py.
 let changes = [];
 try {
   changes = JSON.parse(readFileSync(join(SRC, "corrections.json"), "utf8")).changes ?? [];
@@ -93,6 +93,60 @@ function fixResults(name, data) {
   });
   console.log(`staff result fixes: ${name} (${fixes.length})`);
 }
+// Kicks: a driver the staff removed from the lobby disappears from those
+// sessions for everyone: their result, and every contact, penalty, overtake
+// and record that involves their car. The untouched session is kept in
+// .cache/kicked/ so the safety rating can still charge the kicked driver for
+// their own incidents.
+const KICKED_DIR = join(".cache", "kicked");
+function kickCars(name, data) {
+  const cars = new Set(
+    changes.filter((c) => c.type === "kick").flatMap((c) => c.cars ?? []).filter((k) => k.file === name).map((k) => Number(k.car)),
+  );
+  const rows = data["classification-data"];
+  const gone = rows.filter((d) => cars.has(d.index));
+  if (!gone.length) return;
+  mkdirSync(KICKED_DIR, { recursive: true });
+  writeFileSync(join(KICKED_DIR, name), JSON.stringify(data));
+  const names = new Set(gone.flatMap((d) => [d["driver-name"], d["participant-data"]?.name].filter(Boolean)));
+  const hit = (m) =>
+    (m["involved-drivers"] ?? []).some((i) => cars.has(i)) ||
+    ["vehicle-index", "other-vehicle-index", "overtaker-index", "overtaken-index", "driver-index"].some((k) => cars.has(m[k]));
+  const pairHit = (p) => cars.has(p["driver-1-index"]) || cars.has(p["driver-2-index"]);
+  const hadPoints = rows.some((d) => d["final-classification"]?.points > 0);
+  data["classification-data"] = rows.filter((d) => !cars.has(d.index));
+  if (Array.isArray(data["race-control"])) data["race-control"] = data["race-control"].filter((m) => !hit(m));
+  for (const d of data["classification-data"]) {
+    if (Array.isArray(d["race-control"])) d["race-control"] = d["race-control"].filter((m) => !hit(m));
+    const col = d.collisions;
+    if (col && Array.isArray(col["collision-pairs"])) {
+      col["collision-pairs"] = col["collision-pairs"].filter((p) => !pairHit(p));
+      const most = Math.max(0, ...col["collision-pairs"].map((p) => p["num-collisions"] ?? 0));
+      col["most-collided-pairs"] = {
+        count: most,
+        "collision-pairs": col["collision-pairs"].filter((p) => most && p["num-collisions"] === most).map(({ collisions, "num-collisions": _, ...p }) => p),
+      };
+    }
+  }
+  const byName = (key) => (x) => !names.has(x[key]);
+  if (Array.isArray(data["position-history"])) data["position-history"] = data["position-history"].filter(byName("name"));
+  if (Array.isArray(data["speed-trap-records"])) data["speed-trap-records"] = data["speed-trap-records"].filter(byName("name"));
+  if (Array.isArray(data["tyre-stint-history-v2"])) data["tyre-stint-history-v2"] = data["tyre-stint-history-v2"].filter((x) => !cars.has(x.index) && !names.has(x.name));
+  if (Array.isArray(data.overtakes?.records))
+    data.overtakes.records = data.overtakes.records.filter((o) => !names.has(o["overtaking-driver-name"]) && !names.has(o["overtaken-driver-name"]));
+  const fastest = data.records?.fastest;
+  if (fastest) for (const k of Object.keys(fastest)) if (cars.has(fastest[k]?.["driver-index"])) delete fastest[k];
+  // the others move up: same order, positions and points worked out again
+  const classified = data["classification-data"].filter((d) => d["final-classification"]);
+  classified.sort((a, b) => a["final-classification"].position - b["final-classification"].position);
+  classified.forEach((d, i) => {
+    const fc = d["final-classification"];
+    fc.position = i + 1;
+    d["track-position"] = i + 1;
+    if (hadPoints) fc.points = OUT_STATUSES.includes(fc["result-status"]) ? 0 : (POINTS[i] ?? 0);
+  });
+  console.log(`staff kicks: ${name} (${gone.map((d) => d["driver-name"]).join(", ")})`);
+}
 const renameDrivers = (value) => {
   if (Array.isArray(value)) return value.map(renameDrivers);
   if (value && typeof value === "object") {
@@ -104,6 +158,7 @@ const renameDrivers = (value) => {
 };
 
 rmSync(OUT, { recursive: true, force: true });
+rmSync(KICKED_DIR, { recursive: true, force: true });
 mkdirSync(join(OUT, "sessions"), { recursive: true });
 
 const seen = new Set();
@@ -124,6 +179,7 @@ for (const path of walk(SRC)) {
   }
   renameDrivers(data);
   if (data["session-info"]) fixResults(name, data);
+  kickCars(name, data);
   for (const d of data["classification-data"]) {
     const p = d["participant-data"];
     if (p) {

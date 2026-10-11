@@ -460,6 +460,27 @@ for si, stream in enumerate(streams):
             cat = "retirement" if "retired" in what else "penalty"
             items[n].append({"pts": -v, "text": what[0].upper() + what[1:], "lap": lap if isinstance(lap, int) else None, "cat": cat})
         car = {nm_(c["driver-name"]): c["index"] for c in d["classification-data"]}
+        # a driver kicked by staff is gone from this session for everyone else,
+        # but still answers for their own incidents (from the untouched copy)
+        full = os.path.join(".cache", "kicked", name)
+        if os.path.exists(full):
+            fd = json.load(open(full))
+            kicked = {nm_(c["driver-name"]): c["index"] for c in fd["classification-data"]
+                      if c["index"] not in car.values() and not AI.search(nm_(c["driver-name"]))
+                      and (c.get("participant-data") or {}).get("show-online-names") is not False}
+            if kicked:
+                rows2, other2, _, _ = analyse(full)
+                for r in rows2:
+                    for n, (pts, parts) in r["lines"].items():
+                        if n in kicked and half(pts):
+                            items[n].append({"pts": -half(pts), "text": f"{r['where']}, with {r['vs'][n]}: " + "; ".join(parts), "lap": r["lap"], "cat": "contact"})
+                for n, v, what, lap, _fl in other2:
+                    if n in kicked and v:
+                        items[n].append({"pts": -v, "text": what[0].upper() + what[1:], "lap": lap if isinstance(lap, int) else None,
+                                         "cat": "retirement" if "retired" in what else "penalty"})
+                for n in kicked:
+                    items[n].append({"pts": 0, "text": "Kicked from the lobby by staff: removed from this session's results", "lap": None, "cat": "staff"})
+                car.update(kicked); present += list(kicked)
         apply_staff(name, items, car, is_race, would)
         for n in set(present) | set(items):
             loss = -sum(i["pts"] for i in items[n] if i["pts"] < 0)

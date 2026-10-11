@@ -1,4 +1,59 @@
 {
   "_about": "Written by the staff page. Each change: incident (new points for one SR item), add (a penalty or bonus by hand), result (time penalty, status or position), alias / split (link or unlink a driver name). Remove an entry to undo it.",
-  "changes": []
+  "changes": [
+    {
+      "id": "ce18c108526f",
+      "type": "kick",
+      "day": "2026-10-11",
+      "driver": "moonless-blurb7 (hidden as RB #2)",
+      "cars": [
+        {
+          "file": "Race_Mexico_2026_10_11_19_38_20.json",
+          "car": 6
+        },
+        {
+          "file": "Race_Monza_Just_in_case_2026_10_11_19_54_58.json",
+          "car": 5
+        },
+        {
+          "file": "Race_Brazil_2026_10_11_20_02_55.json",
+          "car": 5
+        },
+        {
+          "file": "Race_Madrid_2026_10_11_20_17_04.json",
+          "car": 5
+        },
+        {
+          "file": "Race_Suzuka_Just_in_case_2026_10_11_20_36_18.json",
+          "car": 5
+        },
+        {
+          "file": "Race_Las_Vegas_2026_10_11_20_46_43.json",
+          "car": 4
+        }
+      ],
+      "reason": "Kicked from the lobby for dirty driving",
+      "by": "GreMi",
+      "at": "2026-10-11T19:45:00Z"
+    },
+    {
+      "id": "84d611741ec1",
+      "type": "kick",
+      "day": "2026-10-11",
+      "driver": "SmithyJRS23 (hidden as Mclaren '26 #21)",
+      "cars": [
+        {
+          "file": "Race_Suzuka_Just_in_case_2026_10_11_20_36_18.json",
+          "car": 11
+        },
+        {
+          "file": "Race_Las_Vegas_2026_10_11_20_46_43.json",
+          "car": 9
+        }
+      ],
+      "reason": "Kicked from the lobby for dirty driving",
+      "by": "GreMi",
+      "at": "2026-10-11T19:45:00Z"
+    }
+  ]
 }
