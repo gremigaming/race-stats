@@ -136,25 +136,32 @@
     // camera: starts on the whole seat (52vmin tall), ends on the close-up upright and 60vmin wide
     const c0 = { x: 649 / 2, y: 720 / 2 }, K = 60 / 52 * kG;
     const P = { x: (K * c1x - c0.x) / (K - 1), y: (K * c1y - c0.y) / (K - 1) };
-    const HOLD = 1000, MOVE = 2600, END = 600;
-    const ease = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    const HOLD = 700, MOVE = 1250, BACK = 5;                   // BACK: the background seat's blur (vmin/10)
+    // a small pull back, then a hard acceleration in that overshoots a touch and settles: the "pop"
+    const ease = t => {
+      if (t < .14) return -.035 * Math.sin(Math.PI * t / .14);
+      const x = (t - .14) / .86, g = x * x * (1.6 - .6 * x), c = 1.2;
+      return 1 + (c + 1) * Math.pow(g - 1, 3) + c * Math.pow(g - 1, 2);
+    };
     const ramp = (t, from, to) => { const x = Math.min(1, Math.max(0, (t - from) / (to - from))); return x * x * (3 - 2 * x); };
     const t0 = performance.now();
     let raf;
     const frame = now => {
       const ms = now - t0 - HOLD, t = Math.min(1, Math.max(0, ms / MOVE)), e = ease(t);
-      const speed = Math.abs(ease(Math.min(1, t + .01)) - e) / .015;   // 1 at the fastest point
+      const speed = Math.abs(ease(Math.min(1, t + .01)) - e) / .025;   // about 1 at the fastest point
       const s = Math.pow(K, e), u = .52 * Math.min(innerWidth, innerHeight) / 720;
       const W = G2.map((r, i) => r.map((v, j) => (i === j ? 1 - e : 0) + v * e));
       const cx = P.x - (P.x - c0.x) / s, cy = P.y - (P.y - c0.y) / s;
       world.style.transform = css(mul([[u * s, 0, -u * s * cx], [0, u * s, -u * s * cy], [0, 0, 1]], W));
-      // the full seat stays until the zoom has landed; the bottom of the seat (long off screen by then)
-      // is cropped away halfway, because the perspective turn can't draw it near the end
+      // the bottom of the seat (long off screen by then) is cropped away halfway, because the
+      // perspective turn can't draw it near the end
       a.style.visibility = e < .5 ? "visible" : "hidden";
       top.style.visibility = e < .5 ? "hidden" : "visible";
-      top.style.opacity = inner.style.opacity = 1 - ramp(ms, MOVE, MOVE + END);
+      // the full seat stays behind the close-up, softly out of focus, like a camera's depth of field
+      const dof = `blur(${ramp(e, .4, 1) * BACK * Math.min(innerWidth, innerHeight) / 1000 / s / u}px)`;
+      a.style.filter = top.style.filter = dof;
       b.style.opacity = ramp(e, .45, .9);
-      world.style.filter = speed > .5 ? `blur(${(speed - .5) * 3 / s / u}px)` : "";
+      world.style.filter = speed > .4 ? `blur(${(speed - .4) * 4 / s / u}px)` : "";
       raf = requestAnimationFrame(frame);
     };
     raf = requestAnimationFrame(frame);
@@ -169,7 +176,7 @@
                    '<img class="top" src="forged-1-top.webp" alt=""><div class="shape"><img src="forged-1-top.webp" alt=""></div><img class="b" src="forged-4.webp" alt=""></div></div>');
     const stop = zoomShot(z);
     z.classList.add("in");
-    await wait(5200);
+    await wait(3900);
     z.classList.replace("in", "out");
     await wait(380);
     stop();
