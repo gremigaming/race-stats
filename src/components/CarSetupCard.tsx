@@ -143,7 +143,9 @@ export function CarSetupCard({
           )
         }
       />
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-5">
+      <div
+        className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-5 ${hideCopy ? "gap-x-5" : "gap-x-8"}`}
+      >
         {/* Column 1: Aero + Transmission + Brakes */}
         <div className="space-y-5">
           <Section title="Aerodynamics">

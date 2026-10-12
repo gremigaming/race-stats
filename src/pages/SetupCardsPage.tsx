@@ -48,12 +48,13 @@ function savedOn(card: SetupCardData): string {
 
 function SetupPicture({ track, card }: { track: SetupTrack; card: SetupCardData }) {
   const title = `${track.post} · ${card.label} setup`;
+  // About 3:2, so a Discord forum thumbnail shows the whole card
   return (
     <section
       id={setupCardId(track.post, card.kind)}
       data-post={track.post}
       data-kind={card.kind}
-      className={cn(cardClass, "relative w-[860px] overflow-hidden p-7")}
+      className={cn(cardClass, "relative w-[680px] overflow-hidden p-6")}
     >
       {card.placeholder || !card.setup ? (
         <>
