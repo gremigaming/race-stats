@@ -17,7 +17,7 @@
 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Montserrat:wght@600;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;800&display=swap" rel="stylesheet">
 <style>
   :root { --yellow: #ffbf00; --ink: #0d0d10; }
   html, body { margin: 0; height: 100%; background: transparent; overflow: hidden; }
@@ -27,11 +27,7 @@
     opacity: 0; transform: scale(.2) rotate(-8deg);
   }
   .card img { display: block; max-width: 60vmin; max-height: 52vmin; filter: drop-shadow(0 2vmin 3vmin rgba(0,0,0,.55)); }
-  .logo img { width: 26vmin; height: auto; }
-  .word {
-    font-family: Anton, Impact, sans-serif; font-size: 11vmin; letter-spacing: .6vmin;
-    color: var(--yellow); line-height: 1; text-shadow: 0 .6vmin 2vmin rgba(0,0,0,.6);
-  }
+  .logo img.mark { width: 78vmin; max-width: 78vmin; height: auto; max-height: none; }
   .code {
     font-family: Montserrat, Arial, sans-serif; font-weight: 800; font-size: 4.6vmin;
     background: var(--yellow); color: var(--ink); padding: 1.2vmin 3vmin; border-radius: 1.6vmin;
@@ -65,7 +61,7 @@
   let playing = false, lastPlay = 0;
 
   // preload, so nothing pops in half-loaded
-  ["logo", ...RIGS].forEach(n => { const i = new Image(); i.src = n + ".webp"; });
+  ["wordmark", ...RIGS].forEach(n => { const i = new Image(); i.src = n + ".webp"; });
 
   function card(html, cls = "") {
     const el = document.createElement("div");
@@ -85,9 +81,9 @@
   async function play() {
     if (playing || Date.now() - lastPlay < 60000 && !q.has("test")) return;
     playing = true; lastPlay = Date.now();
-    await show(card('<img src="logo.webp" alt=""><div class="word">SIMGASM</div>', "logo"), 1800);
+    await show(card('<img class="mark" src="wordmark.webp" alt="Simgasm">', "logo"), 1800);
     for (const r of RIGS) await show(card(`<img class="float" src="${r}.webp" alt="">`), 1500);
-    await show(card('<img src="logo.webp" alt=""><div class="code">10% OFF with code <b>GREMI10</b></div>' +
+    await show(card('<img class="mark" src="wordmark.webp" alt="Simgasm"><div class="code">10% OFF with code <b>GREMI10</b></div>' +
                     '<div class="url">simgasm.com/gremi_gaming</div>', "logo"), 4000);
     playing = false;
   }
