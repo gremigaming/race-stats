@@ -77,5 +77,17 @@ for (const section of await page.$$("#setup-cards section")) {
 }
 writeFileSync(join(out, "setups.json"), JSON.stringify({ tracks: setupTracks }, null, 2));
 console.log(`discord setup cards: ${setupTracks.length} tracks`);
+
+// Test pictures from public/setup-test.json, when there is one
+if (existsSync(join(dist, "setup-test.json"))) {
+  const testOut = join(out, "setup-test");
+  mkdirSync(testOut, { recursive: true });
+  await page.goto(`${base}setup-cards?embed=1&src=setup-test.json`);
+  await page.waitForSelector("#setup-cards section");
+  await page.waitForTimeout(2000);
+  for (const section of await page.$$("#setup-cards section")) {
+    await section.screenshot({ path: join(testOut, `${await section.getAttribute("id")}.png`) });
+  }
+}
 await browser.close();
 server.close();

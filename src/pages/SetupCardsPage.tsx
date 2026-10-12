@@ -64,9 +64,13 @@ function SetupPicture({ track, card }: { track: SetupTrack; card: SetupCardData 
             <span className="rounded-full border border-zinc-600/70 bg-zinc-900/80 px-4 py-1 font-mono text-xs uppercase tracking-[0.2em] text-zinc-400">
               No setup yet
             </span>
-            <span className="text-2xl font-semibold text-zinc-200">{track.post}</span>
+            <span className="text-2xl font-semibold text-zinc-200">
+              {card.kind === "wet" ? `${track.post} · Wet` : track.post}
+            </span>
             <span className="text-sm text-zinc-500">
-              GreMi's setup shows up here after the next race on this track
+              {card.kind === "wet"
+                ? "GreMi's wet setup shows up here after the next wet race on this track"
+                : "GreMi's setup shows up here after the next race on this track"}
             </span>
           </div>
         </>
@@ -87,7 +91,9 @@ export function SetupCardsPage() {
   const { data } = useQuery({
     queryKey: ["league-setups"],
     queryFn: async () => {
-      const res = await fetch(`${import.meta.env.BASE_URL}league/setups.json`);
+      // ?src= draws another list, for test pictures (public/setup-test.json)
+      const src = new URLSearchParams(location.search).get("src") ?? "league/setups.json";
+      const res = await fetch(`${import.meta.env.BASE_URL}${src}`);
       if (!res.ok) throw new Error(`setups.json: ${res.status}`);
       return (await res.json()) as { tracks: SetupTrack[] };
     },

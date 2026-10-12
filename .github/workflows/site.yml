@@ -65,6 +65,7 @@ jobs:
           git config user.email "github-actions@users.noreply.github.com"
           cp dist/discord/leaderboard.png previews/discord-leaderboard.png
           rm -rf previews/setups && cp -r dist/discord/setups previews/setups
+          rm -rf previews/setup-test && if [ -d dist/discord/setup-test ]; then cp -r dist/discord/setup-test previews/setup-test; fi
           git add previews
           git commit -m "chore: page previews [skip ci]" && git pull --rebase origin main && git push || true
 
