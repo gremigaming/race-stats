@@ -168,9 +168,13 @@
     return () => cancelAnimationFrame(raf);
   }
 
-  async function play() {
-    if (playing || Date.now() - lastPlay < 60000 && !q.has("test")) return;
+  async function play(fromChat) {
+    if (playing || Date.now() - lastPlay < (fromChat ? 20000 : 60000) && !q.has("test")) return;
     playing = true; lastPlay = Date.now();
+    try { await loop(); } finally { playing = false; stage.innerHTML = ""; }
+  }
+
+  async function loop() {
     await show(card('<img class="icon" src="logo.webp" alt="Simgasm">', "logo"), 1800);
     const z = card('<div class="zoom"><div class="world"><img class="a" src="forged-1.webp" alt="">' +
                    '<img class="top" src="forged-1-top.webp" alt=""><div class="shape"><img src="forged-1-top.webp" alt=""></div><img class="b" src="forged-4.webp" alt=""></div></div>');
@@ -184,13 +188,16 @@
     for (const [r, cls] of RIGS) await show(card(`<img class="float" src="${r}.webp" alt="">`, cls), 1500);
     await show(card('<img class="mark" src="wordmark.webp" alt="Simgasm"><div class="code">10% OFF with code <b>GREMI10</b></div>' +
                     '<div class="url">simgasm.com/gremi_gaming</div>', "logo"), 4000);
-    playing = false;
   }
 
   // Twitch chat, read-only and anonymous
+  // Fires on Race Control's Simgasm message: from the bot account (by login, so ?bot= if it is
+  // renamed), or from any mod or the broadcaster when the message has the code in it. GreMi can also
+  // type !simgasm to fire it by hand.
   function listen() {
     const ws = new WebSocket("wss://irc-ws.chat.twitch.tv:443");
     ws.onopen = () => {
+      ws.send("CAP REQ :twitch.tv/tags");
       ws.send("PASS SCHMOOZE");
       ws.send("NICK justinfan" + Math.floor(10000 + Math.random() * 80000));
       ws.send("JOIN #" + CHANNEL);
@@ -198,11 +205,16 @@
     ws.onmessage = e => {
       for (const line of e.data.split("\r\n")) {
         if (line.startsWith("PING")) { ws.send("PONG :tmi.twitch.tv"); continue; }
-        const m = line.match(/^:([^!]+)![^ ]+ PRIVMSG #[^ ]+ :(.*)$/);
-        if (m && m[1].toLowerCase() === BOT && m[2].toLowerCase().includes(WORD)) play();
+        const m = line.match(/^(?:@(\S+) )?:([^!]+)![^ ]+ PRIVMSG #[^ ]+ :(.*)$/);
+        if (!m) continue;
+        const tags = m[1] || "", who = m[2].toLowerCase(), text = m[3].toLowerCase();
+        const badges = (tags.match(/(?:^|;)badges=([^;]*)/) || [])[1] || "";
+        const boss = /broadcaster\//.test(badges), mod = boss || /moderator\//.test(badges);
+        if ((who === BOT && text.includes(WORD)) || (mod && text.includes(WORD) && text.includes("gremi10"))
+            || (boss && text.trim() === "!simgasm")) play(true);
       }
     };
-    ws.onclose = () => setTimeout(listen, 5000);
+    ws.onclose = () => setTimeout(listen, 3000);
   }
   listen();
 
