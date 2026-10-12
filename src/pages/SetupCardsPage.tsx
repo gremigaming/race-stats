@@ -121,7 +121,9 @@ function SetupPicture({ track, card }: { track: SetupTrack; card: SetupCardData 
               <span className="text-sm text-zinc-500">
                 {card.kind === "wet"
                   ? "GreMi's wet setup shows up here after the next wet race on this track"
-                  : "GreMi's setup shows up here after the next race on this track"}
+                  : card.kind === "quali"
+                    ? "Until there's a quali setup, GreMi qualifies with the dry race setup"
+                    : "GreMi's setup shows up here after the next race on this track"}
               </span>
             </div>
           </div>
@@ -239,12 +241,12 @@ function SetupOverview({ track }: { track: SetupTrack }) {
         </div>
       </div>
       <div className="flex flex-1 gap-3">
-        <OverviewColumn kind="race" setup={race?.setup} note="No setup yet" />
         <OverviewColumn
           kind="quali"
           setup={quali?.setup}
           note={race ? "Same as dry race" : "No setup yet"}
         />
+        <OverviewColumn kind="race" setup={race?.setup} note="No setup yet" />
         <OverviewColumn kind="wet" setup={wet?.setup} note="No wet setup yet" />
       </div>
     </section>

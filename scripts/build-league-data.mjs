@@ -341,13 +341,12 @@ for (const name of [...files].reverse()) {
   const values = Object.fromEntries(SETUP_KEYS.map((k) => [k, setup[k]]));
   slots[kind] = { setup: { ...values, "is-valid": true }, file: name, session: info["session-type"] };
 }
+// In GreMi's order: quali, race, wet; a kind without a setup is a placeholder
+const SETUP_ORDER = [["quali", "Dry quali"], ["race", "Dry race"], ["wet", "Wet"]];
 const setupCards = SETUP_TRACKS.map(([post]) => {
   const slots = setupSlots.get(post);
-  const cards = [
-    slots.race ? { kind: "race", label: "Dry race", ...slots.race } : { kind: "race", label: "Dry race", placeholder: true },
-  ];
-  if (slots.quali) cards.push({ kind: "quali", label: "Dry quali", ...slots.quali });
-  cards.push(slots.wet ? { kind: "wet", label: "Wet", ...slots.wet } : { kind: "wet", label: "Wet", placeholder: true });
+  const cards = SETUP_ORDER.map(([kind, label]) =>
+    slots[kind] ? { kind, label, ...slots[kind] } : { kind, label, placeholder: true });
   return { post, cards };
 });
 writeFileSync(join(OUT, "setups.json"), JSON.stringify({ tracks: setupCards }, null, 2));
