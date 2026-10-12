@@ -1,5 +1,6 @@
-// Renders the leaderboard (this month, top 15) and the safety rating ranking
-// as pictures for Discord: <dist>/discord/leaderboard.png and safety.png, plus
+// Renders the leaderboard (this month, top 15), the safety rating ranking and
+// GreMi's setup cards as pictures for Discord: <dist>/discord/leaderboard.png,
+// safety.png and setups/*.png, plus
 // leaderboard.json and safety.json, whose "hash" only changes when the
 // standings do. Race Control's hourly job posts or edits the
 // Discord message when that hash changes.
@@ -54,5 +55,27 @@ await sr.screenshot({ path: join(out, "safety.png") });
 const srHash = createHash("sha256").update(await sr.innerText()).digest("hex").slice(0, 16);
 writeFileSync(join(out, "safety.json"), JSON.stringify({ hash: srHash }, null, 2));
 console.log(`discord safety card: ${srHash}`);
+
+// GreMi's setup per track for the F1-SETUPS forum: one picture per card
+// (dry race, dry quali, wet, or a grayed "No setup yet" placeholder), listed
+// in setups.json with a hash that only changes when the card does.
+const setupOut = join(out, "setups");
+mkdirSync(setupOut, { recursive: true });
+await page.goto(`${base}setup-cards?embed=1`);
+await page.waitForSelector("#setup-cards section");
+await page.waitForTimeout(2000);
+const setupTracks = [];
+for (const section of await page.$$("#setup-cards section")) {
+  const id = await section.getAttribute("id");
+  const post = await section.getAttribute("data-post");
+  const kind = await section.getAttribute("data-kind");
+  await section.screenshot({ path: join(setupOut, `${id}.png`) });
+  const hash = createHash("sha256").update(await section.innerText()).digest("hex").slice(0, 12);
+  let track = setupTracks.find((t) => t.post === post);
+  if (!track) setupTracks.push((track = { post, cards: [] }));
+  track.cards.push({ kind, picture: `${id}.png`, hash });
+}
+writeFileSync(join(out, "setups.json"), JSON.stringify({ tracks: setupTracks }, null, 2));
+console.log(`discord setup cards: ${setupTracks.length} tracks`);
 await browser.close();
 server.close();

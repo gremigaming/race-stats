@@ -15,6 +15,7 @@ import { TrackProgressPage } from "./pages/TrackProgressPage";
 import { DriversPage } from "./pages/DriversPage";
 import { HeadToHeadPage } from "./pages/HeadToHeadPage";
 import { SafetyPage } from "./pages/SafetyPage";
+import { SetupCardsPage } from "./pages/SetupCardsPage";
 import { TelemetryProvider, useTelemetry } from "./context/TelemetryContext";
 import { ZipUploadScreen } from "./components/ZipUploadScreen";
 import { GlobalDropZone } from "./components/GlobalDropZone";
@@ -62,6 +63,8 @@ function AppRoutes() {
             />
           )}
           <Route index element={<DefaultScopeRedirect />} />
+          {/* The F1-SETUPS pictures for Discord (scripts/discord-card.mjs) */}
+          <Route path="setup-cards" element={<SetupCardsPage />} />
           <Route
             path=":formulaKey"
             element={

@@ -8,6 +8,10 @@ import { HStack, VStack } from "./ui/Stack";
 
 interface CarSetupCardProps {
   setup: CarSetup;
+  /** Header text; the Discord setup pictures name the track and kind here. */
+  title?: string;
+  /** Pictures can't be clicked, so they leave out the copy button. */
+  hideCopy?: boolean;
 }
 
 function getRangePercent(key: string, value: number): number {
@@ -111,7 +115,11 @@ function TyrePressureCell({
   );
 }
 
-export function CarSetupCard({ setup }: CarSetupCardProps) {
+export function CarSetupCard({
+  setup,
+  title = "Car Setup",
+  hideCopy = false,
+}: CarSetupCardProps) {
   if (!setup["is-valid"]) return null;
 
   const allZero = Object.entries(setup).every(
@@ -123,14 +131,16 @@ export function CarSetupCard({ setup }: CarSetupCardProps) {
     <div>
       <SectionHeader
         size="sm"
-        title="Car Setup"
+        title={title}
         className="mb-4"
         action={
-          <CopyButton
-            label="Copy setup"
-            getText={() => formatSetupText(setup)}
-            className="-my-1.5"
-          />
+          hideCopy ? undefined : (
+            <CopyButton
+              label="Copy setup"
+              getText={() => formatSetupText(setup)}
+              className="-my-1.5"
+            />
+          )
         }
       />
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-5">

@@ -272,3 +272,81 @@ const standings = Object.fromEntries(
 );
 writeFileSync(join(OUT, "championship.json"), JSON.stringify({ months: standings }));
 console.log(`league data: ${files.length} session files`);
+
+// GreMi's car setups per track for the F1-SETUPS forum in Discord (setups.json).
+// Pits n' Giggles only saves the setup of the PC's own driver, and only with
+// "Process incoming car setup data" ticked. Every save sorts into a dry race,
+// dry quali or wet setup; the newest save of a kind replaces the older one.
+// A setup fewer than SETUP_MIN_DIFF values away from a newer one is the same
+// setup, so it is dropped: one card stays the one and only setup.
+const SETUP_TRACKS = [
+  // [Discord forum post name, track-id values in the saves], in calendar order
+  ["Australia", ["Melbourne", "Australia"]],
+  ["China", ["Shanghai", "China"]],
+  ["Japan", ["Suzuka", "Japan"]],
+  ["Bahrain", ["Sakhir", "Bahrain"]],
+  ["Saudi Arabia", ["Jeddah", "Saudi Arabia"]],
+  ["Miami", ["Miami"]],
+  ["Emilia-Romagna", ["Imola", "Emilia Romagna"]],
+  ["Canada", ["Montreal", "Canada"]],
+  ["Monaco", ["Monaco"]],
+  ["Barcelona", ["Catalunya", "Spain", "Barcelona"]],
+  ["Austria", ["Austria"]],
+  ["Great Britain", ["Silverstone", "Great Britain"]],
+  ["Belgium", ["Spa", "Belgium"]],
+  ["Hungary", ["Hungaroring", "Hungary"]],
+  ["Netherlands", ["Zandvoort", "Netherlands"]],
+  ["Monza", ["Monza", "Italy"]],
+  ["Madrid", ["Madrid"]],
+  ["Azerbaijan", ["Baku", "Azerbaijan"]],
+  ["Singapore", ["Singapore"]],
+  ["Austin", ["Texas", "Austin"]],
+  ["Mexico", ["Mexico"]],
+  ["Brazil", ["Brazil"]],
+  ["Las Vegas", ["Las Vegas"]],
+  ["Qatar", ["Losail", "Qatar"]],
+  ["Abu Dhabi", ["Abu Dhabi"]],
+];
+const SETUP_KEYS = [
+  "front-wing", "rear-wing", "on-throttle", "off-throttle", "front-camber", "rear-camber",
+  "front-toe", "rear-toe", "front-suspension", "rear-suspension", "front-anti-roll-bar",
+  "rear-anti-roll-bar", "front-suspension-height", "rear-suspension-height", "brake-pressure",
+  "brake-bias", "front-left-tyre-pressure", "front-right-tyre-pressure",
+  "rear-left-tyre-pressure", "rear-right-tyre-pressure",
+];
+const SETUP_MIN_DIFF = 3;
+const setupDiff = (a, b) => SETUP_KEYS.filter((k) => Math.abs((a[k] ?? 0) - (b[k] ?? 0)) > 1e-3).length;
+const WET_WEATHER = /rain|storm/i;
+const setupSlots = new Map(SETUP_TRACKS.map(([post]) => [post, {}]));
+const postFor = (trackId) => SETUP_TRACKS.find(([, ids]) => ids.includes(trackId))?.[0];
+for (const name of [...files].reverse()) {
+  const data = JSON.parse(readFileSync(join(OUT, "sessions", name), "utf8"));
+  const info = data["session-info"];
+  const post = postFor(info["track-id"]);
+  const me = data["classification-data"].find((d) => d["is-player"]);
+  const setup = me?.["car-setup"];
+  if (!post || !setup?.["is-valid"] || SETUP_KEYS.every((k) => !setup[k])) continue;
+  const wetTyres = (me["tyre-set-history"] ?? []).some((s) => /inter|wet/i.test(s["tyre-set-key"] ?? ""));
+  const kind = WET_WEATHER.test(info.weather ?? "") || wetTyres
+    ? "wet" : /qualifying/i.test(info["session-type"] ?? "") ? "quali" : "race";
+  const slots = setupSlots.get(post);
+  // The very same setup again keeps its first save, so the card stays put
+  if (slots[kind] && setupDiff(slots[kind].setup, setup) === 0) continue;
+  for (const other of Object.keys(slots)) {
+    if (other !== kind && setupDiff(slots[other].setup, setup) < SETUP_MIN_DIFF) delete slots[other];
+  }
+  const values = Object.fromEntries(SETUP_KEYS.map((k) => [k, setup[k]]));
+  slots[kind] = { setup: { ...values, "is-valid": true }, file: name, session: info["session-type"] };
+}
+const setupCards = SETUP_TRACKS.map(([post]) => {
+  const slots = setupSlots.get(post);
+  const bothDry = slots.race && slots.quali;
+  const cards = [];
+  if (slots.race) cards.push({ kind: "race", label: bothDry ? "Dry race" : "Dry", ...slots.race });
+  if (slots.quali) cards.push({ kind: "quali", label: bothDry ? "Dry quali" : "Dry", ...slots.quali });
+  if (!cards.length) cards.push({ kind: "dry", label: "Dry", placeholder: true });
+  if (slots.wet) cards.push({ kind: "wet", label: "Wet", ...slots.wet });
+  return { post, cards };
+});
+writeFileSync(join(OUT, "setups.json"), JSON.stringify({ tracks: setupCards }, null, 2));
+console.log(`setups: ${setupCards.filter((t) => t.cards.some((c) => !c.placeholder)).length} tracks with a setup`);
