@@ -63,19 +63,15 @@ export interface DashboardResultStats {
 }
 
 export function isRepresentativeOnlineRace(session: SessionSummary): boolean {
-  // Representative online races are the dashboard's best signal for real form:
-  // enough human-grid data, not spectator mode, and at least one player lap.
-  // Smaller online lobbies fall back to the broader online bucket. League
-  // lobbies often run 6-12 cars, and the public race files drop empty slots
-  // and network ids, so the bar is a small human grid rather than a full one.
+  // Every online league race the driver finished laps in counts: lobbies are
+  // small and many drivers hide their names, so a human-grid size check would
+  // drop real races from the selected period.
   const result = session.playerRaceResult;
   return (
     Boolean(result) &&
     isRaceSessionType(session.sessionType) &&
     session.isOnline === true &&
     session.isSpectator !== true &&
-    (session.onlineDriverCount ?? 0) >= 4 &&
-    (session.classifiedDriverCount ?? 0) >= 6 &&
     (result?.playerLaps ?? 0) > 0
   );
 }
@@ -212,7 +208,7 @@ function getModeLabel(mode: ResultDataMode): string {
 function getModeDetail(mode: ResultDataMode): string {
   switch (mode) {
     case "representative-online":
-      return "Online races with enough human-grid data to compare your real results.";
+      return "Every online race you drove in the selected period.";
     case "online":
       return "No representative online grid yet, so this uses every online race result in this scope.";
     case "available-races":
