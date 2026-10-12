@@ -517,16 +517,17 @@ function SessionRow({ session }: { session: SafetySession }) {
                 <button
                   type="button"
                   onClick={() => setProtest(it.id ?? null)}
-                  title="Don't agree? Tell the stewards what happened"
-                  className="ml-auto shrink-0 text-zinc-500 hover:text-red-300"
+                  title="Don't agree? Protest this incident"
+                  aria-label="Protest this incident"
+                  className="ml-auto shrink-0 rounded p-0.5 text-zinc-500 hover:bg-red-500/10 hover:text-red-300"
                 >
-                  Protest
+                  <Flag className="h-3.5 w-3.5" />
                 </button>
               )}
             </p>
             {protest === it.id && it.id && (
               <div className="mt-1.5 pl-[4.25rem]">
-                <ProtestForm itemId={it.id} onClose={() => setProtest(null)} />
+                <ProtestForm item={it} onClose={() => setProtest(null)} />
               </div>
             )}
             </div>
