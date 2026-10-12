@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { CloudRain, Sun, Timer } from "lucide-react";
 import { cardClass } from "../components/Card";
 import { CarSetupCard } from "../components/CarSetupCard";
 import type { CarSetup } from "../types/telemetry";
@@ -46,47 +47,94 @@ function savedOn(card: SetupCardData): string {
   return `Used in the ${session} on ${day}`;
 }
 
+// Each kind gets its own colour and icon, on the pictures and in Discord
+const KIND_STYLE = {
+  race: {
+    tag: "Dry race", Icon: Sun, band: "bg-red-500", glow: "from-red-500/[0.14]",
+    chip: "bg-red-500/15 text-red-300", icon: "text-red-400", bar: "bg-red-500/70",
+  },
+  dry: {
+    tag: "Dry", Icon: Sun, band: "bg-red-500", glow: "from-red-500/[0.14]",
+    chip: "bg-red-500/15 text-red-300", icon: "text-red-400", bar: "bg-red-500/70",
+  },
+  quali: {
+    tag: "Dry quali", Icon: Timer, band: "bg-violet-500", glow: "from-violet-500/[0.16]",
+    chip: "bg-violet-500/15 text-violet-300", icon: "text-violet-400", bar: "bg-violet-500/70",
+  },
+  wet: {
+    tag: "Wet", Icon: CloudRain, band: "bg-sky-500", glow: "from-sky-500/[0.16]",
+    chip: "bg-sky-500/15 text-sky-300", icon: "text-sky-400", bar: "bg-sky-500/70",
+  },
+} as const;
+
 function SetupPicture({ track, card }: { track: SetupTrack; card: SetupCardData }) {
-  const title = `${track.post} · ${card.label} setup`;
-  // About 3:2, so a Discord forum thumbnail shows the whole card
+  const style = KIND_STYLE[card.kind] ?? KIND_STYLE.race;
+  const empty = card.placeholder || !card.setup;
+  const { Icon } = style;
   return (
     <section
       id={setupCardId(track.post, card.kind)}
       data-post={track.post}
       data-kind={card.kind}
       data-label={card.label}
-      data-date={card.placeholder ? "" : savedOn(card)}
-      data-placeholder={card.placeholder || !card.setup ? "1" : ""}
-      className={cn(cardClass, "relative w-[680px] overflow-hidden p-6")}
+      data-date={empty ? "" : savedOn(card)}
+      data-placeholder={empty ? "1" : ""}
+      className={cn(cardClass, "relative w-[860px] overflow-hidden p-7")}
     >
-      {card.placeholder || !card.setup ? (
-        <>
-          <div className="pointer-events-none select-none opacity-[0.18] grayscale" aria-hidden>
-            <CarSetupCard setup={PLACEHOLDER_SETUP} title={title} hideCopy />
+      {/* the kind's colour: a band on top and a soft glow from the corner */}
+      <div className={cn("absolute inset-x-0 top-0 h-1", empty ? "bg-zinc-700" : style.band)} />
+      <div
+        className={cn(
+          "pointer-events-none absolute inset-0 bg-gradient-to-br via-transparent to-transparent",
+          empty ? "from-zinc-500/[0.06]" : style.glow,
+        )}
+      />
+      <div className="relative">
+        <div className="mb-6 flex items-center gap-4">
+          <div className={cn("flex h-12 w-12 items-center justify-center rounded-xl", empty ? "bg-zinc-800" : style.chip)}>
+            <Icon className={cn("h-6 w-6", empty ? "text-zinc-600" : style.icon)} strokeWidth={2.2} />
           </div>
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-center">
-            <span className="rounded-full border border-zinc-600/70 bg-zinc-900/80 px-4 py-1 font-mono text-xs uppercase tracking-[0.2em] text-zinc-400">
-              No setup yet
-            </span>
-            <span className="text-2xl font-semibold text-zinc-200">
-              {card.kind === "wet" ? `${track.post} · Wet` : track.post}
-            </span>
-            <span className="text-sm text-zinc-500">
-              {card.kind === "wet"
-                ? "GreMi's wet setup shows up here after the next wet race on this track"
-                : "GreMi's setup shows up here after the next race on this track"}
-            </span>
+          <div className="flex-1">
+            <div className="font-mono text-2xs uppercase tracking-[0.25em] text-zinc-500">
+              {CIRCUITS[track.post] ?? track.post}
+            </div>
+            <div className="text-2xl font-semibold tracking-tight text-zinc-100">{track.post}</div>
           </div>
-        </>
-      ) : (
-        <>
-          <CarSetupCard setup={card.setup} title={title} hideCopy />
-          <div className="mt-5 flex justify-between text-xs text-zinc-500">
-            <span>{savedOn(card)} · GreMi_Gaming</span>
-            <span>gremigaming.github.io/race-stats</span>
+          <span
+            className={cn(
+              "rounded-full px-4 py-1.5 font-mono text-xs font-semibold uppercase tracking-[0.2em]",
+              empty ? "bg-zinc-800 text-zinc-500" : style.chip,
+            )}
+          >
+            {style.tag} setup
+          </span>
+        </div>
+        {empty ? (
+          <div className="relative">
+            <div className="pointer-events-none select-none opacity-[0.14] grayscale" aria-hidden>
+              <CarSetupCard setup={PLACEHOLDER_SETUP} title="" hideCopy />
+            </div>
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-center">
+              <span className="rounded-full border border-zinc-600/70 bg-zinc-900/80 px-4 py-1 font-mono text-xs uppercase tracking-[0.2em] text-zinc-400">
+                No setup yet
+              </span>
+              <span className="text-sm text-zinc-500">
+                {card.kind === "wet"
+                  ? "GreMi's wet setup shows up here after the next wet race on this track"
+                  : "GreMi's setup shows up here after the next race on this track"}
+              </span>
+            </div>
           </div>
-        </>
-      )}
+        ) : (
+          <>
+            <CarSetupCard setup={card.setup!} title="" hideCopy bar={style.bar} />
+            <div className="mt-6 flex justify-between border-t border-zinc-800 pt-4 text-xs text-zinc-500">
+              <span>{savedOn(card)} · GreMi_Gaming</span>
+              <span>gremigaming.github.io/race-stats</span>
+            </div>
+          </>
+        )}
+      </div>
     </section>
   );
 }
@@ -120,9 +168,9 @@ const OVERVIEW_ROWS: { label: string; value: (s: CarSetup) => string }[] = [
 ];
 
 const COLUMN_STYLE = {
-  race: { title: "Dry race", dot: "bg-red-500", text: "text-red-300" },
-  quali: { title: "Dry quali", dot: "bg-violet-500", text: "text-violet-300" },
-  wet: { title: "Wet", dot: "bg-sky-500", text: "text-sky-300" },
+  race: { title: "Dry race", Icon: Sun, text: "text-red-300", band: "bg-red-500" },
+  quali: { title: "Dry quali", Icon: Timer, text: "text-violet-300", band: "bg-violet-500" },
+  wet: { title: "Wet", Icon: CloudRain, text: "text-sky-300", band: "bg-sky-500" },
 } as const;
 
 function OverviewColumn({
@@ -135,10 +183,12 @@ function OverviewColumn({
   note?: string;
 }) {
   const style = COLUMN_STYLE[kind];
+  const { Icon } = style;
   return (
-    <div className="relative flex flex-1 flex-col rounded-xl bg-zinc-800/40 px-4 py-3.5">
+    <div className="relative flex flex-1 flex-col overflow-hidden rounded-xl bg-zinc-800/40 px-4 py-3.5">
+      <div className={cn("absolute inset-x-0 top-0 h-[3px]", setup ? style.band : "bg-zinc-700")} />
       <div className="mb-3 flex items-center gap-2">
-        <span className={cn("h-2 w-2 rounded-full", style.dot, !setup && "opacity-40")} />
+        <Icon className={cn("h-4 w-4", setup ? style.text : "text-zinc-600")} strokeWidth={2.4} />
         <span className={cn("font-mono text-2xs uppercase tracking-[0.18em]", setup ? style.text : "text-zinc-500")}>
           {style.title}
         </span>
