@@ -42,16 +42,17 @@
   .in  { animation: pop-in .55s cubic-bezier(.2, 1.6, .4, 1) forwards; }
   .out { animation: pop-out .35s ease-in forwards; }
   .card.in img.float { animation: float 1.8s ease-in-out infinite alternate; }
-  /* forged seat: zoom into the headrest, then the close-up takes over */
-  .zoom { width: 60vmin; height: 52vmin; position: relative; }
-  .zoom img { position: absolute; inset: 0; margin: auto; }
-  .zoom .a { transform-origin: 72% 12%; }
-  .zoom .b { opacity: 0; transform: scale(1.7); }
-  .zoom.go .a { animation: zoom-out-a .9s cubic-bezier(.6, 0, .9, .5) forwards; }
-  .zoom.go .b { animation: zoom-in-b .9s cubic-bezier(.1, .6, .3, 1) .45s forwards; }
-  @keyframes zoom-out-a { to { transform: scale(3.2); opacity: 0; filter: blur(1.2vmin); } }
-  @keyframes zoom-in-b  { from { opacity: 0; transform: scale(1.7); filter: blur(1.2vmin); }
-                          to   { opacity: 1; transform: scale(1); filter: blur(0); } }
+  /* forged seat: one continuous camera move into the headrest; the close-up photo is lined up
+     on the headrest and fades in mid-zoom, so it reads as a single shot */
+  .zoom {
+    width: 100vmin; height: 90vmin; position: relative; filter: drop-shadow(0 2vmin 3vmin rgba(0,0,0,.55));
+    -webkit-mask-image: radial-gradient(closest-side, #000 80%, transparent 100%);
+            mask-image: radial-gradient(closest-side, #000 80%, transparent 100%);
+  }
+  .zoom .world { position: absolute; left: 50%; top: 50%; width: 649px; height: 720px; transform-origin: 0 0; }
+  .card .zoom img { position: absolute; max-width: none; max-height: none; filter: none; }
+  .zoom .a { left: 0; top: 0; width: 649px; height: 720px; }
+  .zoom .b { opacity: 0; }
   .glow { background: radial-gradient(closest-side, rgba(255,255,255,.55), rgba(255,255,255,0)); border-radius: 50%; }
   .from-left.in  { animation-name: slide-in-left; }
   .from-right.in { animation-name: slide-in-right; }
@@ -96,17 +97,48 @@
     el.remove();
   }
 
+  // The close-up (forged-4, 720x602) sits on the headrest of the full seat (forged-1, 649x720),
+  // in forged-1 pixels. The camera scales about the one point that stays put on screen, so the
+  // move feels like a single zoom lens push rather than a cut.
+  const CLOSE = { x: 499 - 355 * .31, y: 86 - 215 * .31, w: 720 * .31, h: 602 * .31 };
+  function zoomShot(el) {
+    const world = el.querySelector(".world"), a = el.querySelector(".a"), b = el.querySelector(".b");
+    Object.assign(b.style, { left: CLOSE.x + "px", top: CLOSE.y + "px", width: CLOSE.w + "px", height: CLOSE.h + "px" });
+    const c0 = { x: 649 / 2, y: 720 / 2 }, c1 = { x: CLOSE.x + CLOSE.w / 2, y: CLOSE.y + CLOSE.h / 2 };
+    const K = 720 / CLOSE.w * 60 / 52;                 // close-up ends 60vmin wide; seat starts 52vmin tall
+    const P = { x: (K * c1.x - c0.x) / (K - 1), y: (K * c1.y - c0.y) / (K - 1) };
+    const HOLD = 1000, MOVE = 2100;
+    const ease = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    const ramp = (t, from, to) => { const x = Math.min(1, Math.max(0, (t - from) / (to - from))); return x * x * (3 - 2 * x); };
+    const t0 = performance.now();
+    let raf;
+    const frame = now => {
+      const t = Math.min(1, Math.max(0, (now - t0 - HOLD) / MOVE)), e = ease(t);
+      const speed = Math.abs(ease(Math.min(1, t + .01)) - e) / .015;   // 1 at the fastest point
+      const s = Math.pow(K, e), u = .52 * Math.min(innerWidth, innerHeight) / 720;
+      const cx = P.x - (P.x - c0.x) / s, cy = P.y - (P.y - c0.y) / s;
+      world.style.transform = `translate(${-cx * s * u}px, ${-cy * s * u}px) scale(${s * u})`;
+      b.style.opacity = ramp(e, .25, .6);
+      a.style.opacity = 1 - ramp(e, .4, .7);
+      world.style.filter = speed > .5 ? `blur(${(speed - .5) * 3 / (s * u)}px)` : "";
+      raf = requestAnimationFrame(frame);
+    };
+    raf = requestAnimationFrame(frame);
+    return () => cancelAnimationFrame(raf);
+  }
+
   async function play() {
     if (playing || Date.now() - lastPlay < 60000 && !q.has("test")) return;
     playing = true; lastPlay = Date.now();
     await show(card('<img class="icon" src="logo.webp" alt="Simgasm">', "logo"), 1800);
-    const z = card('<div class="zoom"><img class="a" src="forged-1.webp" alt=""><img class="b" src="forged-4.webp" alt=""></div>');
+    const z = card('<div class="zoom"><div class="world"><img class="a" src="forged-1.webp" alt="">' +
+                   '<img class="b" src="forged-4.webp" alt=""></div></div>');
+    const stop = zoomShot(z);
     z.classList.add("in");
-    await wait(1300);
-    z.querySelector(".zoom").classList.add("go");
-    await wait(2300);
+    await wait(4300);
     z.classList.replace("in", "out");
     await wait(380);
+    stop();
     z.remove();
     for (const [r, cls] of RIGS) await show(card(`<img class="float" src="${r}.webp" alt="">`, cls), 1500);
     await show(card('<img class="mark" src="wordmark.webp" alt="Simgasm"><div class="code">10% OFF with code <b>GREMI10</b></div>' +
