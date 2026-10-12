@@ -64,7 +64,31 @@
         {
           "kind": "wet",
           "label": "Wet",
-          "placeholder": true
+          "setup": {
+            "front-wing": 50,
+            "rear-wing": 34,
+            "on-throttle": 80,
+            "off-throttle": 45,
+            "front-camber": -3.5,
+            "rear-camber": -2.0,
+            "front-toe": 0.0,
+            "rear-toe": 0.10000000149011612,
+            "front-suspension": 30,
+            "rear-suspension": 8,
+            "front-anti-roll-bar": 1,
+            "rear-anti-roll-bar": 6,
+            "front-suspension-height": 25,
+            "rear-suspension-height": 48,
+            "brake-pressure": 92,
+            "brake-bias": 58,
+            "front-left-tyre-pressure": 28.0,
+            "front-right-tyre-pressure": 28.0,
+            "rear-left-tyre-pressure": 24.5,
+            "rear-right-tyre-pressure": 24.5,
+            "is-valid": true
+          },
+          "file": "Race_Suzuka_2026_10_02_16_00_32.json",
+          "session": "Race"
         }
       ]
     }
