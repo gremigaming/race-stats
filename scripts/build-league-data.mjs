@@ -345,7 +345,7 @@ const setupCards = SETUP_TRACKS.map(([post]) => {
   if (slots.race) cards.push({ kind: "race", label: bothDry ? "Dry race" : "Dry", ...slots.race });
   if (slots.quali) cards.push({ kind: "quali", label: bothDry ? "Dry quali" : "Dry", ...slots.quali });
   if (!cards.length) cards.push({ kind: "dry", label: "Dry", placeholder: true });
-  if (slots.wet) cards.push({ kind: "wet", label: "Wet", ...slots.wet });
+  cards.push(slots.wet ? { kind: "wet", label: "Wet", ...slots.wet } : { kind: "wet", label: "Wet", placeholder: true });
   return { post, cards };
 });
 writeFileSync(join(OUT, "setups.json"), JSON.stringify({ tracks: setupCards }, null, 2));
