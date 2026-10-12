@@ -84,7 +84,7 @@
   const WORD = (q.get("word") || "simgasm").toLowerCase();
   // each with its own entrance, so the loop keeps moving
   const RIGS = [["rig-1", "from-right"], ["rig-2", "from-left"], ["rig-3", ""],
-                ["rig-4", "from-right"], ["rig-5", "from-left glow"]];
+                ["rig-4", "from-right"], ["rig-5", "from-left"]];
   const stage = document.getElementById("stage");
   const wait = ms => new Promise(r => setTimeout(r, ms));
   let playing = false, lastPlay = 0;
