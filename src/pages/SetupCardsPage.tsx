@@ -215,8 +215,8 @@ function OverviewColumn({
 /** The forum post's thumbnail: all three setups side by side, compact. */
 function SetupOverview({ track }: { track: SetupTrack }) {
   const real = track.cards.filter((c) => !c.placeholder && c.setup);
-  const race = real.find((c) => c.kind === "race") ?? real.find((c) => c.kind === "quali");
-  const quali = real.find((c) => c.kind === "quali" && c !== race);
+  const race = real.find((c) => c.kind === "race");
+  const quali = real.find((c) => c.kind === "quali");
   const wet = real.find((c) => c.kind === "wet");
   return (
     <section

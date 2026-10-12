@@ -278,7 +278,9 @@ console.log(`league data: ${files.length} session files`);
 // "Process incoming car setup data" ticked. Every save sorts into a dry race,
 // dry quali or wet setup; the newest save of a kind replaces the older one.
 // A setup fewer than SETUP_MIN_DIFF values away from a newer one is the same
-// setup, so it is dropped: one card stays the one and only setup.
+// setup, so it is dropped: one card stays the one and only setup, under the
+// kind it was last used as (a wet race's setup raced in the dry is the dry
+// race setup again).
 const SETUP_TRACKS = [
   // [Discord forum post name, track-id values in the saves], in calendar order
   ["Australia", ["Melbourne", "Australia"]],
@@ -315,6 +317,7 @@ const SETUP_KEYS = [
   "rear-left-tyre-pressure", "rear-right-tyre-pressure",
 ];
 const SETUP_MIN_DIFF = 3;
+const SETUP_QUALI_FROM = "20261012";
 const setupDiff = (a, b) => SETUP_KEYS.filter((k) => Math.abs((a[k] ?? 0) - (b[k] ?? 0)) > 1e-3).length;
 const WET_WEATHER = /rain|storm/i;
 const setupSlots = new Map(SETUP_TRACKS.map(([post]) => [post, {}]));
@@ -327,11 +330,11 @@ for (const name of [...files].reverse()) {
   const setup = me?.["car-setup"];
   if (!post || !setup?.["is-valid"] || SETUP_KEYS.every((k) => !setup[k])) continue;
   const wetTyres = (me["tyre-set-history"] ?? []).some((s) => /inter|wet/i.test(s["tyre-set-key"] ?? ""));
-  const kind = WET_WEATHER.test(info.weather ?? "") || wetTyres
-    ? "wet" : /qualifying/i.test(info["session-type"] ?? "") ? "quali" : "race";
+  // GreMi (2026-10-12): every setup used before then is a dry race setup,
+  // also in qualifying; only a wet race makes one a wet setup
+  const quali = /qualifying/i.test(info["session-type"] ?? "") && dateKey(name) >= SETUP_QUALI_FROM;
+  const kind = WET_WEATHER.test(info.weather ?? "") || wetTyres ? "wet" : quali ? "quali" : "race";
   const slots = setupSlots.get(post);
-  // The very same setup again keeps its first save, so the card stays put
-  if (slots[kind] && setupDiff(slots[kind].setup, setup) === 0) continue;
   for (const other of Object.keys(slots)) {
     if (other !== kind && setupDiff(slots[other].setup, setup) < SETUP_MIN_DIFF) delete slots[other];
   }
@@ -340,11 +343,10 @@ for (const name of [...files].reverse()) {
 }
 const setupCards = SETUP_TRACKS.map(([post]) => {
   const slots = setupSlots.get(post);
-  const bothDry = slots.race && slots.quali;
-  const cards = [];
-  if (slots.race) cards.push({ kind: "race", label: bothDry ? "Dry race" : "Dry", ...slots.race });
-  if (slots.quali) cards.push({ kind: "quali", label: bothDry ? "Dry quali" : "Dry", ...slots.quali });
-  if (!cards.length) cards.push({ kind: "dry", label: "Dry", placeholder: true });
+  const cards = [
+    slots.race ? { kind: "race", label: "Dry race", ...slots.race } : { kind: "race", label: "Dry race", placeholder: true },
+  ];
+  if (slots.quali) cards.push({ kind: "quali", label: "Dry quali", ...slots.quali });
   cards.push(slots.wet ? { kind: "wet", label: "Wet", ...slots.wet } : { kind: "wet", label: "Wet", placeholder: true });
   return { post, cards };
 });
