@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simgasm popup</title>
+<!--
+  OBS browser source for GreMi's Simgasm partnership.
+  Plays a short loop (logo, a few cockpits, logo with the discount code) every time
+  Race Control (gremi_bot) posts the Simgasm message in Twitch chat. It reads chat
+  anonymously, so it needs no login. Transparent background.
+
+  URL options:  ?test        play now and every 25 seconds (to place it in OBS)
+                ?every=30    also play on its own every 30 minutes
+                ?channel=gremi_gaming&bot=gremi_bot&word=simgasm
+  Suggested browser source size: 1920 x 1080 (it scales to any size).
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Montserrat:wght@600;800&display=swap" rel="stylesheet">
+<style>
+  :root { --yellow: #ffbf00; --ink: #0d0d10; }
+  html, body { margin: 0; height: 100%; background: transparent; overflow: hidden; }
+  #stage { position: fixed; inset: 0; display: grid; place-items: center; pointer-events: none; }
+  .card {
+    position: absolute; display: grid; justify-items: center; gap: 2vmin;
+    opacity: 0; transform: scale(.2) rotate(-8deg);
+  }
+  .card img { display: block; max-width: 60vmin; max-height: 52vmin; filter: drop-shadow(0 2vmin 3vmin rgba(0,0,0,.55)); }
+  .logo img { width: 26vmin; height: auto; }
+  .word {
+    font-family: Anton, Impact, sans-serif; font-size: 11vmin; letter-spacing: .6vmin;
+    color: var(--yellow); line-height: 1; text-shadow: 0 .6vmin 2vmin rgba(0,0,0,.6);
+  }
+  .code {
+    font-family: Montserrat, Arial, sans-serif; font-weight: 800; font-size: 4.6vmin;
+    background: var(--yellow); color: var(--ink); padding: 1.2vmin 3vmin; border-radius: 1.6vmin;
+    box-shadow: 0 1vmin 3vmin rgba(0,0,0,.5);
+  }
+  .code b { font-size: 6vmin; letter-spacing: .3vmin; }
+  .url {
+    font-family: Montserrat, Arial, sans-serif; font-weight: 600; font-size: 3.4vmin; color: #fff;
+    text-shadow: 0 .4vmin 1.4vmin rgba(0,0,0,.8);
+  }
+  .in  { animation: pop-in .55s cubic-bezier(.2, 1.6, .4, 1) forwards; }
+  .out { animation: pop-out .35s ease-in forwards; }
+  .card.in img.float { animation: float 1.8s ease-in-out infinite alternate; }
+  @keyframes pop-in  { from { opacity: 0; transform: scale(.2) rotate(-8deg); } to { opacity: 1; transform: scale(1) rotate(0); } }
+  @keyframes pop-out { from { opacity: 1; transform: scale(1); } to { opacity: 0; transform: scale(1.25) rotate(4deg); } }
+  @keyframes float   { from { transform: translateY(-.8vmin); } to { transform: translateY(.8vmin); } }
+  @media (prefers-reduced-motion: reduce) { .in, .out, .card.in img.float { animation-duration: .01s; } }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<script>
+(() => {
+  const q = new URLSearchParams(location.search);
+  const CHANNEL = (q.get("channel") || "gremi_gaming").toLowerCase();
+  const BOT = (q.get("bot") || "gremi_bot").toLowerCase();
+  const WORD = (q.get("word") || "simgasm").toLowerCase();
+  const RIGS = ["rig-1", "rig-2", "rig-3", "rig-4", "rig-5"];
+  const stage = document.getElementById("stage");
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+  let playing = false, lastPlay = 0;
+
+  // preload, so nothing pops in half-loaded
+  ["logo", ...RIGS].forEach(n => { const i = new Image(); i.src = n + ".webp"; });
+
+  function card(html, cls = "") {
+    const el = document.createElement("div");
+    el.className = "card " + cls;
+    el.innerHTML = html;
+    stage.appendChild(el);
+    return el;
+  }
+  async function show(el, ms) {
+    el.classList.add("in");
+    await wait(ms);
+    el.classList.replace("in", "out");
+    await wait(380);
+    el.remove();
+  }
+
+  async function play() {
+    if (playing || Date.now() - lastPlay < 60000 && !q.has("test")) return;
+    playing = true; lastPlay = Date.now();
+    await show(card('<img src="logo.webp" alt=""><div class="word">SIMGASM</div>', "logo"), 1800);
+    for (const r of RIGS) await show(card(`<img class="float" src="${r}.webp" alt="">`), 1500);
+    await show(card('<img src="logo.webp" alt=""><div class="code">10% OFF with code <b>GREMI10</b></div>' +
+                    '<div class="url">simgasm.com/gremi_gaming</div>', "logo"), 4000);
+    playing = false;
+  }
+
+  // Twitch chat, read-only and anonymous
+  function listen() {
+    const ws = new WebSocket("wss://irc-ws.chat.twitch.tv:443");
+    ws.onopen = () => {
+      ws.send("PASS SCHMOOZE");
+      ws.send("NICK justinfan" + Math.floor(10000 + Math.random() * 80000));
+      ws.send("JOIN #" + CHANNEL);
+    };
+    ws.onmessage = e => {
+      for (const line of e.data.split("\r\n")) {
+        if (line.startsWith("PING")) { ws.send("PONG :tmi.twitch.tv"); continue; }
+        const m = line.match(/^:([^!]+)![^ ]+ PRIVMSG #[^ ]+ :(.*)$/);
+        if (m && m[1].toLowerCase() === BOT && m[2].toLowerCase().includes(WORD)) play();
+      }
+    };
+    ws.onclose = () => setTimeout(listen, 5000);
+  }
+  listen();
+
+  if (q.has("test")) { play(); setInterval(play, 25000); }
+  const every = parseFloat(q.get("every"));
+  if (every > 0) setInterval(play, every * 60000);
+})();
+</script>
+</body>
+</html>
