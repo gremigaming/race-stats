@@ -6,7 +6,7 @@
 <title>Simgasm popup</title>
 <!--
   OBS browser source for GreMi's Simgasm partnership.
-  Plays a short loop (logo, a few cockpits, logo with the discount code) every time
+  Plays a short loop (the logo icon, a few cockpits, the full logo with the discount code) every time
   Race Control (gremi_bot) posts the Simgasm message in Twitch chat. It reads chat
   anonymously, so it needs no login. Transparent background.
 
@@ -27,6 +27,7 @@
     opacity: 0; transform: scale(.2) rotate(-8deg);
   }
   .card img { display: block; max-width: 60vmin; max-height: 52vmin; filter: drop-shadow(0 2vmin 3vmin rgba(0,0,0,.55)); }
+  .logo img.icon { width: 40vmin; max-width: 40vmin; max-height: 40vmin; height: auto; }
   .logo img.mark { width: 78vmin; max-width: 78vmin; height: auto; max-height: none; }
   .code {
     font-family: Montserrat, Arial, sans-serif; font-weight: 800; font-size: 4.6vmin;
@@ -61,7 +62,7 @@
   let playing = false, lastPlay = 0;
 
   // preload, so nothing pops in half-loaded
-  ["wordmark", ...RIGS].forEach(n => { const i = new Image(); i.src = n + ".webp"; });
+  ["logo", "wordmark", ...RIGS].forEach(n => { const i = new Image(); i.src = n + ".webp"; });
 
   function card(html, cls = "") {
     const el = document.createElement("div");
@@ -81,7 +82,7 @@
   async function play() {
     if (playing || Date.now() - lastPlay < 60000 && !q.has("test")) return;
     playing = true; lastPlay = Date.now();
-    await show(card('<img class="mark" src="wordmark.webp" alt="Simgasm">', "logo"), 1800);
+    await show(card('<img class="icon" src="logo.webp" alt="Simgasm">', "logo"), 1800);
     for (const r of RIGS) await show(card(`<img class="float" src="${r}.webp" alt="">`), 1500);
     await show(card('<img class="mark" src="wordmark.webp" alt="Simgasm"><div class="code">10% OFF with code <b>GREMI10</b></div>' +
                     '<div class="url">simgasm.com/gremi_gaming</div>', "logo"), 4000);
