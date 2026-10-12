@@ -73,7 +73,13 @@ for (const section of await page.$$("#setup-cards section")) {
   const hash = createHash("sha256").update(await section.innerText()).digest("hex").slice(0, 12);
   let track = setupTracks.find((t) => t.post === post);
   if (!track) setupTracks.push((track = { post, cards: [] }));
-  track.cards.push({ kind, picture: `${id}.png`, hash });
+  const extra = {};
+  for (const key of ["label", "date", "circuit"]) {
+    const value = await section.getAttribute(`data-${key}`);
+    if (value) extra[key] = value;
+  }
+  if (await section.getAttribute("data-placeholder")) extra.placeholder = true;
+  track.cards.push({ kind, picture: `${id}.png`, hash, ...extra });
 }
 writeFileSync(join(out, "setups.json"), JSON.stringify({ tracks: setupTracks }, null, 2));
 console.log(`discord setup cards: ${setupTracks.length} tracks`);

@@ -54,6 +54,9 @@ function SetupPicture({ track, card }: { track: SetupTrack; card: SetupCardData 
       id={setupCardId(track.post, card.kind)}
       data-post={track.post}
       data-kind={card.kind}
+      data-label={card.label}
+      data-date={card.placeholder ? "" : savedOn(card)}
+      data-placeholder={card.placeholder || !card.setup ? "1" : ""}
       className={cn(cardClass, "relative w-[680px] overflow-hidden p-6")}
     >
       {card.placeholder || !card.setup ? (
@@ -170,6 +173,7 @@ function SetupOverview({ track }: { track: SetupTrack }) {
       id={setupCardId(track.post, "overview")}
       data-post={track.post}
       data-kind="overview"
+      data-circuit={CIRCUITS[track.post] ?? ""}
       className={cn(cardClass, "flex h-[450px] w-[680px] flex-col p-6")}
     >
       <div className="mb-5 flex items-end justify-between">
