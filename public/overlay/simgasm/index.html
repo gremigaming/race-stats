@@ -7,12 +7,12 @@
 <!--
   OBS browser source for GreMi's Simgasm partnership.
   Plays a short loop (the logo icon, a few cockpits, the full logo with the discount code) every time
-  Race Control (gremi_bot) posts the Simgasm message in Twitch chat. It reads chat
+  Race Control (racecontroll) posts the Simgasm message in Twitch chat. It reads chat
   anonymously, so it needs no login. Transparent background.
 
   URL options:  ?test        play now and every 25 seconds (to place it in OBS)
                 ?every=30    also play on its own every 30 minutes
-                ?channel=gremi_gaming&bot=gremi_bot&word=simgasm
+                ?channel=gremi_gaming&bot=racecontroll&word=simgasm
   Suggested browser source size: 1920 x 1080 (it scales to any size).
 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -80,7 +80,7 @@
 (() => {
   const q = new URLSearchParams(location.search);
   const CHANNEL = (q.get("channel") || "gremi_gaming").toLowerCase();
-  const BOT = (q.get("bot") || "gremi_bot").toLowerCase();
+  const BOT = (q.get("bot") || "racecontroll").toLowerCase();
   const WORD = (q.get("word") || "simgasm").toLowerCase();
   // each with its own entrance, so the loop keeps moving
   const RIGS = [["rig-1", "from-right"], ["rig-2", "from-left"], ["rig-3", ""],
