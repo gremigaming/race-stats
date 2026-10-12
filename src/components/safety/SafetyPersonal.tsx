@@ -25,11 +25,11 @@ import {
   type SafetyData,
   type SafetyDriver,
   type SafetySession,
+  STAFF_URL,
 } from "../../league/safety";
 import { cn } from "../../utils/cn";
 import { toSlug } from "../../utils/parseFilename";
 import { sessionPath } from "../../utils/routes";
-import { ProtestForm } from "./ProtestForm";
 import { RankTile } from "./RankTile";
 
 const half = (n: number) => Math.floor(n * 2 + 0.5) / 2;
@@ -449,7 +449,6 @@ function StreamGroup({
 function SessionRow({ session }: { session: SafetySession }) {
   const { scopeKey } = useTelemetry();
   const [open, setOpen] = useState(false);
-  const [protest, setProtest] = useState<string | null>(null);
   const { quali, track, time } = parseSessionFile(session.file);
   const lost = session.items.filter((i) => i.pts < 0).length;
   return (
@@ -513,23 +512,19 @@ function SessionRow({ session }: { session: SafetySession }) {
                   </span>
                 )}
               </span>
-              {it.pts < 0 && it.id && it.staff == null && protest !== it.id && (
-                <button
-                  type="button"
-                  onClick={() => setProtest(it.id ?? null)}
+              {it.pts < 0 && it.id && it.staff == null && (
+                <a
+                  href={`${STAFF_URL}/protest?item=${encodeURIComponent(it.id)}`}
+                  target="_blank"
+                  rel="noopener"
                   title="Don't agree? Protest this incident"
                   aria-label="Protest this incident"
                   className="ml-auto shrink-0 rounded p-0.5 text-zinc-500 hover:bg-red-500/10 hover:text-red-300"
                 >
                   <Flag className="h-3.5 w-3.5" />
-                </button>
+                </a>
               )}
             </p>
-            {protest === it.id && it.id && (
-              <div className="mt-1.5 pl-[4.25rem]">
-                <ProtestForm item={it} onClose={() => setProtest(null)} />
-              </div>
-            )}
             </div>
           ))}
           <div className="flex items-center justify-between pt-1">
