@@ -194,6 +194,11 @@
   // Fires on Race Control's Simgasm message: from the bot account (by login, so ?bot= if it is
   // renamed), or from any mod or the broadcaster when the message has the code in it. GreMi can also
   // type !simgasm to fire it by hand.
+  // ?debug: a small line in the corner showing the chat connection and the last message seen
+  const dbg = q.has("debug") ? Object.assign(document.body.appendChild(document.createElement("div")), {
+    style: "position:fixed;left:8px;bottom:8px;font:14px monospace;color:#fff;background:#000a;padding:4px 8px;border-radius:4px",
+    textContent: "chat: connecting…" }) : null;
+  const note = t => { if (dbg) dbg.textContent = t; };
   function listen() {
     const ws = new WebSocket("wss://irc-ws.chat.twitch.tv:443");
     ws.onopen = () => {
@@ -206,15 +211,17 @@
       for (const line of e.data.split("\r\n")) {
         if (line.startsWith("PING")) { ws.send("PONG :tmi.twitch.tv"); continue; }
         const m = line.match(/^(?:@(\S+) )?:([^!]+)![^ ]+ PRIVMSG #[^ ]+ :(.*)$/);
+        if (line.includes(" 366 ")) note("chat: connected to #" + CHANNEL + ", waiting for a message");
         if (!m) continue;
         const tags = m[1] || "", who = m[2].toLowerCase(), text = m[3].toLowerCase();
         const badges = (tags.match(/(?:^|;)badges=([^;]*)/) || [])[1] || "";
         const boss = /broadcaster\//.test(badges), mod = boss || /moderator\//.test(badges);
         if ((who === BOT && text.includes(WORD)) || (mod && text.includes(WORD) && text.includes("gremi10"))
-            || (boss && text.trim() === "!simgasm")) play(true);
+            || (boss && text.trim() === "!simgasm")) { note("chat: popup fired by " + who); play(true); }
+        else note("chat: last message from " + who + " (" + (badges || "no badges") + ")");
       }
     };
-    ws.onclose = () => setTimeout(listen, 3000);
+    ws.onclose = () => { note("chat: disconnected, retrying"); setTimeout(listen, 3000); };
   }
   listen();
 
