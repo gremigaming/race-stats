@@ -36,6 +36,8 @@ jobs:
         run: node scripts/build-league-data.mjs
       - name: Work out the safety rating
         run: python3 scripts/safety_rating.py
+      - name: Rank the Discord award roles
+        run: python3 scripts/awards.py
       - name: Build
         env:
           VITE_BASE_PATH: /race-stats/
