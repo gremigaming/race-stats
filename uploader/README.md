@@ -14,3 +14,18 @@ Setup on the racing PC:
    asks for the token and offers to start with Windows.
 
 Settings live in `%APPDATA%\GreMiRaceUploader` (delete that folder to start over).
+
+## Clip uploader
+
+`ClipUploader.ps1` does the same for OBS clips: every new clip in your OBS clips
+folder goes to the private `clip-studio` repo, where new clips get scored and the
+best ones edited every night.
+
+1. Make a second token the same way, but with Repository access > Only select
+   repositories > `clip-studio`, and Contents > Read and write.
+2. Download `ClipUploader.ps1` and `Start Clip Uploader.bat` into the same folder.
+3. Double-click `Start Clip Uploader.bat`. The first run asks for the OBS clips
+   folder and the token, and offers to start with Windows. Clips already in the
+   folder are skipped; only new ones are sent.
+
+Settings live in `%APPDATA%\GreMiClipUploader`.
