@@ -58,6 +58,18 @@
       "reason": "Kicked from the lobby for dirty driving",
       "by": "GreMi",
       "at": "2026-10-11T19:45:00Z"
+    },
+    {
+      "id": "Race_Brazil_2026_10_14_19_56_22.json|0|contact|1|0",
+      "type": "incident",
+      "file": "Race_Brazil_2026_10_14_19_56_22.json",
+      "driver": "TTV/GreMi_Gaming",
+      "car": 0,
+      "pts": 0.0,
+      "was": -12.0,
+      "reason": "Protest accepted: Unsafe start, but only negative for him",
+      "by": "319544045435224067",
+      "at": "2026-10-14T21:32:25Z"
     }
   ]
 }
