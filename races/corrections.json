@@ -85,6 +85,21 @@
           "car": 5
         }
       ]
+    },
+    {
+      "id": "41e932d7e41f",
+      "type": "kick",
+      "reason": "Dirty driving",
+      "by": "319544045435224067",
+      "at": "2026-10-14T21:37:24Z",
+      "day": "2026-10-14",
+      "driver": "RobinGames21",
+      "cars": [
+        {
+          "file": "Race_Baku_2026_10_14_20_36_09.json",
+          "car": 16
+        }
+      ]
     }
   ]
 }
