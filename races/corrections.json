@@ -70,6 +70,21 @@
       "reason": "Protest accepted: Unsafe start, but only negative for him",
       "by": "319544045435224067",
       "at": "2026-10-14T21:32:25Z"
+    },
+    {
+      "id": "50c9d5796f42",
+      "type": "kick",
+      "reason": "Straight lining",
+      "by": "319544045435224067",
+      "at": "2026-10-14T21:37:03Z",
+      "day": "2026-10-14",
+      "driver": "thunder-of_war21",
+      "cars": [
+        {
+          "file": "Race_Baku_2026_10_14_20_36_09.json",
+          "car": 5
+        }
+      ]
     }
   ]
 }
