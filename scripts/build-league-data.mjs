@@ -177,6 +177,118 @@ function realName(name, data) {
   return `${m[1]}_${p.year}_${p.month}_${p.day}_${p.hour}_${p.minute}_${p.second}.json`;
 }
 
+// Hidden-name players (GreMi 2026-10-09): within one stream (sessions less
+// than 3 h apart), when a hidden car stops showing up and a named driver with
+// the same race number + nationality + platform shows up after it, they turned
+// their name on, so the hidden sessions get their name as if they were always
+// named. Never across streams, never the default combo (#2, Unspecified),
+// never when the combo is ambiguous. Every merge is listed in
+// league/merges.json for the staff page; an "unmerge" correction undoes one.
+const STREAM_GAP = 3 * 60 * 60 * 1000;
+const unmerged = new Set(changes.filter((c) => c.type === "unmerge").map((c) => c.merge));
+const fileTime = (name) => {
+  const k = dateKey(name);
+  return k ? Date.UTC(+k.slice(0, 4), +k.slice(4, 6) - 1, +k.slice(6, 8), +k.slice(8, 10), +k.slice(10, 12)) : 0;
+};
+function carsOf(data) {
+  return data["classification-data"].flatMap((d) => {
+    const p = d["participant-data"];
+    if (!p || p["ai-controlled"]) return [];
+    if (p["race-number"] === 2 && (p.nationality ?? "Unspecified") === "Unspecified") return [];
+    const hidden = p["show-online-names"] === false;
+    const name = renameDrivers(d["driver-name"] ?? "");
+    if (!hidden && (!name || / #\d+$/.test(name))) return [];
+    return [{ index: d.index, name, hidden, combo: `${p["race-number"]}|${p.nationality}|${p.platform}` }];
+  });
+}
+function findMerges(sessions) {
+  sessions.sort((a, b) => fileTime(a.name) - fileTime(b.name));
+  const streams = [];
+  for (const s of sessions) {
+    const last = streams.at(-1);
+    if (last && fileTime(s.name) - fileTime(last.at(-1).name) <= STREAM_GAP) last.push(s);
+    else streams.push([s]);
+  }
+  const merges = new Map(); // file -> Map(car index -> name)
+  const list = [];
+  for (const stream of streams) {
+    const combos = new Map();
+    stream.forEach((s, i) =>
+      s.cars.forEach((c) => {
+        if (!combos.has(c.combo)) combos.set(c.combo, []);
+        combos.get(c.combo).push({ ...c, i, file: s.name });
+      }),
+    );
+    for (const [combo, seen] of combos) {
+      const hidden = seen.filter((c) => c.hidden);
+      const named = seen.filter((c) => !c.hidden);
+      const names = new Set(named.map((c) => c.name.toLowerCase()));
+      if (!hidden.length || names.size !== 1) continue;
+      const perSession = new Map();
+      for (const c of seen) perSession.set(c.i, (perSession.get(c.i) ?? 0) + 1);
+      if ([...perSession.values()].some((n) => n > 1)) continue; // two of them in one session
+      if (Math.max(...hidden.map((c) => c.i)) > Math.min(...named.map((c) => c.i))) continue;
+      const to = named.at(-1).name;
+      const [number, nationality, platform] = combo.split("|");
+      const day = stream[0].name.match(/(\d{4})_(\d{2})_(\d{2})_\d{2}_\d{2}_\d{2}\.json$/).slice(1).join("-");
+      const id = `${day}|${to.toLowerCase()}`;
+      const entry = { id, day, name: to, car: `#${number} ${nationality} ${platform}`, hidden: [...new Set(hidden.map((c) => c.name))],
+        files: hidden.map((c) => c.file), off: unmerged.has(id) };
+      list.push(entry);
+      if (entry.off) continue;
+      for (const c of hidden) {
+        if (!merges.has(c.file)) merges.set(c.file, new Map());
+        merges.get(c.file).set(c.index, to);
+      }
+    }
+  }
+  return { merges, list };
+}
+// A merged car takes the driver's name everywhere in the file (results,
+// position history, overtakes, stints) and counts as a named driver.
+function mergeHidden(name, data, merged) {
+  const cars = merged.get(name);
+  if (!cars) return;
+  const names = new Map();
+  for (const d of data["classification-data"]) {
+    const to = cars.get(d.index);
+    if (!to) continue;
+    names.set(d["driver-name"], to);
+    const p = d["participant-data"];
+    if (p) {
+      p["show-online-names"] = true;
+      if (p.name) p.name = to;
+    }
+  }
+  const swap = (value) => {
+    if (Array.isArray(value)) return value.map(swap);
+    if (value && typeof value === "object") {
+      for (const k of Object.keys(value)) value[k] = swap(value[k]);
+      return value;
+    }
+    return typeof value === "string" && names.has(value) ? names.get(value) : value;
+  };
+  swap(data);
+}
+
+// First pass: who drove each session, for the hidden-name merges
+const readSave = (path) => {
+  try {
+    const data = JSON.parse(readFileSync(path, "utf8"));
+    return data && Array.isArray(data["classification-data"]) && data["session-info"] ? data : null;
+  } catch {
+    return null;
+  }
+};
+const firstPass = [];
+for (const path of walk(SRC)) {
+  const base = path.split(/[\\/]/).pop();
+  if (base === "aliases.json" || base === "corrections.json") continue;
+  const data = readSave(path);
+  if (data) firstPass.push({ name: realName(base, data), cars: carsOf(data) });
+}
+const { merges: merged, list: mergeList } = findMerges(firstPass);
+
 const seen = new Set();
 const files = [];
 for (const path of walk(SRC)) {
@@ -196,6 +308,7 @@ for (const path of walk(SRC)) {
   name = realName(name, data);
   if (seen.has(name)) continue;
   renameDrivers(data);
+  mergeHidden(name, data, merged);
   if (data["session-info"]) fixResults(name, data);
   kickCars(name, data);
   for (const d of data["classification-data"]) {
@@ -232,6 +345,8 @@ for (const backup of backups) {
   }
 }
 files.sort((a, b) => dateKey(b).localeCompare(dateKey(a)));
+writeFileSync(join(OUT, "merges.json"), JSON.stringify({ merges: mergeList }, null, 2));
+console.log(`hidden-name merges: ${mergeList.filter((m) => !m.off).length} (${mergeList.filter((m) => m.off).length} undone by staff)`);
 writeFileSync(join(OUT, "index.json"), JSON.stringify({ files, defaultDriver: DEFAULT_DRIVER }, null, 2));
 
 // Championship standings per month (the site's default "This month" view),
