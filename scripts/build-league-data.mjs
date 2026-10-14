@@ -466,3 +466,50 @@ const setupCards = SETUP_TRACKS.map(([post]) => {
 });
 writeFileSync(join(OUT, "setups.json"), JSON.stringify({ tracks: setupCards }, null, 2));
 console.log(`setups: ${setupCards.filter((t) => t.cards.some((c) => !c.placeholder)).length} tracks with a setup`);
+
+// A short text summary of the latest stream (races less than 3 h apart, like the
+// site's "stream" filter) plus this month's top 5, for Race Control's quick
+// Discord answers. The bot loads it once a day, only for stream-race questions,
+// so it stays small: hidden-name drivers are left out like everywhere else.
+const named = (d) => {
+  const shown = display(d["driver-name"] ?? "");
+  if (!shown || d["participant-data"]?.["show-online-names"] === false || /^\d+ #\d+$/.test(shown)) return null;
+  return shown.toLowerCase() === DEFAULT_DRIVER ? "GreMi" : shown;
+};
+const raceFiles = files.filter((f) => /^Race_/.test(f));
+const atOf = (f) => parseName(f)?.at ?? 0;
+const stream = [];
+for (const f of raceFiles) {
+  if (stream.length && atOf(stream[stream.length - 1]) - atOf(f) > 3 * 3600 * 1000) break;
+  stream.push(f);
+}
+const lines = [];
+if (stream.length) {
+  const day = new Date(atOf(stream[0])).toISOString().slice(0, 10);
+  lines.push(`Latest stream ${day}, top 3 per race:`);
+  for (const f of [...stream].reverse()) {
+    const data = JSON.parse(readFileSync(join(OUT, "sessions", f), "utf8"));
+    const rows = data["classification-data"].map((d) => {
+      const fc = d["final-classification"];
+      const ld = d["lap-data"] ?? {};
+      const status = fc ? fc["result-status"] ?? "" : ld["result-status"] ?? "";
+      const position = fc ? fc.position ?? null : ld["car-position"] > 0 ? ld["car-position"] : null;
+      return { name: named(d), status, position };
+    });
+    const finished = rows.filter((r) => finishedStatus(r.status) && r.position).sort((a, b) => a.position - b.position);
+    const podium = finished.slice(0, 3).map((r) => r.name ?? "hidden").join(", ");
+    const dnf = rows.filter((r) => OUT_STATUSES.includes(r.status)).map((r) => r.name ?? "hidden");
+    const fl = data.records?.fastest?.lap;
+    const flName = fl && rows[fl["driver-index"]]?.name;
+    const track = (data["session-info"]?.["track-id"] ?? parseName(f)?.event ?? "?").replace(/_/g, " ");
+    lines.push(`${track}: ${podium || "no result"}` +
+      (flName ? `; FL ${flName}` : "") +
+      (dnf.length ? `; DNF ${dnf.join(", ")}` : ""));
+  }
+}
+const month = Object.keys(standings).sort().pop();
+if (month) {
+  lines.push(`${month} standings: ` + standings[month].slice(0, 5)
+    .map((r) => `${named({ "driver-name": r.name })} ${r.points}`).join(", ") + " pts");
+}
+writeFileSync(join(OUT, "recent.txt"), lines.join("\n") + "\n");
