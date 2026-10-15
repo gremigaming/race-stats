@@ -100,6 +100,18 @@
           "car": 16
         }
       ]
+    },
+    {
+      "id": "Race_Mexico_2026_10_14_21_22_27.json|1|contact|5|0",
+      "type": "incident",
+      "reason": "Mclaren driver was a dirty driver who was trying to take out multiple cars",
+      "by": "452166434588590080",
+      "at": "2026-10-15T11:50:49Z",
+      "file": "Race_Mexico_2026_10_14_21_22_27.json",
+      "driver": "DDRK",
+      "car": 1,
+      "pts": 0.0,
+      "was": -1.5
     }
   ]
 }
