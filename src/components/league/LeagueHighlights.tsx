@@ -53,7 +53,7 @@ export function LeagueHighlights({ rows }: { rows: LeaderboardRow[] }) {
   if (iron)
     extra.push({ id: "iron", title: "Iron Man", icon: Repeat, accent: "sky", name: iron.name, value: String(iron.races), detail: `Most races driven · ${plural(iron.dnfs, "DNF")}` });
   return (
-    <div className="space-y-8">
+    <div id="league-highlights" className="space-y-8">
       <HighlightGrid
         title="Award roles"
         hint={`The Discord award roles · last ${awards?.streams.length ?? 5} streams · GreMi doesn't count`}

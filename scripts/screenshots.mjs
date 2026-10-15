@@ -55,8 +55,13 @@ await page.waitForTimeout(1500);
 await page.screenshot({ path: `${outDir}/leaderboard-month.jpg`, type: "jpeg", quality: 75 });
 await page.selectOption('select[aria-label="Time range"]', "all");
 await shoot("safety", "safety", true);
+await page.locator("#safety-highlights").screenshot({ path: `${outDir}/safety-highlights.jpg`, type: "jpeg", quality: 80 });
+await page.click('th:has-text("Races")');
+await page.waitForTimeout(500);
+await page.screenshot({ path: `${outDir}/safety-sorted.jpg`, type: "jpeg", quality: 75 });
 // sorted by a column, with the highlights below
 await shoot("leaderboard-full", "drivers", true);
+await page.locator("#league-highlights").screenshot({ path: `${outDir}/leaderboard-highlights.jpg`, type: "jpeg", quality: 80 });
 await page.click('th:has-text("Avg gain")');
 await page.waitForTimeout(500);
 await page.screenshot({ path: `${outDir}/leaderboard-sorted.jpg`, type: "jpeg", quality: 75 });

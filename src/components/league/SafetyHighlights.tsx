@@ -29,10 +29,12 @@ export function SafetyHighlights({ drivers }: { drivers: SafetyDriver[] }) {
     items.push({ id: "passes", title: "Clean Overtaker", icon: Swords, accent: "fuchsia", name: passes.name, value: `+${points(passes, "overtakes").toFixed(1)}`, detail: "Most SR from clean overtakes" });
   const role = awardHighlights(awards, ["clean"]).map((h) => ({ ...h, icon: ShieldPlus, accent: "amber" as const, detail: `${h.detail} · last ${awards?.streams.length ?? 5} streams` }));
   return (
+    <div id="safety-highlights">
     <HighlightGrid
       title="Highlights"
       hint="From every rated driver's races · GreMi doesn't count"
       items={[...items, ...role]}
     />
+    </div>
   );
 }
