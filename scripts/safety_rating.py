@@ -12,7 +12,7 @@ BASE = {"LOW": 0, "MEDIUM": 2, "HIGH": 4}
 NAME = {"LOW": "light", "MEDIUM": "medium", "HIGH": "heavy"}
 CAP = 25
 SESSIONS = os.path.join("public", "league", "sessions")  # written by build-league-data.mjs (aliases applied, backups dropped)
-nm_ = lambda n: n
+nm_ = lambda n: re.sub(r"\s+", " ", n).strip()  # same as the leaderboard: "conor\xa0\xa0racing1" is "conor racing1"
 stamp = lambda f: re.search(r"(\d{4}_\d\d_\d\d_\d\d_\d\d_\d\d)", f).group(1)
 
 # ---- history over every race file: race count per driver, best laps for pace ratios

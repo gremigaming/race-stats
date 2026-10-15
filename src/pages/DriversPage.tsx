@@ -1,7 +1,9 @@
 import { Trophy } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { cardClass } from "../components/Card";
+import { LeagueHighlights } from "../components/league/LeagueHighlights";
 import { SectionHeader } from "../components/ui/SectionHeader";
+import { SortHeader, sortRows, useSort } from "../components/ui/SortHeader";
 import {
   tableCellClass,
   tableClassLoose,
@@ -20,6 +22,20 @@ import { dashboardPath } from "../utils/routes";
 
 const EMBED_ROWS = 15;
 
+type SortKey =
+  | "pos"
+  | "name"
+  | "races"
+  | "points"
+  | "wins"
+  | "podiums"
+  | "poles"
+  | "fastestLaps"
+  | "avgFinish"
+  | "bestFinish"
+  | "avgGain"
+  | "dnfs";
+
 const fmt = (n: number | null, digits = 1) =>
   n == null ? "—" : n.toFixed(digits);
 
@@ -29,6 +45,7 @@ export function DriversPage() {
   const location = useLocation();
   // The Discord picture: same table, top 15, with the site address
   const embed = new URLSearchParams(location.search).has("embed");
+  const { sort, toggle } = useSort<SortKey>();
   if (!league) {
     return (
       <div className="flex h-full items-center justify-center text-zinc-500">
@@ -44,6 +61,11 @@ export function DriversPage() {
   const rangeLabel = league.filterLabel;
   const allRows = leaderboard(races);
   const rows = embed ? allRows.slice(0, EMBED_ROWS) : allRows;
+  const position = new Map(allRows.map((r, i) => [r.key, i]));
+  const sortedRows = sortRows(rows, sort, (r, k) =>
+    k === "pos" ? position.get(r.key) : k === "bestFinish" ? r.bestFinish || null : r[k],
+  );
+  const sortProps = { sort, toggle };
   const hidden = races.reduce(
     (n, r) =>
       n +
@@ -98,28 +120,23 @@ export function DriversPage() {
           <table className={tableClassLoose}>
             <thead className={tableHeadClass}>
               <tr>
-                <th className={tableCellClass({ align: "right" })}>#</th>
-                <th className={tableCellClass()}>Driver</th>
-                <th className={tableCellClass({ align: "right" })}>Races</th>
-                <th className={tableCellClass({ align: "right" })}>Points</th>
-                <th className={tableCellClass({ align: "right" })}>Wins</th>
-                <th className={tableCellClass({ align: "right" })}>Podiums</th>
-                <th className={tableCellClass({ align: "right" })}>Poles</th>
-                <th className={tableCellClass({ align: "right" })}>
-                  Fastest laps
-                </th>
-                <th className={tableCellClass({ align: "right" })}>
-                  Avg finish
-                </th>
-                <th className={tableCellClass({ align: "right" })}>Best</th>
-                <th className={tableCellClass({ align: "right" })}>
-                  Avg gain
-                </th>
-                <th className={tableCellClass({ align: "right" })}>DNF</th>
+                <SortHeader column="pos" firstDir="asc" {...sortProps}>#</SortHeader>
+                <SortHeader column="name" firstDir="asc" align="left" {...sortProps}>Driver</SortHeader>
+                <SortHeader column="races" {...sortProps}>Races</SortHeader>
+                <SortHeader column="points" {...sortProps}>Points</SortHeader>
+                <SortHeader column="wins" {...sortProps}>Wins</SortHeader>
+                <SortHeader column="podiums" {...sortProps}>Podiums</SortHeader>
+                <SortHeader column="poles" {...sortProps}>Poles</SortHeader>
+                <SortHeader column="fastestLaps" {...sortProps}>Fastest laps</SortHeader>
+                <SortHeader column="avgFinish" firstDir="asc" {...sortProps}>Avg finish</SortHeader>
+                <SortHeader column="bestFinish" firstDir="asc" {...sortProps}>Best</SortHeader>
+                <SortHeader column="avgGain" {...sortProps}>Avg gain</SortHeader>
+                <SortHeader column="dnfs" firstDir="asc" {...sortProps}>DNF</SortHeader>
               </tr>
             </thead>
             <tbody>
-              {rows.map((row, i) => {
+              {sortedRows.map((row) => {
+                const i = position.get(row.key) ?? 0;
                 const isSelected = !embed && row.key === league.selectedDriver;
                 return (
                   <tr
@@ -186,6 +203,8 @@ export function DriversPage() {
         )}
       </section>
       )}
+
+      {!embed && rows.length > 0 && <LeagueHighlights rows={allRows} />}
     </div>
   );
 }

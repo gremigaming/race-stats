@@ -349,6 +349,18 @@ writeFileSync(join(OUT, "merges.json"), JSON.stringify({ merges: mergeList }, nu
 console.log(`hidden-name merges: ${mergeList.filter((m) => !m.off).length} (${mergeList.filter((m) => m.off).length} undone by staff)`);
 writeFileSync(join(OUT, "index.json"), JSON.stringify({ files, defaultDriver: DEFAULT_DRIVER }, null, 2));
 
+// Every named driver in the published races, for the name pickers on the staff page
+const allNames = new Map();
+for (const name of files) {
+  const data = JSON.parse(readFileSync(join(OUT, "sessions", name), "utf8"));
+  for (const d of data["classification-data"]) {
+    const shown = (d["driver-name"] ?? "").replace(/[\s\u00a0]+/g, " ").trim();
+    if (!shown || d["participant-data"]?.["show-online-names"] === false || / #\d+$/.test(shown)) continue;
+    allNames.set(norm(shown), shown);
+  }
+}
+writeFileSync(join(OUT, "names.json"), JSON.stringify({ names: [...allNames.values()].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" })) }));
+
 // Championship standings per month (the site's default "This month" view),
 // for the live championship board the Discord bot keeps. Same sums as the
 // site's leaderboard: race sessions, named drivers, points as saved.

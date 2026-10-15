@@ -4,7 +4,9 @@ import { useSearchParams } from "react-router-dom";
 import { cardClass } from "../components/Card";
 import { RankLegend, RankTile } from "../components/safety/RankTile";
 import { changeClass, SafetyPersonal } from "../components/safety/SafetyPersonal";
+import { SafetyHighlights } from "../components/league/SafetyHighlights";
 import { SectionHeader } from "../components/ui/SectionHeader";
+import { SortHeader, sortRows, useSort } from "../components/ui/SortHeader";
 import { SegmentedControl } from "../components/ui/SegmentedControl";
 import {
   tableCellClass,
@@ -91,6 +93,7 @@ const HOW_IT_WORKS: { title: string; body: ReactNode }[] = [
 ];
 
 type Tab = "ranking" | "personal";
+type SortKey = "pos" | "rank" | "name" | "sr" | "change" | "races";
 
 export function SafetyPage() {
   const { league } = useTelemetry();
@@ -98,6 +101,7 @@ export function SafetyPage() {
   const highlightRef = useRef<HTMLTableRowElement>(null);
   // ?embed: the Discord picture, the full ranking with the site address
   const embed = params.has("embed");
+  const { sort, toggle } = useSort<SortKey>();
   const tab: Tab = !embed && params.get("tab") === "personal" ? "personal" : "ranking";
 
   useEffect(() => {
@@ -112,6 +116,10 @@ export function SafetyPage() {
     );
   }
   const rows = league.safetyData.drivers.filter((d) => !d.banned);
+  const sortedRows = sortRows(rows, sort, (d, k) =>
+    k === "pos" ? rows.indexOf(d) : k === "rank" ? d.sr : d[k],
+  );
+  const sortProps = { sort, toggle };
   const personalKey = params.get("driver") ?? league.selectedDriver;
   const personalIdx = rows.findIndex((d) => driverKey(d.name) === personalKey);
   const personal = personalIdx >= 0 ? rows[personalIdx] : undefined;
@@ -202,16 +210,17 @@ export function SafetyPage() {
             <table className={tableClassLoose}>
               <thead className={tableHeadClass}>
                 <tr>
-                  <th className={tableCellClass({ align: "right" })}>#</th>
-                  <th className={tableCellClass()}>Rank</th>
-                  <th className={tableCellClass()}>Driver</th>
-                  <th className={tableCellClass({ align: "right" })}>SR</th>
-                  <th className={tableCellClass({ align: "right" })}>Last stream</th>
-                  <th className={tableCellClass({ align: "right" })}>Races</th>
+                  <SortHeader column="pos" firstDir="asc" {...sortProps}>#</SortHeader>
+                  <SortHeader column="rank" align="left" {...sortProps}>Rank</SortHeader>
+                  <SortHeader column="name" firstDir="asc" align="left" {...sortProps}>Driver</SortHeader>
+                  <SortHeader column="sr" {...sortProps}>SR</SortHeader>
+                  <SortHeader column="change" {...sortProps}>Last stream</SortHeader>
+                  <SortHeader column="races" {...sortProps}>Races</SortHeader>
                 </tr>
               </thead>
               <tbody>
-                {rows.map((d, i) => {
+                {sortedRows.map((d) => {
+                  const i = rows.indexOf(d);
                   const key = driverKey(d.name);
                   const isMe = !embed && key === league.selectedDriver;
                   return (
@@ -264,6 +273,8 @@ export function SafetyPage() {
           <RankLegend className="mt-4" />
         </section>
       )}
+
+      {tab === "ranking" && !embed && <SafetyHighlights drivers={rows} />}
 
       {!embed && (
       <section className={cardClass}>
