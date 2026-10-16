@@ -7,6 +7,12 @@
 # First run asks for the save folder (found automatically when possible) and a
 # GitHub token. Both are stored in %APPDATA%\GreMiRaceUploader, the token
 # encrypted for this Windows account only.
+#
+# It also records your own car's detailed telemetry (inputs, speed, wheel slip,
+# suspension, tyre temps) with TelemetryRecorder.cs, which must sit next to this
+# script. Pits n' Giggles forwards the game's data to it: Settings > UDP
+# Forwarding > Target 1 = 127.0.0.1:20778. One file per session goes to the
+# "telemetry" release of gremigaming/race-stats.
 
 $ErrorActionPreference = "Stop"
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
@@ -17,6 +23,11 @@ $ConfigDir = Join-Path $env:APPDATA "GreMiRaceUploader"
 $ConfigFile = Join-Path $ConfigDir "config.json"
 $DoneFile = Join-Path $ConfigDir "uploaded.txt"
 $CheckEverySeconds = 20
+$TelemetryPort = 20778
+$TelemetryDir = Join-Path $ConfigDir "telemetry"
+$TelemetrySentDir = Join-Path $TelemetryDir "sent"
+$TelemetryTag = "telemetry"
+$KeepSentDays = 30
 
 function Say($text, $color = "Gray") {
     Write-Host ("[{0}] {1}" -f (Get-Date -Format "HH:mm:ss"), $text) -ForegroundColor $color
@@ -132,6 +143,67 @@ function Send-Race($file, $token) {
     return "uploaded"
 }
 
+# ------------------------------------------------------------------ telemetry
+
+function Start-Recorder {
+    $source = Join-Path $PSScriptRoot "TelemetryRecorder.cs"
+    if (-not (Test-Path $source)) {
+        Say "TelemetryRecorder.cs isn't next to this script, so driving telemetry isn't recorded." Yellow
+        return $null
+    }
+    try {
+        if (-not ("GmTelemetryRecorder" -as [type])) { Add-Type -Path $source }
+        $recorder = New-Object GmTelemetryRecorder -ArgumentList $TelemetryDir, $TelemetryPort
+        $recorder.Start()
+        Say "Telemetry recorder listening on 127.0.0.1:$TelemetryPort (Pits n' Giggles UDP Forwarding target)." Cyan
+        return $recorder
+    } catch {
+        Say "Telemetry recorder couldn't start, race uploads still work ($($_.Exception.Message))" Yellow
+        return $null
+    }
+}
+
+$script:TelemetryRelease = $null
+
+function Get-TelemetryRelease($token) {
+    if ($script:TelemetryRelease) { return $script:TelemetryRelease }
+    try {
+        $script:TelemetryRelease = Invoke-RestMethod -Uri "$Api/releases/tags/$TelemetryTag" -Headers (Headers $token)
+    } catch {
+        if ((StatusOf $_) -ne 404) { throw }
+        $body = @{
+            tag_name         = $TelemetryTag
+            target_commitish = "main"
+            name             = "Driving telemetry"
+            body             = "GreMi's own car telemetry, one file per session, sent by uploader/RaceUploader.ps1. Read with scripts/telemetry/gmtel.py."
+        } | ConvertTo-Json
+        $script:TelemetryRelease = Invoke-RestMethod -Method Post -Uri "$Api/releases" -Headers (Headers $token) -Body $body -ContentType "application/json"
+    }
+    return $script:TelemetryRelease
+}
+
+function Send-Telemetry($file, $token) {
+    $release = Get-TelemetryRelease $token
+    $url = "https://uploads.github.com/repos/$Repo/releases/$($release.id)/assets?name=" + [Uri]::EscapeDataString($file.Name)
+    try {
+        Invoke-RestMethod -Method Post -Uri $url -Headers (Headers $token) -InFile $file.FullName -ContentType "application/gzip" | Out-Null
+        $result = "uploaded"
+    } catch {
+        if ((StatusOf $_) -ne 422) { throw }
+        $result = "already there"
+    }
+    New-Item -ItemType Directory -Force -Path $TelemetrySentDir | Out-Null
+    Move-Item -Force -Path $file.FullName -Destination (Join-Path $TelemetrySentDir $file.Name)
+    return $result
+}
+
+function Remove-OldTelemetry {
+    if (-not (Test-Path $TelemetrySentDir)) { return }
+    Get-ChildItem -Path $TelemetrySentDir -File |
+        Where-Object { $_.LastWriteTime -lt (Get-Date).AddDays(-$KeepSentDays) } |
+        Remove-Item -Force -ErrorAction SilentlyContinue
+}
+
 # ------------------------------------------------------------------ main
 
 $Host.UI.RawUI.WindowTitle = "GreMi Race Uploader"
@@ -141,6 +213,8 @@ $done = New-Object System.Collections.Generic.HashSet[string]
 if (Test-Path $DoneFile) { Get-Content $DoneFile | ForEach-Object { [void]$done.Add($_) } }
 Say "Watching $($settings.DataDir)" Cyan
 Say "New races go to https://gremigaming.github.io/race-stats/ a few minutes after they're saved."
+$recorder = Start-Recorder
+$recorderStatus = ""
 
 while ($true) {
     $files = Get-ChildItem -Path $settings.DataDir -Recurse -Filter "*.json" -ErrorAction SilentlyContinue |
@@ -161,6 +235,23 @@ while ($true) {
                 Say "$($file.Name): upload failed, trying again soon ($($_.Exception.Message))" Yellow
             }
         }
+    }
+
+    if ($recorder) {
+        if ($recorder.Status -ne $recorderStatus) {
+            $recorderStatus = $recorder.Status
+            Say "Telemetry: $recorderStatus"
+        }
+        $sessions = Get-ChildItem -Path $TelemetryDir -Filter "*.gmtel.gz" -File -ErrorAction SilentlyContinue | Sort-Object LastWriteTime
+        foreach ($file in $sessions) {
+            try {
+                $result = Send-Telemetry $file $settings.Token
+                Say "Telemetry $($file.Name) ($([math]::Round($file.Length / 1MB, 1)) MB): $result" Green
+            } catch {
+                Say "Telemetry $($file.Name): upload failed, trying again soon ($($_.Exception.Message))" Yellow
+            }
+        }
+        Remove-OldTelemetry
     }
     Start-Sleep -Seconds $CheckEverySeconds
 }

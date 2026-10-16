@@ -15,6 +15,24 @@ Setup on the racing PC:
 
 Settings live in `%APPDATA%\GreMiRaceUploader` (delete that folder to start over).
 
+### Driving telemetry
+
+The race uploader also records your own car's detailed telemetry: speed,
+throttle, brake, steering, gear, g-forces, wheel slip, suspension, camber,
+tyre and brake temperatures and your setup, for every frame the game sends.
+
+1. Download `TelemetryRecorder.cs` into the same folder as `RaceUploader.ps1`
+   (and get the newest `RaceUploader.ps1` too), then restart the uploader.
+   It should say "Telemetry recorder listening on 127.0.0.1:20778".
+2. In Pits n' Giggles: Settings > UDP Forwarding > Target 1 = `127.0.0.1:20778`,
+   save and restart Pits n' Giggles.
+3. In the game: Settings > Telemetry Settings > UDP Send Rate = 60Hz.
+
+Each session (practice, quali, race, time trial) becomes one file in
+`%APPDATA%\GreMiRaceUploader\telemetry` (about 10 MB per hour), which goes
+to the `telemetry` release of this repo. `scripts/telemetry/gmtel.py` turns a
+file into laps.
+
 ## Clip uploader
 
 `ClipUploader.ps1` does the same for OBS clips: every new clip in your OBS clips
