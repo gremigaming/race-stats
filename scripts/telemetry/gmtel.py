@@ -153,6 +153,7 @@ class Session:
         self.packet_format = None
         self._cur = None      # sample being filled for the current send tick
         self._ticks = []
+        self._after_finish = {}
         self._read()
 
     def _sample(self, h, pid):
@@ -211,7 +212,7 @@ class Session:
 
     def _file(self, s):
         """File one frame's sample under its lap, undoing what a flashback rewound."""
-        n = s["lap"]
+        n = s["lap"] + self._after_finish.get(s["lap"], 0)
         prev = self.laps.get(n - 1)
         if prev is not None and prev.get("time_ms") is None and s["last_lap_ms"]:
             prev["time_ms"] = s["last_lap_ms"]
@@ -221,6 +222,14 @@ class Session:
             self.laps[n]["time_ms"] = None
         entry = self.laps.setdefault(n, {"samples": [], "time_ms": None, "invalid": 0})
         samples = entry["samples"]
+        if samples and samples[-1]["lap_time_ms"] > s["lap_time_ms"] + 5000 \
+                and samples[-1]["lap_distance"] > s["lap_distance"] + 1000:
+            # crossed the finish line: the game keeps the lap number but restarts the clock
+            entry["time_ms"] = samples[-1]["lap_time_ms"]
+            entry["finish"] = True
+            self._after_finish[s["lap"]] = self._after_finish.get(s["lap"], 0) + 1
+            self._file(s)
+            return
         while samples and samples[-1]["lap_time_ms"] > s["lap_time_ms"]:
             samples.pop()
         samples.append(s)
