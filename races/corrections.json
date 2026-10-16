@@ -112,6 +112,18 @@
       "car": 1,
       "pts": 0.0,
       "was": -1.5
+    },
+    {
+      "id": "Race_Catalunya_2026_10_16_16_19_03.json|3|contact|1|0",
+      "type": "incident",
+      "reason": "Not his fault",
+      "by": "319544045435224067",
+      "at": "2026-10-16T21:50:50Z",
+      "file": "Race_Catalunya_2026_10_16_16_19_03.json",
+      "driver": "sprintstar-1",
+      "car": 3,
+      "pts": 0.0,
+      "was": -3.5
     }
   ]
 }
