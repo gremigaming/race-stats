@@ -34,9 +34,9 @@ public class GmTelemetryRecorder
         "Silverstone_Short", "Texas_Short", "Suzuka_Short", "Hanoi", "Zandvoort", "Imola",
         "Portimao", "Jeddah", "Miami", "Las_Vegas", "Losail", "t33", "t34", "t35", "t36", "t37",
         "t38", "Silverstone_Reverse", "Austria_Reverse", "Zandvoort_Reverse", "Madrid" };
-    static readonly string[] SessionTypes = {
+    static readonly string[] SessionTypes = { // packet format 2024 and later
         "Unknown", "P1", "P2", "P3", "Practice", "Q1", "Q2", "Q3", "Quali", "OSQ",
-        "Race", "Race2", "Race3", "TimeTrial" };
+        "SQ1", "SQ2", "SQ3", "SprintQuali", "OSSQ", "Race", "Race2", "Race3", "TimeTrial" };
 
     readonly string outDir;
     readonly int port;

@@ -48,6 +48,10 @@ TRACKS += [""] * (39 - len(TRACKS)) + ["Silverstone Reverse", "Austria Reverse",
                                         "Zandvoort Reverse", "Madrid"]
 SESSION_TYPES = ["Unknown", "P1", "P2", "P3", "Short practice", "Q1", "Q2", "Q3", "Short quali",
                  "One-shot quali", "Race", "Race 2", "Race 3", "Time trial"]
+SESSION_TYPES_24 = ["Unknown", "P1", "P2", "P3", "Short practice", "Q1", "Q2", "Q3", "Short quali",
+                    "One-shot quali", "Sprint shootout 1", "Sprint shootout 2", "Sprint shootout 3",
+                    "Short sprint shootout", "One-shot sprint shootout", "Race", "Race 2", "Race 3",
+                    "Time trial"]
 WHEELS = ("rl", "rr", "fl", "fr")
 
 
@@ -147,15 +151,20 @@ class Session:
         self.events = []      # (session time, code)
         self.laps = {}        # lap number -> {"samples": [...], "time_ms": .., "invalid": ..}
         self.packet_format = None
-        self._frames = {}     # frame id -> sample being filled
+        self._cur = None      # sample being filled for the current send tick
+        self._ticks = []
         self._read()
 
-    def _sample(self, h):
-        frame = h[8]
-        s = self._frames.get(frame)
-        if s is None:
-            s = self._frames[frame] = {"frame": frame, "t": round(h[7], 4)}
-        return s
+    def _sample(self, h, pid):
+        """The sample for this send tick. The game sends motion, lap data, telemetry etc. once
+        per tick, but their frame ids can differ, so a tick ends when a packet type repeats."""
+        cur = self._cur
+        if cur is None or pid in cur["_ids"]:
+            if cur is not None:
+                self._ticks.append(cur)
+            cur = self._cur = {"_ids": set(), "frame": h[9], "t": round(h[7], 4)}
+        cur["_ids"].add(pid)
+        return cur
 
     def _read(self):
         last_setup = None
@@ -165,15 +174,15 @@ class Session:
             fmt_key = 2026 if fmt >= 2026 else 2025
             try:
                 if pid == 0 and sliced:
-                    self._sample(h).update(parse_motion(fmt_key, body))
+                    self._sample(h, 0).update(parse_motion(fmt_key, body))
                 elif pid == 2 and sliced:
-                    self._lap_packet(h, parse_lap(body))
+                    self._sample(h, 2).update(parse_lap(body))
                 elif pid == 6 and sliced:
-                    self._sample(h).update(parse_telemetry(fmt_key, body))
+                    self._sample(h, 6).update(parse_telemetry(fmt_key, body))
                 elif pid == 13:
-                    self._sample(h).update(parse_motion_ex(body))
+                    self._sample(h, 13).update(parse_motion_ex(body))
                 elif pid == 16 and sliced:
-                    self._sample(h).update(parse_telemetry2(body))
+                    self._sample(h, 16).update(parse_telemetry2(body))
                 elif pid == 5 and sliced:
                     setup = parse_setup(body)
                     if setup != last_setup and setup["front_wing"] + setup["rear_wing"] > 0:
@@ -185,35 +194,37 @@ class Session:
                         self.events.append((round(h[7], 2), code))
                 elif pid == 1:
                     v = SESSION_START.unpack_from(body)
+                    types = SESSION_TYPES_24 if fmt >= 2024 else SESSION_TYPES
                     self.info = {"weather": v[0], "track_temp": v[1], "air_temp": v[2],
                                  "total_laps": v[3], "track_length": v[4],
-                                 "session_type": SESSION_TYPES[v[5]] if v[5] < len(SESSION_TYPES) else v[5],
+                                 "session_type": types[v[5]] if v[5] < len(types) else v[5],
                                  "track": TRACKS[v[6]] if 0 <= v[6] < len(TRACKS) else v[6]}
             except struct.error:
                 continue
+        if self._cur is not None:
+            self._ticks.append(self._cur)
+        for s in self._ticks:
+            del s["_ids"]
+            if "lap" in s and "speed" in s:
+                self._file(s)
+        self._ticks = []
 
-    def _lap_packet(self, h, lap):
-        """Lap data closes out a frame: file the frame's sample under its lap."""
-        s = self._sample(h)
-        s.update(lap)
-        self._frames.pop(h[8], None)
-        # older frames that never got lap data are dropped too
-        for f in [f for f in self._frames if f < h[8]]:
-            del self._frames[f]
-        n = lap["lap"]
+    def _file(self, s):
+        """File one frame's sample under its lap, undoing what a flashback rewound."""
+        n = s["lap"]
         prev = self.laps.get(n - 1)
-        if prev is not None and prev.get("time_ms") is None and lap["last_lap_ms"]:
-            prev["time_ms"] = lap["last_lap_ms"]
-        entry = self.laps.setdefault(n, {"samples": [], "time_ms": None, "invalid": 0})
-        samples = entry["samples"]
-        # a flashback rewinds the lap clock: drop what was undone
-        while samples and samples[-1]["lap_time_ms"] >= lap["lap_time_ms"]:
-            samples.pop()
-        samples.append(s)
-        entry["invalid"] = lap["lap_invalid"]
-        if n + 1 in self.laps:  # flashback into an earlier lap
+        if prev is not None and prev.get("time_ms") is None and s["last_lap_ms"]:
+            prev["time_ms"] = s["last_lap_ms"]
+        if any(k > n for k in self.laps):  # flashback into an earlier lap
             for later in [k for k in self.laps if k > n]:
                 del self.laps[later]
+            self.laps[n]["time_ms"] = None
+        entry = self.laps.setdefault(n, {"samples": [], "time_ms": None, "invalid": 0})
+        samples = entry["samples"]
+        while samples and samples[-1]["lap_time_ms"] > s["lap_time_ms"]:
+            samples.pop()
+        samples.append(s)
+        entry["invalid"] = s["lap_invalid"]
 
     def summary(self):
         rows = []
