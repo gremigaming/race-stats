@@ -136,6 +136,18 @@
       "reason": "Protest accepted: Unfair penalty, removed",
       "by": "319544045435224067",
       "at": "2026-10-18T19:23:51Z"
+    },
+    {
+      "id": "Race_Montreal_2026_10_18_19_41_55.json|2|contact|3|0",
+      "type": "incident",
+      "file": "Race_Montreal_2026_10_18_19_41_55.json",
+      "driver": "Stepino81",
+      "car": 2,
+      "pts": 0.0,
+      "was": -2.0,
+      "reason": "Protest accepted: Agreed",
+      "by": "319544045435224067",
+      "at": "2026-10-18T19:30:31Z"
     }
   ]
 }
