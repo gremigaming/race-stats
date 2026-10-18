@@ -41,6 +41,7 @@ const open = async (p, track, kind) => {
   await p.goto(`${base}${scope}/setups`);
   await p.waitForTimeout(3000);
 };
+await page.goto(`${base}${scope}/drivers`); // a real page load, like coming back from Discord
 await page.goto(`${base}${scope}/setups#setup-key=${encodeURIComponent(process.env.SETUP_KEY)}`);
 await page.waitForTimeout(3000);
 await open(page, "Singapore", "race");
