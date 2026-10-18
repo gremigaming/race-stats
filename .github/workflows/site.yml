@@ -38,16 +38,30 @@ jobs:
         run: python3 scripts/safety_rating.py
       - name: Rank the Discord award roles
         run: python3 scripts/awards.py
+      # GreMi's Setup manager: advice from his telemetry, published only
+      # encrypted (the key comes from the staff server after his Discord login)
+      - uses: actions/cache@v4
+        with:
+          path: /tmp/telemetry-cache
+          key: telemetry-${{ github.run_id }}
+          restore-keys: telemetry-
+      - name: Setup manager advice
+        run: python3 scripts/telemetry/setup_manager.py /tmp/telemetry-cache /tmp/setups.json || echo "setup advice failed, page shows the last build's data is missing"
       - name: Build
         env:
           VITE_BASE_PATH: /race-stats/
           VITE_APP_NAME: GreMi Gang Race Stats
           VITE_DISABLE_ANALYTICS: "true"
           VITE_SKIP_API: "true"
+          VITE_SETUP_MANAGER: "true"
         run: |
           pnpm build
           # GitHub Pages has no app routing: serve the app for every unknown path
           cp dist/index.html dist/404.html
+      - name: Encrypt the Setup manager advice
+        env:
+          SETUP_KEY: ${{ secrets.SETUP_KEY }}
+        run: if [ -f /tmp/setups.json ]; then node scripts/encrypt-setups.mjs /tmp/setups.json dist/league/setups.enc; fi
       # The leaderboard picture Race Control posts in Discord
       - name: Discord leaderboard picture
         run: |
