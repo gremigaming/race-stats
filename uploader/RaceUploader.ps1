@@ -125,6 +125,12 @@ function Headers($token) {
 }
 
 function Send-Race($file, $token) {
+    # Only multiplayer sessions go to the site; career and Grand Prix saves stay on this PC
+    $data = $null
+    try { $data = Get-Content -Raw -Path $file.FullName | ConvertFrom-Json } catch { }
+    if ($data -and $data.'session-info' -and $data.'session-info'.'network-game' -ne 1) {
+        return "skipped (not multiplayer)"
+    }
     $day = $file.Directory.Parent.Name
     $path = "races/$day/" + [Uri]::EscapeDataString($file.Name)
     $url = "$Api/contents/$path"

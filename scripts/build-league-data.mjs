@@ -305,6 +305,12 @@ for (const path of walk(SRC)) {
     console.warn(`skipped (not a Pits n' Giggles save): ${name}`);
     continue;
   }
+  // Only multiplayer sessions belong on the site; career, Grand Prix and time
+  // trial saves from the racing PC are skipped.
+  if (data["session-info"]["network-game"] !== 1) {
+    console.log(`skipped (not multiplayer): ${name}`);
+    continue;
+  }
   name = realName(name, data);
   if (seen.has(name)) continue;
   renameDrivers(data);
