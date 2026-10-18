@@ -124,6 +124,18 @@
       "car": 3,
       "pts": 0.0,
       "was": -3.5
+    },
+    {
+      "id": "Race_Suzuka_Just_in_case_2026_10_18_21_01_01.json|3|contact|1|0",
+      "type": "incident",
+      "file": "Race_Suzuka_Just_in_case_2026_10_18_21_01_01.json",
+      "driver": "Stepino81",
+      "car": 3,
+      "pts": 0.0,
+      "was": -7.0,
+      "reason": "Protest accepted: Unfair penalty, removed",
+      "by": "319544045435224067",
+      "at": "2026-10-18T19:23:51Z"
     }
   ]
 }
