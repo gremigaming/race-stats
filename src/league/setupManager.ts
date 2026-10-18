@@ -75,7 +75,7 @@ export function forgetKey() {
 export function takeLoginResult(): "ok" | "denied" | null {
   const hash = window.location.hash;
   let result: "ok" | "denied" | null = null;
-  const m = hash.match(/setup-key=([A-Za-z0-9+/=_-]+)/);
+  const m = hash.match(/setup-key=([^&]+)/);
   if (m) {
     try {
       localStorage.setItem(KEY_STORAGE, decodeURIComponent(m[1]));
