@@ -184,6 +184,18 @@
       "car": 4,
       "pts": 0.0,
       "was": -2.0
+    },
+    {
+      "id": "Race_Austria_2026_10_14_19_39_47.json|4|contact|1|0",
+      "type": "incident",
+      "reason": "Not his fault",
+      "by": "319544045435224067",
+      "at": "2026-10-18T20:27:28Z",
+      "file": "Race_Austria_2026_10_14_19_39_47.json",
+      "driver": "Stepino81",
+      "car": 4,
+      "pts": 0.0,
+      "was": -2.0
     }
   ]
 }
