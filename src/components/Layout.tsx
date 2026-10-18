@@ -10,6 +10,7 @@ import {
   ShieldCheck,
   Swords,
   Trophy,
+  Wrench,
   X,
   type LucideIcon,
 } from "lucide-react";
@@ -22,6 +23,7 @@ import {
   SIDEBAR_WIDTH_STORAGE_KEY,
 } from "../constants/storage";
 import { useTelemetry } from "../context/TelemetryContext";
+import { SETUP_MANAGER_ON } from "../league/setupManager";
 import {
   areSessionFiltersDefault,
   useSessionFilters,
@@ -262,6 +264,14 @@ export function Layout() {
               icon={Swords}
               label="Head to head"
             />
+            {SETUP_MANAGER_ON && (
+              <MenuLink
+                to={`/${scopeKey}/setups`}
+                active={section === "setups"}
+                icon={Wrench}
+                label="Setup manager"
+              />
+            )}
           </nav>
         ) : (
           <SessionList />

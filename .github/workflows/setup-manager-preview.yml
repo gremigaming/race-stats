@@ -1,0 +1,66 @@
+name: Setup manager preview
+
+# Builds the site with the Setup manager switched on and saves screenshots of
+# it, encrypted, in previews/, without publishing anything. The site build uses
+# a throwaway key, so nothing readable is left behind.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: setup-manager-preview
+  cancel-in-progress: true
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: node scripts/build-league-data.mjs
+      - run: python3 scripts/safety_rating.py
+      - run: python3 scripts/awards.py
+      - uses: actions/cache@v4
+        with:
+          path: /tmp/telemetry-cache
+          key: telemetry-${{ github.run_id }}
+          restore-keys: telemetry-
+      - name: Setup advice
+        run: |
+          python3 scripts/telemetry/setup_manager.py /tmp/telemetry-cache /tmp/setups.json
+          echo "SETUP_KEY=$(head -c 32 /dev/urandom | base64)" >> "$GITHUB_ENV"
+      - name: Build
+        env:
+          VITE_BASE_PATH: /race-stats/
+          VITE_APP_NAME: GreMi Gang Race Stats
+          VITE_DISABLE_ANALYTICS: "true"
+          VITE_SKIP_API: "true"
+          VITE_SETUP_MANAGER: "true"
+        run: |
+          pnpm build
+          node scripts/encrypt-setups.mjs /tmp/setups.json dist/league/setups.enc
+      - name: Screenshots
+        run: |
+          mkdir -p /tmp/shots && cd /tmp/shots && npm init -y >/dev/null && npm i --silent playwright@1 && npx playwright install --with-deps chromium >/dev/null
+          node "$GITHUB_WORKSPACE/scripts/setup-manager-shots.mjs" "$GITHUB_WORKSPACE/dist" /tmp/sm-shots
+          # The screenshots show GreMi's setups, so they are only saved encrypted:
+          # a random password locks them, and only the holder of the private key
+          # for previews/setup-manager-key.pub.pem can unlock that password.
+          cd /tmp && tar czf sm-shots.tgz sm-shots
+          head -c 32 /dev/urandom | base64 > pass.txt
+          openssl enc -aes-256-cbc -pbkdf2 -salt -in sm-shots.tgz -out "$GITHUB_WORKSPACE/previews/setup-manager.tgz.enc" -pass file:pass.txt
+          openssl pkeyutl -encrypt -pubin -inkey "$GITHUB_WORKSPACE/previews/setup-manager-key.pub.pem" -pkeyopt rsa_padding_mode:oaep -in pass.txt -out "$GITHUB_WORKSPACE/previews/setup-manager.pass.enc"
+          cd "$GITHUB_WORKSPACE"
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add previews/setup-manager.tgz.enc previews/setup-manager.pass.enc
+          git commit -m "chore: Setup manager previews (encrypted) [skip ci]" && git pull --rebase origin main && git push || true

@@ -16,6 +16,8 @@ import { DriversPage } from "./pages/DriversPage";
 import { HeadToHeadPage } from "./pages/HeadToHeadPage";
 import { SafetyPage } from "./pages/SafetyPage";
 import { SetupCardsPage } from "./pages/SetupCardsPage";
+import { SetupManagerPage } from "./pages/SetupManagerPage";
+import { SETUP_MANAGER_ON } from "./league/setupManager";
 import { TelemetryProvider, useTelemetry } from "./context/TelemetryContext";
 import { ZipUploadScreen } from "./components/ZipUploadScreen";
 import { GlobalDropZone } from "./components/GlobalDropZone";
@@ -97,6 +99,16 @@ function AppRoutes() {
               </ScopedFormulaRoute>
             }
           />
+          {SETUP_MANAGER_ON && (
+            <Route
+              path=":formulaKey/setups"
+              element={
+                <ScopedFormulaRoute>
+                  <SetupManagerPage />
+                </ScopedFormulaRoute>
+              }
+            />
+          )}
           <Route
             path=":formulaKey/sessions/*"
             element={
