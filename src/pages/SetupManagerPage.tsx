@@ -270,8 +270,8 @@ function SetupManager({ data }: { data: SetupData }) {
   const advice = track.kinds[kind]!;
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[240px_minmax(0,1fr)]">
-      <nav aria-label="Tracks" className={cn(cardClass, "h-fit p-2")}>
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-[240px_minmax(0,1fr)]">
+      <nav aria-label="Tracks" className={cn(cardClass, "h-fit min-w-0 p-2")}>
         <div className="px-2.5 pb-2 pt-1.5">
           <Eyebrow>Tracks</Eyebrow>
         </div>
