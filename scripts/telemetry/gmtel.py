@@ -57,8 +57,18 @@ WHEELS = ("rl", "rr", "fl", "fr")
 
 def records(path):
     """Yield (header tuple, payload bytes after the header, is_slice) per record."""
+    # A file cut off by a PC shutdown ("_unfinished") has no gzip end: keep what's there
+    chunks = []
     with gzip.open(path, "rb") as f:
-        data = f.read()
+        try:
+            while True:
+                c = f.read(1 << 20)
+                if not c:
+                    break
+                chunks.append(c)
+        except (EOFError, OSError):
+            pass
+    data = b"".join(chunks)
     if not data.startswith(MAGIC):
         raise ValueError(f"{path} is not a GreMi telemetry file")
     pos = len(MAGIC)
