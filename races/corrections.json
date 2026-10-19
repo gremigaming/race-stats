@@ -196,6 +196,18 @@
       "car": 4,
       "pts": 0.0,
       "was": -2.0
+    },
+    {
+      "id": "Race_Monza_2026_10_18_20_39_19.json|3|contact|2|0",
+      "type": "incident",
+      "reason": "GreMi got slowed down, no time to react",
+      "by": "319544045435224067",
+      "at": "2026-10-19T06:08:12Z",
+      "file": "Race_Monza_2026_10_18_20_39_19.json",
+      "driver": "Overfast-_",
+      "car": 3,
+      "pts": 0.0,
+      "was": -7.0
     }
   ]
 }
