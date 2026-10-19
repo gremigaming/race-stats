@@ -2,8 +2,8 @@
 
 Reads the session files build-league-data.mjs wrote to public/league/sessions
 and writes public/league/safety.json. The rules are in the GreMi Gang SR rules
-(start 50, penalty points per incident, bonus points for clean driving, last
-80 races weighted 100/75/50/25%, 10% of the part above 50 lost every stream).
+(penalty points per incident, bonus points for clean driving; the SR comes from
+your average points per race, older streams count 10% less each stream).
 """
 import json, glob, re, sys, os, collections, statistics, math
 AI = re.compile(r" #\d+$")  # AI and hidden names, e.g. "Ferrari '26 #28", "RB #46"
@@ -187,6 +187,10 @@ def analyse(path):
         if dm: k = int(dm // 25) * m; pts += k; k and parts.append(f"other car {dm}% damage +{k:g}")
         lost = places_lost(y, inc)
         slow, why, secs = slowed(y, inc)
+        if lost:  # places the other car lost count once per sector, like lost time (pile-ups)
+            pk = ("places", y, inc["lap"], inc["sector"])
+            if pk in time_used: parts.append("other's lost places already counted in this sector"); lost = 0
+            elif slow: time_used.add(pk)
         if not slow:
             if lost: parts.append(f"other lost {lost} place{'s' if lost > 1 else ''} but not slowed ({why}) +0")
             return pts
@@ -234,6 +238,12 @@ def analyse(path):
             if te <= o["timestamp"] <= te + 8 and {o["overtaker-index"], o["overtaken-index"]} == {a, b}:
                 if o["overtaker-index"] == behind: votes[behind] += 1; why[behind].append("was behind and passed right after")
                 break
+        # right behind the other car, with no position swap in the 3 s before (so not side
+        # by side as far as the data shows): one hint, it needs a second one to decide
+        if not real and behind is not None:
+            front = b if behind == a else a
+            swapped = any(t - 3 <= o["timestamp"] < t and {o["overtaker-index"], o["overtaken-index"]} == {a, b} for o in over)
+            if not swapped and warned != {front}: votes[behind] += 1; why[behind].append("was right behind")
         top = votes.most_common()
         culprit, n = (top[0] if top and (len(top) == 1 or top[0][1] > top[1][1]) else (None, 0))
         if culprit is not None and not (game == culprit or n >= 2): culprit = None
@@ -244,7 +254,7 @@ def analyse(path):
                 parts = [f"{NAME[inc['sev']]} contact, shared blame {base / 2:g}"]
                 ex = extras(x, y, inc, parts)
                 if not ex and game != x: parts.append("no harm done, game did not blame you: 0")
-                pts = base / 2 + ex if (ex or game == x) else 0
+                pts = base / 2 + ex / 2 if (ex or game == x) else 0  # shared: half the base and half the harm
                 lines[x] = (adjust(x, y, inc, pts, parts, game, repeat), parts)
         else:
             other = b if culprit == a else a
@@ -257,10 +267,9 @@ def analyse(path):
             if r: used.add(r["id"]); pts += 10; parts.append("other retired from the damage +10")
             if pts == base and game != culprit: parts.append("no harm done, game did not blame you: 0"); pts = 0
             lines[culprit] = (adjust(culprit, other, inc, pts, parts, game, repeat), parts)
-            p2 = [f"{NAME[inc['sev']]} contact, not to blame, half {base / 2:g}"]
-            hx = extras(other, culprit, inc, [])
-            if not hx and base: p2.append("no harm to the other car: 0")
-            lines[other] = (adjust(other, culprit, inc, base / 2 if hx else 0, p2, game, False), p2)
+            p2 = [f"{NAME[inc['sev']]} contact, not to blame 0"]
+            extras(other, culprit, inc, [])  # marks the time the culprit lost as counted
+            lines[other] = (0, p2)
         rows.append({"file": path.split("/")[-1].rsplit("_2026", 1)[0], **inc, "lines": {names[k]: v for k, v in lines.items()},
                      "vs": {names[a]: names[b], names[b]: names[a]}})
     other = []
@@ -288,6 +297,9 @@ def analyse(path):
                 if (c["final-classification"].get("num-laps") or 0) >= ((d.get("session-info") or {}).get("total-laps") or 99):
                     other.append((names[i], 0, "retired after crossing the finish line, not counted", "-", path.split("/")[-1].rsplit("_2026", 1)[0])); continue
                 r = next((r for r in rets if i in r["involved-drivers"]), None)
+                win = next((m["timestamp"] for m in ev if m["message-type"] == "RACE_WINNER"), None)
+                if r and win and r["timestamp"] >= win:
+                    other.append((names[i], 0, "left after the winner finished, not counted", "-", "")); continue
                 if r and "damage" in (r.get("reason") or "").lower():
                     hits = [x for x in rows if names[i] in x["lines"] and x["t"] <= r["timestamp"]]
                     if any(not x["lines"][names[i]][1][0].split(", ")[1].startswith("to blame") for x in hits):
@@ -310,14 +322,30 @@ def analyse(path):
                 would[n] = (0.5, f"clean qualifying, lap {ok[i] / pole * 100:.1f}% of pole")
                 if neg[n] == 0: pos_pts.append((n, *would[n]))
     else:
+        # finishing: +0.5 (+1 when the stream had no qualifying for this race); clean laps:
+        # +0.3 each (race total rounded to 0.5); a perfect race (every lap clean, no warnings): +1
         warned = {p["vehicle-index"] for p in pens}
+        badlap = collections.defaultdict(set)
+        for r in rows:
+            for nn, (p_, _) in r["lines"].items():
+                if p_ > 0: badlap[nn].add(r["lap"])
+        for nn, v, w, lap, _ in other:
+            if v and isinstance(lap, int): badlap[nn].add(lap)
+        tot = (d.get("session-info") or {}).get("total-laps") or 5
+        trk = os.path.basename(path)[5:].rsplit("_2026", 1)[0].replace("_Just_in_case", "").replace("_Manual", "")
+        had_q = any(stamp(q) < stamp(path) and (when(path) - when(q)).total_seconds() < 3600
+                    for q in glob.glob(os.path.join(SESSIONS, f"*Qualifying_{trk}_2026*")))
         for i in cls:
             n = names[i]
-            if not joke[i]:
-                would[n] = (1, "race with 0 penalty points (had a warning)") if i in warned else (2, "race with no warnings at all")
-            if neg[n] > 0: continue
-            if joke[i]: pos_pts.append((n, 0, "ran wrong tyres for the weather, no clean-race bonus")); continue
-            pos_pts.append((n, *would[n]))
+            if (cls[i].get("final-classification") or {}).get("result-status") != "FINISHED": continue
+            if any(v for nn, v, w, lap, _ in other if nn == n and not isinstance(lap, int)): continue  # disqualified
+            pos_pts.append((n, 0.5 if had_q else 1.0, "finished the race" + ("" if had_q else " (no qualifying this time)")))
+            if joke[i]: pos_pts.append((n, 0, "ran wrong tyres for the weather, no clean-lap points")); continue
+            clean = [L for L in range(1, tot + 1) if L not in badlap[n]]
+            perfect = len(clean) == tot and i not in warned
+            would[n] = (half(0.3 * tot) + (1 if i not in warned else 0), f"{tot} clean laps")
+            v = half(0.3 * len(clean)) + (1 if perfect else 0)
+            if v: pos_pts.append((n, v, f"{len(clean)} clean lap{'s' if len(clean) != 1 else ''} (+0.3 each)" + (", perfect race +1" if perfect else "")))
         # close racing: within 0.5 s of another car at both ends of a clean sector
         T = {}
         for j, c in cls.items():
@@ -329,15 +357,17 @@ def analyse(path):
             T[j] = m
         dirty = {(i_, m_["lap-number"], m_.get("sector")) for m_ in cols + pens for i_ in m_["involved-drivers"]}
         for i in cls:
-            n_ok = 0; with_ = collections.Counter()
+            n_ok = 0; n_half = 0; with_ = collections.Counter()
             for (L, s), t0 in T[i].items():
                 end = (L, s + 1) if s < 2 else (L + 1, 0)
                 if end not in T[i] or (L, s) == (1, 0) or (i, L, f"S{s + 1}") in dirty or L in joke[i]: continue
                 near = [o for o in T if o != i and (L, s) in T[o] and end in T[o] and abs(T[o][(L, s)] - t0) <= 500 and abs(T[o][end] - T[i][end]) <= 500]
+                near1 = [o for o in T if o != i and (L, s) in T[o] and end in T[o] and abs(T[o][(L, s)] - t0) <= 1000 and abs(T[o][end] - T[i][end]) <= 1000]
+                if not near and near1: n_ok += 0.5; n_half += 1; continue  # within 1 s: half
                 if near:
                     n_ok += 1; with_[names[min(near, key=lambda o: abs(T[o][end] - T[i][end]))]] += 0.2
             cp = round(n_ok * 0.2 * 2) / 2
-            if cp: pos_pts.append((names[i], cp, f"close racing: {n_ok} clean sectors within 0.5 s of another car ({n_ok * 0.2:.1f}, rounded)", dict(with_)))
+            if cp: pos_pts.append((names[i], cp, f"close racing: {n_ok - n_half / 2:g} clean sectors within 0.5 s and {n_half} within 1 s of another car ({n_ok * 0.2:.1f}, rounded)", dict(with_)))
         timeline = sorted([(c["timestamp"], "c", c["involved-drivers"]) for c in cols] +
                           [(o["timestamp"], "o", o) for o in over if not o.get("overtaker-pitting") and not o.get("overtaken-pitting")], key=lambda x: x[0])
         for i in cls:
@@ -355,7 +385,6 @@ def analyse(path):
 
 FIRST_DAY = "2026_10_07"  # older files have no blame data
 STREAM_GAP_H = 3
-WINDOW = [(20, 1.0), (40, 0.75), (60, 0.5), (80, 0.25)]
 half = lambda x: math.floor(x * 2 + 0.5) / 2
 when = lambda f: __import__("datetime").datetime.strptime(stamp(f), "%Y_%m_%d_%H_%M_%S")
 short = lambda f: os.path.basename(f).rsplit("_2026", 1)[0].replace("_Just_in_case", "")
@@ -399,35 +428,58 @@ def apply_staff(name, items, car, is_race, would):
                          "cat": "staff", "id": c["id"], "staff": c.get("reason") or ""})
     # a driver cleared by staff still gets the clean race or qualifying bonus
     for n, its in items.items():
-        if not any(i.get("staff") for i in its) or any(i["cat"] in ("clean", "quali") for i in its): continue
+        if not any(i.get("staff") for i in its) or any(i["cat"] == "quali" for i in its): continue
         if any(i["pts"] < 0 for i in its) or n not in would: continue
         v, what = would[n]
+        its[:] = [i for i in its if i["cat"] != "clean"]  # the full clean-lap points replace the partial ones
         its.append({"pts": v, "text": what[0].upper() + what[1:] + " (after a staff decision)", "lap": None,
                     "cat": "clean" if is_race else "quali", "id": f"{name}|{car.get(n, '?')}|bonus|0|0"})
 
 entries = collections.defaultdict(list)   # driver -> [{file, race, items}]
 close_hist = collections.defaultdict(list)
-tax = collections.defaultdict(float)
 history = collections.defaultdict(list)    # driver -> [{stream, date, sr}]
 flags = collections.defaultdict(list)
 
-def weights(n):
-    out = []; races_after = 0
-    for e in reversed(entries[n]):
-        out.append(next((wt for lim, wt in WINDOW if races_after < lim), 0.0))
-        if e["race"]: races_after += 1
-    return out[::-1]
+# ---- SR from the average points per race (rules agreed with GreMi on 19 Oct 2026)
+AGE = 0.9          # every stream, older races count 10% less
+EMPTY_UP = 5       # a positive average counts as if you had 5 extra empty races
+EMPTY_DOWN = 3     # a negative one as if you had 3
+RECENT = 10        # penalty points in your last 10 races count 1.5x
+RACE_FLOOR = -6    # one race counts for at most -6
+STING = 0.25       # a quarter of what you lose also comes straight off, gone after 4 races
+FORM_ABOVE, FORM_MARGIN = 70, 15
+SCALE = [(0, 50), (1, 60), (2.3, 76), (3.0, 90), (3.8, 100)]  # average per race -> SR; below 0: 10 per point
 
-def weighted(n):
-    es = entries[n]; total = 0.0; races_after = 0
-    for e in reversed(es):
-        w = next((wt for lim, wt in WINDOW if races_after < lim), 0.0)
-        total += w * sum(i["pts"] for i in e["items"])
-        if e["race"]: races_after += 1
-    return total
+def scale(a):
+    if a <= 0: return 50 + 10 * a
+    for (x0, y0), (x1, y1) in zip(SCALE, SCALE[1:]):
+        if a <= x1: return y0 + (y1 - y0) * (a - x0) / (x1 - x0)
+    return 100.0
 
-def current(n):
-    return min(100.0, half(50 + weighted(n) - tax[n]))
+def session_net(e, recent):
+    pos = sum(i["pts"] for i in e["items"] if i["pts"] > 0); neg = sum(i["pts"] for i in e["items"] if i["pts"] < 0)
+    return max(pos + neg * (1.5 if recent else 1), RACE_FLOOR), -neg
+
+def weights(n, now):
+    return [AGE ** (now - e["stream"]) for e in entries[n]]
+
+def current(n, now):
+    """SR of driver n at the end of stream `now`."""
+    es = entries[n]; total = races_w = sting = 0.0; races_after = 0
+    for e, w in zip(reversed(es), reversed(weights(n, now))):
+        net, loss = session_net(e, races_after < RECENT)
+        sting += STING * min(loss, -RACE_FLOOR) * max(0.0, 1 - races_after / 4)
+        total += w * net
+        if e["race"]: races_w += w; races_after += 1
+    if not races_w: return 50.0
+    sr = scale(total / (races_w + (EMPTY_UP if total > 0 else EMPTY_DOWN))) - sting
+    if sr > FORM_ABOVE:  # you can be at most 15 above what your latest stream alone gives
+        last = max(e["stream"] for e in es)
+        ls = [e for e in es if e["stream"] == last]; nr = sum(e["race"] for e in ls)
+        if nr >= 2:
+            form = scale(sum(session_net(e, True)[0] for e in ls) / nr)
+            sr = min(sr, max(float(FORM_ABOVE), half(form + FORM_MARGIN)))
+    return min(100.0, half(sr))
 
 for si, stream in enumerate(streams):
     seen_stream = set(); stream_loss = collections.defaultdict(float)
@@ -454,7 +506,7 @@ for si, stream in enumerate(streams):
                 if rep and v > 1.5:
                     v = 1.5; what += f"; capped at 1.5 (close with {', '.join(rep)} in 3 of the last 5 races)"
                     flags[n].append(f"{short(f)}: close racing capped, often close with {', '.join(rep)}")
-            cat = ("close" if "close racing" in what else "overtakes" if "overtakes" in what
+            cat = ("finish" if what.startswith("finished") else "close" if "close racing" in what else "overtakes" if "overtakes" in what
                    else "quali" if "qualifying" in what else "clean")
             items[n].append({"pts": v, "text": what[0].upper() + what[1:], "lap": None, "cat": cat})
         for r in rows:
@@ -497,25 +549,21 @@ for si, stream in enumerate(streams):
             entries[n].append({"file": name, "race": is_race, "items": items[n], "stream": si})
     for n, loss in stream_loss.items():
         if loss >= 40: flags[n].append(f"Stream of {when(stream[0]):%d %b %Y}: lost {loss:g} (kick line 40)")
-    # end of the stream: everyone above 50 loses 10% of the part above 50
     for n in entries:
-        excess = 50 + weighted(n) - tax[n] - 50
-        if excess > 0: tax[n] += half(excess * 0.1)
-        tax[n] = min(tax[n], max(0.0, weighted(n)))
-        history[n].append({"stream": si, "date": when(stream[0]).strftime("%Y-%m-%d"), "sr": current(n), "raced": n in stream_loss})
+        history[n].append({"stream": si, "date": when(stream[0]).strftime("%Y-%m-%d"), "sr": current(n, si), "raced": n in stream_loss})
 
 drivers = []
 for n, es in entries.items():
-    sr = current(n); h = history[n]
+    now = len(streams) - 1; sr = current(n, now); h = history[n]
     races = sum(e["race"] for e in es)
     prev = h[-2]["sr"] if len(h) > 1 else 50.0
     drivers.append({
         "name": n, "sr": sr, "change": half(sr - prev), "races": races,
-        "provisional": races < 3, "banned": sr < 0, "aging": half(tax[n]),
+        "provisional": races < 3, "banned": sr < 0,
         "history": [x for x in h],
         "sessions": [{"file": e["file"], "race": e["race"], "stream": e["stream"], "weight": w,
                       "total": half(sum(i["pts"] for i in e["items"])), "items": e["items"]}
-                     for e, w in zip(es, weights(n))],
+                     for e, w in zip(es, weights(n, now))],
         "flags": flags[n],
     })
 drivers.sort(key=lambda x: (-x["sr"], x["name"].lower()))

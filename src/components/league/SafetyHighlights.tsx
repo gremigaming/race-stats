@@ -1,11 +1,9 @@
 import { ArrowUpRight, ShieldCheck, ShieldPlus, Sparkles, Swords, Users } from "lucide-react";
-import { rankOf, type SafetyCategory, type SafetyDriver } from "../../league/safety";
+import { isCleanRace, rankOf, type SafetyCategory, type SafetyDriver } from "../../league/safety";
 import { best, HighlightGrid, useAwards, type Highlight } from "./HighlightCard";
 import { awardHighlights } from "./LeagueHighlights";
 
 const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
-const count = (d: SafetyDriver, cat: SafetyCategory) =>
-  d.sessions.filter((s) => s.items.some((i) => i.cat === cat && i.pts > 0)).length;
 const points = (d: SafetyDriver, cat: SafetyCategory) =>
   d.sessions.reduce((n, s) => n + s.items.filter((i) => i.cat === cat && i.pts > 0).reduce((m, i) => m + i.pts, 0), 0);
 
@@ -18,9 +16,10 @@ export function SafetyHighlights({ drivers }: { drivers: SafetyDriver[] }) {
   const climb = best(drivers, (d) => d.change);
   if (climb)
     items.push({ id: "climb", title: "Biggest Climber", icon: ArrowUpRight, accent: "lime", name: climb.name, value: `+${climb.change.toFixed(1)}`, detail: "Most SR gained in the last stream" });
-  const clean = best(drivers, (d) => count(d, "clean"));
+  const cleanRaces = (d: SafetyDriver) => d.sessions.filter(isCleanRace).length;
+  const clean = best(drivers, cleanRaces);
   if (clean)
-    items.push({ id: "clean", title: "Most Clean Races", icon: Sparkles, accent: "sky", name: clean.name, value: String(count(clean, "clean")), detail: `Clean races out of ${plural(clean.races, "race")}` });
+    items.push({ id: "clean", title: "Most Clean Races", icon: Sparkles, accent: "sky", name: clean.name, value: String(cleanRaces(clean)), detail: `Clean races out of ${plural(clean.races, "race")}` });
   const close = best(drivers, (d) => points(d, "close"));
   if (close)
     items.push({ id: "close", title: "Wheel to Wheel", icon: Users, accent: "violet", name: close.name, value: `+${points(close, "close").toFixed(1)}`, detail: "Most SR from close racing without contact" });

@@ -45,33 +45,46 @@ const HOW_IT_WORKS: { title: string; body: ReactNode }[] = [
     ),
   },
   {
-    title: "How you lose SR",
+    title: "How you lose points",
     body: li([
       "Causing contact. Light touches cost nothing on their own; medium and heavy hits do, and more when the other driver loses places, time or gets damage. One incident costs at most 25.",
-      "Shared contact that harms someone costs a bit as well. Small touches where nobody loses anything are free, unless the game blames you.",
+      "Who is to blame: a game penalty decides it, or two signs that agree (only you got a warning, only your wing broke, you were right behind the other car, or you passed right after). Otherwise the blame is shared.",
+      "Not to blame costs nothing. Shared blame costs half, and you only pay for half of the harm to the other car. Places someone loses in a pile-up count once, not once per car that touched them.",
       "Hitting a car that was already damaged costs half, and contacts with a driver in their first 3 races don't count against you, unless the game blames you.",
       "Track-limit time penalties (1, extreme cuts 2), drive-throughs (4), stop-go's (6) and disqualifications (10). Warnings and invalid qualifying laps cost nothing.",
-      "Quitting a race (1). Retiring because someone else wrecked you, or after you already finished, doesn't count.",
+      "Quitting a race (1). Retiring because someone else wrecked you, after the winner finished, or after you already finished doesn't count.",
       "On the wrong tyres for the weather, game penalties that don't involve anyone else are free, but contacts still count.",
     ]),
   },
   {
-    title: "How you gain SR",
+    title: "How you gain points",
     body: li([
-      "A clean race: +2 with no warnings at all, +1 with 0 penalty points.",
+      "Finishing a race: +0.5, or +1 when there was no qualifying for that race.",
+      "Every clean lap: +0.3 (the race total is rounded to 0.5). A perfect race, every lap clean and no warnings at all: +1 extra.",
       "A clean qualifying lap within 107% of pole: +0.5.",
       "Clean overtakes: +0.5 for every 3 passes in a row on different cars without contact, up to +1.5 per race.",
-      "Close racing: +0.2 for every sector you start and end within half a second of another car without an incident.",
+      "Close racing: +0.2 for every sector you start and end within half a second of another car without an incident, and +0.1 within a second.",
       "Your first race of a stream: +1, and +1 more if you share your full telemetry, because that lets us judge incidents better.",
     ]),
   },
   {
-    title: "Older races and staying on top",
-    body: li([
-      "Only your last 80 races count: the newest 20 in full, then 75%, 50% and 25%.",
-      `Above ${SR_START}, you lose 10% of the part above ${SR_START} after every stream, so 100 drops to 95 and 60 to 59. To stay at the top you have to keep driving clean.`,
-      `Below ${SR_START}, nothing changes while you're away, so you can't wait out your penalties.`,
-    ]),
+    title: "From points to SR",
+    body: (
+      <>
+        <p>
+          Your SR comes from your average points per race, so racing more doesn't push you up, racing
+          clean does. An average of 0 is {SR_START}, +1 is 60, +2.3 is 76, +3 is 90 (S) and +3.8 is
+          100 (S+). Below 0, every point of average costs 10 SR.
+        </p>
+        {li([
+          "New drivers start close to 50: a good average counts as if you had 5 extra empty races, a bad one as if you had 3. After a few races it's clear where you belong.",
+          "Penalty points from your last 10 races count 1.5 times, and one race counts for at most −6.",
+          "A quarter of what you lose in a race also comes straight off your SR, and that fades out over your next 4 races.",
+          "After every stream, all older races count 10% less. What you do now matters most, and if you stop racing your SR slowly moves back to 50.",
+          "Above 70, your SR can be at most 15 above what your latest stream alone would give you. One dirty stream costs you your S or S+ straight away (this rule never takes you below 70).",
+        ])}
+      </>
+    ),
   },
   {
     title: "Ranks",

@@ -10,6 +10,7 @@ export type SafetyCategory =
   | "contact"
   | "penalty"
   | "retirement"
+  | "finish"
   | "clean"
   | "quali"
   | "overtakes"
@@ -37,7 +38,7 @@ export interface SafetySession {
   race: boolean;
   /** Index into SafetyData.streams. */
   stream: number;
-  /** How much this session counts now (1, .75, .5 or .25; 0 when too old). */
+  /** How much this session counts now: 90% of that for every stream since. */
   weight: number;
   total: number;
   items: SafetyItem[];
@@ -51,8 +52,6 @@ export interface SafetyDriver {
   races: number;
   provisional: boolean;
   banned: boolean;
-  /** SR lost so far to the top rule (10% of the part above 50 per stream). */
-  aging?: number;
   history: { stream: number; date: string; sr: number; raced: boolean }[];
   sessions: SafetySession[];
   flags: string[];
@@ -91,6 +90,10 @@ export function rankOf(sr: number): SrRank {
   return SR_RANKS.find((r) => sr >= r.min) ?? SR_RANKS[SR_RANKS.length - 1];
 }
 
+/** A race you finished without losing a single point. */
+export const isCleanRace = (s: SafetySession) =>
+  s.race && s.items.some((i) => i.cat === "finish") && !s.items.some((i) => i.pts < 0);
+
 export function safetyByKey(data: SafetyData | null): Map<string, SafetyDriver> {
   return new Map((data?.drivers ?? []).map((d) => [driverKey(d.name), d]));
 }
@@ -102,7 +105,8 @@ export const SAFETY_CATEGORIES: { cat: SafetyCategory; label: string }[] = [
   { cat: "contact", label: "Contacts" },
   { cat: "penalty", label: "Penalties" },
   { cat: "retirement", label: "Retirements" },
-  { cat: "clean", label: "Clean races" },
+  { cat: "finish", label: "Finishing" },
+  { cat: "clean", label: "Clean laps" },
   { cat: "quali", label: "Clean qualifying" },
   { cat: "overtakes", label: "Clean overtakes" },
   { cat: "close", label: "Close racing" },

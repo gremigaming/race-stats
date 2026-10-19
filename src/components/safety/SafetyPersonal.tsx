@@ -18,6 +18,7 @@ import { useTelemetry } from "../../context/TelemetryContext";
 import {
   rankOf,
   SAFETY_CATEGORIES,
+  isCleanRace,
   SR_RANKS,
   SR_START,
   signedHalf,
@@ -58,6 +59,7 @@ const CAT_COLOR: Record<SafetyCategory, string> = {
   contact: "#f87171",
   penalty: "#fb923c",
   retirement: "#a1a1aa",
+  finish: "#86efac",
   clean: "#4ade80",
   quali: "#38bdf8",
   overtakes: "#c084fc",
@@ -180,7 +182,7 @@ function Stats({ driver }: { driver: SafetyDriver }) {
       else lost -= it.pts * s.weight;
       if (it.pts < 0 && (it.cat === "contact" || it.cat === "penalty")) incidents++;
     }
-    if (s.race && s.items.some((it) => it.cat === "clean")) clean++;
+    if (isCleanRace(s)) clean++;
   }
   const tiles = [
     { label: "Gained", value: `+${half(gained).toFixed(1)}`, tone: "text-emerald-300", icon: Sparkles },
@@ -289,7 +291,6 @@ function Breakdown({ driver }: { driver: SafetyDriver }) {
   const rows = SAFETY_CATEGORIES.map((c) => ({ ...c, v: half(sums.get(c.cat) ?? 0) })).filter(
     (r) => r.v !== 0,
   );
-  if (driver.aging) rows.push({ cat: "stream", label: "Top rule (older streams)", v: -driver.aging });
   rows.sort((a, b) => b.v - a.v);
   const max = Math.max(1, ...rows.map((r) => Math.abs(r.v)));
   if (rows.length === 0) return <p className="text-sm text-zinc-500">No points yet.</p>;
@@ -305,7 +306,7 @@ function Breakdown({ driver }: { driver: SafetyDriver }) {
               style={{
                 left: r.v >= 0 ? "50%" : `${50 - (Math.abs(r.v) / max) * 50}%`,
                 width: `${(Math.abs(r.v) / max) * 50}%`,
-                background: r.label.startsWith("Top rule") ? "#71717a" : CAT_COLOR[r.cat],
+                background: CAT_COLOR[r.cat],
                 opacity: 0.8,
               }}
             />
@@ -314,7 +315,7 @@ function Breakdown({ driver }: { driver: SafetyDriver }) {
         </div>
       ))}
       <p className="pt-1 text-[11px] text-zinc-500">
-        Older races count for less, so these are what's left of each kind today.
+        Older streams count for less, so these are what's left of each kind today. Your SR comes from your average per race, not from this total.
       </p>
     </div>
   );
