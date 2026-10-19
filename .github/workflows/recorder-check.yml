@@ -1,0 +1,36 @@
+name: Recorder check
+
+# Compiles uploader/TelemetryRecorder.cs the way RaceUploader.ps1 does (Windows
+# PowerShell 5.1 Add-Type), feeds it a made-up session and reads the file back.
+on:
+  push:
+    branches: [main]
+    paths:
+      - uploader/TelemetryRecorder.cs
+      - scripts/telemetry/gmtel.py
+      - scripts/telemetry/test_recorder.py
+      - .github/workflows/recorder-check.yml
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Record a made-up session
+        shell: powershell
+        run: |
+          Add-Type -Path uploader/TelemetryRecorder.cs
+          $out = Join-Path $env:RUNNER_TEMP "telemetry"
+          $recorder = New-Object GmTelemetryRecorder -ArgumentList $out, 20778
+          $recorder.Start()
+          Start-Sleep -Seconds 1
+          python scripts/telemetry/test_recorder.py send 20778
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          $recorder.Stop()
+          Write-Host "Recorder status: $($recorder.Status), saved: $($recorder.LastSaved)"
+          python scripts/telemetry/test_recorder.py check $out
+          if ($LASTEXITCODE -ne 0) { exit 1 }

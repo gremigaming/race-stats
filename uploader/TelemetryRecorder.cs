@@ -1,13 +1,16 @@
 // GreMi Gang telemetry recorder (loaded by RaceUploader.ps1).
 //
 // Listens for the F1 game's UDP telemetry, which Pits n' Giggles forwards to
-// 127.0.0.1:20778 (Settings > UDP Forwarding). Only the player's own car is
-// kept: from packets that hold every car, the player's slice is cut out, so a
-// session file stays small. One gzip file per game session; a file is renamed
-// from .part to .gmtel.gz when the session ends, and the uploader sends it.
+// 127.0.0.1:20778 (Settings > UDP Forwarding). The player's own car is kept in
+// full: from packets that hold every car, the player's slice is cut out.
+// For the safety rating, every car's position, heading, speed and pedal/steering
+// inputs are kept too, in short rows: 10 per second, and 30 per second from 5 s
+// before to 3 s after a collision. One gzip file per game session; a file is
+// renamed from .part to .gmtel.gz when the session ends, and the uploader sends it.
 //
 // File layout (after gzip): "GMTEL1\n", then records of
-//   uint8 kind (0 = whole packet, 1 = header + player slice + packet trailer)
+//   uint8 kind (0 = whole packet, 1 = header + player slice + packet trailer,
+//               2 = header + uint8 row size + the first row-size bytes of every car)
 //   uint16 length (little endian), then that many bytes.
 // scripts/telemetry/gmtel.py reads it.
 //
@@ -26,6 +29,14 @@ public class GmTelemetryRecorder
     const int HeaderLen = 29;
     const int IdleSeconds = 90;
     const int MinTelemetryRecords = 600; // about 10 s of driving at 60 Hz
+    const int FieldIntervalMs = 100;     // all-car rows: 10 per second ...
+    const int LapFieldIntervalMs = 500;  // ... lap data 2 per second
+    const int NearIntervalMs = 30;       // ... 30 per second around a collision
+    const int CollisionBeforeMs = 5000;
+    const int CollisionAfterMs = 3000;
+    // Bytes kept per car: motion = position, velocity, forward and right direction;
+    // lap data = up to the result status; telemetry = speed, throttle, steer, brake, clutch, gear
+    const int MotionRow = 36, LapRow = 46, TelemetryRow = 16;
 
     static readonly string[] Tracks = {
         "Melbourne", "Paul_Ricard", "Shanghai", "Bahrain", "Catalunya", "Monaco", "Montreal",
@@ -59,6 +70,17 @@ public class GmTelemetryRecorder
     DateTime lastPacket;
     DateTime lastSession = DateTime.MinValue;
     DateTime lastParticipants = DateTime.MinValue;
+    readonly DateTime[] lastField = new DateTime[3];
+    DateTime fullUntil = DateTime.MinValue;
+    readonly System.Collections.Generic.Queue<HeldRecord> pending = new System.Collections.Generic.Queue<HeldRecord>();
+
+    struct HeldRecord // (time received, finished field record) waiting in case a collision follows
+    {
+        public DateTime At;
+        public int Slot;
+        public byte[] Record;
+        public HeldRecord(DateTime at, int slot, byte[] record) { At = at; Slot = slot; Record = record; }
+    }
 
     public GmTelemetryRecorder(string outDir, int port)
     {
@@ -168,6 +190,13 @@ public class GmTelemetryRecorder
         if (id == 4) lastParticipants = lastPacket;
         if (id == 6) telemetryRecords++;
 
+        if (id == 3 && p.Length >= HeaderLen + 4 && p[HeaderLen] == 'C' && p[HeaderLen + 1] == 'O'
+            && p[HeaderLen + 2] == 'L' && p[HeaderLen + 3] == 'L')
+        {
+            fullUntil = lastPacket.AddMilliseconds(CollisionAfterMs);
+            FlushPending();
+        }
+
         if (trailer < 0) { Write(0, p, 0, p.Length, null, 0, 0); return; }
         int body = p.Length - HeaderLen - trailer;
         if (body <= 0 || body % numCars != 0 || player >= numCars)
@@ -177,6 +206,57 @@ public class GmTelemetryRecorder
         }
         int size = body / numCars;
         Write(1, p, HeaderLen + player * size, size, p, p.Length - trailer, trailer);
+
+        if (id == 0) Field(0, p, numCars, size, MotionRow, FieldIntervalMs);
+        else if (id == 2) Field(1, p, numCars, size, LapRow, LapFieldIntervalMs);
+        else if (id == 6) Field(2, p, numCars, size, TelemetryRow, FieldIntervalMs);
+    }
+
+    // Every car's first `row` bytes, written now (10 per second, or 30 around a collision)
+    // or held for 5 s in case a collision follows. Lap data is never held.
+    void Field(int slot, byte[] p, int numCars, int size, int row, int intervalMs)
+    {
+        if (row > size) return;
+        byte[] rec = new byte[HeaderLen + 1 + numCars * row];
+        Buffer.BlockCopy(p, 0, rec, 0, HeaderLen);
+        rec[HeaderLen] = (byte)row;
+        for (int i = 0; i < numCars; i++)
+            Buffer.BlockCopy(p, HeaderLen + i * size, rec, HeaderLen + 1 + i * row, row);
+
+        DateTime now = lastPacket;
+        while (pending.Count > 0 && (now - pending.Peek().At).TotalMilliseconds > CollisionBeforeMs)
+            pending.Dequeue();
+        double since = (now - lastField[slot]).TotalMilliseconds;
+        if (since >= intervalMs || (slot != 1 && now <= fullUntil && since >= NearIntervalMs))
+        {
+            WriteField(rec);
+            lastField[slot] = now;
+        }
+        else if (slot != 1)
+        {
+            pending.Enqueue(new HeldRecord(now, slot, rec));
+        }
+    }
+
+    // A collision: write what was held from the 5 s before it, 30 per second
+    void FlushPending()
+    {
+        DateTime[] last = { DateTime.MinValue, DateTime.MinValue, DateTime.MinValue };
+        while (pending.Count > 0)
+        {
+            HeldRecord h = pending.Dequeue();
+            if ((h.At - last[h.Slot]).TotalMilliseconds < NearIntervalMs) continue;
+            WriteField(h.Record);
+            last[h.Slot] = h.At;
+        }
+    }
+
+    void WriteField(byte[] rec)
+    {
+        gz.WriteByte(2);
+        gz.WriteByte((byte)(rec.Length & 0xff));
+        gz.WriteByte((byte)(rec.Length >> 8));
+        gz.Write(rec, 0, rec.Length);
     }
 
     void Write(byte kind, byte[] p, int sliceStart, int sliceLen, byte[] t, int tStart, int tLen)
@@ -200,6 +280,9 @@ public class GmTelemetryRecorder
         telemetryRecords = 0;
         lastSession = DateTime.MinValue;
         lastParticipants = DateTime.MinValue;
+        for (int i = 0; i < lastField.Length; i++) lastField[i] = DateTime.MinValue;
+        fullUntil = DateTime.MinValue;
+        pending.Clear();
         startedAt = DateTime.Now;
         partPath = Path.Combine(outDir, startedAt.ToString("yyyy-MM-dd_HH-mm-ss") + ".part");
         file = new FileStream(partPath, FileMode.Create, FileAccess.Write);

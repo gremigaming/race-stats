@@ -8,6 +8,12 @@ player's car. This turns it into laps of samples, one sample per game frame.
     python3 scripts/telemetry/gmtel.py FILE.gmtel.gz              # lap summary
     python3 scripts/telemetry/gmtel.py FILE.gmtel.gz --csv OUTDIR  # one CSV per lap
     python3 scripts/telemetry/gmtel.py FILE.gmtel.gz --json OUT    # everything
+    python3 scripts/telemetry/gmtel.py FILE.gmtel.gz --field OUT.csv  # every car, every row
+    python3 scripts/telemetry/gmtel.py FILE.gmtel.gz --collisions  # where both cars were
+
+Files recorded since 19 Oct 2026 also hold short rows for every car (position,
+heading, speed, inputs, lap distance): 10 per second, and 30 per second from
+5 s before to 3 s after a collision. Session.field has them.
 
 Packet layouts follow the game's UDP spec as implemented by Pits n' Giggles
 (lib/f1_types), for packet formats 2025 and 2026. Wheel arrays are RL, RR, FL, FR.
@@ -38,6 +44,10 @@ MOTION_EX = struct.Struct("<" + "4f" * 8 + "f" * 11 + "4f" + "5f" + "f4f4f")
 SETUP = struct.Struct("<BBBBffffBBBBBBBBBffffBf")
 TELEMETRY2 = struct.Struct("<BBHBBHBB")
 SESSION_START = struct.Struct("<BbbBHBbB")
+# all-car rows (record kind 2): the first bytes of each car's struct
+FIELD_MOTION = struct.Struct("<6f6h")       # position, velocity, forward dir, right dir
+FIELD_LAP = struct.Struct("<IIHBHBHBHBfff14B")
+FIELD_TELEMETRY = struct.Struct("<HfffBb")  # speed, throttle, steer, brake, clutch, gear
 
 TRACKS = ["Melbourne", "Paul Ricard", "Shanghai", "Bahrain", "Catalunya", "Monaco", "Montreal",
           "Silverstone", "Hockenheim", "Hungaroring", "Spa", "Monza", "Singapore", "Suzuka",
@@ -56,7 +66,8 @@ WHEELS = ("rl", "rr", "fl", "fr")
 
 
 def records(path):
-    """Yield (header tuple, payload bytes after the header, is_slice) per record."""
+    """Yield (header tuple, payload bytes after the header, kind) per record:
+    kind 0 = whole packet, 1 = the player's slice, 2 = rows for every car."""
     # A file cut off by a PC shutdown ("_unfinished") has no gzip end: keep what's there
     chunks = []
     with gzip.open(path, "rb") as f:
@@ -80,7 +91,7 @@ def records(path):
         pos += length
         if len(rec) < length:
             break  # file cut off mid-record (PC shut down while recording)
-        yield HEADER.unpack_from(rec), rec[HEADER.size:], kind == 1
+        yield HEADER.unpack_from(rec), rec[HEADER.size:], kind
 
 
 def wheels(prefix, values):
@@ -138,6 +149,46 @@ def parse_motion_ex(b):
     return s
 
 
+def parse_field(pid, b):
+    """Rows for every car from a kind 2 record: {car index: {...}}."""
+    size = b[0]
+    out = {}
+    for i in range((len(b) - 1) // size if size else 0):
+        r = b[1 + i * size:1 + (i + 1) * size]
+        if pid == 0 and size >= FIELD_MOTION.size:
+            v = FIELD_MOTION.unpack_from(r)
+            if v[0] == v[1] == v[2] == 0:
+                continue  # empty slot
+            out[i] = {"x": v[0], "y": v[1], "z": v[2], "vx": v[3], "vy": v[4], "vz": v[5],
+                      "fx": v[6] / 32767, "fy": v[7] / 32767, "fz": v[8] / 32767,
+                      "rx": v[9] / 32767, "ry": v[10] / 32767, "rz": v[11] / 32767}
+        elif pid == 2 and size >= FIELD_LAP.size:
+            v = FIELD_LAP.unpack_from(r)
+            if v[13] == 0:
+                continue
+            out[i] = {"lap_distance": v[10], "total_distance": v[11], "position": v[13],
+                      "lap": v[14], "pit_status": v[15], "sector": v[17] + 1,
+                      "driver_status": v[25], "result_status": v[26]}
+        elif pid == 6 and size >= FIELD_TELEMETRY.size:
+            v = FIELD_TELEMETRY.unpack_from(r)
+            out[i] = {"speed": v[0], "throttle": v[1], "steer": v[2], "brake": v[3], "gear": v[5]}
+    return out
+
+
+def parse_participants(b):
+    """{car index: {"name", "ai", "race_number", "team", "public"}} (packet format 2026)."""
+    n = b[0]
+    per = (len(b) - 1) // 24 if (len(b) - 1) % 24 == 0 else (len(b) - 1) // 22
+    name_at = 10 if per >= 60 else 7
+    out = {}
+    for i in range(n):
+        r = b[1 + i * per:1 + (i + 1) * per]
+        name = r[name_at:name_at + 32].split(b"\0", 1)[0].decode("utf-8", "replace")
+        out[i] = {"name": name, "ai": r[0], "race_number": r[name_at - 2],
+                  "team": r[5] if per >= 60 else r[3], "public": r[name_at + 32]}
+    return out
+
+
 def parse_setup(b):
     v = SETUP.unpack_from(b)
     keys = ["front_wing", "rear_wing", "diff_on_throttle", "diff_off_throttle", "front_camber",
@@ -159,6 +210,9 @@ class Session:
         self.info = {}
         self.setups = []      # (session time, setup) whenever it changes
         self.events = []      # (session time, code)
+        self.collisions = []  # {"t", "a", "b", "severity"} (car indexes)
+        self.drivers = {}     # car index -> participant info
+        self.field = {}       # session time -> {car index: merged motion/lap/telemetry row}
         self.laps = {}        # lap number -> {"samples": [...], "time_ms": .., "invalid": ..}
         self.packet_format = None
         self._cur = None      # sample being filled for the current send tick
@@ -179,8 +233,18 @@ class Session:
 
     def _read(self):
         last_setup = None
-        for h, body, sliced in records(self.path):
+        for h, body, kind in records(self.path):
             fmt, pid = h[0], h[5]
+            sliced = kind == 1
+            if kind == 2:
+                try:
+                    rows = parse_field(pid, body)
+                except struct.error:
+                    continue
+                tick = self.field.setdefault(round(h[7], 3), {})
+                for i, r in rows.items():
+                    tick.setdefault(i, {}).update(r)
+                continue
             self.packet_format = fmt
             fmt_key = 2026 if fmt >= 2026 else 2025
             try:
@@ -203,6 +267,11 @@ class Session:
                     code = body[:4].decode("ascii", "replace")
                     if code not in ("BUTN", "SPTP", "OVTK"):
                         self.events.append((round(h[7], 2), code))
+                    if code == "COLL" and len(body) >= 7:
+                        self.collisions.append({"t": round(h[7], 3), "a": body[4], "b": body[5],
+                                                "severity": body[6]})
+                elif pid == 4 and not sliced:
+                    self.drivers.update(parse_participants(body))
                 elif pid == 1:
                     v = SESSION_START.unpack_from(body)
                     types = SESSION_TYPES_24 if fmt >= 2024 else SESSION_TYPES
@@ -245,6 +314,42 @@ class Session:
         samples.append(s)
         entry["invalid"] = s["lap_invalid"]
 
+    def field_at(self, t, window=0.25):
+        """Every car's row nearest to session time t (within `window` s), merged across packets."""
+        out = {}
+        for ft in sorted(self.field, key=lambda x: abs(x - t)):
+            if abs(ft - t) > window:
+                break
+            for i, r in self.field[ft].items():
+                cur = out.setdefault(i, {})
+                for k, v in r.items():
+                    cur.setdefault(k, v)
+        return out
+
+    def geometry(self, t, a, b):
+        """Where car b was relative to car a at time t: metres ahead (+) / behind (-) along
+        a's heading, metres right (+) / left (-), and how fast they closed in (m/s)."""
+        f = self.field_at(t)
+        if a not in f or b not in f or "x" not in f[a] or "x" not in f[b]:
+            return None
+        A, B = f[a], f[b]
+        dx, dz = B["x"] - A["x"], B["z"] - A["z"]
+        fl = math.hypot(A["fx"], A["fz"]) or 1
+        fx, fz = A["fx"] / fl, A["fz"] / fl
+        ahead = dx * fx + dz * fz
+        right = dx * A["rx"] + dz * A["rz"]
+        dist = math.hypot(dx, dz) or 1
+        closing = -((B["vx"] - A["vx"]) * dx + (B["vz"] - A["vz"]) * dz) / dist
+        return {"ahead_m": round(ahead, 2), "right_m": round(right, 2), "gap_m": round(dist, 2),
+                "closing_ms": round(closing, 2),
+                "speed_a": A.get("speed"), "speed_b": B.get("speed"),
+                "brake_a": A.get("brake"), "brake_b": B.get("brake"),
+                "steer_a": A.get("steer"), "steer_b": B.get("steer")}
+
+    def name(self, i):
+        d = self.drivers.get(i)
+        return d["name"] if d and d["name"] else f"car {i}"
+
     def summary(self):
         rows = []
         for n in sorted(self.laps):
@@ -273,6 +378,8 @@ def main():
     ap.add_argument("file")
     ap.add_argument("--csv", help="write one CSV per lap into this folder")
     ap.add_argument("--json", help="write the whole session as JSON")
+    ap.add_argument("--field", help="write every car's rows as one CSV")
+    ap.add_argument("--collisions", action="store_true", help="show where both cars were at each collision")
     a = ap.parse_args()
     sess = Session(a.file)
     print(f"{os.path.basename(a.file)}: {sess.info.get('track', '?')} {sess.info.get('session_type', '')}, "
@@ -292,6 +399,28 @@ def main():
                 w = csv.DictWriter(f, fieldnames=cols)
                 w.writeheader()
                 w.writerows(lap["samples"])
+    if a.field:
+        cols = ["t", "car", "name", "x", "y", "z", "vx", "vy", "vz", "fx", "fy", "fz", "rx", "ry", "rz",
+                "speed", "throttle", "steer", "brake", "gear", "lap", "lap_distance", "total_distance",
+                "position", "pit_status", "sector", "driver_status", "result_status"]
+        with open(a.field, "w", newline="") as f:
+            w = csv.DictWriter(f, fieldnames=cols, extrasaction="ignore")
+            w.writeheader()
+            for t in sorted(sess.field):
+                for i, r in sorted(sess.field[t].items()):
+                    w.writerow({"t": t, "car": i, "name": sess.name(i), **r})
+        print(f"{len(sess.field)} all-car rows written to {a.field}")
+    if a.collisions:
+        sev = ["light", "medium", "heavy"]
+        for c in sess.collisions:
+            g = None
+            for back in (0.0, 0.1, 0.2, 0.3):  # cars can be apart a frame after the hit
+                g = sess.geometry(c["t"] - back, c["a"], c["b"])
+                if g:
+                    break
+            label = sev[c["severity"]] if c["severity"] < 3 else c["severity"]
+            print(f"{c['t']:8.2f}s {label:>6}  {sess.name(c['a'])} vs {sess.name(c['b'])}: "
+                  + (json.dumps(g) if g else "no all-car rows (recorded before 19 Oct 2026?)"))
     if a.json:
         with open(a.json, "w") as f:
             json.dump({"info": sess.info, "setups": sess.setups, "events": sess.events,

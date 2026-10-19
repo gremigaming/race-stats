@@ -28,10 +28,16 @@ tyre and brake temperatures and your setup, for every frame the game sends.
    save and restart Pits n' Giggles.
 3. In the game: Settings > Telemetry Settings > UDP Send Rate = 60Hz.
 
+Since 19 Oct 2026 it also keeps short rows for every car in the session
+(position, heading, speed, throttle, brake, steering, lap distance): 10 per
+second, and 30 per second from 5 s before to 3 s after each collision, so the
+safety rating can see who was alongside, behind or moving over. The game sends
+these for every car, Restricted telemetry included.
+
 Each session (practice, quali, race, time trial) becomes one file in
-`%APPDATA%\GreMiRaceUploader\telemetry` (about 10 MB per hour), which goes
-to the `telemetry` release of this repo. `scripts/telemetry/gmtel.py` turns a
-file into laps.
+`%APPDATA%\GreMiRaceUploader\telemetry`, which goes to the `telemetry`
+release of this repo. `scripts/telemetry/gmtel.py` turns a file into laps;
+`--collisions` shows where both cars were at each contact.
 
 ## Clip uploader
 
