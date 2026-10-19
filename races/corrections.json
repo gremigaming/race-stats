@@ -208,6 +208,18 @@
       "car": 3,
       "pts": 0.0,
       "was": -7.0
+    },
+    {
+      "id": "Race_Madrid_2026_10_18_20_21_23.json|4|contact|1|0",
+      "type": "incident",
+      "file": "Race_Madrid_2026_10_18_20_21_23.json",
+      "driver": "NEX",
+      "car": 4,
+      "pts": 0.0,
+      "was": -6.0,
+      "reason": "Protest accepted: .",
+      "by": "319544045435224067",
+      "at": "2026-10-19T13:32:01Z"
     }
   ]
 }
