@@ -1,0 +1,9 @@
+{
+  "windows": [
+    {
+      "from": "2026-10-19 21:00",
+      "to": "2026-10-20 06:00",
+      "why": "GreMi testing the new telemetry recorder in random open lobbies, not a stream"
+    }
+  ]
+}

@@ -303,12 +303,29 @@ const readSave = (path) => {
     return null;
   }
 };
+// Test sessions (races/test-sessions.json): saves from these time windows
+// (Amsterdam time, as in the file names) are kept in races/ but left off the
+// site, the safety rating and the Discord boards. GreMi 2026-10-19: random
+// open lobbies joined to test the recorder.
+let testWindows = [];
+try {
+  testWindows = JSON.parse(readFileSync(join(SRC, "test-sessions.json"), "utf8")).windows ?? [];
+} catch {
+  // no test sessions
+}
+const digits = (s) => s.replace(/\D/g, "").padEnd(14, "0");
+const isTest = (name) => {
+  const k = dateKey(name);
+  return !!k && testWindows.some((w) => k >= digits(w.from) && k < digits(w.to));
+};
+const OWN_FILES = new Set(["aliases.json", "corrections.json", "test-sessions.json"]);
+
 const firstPass = [];
 for (const path of walk(SRC)) {
   const base = path.split(/[\\/]/).pop();
-  if (base === "aliases.json" || base === "corrections.json") continue;
+  if (OWN_FILES.has(base)) continue;
   const data = readSave(path);
-  if (data) firstPass.push({ name: realName(base, data), cars: carsOf(data) });
+  if (data && !isTest(realName(base, data))) firstPass.push({ name: realName(base, data), cars: carsOf(data) });
 }
 const { merges: merged, list: mergeList } = findMerges(firstPass);
 
@@ -316,7 +333,7 @@ const seen = new Set();
 const files = [];
 for (const path of walk(SRC)) {
   let name = path.split(/[\\/]/).pop();
-  if (name === "aliases.json" || name === "corrections.json" || seen.has(name)) continue;
+  if (OWN_FILES.has(name) || seen.has(name)) continue;
   let data;
   try {
     data = JSON.parse(readFileSync(path, "utf8"));
@@ -336,6 +353,10 @@ for (const path of walk(SRC)) {
   }
   name = realName(name, data);
   if (seen.has(name)) continue;
+  if (isTest(name)) {
+    console.log(`skipped (test session): ${name}`);
+    continue;
+  }
   renameAiCars(data);
   renameDrivers(data);
   mergeHidden(name, data, merged);
