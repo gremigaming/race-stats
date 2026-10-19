@@ -80,6 +80,7 @@ const HOW_IT_WORKS: { title: string; body: ReactNode }[] = [
           "New drivers start close to 50: a good average counts as if you had 5 extra empty races, a bad one as if you had 3. After a few races it's clear where you belong.",
           "Penalty points from your last 10 races count 1.5 times, and one race counts for at most −6.",
           "A quarter of what you lose in a race also comes straight off your SR, and that fades out over your next 4 races.",
+          "A stream where you score less per race than your average so far lowers your SR, even if every race in it was positive. Each stream on your page shows its points per race next to your average before it.",
           "After every stream, all older races count 10% less. What you do now matters most, and if you stop racing your SR slowly moves back to 50.",
           "Above 70, your SR can be at most 15 above what your latest stream alone would give you. One dirty stream costs you your S or S+ straight away (this rule never takes you below 70).",
         ])}

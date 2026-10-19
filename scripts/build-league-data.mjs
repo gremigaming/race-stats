@@ -157,6 +157,29 @@ const renameDrivers = (value) => {
   return value;
 };
 
+// Game AI drivers carry real F1 names (NORRIS, PÉREZ...). Give them the same
+// "Team #number" name as the other AI cars so they never show up as drivers.
+// A human who drops out also turns ai-controlled, but keeps driver id 255/65535.
+function renameAiCars(data) {
+  const map = new Map();
+  for (const d of data["classification-data"]) {
+    const p = d["participant-data"];
+    const name = d["driver-name"] ?? "";
+    if (!p?.["ai-controlled"] || [255, 65535].includes(p["driver-id"]) || / #\d+$/.test(name)) continue;
+    map.set(name, `${d.team ?? "AI"} #${p["race-number"]}`);
+  }
+  if (!map.size) return;
+  const swap = (v) => {
+    if (Array.isArray(v)) return v.map(swap);
+    if (v && typeof v === "object") {
+      for (const k of Object.keys(v)) v[k] = swap(v[k]);
+      return v;
+    }
+    return typeof v === "string" && map.has(v) ? map.get(v) : v;
+  };
+  swap(data);
+}
+
 rmSync(OUT, { recursive: true, force: true });
 rmSync(KICKED_DIR, { recursive: true, force: true });
 mkdirSync(join(OUT, "sessions"), { recursive: true });
@@ -313,6 +336,7 @@ for (const path of walk(SRC)) {
   }
   name = realName(name, data);
   if (seen.has(name)) continue;
+  renameAiCars(data);
   renameDrivers(data);
   mergeHidden(name, data, merged);
   if (data["session-info"]) fixResults(name, data);

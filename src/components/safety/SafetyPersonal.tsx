@@ -373,13 +373,16 @@ function Sessions({ driver, data }: { driver: SafetyDriver; data: SafetyData }) 
         {groups.map((g, gi) => {
           const hi = histIdx.get(g.stream);
           const h = hi != null ? driver.history[hi] : undefined;
-          const before = hi != null && hi > 0 ? driver.history[hi - 1].sr : SR_START;
+          const prev = hi != null && hi > 0 ? driver.history[hi - 1] : undefined;
+          const before = prev?.sr ?? SR_START;
           return (
             <StreamGroup
               key={g.stream}
               date={data.streams[g.stream]?.date ?? ""}
               sr={h?.sr}
               change={h ? h.sr - before : undefined}
+              perRace={h?.streamAvg ?? undefined}
+              avgBefore={prev?.avg ?? 0}
               sessions={g.sessions}
               defaultOpen={gi === 0 || query.trim() !== ""}
             />
@@ -394,12 +397,16 @@ function StreamGroup({
   date,
   sr,
   change,
+  perRace,
+  avgBefore,
   sessions,
   defaultOpen,
 }: {
   date: string;
   sr?: number;
   change?: number;
+  perRace?: number;
+  avgBefore: number;
   sessions: SafetySession[];
   defaultOpen: boolean;
 }) {
@@ -423,6 +430,12 @@ function StreamGroup({
             {sessions.length} {sessions.length === 1 ? "session" : "sessions"}
             {weight < 1 && ` · counts ${Math.round(weight * 100)}%`}
           </div>
+          {perRace != null && (
+            <div className="text-[11px] text-zinc-500">
+              <span className={changeClass(perRace - avgBefore)}>{signedHalf(perRace).replace(/\.0$/, "")} per race</span>
+              {` vs your average of ${signedHalf(avgBefore)} before it`}
+            </div>
+          )}
         </div>
         {sr != null && (
           <div className="flex items-center gap-2">

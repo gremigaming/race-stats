@@ -463,23 +463,33 @@ def session_net(e, recent):
 def weights(n, now):
     return [AGE ** (now - e["stream"]) for e in entries[n]]
 
-def current(n, now):
-    """SR of driver n at the end of stream `now`."""
+def current(n, now, detail=False):
+    """SR of driver n at the end of stream `now` (with detail: also the average per race it came from)."""
     es = entries[n]; total = races_w = sting = 0.0; races_after = 0
     for e, w in zip(reversed(es), reversed(weights(n, now))):
         net, loss = session_net(e, races_after < RECENT)
         sting += STING * min(loss, -RACE_FLOOR) * max(0.0, 1 - races_after / 4)
         total += w * net
         if e["race"]: races_w += w; races_after += 1
-    if not races_w: return 50.0
-    sr = scale(total / (races_w + (EMPTY_UP if total > 0 else EMPTY_DOWN))) - sting
+    if not races_w: return (50.0, 0.0) if detail else 50.0
+    avg = total / (races_w + (EMPTY_UP if total > 0 else EMPTY_DOWN))
+    sr = scale(avg) - sting
     if sr > FORM_ABOVE:  # you can be at most 15 above what your latest stream alone gives
         last = max(e["stream"] for e in es)
         ls = [e for e in es if e["stream"] == last]; nr = sum(e["race"] for e in ls)
         if nr >= 2:
             form = scale(sum(session_net(e, True)[0] for e in ls) / nr)
             sr = min(sr, max(float(FORM_ABOVE), half(form + FORM_MARGIN)))
-    return min(100.0, half(sr))
+    return (min(100.0, half(sr)), avg) if detail else min(100.0, half(sr))
+
+def stream_avg(n, si):
+    """Points per race in stream si, counted the way the SR counts them (recent penalties 1.5x, -6 floor)."""
+    es = entries[n]; recent = set(); races_after = 0
+    for k in range(len(es) - 1, -1, -1):
+        if races_after < RECENT: recent.add(k)
+        if es[k]["race"]: races_after += 1
+    ks = [k for k, e in enumerate(es) if e["stream"] == si]; nr = sum(es[k]["race"] for k in ks)
+    return round(sum(session_net(es[k], k in recent)[0] for k in ks) / nr, 2) if nr else None
 
 for si, stream in enumerate(streams):
     seen_stream = set(); stream_loss = collections.defaultdict(float)
@@ -550,7 +560,9 @@ for si, stream in enumerate(streams):
     for n, loss in stream_loss.items():
         if loss >= 40: flags[n].append(f"Stream of {when(stream[0]):%d %b %Y}: lost {loss:g} (kick line 40)")
     for n in entries:
-        history[n].append({"stream": si, "date": when(stream[0]).strftime("%Y-%m-%d"), "sr": current(n, si), "raced": n in stream_loss})
+        sr, avg = current(n, si, True)
+        history[n].append({"stream": si, "date": when(stream[0]).strftime("%Y-%m-%d"), "sr": sr, "raced": n in stream_loss,
+                           "avg": round(avg, 2), "streamAvg": stream_avg(n, si)})
 
 drivers = []
 for n, es in entries.items():

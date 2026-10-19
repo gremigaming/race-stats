@@ -52,7 +52,8 @@ export interface SafetyDriver {
   races: number;
   provisional: boolean;
   banned: boolean;
-  history: { stream: number; date: string; sr: number; raced: boolean }[];
+  /** avg: average points per race the SR came from; streamAvg: points per race in that stream. */
+  history: { stream: number; date: string; sr: number; raced: boolean; avg?: number; streamAvg?: number | null }[];
   sessions: SafetySession[];
   flags: string[];
 }
