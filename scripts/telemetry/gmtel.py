@@ -185,7 +185,8 @@ def parse_participants(b):
         r = b[1 + i * per:1 + (i + 1) * per]
         name = r[name_at:name_at + 32].split(b"\0", 1)[0].decode("utf-8", "replace")
         out[i] = {"name": name, "ai": r[0], "race_number": r[name_at - 2],
-                  "team": r[5] if per >= 60 else r[3], "public": r[name_at + 32]}
+                  "team": struct.unpack_from("<H", r, 5)[0] if per >= 60 else r[3],
+                  "public": r[name_at + 32]}
     return out
 
 
