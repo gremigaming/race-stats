@@ -1,0 +1,17 @@
+{
+ "source": "USGS The National Map, USGSImageryOnly (public domain)",
+ "crs": "EPSG:3857",
+ "x0": -10869290.740800628,
+ "y0": 3520013.6836457835,
+ "x1": -10868678.483601267,
+ "y1": 3520657.23496734,
+ "west": -97.6405,
+ "south": 30.128,
+ "east": -97.635,
+ "north": 30.133,
+ "metres_per_pixel": 0.25,
+ "size": [
+  2118,
+  2226
+ ]
+}
