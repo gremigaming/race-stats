@@ -270,7 +270,7 @@ def analyse(path):
             p2 = [f"{NAME[inc['sev']]} contact, not to blame 0"]
             extras(other, culprit, inc, [])  # marks the time the culprit lost as counted
             lines[other] = (0, p2)
-        rows.append({"file": path.split("/")[-1].rsplit("_2026", 1)[0], **inc, "lines": {names[k]: v for k, v in lines.items()},
+        rows.append({"file": path.split("/")[-1].rsplit("_2026", 1)[0], **inc, "pn": [names[a], names[b]], "lines": {names[k]: v for k, v in lines.items()},
                      "vs": {names[a]: names[b], names[b]: names[a]}})
     other = []
     for p in pens:
@@ -410,6 +410,10 @@ ADD = collections.defaultdict(list)
 for c in CHANGES:
     if c.get("type") == "add": ADD[c["file"]].append(c)
 
+def incref(r):
+    """Where a contact happened, for scripts/telemetry/incident_replays.py (which swaps it for a replay id)."""
+    return {"t": r["t"], "te": r["t_end"], "pair": list(r["pair"]), "names": r["pn"]}
+
 def apply_staff(name, items, car, is_race, would):
     """Gives every item its id and applies the staff corrections for this file."""
     for n, its in items.items():
@@ -524,7 +528,8 @@ for si, stream in enumerate(streams):
                 if AI.search(n): continue
                 pts = half(pts)
                 if not pts: continue
-                items[n].append({"pts": -pts, "text": f"{r['where']}, with {r['vs'][n]}: " + "; ".join(parts), "lap": r["lap"], "cat": "contact"})
+                items[n].append({"pts": -pts, "text": f"{r['where']}, with {r['vs'][n]}: " + "; ".join(parts), "lap": r["lap"], "cat": "contact",
+                                 "inc": incref(r)})
         for n, v, what, lap, _fl in other:
             if not n or AI.search(n) or not v: continue
             cat = "retirement" if "retired" in what else "penalty"
@@ -543,7 +548,8 @@ for si, stream in enumerate(streams):
                 for r in rows2:
                     for n, (pts, parts) in r["lines"].items():
                         if n in kicked and half(pts):
-                            items[n].append({"pts": -half(pts), "text": f"{r['where']}, with {r['vs'][n]}: " + "; ".join(parts), "lap": r["lap"], "cat": "contact"})
+                            items[n].append({"pts": -half(pts), "text": f"{r['where']}, with {r['vs'][n]}: " + "; ".join(parts), "lap": r["lap"], "cat": "contact",
+                                                     "inc": incref(r)})
                 for n, v, what, lap, _fl in other2:
                     if n in kicked and v:
                         items[n].append({"pts": -v, "text": what[0].upper() + what[1:], "lap": lap if isinstance(lap, int) else None,

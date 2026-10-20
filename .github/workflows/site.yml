@@ -47,6 +47,10 @@ jobs:
           restore-keys: telemetry-
       - name: Setup manager advice
         run: python3 scripts/telemetry/setup_manager.py /tmp/telemetry-cache /tmp/setups.json || echo "setup advice failed, page shows the last build's data is missing"
+      - name: Incident replays for the safety rating page
+        run: |
+          python3 -m pip install --quiet --break-system-packages numpy || true
+          python3 scripts/telemetry/incident_replays.py /tmp/telemetry-cache || echo "incident replays failed, contacts show without a replay"
       - name: Build
         env:
           VITE_BASE_PATH: /race-stats/

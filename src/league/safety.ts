@@ -31,6 +31,8 @@ export interface SafetyItem {
   staff?: string;
   /** The points before staff changed them. */
   orig?: number;
+  /** Overhead replay of this contact: league/replays/<id>.json (scripts/telemetry/incident_replays.py). */
+  replay?: string;
 }
 
 export interface SafetySession {
