@@ -1,0 +1,46 @@
+# Downloads OpenStreetMap data for a circuit (track surface, run-off, grass, gravel, kerbs)
+# and commits it to scripts/telemetry/tracks/ for the incident replays.
+name: track-map
+on:
+  workflow_dispatch:
+    inputs:
+      name: {description: "File name, e.g. texas", required: true}
+      bbox: {description: "south,west,north,east", required: true}
+permissions:
+  contents: write
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download OSM data
+        run: |
+          mkdir -p scripts/telemetry/tracks
+          q="[out:json][timeout:120];(way(${{ inputs.bbox }});relation(${{ inputs.bbox }})[type=multipolygon];);out geom tags;"
+          for host in overpass-api.de overpass.kumi.systems; do
+            curl -sS -m 180 --data-urlencode "data=$q" "https://$host/api/interpreter" -o osm.json && python3 -c "import json;json.load(open('osm.json'))" && break
+          done
+          python3 - <<'PY'
+          import json, collections
+          d = json.load(open("osm.json"))
+          keep = []
+          for e in d["elements"]:
+              t = e.get("tags", {})
+              if not t or t.get("building"): continue
+              keep.append(e)
+          json.dump({"source": "OpenStreetMap contributors (ODbL)", "elements": keep},
+                    open("scripts/telemetry/tracks/${{ inputs.name }}-osm.json", "w"), separators=(",", ":"))
+          c = collections.Counter()
+          for e in keep:
+              t = e["tags"]
+              for k in ("highway", "area:highway", "surface", "landuse", "natural", "barrier", "leisure", "sport", "landcover"):
+                  if k in t: c[f"{k}={t[k]}"] += 1
+          print(len(keep), "elements"); [print(k, v) for k, v in c.most_common(60)]
+          PY
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add scripts/telemetry/tracks
+          git commit -m "Track map data for ${{ inputs.name }} (OpenStreetMap)" || exit 0
+          git pull --rebase origin main && git push origin HEAD:main
