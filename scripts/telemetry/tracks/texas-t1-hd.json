@@ -1,0 +1,17 @@
+{
+ "source": "https://imagery.geographic.texas.gov/server/rest/services/StratMap/StratMap21_NCCIR_CapArea_Brazos_Kerr/ImageServer",
+ "crs": "EPSG:3857",
+ "x0": -10869179.421309834,
+ "y0": 3520116.649666909,
+ "x1": -10868734.143346662,
+ "y1": 3520592.8783683563,
+ "west": -97.6395,
+ "south": 30.1288,
+ "east": -97.6355,
+ "north": 30.1325,
+ "metres_per_pixel": 0.15,
+ "size": [
+  2567,
+  2745
+ ]
+}
