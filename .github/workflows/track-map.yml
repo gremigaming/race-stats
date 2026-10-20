@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       name: {description: "File name, e.g. texas", required: true}
-      bbox: {description: "south,west,north,east", required: true}
+      bbox: {description: "west,south,east,north", required: true}
 permissions:
   contents: write
 jobs:
@@ -16,26 +16,28 @@ jobs:
       - name: Download OSM data
         run: |
           mkdir -p scripts/telemetry/tracks
-          q="[out:json][timeout:120];(way(${{ inputs.bbox }});relation(${{ inputs.bbox }})[type=multipolygon];);out geom tags;"
-          ok=0
-          for try in 1 2 3; do
-            for url in https://overpass-api.de/api/interpreter https://overpass.private.coffee/api/interpreter https://maps.mail.ru/osm/tools/overpass/api/interpreter https://overpass.kumi.systems/api/interpreter; do
-              echo "trying $url"
-              code=$(curl -sS -m 150 -A "gremigaming-race-stats/1.0 (github.com/gremigaming/race-stats)" --data-urlencode "data=$q" "$url" -o osm.json -w '%{http_code}' || true)
-              echo "status $code, $(wc -c < osm.json 2>/dev/null) bytes"; head -c 300 osm.json; echo
-              if [ "$code" = 200 ] && python3 -c "import json;json.load(open('osm.json'))"; then ok=1; break 2; fi
-            done
-            sleep 20
-          done
-          [ $ok = 1 ]
+          curl -sS -f -m 300 -A "gremigaming-race-stats/1.0 (github.com/gremigaming/race-stats)" \
+            "https://api.openstreetmap.org/api/0.6/map?bbox=${{ inputs.bbox }}" -o osm.xml
+          ls -la osm.xml
           python3 - <<'PY'
           import json, collections
-          d = json.load(open("osm.json"))
-          keep = []
-          for e in d["elements"]:
-              t = e.get("tags", {})
-              if not t or t.get("building"): continue
-              keep.append(e)
+          import xml.etree.ElementTree as ET
+          root = ET.parse("osm.xml").getroot()
+          nodes = {n.get("id"): (float(n.get("lat")), float(n.get("lon"))) for n in root.iter("node")}
+          tags = lambda e: {t.get("k"): t.get("v") for t in e.findall("tag")}
+          ways, keep = {}, []
+          for w in root.iter("way"):
+              geom = [nodes[n.get("ref")] for n in w.findall("nd") if n.get("ref") in nodes]
+              ways[w.get("id")] = geom
+              t = tags(w)
+              if t and not t.get("building"):
+                  keep.append({"type": "way", "id": int(w.get("id")), "tags": t, "geometry": geom})
+          for r in root.iter("relation"):
+              t = tags(r)
+              if t.get("type") != "multipolygon" or t.get("building"): continue
+              members = [{"role": m.get("role"), "geometry": ways.get(m.get("ref"), [])}
+                         for m in r.findall("member") if m.get("type") == "way"]
+              keep.append({"type": "relation", "id": int(r.get("id")), "tags": t, "members": members})
           json.dump({"source": "OpenStreetMap contributors (ODbL)", "elements": keep},
                     open("scripts/telemetry/tracks/${{ inputs.name }}-osm.json", "w"), separators=(",", ":"))
           c = collections.Counter()
