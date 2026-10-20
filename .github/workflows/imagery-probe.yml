@@ -1,0 +1,43 @@
+# Lists aerial imagery services that have pictures at a point (used to pick a track-imagery source).
+name: imagery-probe
+on:
+  workflow_dispatch:
+    inputs:
+      lonlat: {description: "lon,lat", required: true}
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Probe services
+        run: |
+          pip install -q pillow
+          python3 - <<'PY'
+          import json, math, io, urllib.request
+          from PIL import Image, ImageStat
+          lon, lat = map(float, "${{ inputs.lonlat }}".split(","))
+          x = math.radians(lon) * 6378137; y = math.log(math.tan(math.pi / 4 + math.radians(lat) / 2)) * 6378137
+          bb = f"{x-60},{y-60},{x+60},{y+60}"
+          def get(url):
+              return urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": "gremigaming-race-stats/1.0"}), timeout=60).read()
+          def test(url):
+              try:
+                  im = Image.open(io.BytesIO(get(url))).convert("RGB")
+                  st = ImageStat.Stat(im); return f"mean {[round(m) for m in st.mean]} std {[round(s) for s in st.stddev]}"
+              except Exception as ex:
+                  return f"error {str(ex)[:80]}"
+          base = "https://imagery.geographic.texas.gov/server/rest/services/StratMap"
+          try:
+              svcs = json.loads(get(base + "?f=json"))["services"]
+          except Exception as ex:
+              print("list failed", ex); svcs = []
+          for s in svcs:
+              name = s["name"].split("/")[-1]
+              if not any(k in name for k in ("Capital", "CapArea", "Travis", "Brazos", "Central", "Austin", "Bastrop", "Hays")):
+                  continue
+              url = f"https://imagery.geographic.texas.gov/server/rest/services/{s['name']}/{s['type']}"
+              print(name, "|", url, "|", test(f"{url}/exportImage?bbox={bb}&bboxSR=3857&imageSR=3857&size=200,200&bandIds=0,1,2&format=jpg&f=image"))
+          print("all StratMap services:", [s["name"].split("/")[-1] for s in svcs])
+          for url in ["https://gis.traviscountytx.gov/server1/rest/services/Basemap_Reference/Aerial_Imagery_2019/MapServer",
+                      "https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryOnly/MapServer"]:
+              print(url, "|", test(f"{url}/export?bbox={bb}&bboxSR=3857&imageSR=3857&size=200,200&format=jpg&f=image"))
+          PY
