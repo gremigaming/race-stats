@@ -59,7 +59,7 @@ def telemetry(t, frame):
     rows = b""
     for i in range(CARS):
         if i < 2:
-            rows += struct.pack("<HfffBb", 180, 1.0, 0.25 * i, 0.0, 0, 7) + bytes(size - 16)
+            rows += struct.pack("<HfffBb", 180, 1.0, 0.25 * i, 0.0, 0, 7) + bytes(size - 20) + bytes([0, 1, 7, 4])
         else:
             rows += bytes(size)
     return header(6, t, frame) + rows + bytes(3)
@@ -118,6 +118,8 @@ def check(folder):
     assert 7 <= quiet_rate <= 25, quiet_rate   # about 10 motion + 10 telemetry + 2 lap rows a second
     assert near_rate >= 25, near_rate          # 30 a second around the collision
 
+    tele = [r for tick in s.field.values() for r in tick.values() if "surface_fl" in r]
+    assert tele and (tele[0]["surface_rl"], tele[0]["surface_fl"], tele[0]["surface_fr"]) == (0, 7, 4), tele[:1]
     g = s.geometry(HIT_AT, 0, 1)
     print("geometry at the hit:", g)
     assert abs(g["ahead_m"] - 3.0) < 0.5 and abs(g["right_m"] + 2.0) < 0.2, g

@@ -29,7 +29,8 @@ tyre and brake temperatures and your setup, for every frame the game sends.
 3. In the game: Settings > Telemetry Settings > UDP Send Rate = 60Hz.
 
 Since 19 Oct 2026 it also keeps short rows for every car in the session
-(position, heading, speed, throttle, brake, steering, lap distance): 10 per
+(position, heading, speed, throttle, brake, steering, lap distance, and since
+20 Oct 2026 the surface under each wheel: kerb, grass, gravel): 10 per
 second, and 30 per second from 5 s before to 3 s after each collision, so the
 safety rating can see who was alongside, behind or moving over. The game sends
 these for every car, Restricted telemetry included.

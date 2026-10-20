@@ -36,7 +36,8 @@ public class GmTelemetryRecorder
     const int CollisionAfterMs = 3000;
     // Bytes kept per car: motion = position, velocity, forward and right direction;
     // lap data = up to the result status; telemetry = speed, throttle, steer, brake, clutch, gear
-    const int MotionRow = 36, LapRow = 46, TelemetryRow = 16;
+    // plus the surface under each wheel (the last 4 bytes of the car's telemetry)
+    const int MotionRow = 36, LapRow = 46, TelemetryRow = 20, SurfaceBytes = 4;
 
     static readonly string[] Tracks = {
         "Melbourne", "Paul_Ricard", "Shanghai", "Bahrain", "Catalunya", "Monaco", "Montreal",
@@ -220,8 +221,13 @@ public class GmTelemetryRecorder
         byte[] rec = new byte[HeaderLen + 1 + numCars * row];
         Buffer.BlockCopy(p, 0, rec, 0, HeaderLen);
         rec[HeaderLen] = (byte)row;
+        int tail = slot == 2 ? SurfaceBytes : 0;
         for (int i = 0; i < numCars; i++)
-            Buffer.BlockCopy(p, HeaderLen + i * size, rec, HeaderLen + 1 + i * row, row);
+        {
+            int src = HeaderLen + i * size, dst = HeaderLen + 1 + i * row;
+            Buffer.BlockCopy(p, src, rec, dst, row - tail);
+            if (tail > 0) Buffer.BlockCopy(p, src + size - tail, rec, dst + row - tail, tail);
+        }
 
         DateTime now = lastPacket;
         while (pending.Count > 0 && (now - pending.Peek().At).TotalMilliseconds > CollisionBeforeMs)

@@ -172,6 +172,8 @@ def parse_field(pid, b):
         elif pid == 6 and size >= FIELD_TELEMETRY.size:
             v = FIELD_TELEMETRY.unpack_from(r)
             out[i] = {"speed": v[0], "throttle": v[1], "steer": v[2], "brake": v[3], "gear": v[5]}
+            if size >= FIELD_TELEMETRY.size + 4:  # newer recorder: surface under each wheel
+                out[i].update(wheels("surface", r[size - 4:size]))
     return out
 
 
