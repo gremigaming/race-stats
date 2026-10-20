@@ -7,6 +7,10 @@ on:
       name: {description: "File name, e.g. texas-t1", required: true}
       bbox: {description: "west,south,east,north", required: true}
       mpp: {description: "Ground metres per pixel", required: true, default: "0.25"}
+      source:
+        description: "usgs (USGS National Map, NAIP ~0.6 m) or an ArcGIS ImageServer URL (e.g. a Texas StratMap 6-inch service)"
+        required: true
+        default: "usgs"
 permissions:
   contents: write
 jobs:
@@ -28,21 +32,26 @@ jobs:
           # web mercator metres are stretched by 1/cos(lat); ask for real ground metres per pixel
           k = 1 / math.cos(math.radians((s + n) / 2))
           W, H = int((x1 - x0) / (mpp * k)), int((y1 - y0) / (mpp * k))
-          img = Image.new("RGB", (W, H)); step = 2000
+          img = Image.new("RGB", (W, H)); step = 1500
           for i in range(0, W, step):
               for j in range(0, H, step):
                   cw, ch = min(step, W - i), min(step, H - j)
                   bx0 = x0 + i * (x1 - x0) / W; bx1 = x0 + (i + cw) * (x1 - x0) / W
                   by1 = y1 - j * (y1 - y0) / H; by0 = y1 - (j + ch) * (y1 - y0) / H
-                  url = ("https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryOnly/MapServer/export"
-                         f"?bbox={bx0},{by0},{bx1},{by1}&bboxSR=3857&imageSR=3857&size={cw},{ch}&format=jpg&f=image")
+                  src = "${{ inputs.source }}"
+                  if src == "usgs":
+                      url = ("https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryOnly/MapServer/export"
+                             f"?bbox={bx0},{by0},{bx1},{by1}&bboxSR=3857&imageSR=3857&size={cw},{ch}&format=jpg&f=image")
+                  else:
+                      url = (f"{src.rstrip('/')}/exportImage?bbox={bx0},{by0},{bx1},{by1}&bboxSR=3857&imageSR=3857"
+                             f"&size={cw},{ch}&bandIds=0,1,2&format=jpg&interpolation=RSP_BilinearInterpolation&f=image")
                   req = urllib.request.Request(url, headers={"User-Agent": "gremigaming-race-stats/1.0"})
                   t = Image.open(io.BytesIO(urllib.request.urlopen(req, timeout=120).read())).convert("RGB")
                   img.paste(t, (i, j))
           assert img.getextrema() != ((0, 0), (0, 0), (0, 0)), "empty imagery"
           name = "${{ inputs.name }}"
           img.save(f"scripts/telemetry/tracks/{name}.jpg", quality=90)
-          json.dump({"source": "USGS The National Map, USGSImageryOnly (public domain)", "crs": "EPSG:3857",
+          json.dump({"source": "USGS The National Map, USGSImageryOnly (public domain)" if "${{ inputs.source }}" == "usgs" else "${{ inputs.source }}", "crs": "EPSG:3857",
                      "x0": x0, "y0": y0, "x1": x1, "y1": y1, "west": w, "south": s, "east": e, "north": n,
                      "metres_per_pixel": mpp, "size": [W, H]},
                     open(f"scripts/telemetry/tracks/{name}.json", "w"), indent=1)
