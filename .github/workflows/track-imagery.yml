@@ -1,0 +1,61 @@
+# Downloads public-domain aerial imagery (USGS The National Map, imagery only) for an area
+# and commits a stitched JPEG plus its bounds to scripts/telemetry/tracks/ for the incident replays.
+name: track-imagery
+on:
+  workflow_dispatch:
+    inputs:
+      name: {description: "File name, e.g. texas-t1", required: true}
+      bbox: {description: "west,south,east,north", required: true}
+      zoom: {description: "Tile zoom (18 = 0.6 m per pixel, 19 = 0.3 m)", required: true, default: "19"}
+permissions:
+  contents: write
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download and stitch tiles
+        run: |
+          pip install -q pillow
+          python3 - <<'PY'
+          import math, json, io, urllib.request
+          from PIL import Image
+          w, s, e, n = map(float, "${{ inputs.bbox }}".split(","))
+          z = int("${{ inputs.zoom }}")
+          def tile(lon, lat):
+              x = (lon + 180) / 360 * 2 ** z
+              y = (1 - math.asinh(math.tan(math.radians(lat))) / math.pi) / 2 * 2 ** z
+              return x, y
+          x0, y0 = tile(w, n); x1, y1 = tile(e, s)
+          tx = range(int(x0), int(x1) + 1); ty = range(int(y0), int(y1) + 1)
+          img = Image.new("RGB", (256 * len(tx), 256 * len(ty)))
+          ok = 0
+          for i, x in enumerate(tx):
+              for j, y in enumerate(ty):
+                  url = f"https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryOnly/MapServer/tile/{z}/{y}/{x}"
+                  req = urllib.request.Request(url, headers={"User-Agent": "gremigaming-race-stats/1.0"})
+                  try:
+                      t = Image.open(io.BytesIO(urllib.request.urlopen(req, timeout=60).read())).convert("RGB")
+                      img.paste(t, (256 * i, 256 * j)); ok += 1
+                  except Exception as ex:
+                      print("tile", x, y, ex)
+          print(ok, "of", len(tx) * len(ty), "tiles")
+          def lonlat(x, y):
+              lon = x / 2 ** z * 360 - 180
+              lat = math.degrees(math.atan(math.sinh(math.pi * (1 - 2 * y / 2 ** z))))
+              return lon, lat
+          west, north = lonlat(tx[0], ty[0]); east, south = lonlat(tx[-1] + 1, ty[-1] + 1)
+          name = "${{ inputs.name }}"
+          img.save(f"scripts/telemetry/tracks/{name}.jpg", quality=88)
+          json.dump({"source": "USGS The National Map, USGSImageryOnly (public domain)", "zoom": z,
+                     "west": west, "south": south, "east": east, "north": north,
+                     "tile_x": [tx[0], tx[-1]], "tile_y": [ty[0], ty[-1]], "size": img.size},
+                    open(f"scripts/telemetry/tracks/{name}.json", "w"), indent=1)
+          PY
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add scripts/telemetry/tracks
+          git commit -m "Aerial imagery for ${{ inputs.name }} (USGS, public domain)" || exit 0
+          git pull --rebase origin main && git push origin HEAD:main
