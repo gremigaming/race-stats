@@ -1,0 +1,20 @@
+{
+ "source": "USGS The National Map, USGSImageryOnly (public domain)",
+ "zoom": 19,
+ "west": -97.6409912109375,
+ "south": 30.127906033934245,
+ "east": -97.63481140136719,
+ "north": 30.13325085015049,
+ "tile_x": [
+  119944,
+  119952
+ ],
+ "tile_y": [
+  216084,
+  216092
+ ],
+ "size": [
+  2304,
+  2304
+ ]
+}
