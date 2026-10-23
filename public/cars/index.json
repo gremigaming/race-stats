@@ -1,0 +1,58 @@
+{
+ "length_m": 5.6,
+ "width_m": 2.0,
+ "nose": "+x",
+ "origin": "car centre",
+ "viewBox_units": "metres",
+ "cars": {
+  "red_bull": {
+   "file": "red_bull.svg",
+   "body": "#1b2a52",
+   "accent": "#d71920",
+   "accent2": "#f5c400",
+   "number": "#ffffff"
+  },
+  "ferrari": {
+   "file": "ferrari.svg",
+   "body": "#d40000",
+   "accent": "#f2f2f2",
+   "accent2": "#ffd400",
+   "number": "#ffffff"
+  },
+  "aston_martin": {
+   "file": "aston_martin.svg",
+   "body": "#005f50",
+   "accent": "#cedc00",
+   "accent2": "#0b0b0b",
+   "number": "#ffffff"
+  },
+  "mclaren": {
+   "file": "mclaren.svg",
+   "body": "#ff7a00",
+   "accent": "#1a1a1a",
+   "accent2": "#4cb8ff",
+   "number": "#1a1a1a"
+  },
+  "rb": {
+   "file": "rb.svg",
+   "body": "#f4f6fa",
+   "accent": "#1c3fd0",
+   "accent2": "#d71920",
+   "number": "#1c3fd0"
+  },
+  "williams": {
+   "file": "williams.svg",
+   "body": "#0d2d6b",
+   "accent": "#00a3e0",
+   "accent2": "#ffffff",
+   "number": "#ffffff"
+  },
+  "generic": {
+   "file": "generic.svg",
+   "body": "#8a8f98",
+   "accent": "#d8dbe0",
+   "accent2": "#3a3d43",
+   "number": "#ffffff"
+  }
+ }
+}
