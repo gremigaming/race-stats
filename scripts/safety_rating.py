@@ -495,6 +495,7 @@ def stream_avg(n, si):
     ks = [k for k, e in enumerate(es) if e["stream"] == si]; nr = sum(es[k]["race"] for k in ks)
     return round(sum(session_net(es[k], k in recent)[0] for k in ks) / nr, 2) if nr else None
 
+all_incs = []
 for si, stream in enumerate(streams):
     seen_stream = set(); stream_loss = collections.defaultdict(float)
     for f in stream:
@@ -524,6 +525,10 @@ for si, stream in enumerate(streams):
                    else "quali" if "qualifying" in what else "clean")
             items[n].append({"pts": v, "text": what[0].upper() + what[1:], "lap": None, "cat": cat})
         for r in rows:
+            # every collision, also the ones that cost nobody points, for the Incidents tab
+            all_incs.append({"file": name, "lap": r["lap"], "where": r["where"], "sev": r["sev"], "names": r["pn"],
+                             "lines": {n: [-half(pts) or 0, "; ".join(parts)] for n, (pts, parts) in r["lines"].items()},
+                             "inc": incref(r)})
             for n, (pts, parts) in r["lines"].items():
                 if AI.search(n): continue
                 pts = half(pts)
@@ -590,4 +595,6 @@ out = {"generated": __import__("datetime").datetime.now(__import__("datetime").t
        "drivers": drivers}
 with open(os.path.join("public", "league", "safety.json"), "w") as fh:
     json.dump(out, fh, separators=(",", ":"))
-print(f"safety rating: {len(drivers)} drivers over {len(streams)} streams")
+with open(os.path.join("public", "league", "incidents.json"), "w") as fh:
+    json.dump({"incidents": all_incs}, fh, separators=(",", ":"))
+print(f"safety rating: {len(drivers)} drivers over {len(streams)} streams, {len(all_incs)} collisions")

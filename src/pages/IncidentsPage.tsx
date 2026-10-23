@@ -1,5 +1,5 @@
 import { ChevronDown, Flag, Play } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { cardClass } from "../components/Card";
 import {
   IncidentReplay,
@@ -31,7 +31,29 @@ interface Incident {
   where: string;
   sides: Side[];
   replay?: string;
+  /** Game severity: LOW, MEDIUM or HIGH. */
+  sev?: string;
 }
+
+/** league/incidents.json (scripts/safety_rating.py): every collision, also the ones that cost nobody points. */
+interface AllIncidents {
+  incidents: {
+    file: string;
+    lap: number | null;
+    where: string;
+    sev: string;
+    names: [string, string];
+    lines: Record<string, [number, string]>;
+    replay?: string;
+  }[];
+}
+
+const SEV: Record<string, { label: string; cls: string }> = {
+  LOW: { label: "Light", cls: "bg-zinc-500/15 text-zinc-300" },
+  MEDIUM: { label: "Medium", cls: "bg-amber-500/15 text-amber-300" },
+  HIGH: { label: "Heavy", cls: "bg-red-500/15 text-red-300" },
+};
+const PAGE = 60;
 
 /** "Turn 3, with Bob: heavy contact, to blame (...) 4; ..." -> where, other driver, reasons. */
 function splitText(text: string) {
@@ -41,7 +63,7 @@ function splitText(text: string) {
 
 function verdict(item?: SafetyItem): { label: string; cls: string } {
   const t = item?.text.toLowerCase() ?? "";
-  if (!item || item.pts === 0 || t.includes("not to blame")) return { label: "Not to blame", cls: "bg-emerald-500/15 text-emerald-300" };
+  if (!item || t.includes("not to blame")) return { label: "Not to blame", cls: "bg-emerald-500/15 text-emerald-300" };
   if (t.includes("shared blame")) return { label: "Shared blame", cls: "bg-amber-500/15 text-amber-300" };
   if (t.includes("to blame")) return { label: "To blame", cls: "bg-red-500/15 text-red-300" };
   return { label: "Points lost", cls: "bg-zinc-500/15 text-zinc-300" };
@@ -58,6 +80,16 @@ export function IncidentsPage() {
   const { league } = useTelemetry();
   const data = league?.safetyData ?? null;
   const [track, setTrack] = useState<string>("all");
+  const [pointsOnly, setPointsOnly] = useState(false);
+  const [limit, setLimit] = useState(PAGE);
+  const [all, setAll] = useState<AllIncidents | null>(null);
+
+  useEffect(() => {
+    fetch(`${import.meta.env.BASE_URL}league/incidents.json?t=${Date.now()}`, { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d: AllIncidents | null) => setAll(d))
+      .catch(() => undefined);
+  }, []);
 
   const incidents = useMemo(() => {
     const byKey = new Map<string, Incident>();
@@ -91,10 +123,44 @@ export function IncidentsPage() {
         }
       }
     }
+    // every other collision (no points for anyone, or AI and hidden-name cars)
+    for (const c of all?.incidents ?? []) {
+      const key = c.replay ?? `${c.file}|${c.lap}|${[...c.names].sort().join("|")}|${c.where}`;
+      const known = byKey.get(key);
+      if (known) {
+        known.sev = c.sev;
+        continue;
+      }
+      const { quali, track, time } = parseSessionFile(c.file);
+      byKey.set(key, {
+        key,
+        file: c.file,
+        track,
+        quali,
+        time,
+        date: raceDate(c.file),
+        lap: c.lap,
+        where: c.where,
+        sev: c.sev,
+        replay: c.replay,
+        sides: c.names.map((name, i) => {
+          const line = c.lines[name];
+          return {
+            name,
+            item: line && {
+              pts: line[0],
+              text: `${c.where}, with ${c.names[1 - i]}: ${line[1]}`,
+              lap: c.lap,
+              cat: "contact" as const,
+            },
+          };
+        }),
+      });
+    }
     return [...byKey.values()].sort(
       (a, b) => (b.date?.getTime() ?? 0) - (a.date?.getTime() ?? 0) || b.file.localeCompare(a.file) || (b.lap ?? 0) - (a.lap ?? 0),
     );
-  }, [data]);
+  }, [data, all]);
 
   const tracks = useMemo(() => {
     const n = new Map<string, number>();
@@ -102,17 +168,19 @@ export function IncidentsPage() {
     return [...n.entries()].sort((a, b) => a[0].localeCompare(b[0]));
   }, [incidents]);
 
-  const shown = track === "all" ? incidents : incidents.filter((i) => i.track === track);
+  const shown = incidents.filter(
+    (i) => (track === "all" || i.track === track) && (!pointsOnly || i.sides.some((x) => (x.item?.pts ?? 0) < 0)),
+  );
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       <section className={cardClass}>
         <SectionHeader
           title="Incidents"
-          hint={`${incidents.length} contacts that cost safety rating points, newest first`}
+          hint={`${incidents.length} collisions, newest first`}
         />
         <p className="mb-3 text-sm text-zinc-400">
-          Every contact the safety rating counted, with both drivers, the verdict and why. Open one to watch
+          Every collision the game reported, with both drivers, how heavy it was, the verdict and why. Open one to watch
           it from above with every car's real position, and see speeds, who was ahead and who moved across.
         </p>
         <div className="flex flex-wrap gap-1.5">
@@ -120,7 +188,10 @@ export function IncidentsPage() {
             <button
               key={t}
               type="button"
-              onClick={() => setTrack(t)}
+              onClick={() => {
+                setTrack(t);
+                setLimit(PAGE);
+              }}
               className={cn(
                 "rounded-full px-2.5 py-1 text-xs",
                 track === t ? "bg-red-500/20 text-red-200" : "bg-zinc-800/80 text-zinc-400 hover:text-zinc-200",
@@ -130,15 +201,28 @@ export function IncidentsPage() {
             </button>
           ))}
         </div>
+        <label className="mt-3 flex items-center gap-2 text-xs text-zinc-400">
+          <input type="checkbox" checked={pointsOnly} onChange={(e) => setPointsOnly(e.target.checked)} />
+          Only collisions that cost points
+        </label>
       </section>
 
       {!data && <p className="text-sm text-zinc-500">Loading incidents…</p>}
       {data && shown.length === 0 && <p className="text-sm text-zinc-500">No incidents here.</p>}
       <div className="space-y-2">
-        {shown.map((inc) => (
+        {shown.slice(0, limit).map((inc) => (
           <IncidentCard key={inc.key} inc={inc} />
         ))}
       </div>
+      {shown.length > limit && (
+        <button
+          type="button"
+          onClick={() => setLimit((n) => n + PAGE)}
+          className="w-full rounded-xl bg-zinc-900/70 py-2.5 text-sm text-zinc-300 hover:text-white"
+        >
+          Show more ({shown.length - limit} left)
+        </button>
+      )}
     </div>
   );
 }
@@ -180,6 +264,11 @@ function IncidentCard({ inc }: { inc: Incident }) {
             {inc.where && ` · ${cap(inc.where)}`}
           </span>
         </span>
+        {inc.sev && SEV[inc.sev] && (
+          <span className={cn("shrink-0 rounded px-1.5 py-0.5 text-[10px] font-semibold", SEV[inc.sev].cls)}>
+            {SEV[inc.sev].label}
+          </span>
+        )}
         {inc.replay && <Play className="h-3.5 w-3.5 shrink-0 text-zinc-500" aria-label="Has a replay" />}
         <span className="w-10 text-right font-mono text-red-300">{signedHalf(lost)}</span>
         <ChevronDown className={cn("h-3.5 w-3.5 shrink-0 text-zinc-600 transition-transform", open && "rotate-180")} />

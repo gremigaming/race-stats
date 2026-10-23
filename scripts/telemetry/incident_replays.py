@@ -299,6 +299,11 @@ def main():
             for it in s["items"]:
                 if it.get("inc"):
                     todo[s["file"]].append(it)
+    # every collision for the Incidents tab, also the ones that cost nobody points
+    ipath = os.path.join(LEAGUE, "incidents.json")
+    incs = json.load(open(ipath)) if os.path.exists(ipath) else {"incidents": []}
+    for it in incs["incidents"]:
+        todo[it["file"]].append(it)
     try:
         assets = sorted(a["name"] for a in http_json(RELEASE)["assets"] if a["name"].endswith(".gmtel.gz"))
     except Exception as ex:
@@ -386,6 +391,9 @@ def main():
             for it in s["items"]:
                 it.pop("inc", None)
     json.dump(data, open(path, "w"), separators=(",", ":"))
+    for it in incs["incidents"]:
+        it.pop("inc", None)
+    json.dump(incs, open(ipath, "w"), separators=(",", ":"))
     print("replays written:", made)
 
 
