@@ -22,7 +22,7 @@ const TILE = 512;
 let mapIndex: Promise<MapIndex | null> | null = null;
 const loadIndex = () =>
   (mapIndex ??= fetch(`${import.meta.env.BASE_URL}trackmaps/index.json`)
-    .then((r) => (r.ok ? r.json() : null))
+    .then((r): Promise<MapIndex> | null => (r.ok ? r.json() : null))
     .catch(() => null));
 const norm = (t: string) => t.toLowerCase().replace(/reverse|manual|[^a-z]/g, "");
 /** Track name from a race file ("Abu Dhabi") to its map folder ("abu_dhabi", "abudhabi", ...). */
@@ -100,7 +100,7 @@ export function IncidentReplay({
       if (!folder) return;
       const [cx, cz] = data.world.c;
       const near = index[folder].tiles.filter(
-        ([i, j]) => Math.abs((i + 0.5) * TILE - cx) < TILE / 2 + 120 && Math.abs((j + 0.5) * TILE - cz) < TILE / 2 + 120,
+        ([i, j]: [number, number]) => Math.abs((i + 0.5) * TILE - cx) < TILE / 2 + 120 && Math.abs((j + 0.5) * TILE - cz) < TILE / 2 + 120,
       );
       const out: { i: number; j: number; img: HTMLImageElement }[] = [];
       for (const [i, j] of near) {
