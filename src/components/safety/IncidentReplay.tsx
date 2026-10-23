@@ -13,6 +13,8 @@ export interface ReplayData {
   /** The pair's inputs every inputStep frames: speed km/h, throttle/brake 0..1, steer -1..1, gear, race position. */
   inputs?: Record<string, { spd: number[]; thr: number[]; brk: number[]; str: number[]; gear: number[]; pos?: number }>;
   inputStep?: number;
+  /** Team of every car index ("Ferrari '26"), for the car drawings. */
+  teams?: Record<string, string | null>;
   /** Where the replay sits in the game world: its centre (x, z) and the rotation that turns it travel-up. */
   world?: { c: [number, number]; rot: number };
 }
@@ -27,9 +29,13 @@ const loadIndex = () =>
   (mapIndex ??= fetch(`${import.meta.env.BASE_URL}trackmaps/index.json`)
     .then((r): Promise<MapIndex> | null => (r.ok ? r.json() : null))
     .catch(() => null));
-/** Sharp vector tiles around the incidents (public/trackmaps-svg), drawn over the photo tiles. */
+/** Sharp vector map (public/trackmaps-svg): 100 m tiles, one SVG per layer, world metres, x right and z down. */
 interface SvgIndex {
-  [track: string]: { f: string; x0: number; z0: number; x1: number; z1: number }[];
+  [track: string]: {
+    tile: number;
+    layers: string[];
+    tiles: { i: number; j: number; files: Record<string, string>; aerial?: { file: string; x0: number; z0: number; size: number } }[];
+  };
 }
 let svgIndex: Promise<SvgIndex | null> | null = null;
 const loadSvgIndex = () =>
@@ -41,8 +47,55 @@ interface Tile {
   z0: number;
   x1: number;
   z1: number;
-  svg: boolean;
   img: HTMLImageElement;
+}
+interface VecTile {
+  x: number;
+  z: number;
+  size: number;
+  hrefs: string[];
+  aerial?: { href: string; x0: number; z0: number; size: number };
+}
+
+/** Car drawings from the Texas Turn 1 mock-up (public/cars), drawn once at 100 px per metre. */
+const CAR_W = 5.8, CAR_H = 2.3;
+let carSprites: Promise<Record<string, HTMLCanvasElement>> | null = null;
+const loadCars = () =>
+  (carSprites ??= fetch(`${import.meta.env.BASE_URL}cars/index.json`)
+    .then((r) => (r.ok ? r.json() : Promise.reject()))
+    .then(async (idx: { cars: Record<string, { file: string }> }) => {
+      const out: Record<string, HTMLCanvasElement> = {};
+      await Promise.all(
+        Object.entries(idx.cars).map(
+          ([team, c]) =>
+            new Promise<void>((done) => {
+              const img = new Image();
+              img.onload = () => {
+                const cv = document.createElement("canvas");
+                cv.width = CAR_W * 100;
+                cv.height = CAR_H * 100;
+                cv.getContext("2d")?.drawImage(img, 0, 0, cv.width, cv.height);
+                out[team] = cv;
+                done();
+              };
+              img.onerror = () => done();
+              img.src = `${import.meta.env.BASE_URL}cars/${c.file}`;
+            }),
+        ),
+      );
+      return out;
+    })
+    .catch(() => ({})));
+/** "Red Bull Racing '26" -> red_bull, "Racing Bulls" / "VCARB" -> rb, ... */
+function teamKey(team: string | null | undefined) {
+  const t = (team ?? "").toLowerCase();
+  if (t.includes("red bull") && !t.includes("racing bulls")) return "red_bull";
+  if (t.includes("racing bulls") || t.includes("vcarb") || /\brb\b/.test(t)) return "rb";
+  if (t.includes("ferrari")) return "ferrari";
+  if (t.includes("aston")) return "aston_martin";
+  if (t.includes("mclaren")) return "mclaren";
+  if (t.includes("williams")) return "williams";
+  return "generic";
 }
 const norm = (t: string) =>
   t.toLowerCase().replace(/reverse|manual|[^a-z]/g, "").replace(/^sakhir$/, "bahrain");
@@ -111,38 +164,60 @@ export function IncidentReplay({
   const [slow, setSlow] = useState(true);
   const state = useRef({ t: 0, last: 0 });
   const [tiles, setTiles] = useState<Tile[]>([]);
+  const [vec, setVec] = useState<VecTile[]>([]);
+  const [cars, setCars] = useState<Record<string, HTMLCanvasElement>>({});
+  const [zoom, setZoom] = useState(1);
+  const mapRef = useRef<SVGGElement>(null);
   const [frame, setFrame] = useState(0);
+
+  useEffect(() => {
+    let alive = true;
+    loadCars().then((c) => alive && setCars(c));
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (!data?.world || !track) return;
     let alive = true;
     const [cx, cz] = data.world.c;
-    const R = 120; // metres around the contact the camera can show
-    const out: Tile[] = [];
-    const add = (t: Omit<Tile, "img">, src: string) => {
-      const img = new Image();
-      img.onload = () => {
-        if (!alive) return;
-        out.push({ ...t, img });
-        // photo tiles first, sharp vector tiles on top
-        setTiles([...out].sort((a, b) => Number(a.svg) - Number(b.svg)));
-      };
-      img.src = src;
-    };
+    const R = 140; // metres around the contact the camera can show
     const base = import.meta.env.BASE_URL;
-    loadIndex().then((index) => {
-      const folder = alive && index ? mapFolder(index, track) : undefined;
-      if (!index || !folder) return;
-      for (const [i, j] of index[folder].tiles)
-        if (Math.abs((i + 0.5) * TILE - cx) < TILE / 2 + R && Math.abs((j + 0.5) * TILE - cz) < TILE / 2 + R)
-          add({ x0: i * TILE, z0: j * TILE, x1: (i + 1) * TILE, z1: (j + 1) * TILE, svg: false }, `${base}trackmaps/${folder}/${i}_${j}.jpg`);
-    });
+    const photo = () =>
+      loadIndex().then((index) => {
+        const folder = alive && index ? mapFolder(index, track) : undefined;
+        if (!index || !folder) return;
+        const out: Tile[] = [];
+        for (const [i, j] of index[folder].tiles) {
+          if (Math.abs((i + 0.5) * TILE - cx) > TILE / 2 + R || Math.abs((j + 0.5) * TILE - cz) > TILE / 2 + R) continue;
+          const img = new Image();
+          img.onload = () => {
+            if (!alive) return;
+            out.push({ x0: i * TILE, z0: j * TILE, x1: (i + 1) * TILE, z1: (j + 1) * TILE, img });
+            setTiles([...out]);
+          };
+          img.src = `${base}trackmaps/${folder}/${i}_${j}.jpg`;
+        }
+      });
+    // the sharp vector map when this track has one, else the photo tiles
     loadSvgIndex().then((index) => {
-      const folder = alive && index ? mapFolder(index, track) : undefined;
-      if (!index || !folder) return;
-      for (const t of index[folder])
-        if (t.x1 > cx - R && t.x0 < cx + R && t.z1 > cz - R && t.z0 < cz + R)
-          add({ x0: t.x0, z0: t.z0, x1: t.x1, z1: t.z1, svg: true }, `${base}trackmaps-svg/${folder}/${t.f}`);
+      if (!alive) return;
+      const folder = index ? mapFolder(index, track) : undefined;
+      const map = index && folder ? index[folder] : undefined;
+      const near = (map?.tiles ?? []).filter(
+        (t) => Math.abs((t.i + 0.5) * map!.tile - cx) < map!.tile / 2 + R && Math.abs((t.j + 0.5) * map!.tile - cz) < map!.tile / 2 + R,
+      );
+      if (!map || !near.length) return void photo();
+      setVec(
+        near.map((t) => ({
+          x: t.i * map.tile,
+          z: t.j * map.tile,
+          size: map.tile,
+          hrefs: map.layers.filter((l) => t.files[l]).map((l) => `${base}trackmaps-svg/${folder}/${t.files[l]}`),
+          aerial: t.aerial && { ...t.aerial, href: `${base}trackmaps-svg/${folder}/${t.aerial.file}` },
+        })),
+      );
     });
     return () => {
       alive = false;
@@ -201,23 +276,36 @@ export function IncidentReplay({
         cv.width = w;
         cv.height = h;
       }
-      const s = Math.min(w, h) / VIEW;
+      const s = (Math.min(w, h) / VIEW) * zoom;
       ctx.setTransform(1, 0, 0, 1, 0, 0);
-      ctx.fillStyle = "#1c2620";
-      ctx.fillRect(0, 0, w, h);
+      ctx.clearRect(0, 0, w, h);
+      if (!vec.length) {
+        ctx.fillStyle = "#1c2620";
+        ctx.fillRect(0, 0, w, h);
+      }
       const fi = Math.floor(state.current.t), k = state.current.t - fi;
       const c0 = cam[fi], c1 = cam[Math.min(fi + 1, n - 1)];
       const cx = c0[0] + (c1[0] - c0[0]) * k, cy = c0[1] + (c1[1] - c0[1]) * k;
       ctx.setTransform(s, 0, 0, s, w / 2 - cx * s, h / 2 - cy * s);
       ctx.lineJoin = "round";
-      const map = tiles.length > 0 && data.world;
-      if (map && data.world) {
+      if (vec.length && data.world && mapRef.current) {
+        // the vector map is an SVG under the canvas: same camera, in CSS pixels
+        const [wx, wz] = data.world.c;
+        const cr = Math.cos(data.world.rot), sr = Math.sin(data.world.rot);
+        const sc = s / dpr;
+        mapRef.current.setAttribute(
+          "transform",
+          `translate(${(w / 2 - cx * s) / dpr} ${(h / 2 - cy * s) / dpr}) scale(${sc}) matrix(${cr} ${sr} ${-sr} ${cr} ${-(cr * wx - sr * wz)} ${-(sr * wx + cr * wz)})`,
+        );
+      }
+      const map = (tiles.length > 0 || vec.length > 0) && data.world;
+      if (tiles.length > 0 && !vec.length && data.world) {
         // world -> replay: rotate by rot around the centre
         const [wx, wz] = data.world.c;
         const cr = Math.cos(data.world.rot), sr = Math.sin(data.world.rot);
         ctx.save();
         ctx.transform(cr, sr, -sr, cr, -(cr * wx - sr * wz), -(sr * wx + cr * wz));
-        for (const t of tiles) ctx.drawImage(t.img, t.x0, t.z0, t.x1 - t.x0 + (t.svg ? 0.05 : 0.5), t.z1 - t.z0 + (t.svg ? 0.05 : 0.5));
+        for (const t of tiles) ctx.drawImage(t.img, t.x0, t.z0, t.x1 - t.x0 + 0.5, t.z1 - t.z0 + 0.5);
         ctx.restore();
       }
       if (data.track && !map) {
@@ -272,7 +360,23 @@ export function IncidentReplay({
         while (dh < -Math.PI) dh += 2 * Math.PI;
         const x = c[1] + (q[1] - c[1]) * k, y = c[2] + (q[2] - c[2]) * k;
         drawn[c[0]] = [x, y];
-        drawCar(ctx, x, y, c[3] + dh * k, c[0] === a ? COLORS.a : c[0] === b ? COLORS.b : COLORS.other);
+        const col = c[0] === a ? COLORS.a : c[0] === b ? COLORS.b : COLORS.other;
+        const sprite = cars[teamKey(data.teams?.[String(c[0])])] ?? cars.generic;
+        if (sprite) {
+          ctx.save();
+          ctx.translate(x, y);
+          ctx.rotate(c[3] + dh * k);
+          if (c[0] === a || c[0] === b) {
+            // the two cars of the contact keep their colour as a ring around the car
+            ctx.strokeStyle = col;
+            ctx.lineWidth = 0.28;
+            ctx.beginPath();
+            ctx.roundRect(-CAR_W / 2 - 0.35, -CAR_H / 2 - 0.35, CAR_W + 0.7, CAR_H + 0.7, 0.9);
+            ctx.stroke();
+          } else ctx.globalAlpha = 0.85;
+          ctx.drawImage(sprite, -CAR_W / 2, -CAR_H / 2, CAR_W, CAR_H);
+          ctx.restore();
+        } else drawCar(ctx, x, y, c[3] + dh * k, col);
       }
       // contact markers: a ring that grows at the moment of contact, then a cross
       for (const c of data.contacts) {
@@ -323,13 +427,31 @@ export function IncidentReplay({
     };
     raf = requestAnimationFrame(draw);
     return () => cancelAnimationFrame(raf);
-  }, [data, playing, slow, tiles]);
+  }, [data, playing, slow, tiles, vec, cars, zoom]);
 
   if (failed) return <p className="text-zinc-500">The replay of this contact could not be loaded.</p>;
   return (
     <div className="mt-2 overflow-hidden rounded-lg border border-white/[0.06]">
       <div className="grid md:grid-cols-[minmax(0,1fr)_15rem]">
-        <canvas ref={ref} className="block aspect-[4/3] w-full bg-[#1c2620]" aria-label="Overhead replay of this contact" />
+        <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#1c2620]">
+          {vec.length > 0 && (
+            <svg className="absolute inset-0 h-full w-full" aria-hidden="true">
+              <g ref={mapRef}>
+                {vec.map((t) => (
+                  <g key={`${t.x}_${t.z}`}>
+                    {t.aerial && (
+                      <image href={t.aerial.href} x={t.aerial.x0} y={t.aerial.z0} width={t.aerial.size} height={t.aerial.size} preserveAspectRatio="none" />
+                    )}
+                    {t.hrefs.map((h) => (
+                      <image key={h} href={h} x={t.x} y={t.z} width={t.size} height={t.size} preserveAspectRatio="none" />
+                    ))}
+                  </g>
+                ))}
+              </g>
+            </svg>
+          )}
+          <canvas ref={ref} className="absolute inset-0 block h-full w-full" aria-label="Overhead replay of this contact" />
+        </div>
         {data?.inputs && Object.keys(data.inputs).length > 0 && <InputPanel data={data} frame={frame} />}
       </div>
       <div className="flex items-center gap-2 bg-black/30 px-2 py-1.5 text-[11px] text-zinc-400">
@@ -347,6 +469,22 @@ export function IncidentReplay({
           className="rounded px-1.5 py-0.5 text-zinc-200 hover:bg-white/[0.06]"
         >
           {slow ? "0.5×" : "1×"}
+        </button>
+        <button
+          type="button"
+          onClick={() => setZoom((z) => Math.max(0.5, z / 1.5))}
+          className="rounded px-1.5 py-0.5 text-zinc-200 hover:bg-white/[0.06]"
+          aria-label="Zoom out"
+        >
+          −
+        </button>
+        <button
+          type="button"
+          onClick={() => setZoom((z) => Math.min(6, z * 1.5))}
+          className="rounded px-1.5 py-0.5 text-zinc-200 hover:bg-white/[0.06]"
+          aria-label="Zoom in"
+        >
+          +
         </button>
         <span className="ml-auto text-right">Every car's real position from the race · red cross = contact</span>
       </div>

@@ -405,6 +405,9 @@ def main():
                         r = None
                     if not r:
                         continue
+                    # team of every car, for the car drawings (public/cars)
+                    r["teams"] = {str(c["index"]): (c.get("participant-data") or {}).get("team-id") or c.get("team")
+                                  for c in pngs[file].get("classification-data") or []}
                     out_path = os.path.join(outdir, rid + ".json")
                     json.dump(r, open(out_path, "w"), separators=(",", ":"))
                     shutil.copy(out_path, os.path.join(cache, "replays", rid + ".json"))
