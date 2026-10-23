@@ -556,7 +556,7 @@ function SessionRow({ session }: { session: SafetySession }) {
                 </a>
               )}
             </p>
-            {it.replay && replay === it.replay && <IncidentReplay id={it.replay} />}
+            {it.replay && replay === it.replay && <IncidentReplay id={it.replay} track={track} />}
             </div>
           ))}
           <div className="flex items-center justify-between pt-1">

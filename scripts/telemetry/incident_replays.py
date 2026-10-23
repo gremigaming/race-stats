@@ -31,7 +31,7 @@ DOWNLOAD = "https://github.com/gremigaming/race-stats/releases/download/telemetr
 LEAGUE = os.path.join("public", "league")
 BEFORE, AFTER, FPS = 3.0, 2.5, 30
 MARGIN = 40.0          # metres of track drawn around the pair's path
-VERSION = 2            # bump to rebuild every replay
+VERSION = 3            # bump to rebuild every replay
 
 
 def http_json(url):
@@ -258,7 +258,9 @@ class Race:
                 m = (pa[0][n] + pb[0][n]) / 2
                 contacts.append({"f": n, "at": pt(*m)})
         out = {"v": VERSION, "fps": FPS, "contact": ka, "pair": [a, b], "names": {str(a): names[0], str(b): names[1]},
-               "frames": frames, "contacts": contacts}
+               "frames": frames, "contacts": contacts,
+               # world centre and rotation, to put the game track map (public/trackmaps) under the replay
+               "world": {"c": [round(float(c[0]), 2), round(float(c[1]), 2)], "rot": round(rot, 5)}}
         path = np.r_[cars[a][0], cars[b][0]]
         path = path[~np.isnan(path).any(1)]
         rad = min(float(np.hypot(path[:, 0] - c[0], path[:, 1] - c[1]).max()) + MARGIN, 300)

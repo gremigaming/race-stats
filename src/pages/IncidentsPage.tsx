@@ -227,7 +227,7 @@ function IncidentCard({ inc }: { inc: Incident }) {
             })}
           </div>
           {inc.replay ? (
-            <IncidentReplay id={inc.replay} onData={(d) => setStats({ d, s: replayStats(d) })} />
+            <IncidentReplay id={inc.replay} track={inc.track} onData={(d) => setStats({ d, s: replayStats(d) })} />
           ) : (
             <p className="text-zinc-500">No replay for this contact (the race was recorded before every car's position was kept).</p>
           )}

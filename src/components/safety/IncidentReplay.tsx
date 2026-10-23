@@ -10,6 +10,27 @@ export interface ReplayData {
   frames: [number, number, number, number][][];
   contacts: { f: number; at: [number, number] }[];
   track?: { l: number[]; r: number[]; kerbs: number[][] };
+  /** Where the replay sits in the game world: its centre (x, z) and the rotation that turns it travel-up. */
+  world?: { c: [number, number]; rot: number };
+}
+
+/** Game track map tiles (public/trackmaps): 512 m squares at 1 m per pixel, world x right and z down. */
+interface MapIndex {
+  [track: string]: { tiles: [number, number][] };
+}
+const TILE = 512;
+let mapIndex: Promise<MapIndex | null> | null = null;
+const loadIndex = () =>
+  (mapIndex ??= fetch(`${import.meta.env.BASE_URL}trackmaps/index.json`)
+    .then((r) => (r.ok ? r.json() : null))
+    .catch(() => null));
+const norm = (t: string) => t.toLowerCase().replace(/reverse|manual|[^a-z]/g, "");
+/** Track name from a race file ("Abu Dhabi") to its map folder ("abu_dhabi", "abudhabi", ...). */
+function mapFolder(index: MapIndex, track: string) {
+  const want = norm(track);
+  const rev = /reverse/i.test(track);
+  const keys = Object.keys(index).filter((k) => norm(k) === want || norm(k).includes(want) || want.includes(norm(k)));
+  return keys.find((k) => /rev/i.test(k) === rev) ?? keys[0];
 }
 
 const COLORS = { a: "#ff8a1f", b: "#4fb6ff", other: "#9aa1ad" };
@@ -52,13 +73,50 @@ function path(ctx: CanvasRenderingContext2D, p: number[]) {
 }
 
 /** Overhead replay of one contact: loops a few seconds around it at half speed. */
-export function IncidentReplay({ id, onData }: { id: string; onData?: (d: ReplayData) => void }) {
+export function IncidentReplay({
+  id,
+  track,
+  onData,
+}: {
+  id: string;
+  /** Track name, to draw the game map under the replay when there is one. */
+  track?: string;
+  onData?: (d: ReplayData) => void;
+}) {
   const ref = useRef<HTMLCanvasElement>(null);
   const [data, setData] = useState<ReplayData | null>(null);
   const [failed, setFailed] = useState(false);
   const [playing, setPlaying] = useState(!matchMedia("(prefers-reduced-motion: reduce)").matches);
   const [slow, setSlow] = useState(true);
   const state = useRef({ t: 0, last: 0 });
+  const [tiles, setTiles] = useState<{ i: number; j: number; img: HTMLImageElement }[]>([]);
+
+  useEffect(() => {
+    if (!data?.world || !track) return;
+    let alive = true;
+    loadIndex().then((index) => {
+      if (!alive || !index || !data.world) return;
+      const folder = mapFolder(index, track);
+      if (!folder) return;
+      const [cx, cz] = data.world.c;
+      const near = index[folder].tiles.filter(
+        ([i, j]) => Math.abs((i + 0.5) * TILE - cx) < TILE / 2 + 120 && Math.abs((j + 0.5) * TILE - cz) < TILE / 2 + 120,
+      );
+      const out: { i: number; j: number; img: HTMLImageElement }[] = [];
+      for (const [i, j] of near) {
+        const img = new Image();
+        img.onload = () => {
+          if (!alive) return;
+          out.push({ i, j, img });
+          setTiles([...out]);
+        };
+        img.src = `${import.meta.env.BASE_URL}trackmaps/${folder}/${i}_${j}.jpg`;
+      }
+    });
+    return () => {
+      alive = false;
+    };
+  }, [data, track]);
 
   useEffect(() => {
     let alive = true;
@@ -120,7 +178,17 @@ export function IncidentReplay({ id, onData }: { id: string; onData?: (d: Replay
       const cx = c0[0] + (c1[0] - c0[0]) * k, cy = c0[1] + (c1[1] - c0[1]) * k;
       ctx.setTransform(s, 0, 0, s, w / 2 - cx * s, h / 2 - cy * s);
       ctx.lineJoin = "round";
-      if (data.track) {
+      const map = tiles.length > 0 && data.world;
+      if (map && data.world) {
+        // world -> replay: rotate by rot around the centre
+        const [wx, wz] = data.world.c;
+        const cr = Math.cos(data.world.rot), sr = Math.sin(data.world.rot);
+        ctx.save();
+        ctx.transform(cr, sr, -sr, cr, -(cr * wx - sr * wz), -(sr * wx + cr * wz));
+        for (const t of tiles) ctx.drawImage(t.img, t.i * TILE, t.j * TILE, TILE + 0.5, TILE + 0.5);
+        ctx.restore();
+      }
+      if (data.track && !map) {
         const { l, r, kerbs } = data.track;
         ctx.fillStyle = "#121418";
         ctx.beginPath();
@@ -219,7 +287,7 @@ export function IncidentReplay({ id, onData }: { id: string; onData?: (d: Replay
     };
     raf = requestAnimationFrame(draw);
     return () => cancelAnimationFrame(raf);
-  }, [data, playing, slow]);
+  }, [data, playing, slow, tiles]);
 
   if (failed) return <p className="text-zinc-500">The replay of this contact could not be loaded.</p>;
   return (
