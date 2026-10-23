@@ -223,6 +223,25 @@ $recorder = Start-Recorder
 $recorderStatus = ""
 
 while ($true) {
+    # Telemetry first: the recorder closes a session's file when its results come in, so
+    # the recording is on GitHub before the race file starts the site build (replays at once)
+    if ($recorder) {
+        if ($recorder.Status -ne $recorderStatus) {
+            $recorderStatus = $recorder.Status
+            Say "Telemetry: $recorderStatus"
+        }
+        $sessions = Get-ChildItem -Path $TelemetryDir -Filter "*.gmtel.gz" -File -ErrorAction SilentlyContinue | Sort-Object LastWriteTime
+        foreach ($file in $sessions) {
+            try {
+                $result = Send-Telemetry $file $settings.Token
+                Say "Telemetry $($file.Name) ($([math]::Round($file.Length / 1MB, 1)) MB): $result" Green
+            } catch {
+                Say "Telemetry $($file.Name): upload failed, trying again soon ($($_.Exception.Message))" Yellow
+            }
+        }
+        Remove-OldTelemetry
+    }
+
     $files = Get-ChildItem -Path $settings.DataDir -Recurse -Filter "*.json" -ErrorAction SilentlyContinue |
         Where-Object { $_.Directory.Name -eq "race-info" -and -not $done.Contains($_.Name) } |
         Sort-Object LastWriteTime
@@ -243,21 +262,5 @@ while ($true) {
         }
     }
 
-    if ($recorder) {
-        if ($recorder.Status -ne $recorderStatus) {
-            $recorderStatus = $recorder.Status
-            Say "Telemetry: $recorderStatus"
-        }
-        $sessions = Get-ChildItem -Path $TelemetryDir -Filter "*.gmtel.gz" -File -ErrorAction SilentlyContinue | Sort-Object LastWriteTime
-        foreach ($file in $sessions) {
-            try {
-                $result = Send-Telemetry $file $settings.Token
-                Say "Telemetry $($file.Name) ($([math]::Round($file.Length / 1MB, 1)) MB): $result" Green
-            } catch {
-                Say "Telemetry $($file.Name): upload failed, trying again soon ($($_.Exception.Message))" Yellow
-            }
-        }
-        Remove-OldTelemetry
-    }
     Start-Sleep -Seconds $CheckEverySeconds
 }

@@ -65,6 +65,7 @@ public class GmTelemetryRecorder
     string partPath;
     DateTime startedAt;
     ulong sessionUid;
+    ulong doneUid;      // a session whose results came in: its file is closed and sent straight away
     int trackId = -1;
     int sessionType = 0;
     int telemetryRecords;
@@ -154,6 +155,7 @@ public class GmTelemetryRecorder
         ulong uid = BitConverter.ToUInt64(p, 7);
         int player = p[27];
         if (uid == 0 || player == 255) return; // menus or spectating
+        if (uid == doneUid) return;            // results are in, the file has gone to the uploader
         int numCars = format >= 2026 ? 24 : 22;
 
         int trailer;
@@ -198,7 +200,14 @@ public class GmTelemetryRecorder
             FlushPending();
         }
 
-        if (trailer < 0) { Write(0, p, 0, p.Length, null, 0, 0); return; }
+        if (trailer < 0)
+        {
+            Write(0, p, 0, p.Length, null, 0, 0);
+            // final classification: the session is over, so close the file now (not when the
+            // next session starts) and the incident replays reach the site within a minute
+            if (id == 8) { doneUid = uid; Close(); }
+            return;
+        }
         int body = p.Length - HeaderLen - trailer;
         if (body <= 0 || body % numCars != 0 || player >= numCars)
         {

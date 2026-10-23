@@ -22,7 +22,8 @@ const server = createServer((req, res) => {
 }).listen(4173);
 const base = "http://localhost:4173/race-stats/";
 mkdirSync(outDir, { recursive: true });
-const browser = await chromium.launch();
+// PW_CHANNEL=chrome uses the runner's own Google Chrome (no browser download, which took minutes)
+const browser = await chromium.launch(process.env.PW_CHANNEL ? { channel: process.env.PW_CHANNEL } : {});
 const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
 // The default filter (this month) can be empty; most shots use all time
 await page.addInitScript(() => {

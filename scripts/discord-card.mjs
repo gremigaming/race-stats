@@ -27,7 +27,8 @@ const server = createServer((req, res) => {
 const base = "http://localhost:4174/race-stats/";
 const out = join(dist, "discord");
 mkdirSync(out, { recursive: true });
-const browser = await chromium.launch();
+// PW_CHANNEL=chrome uses the runner's own Google Chrome (no browser download, which took minutes)
+const browser = await chromium.launch(process.env.PW_CHANNEL ? { channel: process.env.PW_CHANNEL } : {});
 const page = await browser.newPage({ viewport: { width: 1100, height: 900 }, deviceScaleFactor: 2, timezoneId: "Europe/Amsterdam" });
 await page.goto(base);
 await page.waitForTimeout(4000);
