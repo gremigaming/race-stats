@@ -24,7 +24,8 @@ const loadIndex = () =>
   (mapIndex ??= fetch(`${import.meta.env.BASE_URL}trackmaps/index.json`)
     .then((r): Promise<MapIndex> | null => (r.ok ? r.json() : null))
     .catch(() => null));
-const norm = (t: string) => t.toLowerCase().replace(/reverse|manual|[^a-z]/g, "");
+const norm = (t: string) =>
+  t.toLowerCase().replace(/reverse|manual|[^a-z]/g, "").replace(/^sakhir$/, "bahrain");
 /** Track name from a race file ("Abu Dhabi") to its map folder ("abu_dhabi", "abudhabi", ...). */
 function mapFolder(index: MapIndex, track: string) {
   const want = norm(track);
