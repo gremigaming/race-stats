@@ -24,10 +24,27 @@ const loadIndex = () =>
   (mapIndex ??= fetch(`${import.meta.env.BASE_URL}trackmaps/index.json`)
     .then((r): Promise<MapIndex> | null => (r.ok ? r.json() : null))
     .catch(() => null));
+/** Sharp vector tiles around the incidents (public/trackmaps-svg), drawn over the photo tiles. */
+interface SvgIndex {
+  [track: string]: { f: string; x0: number; z0: number; x1: number; z1: number }[];
+}
+let svgIndex: Promise<SvgIndex | null> | null = null;
+const loadSvgIndex = () =>
+  (svgIndex ??= fetch(`${import.meta.env.BASE_URL}trackmaps-svg/index.json`)
+    .then((r): Promise<SvgIndex> | null => (r.ok ? r.json() : null))
+    .catch(() => null));
+interface Tile {
+  x0: number;
+  z0: number;
+  x1: number;
+  z1: number;
+  svg: boolean;
+  img: HTMLImageElement;
+}
 const norm = (t: string) =>
   t.toLowerCase().replace(/reverse|manual|[^a-z]/g, "").replace(/^sakhir$/, "bahrain");
 /** Track name from a race file ("Abu Dhabi") to its map folder ("abu_dhabi", "abudhabi", ...). */
-function mapFolder(index: MapIndex, track: string) {
+function mapFolder(index: object, track: string) {
   const want = norm(track);
   const rev = /reverse/i.test(track);
   const keys = Object.keys(index).filter((k) => norm(k) === want || norm(k).includes(want) || want.includes(norm(k)));
@@ -90,29 +107,38 @@ export function IncidentReplay({
   const [playing, setPlaying] = useState(!matchMedia("(prefers-reduced-motion: reduce)").matches);
   const [slow, setSlow] = useState(true);
   const state = useRef({ t: 0, last: 0 });
-  const [tiles, setTiles] = useState<{ i: number; j: number; img: HTMLImageElement }[]>([]);
+  const [tiles, setTiles] = useState<Tile[]>([]);
 
   useEffect(() => {
     if (!data?.world || !track) return;
     let alive = true;
+    const [cx, cz] = data.world.c;
+    const R = 120; // metres around the contact the camera can show
+    const out: Tile[] = [];
+    const add = (t: Omit<Tile, "img">, src: string) => {
+      const img = new Image();
+      img.onload = () => {
+        if (!alive) return;
+        out.push({ ...t, img });
+        // photo tiles first, sharp vector tiles on top
+        setTiles([...out].sort((a, b) => Number(a.svg) - Number(b.svg)));
+      };
+      img.src = src;
+    };
+    const base = import.meta.env.BASE_URL;
     loadIndex().then((index) => {
-      if (!alive || !index || !data.world) return;
-      const folder = mapFolder(index, track);
-      if (!folder) return;
-      const [cx, cz] = data.world.c;
-      const near = index[folder].tiles.filter(
-        ([i, j]: [number, number]) => Math.abs((i + 0.5) * TILE - cx) < TILE / 2 + 120 && Math.abs((j + 0.5) * TILE - cz) < TILE / 2 + 120,
-      );
-      const out: { i: number; j: number; img: HTMLImageElement }[] = [];
-      for (const [i, j] of near) {
-        const img = new Image();
-        img.onload = () => {
-          if (!alive) return;
-          out.push({ i, j, img });
-          setTiles([...out]);
-        };
-        img.src = `${import.meta.env.BASE_URL}trackmaps/${folder}/${i}_${j}.jpg`;
-      }
+      const folder = alive && index ? mapFolder(index, track) : undefined;
+      if (!index || !folder) return;
+      for (const [i, j] of index[folder].tiles)
+        if (Math.abs((i + 0.5) * TILE - cx) < TILE / 2 + R && Math.abs((j + 0.5) * TILE - cz) < TILE / 2 + R)
+          add({ x0: i * TILE, z0: j * TILE, x1: (i + 1) * TILE, z1: (j + 1) * TILE, svg: false }, `${base}trackmaps/${folder}/${i}_${j}.jpg`);
+    });
+    loadSvgIndex().then((index) => {
+      const folder = alive && index ? mapFolder(index, track) : undefined;
+      if (!index || !folder) return;
+      for (const t of index[folder])
+        if (t.x1 > cx - R && t.x0 < cx + R && t.z1 > cz - R && t.z0 < cz + R)
+          add({ x0: t.x0, z0: t.z0, x1: t.x1, z1: t.z1, svg: true }, `${base}trackmaps-svg/${folder}/${t.f}`);
     });
     return () => {
       alive = false;
@@ -186,7 +212,7 @@ export function IncidentReplay({
         const cr = Math.cos(data.world.rot), sr = Math.sin(data.world.rot);
         ctx.save();
         ctx.transform(cr, sr, -sr, cr, -(cr * wx - sr * wz), -(sr * wx + cr * wz));
-        for (const t of tiles) ctx.drawImage(t.img, t.i * TILE, t.j * TILE, TILE + 0.5, TILE + 0.5);
+        for (const t of tiles) ctx.drawImage(t.img, t.x0, t.z0, t.x1 - t.x0 + (t.svg ? 0.05 : 0.5), t.z1 - t.z0 + (t.svg ? 0.05 : 0.5));
         ctx.restore();
       }
       if (data.track && !map) {
