@@ -8,6 +8,7 @@ import {
   FolderUp,
   Menu,
   ShieldCheck,
+  Siren,
   Swords,
   Trophy,
   Wrench,
@@ -263,6 +264,12 @@ export function Layout() {
               active={section === "head-to-head"}
               icon={Swords}
               label="Head to head"
+            />
+            <MenuLink
+              to={`/${scopeKey}/incidents`}
+              active={section === "incidents"}
+              icon={Siren}
+              label="Incidents"
             />
             {SETUP_MANAGER_ON && (
               <MenuLink

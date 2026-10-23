@@ -15,6 +15,7 @@ import { TrackProgressPage } from "./pages/TrackProgressPage";
 import { DriversPage } from "./pages/DriversPage";
 import { HeadToHeadPage } from "./pages/HeadToHeadPage";
 import { SafetyPage } from "./pages/SafetyPage";
+import { IncidentsPage } from "./pages/IncidentsPage";
 import { SetupCardsPage } from "./pages/SetupCardsPage";
 import { SetupManagerPage } from "./pages/SetupManagerPage";
 import { SETUP_MANAGER_ON } from "./league/setupManager";
@@ -88,6 +89,14 @@ function AppRoutes() {
             element={
               <ScopedFormulaRoute>
                 <SafetyPage />
+              </ScopedFormulaRoute>
+            }
+          />
+          <Route
+            path=":formulaKey/incidents"
+            element={
+              <ScopedFormulaRoute>
+                <IncidentsPage />
               </ScopedFormulaRoute>
             }
           />

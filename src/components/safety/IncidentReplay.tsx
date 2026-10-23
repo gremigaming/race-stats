@@ -2,7 +2,7 @@ import { Pause, Play } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 /** One replay written by scripts/telemetry/incident_replays.py (metres, the pair's direction of travel up). */
-interface ReplayData {
+export interface ReplayData {
   fps: number;
   contact: number;
   pair: [number, number];
@@ -52,7 +52,7 @@ function path(ctx: CanvasRenderingContext2D, p: number[]) {
 }
 
 /** Overhead replay of one contact: loops a few seconds around it at half speed. */
-export function IncidentReplay({ id }: { id: string }) {
+export function IncidentReplay({ id, onData }: { id: string; onData?: (d: ReplayData) => void }) {
   const ref = useRef<HTMLCanvasElement>(null);
   const [data, setData] = useState<ReplayData | null>(null);
   const [failed, setFailed] = useState(false);
@@ -68,6 +68,7 @@ export function IncidentReplay({ id }: { id: string }) {
         if (!alive) return;
         state.current.t = 0;
         setData(d);
+        onData?.(d);
       })
       .catch(() => alive && setFailed(true));
     return () => {
@@ -240,8 +241,65 @@ export function IncidentReplay({ id }: { id: string }) {
         >
           {slow ? "0.5×" : "1×"}
         </button>
-        <span className="ml-auto">Every car's real position from the race · red cross = contact</span>
+        <span className="ml-auto text-right">Every car's real position from the race · red cross = contact</span>
       </div>
     </div>
   );
+}
+
+export interface CarStats {
+  car: number;
+  /** km/h at the contact and one second before it. */
+  speed: number | null;
+  speedBefore: number | null;
+  /** Metres ahead of the other car along the direction of travel (negative = behind). */
+  ahead: number | null;
+  /** Metres moved toward the left (+) or right (-) edge of the track in the last second. */
+  moved: number | null;
+}
+
+function nearest(p: number[], x: number, y: number) {
+  let best = Infinity;
+  for (let i = 0; i + 3 < p.length; i += 2) {
+    const ax = p[i], ay = p[i + 1], dx = p[i + 2] - ax, dy = p[i + 3] - ay;
+    const l = dx * dx + dy * dy;
+    const t = l ? Math.max(0, Math.min(1, ((x - ax) * dx + (y - ay) * dy) / l)) : 0;
+    best = Math.min(best, Math.hypot(x - ax - t * dx, y - ay - t * dy));
+  }
+  return best;
+}
+
+/** Speeds, who was ahead and who moved across, for the two cars of a replay. */
+export function replayStats(d: ReplayData): CarStats[] {
+  const pos = (car: number, f: number) => {
+    const c = d.frames[f]?.find((x) => x[0] === car);
+    return c ? [c[1], c[2]] : null;
+  };
+  const speed = (car: number, f: number) => {
+    const k = Math.max(1, Math.round(d.fps / 10));
+    const p = pos(car, f - k), q = pos(car, f + k);
+    return p && q ? (Math.hypot(q[0] - p[0], q[1] - p[1]) * d.fps * 3.6) / (2 * k) : null;
+  };
+  const side = (car: number, f: number) => {
+    const p = pos(car, f);
+    if (!p || !d.track) return null;
+    return (nearest(d.track.r, p[0], p[1]) - nearest(d.track.l, p[0], p[1])) / 2;
+  };
+  const f = d.contact, f0 = Math.max(0, f - d.fps);
+  // which edge is on the left of the screen (the way the cars drive)
+  const meanX = (p: number[]) => p.filter((_, i) => i % 2 === 0).reduce((a, b) => a + b, 0) / (p.length / 2 || 1);
+  const flip = d.track && meanX(d.track.l) > meanX(d.track.r) ? -1 : 1;
+  return d.pair.map((car, i) => {
+    const other = d.pair[1 - i];
+    const p = pos(car, f), o = pos(other, f);
+    const s1 = side(car, f), s0 = side(car, f0);
+    return {
+      car,
+      speed: speed(car, f),
+      speedBefore: speed(car, f0),
+      // the pair drives up the screen, so a smaller y is further ahead
+      ahead: p && o ? o[1] - p[1] : null,
+      moved: s1 != null && s0 != null ? (s1 - s0) * flip : null,
+    };
+  });
 }
