@@ -31,7 +31,7 @@ DOWNLOAD = "https://github.com/gremigaming/race-stats/releases/download/telemetr
 LEAGUE = os.path.join("public", "league")
 BEFORE, AFTER, FPS = 3.0, 2.5, 30
 MARGIN = 40.0          # metres of track drawn around the pair's path
-VERSION = 3            # bump to rebuild every replay
+VERSION = 4            # bump to rebuild every replay
 
 
 def http_json(url):
@@ -103,10 +103,16 @@ class Race:
         self.s = sess
         self.pos = collections.defaultdict(list)    # car -> [(t, x, z, fx, fz)]
         self.kerb = []                              # (t, x, z) of rows with a wheel on a kerb
+        self.inp = collections.defaultdict(list)    # car -> [(t, speed, throttle, brake, steer, gear)]
+        self.place = collections.defaultdict(list)  # car -> [(t, race position)]
         for t in sorted(sess.field):
             for i, r in sess.field[t].items():
                 if "x" in r:
                     self.pos[i].append((t, r["x"], r["z"], r["fx"], r["fz"]))
+                if "throttle" in r:
+                    self.inp[i].append((t, r["speed"], r["throttle"], r["brake"], r["steer"], r["gear"]))
+                if "position" in r:
+                    self.place[i].append((t, r["position"]))
         last = {}
         for t in sorted(sess.field):
             for i, r in sess.field[t].items():
@@ -257,8 +263,31 @@ class Race:
                     continue
                 m = (pa[0][n] + pb[0][n]) / 2
                 contacts.append({"f": n, "at": pt(*m)})
+        # inputs of the pair, 10 times a second (frame 3k of the replay), for the data panel
+        step = FPS // 10
+        sub = grid[::step]
+        inputs = {}
+        for car in (a, b):
+            rows = np.array(self.inp.get(car) or [])
+            if len(rows) < 5:
+                continue
+            m = (rows[:, 0] > sub[0] - 1) & (rows[:, 0] < sub[-1] + 1)
+            if m.sum() < 5:
+                continue
+            R = rows[m]
+
+            def lin(col, nd=0):
+                v = np.interp(sub, R[:, 0], R[:, col])
+                return [round(float(x), nd) if nd else int(round(float(x))) for x in v]
+            near = np.abs(R[:, 0][None, :] - sub[:, None]).argmin(1)
+            inputs[str(car)] = {"spd": lin(1), "thr": lin(2, 2), "brk": lin(3, 2), "str": lin(4, 2),
+                                "gear": [int(R[k, 5]) for k in near]}
+            pl = self.place.get(car)
+            if pl:
+                P = np.array(pl)
+                inputs[str(car)]["pos"] = int(P[np.abs(P[:, 0] - grid[ka]).argmin(), 1])
         out = {"v": VERSION, "fps": FPS, "contact": ka, "pair": [a, b], "names": {str(a): names[0], str(b): names[1]},
-               "frames": frames, "contacts": contacts,
+               "frames": frames, "contacts": contacts, "inputs": inputs, "inputStep": step,
                # world centre and rotation, to put the game track map (public/trackmaps) under the replay
                "world": {"c": [round(float(c[0]), 2), round(float(c[1]), 2)], "rot": round(rot, 5)}}
         path = np.r_[cars[a][0], cars[b][0]]

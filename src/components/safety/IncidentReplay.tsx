@@ -10,6 +10,9 @@ export interface ReplayData {
   frames: [number, number, number, number][][];
   contacts: { f: number; at: [number, number] }[];
   track?: { l: number[]; r: number[]; kerbs: number[][] };
+  /** The pair's inputs every inputStep frames: speed km/h, throttle/brake 0..1, steer -1..1, gear, race position. */
+  inputs?: Record<string, { spd: number[]; thr: number[]; brk: number[]; str: number[]; gear: number[]; pos?: number }>;
+  inputStep?: number;
   /** Where the replay sits in the game world: its centre (x, z) and the rotation that turns it travel-up. */
   world?: { c: [number, number]; rot: number };
 }
@@ -108,6 +111,7 @@ export function IncidentReplay({
   const [slow, setSlow] = useState(true);
   const state = useRef({ t: 0, last: 0 });
   const [tiles, setTiles] = useState<Tile[]>([]);
+  const [frame, setFrame] = useState(0);
 
   useEffect(() => {
     if (!data?.world || !track) return;
@@ -186,6 +190,7 @@ export function IncidentReplay({
       return m ? [x / m, y / m] : [0, 0];
     });
     let raf = 0;
+    let lastFrame = -1;
     const draw = (now: number) => {
       const st = state.current;
       if (playing && st.last) st.t = (st.t + ((now - st.last) / 1000) * data.fps * (slow ? 0.5 : 1)) % n;
@@ -305,6 +310,10 @@ export function IncidentReplay({
         ctx.fillStyle = col;
         ctx.fillText(txt, sx + fs * 0.3, sy + fs * 1.05);
       }
+      if (fi !== lastFrame) {
+        lastFrame = fi;
+        setFrame(fi);
+      }
       const sec = (fi - data.contact) / data.fps;
       ctx.fillStyle = "rgba(13,15,19,.82)";
       ctx.fillRect(fs * 0.6, fs * 0.6, fs * 6.2, fs * 1.6);
@@ -319,7 +328,10 @@ export function IncidentReplay({
   if (failed) return <p className="text-zinc-500">The replay of this contact could not be loaded.</p>;
   return (
     <div className="mt-2 overflow-hidden rounded-lg border border-white/[0.06]">
-      <canvas ref={ref} className="block aspect-[4/3] w-full bg-[#1c2620]" aria-label="Overhead replay of this contact" />
+      <div className="grid md:grid-cols-[minmax(0,1fr)_15rem]">
+        <canvas ref={ref} className="block aspect-[4/3] w-full bg-[#1c2620]" aria-label="Overhead replay of this contact" />
+        {data?.inputs && Object.keys(data.inputs).length > 0 && <InputPanel data={data} frame={frame} />}
+      </div>
       <div className="flex items-center gap-2 bg-black/30 px-2 py-1.5 text-[11px] text-zinc-400">
         <button
           type="button"
@@ -397,4 +409,83 @@ export function replayStats(d: ReplayData): CarStats[] {
       moved: s1 != null && s0 != null ? (s1 - s0) * flip : null,
     };
   });
+}
+
+/** Both drivers' inputs at the current replay frame, plus their speed over the clip. */
+function InputPanel({ data, frame }: { data: ReplayData; frame: number }) {
+  const step = data.inputStep ?? 3;
+  const k = Math.floor(frame / step);
+  const kc = Math.floor(data.contact / step);
+  const cars = data.pair.filter((c) => data.inputs?.[String(c)]);
+  const n = Math.max(...cars.map((c) => data.inputs![String(c)].spd.length));
+  const maxV = Math.max(50, ...cars.flatMap((c) => data.inputs![String(c)].spd));
+  const W = 220, H = 64;
+  const x = (i: number) => (i / Math.max(1, n - 1)) * W;
+  const y = (v: number) => H - 4 - (v / maxV) * (H - 8);
+  return (
+    <div className="space-y-2 bg-black/40 p-2.5 text-[11px] text-zinc-300">
+      <p className="flex items-center gap-1 text-zinc-500">
+        <span className="text-base leading-none text-zinc-300">↑</span> driving direction is up
+      </p>
+      {cars.map((car) => {
+        const inp = data.inputs![String(car)];
+        const i = Math.min(k, inp.spd.length - 1);
+        const col = car === data.pair[0] ? COLORS.a : COLORS.b;
+        const steer = inp.str[i] ?? 0;
+        return (
+          <div key={car} className="rounded-md bg-white/[0.03] p-2">
+            <div className="mb-1.5 flex items-center gap-1.5">
+              <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: col }} />
+              <span className="min-w-0 truncate font-semibold text-zinc-100">{data.names[String(car)]}</span>
+              {inp.pos != null && <span className="ml-auto shrink-0 text-zinc-500">P{inp.pos}</span>}
+            </div>
+            <div className="flex items-center gap-2.5">
+              <div className="w-14 shrink-0 text-center">
+                <div className="font-mono text-lg leading-none text-zinc-100">{inp.spd[i]}</div>
+                <div className="text-[10px] text-zinc-500">km/h · gear {inp.gear[i]}</div>
+              </div>
+              <div className="flex h-10 items-end gap-1" title="Throttle and brake">
+                <div className="relative h-full w-2.5 overflow-hidden rounded-sm bg-white/10">
+                  <div className="absolute inset-x-0 bottom-0 bg-emerald-400" style={{ height: `${(inp.thr[i] ?? 0) * 100}%` }} />
+                </div>
+                <div className="relative h-full w-2.5 overflow-hidden rounded-sm bg-white/10">
+                  <div className="absolute inset-x-0 bottom-0 bg-red-500" style={{ height: `${(inp.brk[i] ?? 0) * 100}%` }} />
+                </div>
+              </div>
+              <svg viewBox="-20 -20 40 40" className="h-10 w-10 shrink-0" aria-label="Steering">
+                <g transform={`rotate(${steer * 90})`}>
+                  <circle r="15" fill="none" stroke="#a1a1aa" strokeWidth="3.5" />
+                  <path d="M-15 0 H15 M0 0 V15" stroke="#a1a1aa" strokeWidth="3" />
+                  <circle cy="-15" r="2.6" fill={col} />
+                </g>
+              </svg>
+              <div className="min-w-0 text-[10px] leading-tight text-zinc-500">
+                <div>thr {Math.round((inp.thr[i] ?? 0) * 100)}%</div>
+                <div>brk {Math.round((inp.brk[i] ?? 0) * 100)}%</div>
+                <div>
+                  steer {Math.abs(Math.round(steer * 100))}% {Math.abs(steer) < 0.03 ? "" : steer < 0 ? "L" : "R"}
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })}
+      <div>
+        <p className="mb-0.5 text-zinc-500">Speed over the clip (red line = contact)</p>
+        <svg viewBox={`0 0 ${W} ${H}`} className="h-16 w-full" preserveAspectRatio="none">
+          <line x1={x(kc)} x2={x(kc)} y1="0" y2={H} stroke="#ff3b30" strokeWidth="1" />
+          {cars.map((car) => (
+            <polyline
+              key={car}
+              fill="none"
+              stroke={car === data.pair[0] ? COLORS.a : COLORS.b}
+              strokeWidth="1.5"
+              points={data.inputs![String(car)].spd.map((v, i) => `${x(i)},${y(v)}`).join(" ")}
+            />
+          ))}
+          <line x1={x(k)} x2={x(k)} y1="0" y2={H} stroke="#e5e7eb" strokeWidth="1" strokeDasharray="2 2" />
+        </svg>
+      </div>
+    </div>
+  );
 }
