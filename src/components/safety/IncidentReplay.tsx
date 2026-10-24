@@ -29,7 +29,9 @@ const loadIndex = () =>
   (mapIndex ??= fetch(`${import.meta.env.BASE_URL}trackmaps/index.json`)
     .then((r): Promise<MapIndex> | null => (r.ok ? r.json() : null))
     .catch(() => null));
-/** Sharp vector map (public/trackmaps-svg): 100 m tiles, one SVG per layer, world metres, x right and z down. */
+/** The sharp vector maps live in their own repo and site (gremigaming/race-stats-maps), so this site's deploys stay small and fast. */
+const SVG_MAPS = "https://gremigaming.github.io/race-stats-maps/";
+/** Sharp vector map (race-stats-maps): 100 m tiles, one SVG per layer, world metres, x right and z down. */
 interface SvgIndex {
   [track: string]: {
     tile: number;
@@ -39,7 +41,7 @@ interface SvgIndex {
 }
 let svgIndex: Promise<SvgIndex | null> | null = null;
 const loadSvgIndex = () =>
-  (svgIndex ??= fetch(`${import.meta.env.BASE_URL}trackmaps-svg/index.json`)
+  (svgIndex ??= fetch(`${SVG_MAPS}index.json`)
     .then((r): Promise<SvgIndex> | null => (r.ok ? r.json() : null))
     .catch(() => null));
 interface Tile {
@@ -214,8 +216,8 @@ export function IncidentReplay({
           x: t.i * map.tile,
           z: t.j * map.tile,
           size: map.tile,
-          hrefs: map.layers.filter((l) => t.files[l]).map((l) => `${base}trackmaps-svg/${folder}/${t.files[l]}`),
-          aerial: t.aerial && { ...t.aerial, href: `${base}trackmaps-svg/${folder}/${t.aerial.file}` },
+          hrefs: map.layers.filter((l) => t.files[l]).map((l) => `${SVG_MAPS}${folder}/${t.files[l]}`),
+          aerial: t.aerial && { ...t.aerial, href: `${SVG_MAPS}${folder}/${t.aerial.file}` },
         })),
       );
     });
