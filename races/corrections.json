@@ -220,6 +220,18 @@
       "reason": "Protest accepted: .",
       "by": "319544045435224067",
       "at": "2026-10-19T13:32:01Z"
+    },
+    {
+      "id": "Race_Spa_2026_10_25_15_54_11.json|12|contact|1|0",
+      "type": "incident",
+      "file": "Race_Spa_2026_10_25_15_54_11.json",
+      "driver": "DDRK",
+      "car": 12,
+      "pts": 0.0,
+      "was": -1.5,
+      "reason": "Protest accepted: Agreed",
+      "by": "452166434588590080",
+      "at": "2026-10-25T15:55:32Z"
     }
   ]
 }
