@@ -232,6 +232,18 @@
       "reason": "Protest accepted: Agreed",
       "by": "452166434588590080",
       "at": "2026-10-25T15:55:32Z"
+    },
+    {
+      "id": "Race_Imola_2026_10_25_15_20_36.json|4|contact|1|0",
+      "type": "incident",
+      "file": "Race_Imola_2026_10_25_15_20_36.json",
+      "driver": "Stepino81",
+      "car": 4,
+      "pts": 0.0,
+      "was": -6.0,
+      "reason": "Protest accepted: Agreed",
+      "by": "452166434588590080",
+      "at": "2026-10-25T16:04:32Z"
     }
   ]
 }
