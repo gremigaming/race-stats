@@ -1,18 +1,18 @@
 {
-  "note": "2026 liveries for the Live Race Viewer's vector car (src/viewer/cars.ts): base bodywork, accent (wing flaps, sidepod flash), nose tip, optional side (sidepods and engine cover, two-tone liveries), the tower code and, once we have the file in public/teams/, the team logo. Our own colours per team, no game art.",
+  "note": "2026 liveries for the Live Race Viewer's vector car (src/viewer/cars.ts): base bodywork, accent (wing flaps, sidepod flash), nose tip, optional side (sidepods and engine cover, two-tone liveries), the tower code and the team logo in public/teams/ (from the F1 25 game files, GreMi's OK). Our own colours per team.",
   "teams": {
-    "mclaren": { "base": "#ff8000", "accent": "#47c7fc", "nose": "#1a1a1a", "side": "#1a1a1a", "code": "MCL" },
-    "ferrari": { "base": "#dc0000", "accent": "#f4f4f4", "nose": "#f4f4f4", "code": "FER" },
-    "red_bull": { "base": "#1b2a52", "accent": "#e8112d", "nose": "#f5c400", "code": "RBR" },
-    "mercedes": { "base": "#c8ccd0", "accent": "#00d7b6", "nose": "#16181b", "side": "#16181b", "code": "MER" },
-    "aston_martin": { "base": "#00594f", "accent": "#cedc00", "nose": "#00594f", "code": "AMR" },
-    "alpine": { "base": "#0b5bb5", "accent": "#fd4bc7", "nose": "#fd4bc7", "side": "#0b1530", "code": "ALP" },
-    "williams": { "base": "#1868db", "accent": "#00a3e0", "nose": "#0c1d3d", "code": "WIL" },
-    "rb": { "base": "#f2f3f7", "accent": "#2a4ec9", "nose": "#e3263a", "code": "RB" },
-    "haas": { "base": "#ececec", "accent": "#e10600", "nose": "#1a1a1a", "side": "#1a1a1a", "code": "HAA" },
-    "audi": { "base": "#a9adb1", "accent": "#f50537", "nose": "#1a1a1a", "side": "#1a1a1a", "code": "AUD" },
-    "cadillac": { "base": "#151515", "accent": "#f2f2f2", "nose": "#f2f2f2", "code": "CAD" },
-    "sauber": { "base": "#1f1f1f", "accent": "#52e252", "nose": "#52e252", "code": "SAU" },
+    "mclaren": { "base": "#ff8000", "accent": "#47c7fc", "nose": "#1a1a1a", "side": "#1a1a1a", "code": "MCL", "logo": "teams/mclaren.png" },
+    "ferrari": { "base": "#dc0000", "accent": "#f4f4f4", "nose": "#f4f4f4", "code": "FER", "logo": "teams/ferrari.png" },
+    "red_bull": { "base": "#1b2a52", "accent": "#e8112d", "nose": "#f5c400", "code": "RBR", "logo": "teams/red_bull.png" },
+    "mercedes": { "base": "#c8ccd0", "accent": "#00d7b6", "nose": "#16181b", "side": "#16181b", "code": "MER", "logo": "teams/mercedes.png" },
+    "aston_martin": { "base": "#00594f", "accent": "#cedc00", "nose": "#00594f", "code": "AMR", "logo": "teams/aston_martin.png" },
+    "alpine": { "base": "#0b5bb5", "accent": "#fd4bc7", "nose": "#fd4bc7", "side": "#0b1530", "code": "ALP", "logo": "teams/alpine.png" },
+    "williams": { "base": "#1868db", "accent": "#00a3e0", "nose": "#0c1d3d", "code": "WIL", "logo": "teams/williams.png" },
+    "rb": { "base": "#f2f3f7", "accent": "#2a4ec9", "nose": "#e3263a", "code": "RB", "logo": "teams/rb.png" },
+    "haas": { "base": "#ececec", "accent": "#e10600", "nose": "#1a1a1a", "side": "#1a1a1a", "code": "HAA", "logo": "teams/haas.png" },
+    "audi": { "base": "#a9adb1", "accent": "#f50537", "nose": "#1a1a1a", "side": "#1a1a1a", "code": "AUD", "logo": "teams/audi.png" },
+    "cadillac": { "base": "#151515", "accent": "#f2f2f2", "nose": "#f2f2f2", "code": "CAD", "logo": "teams/cadillac.png" },
+    "sauber": { "base": "#1f1f1f", "accent": "#52e252", "nose": "#52e252", "code": "SAU", "logo": "teams/sauber.png" },
     "generic": { "base": "#8a8f98", "accent": "#d6d9de", "nose": "#4a4e55", "code": "" }
   }
 }
