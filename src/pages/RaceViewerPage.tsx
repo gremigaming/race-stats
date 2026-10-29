@@ -363,6 +363,7 @@ function Viewer({ manifest: initial, base, back }: { manifest: RaceManifest; bas
   const pickDriver = (car: number, add: boolean) => {
     const s = scene.current;
     if (restore.current) {
+      changeRate(restore.current.rate);
       restore.current = null;
       setActiveInc(null);
     }
