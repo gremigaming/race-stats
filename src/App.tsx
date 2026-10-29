@@ -16,6 +16,8 @@ import { DriversPage } from "./pages/DriversPage";
 import { HeadToHeadPage } from "./pages/HeadToHeadPage";
 import { SafetyPage } from "./pages/SafetyPage";
 import { IncidentsPage } from "./pages/IncidentsPage";
+import { RaceListPage } from "./pages/RaceListPage";
+import { RaceViewerPage } from "./pages/RaceViewerPage";
 import { SetupCardsPage } from "./pages/SetupCardsPage";
 import { SetupManagerPage } from "./pages/SetupManagerPage";
 import { SETUP_MANAGER_ON } from "./league/setupManager";
@@ -54,6 +56,8 @@ function AppRoutes() {
   return (
     <>
       <Routes>
+        {/* The Live Race Viewer is one full screen, outside the site layout */}
+        <Route path=":formulaKey/race/:id" element={<RaceViewerPage />} />
         <Route element={<Layout />}>
           {UiDebugPage && (
             <Route
@@ -97,6 +101,14 @@ function AppRoutes() {
             element={
               <ScopedFormulaRoute>
                 <IncidentsPage />
+              </ScopedFormulaRoute>
+            }
+          />
+          <Route
+            path=":formulaKey/race"
+            element={
+              <ScopedFormulaRoute>
+                <RaceListPage />
               </ScopedFormulaRoute>
             }
           />

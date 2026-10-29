@@ -31,7 +31,18 @@ jobs:
         with:
           node-version: 22
           cache: pnpm
-      - run: pnpm install --frozen-lockfile
+      # A new dependency added without network access (Claude's container) comes in here once,
+      # and the updated lockfile is saved back to main
+      - run: pnpm install --frozen-lockfile || pnpm install --no-frozen-lockfile
+      - name: Save an updated lockfile
+        run: |
+          if ! git diff --quiet pnpm-lock.yaml; then
+            git config user.name "github-actions"
+            git config user.email "github-actions@users.noreply.github.com"
+            git add pnpm-lock.yaml
+            git commit -m "chore: update pnpm-lock.yaml [skip ci]"
+            git push origin HEAD:main || echo "lockfile not saved, the next build installs again"
+          fi
       - name: Turn race files into site data
         run: node scripts/build-league-data.mjs
       - name: Work out the safety rating
@@ -51,6 +62,8 @@ jobs:
         run: |
           python3 -m pip install --quiet --break-system-packages numpy || true
           python3 scripts/telemetry/incident_replays.py /tmp/telemetry-cache || echo "incident replays failed, contacts show without a replay"
+      - name: Full-race bundles for the race viewer
+        run: python3 scripts/telemetry/race_bundles.py /tmp/telemetry-cache || echo "race bundles failed, the race viewer only shows races from the live server"
       - name: Build
         env:
           VITE_BASE_PATH: /race-stats/

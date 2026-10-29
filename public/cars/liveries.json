@@ -1,0 +1,18 @@
+{
+  "note": "Liveries for the Live Race Viewer's vector car (src/viewer/cars.ts): base bodywork, accent (wings, sidepod flash, spine) and nose colour. Our own colours per team, no game art.",
+  "teams": {
+    "mercedes": { "base": "#c8ccd0", "accent": "#00d2be", "nose": "#16181b" },
+    "ferrari": { "base": "#dc0000", "accent": "#f4f4f4", "nose": "#dc0000" },
+    "red_bull": { "base": "#1b2a52", "accent": "#e8112d", "nose": "#f5c400" },
+    "williams": { "base": "#1868db", "accent": "#00a3e0", "nose": "#0c1d3d" },
+    "aston_martin": { "base": "#00594f", "accent": "#cedc00", "nose": "#00594f" },
+    "alpine": { "base": "#0b5bb5", "accent": "#ff87bc", "nose": "#0b1530" },
+    "rb": { "base": "#f2f3f7", "accent": "#2a4ec9", "nose": "#e3263a" },
+    "haas": { "base": "#f0f0f0", "accent": "#e10600", "nose": "#2b2b2b" },
+    "mclaren": { "base": "#ff8000", "accent": "#1a1a1a", "nose": "#47c7fc" },
+    "sauber": { "base": "#1f1f1f", "accent": "#52e252", "nose": "#52e252" },
+    "audi": { "base": "#b9bcbf", "accent": "#bb0a30", "nose": "#1c1c1c" },
+    "cadillac": { "base": "#141414", "accent": "#d9d9d9", "nose": "#c7a65a" },
+    "generic": { "base": "#8a8f98", "accent": "#d6d9de", "nose": "#4a4e55" }
+  }
+}

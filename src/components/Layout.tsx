@@ -1,6 +1,7 @@
 import {
   Bell,
   CalendarDays,
+  Clapperboard,
   ChevronDown,
   ChevronRight,
   LayoutDashboard,
@@ -270,6 +271,12 @@ export function Layout() {
               active={section === "incidents"}
               icon={Siren}
               label="Incidents"
+            />
+            <MenuLink
+              to={`/${scopeKey}/race`}
+              active={section === "race"}
+              icon={Clapperboard}
+              label="Race viewer"
             />
             {SETUP_MANAGER_ON && (
               <MenuLink
