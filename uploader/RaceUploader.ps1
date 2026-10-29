@@ -28,6 +28,8 @@ $TelemetryDir = Join-Path $ConfigDir "telemetry"
 $TelemetrySentDir = Join-Path $TelemetryDir "sent"
 $TelemetryTag = "telemetry"
 $KeepSentDays = 30
+$LiveFile = Join-Path $ConfigDir "live.json"
+$LiveUrl = "wss://live.gremigaming.com/ingest"
 
 function Say($text, $color = "Gray") {
     Write-Host ("[{0}] {1}" -f (Get-Date -Format "HH:mm:ss"), $text) -ForegroundColor $color
@@ -169,6 +171,37 @@ function Start-Recorder {
     }
 }
 
+# Live Race Viewer: a light copy of the recorder's data goes to the live server
+# (gremigaming/race-control-stats live/). Asks once for the live token that the
+# server setup printed; Enter skips it (delete live.json to be asked again).
+function Start-Live($recorder) {
+    if (-not $recorder) { return $null }
+    if (-not (Test-Path $LiveFile)) {
+        Write-Host ""
+        Write-Host "Live Race Viewer: paste the live token from the server setup and press Enter."
+        Write-Host "Just press Enter to skip (races still upload as before)."
+        $secure = Read-Host "Live token" -AsSecureString
+        $plain = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
+            [Runtime.InteropServices.Marshal]::SecureStringToBSTR($secure)).Trim()
+        if ($plain) { @{ token = ($secure | ConvertFrom-SecureString) } | ConvertTo-Json | Set-Content $LiveFile }
+        else { @{ off = $true } | ConvertTo-Json | Set-Content $LiveFile }
+    }
+    $c = Get-Content $LiveFile -Raw | ConvertFrom-Json
+    if ($c.off -or -not $c.token) { return $null }
+    $token = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
+        [Runtime.InteropServices.Marshal]::SecureStringToBSTR(($c.token | ConvertTo-SecureString))).Trim()
+    try {
+        $live = New-Object GmLiveUplink -ArgumentList $LiveUrl, $token
+        $live.Start()
+        $recorder.Live = $live
+        Say "Live viewer uplink on (sends to live.gremigaming.com while you're in a session)." Cyan
+        return $live
+    } catch {
+        Say "Live uplink couldn't start, everything else still works ($($_.Exception.Message))" Yellow
+        return $null
+    }
+}
+
 $script:TelemetryRelease = $null
 
 function Get-TelemetryRelease($token) {
@@ -221,6 +254,8 @@ Say "Watching $($settings.DataDir)" Cyan
 Say "New races go to https://gremigaming.github.io/race-stats/ a few minutes after they're saved."
 $recorder = Start-Recorder
 $recorderStatus = ""
+$live = Start-Live $recorder
+$liveStatus = ""
 
 while ($true) {
     # Telemetry first: the recorder closes a session's file when its results come in, so
@@ -240,6 +275,10 @@ while ($true) {
             }
         }
         Remove-OldTelemetry
+    }
+    if ($live -and $live.Status -ne $liveStatus) {
+        $liveStatus = $live.Status
+        Say "Live: $liveStatus"
     }
 
     $files = Get-ChildItem -Path $settings.DataDir -Recurse -Filter "*.json" -ErrorAction SilentlyContinue |

@@ -7,6 +7,7 @@ on:
     branches: [main]
     paths:
       - uploader/TelemetryRecorder.cs
+      - uploader/RaceUploader.ps1
       - scripts/telemetry/gmtel.py
       - scripts/telemetry/test_recorder.py
       - .github/workflows/recorder-check.yml
@@ -34,3 +35,36 @@ jobs:
           Write-Host "Recorder status: $($recorder.Status), saved: $($recorder.LastSaved)"
           python scripts/telemetry/test_recorder.py check $out
           if ($LASTEXITCODE -ne 0) { exit 1 }
+      # The live uplink: the same made-up session through GmLiveUplink into the live
+      # race server (gremigaming/race-control-stats live/), which must store it
+      - uses: actions/checkout@v4
+        with:
+          repository: gremigaming/race-control-stats
+          path: race-control-stats
+      - name: Send a made-up session to the live server
+        shell: powershell
+        run: |
+          python -m pip install --quiet "websockets>=13,<16"
+          $env:INGEST_TOKEN = "test-token"
+          $env:DATA_DIR = Join-Path $env:RUNNER_TEMP "live"
+          $env:PORT = "8100"
+          $server = Start-Process python -ArgumentList "-m", "live.server" -WorkingDirectory race-control-stats -PassThru -NoNewWindow
+          Start-Sleep -Seconds 4
+          Add-Type -Path uploader/TelemetryRecorder.cs
+          $recorder = New-Object GmTelemetryRecorder -ArgumentList (Join-Path $env:RUNNER_TEMP "telemetry-live"), 20779
+          $live = New-Object GmLiveUplink -ArgumentList "ws://127.0.0.1:8100/ingest", "test-token"
+          $live.Start()
+          $recorder.Live = $live
+          $recorder.Start()
+          Start-Sleep -Seconds 1
+          python scripts/telemetry/test_recorder.py send 20779
+          Start-Sleep -Seconds 3
+          $st = Invoke-RestMethod http://127.0.0.1:8100/status
+          $st | ConvertTo-Json -Depth 5
+          Write-Host "Uplink status: $($live.Status)"
+          $recorder.Stop()
+          $live.Stop()
+          Stop-Process -Id $server.Id
+          if ($st.batches -lt 100) { Write-Host "too few batches arrived"; exit 1 }
+          $s = @($st.sessions)[0]
+          if (-not $s -or $s.chunks -lt 1 -or $s.cars -lt 2 -or $s.track -ne "Silverstone") { Write-Host "session not stored"; exit 1 }
