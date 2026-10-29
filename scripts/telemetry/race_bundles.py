@@ -37,7 +37,7 @@ import gmtel  # noqa: E402
 RELEASE = "https://api.github.com/repos/gremigaming/race-stats/releases/tags/telemetry"
 DOWNLOAD = "https://github.com/gremigaming/race-stats/releases/download/telemetry/"
 
-VERSION = 1          # bump to rebuild every bundle
+VERSION = 2          # bump to rebuild every bundle
 KEEP = 40            # newest races published on the site (R2 keeps everything later)
 CHUNK_SECONDS = 10
 CHUNK_HEAD = struct.Struct("<4sBBHd")
@@ -80,9 +80,9 @@ def team_name(tid):
 
 
 def shown_name(p):
-    """Same rule as live/race.py: hidden-name players only by race number."""
-    if p.get("ai") or p.get("public"):
-        return p.get("name") or f"Car #{p.get('race_number', 0)}"
+    """Same rule as live/race.py: hidden-name players (and the game's anonymous "Player") only by race number."""
+    if (p.get("ai") or p.get("public")) and p.get("name") not in (None, "", "Player"):
+        return p["name"]
     return f"Car #{p.get('race_number', 0)}"
 
 
