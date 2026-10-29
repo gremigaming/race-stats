@@ -134,7 +134,7 @@ function revs(s: CarState | undefined) {
 }
 
 /** An F1 yoke: carbon body, rubber grips, rev lights across the top, the gear on its screen. */
-export function SteeringWheel({ s }: { s: CarState | undefined }) {
+export function SteeringWheel({ s, small }: { s: CarState | undefined; small?: boolean }) {
   const steer = s?.steer ?? 0;
   const lit = Math.round(revs(s) * 15);
   const leds = Array.from({ length: 15 }, (_, i) => {
@@ -144,7 +144,8 @@ export function SteeringWheel({ s }: { s: CarState | undefined }) {
   });
   const gear = !s ? "–" : s.gear < 0 ? "R" : s.gear === 0 ? "N" : String(s.gear);
   return (
-    <svg viewBox="-34 -24 68 48" className="h-16 w-24 shrink-0" aria-label={`Steering ${Math.round(steer * 100)}%`}>
+    // a square box wider than the wheel, so a full lock never clips it
+    <svg viewBox="-38 -38 76 76" className={`${small ? "h-12 w-12" : "h-20 w-20"} shrink-0`} aria-label={`Steering ${Math.round(steer * 100)}%`}>
       <g transform={`rotate(${steer * 135})`}>
         {/* grips */}
         <path d="M-31 -8 Q-34 6 -27 17 Q-23 21 -19 17 L-17 -2 Z" fill="#26282d" />

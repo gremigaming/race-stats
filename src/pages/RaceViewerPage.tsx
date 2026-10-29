@@ -1,9 +1,23 @@
 import { ArrowLeft, Compass, Hand, Maximize, Minus, Navigation, Plus, RotateCcw, RotateCw, Video } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import { liveryOf, loadLiveries, type Livery } from "../viewer/cars";
 import { incidentsOf, loadManifest, type RaceManifest } from "../viewer/format";
 import { DriverCard } from "../viewer/DriverCard";
+import {
+  DriverHeader,
+  FocusPicker,
+  IncidentFeed,
+  InputsBars,
+  InputsYoke,
+  InputTrace,
+  LayoutSwitch,
+  RaceStatsGrid,
+  Tags,
+  TvStrip,
+  type Focus,
+  type LayoutId,
+} from "../viewer/layouts";
 import {
   CarInputs,
   IconButton,
@@ -100,6 +114,27 @@ function Viewer({ manifest: initial, base, back }: { manifest: RaceManifest; bas
   const [towerOpen, setTowerOpen] = useState(() => window.innerWidth >= 768);
   const [liveries, setLiveries] = useState<Record<string, Livery>>({});
   const [loads, setLoads] = useState(0);
+  // round 2 preview: ?layouts on the URL shows a switch between the right-column layouts
+  const [params] = useSearchParams();
+  const preview = params.has("layouts");
+  const [layout, setLayoutState] = useState<LayoutId>(() => {
+    try {
+      return preview ? ((localStorage.getItem("viewer-layout") as LayoutId | null) ?? "A") : "now";
+    } catch {
+      return preview ? "A" : "now";
+    }
+  });
+  const setLayout = (l: LayoutId) => {
+    setLayoutState(l);
+    try {
+      localStorage.setItem("viewer-layout", l);
+    } catch {
+      // private window: the choice just isn't remembered
+    }
+  };
+  const [focusPick, setFocusPick] = useState<number | null>(null);
+  const [tab, setTab] = useState<"inputs" | "stats" | "incidents">("inputs");
+  const grid = useRef<Map<number, number> | null>(null);
   const lastUi = useRef(0);
   const lastTrace = useRef(0);
   const incidentsRef = useRef(incidents);
@@ -186,6 +221,7 @@ function Viewer({ manifest: initial, base, back }: { manifest: RaceManifest; bas
       .filter((e) => e.code === "COLL" && e.a !== undefined && e.b !== undefined)
       .map((e) => ({ t: e.t, a: e.a!, b: e.b! }));
     s.onPick = (car, add) => {
+      setFocusPick(car);
       setSelected((cur) => (cur.includes(car) ? cur : [...cur, car].slice(-MAX_SELECTED)));
       s.follow(add ? [...s.followCars, car] : [car]);
     };
@@ -322,6 +358,130 @@ function Viewer({ manifest: initial, base, back }: { manifest: RaceManifest; bas
 
   const rotDeg = (view.rot * 180) / Math.PI;
 
+  // grid slots: everyone's position at the start, read once the first chunk is in
+  if (!grid.current) {
+    const s0 = store.sample(lapStarts[0] ?? start).filter((x) => x.pos > 0);
+    if (s0.length) grid.current = new Map(s0.map((x) => [x.car, x.pos]));
+  }
+  const focusCar = focusPick !== null && selected.includes(focusPick) ? focusPick : (selected[selected.length - 1] ?? null);
+  const focus: Focus | null =
+    focusCar === null
+      ? null
+      : (() => {
+          const n = neighbours(focusCar);
+          const st = byCar.get(focusCar);
+          const info = manifest.cars[String(focusCar)];
+          return {
+            car: focusCar,
+            info,
+            color: color(focusCar),
+            team: info?.team_name ?? "",
+            s: st,
+            ahead: gapTo(n.ahead, n.me),
+            behind: gapTo(n.me, n.behind),
+            grid: grid.current?.get(focusCar) ?? null,
+            trace: view.traces[focusCar],
+            tags: st ? tagsOf(st, touched(focusCar)) : [],
+          };
+        })();
+  const carName = (c: number) => manifest.cars[String(c)]?.name ?? `Car ${c}`;
+  const picker = focus && <FocusPicker cars={selected} focus={focus.car} name={carName} color={color} onPick={setFocusPick} />;
+  const detail = activeInc !== null && incidents[activeInc] && (
+    <IncidentDetail incident={incidents[activeInc]} stats={incStats} cars={manifest.cars} color={color} start={start} onClose={() => setActiveInc(null)} />
+  );
+  const feed = (compact?: boolean) => (
+    <IncidentFeed
+      incidents={incidents}
+      cars={manifest.cars}
+      color={color}
+      start={start}
+      t={view.t}
+      focus={focusCar}
+      active={activeInc}
+      compact={compact}
+      onPick={pickIncident}
+    />
+  );
+  const hint = (
+    <p className="p-3 text-sm text-zinc-500">Click a car or a name in the timing tower to see their telemetry. Shift+click adds more cars.</p>
+  );
+  let column: ReactNode = null;
+  if (layout === "A")
+    column = (
+      <>
+        {focus ? <DriverHeader f={focus} laps={manifest.laps} picker={picker} /> : hint}
+        <div className="flex border-b border-white/10 text-[11px] font-semibold uppercase tracking-wider">
+          {(
+            [
+              ["inputs", "Inputs"],
+              ["stats", "Race stats"],
+              ["incidents", `Incidents · ${incidents.filter((i) => i.t0 <= view.t).length}`],
+            ] as const
+          ).map(([k, label]) => (
+            <button
+              key={k}
+              type="button"
+              onClick={() => setTab(k)}
+              className={`flex-1 py-2 ${tab === k ? "text-white shadow-[inset_0_-2px_0_white]" : "text-zinc-500 hover:text-zinc-300"}`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        {tab === "inputs" &&
+          (focus ? (
+            <div className="space-y-3 p-3">
+              <InputsYoke f={focus} />
+              <InputTrace trace={focus.trace} />
+              <Tags f={focus} />
+            </div>
+          ) : null)}
+        {tab === "stats" && focus && (
+          <div className="p-3">
+            <RaceStatsGrid f={focus} laps={manifest.laps} />
+          </div>
+        )}
+        {tab === "incidents" && (
+          <>
+            {detail && <div className="p-3">{detail}</div>}
+            {feed()}
+          </>
+        )}
+      </>
+    );
+  else if (layout === "B")
+    column = (
+      <>
+        <div className="border-b border-white/10 px-3 py-2">
+          <div className="text-sm font-semibold">Incidents</div>
+          <div className="text-[11px] text-zinc-500">Click one to watch it</div>
+        </div>
+        {detail && <div className="p-3">{detail}</div>}
+        {feed()}
+      </>
+    );
+  else if (layout === "C")
+    column = (
+      <>
+        {focus ? (
+          <>
+            <DriverHeader f={focus} laps={manifest.laps} picker={picker} />
+            <div className="space-y-3 border-b border-white/10 p-3">
+              <RaceStatsGrid f={focus} laps={manifest.laps} />
+              <InputsBars f={focus} />
+              <InputTrace trace={focus.trace} height={52} />
+              <Tags f={focus} />
+            </div>
+          </>
+        ) : (
+          hint
+        )}
+        {detail && <div className="p-3">{detail}</div>}
+        <div className="px-3 pt-2 text-[10px] uppercase tracking-wider text-zinc-500">Incidents · this race</div>
+        {feed(true)}
+      </>
+    );
+
   return (
     <div className="fixed inset-0 flex flex-col bg-[#0c0e11] text-zinc-100 md:flex-row">
       <div className="relative min-h-0 min-w-0 flex-1">
@@ -342,6 +502,7 @@ function Viewer({ manifest: initial, base, back }: { manifest: RaceManifest; bas
               {!manifest.finished && <span className="ml-2 font-semibold text-red-400">LIVE</span>}
             </div>
           </div>
+          {preview && <LayoutSwitch value={layout} onChange={setLayout} />}
           <div className="pointer-events-auto ml-auto flex flex-wrap items-center justify-end gap-0.5 rounded-lg border border-white/10 bg-[#0c0e11]/85 p-0.5 backdrop-blur">
             <IconButton label="Full track" active={mode === "track"} onClick={() => scene.current?.showTrack()}>
               <Maximize className="h-4 w-4" />
@@ -394,6 +555,7 @@ function Viewer({ manifest: initial, base, back }: { manifest: RaceManifest; bas
             onToggle={() => setTowerOpen((o) => !o)}
             onPick={(car) => {
               setCardCar(car);
+              setFocusPick(car);
               setSelected((cur) => (cur.includes(car) ? cur : [...cur, car].slice(-MAX_SELECTED)));
             }}
           />
@@ -411,6 +573,11 @@ function Viewer({ manifest: initial, base, back }: { manifest: RaceManifest; bas
             />
           )}
         </div>
+        {layout === "B" && focus && (
+          <div className="pointer-events-none absolute inset-x-0 flex justify-center" style={{ bottom: BAR_SPACE + 8 }}>
+            <TvStrip f={focus} />
+          </div>
+        )}
         <div className="pointer-events-none absolute inset-x-0 bottom-0 p-3">
           <PlayerBar
             t={view.t}
@@ -428,56 +595,60 @@ function Viewer({ manifest: initial, base, back }: { manifest: RaceManifest; bas
           />
         </div>
       </div>
-      <aside className="flex h-[42vh] w-full shrink-0 flex-col gap-3 overflow-y-auto border-t border-white/10 p-3 md:h-auto md:w-80 md:border-l md:border-t-0">
-        {activeInc !== null && incidents[activeInc] && (
-          <IncidentDetail
-            incident={incidents[activeInc]}
-            stats={incStats}
+      {layout !== "now" ? (
+        <aside className="flex h-[42vh] w-full shrink-0 flex-col overflow-y-auto border-t border-white/10 md:h-auto md:w-80 md:border-l md:border-t-0">{column}</aside>
+      ) : (
+        <aside className="flex h-[42vh] w-full shrink-0 flex-col gap-3 overflow-y-auto border-t border-white/10 p-3 md:h-auto md:w-80 md:border-l md:border-t-0">
+          {activeInc !== null && incidents[activeInc] && (
+            <IncidentDetail
+              incident={incidents[activeInc]}
+              stats={incStats}
+              cars={manifest.cars}
+              color={color}
+              start={start}
+              onClose={() => setActiveInc(null)}
+            />
+          )}
+          {selected.length > 0 ? (
+            <div className="space-y-2">
+              {selected.map((car) => {
+                const n = neighbours(car);
+                const st = byCar.get(car);
+                return (
+                  <CarInputs
+                    key={car}
+                    car={manifest.cars[String(car)]}
+                    color={color(car)}
+                    s={st}
+                    trace={view.traces[car]}
+                    gapAhead={gapTo(n.ahead, n.me)}
+                    gapBehind={gapTo(n.me, n.behind)}
+                    laps={manifest.laps}
+                    tags={st ? tagsOf(st, touched(car)) : []}
+                    following={mode === "follow" && followed.includes(car)}
+                    onFollow={() => toggleFollow(car)}
+                    onCard={() => setCardCar(car)}
+                    onRemove={() => setSelected((cur) => cur.filter((c) => c !== car))}
+                  />
+                );
+              })}
+            </div>
+          ) : (
+            <p className="text-sm text-zinc-500">
+              Click a car to follow it and see its telemetry (Shift+click adds more cars to follow). Click a driver in the timing tower for their stats.
+            </p>
+          )}
+          <IncidentList
+            incidents={incidents}
             cars={manifest.cars}
-            color={color}
             start={start}
-            onClose={() => setActiveInc(null)}
+            active={activeInc}
+            open={incOpen}
+            onToggle={() => setIncOpen((o) => !o)}
+            onPick={pickIncident}
           />
-        )}
-        {selected.length > 0 ? (
-          <div className="space-y-2">
-            {selected.map((car) => {
-              const n = neighbours(car);
-              const st = byCar.get(car);
-              return (
-                <CarInputs
-                  key={car}
-                  car={manifest.cars[String(car)]}
-                  color={color(car)}
-                  s={st}
-                  trace={view.traces[car]}
-                  gapAhead={gapTo(n.ahead, n.me)}
-                  gapBehind={gapTo(n.me, n.behind)}
-                  laps={manifest.laps}
-                  tags={st ? tagsOf(st, touched(car)) : []}
-                  following={mode === "follow" && followed.includes(car)}
-                  onFollow={() => toggleFollow(car)}
-                  onCard={() => setCardCar(car)}
-                  onRemove={() => setSelected((cur) => cur.filter((c) => c !== car))}
-                />
-              );
-            })}
-          </div>
-        ) : (
-          <p className="text-sm text-zinc-500">
-            Click a car to follow it and see its telemetry (Shift+click adds more cars to follow). Click a driver in the timing tower for their stats.
-          </p>
-        )}
-        <IncidentList
-          incidents={incidents}
-          cars={manifest.cars}
-          start={start}
-          active={activeInc}
-          open={incOpen}
-          onToggle={() => setIncOpen((o) => !o)}
-          onPick={pickIncident}
-        />
-      </aside>
+        </aside>
+      )}
     </div>
   );
 }
