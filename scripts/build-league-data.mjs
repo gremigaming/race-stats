@@ -3,6 +3,7 @@
 // Fields nobody needs on a public site (platform, network slot) are dropped.
 import { mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { createHash } from "node:crypto";
 
 const SRC = "races";
 const OUT = join("public", "league");
@@ -330,6 +331,7 @@ for (const path of walk(SRC)) {
 const { merges: merged, list: mergeList } = findMerges(firstPass);
 
 const seen = new Set();
+const fingerprints = new Map();
 const files = [];
 for (const path of walk(SRC)) {
   let name = path.split(/[\\/]/).pop();
@@ -353,6 +355,8 @@ for (const path of walk(SRC)) {
   }
   name = realName(name, data);
   if (seen.has(name)) continue;
+  const { debug, ...race } = data;
+  fingerprints.set(name, createHash("sha1").update(JSON.stringify(race)).digest("hex"));
   if (isTest(name)) {
     console.log(`skipped (test session): ${name}`);
     continue;
@@ -375,7 +379,9 @@ for (const path of walk(SRC)) {
 }
 // Pits n' Giggles writes a "Just_in_case" save when a session looks like it
 // ended without results, and often the real save follows a minute later.
-// Keep the backup only when no real save of the same event came after it.
+// Keep the backup only when no real save of the same event came after it, and
+// never when it is the same race as another save (the app can re-save an old
+// race as a backup a day later).
 const parseName = (name) => {
   const m = name.match(/^(.+?)_(?:Just_in_case_)?(\d{4})_(\d{2})_(\d{2})_(\d{2})_(\d{2})_(\d{2})\.json$/);
   return m ? { event: m[1], at: Date.UTC(+m[2], +m[3] - 1, +m[4], +m[5], +m[6], +m[7]) } : null;
@@ -385,6 +391,7 @@ for (const backup of backups) {
   const b = parseName(backup);
   if (!b) continue;
   const replaced = files.some((f) => {
+    if (f !== backup && fingerprints.get(f) === fingerprints.get(backup)) return true;
     if (f.includes("_Just_in_case_")) return false;
     const r = parseName(f);
     return r && r.event === b.event && r.at >= b.at && r.at - b.at <= 15 * 60 * 1000;
