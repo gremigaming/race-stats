@@ -1,6 +1,6 @@
 // Saves screenshots of the main pages into the given folder (previews/), so
 // changes can be checked without opening the site.
-import { existsSync, mkdirSync, readFileSync, statSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { createServer } from "node:http";
 import { createRequire } from "node:module";
 import { extname, join } from "node:path";
@@ -93,5 +93,35 @@ if (href) {
   await page.screenshot({ path: `${outDir}/race.jpg`, type: "jpeg", quality: 75, fullPage: true });
   console.log(`saved race (${page.url()})`);
 }
+// the Live Race Viewer: the newest race, an incident, a picked driver and the follow camera
+const log = [];
+page.on("console", (m) => (m.type() === "error" || m.type() === "warning") && log.push(`${m.type()}: ${m.text()}`));
+page.on("pageerror", (e) => log.push(`pageerror: ${e.message}`));
+await shoot("race-viewer-list", "race");
+const raceHref = await page.$eval(`a[href*="/race/"]`, (a) => a.getAttribute("href")).catch(() => null);
+if (raceHref) {
+  await page.goto(new URL(raceHref, base).toString());
+  await page.waitForTimeout(7000);
+  await page.screenshot({ path: `${outDir}/race-viewer.jpg`, type: "jpeg", quality: 80 });
+  console.log(`saved race-viewer (${page.url()})`);
+  const incident = page.locator("aside ul").last().locator("button").first();
+  if (await incident.count()) {
+    await incident.click();
+    await page.waitForTimeout(4500);
+    await page.screenshot({ path: `${outDir}/race-viewer-incident.jpg`, type: "jpeg", quality: 80 });
+  }
+  await page.keyboard.press("Space");
+  const follow = page.locator('button[aria-label="Follow with the camera"]').first();
+  if (await follow.count()) {
+    await follow.click();
+    await page.keyboard.press("Space");
+    await page.waitForTimeout(3000);
+    await page.screenshot({ path: `${outDir}/race-viewer-follow.jpg`, type: "jpeg", quality: 80 });
+  }
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.waitForTimeout(1500);
+  await page.screenshot({ path: `${outDir}/race-viewer-phone.jpg`, type: "jpeg", quality: 75 });
+}
+writeFileSync(`${outDir}/race-viewer-console.txt`, log.join("\n") || "no errors");
 await browser.close();
 server.close();
