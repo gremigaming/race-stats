@@ -18,6 +18,8 @@ export interface RaceEvent {
   a?: number;
   b?: number;
   car?: number;
+  /** STLG: how many start lights are on. */
+  lights?: number;
 }
 
 export interface RaceIncident {
@@ -48,6 +50,8 @@ export interface RaceManifest {
   lap_starts?: number[];
   track_length?: number;
   incidents?: RaceIncident[];
+  /** Per car: grid slot, completed laps [lap, session time, ms], result status changes [time, status]. */
+  timing?: Record<string, CarTiming>;
 }
 
 export interface RaceIndexEntry {
@@ -58,6 +62,13 @@ export interface RaceIndexEntry {
   laps: number;
   cars: number;
   incidents?: number;
+}
+
+export interface CarTiming {
+  grid: number;
+  laps: [number, number, number][];
+  /** 2 active, 3 finished, 4 DNF, 5 DSQ, 6 not classified, 7 retired */
+  status: [number, number][];
 }
 
 /** One decoded chunk: frame-major columns (frame 0 car 0, frame 0 car 1, ...). */
@@ -78,6 +89,8 @@ export interface Chunk {
   off: Uint8Array;
   lap: Uint8Array;
   pos: Uint8Array;
+  /** The game's interval to the car ahead (ms), chunk version 2 only. */
+  gap: Uint32Array | null;
 }
 
 /** Decode a GMLC chunk (see live/race.py). The buffer must start at byte 0 of its ArrayBuffer. */
@@ -85,6 +98,7 @@ export function decodeChunk(buf: ArrayBuffer): Chunk {
   const dv = new DataView(buf);
   const magic = String.fromCharCode(dv.getUint8(0), dv.getUint8(1), dv.getUint8(2), dv.getUint8(3));
   if (magic !== "GMLC") throw new Error("not a race chunk");
+  const version = dv.getUint8(4);
   const cars = dv.getUint8(5);
   const n = dv.getUint16(6, true);
   const t0 = dv.getFloat64(8, true);
@@ -118,7 +132,13 @@ export function decodeChunk(buf: ArrayBuffer): Chunk {
   const off = u8();
   const lap = u8();
   const place = u8();
-  return { t0, cars, n, t, x, z, dist, heading, speed, throttle, brake, steer, gear, off, lap, pos: place };
+  // version 2 adds the game's interval in 10 ms units; copied, since it may sit at an odd offset
+  let gap: Uint32Array | null = null;
+  if (version >= 2 && pos + m * 2 <= buf.byteLength) {
+    gap = new Uint32Array(m);
+    for (let i = 0; i < m; i++) gap[i] = dv.getUint16(pos + i * 2, true) * 10;
+  }
+  return { t0, cars, n, t, x, z, dist, heading, speed, throttle, brake, steer, gear, off, lap, pos: place, gap };
 }
 
 /** Where races are read from: Cloudflare R2 (the live server publishes there), then this site. */

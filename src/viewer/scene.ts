@@ -5,12 +5,12 @@
  * incident marker and edge arrows are drawn in screen space so they stay the same size.
  */
 import { Application, Container, Graphics, Sprite, Text } from "pixi.js";
-import { CAR_LENGTH, CAR_WIDTH, carTexture, clearCarTextures, inkOn, liveryOf, loadLiveries, type Livery } from "./cars";
+import { CAR_LENGTH, CAR_WIDTH, carTexture, clearCarTextures, inkOn, liveryOf, loadLiveries, retainCarTextures, type Livery } from "./cars";
 import type { RaceCar } from "./format";
 import { TrackMap } from "./map";
 import type { CarState } from "./store";
 
-export type CameraMode = "track" | "follow" | "free";
+export type CameraMode = "track" | "follow" | "free" | "tv";
 
 interface Cam {
   x: number;
@@ -23,6 +23,8 @@ const MIN_SCALE = 0.05;
 const MAX_SCALE = 60;
 const DOT_R = 12;
 const FOLLOW_CAP = 500; // metres: followed cars further apart get an edge arrow instead
+const TV_MIN_SCALE = 3.4; // px per metre: the broadcast camera never zooms out so far that cars turn into dots
+const CUT_MS = 1800; // a broadcast cut: zoom out a little, pan, zoom back in
 const FONT = "Geist Variable, system-ui, sans-serif";
 
 /** Event tags pinned to a car, like the game's broadcast graphics. */
@@ -90,6 +92,10 @@ export class RaceScene {
 
   mode: CameraMode = "track";
   followCars: number[] = [];
+  /** The broadcast camera's shot (set by the director) and the cars around it that get edge arrows. */
+  tvCars: number[] = [];
+  tvContext: number[] = [];
+  private cut: number | null = null;
   /** Smallest frame (metres) the multi-car camera zooms to. */
   minFrame = 60;
   /** In follow mode, turn the map so the (first) followed car points up. */
@@ -113,6 +119,7 @@ export class RaceScene {
     this.carInfo = carInfo;
     this.frame = frame;
     this.map = new TrackMap(track);
+    retainCarTextures();
     void this.init();
   }
 
@@ -152,7 +159,10 @@ export class RaceScene {
 
   destroy() {
     this.destroyed = true;
-    if (!this.ready) return;
+    if (!this.ready) {
+      clearCarTextures();
+      return;
+    }
     const c = this.app.canvas;
     c.removeEventListener("pointerdown", this.down);
     c.removeEventListener("pointermove", this.move);
@@ -193,7 +203,29 @@ export class RaceScene {
     this.onModeChange(this.mode, this.followCars);
   }
 
+  /** The broadcast camera: frames the director's shot, cutting smoothly between shots. */
+  tv() {
+    if (this.mode === "tv") return;
+    this.mode = "tv";
+    this.followCars = [];
+    this.zoomBias = 1;
+    this.cut = this.clockMs;
+    this.onModeChange(this.mode, this.followCars);
+  }
+
+  /** A new shot from the director (the same cars again just refreshes it). */
+  shoot(cars: number[], context: number[] = []) {
+    const same = cars.length === this.tvCars.length && cars.every((c) => this.tvCars.includes(c));
+    if (!same && this.tvCars.length) this.cut = this.clockMs;
+    this.tvCars = cars;
+    this.tvContext = context;
+  }
+
   zoom(factor: number) {
+    if (this.mode === "tv") {
+      this.zoomBias = clamp(this.zoomBias * factor, 0.5, 4);
+      return;
+    }
     if (this.mode === "follow") {
       if (this.followCars.length === 1) this.followScale = clamp(this.followScale * factor, MIN_SCALE, MAX_SCALE);
       else this.zoomBias = clamp(this.zoomBias * factor, 0.2, 5);
@@ -286,9 +318,12 @@ export class RaceScene {
     return this.centreOn(um * c + vm * s, -um * s + vm * c, scale, rot);
   }
 
-  /** The cars the follow camera frames, and the ones it points to with edge arrows instead. */
+  /** The cars the follow (or broadcast) camera frames, and the ones it points to with edge arrows instead. */
   private followSplit(byCar: Map<number, CarState>) {
-    const present = this.followCars.map((c) => byCar.get(c)).filter((s): s is CarState => !!s);
+    const tv = this.mode === "tv";
+    const { vw, vh } = this.freeCentre();
+    const cap = tv ? (Math.min(vw, vh) / TV_MIN_SCALE) * 0.8 : FOLLOW_CAP;
+    const present = (tv ? this.tvCars : this.followCars).map((c) => byCar.get(c)).filter((s): s is CarState => !!s);
     if (present.length <= 1) return { inFrame: present, outside: [] as CarState[] };
     const [first, ...rest] = present;
     rest.sort((a, b) => Math.hypot(a.x - first.x, a.z - first.z) - Math.hypot(b.x - first.x, b.z - first.z));
@@ -298,7 +333,7 @@ export class RaceScene {
       const xs = [...inFrame, s].map((p) => p.x);
       const zs = [...inFrame, s].map((p) => p.z);
       const span = Math.max(Math.max(...xs) - Math.min(...xs), Math.max(...zs) - Math.min(...zs));
-      (span <= FOLLOW_CAP ? inFrame : outside).push(s);
+      (span <= cap ? inFrame : outside).push(s);
     }
     return { inFrame, outside };
   }
@@ -324,6 +359,17 @@ export class RaceScene {
         return this.centreOn(inFrame[0].x, inFrame[0].z, this.followScale, rot);
       const f = this.fit(inFrame, rot, 0.2, this.minFrame);
       return this.centreOnScaled(f, this.zoomBias);
+    }
+    if (this.mode === "tv") {
+      if (!inFrame.length) return null;
+      const f = this.fit(inFrame, rot, 0.45, 70);
+      let scale = Math.max(f.scale * this.zoomBias, TV_MIN_SCALE);
+      if (this.cut !== null) {
+        const p = (this.clockMs - this.cut) / CUT_MS;
+        if (p >= 1) this.cut = null;
+        else scale = Math.max(scale * (1 - 0.3 * Math.sin(Math.PI * p)), TV_MIN_SCALE * 0.9);
+      }
+      return this.centreOnScaled(f, scale / f.scale);
     }
     if (this.snapRot) return { ...this.cam, rot: 0 };
     return null;
@@ -352,10 +398,11 @@ export class RaceScene {
     const byCar = new Map(this.states.map((s) => [s.car, s]));
     const split = this.followSplit(byCar);
     const inFrame = split.inFrame;
-    const outside = this.mode === "follow" ? split.outside : [];
+    let outside = this.mode === "follow" || this.mode === "tv" ? split.outside : [];
+    if (this.mode === "tv") outside = [...outside, ...this.tvContext.map((c) => byCar.get(c)).filter((s): s is CarState => !!s && !this.tvCars.includes(s.car))];
     const aim = this.aim(inFrame);
     if (aim) {
-      const k = 1 - Math.exp(-dtMs / (this.mode === "follow" ? 110 : 220));
+      const k = 1 - Math.exp(-dtMs / (this.mode === "tv" ? (this.cut !== null ? 420 : 160) : this.mode === "follow" ? 110 : 220));
       this.cam.x += (aim.x - this.cam.x) * k;
       this.cam.z += (aim.z - this.cam.z) * k;
       this.cam.scale *= Math.pow(aim.scale / this.cam.scale, k);
@@ -566,6 +613,7 @@ export class RaceScene {
     const show = new Set(this.selected);
     if (this.hovered !== null) show.add(this.hovered);
     if (this.mode === "follow") for (const c of this.followCars) show.add(c);
+    if (this.mode === "tv") for (const c of this.tvCars) show.add(c);
     const byCar = new Map(this.states.map((s) => [s.car, s]));
     for (const [car, chip] of this.chips) {
       if (!show.has(car) || !byCar.has(car)) {
@@ -718,7 +766,7 @@ export class RaceScene {
     e.preventDefault();
     const factor = Math.exp(-e.deltaY * (e.deltaMode === 1 ? 0.05 : 0.0015));
     if (e.shiftKey) return this.rotateBy((e.deltaY || e.deltaX) * 0.002);
-    if (this.mode === "follow") return this.zoom(factor);
+    if (this.mode === "follow" || this.mode === "tv") return this.zoom(factor);
     const p = this.local(e);
     const before = this.toWorld(p.x, p.y);
     this.cam.scale = clamp(this.cam.scale * factor, MIN_SCALE, MAX_SCALE);

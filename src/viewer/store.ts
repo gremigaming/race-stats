@@ -25,6 +25,14 @@ export interface CarState {
 
 const PREFETCH = 3; // chunks either side of the playhead
 const KEEP = 60; // chunks kept in memory either side
+/** Timing points per lap: GreMi's 3 sectors x 8 equal parts. */
+export const SPLITS = 24;
+
+/** When a car passed one timing point, and the game's own interval to the car ahead then (ms, 0 = none). */
+interface Crossing {
+  t: number;
+  gap: number;
+}
 
 export class ChunkStore {
   readonly chunkSeconds: number;
@@ -40,9 +48,14 @@ export class ChunkStore {
   bounds: [number, number, number, number] | null = null;
   onLoad: (() => void) | null = null;
   private base: string;
+  /** Lap length for the timing points; longer than any track when unknown, so progress never runs backwards. */
+  lapLength: number;
+  /** car -> timing point (lap * SPLITS + split) -> crossing; kept after their chunks are dropped. */
+  private crossings = new Map<number, Map<number, Crossing>>();
 
   constructor(manifest: RaceManifest, base: string) {
     this.base = base;
+    this.lapLength = manifest.track_length || 7100;
     this.chunkSeconds = manifest.chunk_seconds || 10;
     this.names = new Map(
       manifest.chunks.map((name) => [parseInt(name, 10), name] as [number, string]),
@@ -61,6 +74,7 @@ export class ChunkStore {
       if (e.data.chunk) {
         this.chunks.set(k, e.data.chunk);
         this.grow(e.data.chunk);
+        this.time(k, e.data.chunk);
         this.onLoad?.();
       } else this.failed.add(k);
       if (this.all) this.wantAll();
@@ -100,6 +114,67 @@ export class ChunkStore {
       if (z > z1) z1 = z;
     }
     if (x0 <= x1) this.bounds = [x0, z0, x1, z1];
+  }
+
+  /** A car's distance into the race (m): laps done plus lap distance. */
+  progress(lap: number, dist: number) {
+    return (Math.max(lap, 1) - 1) * this.lapLength + dist;
+  }
+
+  /** Record every timing point the cars passed inside chunk k and across its edges with k-1 and k+1. */
+  private time(k: number, c: Chunk) {
+    for (let i = 0; i + 1 < c.n; i++) this.timePair(c, i, c, i + 1);
+    const prev = this.chunks.get(k - 1);
+    if (prev && prev.n && c.n) this.timePair(prev, prev.n - 1, c, 0);
+    const next = this.chunks.get(k + 1);
+    if (next && next.n && c.n) this.timePair(c, c.n - 1, next, 0);
+  }
+
+  private timePair(a: Chunk, i: number, b: Chunk, j: number) {
+    const step = this.lapLength / SPLITS;
+    const cars = Math.min(a.cars, b.cars);
+    for (let car = 0; car < cars; car++) {
+      const p = i * a.cars + car;
+      const q = j * b.cars + car;
+      if (!a.pos[p] || !b.pos[q]) continue;
+      const p1 = this.progress(a.lap[p], a.dist[p]);
+      const p2 = this.progress(b.lap[q], b.dist[q]);
+      if (!(p2 > p1) || p2 - p1 > this.lapLength / 4) continue; // standing, a flashback, or a jump
+      const k1 = Math.floor(p1 / step);
+      const k2 = Math.floor(p2 / step);
+      if (k2 <= k1) continue;
+      let m = this.crossings.get(car);
+      if (!m) this.crossings.set(car, (m = new Map()));
+      for (let key = k1 + 1; key <= k2; key++) {
+        const f = (key * step - p1) / (p2 - p1);
+        m.set(key, { t: a.t[i] + f * (b.t[j] - a.t[i]), gap: b.gap ? b.gap[q] : 0 });
+      }
+    }
+  }
+
+  /** The newest timing point `car` passed at or before t (searching back from its progress now). */
+  private lastCrossing(car: number, progressNow: number, t: number): [number, Crossing] | null {
+    const m = this.crossings.get(car);
+    if (!m) return null;
+    const k = Math.floor(progressNow / (this.lapLength / SPLITS));
+    for (let key = k + 1; key >= k - SPLITS; key--) {
+      const c = m.get(key);
+      if (c && c.t <= t + 1e-3) return [key, c];
+    }
+    return null;
+  }
+
+  /**
+   * The interval of `car` to `ahead` (s), set each time `car` passes a timing point: the game's
+   * own number where the race carries it, else the time between both cars passing that point.
+   */
+  interval(car: CarState, ahead: CarState, t: number): number | null {
+    const mine = this.lastCrossing(car.car, this.progress(car.lap, car.dist), t);
+    if (!mine) return null;
+    if (mine[1].gap > 0) return mine[1].gap / 1000;
+    const theirs = this.crossings.get(ahead.car)?.get(mine[0]);
+    if (!theirs || theirs.t > mine[1].t) return null;
+    return mine[1].t - theirs.t;
   }
 
   /** Ask for the chunks around time t; drop the far ones. */
@@ -202,10 +277,14 @@ export class ChunkStore {
       const z = gone ? c1.z[p] : hermite(a[0].z[pa], c1.z[p], c2.z[q], n2[0].z[pn], tA, ta, tb, tN, u);
       const h1 = c1.heading[p] / 10000;
       const h2 = gone ? h1 : c2.heading[q] / 10000;
-      let dh = h2 - h1;
-      if (dh > Math.PI) dh -= Math.PI * 2;
-      if (dh < -Math.PI) dh += Math.PI * 2;
-      const lerp = (v1: number, v2: number) => v1 + (gone ? 0 : (v2 - v1) * u);
+      const dh = wrapPi(h2 - h1);
+      // heading and inputs follow the same curve as the position, so turns and pedals stay smooth in slow motion
+      const h2u = h1 + dh;
+      const h0u = h1 + wrapPi(a[0].heading[pa] / 10000 - h1);
+      const h3u = h2u + wrapPi(n2[0].heading[pn] / 10000 - h2);
+      const curve = (v0: number, v1: number, v2: number, v3: number) => (gone ? v1 : cubic(v0, v1, v2, v3, tA, ta, tb, tN, u));
+      const input = (col: "throttle" | "brake" | "steer", scale: number, lo: number) =>
+        Math.max(lo, Math.min(1, curve(a[0][col][pa], c1[col][p], c2[col][q], n2[0][col][pn]) / scale));
       // direction of travel over this row, for the slide angle
       const mx = c2.x[q] - c1.x[p];
       const mz = c2.z[q] - c1.z[p];
@@ -219,11 +298,11 @@ export class ChunkStore {
         car,
         x,
         z,
-        heading: h1 + dh * u,
-        speed: lerp(c1.speed[p], c2.speed[q]) / 10,
-        throttle: lerp(c1.throttle[p], c2.throttle[q]) / 255,
-        brake: lerp(c1.brake[p], c2.brake[q]) / 255,
-        steer: lerp(c1.steer[p], c2.steer[q]) / 127,
+        heading: curve(h0u, h1, h2u, h3u),
+        speed: Math.max(0, curve(a[0].speed[pa], c1.speed[p], c2.speed[q], n2[0].speed[pn]) / 10),
+        throttle: input("throttle", 255, 0),
+        brake: input("brake", 255, 0),
+        steer: input("steer", 127, -1),
         gear: (u < 0.5 ? c1 : c2).gear[u < 0.5 ? p : q],
         lap: c1.lap[p],
         pos: c1.pos[p],
@@ -234,6 +313,23 @@ export class ChunkStore {
     }
     return out;
   }
+}
+
+const wrapPi = (a: number) => {
+  while (a > Math.PI) a -= Math.PI * 2;
+  while (a < -Math.PI) a += Math.PI * 2;
+  return a;
+};
+
+/** Catmull-Rom on uneven times through p1 (at t1) and p2 (at t2), for any value (0 included). */
+function cubic(p0: number, p1: number, p2: number, p3: number, t0: number, t1: number, t2: number, t3: number, u: number) {
+  const h = t2 - t1;
+  if (h <= 1e-4) return p1;
+  const m1 = t2 - t0 > 1e-4 ? ((p2 - p0) / (t2 - t0)) * h : p2 - p1;
+  const m2 = t3 - t1 > 1e-4 ? ((p3 - p1) / (t3 - t1)) * h : p2 - p1;
+  const u2 = u * u;
+  const u3 = u2 * u;
+  return (2 * u3 - 3 * u2 + 1) * p1 + (u3 - 2 * u2 + u) * m1 + (-2 * u3 + 3 * u2) * p2 + (u3 - u2) * m2;
 }
 
 function hermite(p0: number, p1: number, p2: number, p3: number, t0: number, t1: number, t2: number, t3: number, u: number) {

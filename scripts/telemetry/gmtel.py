@@ -168,7 +168,8 @@ def parse_field(pid, b):
                 continue
             out[i] = {"lap_distance": v[10], "total_distance": v[11], "position": v[13],
                       "lap": v[14], "pit_status": v[15], "sector": v[17] + 1,
-                      "driver_status": v[25], "result_status": v[26]}
+                      "driver_status": v[25], "result_status": v[26], "grid": v[24],
+                      "last_lap_ms": v[0], "gap_front_ms": v[6] + v[7] * 60000}
         elif pid == 6 and size >= FIELD_TELEMETRY.size:
             v = FIELD_TELEMETRY.unpack_from(r)
             out[i] = {"speed": v[0], "throttle": v[1], "steer": v[2], "brake": v[3], "gear": v[5]}
@@ -213,9 +214,11 @@ class Session:
         self.info = {}
         self.setups = []      # (session time, setup) whenever it changes
         self.events = []      # (session time, code)
+        self.event_detail = []  # start lights, overtakes and retirements with their cars
         self.collisions = []  # {"t", "a", "b", "severity"} (car indexes)
         self.drivers = {}     # car index -> participant info
         self.field = {}       # session time -> {car index: merged motion/lap/telemetry row}
+        self.field_frames = {}  # session time -> the game's frame id of that motion row
         self.laps = {}        # lap number -> {"samples": [...], "time_ms": .., "invalid": ..}
         self.packet_format = None
         self._cur = None      # sample being filled for the current send tick
@@ -245,6 +248,8 @@ class Session:
                 except struct.error:
                     continue
                 tick = self.field.setdefault(round(h[7], 3), {})
+                if pid == 0:
+                    self.field_frames[round(h[7], 3)] = h[9]
                 for i, r in rows.items():
                     tick.setdefault(i, {}).update(r)
                 continue
@@ -270,6 +275,12 @@ class Session:
                     code = body[:4].decode("ascii", "replace")
                     if code not in ("BUTN", "SPTP", "OVTK"):
                         self.events.append((round(h[7], 2), code))
+                    if code == "STLG" and len(body) >= 5:
+                        self.event_detail.append({"t": round(h[7], 3), "code": code, "lights": body[4]})
+                    elif code == "OVTK" and len(body) >= 6:
+                        self.event_detail.append({"t": round(h[7], 3), "code": code, "a": body[4], "b": body[5]})
+                    elif code == "RTMT" and len(body) >= 5:
+                        self.event_detail.append({"t": round(h[7], 3), "code": code, "car": body[4]})
                     if code == "COLL" and len(body) >= 7:
                         self.collisions.append({"t": round(h[7], 3), "a": body[4], "b": body[5],
                                                 "severity": body[6]})

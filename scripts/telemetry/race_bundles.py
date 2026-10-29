@@ -37,7 +37,7 @@ import gmtel  # noqa: E402
 RELEASE = "https://api.github.com/repos/gremigaming/race-stats/releases/tags/telemetry"
 DOWNLOAD = "https://github.com/gremigaming/race-stats/releases/download/telemetry/"
 
-VERSION = 3          # bump to rebuild every bundle
+VERSION = 4          # bump to rebuild every bundle
 KEEP = 40            # newest races published on the site (R2 keeps everything later)
 CHUNK_SECONDS = 10
 CHUNK_HEAD = struct.Struct("<4sBBHd")
@@ -88,13 +88,13 @@ def shown_name(p):
 
 def encode_chunk(t0, frames):
     """Copy of live/race.py encode_chunk. frames: [(t, {slot: (x, z, y, heading, speed, throttle,
-    brake, steer, gear, offtrack, lap_distance, lap, position)})]."""
+    brake, steer, gear, offtrack, lap_distance, lap, position, gap_front_ms)})]."""
     cars = max((max(c) for _, c in frames if c), default=-1) + 1
     n = len(frames)
-    blank = (0.0, 0.0, 0.0, 0.0, 0, 0.0, 0.0, 0.0, 0, 0, 0.0, 0, 0)
+    blank = (0.0, 0.0, 0.0, 0.0, 0, 0.0, 0.0, 0.0, 0, 0, 0.0, 0, 0, 0)
     flat = [c.get(i, blank) for _, c in frames for i in range(cars)]
     clamp = lambda v, lo, hi: max(lo, min(hi, v))  # noqa: E731
-    out = [CHUNK_HEAD.pack(b"GMLC", 1, cars, n, float(t0)), struct.pack(f"<{n}f", *(t for t, _ in frames))]
+    out = [CHUNK_HEAD.pack(b"GMLC", 2, cars, n, float(t0)), struct.pack(f"<{n}f", *(t for t, _ in frames))]
     for k in (0, 1, 2, 10):
         out.append(struct.pack(f"<{len(flat)}f", *(r[k] for r in flat)))
     out.append(struct.pack(f"<{len(flat)}h", *(clamp(round(r[3] * 10000), -32768, 32767) for r in flat)))
@@ -106,6 +106,7 @@ def encode_chunk(t0, frames):
     out.append(bytes(r[9] & 15 for r in flat))
     out.append(bytes(clamp(r[11], 0, 255) for r in flat))
     out.append(bytes(clamp(r[12], 0, 255) for r in flat))
+    out.append(struct.pack(f"<{len(flat)}H", *(clamp(round(r[13] / 10), 0, 65535) for r in flat)))
     return b"".join(out)
 
 
@@ -132,7 +133,8 @@ def add_surfaces(sess, incs):
 
 
 def frames_of(sess):
-    """One frame per all-car motion row, each car's newest telemetry and lap data carried along."""
+    """One frame per all-car motion row, each car's newest telemetry and lap data carried along,
+    re-timed by the game's frame counter (see retime)."""
     tel, lap, frames = {}, {}, []
     for t in sorted(sess.field):
         rows = sess.field[t]
@@ -142,13 +144,57 @@ def frames_of(sess):
                           if r.get("surface_" + k, 0) not in ON_TRACK)
                 tel[i] = (r["speed"], r["throttle"], r["brake"], r["steer"], r["gear"], off)
             if "lap" in r:
-                lap[i] = (r["lap_distance"], r["lap"], r["position"])
+                lap[i] = (r["lap_distance"], r["lap"], r["position"], r.get("gap_front_ms", 0))
         cars = {i: (r["x"], r["z"], r["y"], math.atan2(r["fz"], r["fx"]))
-                + tel.get(i, (0, 0.0, 0.0, 0.0, 0, 0)) + lap.get(i, (0.0, 0, 0))
+                + tel.get(i, (0, 0.0, 0.0, 0.0, 0, 0)) + lap.get(i, (0.0, 0, 0, 0))
                 for i, r in rows.items() if "x" in r}
         if cars:
             frames.append((t, cars))
-    return frames
+    return retime(frames, sess.field_frames)
+
+
+def retime(frames, ids):
+    """The session time on a motion row can be ~20 ms off from when its positions were taken,
+    while the positions themselves move in whole game frames (1/60 s): in the viewer cars stop
+    and lurch. Count the game frames between rows from how far the moving cars went at their
+    speed (the frame id when nobody is moving fast), time each row by that count (pulled slowly
+    towards the session time so it never drifts) and drop rows that repeat the previous one."""
+    out = []
+    prev = None  # (frame id, corrected time, cars)
+    period = 1 / 60
+    for t, cars in frames:
+        f = ids.get(t)
+        if prev is None:
+            tc = t
+        else:
+            df = moved_frames(prev[2], cars)
+            if df is None and f is not None and prev[0] is not None:
+                df = f - prev[0]
+            if df == 0 and t - out[-1][2] < 0.1:
+                continue
+            if df is not None and 0 < df <= 120 and 0 < t - out[-1][2] < 3:
+                period += 0.002 * (min(max((t - out[-1][2]) / df, 0.008), 0.03) - period)
+                tc = prev[1] + df * period
+                tc += 0.05 * (t - tc)
+                if abs(tc - t) > 0.1 or tc <= prev[1]:
+                    tc = t
+            else:
+                tc = t  # flashback, pause or a gap in the recording
+        prev = (f, tc, cars)
+        out.append((round(tc, 4), cars, t))
+    return [(tc, cars) for tc, cars, _ in out]
+
+
+def moved_frames(a, b):
+    """Game frames between two rows, from the distance the cars over 80 km/h covered at their speed."""
+    est = []
+    for i, v in b.items():
+        p = a.get(i)
+        if p and v[4] > 80 and p[4] > 80:
+            est.append(math.hypot(v[0] - p[0], v[1] - p[1]) / ((v[4] + p[4]) / 7.2) * 60)
+    if len(est) < 2:
+        return None
+    return round(statistics.median(est))
 
 
 class Normal:
@@ -165,6 +211,29 @@ class Normal:
     def ratio(self, i, c):
         ref = self.v.get((i, int(c[10] // 20)))
         return c[4] / ref if ref else 1.0
+
+
+def timing_of(sess):
+    """Per car: grid slot, completed laps [lap, session time, ms] and result status changes
+    [session time, status] (2 active, 3 finished, 4 DNF, 5 DSQ, 6 not classified, 7 retired)."""
+    out = {}
+    for t in sorted(sess.field):
+        for i, r in sess.field[t].items():
+            if "result_status" not in r:
+                continue
+            d = out.setdefault(i, {"grid": 0, "laps": [], "status": [], "_last": None})
+            if r.get("grid"):
+                d["grid"] = r["grid"]
+            ms = r.get("last_lap_ms", 0)
+            if ms and d["_last"] is not None and ms != d["_last"]:
+                d["laps"].append([len(d["laps"]) + 1, round(t, 2), ms])
+            if d["_last"] is None or ms:
+                d["_last"] = ms
+            if not d["status"] or d["status"][-1][1] != r["result_status"]:
+                d["status"].append([round(t, 2), r["result_status"]])
+    for d in out.values():
+        del d["_last"]
+    return out
 
 
 def lap_starts(frames):
@@ -263,7 +332,8 @@ def bundle(path, rid, outdir):
                      "number": p.get("race_number"), "ai": bool(p.get("ai"))}
             for i, p in sess.drivers.items() if i in seen}
     events = [{"t": round(c["t"], 3), "code": "COLL", "a": c["a"], "b": c["b"]} for c in sess.collisions]
-    events += [{"t": t, "code": code} for t, code in sess.events if code not in ("COLL",)]
+    events += [{"t": t, "code": code} for t, code in sess.events if code not in ("COLL", "STLG", "RTMT")]
+    events += sess.event_detail
     events.sort(key=lambda e: e["t"])
     base = os.path.basename(path).replace(".gmtel.gz", "")
     manifest = {"v": 1, "uid": rid, "started": base[:10] + "T" + base[11:19].replace("-", ":"),
@@ -271,6 +341,7 @@ def bundle(path, rid, outdir):
                 "laps": sess.info.get("total_laps", 0), "track_length": sess.info.get("track_length", 0),
                 "chunk_seconds": CHUNK_SECONDS, "chunks": chunks, "duration": round(frames[-1][0], 2),
                 "lap_starts": lap_starts(frames),
+                "timing": {str(i): v for i, v in timing_of(sess).items() if str(i) in cars},
                 "cars": cars, "events": events, "finished": True, "source": "recording", "bundle": VERSION,
                 "incidents": incidents(frames, sess.collisions, sess.info.get("track_length", 0))}
     add_surfaces(sess, manifest["incidents"])

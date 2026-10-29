@@ -1,7 +1,7 @@
-import { ChevronDown, ChevronRight, Pause, Play, RotateCcw, RotateCw, Video, X } from "lucide-react";
+import { Pause, Play, RotateCcw, RotateCw, X } from "lucide-react";
 import { useRef, type ReactNode } from "react";
 import type { RaceCar, RaceIncident } from "./format";
-import { bits, type CarTag } from "./scene";
+import type { CarTag } from "./scene";
 import type { CarState } from "./store";
 
 export const SPEEDS = [0.25, 0.5, 1, 2, 4, 8];
@@ -28,6 +28,8 @@ export function PlayerBar(props: {
   onSeek: (t: number) => void;
   onRate: (r: number) => void;
   onIncident: (i: number) => void;
+  /** The selected driver's colour for incidents they were in, else null. */
+  highlight?: (i: number) => string | null;
 }) {
   const { t, start, end, playing, rate, lapStarts, incidents } = props;
   const bar = useRef<HTMLDivElement>(null);
@@ -57,17 +59,20 @@ export function PlayerBar(props: {
         {lapStarts.slice(1).map((s, i) => (
           <div key={`lap${i}`} className="absolute top-1 h-3 w-px bg-white/35" style={{ left: pct(s) }} title={`Lap ${i + 2}`} />
         ))}
-        {incidents.map((inc, i) => (
-          <button
-            key={`inc${i}`}
-            type="button"
-            title={`Incident, lap ${inc.lap || "?"}`}
-            className="absolute -top-1 h-2.5 w-2.5 -translate-x-1/2 rotate-45 rounded-[2px] bg-amber-400 hover:scale-125"
-            style={{ left: pct(inc.t0) }}
-            onPointerDown={(e) => e.stopPropagation()}
-            onClick={() => props.onIncident(i)}
-          />
-        ))}
+        {incidents.map((inc, i) => {
+          const mine = props.highlight?.(i) ?? null;
+          return (
+            <button
+              key={`inc${i}`}
+              type="button"
+              title={`Incident, lap ${inc.lap || "?"}`}
+              className={`absolute -translate-x-1/2 rotate-45 rounded-[2px] hover:scale-125 ${mine ? "-top-1.5 z-10 h-3.5 w-3.5 ring-2 ring-white" : "-top-1 h-2.5 w-2.5 bg-amber-400"}`}
+              style={{ left: pct(inc.t0), background: mine ?? undefined }}
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={() => props.onIncident(i)}
+            />
+          );
+        })}
         <div className="absolute top-0.5 h-4 w-4 -translate-x-1/2 rounded-full bg-white shadow" style={{ left: pct(t) }} />
       </div>
       <div className="mt-1 flex items-center gap-1 text-sm">
@@ -117,7 +122,6 @@ export function IconButton(props: { label: string; onClick: () => void; active?:
 }
 
 export interface Trace {
-  speed: number[];
   throttle: number[];
   brake: number[];
   steer: number[];
@@ -171,24 +175,6 @@ export function SteeringWheel({ s, small }: { s: CarState | undefined; small?: b
   );
 }
 
-/** The last 10 s of speed (white), throttle (green), brake (red) and steering (blue). */
-function TraceChart({ trace }: { trace: Trace | undefined }) {
-  if (!trace || trace.speed.length < 2) return <div className="h-14 rounded bg-white/[0.03]" />;
-  const n = trace.speed.length;
-  const X = (i: number) => (i / (n - 1)) * 100;
-  const line = (vals: number[], f: (v: number) => number) => vals.map((v, i) => `${X(i).toFixed(1)},${f(v).toFixed(1)}`).join(" ");
-  const area = (vals: number[]) => `0,40 ${line(vals, (v) => 40 - v * 38)} 100,40`;
-  return (
-    <svg viewBox="0 0 100 40" preserveAspectRatio="none" className="h-14 w-full rounded bg-white/[0.03]">
-      <polygon points={area(trace.throttle)} fill="rgba(52,211,153,0.28)" />
-      <polygon points={area(trace.brake)} fill="rgba(239,68,68,0.45)" />
-      <line x1="0" y1="20" x2="100" y2="20" stroke="rgba(255,255,255,0.08)" strokeWidth="0.4" />
-      <polyline points={line(trace.steer, (v) => 20 - v * 18)} fill="none" stroke="#60a5fa" strokeWidth="0.8" vectorEffect="non-scaling-stroke" />
-      <polyline points={line(trace.speed, (v) => 39 - (Math.min(v, 360) / 360) * 37)} fill="none" stroke="#f4f4f5" strokeWidth="1.2" vectorEffect="non-scaling-stroke" />
-    </svg>
-  );
-}
-
 const TAG_STYLE: Record<CarTag, string> = {
   CONTACT: "bg-amber-400/20 text-amber-300",
   "OFF TRACK": "bg-orange-500/20 text-orange-300",
@@ -208,93 +194,6 @@ export function TagChips({ tags }: { tags: CarTag[] }) {
   );
 }
 
-const fmtGap = (g: number | null) => (g === null ? "–" : `${g.toFixed(1)}s`);
-
-/** Everything about one selected driver: yoke, inputs, traces, lap, gaps and event tags. */
-export function CarInputs(props: {
-  car: RaceCar | undefined;
-  color: string;
-  s: CarState | undefined;
-  trace: Trace | undefined;
-  gapAhead: number | null;
-  gapBehind: number | null;
-  laps: number;
-  tags: CarTag[];
-  following: boolean;
-  onFollow: () => void;
-  onCard: () => void;
-  onRemove: () => void;
-}) {
-  const { s, car } = props;
-  const pctBar = (v: number, cls: string, label: string) => (
-    <div className="flex items-center gap-2">
-      <span className="w-12 text-[11px] uppercase tracking-wide text-zinc-500">{label}</span>
-      <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-white/10">
-        <div className={`h-full rounded-full ${cls}`} style={{ width: `${Math.round((v || 0) * 100)}%` }} />
-      </div>
-      <span className="w-9 text-right font-mono text-xs tabular-nums text-zinc-300">{Math.round((v || 0) * 100)}%</span>
-    </div>
-  );
-  const slide = s ? Math.abs(s.slip) * (180 / Math.PI) : 0;
-  return (
-    <div className="rounded-lg border border-white/10 bg-white/[0.03] p-3">
-      <div className="mb-2 flex items-center gap-2">
-        <span className="h-4 w-1 rounded-full" style={{ background: props.color }} />
-        <span className="font-mono text-xs text-zinc-400">{s?.pos ? `P${s.pos}` : ""}</span>
-        <button type="button" onClick={props.onCard} className="min-w-0 flex-1 truncate text-left text-sm font-semibold hover:underline">
-          {car?.number ? `${car.number} ` : ""}
-          {car?.name ?? "Car"}
-        </button>
-        <IconButton label={props.following ? "Stop following" : "Follow with the camera (adds to the cars followed)"} active={props.following} onClick={props.onFollow}>
-          <Video className="h-4 w-4" />
-        </IconButton>
-        <IconButton label="Remove" onClick={props.onRemove}>
-          <X className="h-4 w-4" />
-        </IconButton>
-      </div>
-      <div className="flex items-center gap-2">
-        <SteeringWheel s={s} />
-        <div className="flex-1">
-          <div className="font-mono text-2xl leading-none tabular-nums">
-            {s ? Math.round(s.speed) : "–"}
-            <span className="ml-1 text-xs text-zinc-500">km/h</span>
-          </div>
-          <div className="mt-1 text-xs text-zinc-400">
-            Lap {s?.lap || "–"}
-            {props.laps ? `/${props.laps}` : ""} · {s ? `${Math.round(s.dist)} m` : "–"}
-          </div>
-          <div className="text-xs text-zinc-400">
-            Ahead {fmtGap(props.gapAhead)} · Behind {fmtGap(props.gapBehind)}
-          </div>
-        </div>
-      </div>
-      <div className="mt-2 space-y-1.5">
-        {pctBar(s?.throttle ?? 0, "bg-emerald-400", "Throttle")}
-        {pctBar(s?.brake ?? 0, "bg-red-500", "Brake")}
-        <div className="flex items-center gap-2 text-[11px] text-zinc-500">
-          <span className="w-12 uppercase tracking-wide">Steer</span>
-          <span className="font-mono text-zinc-300">{s ? `${Math.round(s.steer * 100)}%` : "–"}</span>
-          <span className="ml-3 uppercase tracking-wide">Slide</span>
-          <span className={`font-mono ${slide >= 9 ? "text-sky-300" : "text-zinc-300"}`}>{s ? `${slide.toFixed(0)}°` : "–"}</span>
-        </div>
-      </div>
-      <div className="mt-2">
-        <TraceChart trace={props.trace} />
-        <div className="mt-1 flex justify-between text-[10px] text-zinc-600">
-          <span>−10 s</span>
-          <span>speed · throttle · brake · steering</span>
-          <span>now</span>
-        </div>
-      </div>
-      {props.tags.length > 0 && (
-        <div className="mt-2 flex flex-wrap gap-1">
-          <TagChips tags={props.tags} />
-        </div>
-      )}
-    </div>
-  );
-}
-
 /** What one driver did in an incident, measured from the chunks (and the recording's wheel surfaces). */
 export interface IncidentDriverStats {
   car: number;
@@ -307,6 +206,49 @@ export interface IncidentDriverStats {
   lockup: boolean;
   surfaces?: Record<string, string>;
   speeds: number[];
+  /** Inputs every 0.1 s over the same window as speeds. */
+  throttle: number[];
+  brake: number[];
+  steer: number[];
+}
+
+/** One driver's pedals and steering through an incident, with live bars, so everyone involved can be compared. */
+function IncidentInputs({ d, s, at, contact }: { d: IncidentDriverStats; s: CarState | undefined; at: number; contact: number }) {
+  const n = d.throttle.length;
+  const X = (i: number) => ((i / Math.max(n - 1, 1)) * 100).toFixed(2);
+  const line = (vals: number[], f: (v: number) => number) => vals.map((v, i) => `${X(i)},${f(v).toFixed(2)}`).join(" ");
+  const bar = (v: number, cls: string) => (
+    <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
+      <div className={`h-full ${cls}`} style={{ width: `${Math.round(Math.max(0, Math.min(1, v)) * 100)}%` }} />
+    </div>
+  );
+  return (
+    <div className="mt-1.5 grid grid-cols-[3.5rem_1fr] items-center gap-2">
+      <div className="space-y-1">
+        {bar(s?.throttle ?? 0, "bg-emerald-500")}
+        {bar(s?.brake ?? 0, "bg-red-500")}
+        <div className="relative h-1.5 overflow-hidden rounded-full bg-white/10">
+          <span className="absolute inset-y-0 left-1/2 w-px bg-white/30" />
+          <div
+            className="absolute inset-y-0 bg-sky-400"
+            style={{ left: `${50 + Math.min(0, s?.steer ?? 0) * 50}%`, width: `${Math.abs(s?.steer ?? 0) * 50}%` }}
+          />
+        </div>
+      </div>
+      <svg viewBox="0 0 100 30" preserveAspectRatio="none" className="h-10 w-full rounded bg-white/[0.03]">
+        {n > 1 && (
+          <>
+            <line x1="0" y1="15" x2="100" y2="15" stroke="rgba(255,255,255,0.08)" strokeWidth="0.4" vectorEffect="non-scaling-stroke" />
+            <polyline points={line(d.steer, (v) => 15 - v * 13)} fill="none" stroke="#60a5fa" strokeWidth="1" vectorEffect="non-scaling-stroke" />
+            <polyline points={line(d.throttle, (v) => 29 - v * 27)} fill="none" stroke="#22c55e" strokeWidth="1.4" vectorEffect="non-scaling-stroke" />
+            <polyline points={line(d.brake, (v) => 29 - v * 27)} fill="none" stroke="#ef4444" strokeWidth="1.4" vectorEffect="non-scaling-stroke" />
+          </>
+        )}
+        <line x1={contact * 100} y1="0" x2={contact * 100} y2="30" stroke="#fbbf24" strokeWidth="1" vectorEffect="non-scaling-stroke" />
+        {at >= 0 && at <= 1 && <line x1={at * 100} y1="0" x2={at * 100} y2="30" stroke="#ffffff" strokeWidth="1.2" vectorEffect="non-scaling-stroke" />}
+      </svg>
+    </div>
+  );
 }
 
 const WHEEL = { fl: "front left", fr: "front right", rl: "rear left", rr: "rear right" } as Record<string, string>;
@@ -318,6 +260,11 @@ export function IncidentDetail(props: {
   cars: Record<string, RaceCar>;
   color: (car: number) => string;
   start: number;
+  /** The playhead, the window the stats cover, and every car now (for the live pedal bars). */
+  t: number;
+  from: number;
+  to: number;
+  states: Map<number, CarState>;
   onClose: () => void;
 }) {
   const { incident: inc } = props;
@@ -335,7 +282,6 @@ export function IncidentDetail(props: {
       <div className="space-y-2">
         {props.stats.map((d) => {
           const info = props.cars[String(d.car)];
-          const max = Math.max(1, ...d.speeds);
           return (
             <div key={d.car} className="rounded-md bg-black/20 p-2">
               <div className="flex items-center gap-2 text-sm">
@@ -373,124 +319,16 @@ export function IncidentDetail(props: {
                     ? `${d.offWheels} wheel${d.offWheels > 1 ? "s" : ""} off the track`
                     : "all four wheels on track"}
               </div>
-              <svg viewBox="0 0 100 20" preserveAspectRatio="none" className="mt-1 h-6 w-full">
-                <polyline
-                  points={d.speeds.map((v, i) => `${((i / Math.max(d.speeds.length - 1, 1)) * 100).toFixed(1)},${(19 - (v / max) * 18).toFixed(1)}`).join(" ")}
-                  fill="none"
-                  stroke={props.color(d.car)}
-                  strokeWidth="1.2"
-                  vectorEffect="non-scaling-stroke"
-                />
-              </svg>
+              <IncidentInputs d={d} s={props.states.get(d.car)} at={(props.t - props.from) / Math.max(props.to - props.from, 0.1)} contact={(props.incident.t0 - props.from) / Math.max(props.to - props.from, 0.1)} />
             </div>
           );
         })}
         {!props.stats.length && <p className="text-xs text-zinc-500">Loading the cars around this incident…</p>}
       </div>
-      <p className="mt-2 text-[10px] text-zinc-600">Speeds in km/h, 3 s before to 3 s after. Slide = angle between where the car points and where it goes.</p>
-    </div>
-  );
-}
-
-/** The running order, top left, like the game's timing tower. */
-export function TimingTower(props: {
-  order: CarState[];
-  cars: Record<string, RaceCar>;
-  color: (car: number) => string;
-  interval: (car: number) => number | null;
-  lap: number;
-  laps: number;
-  selected: number[];
-  followed: number[];
-  open: boolean;
-  onToggle: () => void;
-  onPick: (car: number) => void;
-}) {
-  return (
-    <div className="pointer-events-auto w-56 overflow-hidden rounded-lg border border-white/10 bg-[#0c0e11]/88 text-xs shadow-xl backdrop-blur">
-      <button type="button" onClick={props.onToggle} className="flex w-full items-center gap-1 bg-white/5 px-2 py-1.5 font-semibold uppercase tracking-wide text-zinc-300">
-        {props.open ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
-        Lap {Math.max(1, props.lap)}
-        {props.laps ? ` / ${props.laps}` : ""}
-        <span className="ml-auto font-normal normal-case text-zinc-500">Interval</span>
-      </button>
-      {props.open && (
-        <ul aria-label="Running order" className="max-h-[52vh] overflow-y-auto py-0.5">
-          {props.order.map((s, i) => {
-            const info = props.cars[String(s.car)];
-            const on = props.selected.includes(s.car);
-            const gap = i === 0 ? null : props.interval(s.car);
-            return (
-              <li key={s.car}>
-                <button
-                  type="button"
-                  onClick={() => props.onPick(s.car)}
-                  className={`flex h-6 w-full items-center gap-1.5 pr-2 text-left hover:bg-white/10 ${on ? "bg-white/10" : ""}`}
-                >
-                  <span className="flex h-6 w-6 items-center justify-center bg-white/90 font-mono text-[11px] font-bold text-black">{s.pos || "–"}</span>
-                  <span className="h-4 w-1 rounded-sm" style={{ background: props.color(s.car) }} />
-                  <span className="min-w-0 flex-1 truncate font-semibold uppercase tracking-wide">{info?.name ?? `Car ${s.car}`}</span>
-                  {props.followed.includes(s.car) && <Video className="h-3 w-3 text-zinc-400" />}
-                  {bits(s.off) >= 2 && <span className="text-[9px] font-bold text-orange-300">OFF</span>}
-                  <span className="w-11 text-right font-mono tabular-nums text-zinc-400">{i === 0 ? "Leader" : gap === null ? "" : `+${gap.toFixed(1)}`}</span>
-                </button>
-              </li>
-            );
-          })}
-        </ul>
-      )}
-    </div>
-  );
-}
-
-/** The incident list: every grouped incident, a click jumps the clock and the camera to it. */
-export function IncidentList(props: {
-  incidents: RaceIncident[];
-  cars: Record<string, RaceCar>;
-  start: number;
-  active: number | null;
-  open: boolean;
-  onToggle: () => void;
-  onPick: (i: number) => void;
-}) {
-  const name = (c: number) => props.cars[String(c)]?.name ?? `Car ${c}`;
-  return (
-    <div>
-      <button type="button" onClick={props.onToggle} className="flex w-full items-center gap-1 py-1 text-xs font-semibold uppercase tracking-wide text-zinc-400">
-        {props.open ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-        Incidents ({props.incidents.length})
-      </button>
-      {props.open && (
-        <ul className="mt-1 space-y-1">
-          {props.incidents.map((inc, i) => {
-            const contact = inc.drivers.filter((d) => d.role === "contact");
-            const others = inc.drivers.filter((d) => d.role !== "contact");
-            return (
-              <li key={i}>
-                <button
-                  type="button"
-                  onClick={() => props.onPick(i)}
-                  className={`w-full rounded-md px-2 py-1.5 text-left text-sm hover:bg-white/10 ${props.active === i ? "bg-white/10" : ""}`}
-                >
-                  <div className="flex items-center gap-2 text-xs text-zinc-500">
-                    <span className="h-2 w-2 rotate-45 rounded-[1px] bg-amber-400" />
-                    {inc.lap ? `Lap ${inc.lap} · ` : ""}
-                    {clock(inc.t0 - props.start)}
-                    {inc.contacts.length > 1 ? ` · ${inc.contacts.length} contacts` : ""}
-                  </div>
-                  <div className="truncate">{contact.map((d) => name(d.car)).join(", ")}</div>
-                  {others.length > 0 && (
-                    <div className="truncate text-xs text-zinc-500">
-                      Also involved: {others.map((d) => `${name(d.car)} (${d.role})`).join(", ")}
-                    </div>
-                  )}
-                </button>
-              </li>
-            );
-          })}
-          {!props.incidents.length && <li className="px-2 text-sm text-zinc-500">No contacts in this race.</li>}
-        </ul>
-      )}
+      <p className="mt-2 text-[10px] text-zinc-600">
+        Speeds in km/h. Traces run 3 s before to 3 s after: <span className="text-emerald-400">throttle</span>, <span className="text-red-400">brake</span>,{" "}
+        <span className="text-sky-400">steering</span>; the white line is now, the amber line the first contact. Slide = angle between where the car points and where it goes.
+      </p>
     </div>
   );
 }
