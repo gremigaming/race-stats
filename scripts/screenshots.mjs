@@ -104,22 +104,31 @@ if (raceHref) {
   await page.waitForTimeout(7000);
   await page.screenshot({ path: `${outDir}/race-viewer.jpg`, type: "jpeg", quality: 80 });
   console.log(`saved race-viewer (${page.url()})`);
-  const incident = page.locator("aside ul").last().locator("button").first();
+  // play from the grid: the start lights, then the broadcast camera
+  await page.keyboard.press("Space");
+  await page.waitForTimeout(3600);
+  await page.screenshot({ path: `${outDir}/race-viewer-lights.jpg`, type: "jpeg", quality: 80 });
+  await page.waitForTimeout(12000);
+  await page.screenshot({ path: `${outDir}/race-viewer-broadcast.jpg`, type: "jpeg", quality: 80 });
+  // an incident from the timeline: inputs of everyone involved, then back to the broadcast camera
+  const incident = page.locator('button[title^="Incident"]').first();
   if (await incident.count()) {
     await incident.click();
-    await page.waitForTimeout(4500);
+    await page.waitForTimeout(5000);
     await page.screenshot({ path: `${outDir}/race-viewer-incident.jpg`, type: "jpeg", quality: 80 });
+    await page.waitForTimeout(16000);
+    await page.screenshot({ path: `${outDir}/race-viewer-snapback.jpg`, type: "jpeg", quality: 80 });
   }
-  // the running order: open a driver's card (and follow them with the camera)
+  // the running order: pick a driver (camera follows, TV strip, race card)
   const row = page.locator('ul[aria-label="Running order"] button').nth(2);
   if (await row.count()) {
     await row.click();
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(3000);
     await page.screenshot({ path: `${outDir}/race-viewer-card.jpg`, type: "jpeg", quality: 80 });
   }
-  const follow = page.locator('button[aria-label^="Follow with the camera"]').first();
-  if (await follow.count()) {
-    await follow.click();
+  const second = page.locator('ul[aria-label="Running order"] button').nth(3);
+  if (await second.count()) {
+    await second.click({ modifiers: ["Shift"] });
     await page.waitForTimeout(3000);
     await page.screenshot({ path: `${outDir}/race-viewer-follow.jpg`, type: "jpeg", quality: 80 });
   }
