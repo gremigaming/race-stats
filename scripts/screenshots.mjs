@@ -110,11 +110,16 @@ if (raceHref) {
     await page.waitForTimeout(4500);
     await page.screenshot({ path: `${outDir}/race-viewer-incident.jpg`, type: "jpeg", quality: 80 });
   }
-  await page.keyboard.press("Space");
-  const follow = page.locator('button[aria-label="Follow with the camera"]').first();
+  // the running order: open a driver's card (and follow them with the camera)
+  const row = page.locator('ul[aria-label="Running order"] button').nth(2);
+  if (await row.count()) {
+    await row.click();
+    await page.waitForTimeout(1500);
+    await page.screenshot({ path: `${outDir}/race-viewer-card.jpg`, type: "jpeg", quality: 80 });
+  }
+  const follow = page.locator('button[aria-label^="Follow with the camera"]').first();
   if (await follow.count()) {
     await follow.click();
-    await page.keyboard.press("Space");
     await page.waitForTimeout(3000);
     await page.screenshot({ path: `${outDir}/race-viewer-follow.jpg`, type: "jpeg", quality: 80 });
   }

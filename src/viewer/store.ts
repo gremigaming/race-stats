@@ -19,6 +19,8 @@ export interface CarState {
   pos: number;
   dist: number;
   off: number;
+  /** Angle between where the car points and where it travels (radians, + = nose right of travel). */
+  slip: number;
 }
 
 const PREFETCH = 3; // chunks either side of the playhead
@@ -204,6 +206,15 @@ export class ChunkStore {
       if (dh > Math.PI) dh -= Math.PI * 2;
       if (dh < -Math.PI) dh += Math.PI * 2;
       const lerp = (v1: number, v2: number) => v1 + (gone ? 0 : (v2 - v1) * u);
+      // direction of travel over this row, for the slide angle
+      const mx = c2.x[q] - c1.x[p];
+      const mz = c2.z[q] - c1.z[p];
+      let slip = 0;
+      if (!gone && Math.hypot(mx, mz) > 0.3) {
+        slip = h1 + dh / 2 - Math.atan2(mz, mx); // the chord matches the heading halfway along
+        while (slip > Math.PI) slip -= Math.PI * 2;
+        while (slip < -Math.PI) slip += Math.PI * 2;
+      }
       out.push({
         car,
         x,
@@ -218,6 +229,7 @@ export class ChunkStore {
         pos: c1.pos[p],
         dist: c1.dist[p],
         off: c1.off[p],
+        slip,
       });
     }
     return out;

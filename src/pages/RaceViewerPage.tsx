@@ -1,14 +1,26 @@
-import { ArrowLeft, Crosshair, Hand, Maximize, Minus, Plus, Video } from "lucide-react";
+import { ArrowLeft, Compass, Hand, Maximize, Minus, Navigation, Plus, RotateCcw, RotateCw, Video } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Link, useParams } from "react-router-dom";
 import { liveryOf, loadLiveries, type Livery } from "../viewer/cars";
 import { incidentsOf, loadManifest, type RaceManifest } from "../viewer/format";
-import { CarInputs, IconButton, IncidentList, PlayerBar } from "../viewer/panels";
-import { RaceScene, type CameraMode } from "../viewer/scene";
+import { DriverCard } from "../viewer/DriverCard";
+import {
+  CarInputs,
+  IconButton,
+  IncidentDetail,
+  IncidentList,
+  PlayerBar,
+  TimingTower,
+  type IncidentDriverStats,
+  type Trace,
+} from "../viewer/panels";
+import { bits, RaceScene, tagsOf, type CameraMode } from "../viewer/scene";
 import { ChunkStore, type CarState } from "../viewer/store";
 
 const MAX_SELECTED = 4;
 const BAR_SPACE = 96; // px the player bar covers at the bottom of the map
+const TOP_SPACE = 56; // the title row
+const TOWER_SPACE = 236; // the timing tower on the left (wide screens)
 
 /** The Live Race Viewer: one screen, the whole race on a WebGL map (spec v1, phase 2). */
 export function RaceViewerPage() {
@@ -61,6 +73,8 @@ function Shell({ back, children }: { back: string; children: ReactNode }) {
 interface View {
   t: number;
   states: CarState[];
+  rot: number;
+  traces: Record<number, Trace>;
 }
 
 function Viewer({ manifest: initial, base, back }: { manifest: RaceManifest; base: string; back: string }) {
@@ -73,18 +87,25 @@ function Viewer({ manifest: initial, base, back }: { manifest: RaceManifest; bas
   const end = manifest.duration ?? spanEnd;
   const lapStarts = manifest.lap_starts ?? [];
   const play = useRef({ t: lapStarts[0] ?? start, playing: false, rate: 1 });
-  const [view, setView] = useState<View>({ t: play.current.t, states: [] });
+  const [view, setView] = useState<View>({ t: play.current.t, states: [], rot: 0, traces: {} });
   const [playing, setPlaying] = useState(false);
   const [rate, setRate] = useState(1);
   const [selected, setSelected] = useState<number[]>([]);
   const [mode, setMode] = useState<CameraMode>("track");
-  const [follow, setFollow] = useState<number | null>(null);
+  const [followed, setFollowed] = useState<number[]>([]);
+  const [autoRotate, setAutoRotate] = useState(false);
   const [activeInc, setActiveInc] = useState<number | null>(null);
+  const [cardCar, setCardCar] = useState<number | null>(null);
   const [incOpen, setIncOpen] = useState(true);
+  const [towerOpen, setTowerOpen] = useState(() => window.innerWidth >= 768);
   const [liveries, setLiveries] = useState<Record<string, Livery>>({});
+  const [loads, setLoads] = useState(0);
   const lastUi = useRef(0);
+  const lastTrace = useRef(0);
   const incidentsRef = useRef(incidents);
   incidentsRef.current = incidents;
+  const selectedRef = useRef(selected);
+  selectedRef.current = selected;
 
   useEffect(() => {
     void loadLiveries().then(setLiveries);
@@ -103,12 +124,16 @@ function Viewer({ manifest: initial, base, back }: { manifest: RaceManifest; bas
     return () => window.clearInterval(timer);
   }, [initial, store]);
 
-  // the scene, its clock and the incident marker
+  // the scene, its clock, the incident marker and the 10 s traces of the selected drivers
   useEffect(() => {
     const el = host.current;
     if (!el) return;
     const p = play.current;
     store.wantAll();
+    let loadTimer = 0;
+    store.onLoad = () => {
+      if (!loadTimer) loadTimer = window.setTimeout(() => ((loadTimer = 0), setLoads((n) => n + 1)), 300);
+    };
     const s = new RaceScene(el, initial.cars, initial.track, (dtMs) => {
       if (p.playing && store.loaded(p.t)) {
         p.t += (dtMs / 1000) * p.rate;
@@ -125,25 +150,53 @@ function Viewer({ manifest: initial, base, back }: { manifest: RaceManifest; bas
       if (k >= 0) {
         const i = incs[k];
         const strength = p.t < i.t0 ? 1 - (i.t0 - p.t) / 3 : p.t > i.t1 + 1.5 ? 1 - (p.t - i.t1 - 1.5) / 1.5 : 1;
-        s.incident = { cars: i.drivers.map((d) => d.car), x: i.x, z: i.z, strength };
-      } else if (s.mode !== "incident") s.incident = null;
+        s.incident = { x: i.x, z: i.z, strength };
+      } else s.incident = null;
       const now = performance.now();
       if (now - lastUi.current > 33) {
         lastUi.current = now;
-        setView({ t: p.t, states });
+        setView((v) => {
+          let traces = v.traces;
+          if (now - lastTrace.current > 150) {
+            lastTrace.current = now;
+            traces = {};
+            const cars = selectedRef.current;
+            if (cars.length) {
+              for (const c of cars) traces[c] = { speed: [], throttle: [], brake: [], steer: [] };
+              for (let k2 = 40; k2 >= 0; k2--) {
+                const at = new Map(store.sample(p.t - k2 * 0.25).map((x) => [x.car, x]));
+                for (const c of cars) {
+                  const x = at.get(c);
+                  const tr = traces[c];
+                  tr.speed.push(x?.speed ?? 0);
+                  tr.throttle.push(x?.throttle ?? 0);
+                  tr.brake.push(x?.brake ?? 0);
+                  tr.steer.push(x?.steer ?? 0);
+                }
+              }
+            }
+          }
+          return { t: p.t, states, rot: s.rotation, traces };
+        });
       }
-      return states;
+      return { t: p.t, states };
     });
     s.bounds = () => store.bounds;
-    s.inset = { bottom: BAR_SPACE, right: 0 };
-    s.onPick = (car) =>
-      setSelected((cur) => (cur.includes(car) ? cur.filter((c) => c !== car) : [...cur, car].slice(-MAX_SELECTED)));
-    s.onModeChange = (m) => {
+    s.contacts = initial.events
+      .filter((e) => e.code === "COLL" && e.a !== undefined && e.b !== undefined)
+      .map((e) => ({ t: e.t, a: e.a!, b: e.b! }));
+    s.onPick = (car, add) => {
+      setSelected((cur) => (cur.includes(car) ? cur : [...cur, car].slice(-MAX_SELECTED)));
+      s.follow(add ? [...s.followCars, car] : [car]);
+    };
+    s.onModeChange = (m, cars) => {
       setMode(m);
-      setFollow(s.follow);
+      setFollowed([...cars]);
     };
     scene.current = s;
     return () => {
+      window.clearTimeout(loadTimer);
+      store.onLoad = null;
       s.destroy();
       scene.current = null;
       store.dispose();
@@ -155,6 +208,12 @@ function Viewer({ manifest: initial, base, back }: { manifest: RaceManifest; bas
   useEffect(() => {
     if (scene.current) scene.current.selected = new Set(selected);
   }, [selected]);
+
+  // keep the camera clear of the title row, the timing tower and the player bar
+  useEffect(() => {
+    const s = scene.current;
+    if (s) s.inset = { top: TOP_SPACE, bottom: BAR_SPACE, left: towerOpen && window.innerWidth >= 768 ? TOWER_SPACE : 0, right: 0 };
+  }, [towerOpen, view.states.length > 0]);
 
   const seek = useCallback(
     (t: number) => {
@@ -173,20 +232,32 @@ function Viewer({ manifest: initial, base, back }: { manifest: RaceManifest; bas
     play.current.rate = r;
     setRate(r);
   };
-  const camera = (m: CameraMode, car: number | null = null) => scene.current?.setMode(m, car);
+  /** Jump to an incident: 3 s before, half speed, camera locked on everyone involved at ~70 m. */
   const pickIncident = (k: number) => {
     const inc = incidents[k];
     if (!inc) return;
     setActiveInc(k);
     seek(inc.t0 - 3);
-    setSelected(inc.drivers.map((d) => d.car).slice(0, MAX_SELECTED));
-    const s = scene.current;
-    if (s) {
-      s.incident = { cars: inc.drivers.map((d) => d.car), x: inc.x, z: inc.z, strength: 0 };
-      s.setMode("incident", null);
-    }
+    changeRate(0.5);
+    const cars = inc.drivers.map((d) => d.car);
+    setSelected(cars.slice(0, MAX_SELECTED));
+    scene.current?.follow(cars, 70);
     play.current.playing = true;
     setPlaying(true);
+  };
+  const toggleFollow = (car: number) => {
+    const s = scene.current;
+    if (!s) return;
+    const cur = s.mode === "follow" ? s.followCars : [];
+    if (cur.includes(car)) {
+      const rest = cur.filter((c) => c !== car);
+      if (rest.length) s.follow(rest);
+      else s.showTrack();
+    } else s.follow([...cur, car]);
+  };
+  const setAuto = (on: boolean) => {
+    setAutoRotate(on);
+    if (scene.current) scene.current.autoRotate = on;
   };
 
   useEffect(() => {
@@ -197,6 +268,9 @@ function Viewer({ manifest: initial, base, back }: { manifest: RaceManifest; bas
         toggle();
       } else if (e.code === "ArrowLeft") seek(play.current.t - 5);
       else if (e.code === "ArrowRight") seek(play.current.t + 5);
+      else if (e.key === "q") scene.current?.rotateBy(-Math.PI / 12);
+      else if (e.key === "e") scene.current?.rotateBy(Math.PI / 12);
+      else if (e.key === "n") scene.current?.resetRotation();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -206,6 +280,47 @@ function Viewer({ manifest: initial, base, back }: { manifest: RaceManifest; bas
   const order = [...view.states].sort((a, b) => (a.pos || 99) - (b.pos || 99));
   const color = (car: number) => liveryOf(liveries, manifest.cars[String(car)]).base;
   const date = manifest.started.slice(0, 10);
+  const trackLen = manifest.track_length || Math.max(1000, ...view.states.map((s) => s.dist));
+  const progress = (s: CarState) => (Math.max(s.lap, 1) - 1) * trackLen + s.dist;
+  const gapTo = (a: CarState | undefined, b: CarState | undefined) =>
+    a && b ? Math.max(0, (progress(a) - progress(b)) / Math.max(b.speed / 3.6, 10)) : null;
+  const neighbours = (car: number) => {
+    const i = order.findIndex((s) => s.car === car);
+    return { ahead: i > 0 ? order[i - 1] : undefined, behind: i >= 0 ? order[i + 1] : undefined, me: order[i] };
+  };
+  const touched = (car: number) =>
+    manifest.events.some((e) => e.code === "COLL" && (e.a === car || e.b === car) && view.t >= e.t - 0.2 && view.t <= e.t + 1.2);
+  const leaderLap = order[0]?.lap ?? 0;
+
+  // the incident deep-dive, measured from the chunks around it (recomputed as chunks arrive)
+  const incStats = useMemo<IncidentDriverStats[]>(() => {
+    const inc = activeInc === null ? null : incidents[activeInc];
+    if (!inc) return [];
+    const out = new Map<number, IncidentDriverStats>();
+    for (const d of inc.drivers)
+      out.set(d.car, { car: d.car, role: d.role, speedAt: 0, minSpeed: Infinity, maxSlide: 0, maxBrake: 0, offWheels: 0, lockup: false, surfaces: d.surfaces, speeds: [] });
+    let any = false;
+    for (let t = inc.t0 - 3; t <= inc.t1 + 3; t += 0.1) {
+      for (const x of store.sample(t)) {
+        const d = out.get(x.car);
+        if (!d) continue;
+        any = true;
+        const slide = Math.abs(x.slip) * (180 / Math.PI);
+        d.speeds.push(x.speed);
+        if (Math.abs(t - inc.t0) < 0.06) d.speedAt = x.speed;
+        if (t >= inc.t0) d.minSpeed = Math.min(d.minSpeed, x.speed);
+        if (x.speed > 40) d.maxSlide = Math.max(d.maxSlide, slide);
+        if (t >= inc.t0 - 1.5 && t <= inc.t1 + 1.5) d.maxBrake = Math.max(d.maxBrake, x.brake);
+        d.offWheels = Math.max(d.offWheels, bits(x.off));
+        if (x.speed > 40 && x.brake >= 0.8 && slide >= 4) d.lockup = true;
+      }
+    }
+    if (!any) return [];
+    return [...out.values()].map((d) => ({ ...d, minSpeed: Number.isFinite(d.minSpeed) ? d.minSpeed : d.speedAt }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeInc, incidents, store, loads]);
+
+  const rotDeg = (view.rot * 180) / Math.PI;
 
   return (
     <div className="fixed inset-0 flex flex-col bg-[#0c0e11] text-zinc-100 md:flex-row">
@@ -224,25 +339,21 @@ function Viewer({ manifest: initial, base, back }: { manifest: RaceManifest; bas
             </div>
             <div className="text-xs text-zinc-500">
               {date}
-              {manifest.laps ? ` · ${manifest.laps} laps` : ""}
               {!manifest.finished && <span className="ml-2 font-semibold text-red-400">LIVE</span>}
             </div>
           </div>
-          <div className="pointer-events-auto ml-auto flex items-center gap-0.5 rounded-lg border border-white/10 bg-[#0c0e11]/85 p-0.5 backdrop-blur">
-            <IconButton label="Full track" active={mode === "track"} onClick={() => camera("track")}>
+          <div className="pointer-events-auto ml-auto flex flex-wrap items-center justify-end gap-0.5 rounded-lg border border-white/10 bg-[#0c0e11]/85 p-0.5 backdrop-blur">
+            <IconButton label="Full track" active={mode === "track"} onClick={() => scene.current?.showTrack()}>
               <Maximize className="h-4 w-4" />
             </IconButton>
             <IconButton
-              label="Follow a driver"
+              label="Follow the selected drivers"
               active={mode === "follow"}
-              onClick={() => camera("follow", follow ?? selected[0] ?? order[0]?.car ?? null)}
+              onClick={() => scene.current?.follow(selected.length ? selected : order[0] ? [order[0].car] : [])}
             >
               <Video className="h-4 w-4" />
             </IconButton>
-            <IconButton label="Incident camera" active={mode === "incident"} onClick={() => activeInc !== null && pickIncident(activeInc)}>
-              <Crosshair className="h-4 w-4" />
-            </IconButton>
-            <IconButton label="Free pan and zoom" active={mode === "free"} onClick={() => camera("free")}>
+            <IconButton label="Free pan and zoom" active={mode === "free"} onClick={() => scene.current?.free()}>
               <Hand className="h-4 w-4" />
             </IconButton>
             <IconButton label="Zoom in" onClick={() => scene.current?.zoom(1.5)}>
@@ -251,7 +362,54 @@ function Viewer({ manifest: initial, base, back }: { manifest: RaceManifest; bas
             <IconButton label="Zoom out" onClick={() => scene.current?.zoom(1 / 1.5)}>
               <Minus className="h-4 w-4" />
             </IconButton>
+            <span className="mx-0.5 h-5 w-px bg-white/10" />
+            <IconButton label="Rotate left (Q, or Shift+drag)" onClick={() => scene.current?.rotateBy(-Math.PI / 12)}>
+              <RotateCcw className="h-4 w-4" />
+            </IconButton>
+            <IconButton label="North up (N)" active={Math.abs(rotDeg) > 0.5} onClick={() => scene.current?.resetRotation()}>
+              <Compass className="h-4 w-4" style={{ transform: `rotate(${rotDeg}deg)` }} />
+            </IconButton>
+            <IconButton label="Rotate right (E, or Shift+drag)" onClick={() => scene.current?.rotateBy(Math.PI / 12)}>
+              <RotateCw className="h-4 w-4" />
+            </IconButton>
+            <IconButton label="Car points up (follow mode)" active={autoRotate} onClick={() => setAuto(!autoRotate)}>
+              <Navigation className="h-4 w-4" />
+            </IconButton>
           </div>
+        </div>
+        <div className="pointer-events-none absolute left-3 top-[60px] flex items-start gap-2">
+          <TimingTower
+            order={order}
+            cars={manifest.cars}
+            color={color}
+            interval={(car) => {
+              const n = neighbours(car);
+              return gapTo(n.ahead, n.me);
+            }}
+            lap={leaderLap}
+            laps={manifest.laps}
+            selected={selected}
+            followed={mode === "follow" ? followed : []}
+            open={towerOpen}
+            onToggle={() => setTowerOpen((o) => !o)}
+            onPick={(car) => {
+              setCardCar(car);
+              setSelected((cur) => (cur.includes(car) ? cur : [...cur, car].slice(-MAX_SELECTED)));
+            }}
+          />
+          {cardCar !== null && (
+            <DriverCard
+              car={cardCar}
+              info={manifest.cars[String(cardCar)]}
+              color={color(cardCar)}
+              incidents={incidents}
+              start={start}
+              following={mode === "follow" && followed.includes(cardCar)}
+              onFollow={() => toggleFollow(cardCar)}
+              onIncident={pickIncident}
+              onClose={() => setCardCar(null)}
+            />
+          )}
         </div>
         <div className="pointer-events-none absolute inset-x-0 bottom-0 p-3">
           <PlayerBar
@@ -271,48 +429,45 @@ function Viewer({ manifest: initial, base, back }: { manifest: RaceManifest; bas
         </div>
       </div>
       <aside className="flex h-[42vh] w-full shrink-0 flex-col gap-3 overflow-y-auto border-t border-white/10 p-3 md:h-auto md:w-80 md:border-l md:border-t-0">
+        {activeInc !== null && incidents[activeInc] && (
+          <IncidentDetail
+            incident={incidents[activeInc]}
+            stats={incStats}
+            cars={manifest.cars}
+            color={color}
+            start={start}
+            onClose={() => setActiveInc(null)}
+          />
+        )}
         {selected.length > 0 ? (
           <div className="space-y-2">
-            {selected.map((car) => (
-              <CarInputs
-                key={car}
-                car={manifest.cars[String(car)]}
-                color={color(car)}
-                s={byCar.get(car)}
-                following={mode === "follow" && follow === car}
-                onFollow={() => camera("follow", car)}
-                onRemove={() => setSelected((cur) => cur.filter((c) => c !== car))}
-              />
-            ))}
-          </div>
-        ) : (
-          <p className="text-sm text-zinc-500">Click a car or a driver below to see their throttle, brake and steering.</p>
-        )}
-        <div>
-          <div className="py-1 text-xs font-semibold uppercase tracking-wide text-zinc-400">Running order</div>
-          <ul>
-            {order.map((s) => {
-              const info = manifest.cars[String(s.car)];
-              const on = selected.includes(s.car);
+            {selected.map((car) => {
+              const n = neighbours(car);
+              const st = byCar.get(car);
               return (
-                <li key={s.car}>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setSelected((cur) => (on ? cur.filter((c) => c !== s.car) : [...cur, s.car].slice(-MAX_SELECTED)))
-                    }
-                    className={`flex w-full items-center gap-2 rounded px-2 py-1 text-left text-sm hover:bg-white/10 ${on ? "bg-white/10" : ""}`}
-                  >
-                    <span className="w-6 font-mono text-xs text-zinc-500">{s.pos || "–"}</span>
-                    <span className="h-3 w-1 rounded-full" style={{ background: color(s.car) }} />
-                    <span className="min-w-0 flex-1 truncate">{info?.name ?? `Car ${s.car}`}</span>
-                    {s.off ? <span className="text-[10px] text-amber-400">OFF</span> : null}
-                  </button>
-                </li>
+                <CarInputs
+                  key={car}
+                  car={manifest.cars[String(car)]}
+                  color={color(car)}
+                  s={st}
+                  trace={view.traces[car]}
+                  gapAhead={gapTo(n.ahead, n.me)}
+                  gapBehind={gapTo(n.me, n.behind)}
+                  laps={manifest.laps}
+                  tags={st ? tagsOf(st, touched(car)) : []}
+                  following={mode === "follow" && followed.includes(car)}
+                  onFollow={() => toggleFollow(car)}
+                  onCard={() => setCardCar(car)}
+                  onRemove={() => setSelected((cur) => cur.filter((c) => c !== car))}
+                />
               );
             })}
-          </ul>
-        </div>
+          </div>
+        ) : (
+          <p className="text-sm text-zinc-500">
+            Click a car to follow it and see its telemetry (Shift+click adds more cars to follow). Click a driver in the timing tower for their stats.
+          </p>
+        )}
         <IncidentList
           incidents={incidents}
           cars={manifest.cars}

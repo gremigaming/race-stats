@@ -28,7 +28,8 @@ export interface RaceIncident {
   x: number;
   z: number;
   contacts: { t: number; a: number; b: number; severity: number }[];
-  drivers: { car: number; role: string; verdict?: string; rules?: string[] }[];
+  /** surfaces: what each wheel (rl, rr, fl, fr) touched off the tarmac around the incident. */
+  drivers: { car: number; role: string; verdict?: string; rules?: string[]; surfaces?: Record<string, string> }[];
 }
 
 export interface RaceManifest {
@@ -45,6 +46,7 @@ export interface RaceManifest {
   finished: boolean;
   duration?: number;
   lap_starts?: number[];
+  track_length?: number;
   incidents?: RaceIncident[];
 }
 

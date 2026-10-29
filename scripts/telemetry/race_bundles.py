@@ -37,7 +37,7 @@ import gmtel  # noqa: E402
 RELEASE = "https://api.github.com/repos/gremigaming/race-stats/releases/tags/telemetry"
 DOWNLOAD = "https://github.com/gremigaming/race-stats/releases/download/telemetry/"
 
-VERSION = 2          # bump to rebuild every bundle
+VERSION = 3          # bump to rebuild every bundle
 KEEP = 40            # newest races published on the site (R2 keeps everything later)
 CHUNK_SECONDS = 10
 CHUNK_HEAD = struct.Struct("<4sBBHd")
@@ -107,6 +107,28 @@ def encode_chunk(t0, frames):
     out.append(bytes(clamp(r[11], 0, 255) for r in flat))
     out.append(bytes(clamp(r[12], 0, 255) for r in flat))
     return b"".join(out)
+
+
+SURFACES = ["Tarmac", "Kerb", "Concrete", "Rock", "Gravel", "Mud", "Sand", "Grass", "Water",
+            "Cobblestone", "Metal", "Ridged"]
+
+
+def add_surfaces(sess, incs):
+    """What every involved car's wheels touched around the incident (the chunks only say on/off)."""
+    times = sorted(sess.field)
+    for inc in incs:
+        k0, k1 = bisect.bisect_left(times, inc["t0"] - 1), bisect.bisect_right(times, inc["t1"] + 2)
+        for d in inc["drivers"]:
+            seen = collections.defaultdict(collections.Counter)
+            for t in times[k0:k1]:
+                r = sess.field[t].get(d["car"])
+                for w in ("rl", "rr", "fl", "fr"):
+                    v = r.get("surface_" + w) if r else None
+                    if v is not None and v not in ON_TRACK:
+                        seen[w][v] += 1
+            if seen:
+                d["surfaces"] = {w: SURFACES[c.most_common(1)[0][0]] if c.most_common(1)[0][0] < len(SURFACES) else "Other"
+                                 for w, c in seen.items()}
 
 
 def frames_of(sess):
@@ -251,6 +273,7 @@ def bundle(path, rid, outdir):
                 "lap_starts": lap_starts(frames),
                 "cars": cars, "events": events, "finished": True, "source": "recording", "bundle": VERSION,
                 "incidents": incidents(frames, sess.collisions, sess.info.get("track_length", 0))}
+    add_surfaces(sess, manifest["incidents"])
     with open(os.path.join(rdir, "manifest.json"), "w") as f:
         json.dump(manifest, f, separators=(",", ":"))
     return manifest
