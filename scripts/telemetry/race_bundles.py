@@ -52,7 +52,10 @@ TEAMS = ["Mercedes", "Ferrari", "Red Bull Racing", "Williams", "Aston Martin", "
 
 
 def http_json(url):
-    req = urllib.request.Request(url, headers={"Accept": "application/vnd.github+json", "User-Agent": "race-stats"})
+    headers = {"Accept": "application/vnd.github+json", "User-Agent": "race-stats"}
+    if os.environ.get("GITHUB_TOKEN"):   # unauthenticated calls share 60/hour per runner IP and run out
+        headers["Authorization"] = "Bearer " + os.environ["GITHUB_TOKEN"]
+    req = urllib.request.Request(url, headers=headers)
     with urllib.request.urlopen(req, timeout=60) as r:
         return json.load(r)
 
@@ -366,8 +369,9 @@ def main():
             names = sorted((x["name"] for x in http_json(RELEASE)["assets"]
                             if x["name"].endswith("_Race.gmtel.gz")), reverse=True)
         except Exception as ex:
-            print("telemetry release not reachable:", ex)
-            names = []
+            # never publish an empty viewer: fall back to the bundles kept from earlier builds
+            print("telemetry release not reachable, using the kept bundles:", ex)
+            names = sorted((d + ".gmtel.gz" for d in os.listdir(keep)), reverse=True) if os.path.isdir(keep) else []
     index = []
     for n in names:
         if len(index) >= KEEP:
