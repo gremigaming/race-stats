@@ -21,6 +21,8 @@ export interface CarState {
   off: number;
   /** Angle between where the car points and where it travels (radians, + = nose right of travel). */
   slip: number;
+  /** Ghosted (drives through other cars): drawn see-through. */
+  ghost: boolean;
 }
 
 const PREFETCH = 3; // chunks either side of the playhead
@@ -52,11 +54,14 @@ export class ChunkStore {
   lapLength: number;
   /** car -> timing point (lap * SPLITS + split) -> crossing; kept after their chunks are dropped. */
   private crossings = new Map<number, Map<number, Crossing>>();
+  /** car -> [from, to] session times it was ghosted (manifest.ghosts; replaced as a live manifest grows). */
+  ghosts: Record<string, [number, number][]>;
 
   constructor(manifest: RaceManifest, base: string) {
     this.base = base;
     this.lapLength = manifest.track_length || 7100;
     this.chunkSeconds = manifest.chunk_seconds || 10;
+    this.ghosts = manifest.ghosts ?? {};
     this.names = new Map(
       manifest.chunks.map((name) => [parseInt(name, 10), name] as [number, string]),
     );
@@ -309,6 +314,7 @@ export class ChunkStore {
         dist: c1.dist[p],
         off: c1.off[p],
         slip,
+        ghost: !!this.ghosts[car]?.some(([a, b]) => t >= a && t <= b),
       });
     }
     return out;

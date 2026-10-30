@@ -52,6 +52,8 @@ export interface RaceManifest {
   lap_starts?: number[];
   track_length?: number;
   incidents?: RaceIncident[];
+  /** Per car: when it was ghosted [from, to] (session time). The game sends no flag: read from the motion. */
+  ghosts?: Record<string, [number, number][]>;
   /** Per car: grid slot, completed laps [lap, session time, ms], result status changes [time, status]. */
   timing?: Record<string, CarTiming>;
 }

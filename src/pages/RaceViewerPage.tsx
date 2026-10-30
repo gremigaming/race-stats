@@ -143,6 +143,7 @@ function Viewer({ manifest: initial, base, back }: { manifest: RaceManifest; bas
       const r = await loadManifest(initial.uid);
       if (r) {
         store.addNames(r.manifest.chunks);
+        if (r.manifest.ghosts) store.ghosts = r.manifest.ghosts;
         if (r.manifest.track_length) store.lapLength = r.manifest.track_length;
         setManifest(r.manifest);
       }

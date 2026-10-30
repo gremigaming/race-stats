@@ -53,6 +53,9 @@ const wrap = (a: number) => {
 };
 const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
 
+/** How see-through a ghosted car is drawn. */
+const GHOST_ALPHA = 0.35;
+
 interface Frame {
   t: number;
   states: CarState[];
@@ -452,7 +455,7 @@ export class RaceScene {
       }
       if (sp.texture !== tex) sp.texture = tex;
       sp.visible = alpha > 0.01;
-      sp.alpha = alpha;
+      sp.alpha = alpha * (s.ghost ? GHOST_ALPHA : 1);
       sp.position.set(s.x, s.z);
       sp.rotation = s.heading;
       sp.width = CAR_LENGTH;
@@ -495,7 +498,7 @@ export class RaceScene {
       const p = this.toScreen(s.x, s.z);
       d.c.position.set(p.x, p.y);
       d.c.visible = alpha > 0.01;
-      d.c.alpha = alpha;
+      d.c.alpha = alpha * (s.ghost ? GHOST_ALPHA : 1);
       d.c.zIndex = 100 - (s.pos || 99);
     }
     for (const [car, d] of this.dots) if (!live.has(car)) d.c.visible = false;

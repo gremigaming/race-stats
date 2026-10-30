@@ -12,6 +12,7 @@ in the same chunk format as live/race.py (encode_chunk below is a copy: keep the
 so the viewer reads both the same way. Hidden-name players only get "Car #<number>".
 
 Incidents: see incidents() for the grouping rules (calibrated with GreMi on 30 Oct 2026).
+Ghosted cars: see ghosts(); the game sends no ghost flag, so it is read from the motion.
 
     python3 scripts/telemetry/race_bundles.py /tmp/telemetry-cache [--only NAME] [--out DIR]
 """
@@ -35,7 +36,7 @@ import gmtel  # noqa: E402
 RELEASE = "https://api.github.com/repos/gremigaming/race-stats/releases/tags/telemetry"
 DOWNLOAD = "https://github.com/gremigaming/race-stats/releases/download/telemetry/"
 
-VERSION = 5          # bump to rebuild every bundle
+VERSION = 6          # bump to rebuild every bundle
 KEEP = 40            # newest races published on the site (R2 keeps everything later)
 CHUNK_SECONDS = 10
 CHUNK_HEAD = struct.Struct("<4sBBHd")
@@ -45,6 +46,7 @@ NORMAL = 0.9         # below 90% of a driver's own normal speed = not back to no
 CONTACT_M = 7.0      # centres further apart than this: not a real contact (a car is ~5.6 m long)
 SLIP_DEG = 20        # heading this far off the direction of travel = sliding or spinning
 AVOID_M = 60         # a non-contact car joins only from this close behind an upset car
+GHOST_LON, GHOST_LAT = 3.5, 1.4  # two car centres this close (along, across): driving through each other
 
 # Team ids in the participants packet; the 2026 season pack starts at 476, with Audi in
 # Sauber's slot and Cadillac after it (checked against the race files, 25 Oct)
@@ -276,7 +278,70 @@ def lap_starts(frames):
     return out
 
 
-def incidents(frames, collisions, track_len):
+def overlaps(cars):
+    """Pairs of cars (a, b) driving through each other in one frame: centres under GHOST_LON along
+    and GHOST_LAT across, both over 30 km/h. Real cars can't get that close (~5.6 x 2 m).
+    Copy of live/race.py overlaps: keep them equal."""
+    out = []
+    items = [(i, c) for i, c in cars.items() if c[4] > 30]
+    for k, (i, a) in enumerate(items):
+        fx, fz = math.cos(a[3]), math.sin(a[3])
+        for j, b in items[k + 1:]:
+            dx, dz = b[0] - a[0], b[1] - a[1]
+            if dx * dx + dz * dz > 25 or abs(b[2] - a[2]) > 2:
+                continue
+            if abs(dx * fx + dz * fz) < GHOST_LON and abs(dz * fx - dx * fz) < GHOST_LAT:
+                out.append((i, j))
+    return out
+
+
+def ghosts(hits, collisions):
+    """When each car was ghosted, {car: [[t0, t1], ...]}. The game sends no ghost flag (GreMi's lobbies
+    ghost griefing cars: slow, wrong way, rejoining), so: two cars driving through each other with no
+    game contact means one of them was ghosted. It is the one that went through more different cars
+    in the race (a tie marks both). hits: [(t, a, b)] from overlaps(). Copy of live/race.py ghosts."""
+    contact = collections.defaultdict(list)
+    for c in collisions:
+        contact[frozenset((c["a"], c["b"]))].append(c["t"])
+    episodes = collections.defaultdict(list)   # pair -> [[t0, t1, frames]]
+    for t, a, b in sorted(hits):
+        eps = episodes[frozenset((a, b))]
+        if eps and t - eps[-1][1] <= 1:
+            eps[-1][1] = t
+            eps[-1][2] += 1
+        else:
+            eps.append([t, t, 1])
+    kept, partners = [], collections.defaultdict(set)
+    for pair, eps in episodes.items():
+        for t0, t1, n in eps:
+            if n >= 2 and not any(t0 - 1.5 <= ct <= t1 + 1.5 for ct in contact[pair]):
+                kept.append((pair, t0, t1))
+                a, b = sorted(pair)
+                partners[a].add(b)
+                partners[b].add(a)
+    wins = collections.defaultdict(list)
+    for pair, t0, t1 in kept:
+        a, b = sorted(pair)
+        na, nb = len(partners[a]), len(partners[b])
+        for i in ([a] if na > nb else [b] if nb > na else [a, b]):
+            wins[i].append([t0 - 1, t1 + 1])
+    out = {}
+    for i, ws in wins.items():
+        merged = []
+        for t0, t1 in sorted(ws):
+            if merged and t0 - merged[-1][1] < 3:
+                merged[-1][1] = max(merged[-1][1], t1)
+            else:
+                merged.append([t0, t1])
+        out[str(i)] = [[round(max(t0, 0), 2), round(t1, 2)] for t0, t1 in merged]
+    return out
+
+
+def ghosted(windows, car, t):
+    return any(t0 <= t <= t1 for t0, t1 in windows.get(str(car), ()))
+
+
+def incidents(frames, collisions, track_len, ghost_windows=None):
     """Group the game's contacts into incidents (rules calibrated with GreMi, batch 1, 30 Oct 2026).
 
     - A contact counts only when the two cars really were together (centres under CONTACT_M
@@ -292,7 +357,9 @@ def incidents(frames, collisions, track_len):
       car of the incident (same lap, under AVOID_M behind) and then braked hard, slid or went off.
       Cars ahead of it never join.
     - An incident ends when all its cars have been back to normal for 2 s (15 s at most).
+    - Ghosted cars (ghosts()) never join: not by contact, not as avoiders.
     """
+    gw = ghost_windows or {}
     times = [t for t, _ in frames]
     normal = Normal(frames)
     slip = slip_angles(frames)
@@ -319,6 +386,8 @@ def incidents(frames, collisions, track_len):
         cars = at(c["t"])
         A, B = cars.get(c["a"]), cars.get(c["b"])
         if not A or not B or math.hypot(A[0] - B[0], A[1] - B[1]) > CONTACT_M:
+            continue
+        if ghosted(gw, c["a"], c["t"]) or ghosted(gw, c["b"], c["t"]):
             continue
         open_ = [x for x in open_ if x["end"] is None or x["end"] > c["t"]]
         joined = None
@@ -350,7 +419,7 @@ def incidents(frames, collisions, track_len):
         calm = {}
         for t, cars in frames[k0:k1]:
             for i, c in cars.items():
-                if i in role:
+                if i in role or ghosted(gw, i, t):
                     continue
                 if t < inc["t0"] + 0.3:   # already in trouble before the incident: not ours
                     calm[i] = calm.get(i, True) and not upset_within(i, t, t)
@@ -425,6 +494,7 @@ def bundle(path, rid, outdir):
             f.write(gzip.compress(encode_chunk(k * CHUNK_SECONDS, by[k]), 9))
         chunks.append(name)
     seen = {i for _, c in frames for i in c}
+    ghost_windows = ghosts([(t, a, b) for t, c in frames for a, b in overlaps(c)], sess.collisions)
     cars = {str(i): {"name": shown_name(p), "team": p.get("team"), "team_name": team_name(p.get("team")),
                      "number": p.get("race_number"), "ai": bool(p.get("ai"))}
             for i, p in sess.drivers.items() if i in seen}
@@ -440,7 +510,8 @@ def bundle(path, rid, outdir):
                 "lap_starts": lap_starts(frames),
                 "timing": {str(i): v for i, v in timing_of(sess).items() if str(i) in cars},
                 "cars": cars, "events": events, "finished": True, "source": "recording", "bundle": VERSION,
-                "incidents": incidents(frames, sess.collisions, sess.info.get("track_length", 0))}
+                "ghosts": ghost_windows,
+                "incidents": incidents(frames, sess.collisions, sess.info.get("track_length", 0), ghost_windows)}
     add_surfaces(sess, manifest["incidents"])
     with open(os.path.join(rdir, "manifest.json"), "w") as f:
         json.dump(manifest, f, separators=(",", ":"))
