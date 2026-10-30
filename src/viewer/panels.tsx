@@ -1,6 +1,7 @@
 import { Pause, Play, RotateCcw, RotateCw, X } from "lucide-react";
 import { useRef, type ReactNode } from "react";
 import type { RaceCar, RaceIncident } from "./format";
+import type { SurfacePick, TimePick } from "./look";
 import type { CarState } from "./store";
 
 export const SPEEDS = [0.25, 0.5, 1, 2, 4, 8];
@@ -29,6 +30,11 @@ export function PlayerBar(props: {
   onIncident: (i: number) => void;
   /** The selected driver's colour for incidents they were in, else null. */
   highlight?: (i: number) => string | null;
+  /** Track conditions: the race's own (auto) or the viewer's pick. */
+  surface?: SurfacePick;
+  time?: TimePick;
+  onSurface?: (v: SurfacePick) => void;
+  onTime?: (v: TimePick) => void;
 }) {
   const { t, start, end, playing, rate, lapStarts, incidents } = props;
   const bar = useRef<HTMLDivElement>(null);
@@ -89,7 +95,13 @@ export function PlayerBar(props: {
         </span>
         {lapStarts.length > 0 && <span className="ml-3 text-zinc-400">Lap {Math.max(1, lap)}</span>}
         {props.buffering && <span className="ml-3 text-xs text-zinc-500">Loading…</span>}
-        <div className="ml-auto flex items-center gap-0.5">
+        {props.onSurface && props.onTime && (
+          <div className="ml-auto flex items-center gap-1 text-xs">
+            <Cycle label="Track" value={props.surface ?? "auto"} options={["auto", "dry", "wet"]} onChange={props.onSurface} />
+            <Cycle label="Light" value={props.time ?? "auto"} options={["auto", "day", "night"]} onChange={props.onTime} />
+          </div>
+        )}
+        <div className={`${props.onSurface ? "ml-2" : "ml-auto"} flex items-center gap-0.5`}>
           {SPEEDS.map((s) => (
             <button
               key={s}
@@ -103,6 +115,21 @@ export function PlayerBar(props: {
         </div>
       </div>
     </div>
+  );
+}
+
+/** A small button that steps through its options (Auto, then the overrides). */
+function Cycle<T extends string>(props: { label: string; value: T; options: T[]; onChange: (v: T) => void }) {
+  const { value, options } = props;
+  return (
+    <button
+      type="button"
+      title={`${props.label}: ${value} (click to change)`}
+      onClick={() => props.onChange(options[(options.indexOf(value) + 1) % options.length])}
+      className={`rounded px-1.5 py-0.5 capitalize ${value === "auto" ? "text-zinc-400 hover:bg-white/10" : "bg-white/90 text-black"}`}
+    >
+      {props.label} {value}
+    </button>
   );
 }
 

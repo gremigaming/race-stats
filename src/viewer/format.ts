@@ -56,6 +56,10 @@ export interface RaceManifest {
   ghosts?: Record<string, [number, number][]>;
   /** Per car: grid slot, completed laps [lap, session time, ms], result status changes [time, status]. */
   timing?: Record<string, CarTiming>;
+  /** Weather changes [session time, code]: 0 clear, 1 light cloud, 2 overcast, 3 light rain, 4 heavy rain, 5 storm. */
+  weather?: [number, number][];
+  /** Local time of day at the track: [session time, minutes since midnight] from the first session packet. */
+  tod?: [number, number] | null;
 }
 
 export interface RaceIndexEntry {
@@ -85,6 +89,8 @@ export interface Chunk {
   t: Float32Array;
   x: Float32Array;
   z: Float32Array;
+  /** Height (game y, metres): picks above or below a bridge. */
+  y: Float32Array;
   dist: Float32Array;
   heading: Int16Array;
   speed: Uint16Array;
@@ -118,7 +124,7 @@ export function decodeChunk(buf: ArrayBuffer): Chunk {
   const t = f32(n);
   const x = f32(m);
   const z = f32(m);
-  f32(m); // height, not drawn
+  const y = f32(m);
   const dist = f32(m);
   const heading = new Int16Array(buf, pos, m);
   pos += m * 2;
@@ -144,7 +150,7 @@ export function decodeChunk(buf: ArrayBuffer): Chunk {
     gap = new Uint32Array(m);
     for (let i = 0; i < m; i++) gap[i] = dv.getUint16(pos + i * 2, true) * 10;
   }
-  return { t0, cars, n, t, x, z, dist, heading, speed, throttle, brake, steer, gear, off, lap, pos: place, gap };
+  return { t0, cars, n, t, x, z, y, dist, heading, speed, throttle, brake, steer, gear, off, lap, pos: place, gap };
 }
 
 /** Where races are read from: Cloudflare R2 (the live server publishes there), then this site. */

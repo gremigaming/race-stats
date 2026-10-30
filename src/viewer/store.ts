@@ -9,6 +9,8 @@ export interface CarState {
   car: number;
   x: number;
   z: number;
+  /** Height (metres). */
+  y: number;
   heading: number;
   speed: number;
   throttle: number;
@@ -303,6 +305,7 @@ export class ChunkStore {
         car,
         x,
         z,
+        y: gone ? c1.y[p] : c1.y[p] + (c2.y[q] - c1.y[p]) * u,
         heading: curve(h0u, h1, h2u, h3u),
         speed: Math.max(0, curve(a[0].speed[pa], c1.speed[p], c2.speed[q], n2[0].speed[pn]) / 10),
         throttle: input("throttle", 255, 0),

@@ -3,11 +3,14 @@
  * metres; pan, zoom, rotate and follow only move the camera. Zoomed out, each car fades into a
  * team-coloured dot with its race position (leader on top). Dots, name chips, the incident
  * marker and edge arrows are drawn in screen space so they stay the same size.
+ * Cars under a bridge, tunnel or tree are drawn below the map's over layer; a car is above it only
+ * while it drives on a structure (its height at or over the structure's underside).
  */
 import { Application, Container, Graphics, Sprite, Text } from "pixi.js";
 import { CAR_LENGTH, CAR_WIDTH, carTexture, clearCarTextures, inkOn, liveryOf, loadLiveries, retainCarTextures, type Livery } from "./cars";
-import type { RaceCar } from "./format";
-import { TrackMap } from "./map";
+import type { RaceCar, RaceManifest } from "./format";
+import { applyLook, lookAt, lookFilter, type SurfacePick, type TimePick } from "./look";
+import { fades, TrackMap, type Overhead } from "./map";
 import type { CarState } from "./store";
 
 export type CameraMode = "track" | "follow" | "free" | "tv";
@@ -30,6 +33,10 @@ const TV_EASE_MS = 420; // the broadcast camera glides; follow mode stays tight
 const TV_ZOOM_EASE_MS = 1100;
 const TV_ZOOM_HOLD = 0.15; // the broadcast camera ignores zoom changes smaller than this (fraction)
 const CHIP_FADE_MS = 140;
+const ROOF_ALPHA = 0.35; // a tunnel roof while a car is inside
+const ROOF_MIN_HIDDEN = 0.5; // seconds a car must stay under a roof for it to turn see-through
+
+const inBox = (o: Overhead, x: number, z: number) => x >= o.bbox[0] && x <= o.bbox[2] && z >= o.bbox[1] && z <= o.bbox[3];
 
 export function bits(v: number) {
   let n = 0;
@@ -56,11 +63,14 @@ export class RaceScene {
   readonly app = new Application();
   private world = new Container();
   private carLayer = new Container();
+  private carsBelow = new Container();
+  private look = lookFilter();
   private overlay = new Container();
   private dotLayer = new Container();
   private chipLayer = new Container();
   private marks = new Graphics();
   private sprites = new Map<number, Sprite>();
+  private roofAlpha = new Map<string, number>();
   private dots = new Map<number, { c: Container; t: Text; pos: number }>();
   /** Name chips, the slot each one sat in last frame (kept while it stays free) and its leader line. */
   private chips = new Map<number, { c: Container; slot: number }>();
@@ -103,6 +113,10 @@ export class RaceScene {
   bounds: () => [number, number, number, number] | null = () => null;
   /** Screen space (px) covered by controls, kept clear when framing. */
   inset = { top: 0, right: 0, bottom: 0, left: 0 };
+  /** The race's weather and time of day, and the viewer's overrides. */
+  conditions: Pick<RaceManifest, "weather" | "tod"> = {};
+  surface: SurfacePick = "auto";
+  time: TimePick = "auto";
   onHover: (car: number | null) => void = () => {};
   onPick: (car: number, add: boolean) => void = () => {};
   onModeChange: (mode: CameraMode, cars: number[]) => void = () => {};
@@ -133,8 +147,11 @@ export class RaceScene {
     this.liveries = await loadLiveries();
     if (this.destroyed) return;
     this.carLayer.sortableChildren = true;
+    this.carsBelow.sortableChildren = true;
     this.dotLayer.sortableChildren = true;
-    this.world.addChild(this.map.view, this.carLayer);
+    this.world.addChild(this.map.view, this.carsBelow, this.map.over, this.carLayer);
+    this.world.filters = [this.look];
+    this.world.filterArea = this.app.screen; // the filter runs on the screen, not the whole map
     this.chipLayer.addChild(this.leaders);
     this.overlay.addChild(this.marks, this.dotLayer, this.chipLayer);
     this.app.stage.addChild(this.world, this.overlay);
@@ -428,7 +445,9 @@ export class RaceScene {
     this.map.update(Math.min(...xs), Math.min(...zs), Math.max(...xs), Math.max(...zs), scale);
     const carPx = CAR_LENGTH * scale;
     const carAlpha = clamp((carPx - 10) / 8, 0, 1); // 10 px long: all dot; 18 px: all car
+    applyLook(this.look, lookAt(this.conditions, this.now, this.surface, this.time));
     this.drawCars(carAlpha);
+    this.drawRoofs(dtMs);
     this.drawDots(1 - carAlpha);
     this.drawMarks(outside);
     this.drawChips(carAlpha, dtMs);
@@ -450,8 +469,9 @@ export class RaceScene {
         sp = new Sprite(tex);
         sp.anchor.set(0.5);
         this.sprites.set(s.car, sp);
-        this.carLayer.addChild(sp);
       }
+      const layer = this.onTop(s) ? this.carLayer : this.carsBelow;
+      if (sp.parent !== layer) layer.addChild(sp);
       if (sp.texture !== tex) sp.texture = tex;
       sp.visible = alpha > 0.01;
       sp.alpha = alpha * (s.ghost ? GHOST_ALPHA : 1);
@@ -462,6 +482,24 @@ export class RaceScene {
       sp.zIndex = 100 - (s.pos || 99); // the leader drawn last, on top
     }
     for (const [car, sp] of this.sprites) if (!live.has(car)) sp.visible = false;
+  }
+
+  /** Driving on a bridge: drawn above the over layer. Everywhere else cars pass under trees and roofs. */
+  private onTop(s: CarState) {
+    return this.map.overheads.some((o) => inBox(o, s.x, s.z) && s.y >= o.under - 1);
+  }
+
+  /** A tunnel roof turns see-through as soon as a car enters that will stay hidden over 0.5 s. */
+  private drawRoofs(dtMs: number) {
+    const k = 1 - Math.exp(-dtMs / 80);
+    for (const o of this.map.overheads) {
+      if (!fades(o)) continue;
+      const inside = this.states.some((s) => inBox(o, s.x, s.z) && s.y < o.under - 1 && o.length_m / Math.max(s.speed / 3.6, 1) > ROOF_MIN_HIDDEN);
+      const cur = this.roofAlpha.get(o.id) ?? 1;
+      const next = cur + ((inside ? ROOF_ALPHA : 1) - cur) * k;
+      this.roofAlpha.set(o.id, next);
+      this.map.setRoofAlpha(o.id, next);
+    }
   }
 
   private drawDots(alpha: number) {

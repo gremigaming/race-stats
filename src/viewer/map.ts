@@ -6,6 +6,10 @@
  *   github.io site) once they are published: index.json with 100 m tiles, one SVG per layer.
  *   Tiles in view are rasterised at the zoom level they are shown at, so an apex stays sharp.
  *   Until the maps are published the index is empty and only the base shows.
+ * - Over layer ("over" in index.json): what hangs above the road (bridge decks with the road they
+ *   carry, tunnel roofs, gantries, tree canopies), drawn above the cars that pass under it.
+ *   over.json lists the structures with the height of their underside; tunnel and roof parts get
+ *   sprites of their own so they can turn see-through while a car is inside.
  */
 import { Container, Sprite, Texture } from "pixi.js";
 
@@ -22,6 +26,18 @@ interface SvgIndex {
     tiles: { i: number; j: number; files: Record<string, string> }[];
   };
 }
+
+/** A structure over the road, from <track>/over.json (world metres, heights are game y). */
+export interface Overhead {
+  id: string;
+  kind: "bridge" | "tunnel" | "gantry" | "tree" | "roof";
+  under: number;
+  bbox: [number, number, number, number];
+  length_m: number;
+}
+
+/** Tunnel roofs and covered buildings turn see-through; bridges and trees never do. */
+export const fades = (o: Overhead) => o.kind === "tunnel" || o.kind === "roof";
 
 const norm = (t: string) =>
   t.toLowerCase().replace(/reverse|manual|[^a-z]/g, "").replace(/^sakhir$/, "bahrain");
@@ -56,12 +72,46 @@ function image(src: string) {
 /** Pixels per metre the sharp layer is drawn at, by zoom. */
 const LODS = [2, 6, 16];
 
+function svgImage(text: string) {
+  return image(`data:image/svg+xml;charset=utf-8,${encodeURIComponent(text)}`);
+}
+
+/** An over tile split in the part that stays solid and the see-through parts, by structure id. */
+async function splitOver(url: string, i: number, j: number, tile: number, fading: Overhead[]) {
+  const r = await fetch(url);
+  if (!r.ok) return null;
+  const doc = new DOMParser().parseFromString(await r.text(), "image/svg+xml");
+  const root = doc.documentElement;
+  const defs = root.querySelector("defs");
+  const ser = new XMLSerializer();
+  const parts: { id: string; svg: string }[] = [];
+  for (const g of Array.from(root.querySelectorAll('g[data-kind="tunnel"], g[data-kind="roof"]'))) {
+    // the exporter's id, else the fading structure of that kind whose box reaches this tile
+    const id =
+      g.getAttribute("data-id") ??
+      fading.find((o) => o.kind === g.getAttribute("data-kind") && o.bbox[0] < (i + 1) * tile && o.bbox[2] > i * tile && o.bbox[1] < (j + 1) * tile && o.bbox[3] > j * tile)?.id;
+    if (!id) continue;
+    const one = root.cloneNode(false) as Element;
+    if (defs) one.appendChild(defs.cloneNode(true));
+    one.appendChild(g.cloneNode(true));
+    parts.push({ id, svg: ser.serializeToString(one) });
+    g.remove();
+  }
+  return { solid: ser.serializeToString(root), parts };
+}
+
 export class TrackMap {
   readonly view = new Container();
+  /** Drawn by the scene between the cars below and the cars above. */
+  readonly over = new Container();
+  /** Structures over the road (empty until over.json loads, or for tracks without one). */
+  overheads: Overhead[] = [];
+  private roofs = new Map<string, Sprite[]>();
+  private roofAlpha = new Map<string, number>();
   private base = new Container();
   private sharp = new Container();
   private svg: { root: string; tile: number; layers: string[]; tiles: Map<string, Record<string, string>> } | null = null;
-  private drawn = new Map<string, { lod: number; sprite: Sprite }>();
+  private drawn = new Map<string, { lod: number; sprite: Sprite; over: Sprite[] }>();
   private busy = new Set<string>();
   private alive = true;
   /** World bounds of the map tiles: [minX, minZ, maxX, maxZ]. */
@@ -76,6 +126,7 @@ export class TrackMap {
   destroy() {
     this.alive = false;
     this.view.destroy({ children: true, texture: true });
+    this.over.destroy({ children: true, texture: true });
   }
 
   private async loadPhotos(track: string) {
@@ -112,6 +163,10 @@ export class TrackMap {
         layers: m.layers,
         tiles: new Map(m.tiles.map((t) => [`${t.i}_${t.j}`, t.files])),
       };
+      if (m.layers.includes("over")) {
+        const o = await json<Overhead[]>(`${root}${folder}/over.json`);
+        if (o && this.alive) this.overheads = o;
+      }
       return;
     }
   }
@@ -145,7 +200,7 @@ export class TrackMap {
       const [i, j] = key.split("_").map(Number);
       const far = (i + 1) * svg.tile < x0 - 400 || i * svg.tile > x1 + 400 || (j + 1) * svg.tile < z0 - 400 || j * svg.tile > z1 + 400;
       if (far || level < 0) {
-        d.sprite.destroy({ texture: true, textureSource: true });
+        this.drop(d);
         this.drawn.delete(key);
       }
     }
@@ -157,24 +212,62 @@ export class TrackMap {
     try {
       const px = Math.round(svg.tile * LODS[level]);
       const imgs = await Promise.all(
-        svg.layers.filter((l) => files[l]).map((l) => image(`${svg.root}${files[l]}`).catch(() => null)),
+        svg.layers.filter((l) => files[l] && l !== "over").map((l) => image(`${svg.root}${files[l]}`).catch(() => null)),
       );
+      const split = files.over ? await splitOver(`${svg.root}${files.over}`, i, j, svg.tile, this.overheads.filter(fades)).catch(() => null) : null;
+      const overImgs = split
+        ? await Promise.all([split.solid, ...split.parts.map((p) => p.svg)].map((t) => svgImage(t).catch(() => null)))
+        : [];
       if (!this.alive) return;
-      const canvas = document.createElement("canvas");
-      canvas.width = canvas.height = px;
-      const ctx = canvas.getContext("2d");
-      if (!ctx) return;
-      for (const img of imgs) if (img) ctx.drawImage(img, 0, 0, px, px);
-      const sprite = new Sprite(Texture.from(canvas));
-      sprite.position.set(i * svg.tile, j * svg.tile);
-      sprite.width = svg.tile;
-      sprite.height = svg.tile;
+      const sprite = this.tileSprite(imgs, px, i, j);
+      if (!sprite) return;
+      const over: Sprite[] = [];
+      overImgs.forEach((img, k) => {
+        const sp = img && this.tileSprite([img], px, i, j);
+        if (!sp) return;
+        if (k > 0) {
+          const id = split!.parts[k - 1].id;
+          sp.label = id;
+          sp.alpha = this.roofAlpha.get(id) ?? 1;
+          this.roofs.set(id, [...(this.roofs.get(id) ?? []), sp]);
+        }
+        this.over.addChild(sp);
+        over.push(sp);
+      });
       const old = this.drawn.get(key);
       this.sharp.addChild(sprite);
-      old?.sprite.destroy({ texture: true, textureSource: true });
-      this.drawn.set(key, { lod: level, sprite });
+      if (old) this.drop(old);
+      this.drawn.set(key, { lod: level, sprite, over });
     } finally {
       this.busy.delete(key);
     }
+  }
+
+  private tileSprite(imgs: (HTMLImageElement | null)[], px: number, i: number, j: number) {
+    const svg = this.svg!;
+    const canvas = document.createElement("canvas");
+    canvas.width = canvas.height = px;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return null;
+    for (const img of imgs) if (img) ctx.drawImage(img, 0, 0, px, px);
+    const sprite = new Sprite(Texture.from(canvas));
+    sprite.position.set(i * svg.tile, j * svg.tile);
+    sprite.width = svg.tile;
+    sprite.height = svg.tile;
+    return sprite;
+  }
+
+  private drop(d: { sprite: Sprite; over: Sprite[] }) {
+    for (const sp of d.over) {
+      if (sp.label) this.roofs.set(sp.label, (this.roofs.get(sp.label) ?? []).filter((x) => x !== sp));
+      sp.destroy({ texture: true, textureSource: true });
+    }
+    d.sprite.destroy({ texture: true, textureSource: true });
+  }
+
+  /** How solid a tunnel or roof is drawn (1 solid .. 0 gone). */
+  setRoofAlpha(id: string, alpha: number) {
+    this.roofAlpha.set(id, alpha);
+    for (const sp of this.roofs.get(id) ?? []) sp.alpha = alpha;
   }
 }

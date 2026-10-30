@@ -216,6 +216,8 @@ class Session:
         self.events = []      # (session time, code)
         self.event_detail = []  # start lights, overtakes and retirements with their cars
         self.collisions = []  # {"t", "a", "b", "severity"} (car indexes)
+        self.weather = []     # [session time, weather code] whenever it changes (0 clear .. 5 storm)
+        self.tod = None       # [session time, local minutes since midnight], first session packet
         self.drivers = {}     # car index -> participant info
         self.field = {}       # session time -> {car index: merged motion/lap/telemetry row}
         self.field_frames = {}  # session time -> the game's frame id of that motion row
@@ -293,6 +295,10 @@ class Session:
                                  "total_laps": v[3], "track_length": v[4],
                                  "session_type": types[v[5]] if v[5] < len(types) else v[5],
                                  "track": TRACKS[v[6]] if 0 <= v[6] < len(TRACKS) else v[6]}
+                    if self.tod is None and len(body) >= 671:  # local time of day, minutes since midnight
+                        self.tod = [round(h[7], 3), struct.unpack_from("<I", body, 667)[0]]
+                    if not self.weather or self.weather[-1][1] != v[0]:
+                        self.weather.append([round(h[7], 3), v[0]])
             except struct.error:
                 continue
         if self._cur is not None:

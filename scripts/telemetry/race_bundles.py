@@ -515,7 +515,7 @@ def bundle(path, rid, outdir):
                 "lap_starts": lap_starts(frames),
                 "timing": {str(i): v for i, v in timing_of(sess).items() if str(i) in cars},
                 "cars": cars, "events": events, "finished": True, "source": "recording", "bundle": VERSION,
-                "ghosts": ghost_windows,
+                "ghosts": ghost_windows, "weather": sess.weather, "tod": sess.tod,
                 "incidents": incidents(frames, sess.collisions, sess.info.get("track_length", 0), ghost_windows)}
     add_surfaces(sess, manifest["incidents"])
     with open(os.path.join(rdir, "manifest.json"), "w") as f:

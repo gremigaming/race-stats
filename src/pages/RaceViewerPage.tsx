@@ -8,6 +8,7 @@ import { IncidentFeed, IncidentPip, StartLights, TvStrip } from "../viewer/broad
 import { DriverCard } from "../viewer/DriverCard";
 import { Director } from "../viewer/director";
 import { incidentsOf, loadManifest, type RaceIncident, type RaceManifest } from "../viewer/format";
+import type { SurfacePick, TimePick } from "../viewer/look";
 import { IconButton, IncidentDetail, PlayerBar, type IncidentDriverStats, type Trace } from "../viewer/panels";
 import { bits, RaceScene, type CameraMode } from "../viewer/scene";
 import { Empty, PointsPanel, SafetyPanel, Sidebar, StatsPanel, type SafetyRow, type SideTab, type StatsRow } from "../viewer/sidebar";
@@ -131,6 +132,8 @@ function Viewer({ manifest: initial, base, back }: { manifest: RaceManifest; bas
   const [view, setView] = useState<View>({ t: play.current.t, states: [], rot: 0, trace: undefined, lights: null });
   const [playing, setPlaying] = useState(false);
   const [rate, setRate] = useState(1);
+  const [surface, setSurface] = useState<SurfacePick>("auto");
+  const [timePick, setTimePick] = useState<TimePick>("auto");
   const [selected, setSelected] = useState<number[]>([]);
   const [focusPick, setFocusPick] = useState<number | null>(null);
   const [mode, setMode] = useState<CameraMode>("tv");
@@ -310,6 +313,7 @@ function Viewer({ manifest: initial, base, back }: { manifest: RaceManifest; bas
       return { t: p.t, states };
     });
     s.bounds = () => store.bounds;
+    s.conditions = initial;
     s.onPick = (car, add) => pickRef.current(car, add);
     s.onModeChange = (m, cars) => {
       setMode(m);
@@ -331,6 +335,14 @@ function Viewer({ manifest: initial, base, back }: { manifest: RaceManifest; bas
   useEffect(() => {
     if (scene.current) scene.current.selected = new Set(selected);
   }, [selected]);
+
+  useEffect(() => {
+    const s = scene.current;
+    if (!s) return;
+    s.conditions = manifest;
+    s.surface = surface;
+    s.time = timePick;
+  }, [manifest, surface, timePick]);
 
   const stripOn = selected.length > 0 && activeInc === null && !clean;
   const towerShown = towerOpen && !clean;
@@ -813,6 +825,10 @@ function Viewer({ manifest: initial, base, back }: { manifest: RaceManifest; bas
             onSeek={seek}
             onRate={changeRate}
             onIncident={pickIncident}
+            surface={surface}
+            time={timePick}
+            onSurface={setSurface}
+            onTime={setTimePick}
             highlight={(i) => (focusCar !== null && incidents[i]?.drivers.some((d) => d.car === focusCar) ? color(focusCar) : null)}
           />
         </div>
