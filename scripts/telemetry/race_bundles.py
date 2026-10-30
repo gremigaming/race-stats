@@ -68,6 +68,23 @@ def download(name, cache):
     return path
 
 
+def test_windows():
+    """Time windows from races/test-sessions.json (Amsterdam time, as in the recording
+    names): test lobbies and personal races, kept in the release but off the viewer."""
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "races", "test-sessions.json")
+    try:
+        windows = json.load(open(path)).get("windows", [])
+    except (OSError, ValueError):
+        return []
+    digits = lambda s: "".join(c for c in s if c.isdigit()).ljust(14, "0")
+    return [(digits(w["from"]), digits(w["to"])) for w in windows]
+
+
+def is_test(name, windows):
+    key = "".join(c for c in os.path.basename(name)[:19] if c.isdigit())
+    return len(key) == 14 and any(a <= key < b for a, b in windows)
+
+
 def has_field(path):
     """True when the recording has rows for every car (recorded since 19 Oct 2026)."""
     return any(kind == 2 for _, _, kind in gmtel.records(path))
@@ -372,10 +389,14 @@ def main():
             # never publish an empty viewer: fall back to the bundles kept from earlier builds
             print("telemetry release not reachable, using the kept bundles:", ex)
             names = sorted((d + ".gmtel.gz" for d in os.listdir(keep)), reverse=True) if os.path.isdir(keep) else []
+    windows = test_windows()
     index = []
     for n in names:
         if len(index) >= KEEP:
             break
+        if is_test(n, windows):
+            print("  skipped (test or personal session)", n)
+            continue
         rid = os.path.basename(n).replace(".gmtel.gz", "")
         kept = os.path.join(keep, rid)
         try:
