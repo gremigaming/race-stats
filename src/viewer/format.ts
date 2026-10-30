@@ -70,6 +70,14 @@ export interface RaceIndexEntry {
   laps: number;
   cars: number;
   incidents?: number;
+  /** Picker stats (race_summary in race_bundles.py / live/publish.py); older index entries lack them. */
+  drivers?: string[];
+  winner?: string;
+  /** Seconds from winner to second place on the same lap count. */
+  gap?: number;
+  fastest?: { name: string; ms: number };
+  /** 0-10: incidents per car per lap. */
+  chaos?: number;
 }
 
 export interface CarTiming {

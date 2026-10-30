@@ -480,6 +480,28 @@ def slip_angles(frames):
     return out
 
 
+def race_summary(m):
+    """What the race picker shows besides track and date: who raced (shown names, no AI), the
+    winner and gap to second (from the lap timing), the fastest lap and a 0-10 chaos rating
+    (incidents, or game contacts when a live race has none, per car per lap).
+    Copy of race-control-stats live/publish.py race_summary: keep them equal."""
+    cars, timing = m["cars"], m.get("timing", {})
+    order = sorted((k for k in timing if k in cars and timing[k]["laps"]),
+                   key=lambda k: (-len(timing[k]["laps"]), timing[k]["laps"][-1][1]))
+    out = {"drivers": sorted({c["name"] for c in cars.values() if c.get("name") and not c.get("ai") and not c["name"].startswith("Car #")})}
+    if order:
+        first = timing[order[0]]["laps"]
+        out["winner"] = cars[order[0]]["name"]
+        if len(order) > 1 and len(timing[order[1]]["laps"]) == len(first):
+            out["gap"] = round(timing[order[1]]["laps"][-1][1] - first[-1][1], 2)
+    best = min(((lap[2], k) for k in order for lap in timing[k]["laps"] if lap[2] > 0), default=None)
+    if best:
+        out["fastest"] = {"name": cars[best[1]]["name"], "ms": best[0]}
+    hits = len(m["incidents"]) if "incidents" in m else sum(1 for e in m["events"] if e["code"] == "COLL")
+    out["chaos"] = min(10.0, round(hits / max(1, len(cars) * max(1, m["laps"])) * 15, 1))
+    return out
+
+
 def bundle(path, rid, outdir):
     sess = gmtel.Session(path)
     if sess.info.get("session_type") not in ("Race", "Race 2", "Race 3") or not sess.field:
@@ -573,7 +595,7 @@ def main():
                 shutil.copytree(os.path.join(a.out, rid), kept)
             print(rid, f"{len(m['chunks'])} chunks, {len(m['incidents'])} incidents")
         index.append({"uid": rid, "started": m["started"], "track": m["track"], "session": m["session"],
-                      "laps": m["laps"], "cars": len(m["cars"]), "incidents": len(m["incidents"])})
+                      "laps": m["laps"], "cars": len(m["cars"]), "incidents": len(m["incidents"]), **race_summary(m)})
     with open(os.path.join(a.out, "index.json"), "w") as f:
         json.dump({"races": index}, f, separators=(",", ":"))
     print("race bundles:", len(index))
