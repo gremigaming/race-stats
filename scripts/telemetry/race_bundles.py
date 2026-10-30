@@ -11,9 +11,7 @@ Runs in site.yml. For every race recording with rows for every car it writes
 in the same chunk format as live/race.py (encode_chunk below is a copy: keep them equal),
 so the viewer reads both the same way. Hidden-name players only get "Car #<number>".
 
-Incidents follow GreMi's rule from the spec: a contact joins an open incident when it is on
-the same lap and near the same corner while a car of that incident is still below 90% of its
-own normal speed there. Every driver near it who went off, spun or braked hard is involved too.
+Incidents: see incidents() for the grouping rules (calibrated with GreMi on 30 Oct 2026).
 
     python3 scripts/telemetry/race_bundles.py /tmp/telemetry-cache [--only NAME] [--out DIR]
 """
@@ -44,7 +42,9 @@ CHUNK_HEAD = struct.Struct("<4sBBHd")
 ON_TRACK = (0, 1)    # surface: tarmac, rumble strip
 CORNER_M = 150       # "same corner": contacts this close in lap distance
 NORMAL = 0.9         # below 90% of a driver's own normal speed = not back to normal yet
-NEAR_M, NEAR_S = 50, 3.0
+CONTACT_M = 7.0      # centres further apart than this: not a real contact (a car is ~5.6 m long)
+SLIP_DEG = 20        # heading this far off the direction of travel = sliding or spinning
+AVOID_M = 60         # a non-contact car joins only from this close behind an upset car
 
 # Team ids in the participants packet; the 2026 season pack starts at 476, with Audi in
 # Sauber's slot and Cadillac after it (checked against the race files, 25 Oct)
@@ -220,18 +220,25 @@ def moved_frames(a, b):
 
 
 class Normal:
-    """Each driver's normal speed by lap distance: the median over their laps, 20 m bins."""
+    """Each driver's normal speed by lap distance: the median over their laps 2+, 20 m bins.
+    Lap 1 is the start, slower for everyone: there the reference is the field's median on lap 1."""
 
     def __init__(self, frames):
-        bins = collections.defaultdict(list)
+        bins, first = collections.defaultdict(list), collections.defaultdict(list)
         for _, cars in frames:
             for i, c in cars.items():
-                if c[11] >= 2 and c[10] > 0:  # lap 1 is the start: not normal
+                if c[10] <= 0:
+                    continue
+                if c[11] >= 2:
                     bins[(i, int(c[10] // 20))].append(c[4])
+                elif c[11] == 1:
+                    first[int(c[10] // 20)].append(c[4])
         self.v = {k: statistics.median(v) for k, v in bins.items() if len(v) >= 2}
+        self.lap1 = {k: statistics.median(v) for k, v in first.items() if len(v) >= 5}
 
     def ratio(self, i, c):
-        ref = self.v.get((i, int(c[10] // 20)))
+        b = int(c[10] // 20)
+        ref = self.lap1.get(b) if c[11] <= 1 else self.v.get((i, b))
         return c[4] / ref if ref else 1.0
 
 
@@ -270,64 +277,132 @@ def lap_starts(frames):
 
 
 def incidents(frames, collisions, track_len):
-    """Group the game's contacts into incidents (see the module doc)."""
+    """Group the game's contacts into incidents (rules calibrated with GreMi, batch 1, 30 Oct 2026).
+
+    - A contact counts only when the two cars really were together (centres under CONTACT_M
+      apart): the game sometimes reports contacts between cars that are metres apart.
+    - A car is "upset" while it is below 90% of its normal speed there, slides (heading 20+
+      degrees off its direction of travel) or has 2+ wheels off the track.
+    - A contact opens a new incident unless one of its cars is already in an open incident and
+      still upset (or touched in it less than 1.5 s ago): then it joins that one. So a battle over
+      several corners stays one incident, a chain (A hits B, B hits C) is one incident, and two
+      separate contacts at the same corner stay apart.
+    - A contact after which nobody gets upset is a tap: kind "tap", not an incident.
+    - Cars that never touched anyone join as "avoided" only when they were close behind an upset
+      car of the incident (same lap, under AVOID_M behind) and then braked hard, slid or went off.
+      Cars ahead of it never join.
+    - An incident ends when all its cars have been back to normal for 2 s (15 s at most).
+    """
     times = [t for t, _ in frames]
     normal = Normal(frames)
+    slip = slip_angles(frames)
 
     def at(t):
         k = min(max(bisect.bisect_left(times, t), 0), len(frames) - 1)
         return frames[k][1]
 
-    def gap(a, b):
-        d = abs(a - b)
-        return min(d, track_len - d) if track_len else d
+    def behind(a, b):
+        """Metres car a is behind car b along the lap (negative: a is ahead)."""
+        d = (b[11] - a[11]) * track_len + b[10] - a[10] if track_len else b[10] - a[10]
+        return d
 
-    out = []
+    def upset_within(i, t0, t1):
+        k0, k1 = bisect.bisect_left(times, t0), bisect.bisect_right(times, t1)
+        for t, cars in frames[k0:k1]:
+            c = cars.get(i)
+            if c and (normal.ratio(i, c) < NORMAL or slip.get((i, t), 0) > SLIP_DEG or bin(c[9]).count("1") >= 2):
+                return True
+        return False
+
+    out, open_ = [], []
     for c in sorted(collisions, key=lambda c: c["t"]):
         cars = at(c["t"])
         A, B = cars.get(c["a"]), cars.get(c["b"])
-        if not A or not B:
+        if not A or not B or math.hypot(A[0] - B[0], A[1] - B[1]) > CONTACT_M:
             continue
-        lap, dist = max(A[11], B[11]), A[10]
+        open_ = [x for x in open_ if x["end"] is None or x["end"] > c["t"]]
         joined = None
-        for inc in out[-4:]:
-            if inc["lap"] != lap or gap(inc["dist"], dist) > CORNER_M:
-                continue
-            # still open: a car of it is below 90% of its normal speed
-            now = at(c["t"])
-            if any(i in now and normal.ratio(i, now[i]) < NORMAL for i in inc["cars"]) or c["t"] - inc["t1"] < 1.5:
-                joined = inc
+        for inc in reversed(open_):
+            for i in (c["a"], c["b"]):
+                if i in inc["cars"] and (c["t"] - inc["last"].get(i, -99) < 1.5 or upset_within(i, c["t"] - 0.5, c["t"])):
+                    joined = inc
+                    break
+            if joined:
                 break
         if joined is None:
-            joined = {"t0": c["t"], "t1": c["t"], "lap": lap, "dist": dist, "cars": [], "contacts": [],
-                      "x": round((A[0] + B[0]) / 2, 1), "z": round((A[1] + B[1]) / 2, 1)}
+            joined = {"t0": c["t"], "t1": c["t"], "lap": max(A[11], B[11]), "dist": A[10], "cars": [], "last": {},
+                      "contacts": [], "x": round((A[0] + B[0]) / 2, 1), "z": round((A[1] + B[1]) / 2, 1), "end": None}
             out.append(joined)
+            open_.append(joined)
         joined["t1"] = c["t"]
         joined["contacts"].append({"t": round(c["t"], 2), "a": c["a"], "b": c["b"], "severity": c.get("severity", 0)})
         for i in (c["a"], c["b"]):
+            joined["last"][i] = c["t"]
             if i not in joined["cars"]:
                 joined["cars"].append(i)
-    # drivers near it who went off, spun or braked hard without touching anyone
+        joined["end"] = ending(joined, frames, times, normal, slip, joined["t1"])
+    res = []
     for inc in out:
         role = {i: "contact" for i in inc["cars"]}
-        k0, k1 = bisect.bisect_left(times, inc["t0"] - NEAR_S), bisect.bisect_right(times, inc["t1"] + NEAR_S)
+        hurt = [i for i in inc["cars"] if upset_within(i, inc["t0"], inc["t1"] + 2)]
+        # avoiders: close behind an upset car of the incident, then braked hard, slid or went off
+        k0, k1 = bisect.bisect_left(times, inc["t0"] - 0.5), bisect.bisect_right(times, inc["end"])
+        calm = {}
         for t, cars in frames[k0:k1]:
             for i, c in cars.items():
-                if i in role or math.hypot(c[0] - inc["x"], c[1] - inc["z"]) > NEAR_M:
+                if i in role:
+                    continue
+                if t < inc["t0"] + 0.3:   # already in trouble before the incident: not ours
+                    calm[i] = calm.get(i, True) and not upset_within(i, t, t)
+                    continue
+                if not calm.get(i, True):
+                    continue
+                near = any(m in cars and 0 < behind(c, cars[m]) < AVOID_M and upset_within(m, t - 0.2, t) for m in hurt)
+                if not near:
                     continue
                 if bin(c[9]).count("1") >= 2:
                     role[i] = "off track"
-                elif c[6] > 0.8 and normal.ratio(i, c) < 0.7:
+                elif slip.get((i, t), 0) > SLIP_DEG:
+                    role[i] = "spun"
+                elif c[6] > 0.8 and normal.ratio(i, c) < 0.75:
                     role[i] = "hard braking"
-        # end: every involved car back above 90% of normal speed (or 8 s at most)
-        end = inc["t1"]
-        for t, cars in frames[bisect.bisect_left(times, inc["t1"]):]:
-            end = t
-            if t - inc["t1"] > 8 or all(i not in cars or normal.ratio(i, cars[i]) >= NORMAL for i in role):
-                break
-        inc.update(t0=round(inc["t0"], 2), t1=round(end, 2), dist=round(inc["dist"]),
-                   drivers=[{"car": i, "role": r} for i, r in role.items()])
-        del inc["cars"]
+        res.append({"t0": round(inc["t0"], 2), "t1": round(ending(inc, frames, times, normal, slip, inc["t1"], list(role)), 2),
+                    "lap": inc["lap"], "dist": round(inc["dist"]), "x": inc["x"], "z": inc["z"],
+                    "kind": "incident" if hurt else "tap", "contacts": inc["contacts"],
+                    "drivers": [{"car": i, "role": r} for i, r in role.items()]})
+    return res
+
+
+def ending(inc, frames, times, normal, slip, t1, cars=None):
+    """When every car of the incident has been back to normal for 2 s (15 s after the last contact at most)."""
+    cars = cars or inc["cars"]
+    calm_since = None
+    for t, row in frames[bisect.bisect_left(times, t1):]:
+        if t - t1 > 15:
+            return t
+        ok = all(i not in row or (normal.ratio(i, row[i]) >= NORMAL and slip.get((i, t), 0) <= SLIP_DEG
+                                  and bin(row[i][9]).count("1") < 2) for i in cars)
+        if not ok:
+            calm_since = None
+        elif calm_since is None:
+            calm_since = t
+        elif t - calm_since >= 2:
+            return calm_since
+    return frames[-1][0]
+
+
+def slip_angles(frames):
+    """Degrees between each car's heading and its direction of travel, {(car, time): deg}, for cars over 30 km/h."""
+    out, prev = {}, {}
+    for t, cars in frames:
+        for i, c in cars.items():
+            p = prev.get(i)
+            if p and c[4] > 30:
+                dx, dz = c[0] - p[0], c[1] - p[1]
+                if math.hypot(dx, dz) > 0.5:
+                    d = math.degrees(math.atan2(dz, dx) - c[3])
+                    out[(i, t)] = abs((d + 180) % 360 - 180)
+            prev[i] = c
     return out
 
 

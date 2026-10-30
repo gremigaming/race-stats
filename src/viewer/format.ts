@@ -29,6 +29,8 @@ export interface RaceIncident {
   dist: number;
   x: number;
   z: number;
+  /** "tap": a contact after which nobody slowed, slid or went off (bundle v5+). */
+  kind?: "incident" | "tap";
   contacts: { t: number; a: number; b: number; severity: number }[];
   /** surfaces: what each wheel (rl, rr, fl, fr) touched off the tarmac around the incident. */
   drivers: { car: number; role: string; verdict?: string; rules?: string[]; surfaces?: Record<string, string> }[];

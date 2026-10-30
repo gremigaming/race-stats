@@ -171,6 +171,7 @@ export function IncidentFeed(props: {
                     ))}
                   </span>
                   <span className="mt-0.5 block truncate text-[11px] text-zinc-500">
+                    {inc.kind === "tap" && <span className="mr-1 rounded bg-white/10 px-1 font-bold text-zinc-400">LIGHT CONTACT</span>}
                     {inc.contacts.length > 1 && <span className="mr-1 rounded bg-amber-400/15 px-1 font-bold text-amber-300">{inc.contacts.length} CONTACTS</span>}
                     {others.length ? `Also: ${others.map((d) => `${name(d.car)} (${d.role})`).join(", ")}` : inc.dist ? `${Math.round(inc.dist)} m into the lap` : ""}
                   </span>
