@@ -152,7 +152,6 @@ export class RaceScene {
     this.dotLayer.sortableChildren = true;
     this.world.addChild(this.map.view, this.carsBelow, this.map.over, this.carLayer);
     this.world.filters = [this.look];
-    this.world.filterArea = this.app.screen; // the filter runs on the screen, not the whole map
     this.chipLayer.addChild(this.leaders);
     this.overlay.addChild(this.marks, this.dotLayer, this.chipLayer);
     this.app.stage.addChild(this.world, this.overlay);
