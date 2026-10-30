@@ -119,6 +119,8 @@ export class TrackMap {
   private svg: { root: string; tile: number; layers: string[]; tiles: Map<string, Record<string, string>> } | null = null;
   private drawn = new Map<string, { lod: number; sprite: Sprite; over: Sprite[] }>();
   private busy = new Set<string>();
+  /** Tiles whose fetch failed, by when they may be tried again. */
+  private retryAt = new Map<string, number>();
   private alive = true;
   /** World bounds of the map tiles: [minX, minZ, maxX, maxZ]. */
   bounds: [number, number, number, number] | null = null;
@@ -195,7 +197,7 @@ export class TrackMap {
           if (!files) continue;
           seen.add(key);
           const have = this.drawn.get(key);
-          if ((!have || have.lod < level) && !this.busy.has(key) && this.busy.size < 6)
+          if ((!have || have.lod < level) && !this.busy.has(key) && this.busy.size < 6 && (this.retryAt.get(key) ?? 0) <= performance.now())
             void this.draw(key, i, j, files, level);
         }
       }
@@ -240,10 +242,14 @@ export class TrackMap {
         this.over.addChild(sp);
         over.push(sp);
       });
+      // a layer that failed to load is shown without it and fetched again in a few seconds
+      const failed = imgs.includes(null) || (!!files.over && (!split || overImgs.includes(null)));
+      if (failed) this.retryAt.set(key, performance.now() + 3000);
+      else this.retryAt.delete(key);
       const old = this.drawn.get(key);
       this.sharp.addChild(sprite);
       if (old) this.drop(old);
-      this.drawn.set(key, { lod: level, sprite, over });
+      this.drawn.set(key, { lod: failed ? -1 : level, sprite, over });
     } finally {
       this.busy.delete(key);
     }
