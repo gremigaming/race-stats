@@ -1,8 +1,8 @@
 /**
  * The Live Race Viewer's WebGL scene (PixiJS v8): track map and cars live on the GPU in world
  * metres; pan, zoom, rotate and follow only move the camera. Zoomed out, each car fades into a
- * team-coloured dot with its race position (leader on top). Dots, name chips, event tags, the
- * incident marker and edge arrows are drawn in screen space so they stay the same size.
+ * team-coloured dot with its race position (leader on top). Dots, name chips, the incident
+ * marker and edge arrows are drawn in screen space so they stay the same size.
  */
 import { Application, Container, Graphics, Sprite, Text } from "pixi.js";
 import { CAR_LENGTH, CAR_WIDTH, carTexture, clearCarTextures, inkOn, liveryOf, loadLiveries, retainCarTextures, type Livery } from "./cars";
@@ -26,19 +26,10 @@ const FOLLOW_CAP = 500; // metres: followed cars further apart get an edge arrow
 const TV_MIN_SCALE = 3.4; // px per metre: the broadcast camera never zooms out so far that cars turn into dots
 const CUT_MS = 1800; // a broadcast cut: zoom out a little, pan, zoom back in
 const FONT = "Geist Variable, system-ui, sans-serif";
-
-/** Event tags pinned to a car, like the game's broadcast graphics. */
-export type CarTag = "CONTACT" | "OFF TRACK" | "SLIDE" | "LOCK-UP?";
-
-export function tagsOf(s: CarState, contact: boolean): CarTag[] {
-  const out: CarTag[] = [];
-  if (contact) out.push("CONTACT");
-  if (bits(s.off) >= 2) out.push("OFF TRACK");
-  const slide = Math.abs(s.slip) * (180 / Math.PI);
-  if (s.speed > 40 && s.brake >= 0.8 && slide >= 4) out.push("LOCK-UP?");
-  else if (s.speed > 40 && slide >= 9) out.push("SLIDE");
-  return out;
-}
+const TV_EASE_MS = 420; // the broadcast camera glides; follow mode stays tight
+const TV_ZOOM_EASE_MS = 1100;
+const TV_ZOOM_HOLD = 0.15; // the broadcast camera ignores zoom changes smaller than this (fraction)
+const CHIP_FADE_MS = 140;
 
 export function bits(v: number) {
   let n = 0;
@@ -67,13 +58,13 @@ export class RaceScene {
   private carLayer = new Container();
   private overlay = new Container();
   private dotLayer = new Container();
-  private tagLayer = new Container();
   private chipLayer = new Container();
   private marks = new Graphics();
   private sprites = new Map<number, Sprite>();
   private dots = new Map<number, { c: Container; t: Text; pos: number }>();
-  private tags = new Map<number, { c: Container; t: Text; label: string }>();
-  private chips = new Map<number, Container>();
+  /** Name chips, the slot each one sat in last frame (kept while it stays free) and its leader line. */
+  private chips = new Map<number, { c: Container; slot: number }>();
+  private leaders = new Graphics();
   private arrowText: Text[] = [];
   private liveries: Record<string, Livery> = {};
   private map: TrackMap;
@@ -99,14 +90,13 @@ export class RaceScene {
   tvCars: number[] = [];
   tvContext: number[] = [];
   private cut: number | null = null;
+  private tvScale: number | null = null;
   /** Smallest frame (metres) the multi-car camera zooms to. */
   minFrame = 60;
   /** In follow mode, turn the map so the (first) followed car points up. */
   autoRotate = false;
   /** The incident marker: where, and how strongly to show it (0..1). */
   incident: { x: number; z: number; strength: number } | null = null;
-  /** Contacts, for the CONTACT tag. */
-  contacts: { t: number; a: number; b: number }[] = [];
   selected = new Set<number>();
   hovered: number | null = null;
   /** World bounds the "full track" camera shows. */
@@ -145,7 +135,8 @@ export class RaceScene {
     this.carLayer.sortableChildren = true;
     this.dotLayer.sortableChildren = true;
     this.world.addChild(this.map.view, this.carLayer);
-    this.overlay.addChild(this.marks, this.dotLayer, this.tagLayer, this.chipLayer);
+    this.chipLayer.addChild(this.leaders);
+    this.overlay.addChild(this.marks, this.dotLayer, this.chipLayer);
     this.app.stage.addChild(this.world, this.overlay);
     this.app.ticker.add((t) => this.tick(t.deltaMS));
     const c = this.app.canvas;
@@ -213,13 +204,17 @@ export class RaceScene {
     this.followCars = [];
     this.zoomBias = 1;
     this.cut = this.clockMs;
+    this.tvScale = null;
     this.onModeChange(this.mode, this.followCars);
   }
 
-  /** A new shot from the director (the same cars again just refreshes it). */
+  /** A new shot from the director. A car joining or leaving the shot just reframes; only a shot with none of the same cars is a cut. */
   shoot(cars: number[], context: number[] = []) {
-    const same = cars.length === this.tvCars.length && cars.every((c) => this.tvCars.includes(c));
-    if (!same && this.tvCars.length) this.cut = this.clockMs;
+    const shared = cars.some((c) => this.tvCars.includes(c));
+    if (!shared && this.tvCars.length) {
+      this.cut = this.clockMs;
+      this.tvScale = null;
+    }
     this.tvCars = cars;
     this.tvContext = context;
   }
@@ -367,10 +362,13 @@ export class RaceScene {
       if (!inFrame.length) return null;
       const f = this.fit(inFrame, rot, 0.45, 70);
       let scale = Math.max(f.scale * this.zoomBias, TV_MIN_SCALE);
+      // hold the zoom while the framing only breathes a little: no constant pumping in and out
+      if (this.tvScale !== null && Math.abs(scale / this.tvScale - 1) < TV_ZOOM_HOLD) scale = this.tvScale;
+      else this.tvScale = scale;
       if (this.cut !== null) {
         const p = (this.clockMs - this.cut) / CUT_MS;
         if (p >= 1) this.cut = null;
-        else scale = Math.max(scale * (1 - 0.3 * Math.sin(Math.PI * p)), TV_MIN_SCALE * 0.9);
+        else scale = Math.max(scale * (1 - 0.18 * Math.sin(Math.PI * p)), TV_MIN_SCALE * 0.9);
       }
       return this.centreOnScaled(f, scale / f.scale);
     }
@@ -405,10 +403,12 @@ export class RaceScene {
     if (this.mode === "tv") outside = [...outside, ...this.tvContext.map((c) => byCar.get(c)).filter((s): s is CarState => !!s && !this.tvCars.includes(s.car))];
     const aim = this.aim(inFrame);
     if (aim) {
-      const k = 1 - Math.exp(-dtMs / (this.mode === "tv" ? (this.cut !== null ? 420 : 160) : this.mode === "follow" ? 110 : 220));
+      const tv = this.mode === "tv";
+      const k = 1 - Math.exp(-dtMs / (tv ? (this.cut !== null ? 700 : TV_EASE_MS) : this.mode === "follow" ? 110 : 220));
+      const kz = tv ? 1 - Math.exp(-dtMs / (this.cut !== null ? 700 : TV_ZOOM_EASE_MS)) : k;
       this.cam.x += (aim.x - this.cam.x) * k;
       this.cam.z += (aim.z - this.cam.z) * k;
-      this.cam.scale *= Math.pow(aim.scale / this.cam.scale, k);
+      this.cam.scale *= Math.pow(aim.scale / this.cam.scale, kz);
       this.cam.rot = wrap(this.cam.rot + wrap(aim.rot - this.cam.rot) * k);
       if (this.snapRot && Math.abs(this.cam.rot) < 0.002) {
         this.cam.rot = 0;
@@ -430,9 +430,8 @@ export class RaceScene {
     const carAlpha = clamp((carPx - 10) / 8, 0, 1); // 10 px long: all dot; 18 px: all car
     this.drawCars(carAlpha);
     this.drawDots(1 - carAlpha);
-    this.drawTags(carAlpha > 0.5);
     this.drawMarks(outside);
-    this.drawChips(carAlpha);
+    this.drawChips(carAlpha, dtMs);
   }
 
   private livery(car: number) {
@@ -504,55 +503,6 @@ export class RaceScene {
     for (const [car, d] of this.dots) if (!live.has(car)) d.c.visible = false;
   }
 
-  private drawTags(show: boolean) {
-    const byCar = new Map(this.states.map((s) => [s.car, s]));
-    const touched = new Set<number>();
-    for (const c of this.contacts) {
-      if (this.now >= c.t - 0.2 && this.now <= c.t + 1.2) {
-        touched.add(c.a);
-        touched.add(c.b);
-      }
-    }
-    const want = new Map<number, string>();
-    if (show) for (const s of this.states) {
-      const tags = tagsOf(s, touched.has(s.car));
-      if (tags.length) want.set(s.car, tags.join(" · "));
-    }
-    for (const [car, tag] of this.tags) {
-      if (!want.has(car)) {
-        tag.c.destroy({ children: true });
-        this.tags.delete(car);
-      }
-    }
-    for (const [car, label] of want) {
-      let tag = this.tags.get(car);
-      if (!tag || tag.label !== label) {
-        tag?.c.destroy({ children: true });
-        const c = new Container();
-        const t = new Text({
-          text: label,
-          style: { fontFamily: FONT, fontSize: 10, fontWeight: "800", fontStyle: "italic", fill: 0xffffff, letterSpacing: 0.5 },
-          resolution: Math.min(window.devicePixelRatio || 1, 2) * 1.5,
-        });
-        t.position.set(12, 2);
-        const warn = label.includes("CONTACT") || label.includes("LOCK");
-        const g = new Graphics()
-          .roundRect(0, 0, t.width + 18, t.height + 4, 3)
-          .fill({ color: 0x0c0e11, alpha: 0.78 })
-          .circle(6, (t.height + 4) / 2, 3)
-          .fill(warn ? 0xffb020 : 0xffffff);
-        c.addChild(g, t);
-        tag = { c, t, label };
-        this.tags.set(car, tag);
-        this.tagLayer.addChild(c);
-      }
-      const s = byCar.get(car)!;
-      const p = this.toScreen(s.x, s.z);
-      const r = (CAR_WIDTH * this.cam.scale) / 2 + 6;
-      tag.c.position.set(Math.round(p.x + r), Math.round(p.y - tag.c.height / 2 - r));
-    }
-  }
-
   /** The incident marker (pulsing ring) and arrows at the screen edge for what's off screen. */
   private drawMarks(outside: CarState[]) {
     const g = this.marks;
@@ -567,7 +517,7 @@ export class RaceScene {
       if (p.x < box.x0 || p.x > box.x1 || p.y < box.y0 || p.y > box.y1) {
         arrows.push({ ...p, color: "#ffb020", label: "!" });
       } else {
-        const pulse = (this.clockMs / 900) % 1;
+        const pulse = (this.clockMs / 450) % 1;
         const a = inc.strength;
         g.circle(p.x, p.y, 14 + pulse * 30).stroke({ width: 3, color: 0xffb020, alpha: a * (1 - pulse) });
         g.circle(p.x, p.y, 15).stroke({ width: 3, color: 0xffb020, alpha: a });
@@ -612,7 +562,13 @@ export class RaceScene {
     for (let n = arrows.length; n < this.arrowText.length; n++) this.arrowText[n].visible = false;
   }
 
-  private drawChips(carAlpha: number) {
+  /**
+   * Name chips for the picked, hovered and framed cars. Each chip takes the first free slot around
+   * its car (above, below, the sides, the corners, then a ring further out) that covers no car and
+   * no other chip; it keeps last frame's slot while that stays free, and fades out when there's no
+   * room at all until there is again.
+   */
+  private drawChips(carAlpha: number, dtMs: number) {
     const show = new Set(this.selected);
     if (this.hovered !== null) show.add(this.hovered);
     if (this.mode === "follow") for (const c of this.followCars) show.add(c);
@@ -620,32 +576,75 @@ export class RaceScene {
     const byCar = new Map(this.states.map((s) => [s.car, s]));
     for (const [car, chip] of this.chips) {
       if (!show.has(car) || !byCar.has(car)) {
-        chip.destroy({ children: true });
+        chip.c.destroy({ children: true });
         this.chips.delete(car);
       }
     }
-    const placed: { x0: number; x1: number; y0: number; y1: number }[] = [];
+    type Box = { x0: number; x1: number; y0: number; y1: number };
+    const hits = (a: Box, b: Box) => a.x0 < b.x1 && a.x1 > b.x0 && a.y0 < b.y1 && a.y1 > b.y0;
+    const r = carAlpha > 0.5 ? Math.max((CAR_LENGTH * this.cam.scale) / 2, 4) : DOT_R + 1;
+    const taken: Box[] = [];
+    for (const s of this.states) {
+      const p = this.toScreen(s.x, s.z);
+      taken.push({ x0: p.x - r, x1: p.x + r, y0: p.y - r, y1: p.y + r });
+    }
+    const fade = 1 - Math.exp(-dtMs / CHIP_FADE_MS);
+    const lines = this.leaders;
+    lines.clear();
     const order = [...show].map((c) => byCar.get(c)).filter((s): s is CarState => !!s).sort((a, b) => (a.pos || 99) - (b.pos || 99));
-    const lift = carAlpha > 0.5 ? (CAR_WIDTH * this.cam.scale) / 2 + 10 : DOT_R + 6;
     for (const s of order) {
       let chip = this.chips.get(s.car);
       if (!chip) {
-        chip = this.makeChip(s.car);
+        chip = { c: this.makeChip(s.car), slot: 0 };
+        chip.c.alpha = 0;
         this.chips.set(s.car, chip);
-        this.chipLayer.addChild(chip);
+        this.chipLayer.addChild(chip.c);
       }
       const p = this.toScreen(s.x, s.z);
-      let x0 = Math.round(p.x - chip.width / 2);
-      let y0 = Math.round(p.y - lift - chip.height);
-      // nudge up past chips already placed, so names don't overlap
-      for (let guard = 0; guard < 8; guard++) {
-        const hit = placed.find((r) => x0 < r.x1 && x0 + chip!.width > r.x0 && y0 < r.y1 && y0 + chip!.height > r.y0);
-        if (!hit) break;
-        y0 = hit.y0 - chip.height - 2;
+      const w = chip.c.width;
+      const h = chip.c.height;
+      const slots: [number, number][] = [];
+      for (const g of [r + 3, r + h + 10]) {
+        const d = g * 0.72;
+        slots.push(
+          [-w / 2, -g - h],
+          [-w / 2, g],
+          [g, -h / 2],
+          [-g - w, -h / 2],
+          [d, -d - h],
+          [-d - w, -d - h],
+          [d, d],
+          [-d - w, d],
+        );
       }
-      x0 = Math.round(x0);
-      chip.position.set(x0, y0);
-      placed.push({ x0, x1: x0 + chip.width, y0, y1: y0 + chip.height });
+      const box = (k: number): Box => {
+        const x0 = Math.round(p.x + slots[k][0]);
+        const y0 = Math.round(p.y + slots[k][1]);
+        return { x0, x1: x0 + w, y0, y1: y0 + h };
+      };
+      const free = (k: number) => {
+        const b = box(k);
+        return !taken.some((t) => hits(b, t));
+      };
+      let slot = free(chip.slot) ? chip.slot : -1;
+      for (let k = 0; slot < 0 && k < slots.length; k++) if (free(k)) slot = k;
+      if (slot < 0) {
+        chip.c.alpha += (0 - chip.c.alpha) * fade;
+        chip.c.visible = chip.c.alpha > 0.02;
+        continue;
+      }
+      chip.slot = slot;
+      const b = box(slot);
+      taken.push(b);
+      chip.c.position.set(b.x0, b.y0);
+      chip.c.alpha += (1 - chip.c.alpha) * fade;
+      chip.c.visible = true;
+      if (slot >= 8) {
+        // the outer ring: a thin line back to the car
+        const cx = clamp(p.x, b.x0, b.x1);
+        const cy = clamp(p.y, b.y0, b.y1);
+        lines.moveTo(p.x, p.y).lineTo(cx, cy).stroke({ width: 1, color: 0xffffff, alpha: 0.35 * chip.c.alpha });
+      }
     }
   }
 
@@ -655,14 +654,14 @@ export class RaceScene {
     const c = new Container();
     const text = new Text({
       text: info?.name ?? `Car ${car}`,
-      style: { fontFamily: FONT, fontSize: 11, fontWeight: "600", fill: 0xf4f5f7 },
+      style: { fontFamily: FONT, fontSize: 9.5, fontWeight: "600", fill: 0xf4f5f7 },
       resolution: Math.min(window.devicePixelRatio || 1, 2) * 1.5,
     });
-    text.position.set(9, 3);
+    text.position.set(6, 1.5);
     const bg = new Graphics()
-      .roundRect(0, 0, text.width + 15, text.height + 6, 4)
-      .fill({ color: 0x0c0e11, alpha: 0.85 })
-      .rect(0, 0, 4, text.height + 6)
+      .roundRect(0, 0, text.width + 10, text.height + 3, 3)
+      .fill({ color: 0x0c0e11, alpha: 0.8 })
+      .rect(0, 0, 3, text.height + 3)
       .fill(l.base);
     c.addChild(bg, text);
     return c;

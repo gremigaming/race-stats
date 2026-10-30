@@ -73,6 +73,8 @@ export interface CarTiming {
   laps: [number, number, number][];
   /** 2 active, 3 finished, 4 DNF, 5 DSQ, 6 not classified, 7 retired */
   status: [number, number][];
+  /** Session times the car entered the pit lane (bundle v7+). */
+  pits?: number[];
 }
 
 /** One decoded chunk: frame-major columns (frame 0 car 0, frame 0 car 1, ...). */

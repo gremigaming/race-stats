@@ -11,7 +11,7 @@ export function lapTime(ms: number | null | undefined) {
   return `${m}:${s.toFixed(3).padStart(6, "0")}`;
 }
 
-/** A driver's stats in this race, up to the playhead: no lifetime totals, no spoilers. */
+/** A driver's stats in this race, up to the playhead: no lifetime totals, no spoilers. Lives in the Driver tab. */
 export function DriverCard(props: {
   car: number;
   info: RaceCar | undefined;
@@ -48,7 +48,7 @@ export function DriverCard(props: {
     </div>
   );
   return (
-    <div className="pointer-events-auto w-80 max-w-[calc(100vw-24px)] rounded-xl border border-white/10 bg-[#0c0e11]/92 p-3 text-sm shadow-2xl backdrop-blur">
+    <div className="p-3 text-sm">
       <div className="flex items-center gap-2">
         <span className="h-6 w-1.5 rounded-full" style={{ background: props.color }} />
         <div className="min-w-0 flex-1">

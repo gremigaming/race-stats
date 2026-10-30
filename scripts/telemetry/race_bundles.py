@@ -36,7 +36,7 @@ import gmtel  # noqa: E402
 RELEASE = "https://api.github.com/repos/gremigaming/race-stats/releases/tags/telemetry"
 DOWNLOAD = "https://github.com/gremigaming/race-stats/releases/download/telemetry/"
 
-VERSION = 6          # bump to rebuild every bundle
+VERSION = 7          # bump to rebuild every bundle
 KEEP = 40            # newest races published on the site (R2 keeps everything later)
 CHUNK_SECONDS = 10
 CHUNK_HEAD = struct.Struct("<4sBBHd")
@@ -245,14 +245,15 @@ class Normal:
 
 
 def timing_of(sess):
-    """Per car: grid slot, completed laps [lap, session time, ms] and result status changes
-    [session time, status] (2 active, 3 finished, 4 DNF, 5 DSQ, 6 not classified, 7 retired)."""
+    """Per car: grid slot, completed laps [lap, session time, ms], result status changes
+    [session time, status] (2 active, 3 finished, 4 DNF, 5 DSQ, 6 not classified, 7 retired)
+    and pit stops (session time it entered the pit lane)."""
     out = {}
     for t in sorted(sess.field):
         for i, r in sess.field[t].items():
             if "result_status" not in r:
                 continue
-            d = out.setdefault(i, {"grid": 0, "laps": [], "status": [], "_last": None})
+            d = out.setdefault(i, {"grid": 0, "laps": [], "status": [], "pits": [], "_last": None, "_pit": 0})
             if r.get("grid"):
                 d["grid"] = r["grid"]
             ms = r.get("last_lap_ms", 0)
@@ -260,10 +261,14 @@ def timing_of(sess):
                 d["laps"].append([len(d["laps"]) + 1, round(t, 2), ms])
             if d["_last"] is None or ms:
                 d["_last"] = ms
+            pit = r.get("pit_status", 0)
+            if pit and not d["_pit"] and d["laps"]:  # lap 1 starts on the grid, never in the pits
+                d["pits"].append(round(t, 2))
+            d["_pit"] = pit
             if not d["status"] or d["status"][-1][1] != r["result_status"]:
                 d["status"].append([round(t, 2), r["result_status"]])
     for d in out.values():
-        del d["_last"]
+        del d["_last"], d["_pit"]
     return out
 
 

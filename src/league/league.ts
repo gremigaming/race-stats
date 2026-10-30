@@ -160,7 +160,7 @@ function finished(status: string): boolean {
   return status === "FINISHED" || status === "ACTIVE" || status === "";
 }
 
-const RACE_POINTS = [25, 18, 15, 12, 10, 8, 6, 4, 2, 1];
+export const RACE_POINTS = [25, 18, 15, 12, 10, 8, 6, 4, 2, 1];
 
 /**
  * "Just in case" autosaves are written before the game sends the final

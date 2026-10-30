@@ -1,7 +1,6 @@
 import { Pause, Play, RotateCcw, RotateCw, X } from "lucide-react";
 import { useRef, type ReactNode } from "react";
 import type { RaceCar, RaceIncident } from "./format";
-import type { CarTag } from "./scene";
 import type { CarState } from "./store";
 
 export const SPEEDS = [0.25, 0.5, 1, 2, 4, 8];
@@ -175,25 +174,6 @@ export function SteeringWheel({ s, small }: { s: CarState | undefined; small?: b
   );
 }
 
-const TAG_STYLE: Record<CarTag, string> = {
-  CONTACT: "bg-amber-400/20 text-amber-300",
-  "OFF TRACK": "bg-orange-500/20 text-orange-300",
-  SLIDE: "bg-sky-500/20 text-sky-300",
-  "LOCK-UP?": "bg-red-500/20 text-red-300",
-};
-
-export function TagChips({ tags }: { tags: CarTag[] }) {
-  return (
-    <>
-      {tags.map((t) => (
-        <span key={t} title={t === "LOCK-UP?" ? "Estimate: hard braking while the car slides (wheel data only exists for GreMi's car)" : undefined} className={`rounded px-1.5 py-0.5 text-[10px] font-bold italic ${TAG_STYLE[t]}`}>
-          {t}
-        </span>
-      ))}
-    </>
-  );
-}
-
 /** What one driver did in an incident, measured from the chunks (and the recording's wheel surfaces). */
 export interface IncidentDriverStats {
   car: number;
@@ -205,47 +185,71 @@ export interface IncidentDriverStats {
   offWheels: number;
   lockup: boolean;
   surfaces?: Record<string, string>;
+  /** Speed every 0.1 s over the incident window (NaN while the car isn't in the data). */
   speeds: number[];
-  /** Inputs every 0.1 s over the same window as speeds. */
-  throttle: number[];
-  brake: number[];
-  steer: number[];
 }
 
-/** One driver's pedals and steering through an incident, with live bars, so everyone involved can be compared. */
-function IncidentInputs({ d, s, at, contact }: { d: IncidentDriverStats; s: CarState | undefined; at: number; contact: number }) {
-  const n = d.throttle.length;
-  const X = (i: number) => ((i / Math.max(n - 1, 1)) * 100).toFixed(2);
-  const line = (vals: number[], f: (v: number) => number) => vals.map((v, i) => `${X(i)},${f(v).toFixed(2)}`).join(" ");
-  const bar = (v: number, cls: string) => (
-    <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
-      <div className={`h-full ${cls}`} style={{ width: `${Math.round(Math.max(0, Math.min(1, v)) * 100)}%` }} />
+/** One driver's pedals and steering right now, as bars. */
+function InputBars({ s }: { s: CarState | undefined }) {
+  const bar = (label: string, v: number, cls: string) => (
+    <div className="flex items-center gap-1.5">
+      <span className="w-3 text-[9px] font-bold text-zinc-500">{label}</span>
+      <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/10">
+        <div className={`h-full ${cls}`} style={{ width: `${Math.round(Math.max(0, Math.min(1, v)) * 100)}%` }} />
+      </div>
     </div>
   );
+  const steer = s?.steer ?? 0;
   return (
-    <div className="mt-1.5 grid grid-cols-[3.5rem_1fr] items-center gap-2">
-      <div className="space-y-1">
-        {bar(s?.throttle ?? 0, "bg-emerald-500")}
-        {bar(s?.brake ?? 0, "bg-red-500")}
-        <div className="relative h-1.5 overflow-hidden rounded-full bg-white/10">
+    <div className="mt-1.5 grid grid-cols-3 gap-2">
+      {bar("T", s?.throttle ?? 0, "bg-emerald-500")}
+      {bar("B", s?.brake ?? 0, "bg-red-500")}
+      <div className="flex items-center gap-1.5">
+        <span className="w-3 text-[9px] font-bold text-zinc-500">S</span>
+        <div className="relative h-1.5 flex-1 overflow-hidden rounded-full bg-white/10">
           <span className="absolute inset-y-0 left-1/2 w-px bg-white/30" />
-          <div
-            className="absolute inset-y-0 bg-sky-400"
-            style={{ left: `${50 + Math.min(0, s?.steer ?? 0) * 50}%`, width: `${Math.abs(s?.steer ?? 0) * 50}%` }}
-          />
+          <div className="absolute inset-y-0 bg-sky-400" style={{ left: `${50 + Math.min(0, steer) * 50}%`, width: `${Math.abs(steer) * 50}%` }} />
         </div>
       </div>
-      <svg viewBox="0 0 100 30" preserveAspectRatio="none" className="h-10 w-full rounded bg-white/[0.03]">
-        {n > 1 && (
-          <>
-            <line x1="0" y1="15" x2="100" y2="15" stroke="rgba(255,255,255,0.08)" strokeWidth="0.4" vectorEffect="non-scaling-stroke" />
-            <polyline points={line(d.steer, (v) => 15 - v * 13)} fill="none" stroke="#60a5fa" strokeWidth="1" vectorEffect="non-scaling-stroke" />
-            <polyline points={line(d.throttle, (v) => 29 - v * 27)} fill="none" stroke="#22c55e" strokeWidth="1.4" vectorEffect="non-scaling-stroke" />
-            <polyline points={line(d.brake, (v) => 29 - v * 27)} fill="none" stroke="#ef4444" strokeWidth="1.4" vectorEffect="non-scaling-stroke" />
-          </>
-        )}
-        <line x1={contact * 100} y1="0" x2={contact * 100} y2="30" stroke="#fbbf24" strokeWidth="1" vectorEffect="non-scaling-stroke" />
-        {at >= 0 && at <= 1 && <line x1={at * 100} y1="0" x2={at * 100} y2="30" stroke="#ffffff" strokeWidth="1.2" vectorEffect="non-scaling-stroke" />}
+    </div>
+  );
+}
+
+/** Everyone's speed through the incident in one chart, in team colours. */
+function SpeedChart(props: { stats: IncidentDriverStats[]; color: (car: number) => string; at: number; contact: number }) {
+  const all = props.stats.flatMap((d) => d.speeds.filter((v) => Number.isFinite(v)));
+  if (!all.length) return null;
+  const top = Math.max(100, Math.ceil(Math.max(...all) / 50) * 50);
+  const H = 40;
+  const path = (vals: number[]) => {
+    const n = vals.length;
+    let out = "";
+    let pen = false;
+    vals.forEach((v, i) => {
+      if (!Number.isFinite(v)) {
+        pen = false;
+        return;
+      }
+      const x = ((i / Math.max(n - 1, 1)) * 100).toFixed(2);
+      const y = (H - 1 - (v / top) * (H - 2)).toFixed(2);
+      out += `${pen ? "L" : "M"}${x},${y}`;
+      pen = true;
+    });
+    return out;
+  };
+  return (
+    <div className="mb-2">
+      <div className="mb-0.5 flex justify-between text-[10px] text-zinc-500">
+        <span>Speed</span>
+        <span>{top} km/h</span>
+      </div>
+      <svg viewBox={`0 0 100 ${H}`} preserveAspectRatio="none" className="h-20 w-full rounded bg-white/[0.03]">
+        <line x1="0" y1={H / 2} x2="100" y2={H / 2} stroke="rgba(255,255,255,0.06)" strokeWidth="0.4" vectorEffect="non-scaling-stroke" />
+        {props.stats.map((d) => (
+          <path key={d.car} d={path(d.speeds)} fill="none" stroke={props.color(d.car)} strokeWidth="1.6" vectorEffect="non-scaling-stroke" />
+        ))}
+        <line x1={props.contact * 100} y1="0" x2={props.contact * 100} y2={H} stroke="#fbbf24" strokeWidth="1" vectorEffect="non-scaling-stroke" />
+        {props.at >= 0 && props.at <= 1 && <line x1={props.at * 100} y1="0" x2={props.at * 100} y2={H} stroke="#ffffff" strokeWidth="1.2" vectorEffect="non-scaling-stroke" />}
       </svg>
     </div>
   );
@@ -268,6 +272,7 @@ export function IncidentDetail(props: {
   onClose: () => void;
 }) {
   const { incident: inc } = props;
+  const span = Math.max(props.to - props.from, 0.1);
   return (
     <div className="rounded-lg border border-amber-400/30 bg-amber-400/[0.04] p-3">
       <div className="mb-2 flex items-center gap-2">
@@ -279,6 +284,7 @@ export function IncidentDetail(props: {
           <X className="h-4 w-4" />
         </IconButton>
       </div>
+      <SpeedChart stats={props.stats} color={props.color} at={(props.t - props.from) / span} contact={(inc.t0 - props.from) / span} />
       <div className="space-y-2">
         {props.stats.map((d) => {
           const info = props.cars[String(d.car)];
@@ -319,15 +325,15 @@ export function IncidentDetail(props: {
                     ? `${d.offWheels} wheel${d.offWheels > 1 ? "s" : ""} off the track`
                     : "all four wheels on track"}
               </div>
-              <IncidentInputs d={d} s={props.states.get(d.car)} at={(props.t - props.from) / Math.max(props.to - props.from, 0.1)} contact={(props.incident.t0 - props.from) / Math.max(props.to - props.from, 0.1)} />
+              <InputBars s={props.states.get(d.car)} />
             </div>
           );
         })}
         {!props.stats.length && <p className="text-xs text-zinc-500">Loading the cars around this incident…</p>}
       </div>
       <p className="mt-2 text-[10px] text-zinc-600">
-        Speeds in km/h. Traces run 3 s before to 3 s after: <span className="text-emerald-400">throttle</span>, <span className="text-red-400">brake</span>,{" "}
-        <span className="text-sky-400">steering</span>; the white line is now, the amber line the first contact. Slide = angle between where the car points and where it goes.
+        Speeds in km/h. The chart runs 3 s before to 3 s after; the white line is now, the amber line the first contact. Bars: <span className="text-emerald-400">throttle</span>,{" "}
+        <span className="text-red-400">brake</span>, <span className="text-sky-400">steering</span>. Slide = angle between where the car points and where it goes.
       </p>
     </div>
   );

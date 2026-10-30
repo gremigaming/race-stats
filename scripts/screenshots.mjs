@@ -132,9 +132,33 @@ if (raceHref) {
     await page.waitForTimeout(3000);
     await page.screenshot({ path: `${outDir}/race-viewer-follow.jpg`, type: "jpeg", quality: 80 });
   }
+  // the side column's tabs, then the clean view (H)
+  for (const [tab, file] of [["Safety", "safety"], ["Race stats", "stats"], ["Points", "points"]]) {
+    const b = page.locator(`nav[aria-label="Panels"] button[title="${tab}"]`);
+    if (await b.count()) {
+      await b.click();
+      await page.waitForTimeout(800);
+      await page.screenshot({ path: `${outDir}/race-viewer-${file}.jpg`, type: "jpeg", quality: 80 });
+    }
+  }
+  await page.keyboard.press("h");
+  await page.waitForTimeout(1500);
+  await page.screenshot({ path: `${outDir}/race-viewer-clean.jpg`, type: "jpeg", quality: 80 });
+  await page.keyboard.press("h");
   await page.setViewportSize({ width: 390, height: 844 });
   await page.waitForTimeout(1500);
   await page.screenshot({ path: `${outDir}/race-viewer-phone.jpg`, type: "jpeg", quality: 75 });
+  // a phone opening the race fresh: panels folded away, then opened
+  const phone = await browser.newPage({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+  await phone.goto(new URL(raceHref, base).toString());
+  await phone.waitForTimeout(7000);
+  await phone.screenshot({ path: `${outDir}/race-viewer-phone-fresh.jpg`, type: "jpeg", quality: 75 });
+  const open = phone.locator('button[aria-label="Show the panels"]');
+  if (await open.count()) {
+    await open.click();
+    await phone.waitForTimeout(1500);
+    await phone.screenshot({ path: `${outDir}/race-viewer-phone-panels.jpg`, type: "jpeg", quality: 75 });
+  }
 }
 writeFileSync(`${outDir}/race-viewer-console.txt`, log.join("\n") || "no errors");
 await browser.close();

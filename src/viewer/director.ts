@@ -2,7 +2,8 @@
  * The broadcast camera's director: picks what the default TV view shows, like a race director
  * cutting between cameras. Collisions first, then overtakes, then the tightest battles. A shot
  * is held at least MIN_HOLD seconds (collisions may cut in any time) and at most MAX_HOLD while
- * something else is worth showing. On a finished race it knows a collision is coming and cuts
+ * something else is worth showing. When a shot ends (a battle breaks up, an overtake is done) it
+ * stays with a shot that has some of the same cars, so the camera doesn't jump across the track. On a finished race it knows a collision is coming and cuts
  * there a few seconds before it; live, it cuts when it happens.
  */
 import type { RaceEvent, RaceIncident } from "./format";
@@ -15,7 +16,7 @@ export interface Shot {
   score: number;
 }
 
-const MIN_HOLD = 8;
+const MIN_HOLD = 12;
 const MAX_HOLD = 60;
 const LEAD_IN = 4; // seconds a finished race's camera arrives before a collision
 const BATTLE_GAP = 1.0; // seconds between cars that count as a battle
@@ -54,9 +55,14 @@ export class Director {
     let next = this.shot;
     if (!this.shot || !best) next = best;
     else if (best.kind === "collision" && this.shot.kind !== "collision") next = best;
-    else if (!cur) next = held >= 4 || this.shot.kind === "collision" ? best : this.shot;
+    else if (!cur) {
+      const prev = this.shot.cars;
+      const near = options.filter((o) => o.cars.some((c) => prev.includes(c))).sort((a, b) => b.score - a.score)[0];
+      if (near && best.kind !== "collision") next = near;
+      else next = held >= 6 || this.shot.kind === "collision" ? best : this.shot;
+    }
     else if (held >= MAX_HOLD) next = options.filter((o) => o.key !== cur.key && o.score >= 30).sort((a, b) => b.score - a.score)[0] ?? cur;
-    else if (held >= MIN_HOLD && best.key !== cur.key && best.score > cur.score * 1.3 + 5) next = best;
+    else if (held >= MIN_HOLD && best.key !== cur.key && best.score > cur.score * 1.3 + 5 && !best.cars.every((c) => cur.cars.includes(c))) next = best;
     else next = cur; // same shot, cars and score refreshed
     if (next && (!this.shot || next.key !== this.shot.key)) this.since = t;
     this.shot = next;
