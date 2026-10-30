@@ -113,7 +113,7 @@ if (raceHref) {
   // an incident from the timeline: inputs of everyone involved, then back to the broadcast camera
   const incident = page.locator('button[title^="Incident"]').first();
   if (await incident.count()) {
-    await incident.click();
+    await incident.click({ force: true, timeout: 5000 });
     await page.waitForTimeout(5000);
     await page.screenshot({ path: `${outDir}/race-viewer-incident.jpg`, type: "jpeg", quality: 80 });
     await page.waitForTimeout(16000);
@@ -122,13 +122,13 @@ if (raceHref) {
   // the running order: pick a driver (camera follows, TV strip, race card)
   const row = page.locator('ul[aria-label="Running order"] button').nth(2);
   if (await row.count()) {
-    await row.click();
+    await row.click({ timeout: 5000 });
     await page.waitForTimeout(3000);
     await page.screenshot({ path: `${outDir}/race-viewer-card.jpg`, type: "jpeg", quality: 80 });
   }
   const second = page.locator('ul[aria-label="Running order"] button').nth(3);
   if (await second.count()) {
-    await second.click({ modifiers: ["Shift"] });
+    await second.click({ modifiers: ["Shift"], timeout: 5000 });
     await page.waitForTimeout(3000);
     await page.screenshot({ path: `${outDir}/race-viewer-follow.jpg`, type: "jpeg", quality: 80 });
   }
@@ -136,7 +136,7 @@ if (raceHref) {
   for (const [tab, file] of [["Safety", "safety"], ["Race stats", "stats"], ["Points", "points"]]) {
     const b = page.locator(`nav[aria-label="Panels"] button[title="${tab}"]`);
     if (await b.count()) {
-      await b.click();
+      await b.click({ timeout: 5000 });
       await page.waitForTimeout(800);
       await page.screenshot({ path: `${outDir}/race-viewer-${file}.jpg`, type: "jpeg", quality: 80 });
     }
@@ -155,7 +155,7 @@ if (raceHref) {
   await phone.screenshot({ path: `${outDir}/race-viewer-phone-fresh.jpg`, type: "jpeg", quality: 75 });
   const open = phone.locator('button[aria-label="Show the panels"]');
   if (await open.count()) {
-    await open.click();
+    await open.click({ timeout: 5000 });
     await phone.waitForTimeout(1500);
     await phone.screenshot({ path: `${outDir}/race-viewer-phone-panels.jpg`, type: "jpeg", quality: 75 });
   }
