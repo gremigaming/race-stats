@@ -85,7 +85,6 @@ export class RaceScene {
   private carInfo: Record<string, RaceCar>;
   private frame: (dtMs: number) => Frame;
   private states: CarState[] = [];
-  private now = 0;
   private clockMs = 0;
   private pointers = new Map<number, { x: number; y: number }>();
   private drag: { x: number; y: number; moved: boolean; rotate: boolean } | null = null;
@@ -412,7 +411,6 @@ export class RaceScene {
     this.clockMs += dtMs;
     const f = this.frame(dtMs);
     this.states = f.states;
-    this.now = f.t;
     const byCar = new Map(this.states.map((s) => [s.car, s]));
     const split = this.followSplit(byCar);
     const inFrame = split.inFrame;
