@@ -86,10 +86,16 @@ async function splitOver(url: string, i: number, j: number, tile: number, fading
   const ser = new XMLSerializer();
   const parts: { id: string; svg: string }[] = [];
   for (const g of Array.from(root.querySelectorAll('g[data-kind="tunnel"], g[data-kind="roof"]'))) {
-    // the exporter's id, else the fading structure of that kind whose box reaches this tile
+    // the exporter's id, else the fading structure of that kind and underside height whose box reaches this tile
+    const under = Number(g.getAttribute("data-under"));
     const id =
       g.getAttribute("data-id") ??
-      fading.find((o) => o.kind === g.getAttribute("data-kind") && o.bbox[0] < (i + 1) * tile && o.bbox[2] > i * tile && o.bbox[1] < (j + 1) * tile && o.bbox[3] > j * tile)?.id;
+      fading.find(
+        (o) =>
+          o.kind === g.getAttribute("data-kind") &&
+          (!Number.isFinite(under) || Math.abs(o.under - under) < 0.05) &&
+          o.bbox[0] < (i + 1) * tile && o.bbox[2] > i * tile && o.bbox[1] < (j + 1) * tile && o.bbox[3] > j * tile,
+      )?.id;
     if (!id) continue;
     const one = root.cloneNode(false) as Element;
     if (defs) one.appendChild(defs.cloneNode(true));
