@@ -12,6 +12,7 @@ import type { SurfacePick, TimePick } from "../viewer/look";
 import { IconButton, IncidentDetail, PlayerBar, type IncidentDriverStats, type Trace } from "../viewer/panels";
 import { bits, RaceScene, type CameraMode } from "../viewer/scene";
 import { Empty, PointsPanel, SafetyPanel, Sidebar, StatsPanel, type SafetyRow, type SideTab, type StatsRow } from "../viewer/sidebar";
+import { readShared, ShareMenu } from "../viewer/share";
 import { ChunkStore, type CarState } from "../viewer/store";
 import { TimingTower, type TowerRow } from "../viewer/tower";
 
@@ -481,6 +482,30 @@ function Viewer({ manifest: initial, base, back }: { manifest: RaceManifest; bas
     return () => window.removeEventListener("keydown", onKey);
   }, [toggle, seek]);
 
+  // a shared link (?car=, ?inc=, ?t=): follow those drivers, then open the incident or go to the moment
+  useEffect(() => {
+    const sh = readShared(window.location.search);
+    const s = scene.current;
+    if (!s) return;
+    const cars = sh.cars.filter((c) => manifest.cars[String(c)]).slice(-MAX_SELECTED);
+    if (cars.length) {
+      setSelected(cars);
+      setFocusPick(cars[cars.length - 1]);
+      setCardCar(cars[cars.length - 1]);
+      s.follow(cars);
+    }
+    if (sh.inc !== null) {
+      const at = start + sh.inc;
+      let k = -1;
+      incidents.forEach((i, n) => {
+        if (Math.abs(i.t0 - at) < 3 && (k < 0 || Math.abs(i.t0 - at) < Math.abs(incidents[k].t0 - at))) k = n;
+      });
+      if (k >= 0) pickIncident(k);
+      else seek(at - 3);
+    } else if (sh.t !== null) seek(start + sh.t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // ------------------------------------------------------------------ timing tower
 
   const t = view.t;
@@ -738,6 +763,12 @@ function Viewer({ manifest: initial, base, back }: { manifest: RaceManifest; bas
               </IconButton>
             </span>
             <span className="mx-0.5 h-5 w-px bg-white/10" />
+            <ShareMenu
+              t={t - start}
+              incident={inc ? Math.round((inc.t0 - start) * 10) / 10 : null}
+              cars={mode === "follow" && followed.length ? followed : selected}
+              names={name}
+            />
             <IconButton label={clean ? "Show the panels again (H)" : "Clean view: hide every panel (H)"} active={clean} onClick={() => setClean((c) => !c)}>
               {clean ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
             </IconButton>
