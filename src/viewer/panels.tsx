@@ -90,18 +90,28 @@ export function PlayerBar(props: {
         <IconButton label="Forward 5 s" onClick={() => props.onSeek(t + 5)}>
           <RotateCw className="h-4 w-4" />
         </IconButton>
-        <span className="ml-2 font-mono tabular-nums text-zinc-300">
-          {clock(t - start)} / {clock(end - start)}
+        <span className="ml-1 whitespace-nowrap font-mono tabular-nums text-zinc-300 sm:ml-2">
+          {clock(t - start)}
+          <span className="hidden sm:inline"> / {clock(end - start)}</span>
         </span>
-        {lapStarts.length > 0 && <span className="ml-3 text-zinc-400">Lap {Math.max(1, lap)}</span>}
+        {lapStarts.length > 0 && <span className="ml-2 whitespace-nowrap text-zinc-400 sm:ml-3">Lap {Math.max(1, lap)}</span>}
         {props.buffering && <span className="ml-3 text-xs text-zinc-500">Loading…</span>}
         {props.onSurface && props.onTime && (
-          <div className="ml-auto flex items-center gap-1 text-xs">
+          <div className="ml-auto hidden items-center gap-1 text-xs sm:flex">
             <Cycle label="Track" value={props.surface ?? "auto"} options={["auto", "dry", "wet"]} onChange={props.onSurface} />
             <Cycle label="Light" value={props.time ?? "auto"} options={["auto", "day", "night"]} onChange={props.onTime} />
           </div>
         )}
-        <div className={`${props.onSurface ? "ml-2" : "ml-auto"} flex items-center gap-0.5`}>
+        {/* phones: one button that steps through the speeds */}
+        <button
+          type="button"
+          title="Playback speed"
+          onClick={() => props.onRate(SPEEDS[(SPEEDS.indexOf(rate) + 1) % SPEEDS.length])}
+          className="ml-auto rounded bg-white/10 px-2 py-0.5 font-mono text-xs text-zinc-200 sm:hidden"
+        >
+          {rate}x
+        </button>
+        <div className={`${props.onSurface ? "ml-2" : "ml-auto"} hidden items-center gap-0.5 sm:flex`}>
           {SPEEDS.map((s) => (
             <button
               key={s}

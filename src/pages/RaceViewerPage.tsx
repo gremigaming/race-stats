@@ -700,7 +700,7 @@ function Viewer({ manifest: initial, base, back }: { manifest: RaceManifest; bas
 
   return (
     <div className="fixed inset-0 flex flex-col bg-[#0c0e11] text-zinc-100 md:flex-row">
-      <div className="relative min-h-0 min-w-0 flex-1">
+      <div className="relative min-h-0 min-w-0 flex-1 overflow-hidden">
         <div ref={host} className="absolute inset-0" />
         <div className="pointer-events-none absolute inset-x-0 top-0 flex items-start gap-2 p-2 md:p-3">
           <Link

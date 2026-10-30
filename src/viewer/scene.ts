@@ -93,6 +93,7 @@ export class RaceScene {
   private snapRot = false;
   private ready = false;
   private destroyed = false;
+  private resizer: ResizeObserver | null = null;
 
   mode: CameraMode = "track";
   followCars: number[] = [];
@@ -165,6 +166,9 @@ export class RaceScene {
     c.addEventListener("pointercancel", this.up);
     c.addEventListener("pointerleave", this.leave);
     c.addEventListener("wheel", this.wheel, { passive: false });
+    // Pixi's resizeTo only follows the window: also follow the map area when the side column opens or folds away
+    this.resizer = new ResizeObserver(() => this.app.resize());
+    this.resizer.observe(this.host);
     this.ready = true;
   }
 
@@ -181,6 +185,7 @@ export class RaceScene {
     c.removeEventListener("pointercancel", this.up);
     c.removeEventListener("pointerleave", this.leave);
     c.removeEventListener("wheel", this.wheel);
+    this.resizer?.disconnect();
     this.map.destroy();
     this.app.destroy(true, { children: true });
     clearCarTextures();
