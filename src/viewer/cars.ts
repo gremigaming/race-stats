@@ -30,7 +30,9 @@ export const loadLiveries = () =>
     .then((d: { teams: Record<string, Livery> }) => d.teams)
     .catch(() => ({ generic: GENERIC })));
 
-const TEAM_ORDER = ["mercedes", "ferrari", "red_bull", "williams", "aston_martin", "alpine", "rb", "haas", "mclaren", "sauber", "audi", "cadillac"];
+const TEAM_ORDER = ["mercedes", "ferrari", "red_bull", "williams", "aston_martin", "alpine", "rb", "haas", "mclaren", "sauber"];
+/** The 2026 season pack (ids from 476): Sauber's slot is Audi and Cadillac follows (checked against race files, 25 Oct). */
+const TEAM_ORDER_26 = ["mercedes", "ferrari", "red_bull", "williams", "aston_martin", "alpine", "rb", "haas", "mclaren", "audi", "cadillac"];
 
 /** "Red Bull Racing '26" -> red_bull, "Racing Bulls" -> rb; else the game's team id. The 2026 pack's Sauber races as Audi. */
 export function teamKey(car: RaceCar | undefined): string {
@@ -44,7 +46,7 @@ export function teamKey(car: RaceCar | undefined): string {
   }
   const id = car?.team ?? -1;
   if (id >= 0 && id < TEAM_ORDER.length) return TEAM_ORDER[id];
-  if (id >= 476 && id < 476 + TEAM_ORDER.length) return TEAM_ORDER[id - 476] === "sauber" ? "audi" : TEAM_ORDER[id - 476];
+  if (id >= 476 && id < 476 + TEAM_ORDER_26.length) return TEAM_ORDER_26[id - 476];
   return "generic";
 }
 

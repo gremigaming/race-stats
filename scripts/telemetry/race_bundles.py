@@ -37,7 +37,7 @@ import gmtel  # noqa: E402
 RELEASE = "https://api.github.com/repos/gremigaming/race-stats/releases/tags/telemetry"
 DOWNLOAD = "https://github.com/gremigaming/race-stats/releases/download/telemetry/"
 
-VERSION = 4          # bump to rebuild every bundle
+VERSION = 5          # bump to rebuild every bundle
 KEEP = 40            # newest races published on the site (R2 keeps everything later)
 CHUNK_SECONDS = 10
 CHUNK_HEAD = struct.Struct("<4sBBHd")
@@ -46,9 +46,11 @@ CORNER_M = 150       # "same corner": contacts this close in lap distance
 NORMAL = 0.9         # below 90% of a driver's own normal speed = not back to normal yet
 NEAR_M, NEAR_S = 50, 3.0
 
-# Team ids in the participants packet; the 2026 season pack uses the same order from 476
+# Team ids in the participants packet; the 2026 season pack starts at 476, with Audi in
+# Sauber's slot and Cadillac after it (checked against the race files, 25 Oct)
 TEAMS = ["Mercedes", "Ferrari", "Red Bull Racing", "Williams", "Aston Martin", "Alpine",
-         "Racing Bulls", "Haas", "McLaren", "Sauber", "Audi", "Cadillac"]
+         "Racing Bulls", "Haas", "McLaren", "Sauber"]
+TEAMS_26 = TEAMS[:9] + ["Audi", "Cadillac"]
 
 
 def http_json(url):
@@ -93,9 +95,9 @@ def has_field(path):
 def team_name(tid):
     if tid is None:
         return None
-    for base, suffix in ((476, " '26"), (0, "")):
-        if base <= tid < base + len(TEAMS):
-            return TEAMS[tid - base] + suffix
+    for base, teams, suffix in ((476, TEAMS_26, " '26"), (0, TEAMS, "")):
+        if base <= tid < base + len(teams):
+            return teams[tid - base] + suffix
     return None
 
 
