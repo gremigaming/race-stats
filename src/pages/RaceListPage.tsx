@@ -140,7 +140,7 @@ export function RaceListPage() {
   );
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6">
+    <div className="mx-auto max-w-5xl space-y-6">
       <section className={cn(cardClass, "relative overflow-hidden")}>
         <div className="pointer-events-none absolute -right-10 -top-16 h-56 w-56 rounded-full bg-red-500/10 blur-3xl" />
         <div className="relative flex flex-wrap items-end justify-between gap-4">
@@ -274,7 +274,7 @@ function RaceCard({ race: r, to, badges }: { race: Race; to: string; badges: ("c
     >
       <TrackLayout
         track={r.track}
-        className="pointer-events-none absolute -bottom-3 -right-3 size-32 text-white/[0.07] transition group-hover:text-red-500/25 [&>svg]:size-full"
+        className="pointer-events-none absolute bottom-2 right-2 size-24 text-white/[0.08] transition group-hover:text-red-500/25 [&>svg]:size-full"
       />
       <div className="relative flex items-start justify-between gap-2">
         <div className="min-w-0">
