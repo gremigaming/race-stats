@@ -365,6 +365,10 @@ export class TrackMap {
     }
   }
 
+  stats() {
+    return { photoTiles: this.base.children.length, sharpTiles: this.drawn.size, rasters: rasters.size };
+  }
+
   /** How solid a tunnel or roof is drawn (1 solid .. 0 gone). */
   setRoofAlpha(id: string, alpha: number) {
     this.roofAlpha.set(id, alpha);

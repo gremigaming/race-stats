@@ -125,7 +125,9 @@ export class ChunkStore {
     this.liveKeys.add(k);
     this.chunks.set(k, merged);
     this.grow(c);
-    this.time(k, merged);
+    // a push that only adds newer frames (the usual case, ~5 a second): time just the new rows
+    if (old && old.n && c.t[0] > old.t[old.n - 1]) for (let i = old.n - 1; i + 1 < merged.n; i++) this.timePair(merged, i, merged, i + 1);
+    else this.time(k, merged);
   }
 
   /** The first and last session time the race has chunks for. */

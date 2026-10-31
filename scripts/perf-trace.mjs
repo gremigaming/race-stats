@@ -65,7 +65,7 @@ for (const s of SETUPS) {
   await page.goto(base);
   await page.waitForTimeout(3000);
   const scope = new URL(page.url()).pathname.replace(/^\/race-stats\//, "").split("/")[0] || "f1";
-  await page.goto(`${base}${scope}/race/${encodeURIComponent(uid)}?t=240`);
+  await page.goto(`${base}${scope}/race/${encodeURIComponent(uid)}?t=240&perf`);
   await page.waitForSelector("canvas", { timeout: 30000 });
   await page.waitForTimeout(6000); // map tiles and chunks around the playhead
   const cdp = await ctx.newCDPSession(page);
@@ -85,6 +85,20 @@ for (const s of SETUPS) {
   const heap1 = await page.evaluate(() => performance.memory?.usedJSHeapSize ?? 0);
   const { profile } = await cdp.send("Profiler.stop");
   const { frames, long } = await page.evaluate(() => ({ frames: window.__frames, long: window.__long }));
+  const scene = await page.evaluate(() => window.__scene?.debug?.() ?? null);
+  // what the GPU side costs: the same view for a few seconds without the look pass, then without the map
+  const fpsFor = async (fn) => {
+    await page.evaluate(fn);
+    await page.evaluate(() => ((window.__frames = []), (window.__rec = true)));
+    await page.waitForTimeout(6000);
+    const f = await page.evaluate(() => ((window.__rec = false), window.__frames.map((x) => x[1])));
+    return f.length ? +(1000 / (f.reduce((a, b) => a + b, 0) / f.length)).toFixed(1) : 0;
+  };
+  const ab = {
+    noLook: await fpsFor(() => window.__scene?.debugToggle("look", false)),
+    noLookNoMap: await fpsFor(() => window.__scene?.debugToggle("map", false)),
+  };
+  await page.evaluate(() => (window.__scene?.debugToggle("look", true), window.__scene?.debugToggle("map", true)));
   await page.screenshot({ path: `${outDir}/${s.name.replace(/[^a-z0-9]+/gi, "-")}.jpg`, type: "jpeg", quality: 70 });
   // self time per function
   const dt = new Map();
@@ -118,7 +132,10 @@ for (const s of SETUPS) {
     longTaskMs: Math.round(long.reduce((a, l) => a + l[1], 0)),
     mainThreadBusyPct: total ? Math.round((busy / total) * 100) : null,
     heapGrowthMB: +((heap1 - heap0) / 1e6).toFixed(1),
-    slowFramesAt: slow.slice(0, 40),
+    scene,
+    fpsWithoutLook: ab.noLook,
+    fpsWithoutLookAndMap: ab.noLookNoMap,
+    slowFramesAt: slow.slice(0, 20),
     top,
   };
   results.push(r);
@@ -134,6 +151,10 @@ const md = [
   "| setup | fps | p50 ms | p95 ms | p99 ms | max ms | >20 ms | >33 ms | >50 ms | long tasks (ms) | main thread busy | heap growth |",
   "|---|---|---|---|---|---|---|---|---|---|---|---|",
   ...results.map((r) => `| ${r.setup} | ${r.fps} | ${r.p50} | ${r.p95} | ${r.p99} | ${r.max} | ${r.over20} | ${r.over33} | ${r.over50} | ${r.longTasks} (${r.longTaskMs}) | ${r.mainThreadBusyPct}% | ${r.heapGrowthMB} MB |`),
+  "",
+  "| setup | camera | tiles (photo / sharp) | fps without look pass | fps without look + map |",
+  "|---|---|---|---|---|",
+  ...results.map((r) => `| ${r.setup} | ${r.scene ? `${r.scene.mode} ${r.scene.scale} px/m` : "?"} | ${r.scene ? `${r.scene.photoTiles} / ${r.scene.sharpTiles}` : "?"} | ${r.fpsWithoutLook} | ${r.fpsWithoutLookAndMap} |`),
   "",
   ...results.flatMap((r) => [`**${r.setup}**: top main-thread functions (self ms)`, "", ...r.top.map((t) => `- ${t.ms} ms ${t.fn}`), ""]),
 ].join("\n");

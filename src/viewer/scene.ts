@@ -223,6 +223,15 @@ export class RaceScene {
     else this.app.ticker.stop();
   }
 
+  /** For the frame-time trace: camera, map tiles drawn, and switches for the look pass and the map. */
+  debug() {
+    return { mode: this.mode, scale: +this.cam.scale.toFixed(2), filter: !!this.lookRoot.filters, ...this.map.stats() };
+  }
+  debugToggle(what: "look" | "map", on: boolean) {
+    if (what === "look") this.lookRoot.filters = on ? [this.look] : null;
+    else this.map.view.visible = this.map.over.visible = on;
+  }
+
   // ------------------------------------------------------------------ camera API
 
   get rotation() {

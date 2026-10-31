@@ -351,6 +351,8 @@ function Viewer({ manifest: initial, base, back }: { manifest: RaceManifest; bas
     };
     s.tv();
     scene.current = s;
+    // the frame-time trace (scripts/perf-trace.mjs) reads the camera and toggles layers to measure them
+    if (/[?&]perf\b/.test(window.location.search)) (window as unknown as { __scene?: RaceScene }).__scene = s;
     return () => {
       window.clearTimeout(loadTimer);
       store.onLoad = null;
