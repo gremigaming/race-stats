@@ -78,6 +78,8 @@ export interface RaceIndexEntry {
   fastest?: { name: string; ms: number };
   /** 0-10: incidents per car per lap. */
   chaos?: number;
+  /** Weather codes in the order they happened (0 clear .. 5 storm); more than one = changed mid-race. */
+  weather?: number[];
 }
 
 export interface CarTiming {
@@ -184,11 +186,13 @@ export async function loadRaceIndex(): Promise<(RaceIndexEntry & { base: string 
       return (idx?.races ?? []).map((r) => ({ ...r, base }));
     }),
   );
-  const seen = new Set<string>();
-  return lists
-    .flat()
-    .filter((r) => (seen.has(r.uid) ? false : (seen.add(r.uid), true)))
-    .sort((a, b) => b.started.localeCompare(a.started));
+  // a race in more than one source keeps the first source; picker stats it lacks come from the others
+  const byUid = new Map<string, RaceIndexEntry & { base: string }>();
+  for (const r of lists.flat()) {
+    const had = byUid.get(r.uid);
+    byUid.set(r.uid, had ? { ...r, ...Object.fromEntries(Object.entries(had).filter(([, v]) => v !== undefined)), base: had.base } : r);
+  }
+  return [...byUid.values()].sort((a, b) => b.started.localeCompare(a.started));
 }
 
 /** The manifest of one race and the base URL its chunks come from. */

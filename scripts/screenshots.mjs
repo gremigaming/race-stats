@@ -39,6 +39,7 @@ const shoot = async (name, path, fullPage = false) => {
   console.log(`saved ${name} (${page.url()})`);
 };
 await shoot("dashboard", "");
+await shoot("race-picker", "race", true);
 // the driver search, typed into
 await page.click('button[aria-label="Driver"]');
 await page.keyboard.type("co");

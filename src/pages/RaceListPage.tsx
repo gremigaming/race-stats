@@ -4,6 +4,7 @@ import { Link, useParams, useSearchParams } from "react-router-dom";
 import { cardClass, cardHighlight } from "../components/Card";
 import { TrackFlag } from "../components/TrackFlag";
 import { TrackLayout } from "../components/TrackLayout";
+import { WeatherBackdrop, WeatherChip } from "../components/RaceWeather";
 import { PillSelect } from "../components/ui/PillSelect";
 import { cn } from "../utils/cn";
 import { msToLapTime } from "../utils/format";
@@ -272,6 +273,7 @@ function RaceCard({ race: r, to, badges }: { race: Race; to: string; badges: ("c
         cardHighlight,
       )}
     >
+      <WeatherBackdrop codes={r.weather} />
       <TrackLayout
         track={r.track}
         className="pointer-events-none absolute bottom-2 right-2 size-24 text-white/[0.08] transition group-hover:text-red-500/25 [&>svg]:size-full"
@@ -285,6 +287,7 @@ function RaceCard({ race: r, to, badges }: { race: Race; to: string; badges: ("c
           <div className="mt-0.5 text-xs text-zinc-500">
             {dayLabel(r.started)} · {r.started.slice(11, 16)} · {r.session}
           </div>
+          <WeatherChip codes={r.weather} className="mt-1.5 w-fit" />
         </div>
         <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-red-500/90 text-white opacity-0 shadow-lg transition group-hover:opacity-100">
           <Play className="ml-0.5 size-3.5 fill-current" />
