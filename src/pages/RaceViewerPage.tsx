@@ -160,6 +160,7 @@ function Viewer({ manifest: initial, base, back }: { manifest: RaceManifest; bas
   const [liveries, setLiveries] = useState<Record<string, Livery>>({});
   const [loads, setLoads] = useState(0);
   const [pip, setPip] = useState<number[]>([]);
+  const pipT = useRef(play.current.t);
   const lastUi = useRef(0);
   const lastTrace = useRef(0);
   const incidentsRef = useRef(incidents);
@@ -178,6 +179,7 @@ function Viewer({ manifest: initial, base, back }: { manifest: RaceManifest; bas
         () => incidentsRef.current,
         () => manifestRef.current.events,
         initial.finished,
+        () => manifestRef.current.lap_starts?.[0],
       ),
     [initial],
   );
@@ -264,6 +266,12 @@ function Viewer({ manifest: initial, base, back }: { manifest: RaceManifest; bas
         const on = ev.filter((e) => e.code === "STLG").length;
         if (on && !ev.some((e) => e.code === "LGOT")) lit = { lit: Math.min(5, on), fade: 1 };
       }
+      // dynamic mode on a finished race: every incident replays in the PiP at 0.5x (live races queue them as they come in)
+      if (s.mode === "tv" && manifestRef.current.finished) {
+        const fresh = director.crossed(pipT.current, p.t);
+        if (fresh.length) window.setTimeout(() => setPip((q) => [...q, ...fresh.filter((i) => !q.includes(i))].slice(-3)), 0);
+      }
+      pipT.current = p.t;
       store.want(p.t);
       const states = store.sample(p.t);
       const order = [...states].sort((a, b) => (a.pos || 99) - (b.pos || 99));
@@ -273,7 +281,7 @@ function Viewer({ manifest: initial, base, back }: { manifest: RaceManifest; bas
         if (shot) {
           const idx = shot.cars.map((c) => order.findIndex((o) => o.car === c)).filter((i) => i >= 0);
           const around = idx.length ? [order[Math.min(...idx) - 1], order[Math.max(...idx) + 1]].filter((o): o is CarState => !!o).map((o) => o.car) : [];
-          s.shoot(shot.cars, around);
+          s.shoot(shot.cars, shot.kind === "pack" ? [] : around, shot.kind === "pack");
         }
       }
       // the incident marker: on the track only from the moment of contact

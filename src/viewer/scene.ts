@@ -27,6 +27,8 @@ const MAX_SCALE = 60;
 const DOT_R = 12;
 const FOLLOW_CAP = 500; // metres: followed cars further apart get an edge arrow instead
 const TV_MIN_SCALE = 3.4; // px per metre: the broadcast camera never zooms out so far that cars turn into dots
+const TV_WIDE_MIN_SCALE = 1.6; // the lap 1 pack shot may go wider to keep the whole field in frame
+const FOLLOW_GLIDE_MS = 350; // follow mode: glide onto the car once, then lock it dead centre
 const CUT_MS = 1800; // a broadcast cut: zoom out a little, pan, zoom back in
 const FONT = "Geist Variable, system-ui, sans-serif";
 const TV_EASE_MS = 420; // the broadcast camera glides; follow mode stays tight
@@ -102,6 +104,10 @@ export class RaceScene {
   tvContext: number[] = [];
   private cut: number | null = null;
   private tvScale: number | null = null;
+  /** The director's wide shot (lap 1 pack): may zoom out further than a battle shot. */
+  private tvWide = false;
+  /** When follow mode started (clockMs): a short glide onto the car, then a hard lock. */
+  private followAt = -Infinity;
   /** Smallest frame (metres) the multi-car camera zooms to. */
   minFrame = 60;
   /** In follow mode, turn the map so the (first) followed car points up. */
@@ -210,6 +216,7 @@ export class RaceScene {
     this.minFrame = minFrame;
     this.zoomBias = 1;
     if (this.followCars.length === 1) this.followScale = Math.max(this.cam.scale, 3.5);
+    this.followAt = this.clockMs;
     this.onModeChange(this.mode, this.followCars);
   }
 
@@ -230,7 +237,7 @@ export class RaceScene {
   }
 
   /** A new shot from the director. A car joining or leaving the shot just reframes; only a shot with none of the same cars is a cut. */
-  shoot(cars: number[], context: number[] = []) {
+  shoot(cars: number[], context: number[] = [], wide = false) {
     const shared = cars.some((c) => this.tvCars.includes(c));
     if (!shared && this.tvCars.length) {
       this.cut = this.clockMs;
@@ -238,6 +245,7 @@ export class RaceScene {
     }
     this.tvCars = cars;
     this.tvContext = context;
+    this.tvWide = wide;
   }
 
   zoom(factor: number) {
@@ -341,7 +349,7 @@ export class RaceScene {
   private followSplit(byCar: Map<number, CarState>) {
     const tv = this.mode === "tv";
     const { vw, vh } = this.freeCentre();
-    const cap = tv ? (Math.min(vw, vh) / TV_MIN_SCALE) * 0.8 : FOLLOW_CAP;
+    const cap = tv ? (Math.min(vw, vh) / this.tvMin()) * 0.8 : FOLLOW_CAP;
     const present = (tv ? this.tvCars : this.followCars).map((c) => byCar.get(c)).filter((s): s is CarState => !!s);
     if (present.length <= 1) return { inFrame: present, outside: [] as CarState[] };
     const [first, ...rest] = present;
@@ -382,19 +390,24 @@ export class RaceScene {
     if (this.mode === "tv") {
       if (!inFrame.length) return null;
       const f = this.fit(inFrame, rot, 0.45, 70);
-      let scale = Math.max(f.scale * this.zoomBias, TV_MIN_SCALE);
+      const min = this.tvMin();
+      let scale = Math.max(f.scale * this.zoomBias, min);
       // hold the zoom while the framing only breathes a little: no constant pumping in and out
       if (this.tvScale !== null && Math.abs(scale / this.tvScale - 1) < TV_ZOOM_HOLD) scale = this.tvScale;
       else this.tvScale = scale;
       if (this.cut !== null) {
         const p = (this.clockMs - this.cut) / CUT_MS;
         if (p >= 1) this.cut = null;
-        else scale = Math.max(scale * (1 - 0.18 * Math.sin(Math.PI * p)), TV_MIN_SCALE * 0.9);
+        else scale = Math.max(scale * (1 - 0.18 * Math.sin(Math.PI * p)), min * 0.9);
       }
       return this.centreOnScaled(f, scale / f.scale);
     }
     if (this.snapRot) return { ...this.cam, rot: 0 };
     return null;
+  }
+
+  private tvMin() {
+    return this.tvWide ? TV_WIDE_MIN_SCALE : TV_MIN_SCALE;
   }
 
   private centreOnScaled(f: Cam, bias: number): Cam {
@@ -427,10 +440,19 @@ export class RaceScene {
       const tv = this.mode === "tv";
       const k = 1 - Math.exp(-dtMs / (tv ? (this.cut !== null ? 700 : TV_EASE_MS) : this.mode === "follow" ? 110 : 220));
       const kz = tv ? 1 - Math.exp(-dtMs / (this.cut !== null ? 700 : TV_ZOOM_EASE_MS)) : k;
-      this.cam.x += (aim.x - this.cam.x) * k;
-      this.cam.z += (aim.z - this.cam.z) * k;
+      // one followed car: locked dead centre with no lag at any playback speed (only a short glide when follow starts)
+      const lock = this.mode === "follow" && this.followCars.length === 1 && inFrame.length === 1;
+      const kp = lock ? Math.max(k, Math.min(1, (this.clockMs - this.followAt) / FOLLOW_GLIDE_MS)) : k;
+      this.cam.x += (aim.x - this.cam.x) * kp;
+      this.cam.z += (aim.z - this.cam.z) * kp;
       this.cam.scale *= Math.pow(aim.scale / this.cam.scale, kz);
       this.cam.rot = wrap(this.cam.rot + wrap(aim.rot - this.cam.rot) * k);
+      if (lock && kp >= 1) {
+        // exact: centred for the scale and rotation actually shown this frame, not the ones being eased to
+        const c = this.centreOn(inFrame[0].x, inFrame[0].z, this.cam.scale, this.cam.rot);
+        this.cam.x = c.x;
+        this.cam.z = c.z;
+      }
       if (this.snapRot && Math.abs(this.cam.rot) < 0.002) {
         this.cam.rot = 0;
         this.snapRot = false;
