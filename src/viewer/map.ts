@@ -63,10 +63,36 @@ function image(src: string) {
   return new Promise<HTMLImageElement>((done, fail) => {
     const img = new Image();
     img.crossOrigin = "anonymous";
-    img.onload = () => done(img);
+    // decoded off the main thread before it is drawn
+    img.onload = () => void img.decode().then(() => done(img), () => done(img));
     img.onerror = fail;
     img.src = src;
   });
+}
+
+/**
+ * Rasterised tiles shared by every map on the page (the main view and the incident picture-in-picture
+ * draw the same tiles: rasterised once), freed when the last map lets go.
+ */
+interface Raster {
+  base: Texture;
+  /** The over layer: the solid part first (id ""), then each see-through structure. */
+  over: { id: string; tex: Texture }[];
+  failed: boolean;
+  refs: number;
+}
+const rasters = new Map<string, Raster>();
+const rasterJobs = new Map<string, Promise<Raster | null>>();
+
+/**
+ * Rasterising an SVG tile and uploading it is the heaviest thing the viewer does on the main thread:
+ * at most one per animation frame, so a camera move never stacks several into one long frame.
+ */
+let rasterQueue: Promise<void> = Promise.resolve();
+function rasterTurn(): Promise<void> {
+  const turn = rasterQueue.then(() => new Promise<void>((done) => requestAnimationFrame(() => done())));
+  rasterQueue = turn;
+  return turn;
 }
 
 /** Pixels per metre the sharp layer is drawn at, by zoom. */
@@ -106,6 +132,31 @@ async function splitOver(url: string, i: number, j: number, tile: number, fading
   return { solid: ser.serializeToString(root), parts };
 }
 
+/** A tile on this map: its sprites and the shared raster they show (or its own, when a layer failed). */
+interface Drawn {
+  lod: number;
+  sprite: Sprite;
+  over: Sprite[];
+  raster: string | null;
+  own: Raster | null;
+  i: number;
+  j: number;
+}
+
+function canvasTexture(imgs: (HTMLImageElement | null)[], px: number) {
+  const canvas = document.createElement("canvas");
+  canvas.width = canvas.height = px;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return null;
+  for (const img of imgs) if (img) ctx.drawImage(img, 0, 0, px, px);
+  return Texture.from(canvas);
+}
+
+function release(r: Raster) {
+  r.base.destroy(true);
+  for (const o of r.over) o.tex.destroy(true);
+}
+
 export class TrackMap {
   readonly view = new Container();
   /** Drawn by the scene between the cars below and the cars above. */
@@ -117,8 +168,9 @@ export class TrackMap {
   private base = new Container();
   private sharp = new Container();
   private svg: { root: string; tile: number; layers: string[]; tiles: Map<string, Record<string, string>> } | null = null;
-  private drawn = new Map<string, { lod: number; sprite: Sprite; over: Sprite[] }>();
+  private drawn = new Map<string, Drawn>();
   private busy = new Set<string>();
+  private seen = new Set<string>();
   /** Tiles whose fetch failed, by when they may be tried again. */
   private retryAt = new Map<string, number>();
   private alive = true;
@@ -133,8 +185,11 @@ export class TrackMap {
 
   destroy() {
     this.alive = false;
-    this.view.destroy({ children: true, texture: true });
-    this.over.destroy({ children: true, texture: true });
+    for (const d of this.drawn.values()) this.drop(d);
+    this.drawn.clear();
+    // the photo tiles are this map's own
+    this.view.destroy({ children: true, texture: true, textureSource: true });
+    this.over.destroy({ children: true });
   }
 
   private async loadPhotos(track: string) {
@@ -188,10 +243,12 @@ export class TrackMap {
       level = LODS.findIndex((l) => l >= scale * 0.8);
       if (level < 0) level = LODS.length - 1;
     }
-    const seen = new Set<string>();
+    const seen = this.seen;
+    seen.clear();
     if (level >= 0) {
-      for (let i = Math.floor(x0 / svg.tile); i <= Math.floor(x1 / svg.tile); i++) {
-        for (let j = Math.floor(z0 / svg.tile); j <= Math.floor(z1 / svg.tile); j++) {
+      // one tile beyond the screen edge too: rasterised before it scrolls into view
+      for (let i = Math.floor(x0 / svg.tile) - 1; i <= Math.floor(x1 / svg.tile) + 1; i++) {
+        for (let j = Math.floor(z0 / svg.tile) - 1; j <= Math.floor(z1 / svg.tile) + 1; j++) {
           const key = `${i}_${j}`;
           const files = svg.tiles.get(key);
           if (!files) continue;
@@ -205,7 +262,7 @@ export class TrackMap {
     // tiles far out of view go, so a long session doesn't fill the GPU
     for (const [key, d] of this.drawn) {
       if (seen.has(key)) continue;
-      const [i, j] = key.split("_").map(Number);
+      const { i, j } = d;
       const far = (i + 1) * svg.tile < x0 - 400 || i * svg.tile > x1 + 400 || (j + 1) * svg.tile < z0 - 400 || j * svg.tile > z1 + 400;
       if (far || level < 0) {
         this.drop(d);
@@ -218,63 +275,94 @@ export class TrackMap {
     const svg = this.svg!;
     this.busy.add(key);
     try {
-      const px = Math.round(svg.tile * LODS[level]);
-      const imgs = await Promise.all(
-        svg.layers.filter((l) => files[l] && l !== "over").map((l) => image(`${svg.root}${files[l]}`).catch(() => null)),
-      );
-      const split = files.over ? await splitOver(`${svg.root}${files.over}`, i, j, svg.tile, this.overheads.filter(fades)).catch(() => null) : null;
-      const overImgs = split
-        ? await Promise.all([split.solid, ...split.parts.map((p) => p.svg)].map((t) => svgImage(t).catch(() => null)))
-        : [];
-      if (!this.alive) return;
-      const sprite = this.tileSprite(imgs, px, i, j);
-      if (!sprite) return;
+      const id = `${svg.root}${key}@${level}`;
+      let r = rasters.get(id) ?? null;
+      if (!r) {
+        let job = rasterJobs.get(id);
+        if (!job) {
+          job = this.raster(i, j, files, level).finally(() => rasterJobs.delete(id));
+          rasterJobs.set(id, job);
+        }
+        r = await job;
+        if (r && !r.failed) rasters.set(id, r);
+      }
+      if (!this.alive || !r) return;
+      r.refs++;
+      const sprite = this.tileSprite(r.base, i, j);
       const over: Sprite[] = [];
-      overImgs.forEach((img, k) => {
-        const sp = img && this.tileSprite([img], px, i, j);
-        if (!sp) return;
-        if (k > 0) {
-          const id = split!.parts[k - 1].id;
-          sp.label = id;
-          sp.alpha = this.roofAlpha.get(id) ?? 1;
-          this.roofs.set(id, [...(this.roofs.get(id) ?? []), sp]);
+      for (const o of r.over) {
+        const sp = this.tileSprite(o.tex, i, j);
+        if (o.id) {
+          sp.label = o.id;
+          sp.alpha = this.roofAlpha.get(o.id) ?? 1;
+          this.roofs.set(o.id, [...(this.roofs.get(o.id) ?? []), sp]);
         }
         this.over.addChild(sp);
         over.push(sp);
-      });
+      }
       // a layer that failed to load is shown without it and fetched again in a few seconds
-      const failed = imgs.includes(null) || (!!files.over && (!split || overImgs.includes(null)));
-      if (failed) this.retryAt.set(key, performance.now() + 3000);
+      if (r.failed) this.retryAt.set(key, performance.now() + 3000);
       else this.retryAt.delete(key);
       const old = this.drawn.get(key);
       this.sharp.addChild(sprite);
       if (old) this.drop(old);
-      this.drawn.set(key, { lod: failed ? -1 : level, sprite, over });
+      this.drawn.set(key, { lod: r.failed ? -1 : level, sprite, over, raster: r.failed ? null : id, own: r.failed ? r : null, i, j });
     } finally {
       this.busy.delete(key);
     }
   }
 
-  private tileSprite(imgs: (HTMLImageElement | null)[], px: number, i: number, j: number) {
+  /** Fetch a tile's layers and rasterise them at this level (one canvas per frame at most). */
+  private async raster(i: number, j: number, files: Record<string, string>, level: number): Promise<Raster | null> {
     const svg = this.svg!;
-    const canvas = document.createElement("canvas");
-    canvas.width = canvas.height = px;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return null;
-    for (const img of imgs) if (img) ctx.drawImage(img, 0, 0, px, px);
-    const sprite = new Sprite(Texture.from(canvas));
+    const px = Math.round(svg.tile * LODS[level]);
+    const imgs = await Promise.all(
+      svg.layers.filter((l) => files[l] && l !== "over").map((l) => image(`${svg.root}${files[l]}`).catch(() => null)),
+    );
+    const split = files.over ? await splitOver(`${svg.root}${files.over}`, i, j, svg.tile, this.overheads.filter(fades)).catch(() => null) : null;
+    const overImgs = split
+      ? await Promise.all([split.solid, ...split.parts.map((p) => p.svg)].map((t) => svgImage(t).catch(() => null)))
+      : [];
+    if (!this.alive) return null;
+    await rasterTurn();
+    const base = canvasTexture(imgs, px);
+    if (!base) return null;
+    const over: Raster["over"] = [];
+    for (let k = 0; k < overImgs.length; k++) {
+      const img = overImgs[k];
+      if (!img) continue;
+      await rasterTurn();
+      const tex = canvasTexture([img], px);
+      if (tex) over.push({ id: k > 0 ? split!.parts[k - 1].id : "", tex });
+    }
+    const failed = imgs.includes(null) || (!!files.over && (!split || overImgs.includes(null)));
+    return { base, over, failed, refs: 0 };
+  }
+
+  private tileSprite(tex: Texture, i: number, j: number) {
+    const svg = this.svg!;
+    const sprite = new Sprite(tex);
     sprite.position.set(i * svg.tile, j * svg.tile);
-    sprite.width = svg.tile;
-    sprite.height = svg.tile;
+    sprite.scale.set(svg.tile / tex.width, svg.tile / tex.height);
     return sprite;
   }
 
-  private drop(d: { sprite: Sprite; over: Sprite[] }) {
+  private drop(d: Drawn) {
     for (const sp of d.over) {
       if (sp.label) this.roofs.set(sp.label, (this.roofs.get(sp.label) ?? []).filter((x) => x !== sp));
-      sp.destroy({ texture: true, textureSource: true });
+      sp.destroy();
     }
-    d.sprite.destroy({ texture: true, textureSource: true });
+    d.sprite.destroy();
+    if (d.own) {
+      if (--d.own.refs <= 0) release(d.own);
+    }
+    else if (d.raster) {
+      const r = rasters.get(d.raster);
+      if (r && --r.refs <= 0) {
+        rasters.delete(d.raster);
+        release(r);
+      }
+    }
   }
 
   /** How solid a tunnel or roof is drawn (1 solid .. 0 gone). */

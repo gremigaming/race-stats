@@ -31,6 +31,8 @@ const PACK_DIST = 800; // metres: past this the leader is through the first corn
 
 const overlap = (a: number[], b: number[]) => a.filter((c) => b.includes(c)).length;
 
+const NONE: number[] = [];
+
 export class Director {
   private shot: Shot | null = null;
   private since = 0;
@@ -56,13 +58,14 @@ export class Director {
 
   /** Incidents whose contact happened in (from, to]: the ones to replay in the PiP. Seeks (big jumps) give none. */
   crossed(from: number, to: number): number[] {
-    if (!(to > from) || to - from > 2) return [];
-    const out: number[] = [];
-    this.incidents().forEach((inc, i) => {
-      const at = Math.min(inc.t1, inc.t0 + 3);
-      if (at > from && at <= to) out.push(i);
-    });
-    return out;
+    if (!(to > from) || to - from > 2) return NONE;
+    let out: number[] | null = null;
+    const incs = this.incidents();
+    for (let i = 0; i < incs.length; i++) {
+      const at = Math.min(incs[i].t1, incs[i].t0 + 3);
+      if (at > from && at <= to) (out ??= []).push(i);
+    }
+    return out ?? NONE; // called every frame: no new array when nothing was crossed
   }
 
   /** The shot to show at race time t. `order` runs P1 first; interval(car) is to the car ahead. */

@@ -60,6 +60,8 @@ export interface RaceManifest {
   weather?: [number, number][];
   /** Local time of day at the track: [session time, minutes since midnight] from the first session packet. */
   tod?: [number, number] | null;
+  /** Where the cars drove, [minX, minZ, maxX, maxZ] (recordings, bundle v9+): the full-track frame before any chunk loads. */
+  bounds?: [number, number, number, number] | null;
 }
 
 export interface RaceIndexEntry {

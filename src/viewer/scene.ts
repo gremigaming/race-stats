@@ -6,10 +6,10 @@
  * Cars under a bridge, tunnel or tree are drawn below the map's over layer; a car is above it only
  * while it drives on a structure (its height at or over the structure's underside).
  */
-import { Application, Container, Graphics, Sprite, Text } from "pixi.js";
+import { Application, Container, Graphics, Sprite, Text, type Texture } from "pixi.js";
 import { CAR_LENGTH, CAR_WIDTH, carTexture, clearCarTextures, inkOn, liveryOf, loadLiveries, retainCarTextures, type Livery } from "./cars";
 import type { RaceCar, RaceManifest } from "./format";
-import { applyLook, lookAt, lookFilter, type SurfacePick, type TimePick } from "./look";
+import { lookAt, lookFilter, lookMatrix, type SurfacePick, type TimePick } from "./look";
 import { fades, TrackMap, type Overhead } from "./map";
 import type { CarState } from "./store";
 
@@ -64,6 +64,12 @@ interface Frame {
 export class RaceScene {
   readonly app = new Application();
   private world = new Container();
+  /** Holds the world untransformed, so the look pass covers exactly the screen (no bounds walk of every tile). */
+  private lookRoot = new Container();
+  private lookKey = "";
+  private byCar = new Map<number, CarState>();
+  private carTex = new Map<number, { ppm: number; tex: Texture }>();
+  private frameNo = 0;
   private carLayer = new Container();
   private carsBelow = new Container();
   private look = lookFilter();
@@ -72,10 +78,18 @@ export class RaceScene {
   private chipLayer = new Container();
   private marks = new Graphics();
   private sprites = new Map<number, Sprite>();
+  /** The frame each car was last drawn in. */
+  private seen = new Map<number, number>();
   private roofAlpha = new Map<string, number>();
-  private dots = new Map<number, { c: Container; t: Text; pos: number }>();
+  private dots = new Map<number, { c: Container; t: Text; pos: number; seen: number }>();
   /** Name chips, the slot each one sat in last frame (kept while it stays free) and its leader line. */
-  private chips = new Map<number, { c: Container; slot: number }>();
+  private chips = new Map<number, { c: Container; slot: number; w: number; h: number }>();
+  private show = new Set<number>();
+  private chipOrder: CarState[] = [];
+  private taken = new Float64Array(256);
+  private slotX = new Float64Array(16);
+  private slotY = new Float64Array(16);
+  private leaderLines = false;
   private leaders = new Graphics();
   private arrowText: Text[] = [];
   private liveries: Record<string, Livery> = {};
@@ -94,6 +108,7 @@ export class RaceScene {
   private pinch: { d: number; a: number } | null = null;
   private snapRot = false;
   private ready = false;
+  private running = true;
   private destroyed = false;
   private resizer: ResizeObserver | null = null;
 
@@ -118,6 +133,8 @@ export class RaceScene {
   hovered: number | null = null;
   /** World bounds the "full track" camera shows. */
   bounds: () => [number, number, number, number] | null = () => null;
+  /** Last resort when neither the race nor the map knows its extent: where the cars loaded so far drove. */
+  carBounds: () => [number, number, number, number] | null = () => null;
   /** Screen space (px) covered by controls, kept clear when framing. */
   inset = { top: 0, right: 0, bottom: 0, left: 0 };
   /** The race's weather and time of day, and the viewer's overrides. */
@@ -157,10 +174,11 @@ export class RaceScene {
     this.carsBelow.sortableChildren = true;
     this.dotLayer.sortableChildren = true;
     this.world.addChild(this.map.view, this.carsBelow, this.map.over, this.carLayer);
-    this.world.filters = [this.look];
+    this.lookRoot.addChild(this.world);
+    this.lookRoot.filterArea = this.app.screen;
     this.chipLayer.addChild(this.leaders);
     this.overlay.addChild(this.marks, this.dotLayer, this.chipLayer);
-    this.app.stage.addChild(this.world, this.overlay);
+    this.app.stage.addChild(this.lookRoot, this.overlay);
     this.app.ticker.add((t) => this.tick(t.deltaMS));
     const c = this.app.canvas;
     c.style.touchAction = "none";
@@ -175,6 +193,7 @@ export class RaceScene {
     this.resizer = new ResizeObserver(() => this.app.resize());
     this.resizer.observe(this.host);
     this.ready = true;
+    if (!this.running) this.app.ticker.stop();
   }
 
   destroy() {
@@ -194,6 +213,14 @@ export class RaceScene {
     this.map.destroy();
     this.app.destroy(true, { children: true });
     clearCarTextures();
+  }
+
+  /** Stop or start drawing (a hidden picture-in-picture costs nothing while stopped). */
+  setRunning(on: boolean) {
+    this.running = on;
+    if (!this.ready) return;
+    if (on) this.app.ticker.start();
+    else this.app.ticker.stop();
   }
 
   // ------------------------------------------------------------------ camera API
@@ -277,6 +304,19 @@ export class RaceScene {
 
   private size() {
     return { w: this.app.screen.width, h: this.app.screen.height };
+  }
+
+  private pt = { x: 0, y: 0 };
+  /** toScreen into one shared point (read it before the next call). */
+  private screenPt(x: number, z: number) {
+    const { scale, rot } = this.cam;
+    const dx = (x - this.cam.x) * scale;
+    const dz = (z - this.cam.z) * scale;
+    const c = Math.cos(rot);
+    const s = Math.sin(rot);
+    this.pt.x = this.app.screen.width / 2 + dx * c - dz * s;
+    this.pt.y = this.app.screen.height / 2 + dx * s + dz * c;
+    return this.pt;
   }
 
   toScreen(x: number, z: number) {
@@ -370,7 +410,7 @@ export class RaceScene {
     if (this.snapRot) rot = 0;
     if (this.mode === "follow" && this.autoRotate && inFrame[0]) rot = -inFrame[0].heading - Math.PI / 2;
     if (this.mode === "track") {
-      const b = this.bounds() ?? this.map.bounds;
+      const b = this.bounds() ?? this.map.bounds ?? this.carBounds();
       if (!b) return null;
       const pts = [
         { x: b[0], z: b[1] },
@@ -430,7 +470,10 @@ export class RaceScene {
     const f = this.frame(dtMs);
     this.states = f.states;
     this.now = f.t;
-    const byCar = new Map(this.states.map((s) => [s.car, s]));
+    const byCar = this.byCar;
+    byCar.clear();
+    for (const st of this.states) byCar.set(st.car, st);
+    this.frameNo++;
     const split = this.followSplit(byCar);
     const inFrame = split.inFrame;
     let outside = this.mode === "follow" || this.mode === "tv" ? split.outside : [];
@@ -464,14 +507,15 @@ export class RaceScene {
     this.world.position.set(w / 2, h / 2);
     this.world.scale.set(scale);
     this.world.rotation = rot;
-    // visible world box (rotated view: take the box around all four corners)
-    const corners = [this.toWorld(0, 0), this.toWorld(w, 0), this.toWorld(0, h), this.toWorld(w, h)];
-    const xs = corners.map((p) => p.x);
-    const zs = corners.map((p) => p.z);
-    this.map.update(Math.min(...xs), Math.min(...zs), Math.max(...xs), Math.max(...zs), scale);
+    // visible world box (rotated view: the box around all four corners)
+    const hw = w / 2 / scale;
+    const hh = h / 2 / scale;
+    const ex = Math.abs(Math.cos(rot)) * hw + Math.abs(Math.sin(rot)) * hh;
+    const ez = Math.abs(Math.sin(rot)) * hw + Math.abs(Math.cos(rot)) * hh;
+    this.map.update(x - ex, z - ez, x + ex, z + ez, scale);
     const carPx = CAR_LENGTH * scale;
     const carAlpha = clamp((carPx - 10) / 8, 0, 1); // 10 px long: all dot; 18 px: all car
-    applyLook(this.look, lookAt(this.conditions, this.now, this.surface, this.time));
+    this.updateLook();
     this.drawCars(carAlpha);
     this.drawRoofs(dtMs);
     this.drawDots(1 - carAlpha);
@@ -479,18 +523,34 @@ export class RaceScene {
     this.drawChips(carAlpha, dtMs);
   }
 
+  /** The look pass: recomputed only when the conditions change (by the minute), skipped when it would change nothing. */
+  private updateLook() {
+    const l = lookAt(this.conditions, this.now, this.surface, this.time);
+    const key = `${l.wet}|${Math.round(l.hour * 60)}`;
+    if (key === this.lookKey) return;
+    this.lookKey = key;
+    const m = lookMatrix(l);
+    const identity = m.every((v, i) => Math.abs(v - (i % 6 === 0 ? 1 : 0)) < 1e-4);
+    this.look.matrix = m as typeof this.look.matrix;
+    this.lookRoot.filters = identity ? null : [this.look];
+  }
+
   private livery(car: number) {
     return liveryOf(this.liveries, this.carInfo[String(car)]);
   }
 
   private drawCars(alpha: number) {
-    const live = new Set<number>();
     const ppm = this.cam.scale * (window.devicePixelRatio || 1) > 20 ? 48 : 16;
+    const n = this.frameNo;
     for (const s of this.states) {
-      live.add(s.car);
       let sp = this.sprites.get(s.car);
-      const info = this.carInfo[String(s.car)];
-      const tex = carTexture(this.livery(s.car), info?.number, ppm);
+      let ct = this.carTex.get(s.car);
+      if (!ct || ct.ppm !== ppm) {
+        const info = this.carInfo[String(s.car)];
+        ct = { ppm, tex: carTexture(this.livery(s.car), info?.number, ppm) };
+        this.carTex.set(s.car, ct);
+      }
+      const tex = ct.tex;
       if (!sp) {
         sp = new Sprite(tex);
         sp.anchor.set(0.5);
@@ -498,21 +558,27 @@ export class RaceScene {
       }
       const layer = this.onTop(s) ? this.carLayer : this.carsBelow;
       if (sp.parent !== layer) layer.addChild(sp);
-      if (sp.texture !== tex) sp.texture = tex;
+      if (sp.texture !== tex || sp.scale.x === 1) {
+        // sized by scale once per texture (the width/height setters measure bounds every frame)
+        sp.texture = tex;
+        sp.scale.set(CAR_LENGTH / tex.width, CAR_WIDTH / tex.height);
+      }
       sp.visible = alpha > 0.01;
       sp.alpha = alpha * (s.ghost ? GHOST_ALPHA : 1);
       sp.position.set(s.x, s.z);
       sp.rotation = s.heading;
-      sp.width = CAR_LENGTH;
-      sp.height = CAR_WIDTH;
-      sp.zIndex = 100 - (s.pos || 99); // the leader drawn last, on top
+      const zi = 100 - (s.pos || 99); // the leader drawn last, on top
+      if (sp.zIndex !== zi) sp.zIndex = zi;
+      this.seen.set(s.car, n);
     }
-    for (const [car, sp] of this.sprites) if (!live.has(car)) sp.visible = false;
+    for (const [car, sp] of this.sprites) if (this.seen.get(car) !== n) sp.visible = false;
   }
 
   /** Driving on a bridge: drawn above the over layer. Everywhere else cars pass under trees and roofs. */
   private onTop(s: CarState) {
-    return this.map.overheads.some((o) => inBox(o, s.x, s.z) && s.y >= o.under - 1);
+    const os = this.map.overheads;
+    for (let i = 0; i < os.length; i++) if (inBox(os[i], s.x, s.z) && s.y >= os[i].under - 1) return true;
+    return false;
   }
 
   /** A tunnel roof turns see-through as soon as a car enters that will stay hidden over 0.5 s. */
@@ -520,18 +586,21 @@ export class RaceScene {
     const k = 1 - Math.exp(-dtMs / 80);
     for (const o of this.map.overheads) {
       if (!fades(o)) continue;
-      const inside = this.states.some((s) => inBox(o, s.x, s.z) && s.y < o.under - 1 && o.length_m / Math.max(s.speed / 3.6, 1) > ROOF_MIN_HIDDEN);
+      let inside = false;
+      for (const s of this.states) if (inBox(o, s.x, s.z) && s.y < o.under - 1 && o.length_m / Math.max(s.speed / 3.6, 1) > ROOF_MIN_HIDDEN) inside = true;
       const cur = this.roofAlpha.get(o.id) ?? 1;
-      const next = cur + ((inside ? ROOF_ALPHA : 1) - cur) * k;
+      const want = inside ? ROOF_ALPHA : 1;
+      if (cur === want) continue;
+      const next = Math.abs(want - cur) < 0.002 ? want : cur + (want - cur) * k;
       this.roofAlpha.set(o.id, next);
       this.map.setRoofAlpha(o.id, next);
     }
   }
 
   private drawDots(alpha: number) {
-    const live = new Set<number>();
+    const n = this.frameNo;
+    const vis = alpha > 0.01;
     for (const s of this.states) {
-      live.add(s.car);
       let d = this.dots.get(s.car);
       if (!d) {
         const l = this.livery(s.car);
@@ -550,7 +619,7 @@ export class RaceScene {
         });
         t.anchor.set(0.5);
         c.addChild(g, t);
-        d = { c, t, pos: -1 };
+        d = { c, t, pos: -1, seen: 0 };
         this.dots.set(s.car, d);
         this.dotLayer.addChild(c);
       }
@@ -558,19 +627,28 @@ export class RaceScene {
         d.pos = s.pos;
         d.t.text = s.pos ? `P${s.pos}` : "";
       }
-      const p = this.toScreen(s.x, s.z);
+      d.c.visible = vis;
+      d.seen = n;
+      if (!vis) continue; // zoomed in: dots are hidden, nothing to place
+      const p = this.screenPt(s.x, s.z);
       d.c.position.set(p.x, p.y);
-      d.c.visible = alpha > 0.01;
       d.c.alpha = alpha * (s.ghost ? GHOST_ALPHA : 1);
-      d.c.zIndex = 100 - (s.pos || 99);
+      const zi = 100 - (s.pos || 99);
+      if (d.c.zIndex !== zi) d.c.zIndex = zi;
     }
-    for (const [car, d] of this.dots) if (!live.has(car)) d.c.visible = false;
+    for (const d of this.dots.values()) if (d.seen !== n) d.c.visible = false;
   }
 
   /** The incident marker (pulsing ring) and arrows at the screen edge for what's off screen. */
+  private marksDrawn = false;
   private drawMarks(outside: CarState[]) {
     const g = this.marks;
+    if (!this.marksDrawn && !outside.length && !this.incident) {
+      for (const t of this.arrowText) t.visible = false;
+      return;
+    }
     g.clear();
+    this.marksDrawn = false;
     const { w, h } = this.size();
     const i = this.inset;
     const box = { x0: i.left + 22, y0: i.top + 22, x1: w - i.right - 22, y1: h - i.bottom - 22 };
@@ -581,6 +659,7 @@ export class RaceScene {
       if (p.x < box.x0 || p.x > box.x1 || p.y < box.y0 || p.y > box.y1) {
         arrows.push({ ...p, color: "#ffb020", label: "!" });
       } else {
+        this.marksDrawn = true;
         const pulse = (this.clockMs / 450) % 1;
         const a = inc.strength;
         g.circle(p.x, p.y, 14 + pulse * 30).stroke({ width: 3, color: 0xffb020, alpha: a * (1 - pulse) });
@@ -607,6 +686,7 @@ export class RaceScene {
       const [ax, ay] = tip(14, 0);
       const [bx, by] = tip(10, 2.4);
       const [qx, qy] = tip(10, -2.4);
+      this.marksDrawn = true;
       g.poly([ax, ay, bx, by, qx, qy]).fill(a.color).stroke({ width: 1.5, color: 0x000000, alpha: 0.6 });
       let t = this.arrowText[n];
       if (!t) {
@@ -619,7 +699,7 @@ export class RaceScene {
         this.arrowText[n] = t;
         this.overlay.addChild(t);
       }
-      t.text = a.label;
+      if (t.text !== a.label) t.text = a.label;
       t.visible = true;
       t.position.set(ex - Math.cos(ang) * 14, ey - Math.sin(ang) * 14);
     });
@@ -633,81 +713,99 @@ export class RaceScene {
    * room at all until there is again.
    */
   private drawChips(carAlpha: number, dtMs: number) {
-    const show = new Set(this.selected);
+    const show = this.show;
+    show.clear();
+    for (const c of this.selected) show.add(c);
     if (this.hovered !== null) show.add(this.hovered);
     if (this.mode === "follow") for (const c of this.followCars) show.add(c);
     if (this.mode === "tv") for (const c of this.tvCars) show.add(c);
-    const byCar = new Map(this.states.map((s) => [s.car, s]));
+    const byCar = this.byCar;
     for (const [car, chip] of this.chips) {
       if (!show.has(car) || !byCar.has(car)) {
         chip.c.destroy({ children: true });
         this.chips.delete(car);
       }
     }
-    type Box = { x0: number; x1: number; y0: number; y1: number };
-    const hits = (a: Box, b: Box) => a.x0 < b.x1 && a.x1 > b.x0 && a.y0 < b.y1 && a.y1 > b.y0;
-    const r = carAlpha > 0.5 ? Math.max((CAR_LENGTH * this.cam.scale) / 2, 4) : DOT_R + 1;
-    const taken: Box[] = [];
-    for (const s of this.states) {
-      const p = this.toScreen(s.x, s.z);
-      taken.push({ x0: p.x - r, x1: p.x + r, y0: p.y - r, y1: p.y + r });
-    }
-    const fade = 1 - Math.exp(-dtMs / CHIP_FADE_MS);
     const lines = this.leaders;
-    lines.clear();
-    const order = [...show].map((c) => byCar.get(c)).filter((s): s is CarState => !!s).sort((a, b) => (a.pos || 99) - (b.pos || 99));
+    if (this.leaderLines) lines.clear();
+    this.leaderLines = false;
+    if (!show.size) return;
+    // boxes already taken (every car, then each placed chip): flat x0, y0, x1, y1
+    const r = carAlpha > 0.5 ? Math.max((CAR_LENGTH * this.cam.scale) / 2, 4) : DOT_R + 1;
+    let taken = this.taken;
+    const need = (this.states.length + show.size) * 4;
+    if (taken.length < need) taken = this.taken = new Float64Array(need * 2);
+    let nt = 0;
+    for (const s of this.states) {
+      const p = this.screenPt(s.x, s.z);
+      taken[nt++] = p.x - r;
+      taken[nt++] = p.y - r;
+      taken[nt++] = p.x + r;
+      taken[nt++] = p.y + r;
+    }
+    const free = (x0: number, y0: number, w: number, h: number) => {
+      for (let i = 0; i < nt; i += 4) if (x0 < taken[i + 2] && x0 + w > taken[i] && y0 < taken[i + 3] && y0 + h > taken[i + 1]) return false;
+      return true;
+    };
+    const fade = 1 - Math.exp(-dtMs / CHIP_FADE_MS);
+    const order = this.chipOrder;
+    order.length = 0;
+    for (const c of show) {
+      const st = byCar.get(c);
+      if (st) order.push(st);
+    }
+    order.sort((a, b) => (a.pos || 99) - (b.pos || 99));
+    const sx = this.slotX;
+    const sy = this.slotY;
     for (const s of order) {
       let chip = this.chips.get(s.car);
       if (!chip) {
-        chip = { c: this.makeChip(s.car), slot: 0 };
+        const c = this.makeChip(s.car);
+        chip = { c, slot: 0, w: c.width, h: c.height };
         chip.c.alpha = 0;
         this.chips.set(s.car, chip);
         this.chipLayer.addChild(chip.c);
       }
-      const p = this.toScreen(s.x, s.z);
-      const w = chip.c.width;
-      const h = chip.c.height;
-      const slots: [number, number][] = [];
-      for (const g of [r + 3, r + h + 10]) {
+      const p = this.screenPt(s.x, s.z);
+      const px = p.x;
+      const py = p.y;
+      const { w, h } = chip;
+      // slots: above, below, right, left, then the corners; the same again further out
+      for (let ring = 0; ring < 2; ring++) {
+        const g = ring ? r + h + 10 : r + 3;
         const d = g * 0.72;
-        slots.push(
-          [-w / 2, -g - h],
-          [-w / 2, g],
-          [g, -h / 2],
-          [-g - w, -h / 2],
-          [d, -d - h],
-          [-d - w, -d - h],
-          [d, d],
-          [-d - w, d],
-        );
+        const o = ring * 8;
+        sx[o] = -w / 2; sy[o] = -g - h;
+        sx[o + 1] = -w / 2; sy[o + 1] = g;
+        sx[o + 2] = g; sy[o + 2] = -h / 2;
+        sx[o + 3] = -g - w; sy[o + 3] = -h / 2;
+        sx[o + 4] = d; sy[o + 4] = -d - h;
+        sx[o + 5] = -d - w; sy[o + 5] = -d - h;
+        sx[o + 6] = d; sy[o + 6] = d;
+        sx[o + 7] = -d - w; sy[o + 7] = d;
       }
-      const box = (k: number): Box => {
-        const x0 = Math.round(p.x + slots[k][0]);
-        const y0 = Math.round(p.y + slots[k][1]);
-        return { x0, x1: x0 + w, y0, y1: y0 + h };
-      };
-      const free = (k: number) => {
-        const b = box(k);
-        return !taken.some((t) => hits(b, t));
-      };
-      let slot = free(chip.slot) ? chip.slot : -1;
-      for (let k = 0; slot < 0 && k < slots.length; k++) if (free(k)) slot = k;
+      const fits = (k: number) => free(Math.round(px + sx[k]), Math.round(py + sy[k]), w, h);
+      let slot = fits(chip.slot) ? chip.slot : -1;
+      for (let k = 0; slot < 0 && k < 16; k++) if (fits(k)) slot = k;
       if (slot < 0) {
         chip.c.alpha += (0 - chip.c.alpha) * fade;
         chip.c.visible = chip.c.alpha > 0.02;
         continue;
       }
       chip.slot = slot;
-      const b = box(slot);
-      taken.push(b);
-      chip.c.position.set(b.x0, b.y0);
+      const x0 = Math.round(px + sx[slot]);
+      const y0 = Math.round(py + sy[slot]);
+      taken[nt++] = x0;
+      taken[nt++] = y0;
+      taken[nt++] = x0 + w;
+      taken[nt++] = y0 + h;
+      chip.c.position.set(x0, y0);
       chip.c.alpha += (1 - chip.c.alpha) * fade;
       chip.c.visible = true;
       if (slot >= 8) {
         // the outer ring: a thin line back to the car
-        const cx = clamp(p.x, b.x0, b.x1);
-        const cy = clamp(p.y, b.y0, b.y1);
-        lines.moveTo(p.x, p.y).lineTo(cx, cy).stroke({ width: 1, color: 0xffffff, alpha: 0.35 * chip.c.alpha });
+        lines.moveTo(px, py).lineTo(clamp(px, x0, x0 + w), clamp(py, y0, y0 + h)).stroke({ width: 1, color: 0xffffff, alpha: 0.35 * chip.c.alpha });
+        this.leaderLines = true;
       }
     }
   }

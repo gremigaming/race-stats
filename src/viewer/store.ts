@@ -27,7 +27,7 @@ export interface CarState {
   ghost: boolean;
 }
 
-const PREFETCH = 3; // chunks either side of the playhead
+const PREFETCH = 3; // chunks either side of the playhead (more ahead at higher speeds)
 const KEEP = 60; // chunks kept in memory either side
 /** Timing points per lap: GreMi's 3 sectors x 8 equal parts. */
 export const SPLITS = 24;
@@ -47,7 +47,6 @@ export class ChunkStore {
   private worker: Worker | null = null;
   private nextId = 1;
   private waiting = new Map<number, number>();
-  private all = false;
   /** World bounds of every car seen so far: [minX, minZ, maxX, maxZ]. */
   bounds: [number, number, number, number] | null = null;
   onLoad: (() => void) | null = null;
@@ -90,7 +89,6 @@ export class ChunkStore {
         this.time(k, e.data.chunk);
         this.onLoad?.();
       } else this.failed.add(k);
-      if (this.all) this.wantAll();
     };
     this.worker = w;
     return w;
@@ -217,22 +215,21 @@ export class ChunkStore {
     return mine[1].t - theirs.t;
   }
 
-  /** Ask for the chunks around time t; drop the far ones. */
-  want(t: number) {
+  /**
+   * Ask for the chunks around time t, nearest first and further ahead the faster it plays (about
+   * 30 s of playback ahead), so the clock never waits for a chunk; drop the far ones.
+   */
+  want(t: number, rate = 1) {
     const k = Math.floor(t / this.chunkSeconds);
-    for (let d = 0; d <= PREFETCH; d++) {
-      for (const j of d ? [k + d, k - d] : [k]) this.request(j);
+    const ahead = Math.max(PREFETCH, Math.ceil((Math.abs(rate) * 30) / this.chunkSeconds));
+    this.request(k);
+    for (let d = 1; d <= ahead; d++) {
+      this.request(k + d);
+      if (d <= PREFETCH) this.request(k - d);
     }
     if (this.chunks.size > KEEP * 2) {
       for (const j of this.chunks.keys()) if (Math.abs(j - k) > KEEP) this.chunks.delete(j);
     }
-  }
-
-  /** Load every chunk in the background (finished races: makes the whole-track bounds right). */
-  wantAll() {
-    if (this.names.size > KEEP * 2) return; // long races: only around the playhead
-    this.all = true;
-    for (const j of this.names.keys()) this.request(j);
   }
 
   private request(k: number) {
@@ -287,75 +284,122 @@ export class ChunkStore {
     return [cur, j];
   }
 
-  /** Every car at time t. Empty while the chunk is still loading. */
-  sample(t: number): CarState[] {
-    const at = this.locate(t);
-    if (!at) return [];
-    const [c1, i1] = at;
-    const b = this.step(c1, i1, 1);
-    const a = this.step(c1, i1, -1) ?? at;
-    const [c2, i2] = b ?? at;
-    const d = b ?? at;
-    const n2 = this.step(d[0], d[1], 1) ?? d;
-    const ta = c1.t[i1];
-    const tb = c2.t[i2];
-    const span = tb - ta;
-    const u = span > 1e-4 ? Math.min(1, Math.max(0, (t - ta) / span)) : 0;
-    const out: CarState[] = [];
-    const cars = Math.min(c1.cars, c2.cars);
+  /**
+   * Every car at time t. Empty while the chunk is still loading. Pass `into` (kept by the caller
+   * between frames) to reuse its array and car objects: no garbage per frame, so no GC pauses.
+   */
+  sample(t: number, into?: CarState[]): CarState[] {
+    const out = into ?? [];
+    out.length = 0;
+    const pool = into ? (this.pools.get(into) ?? this.newPool(into)) : null;
+    const f = this.frameAt(t);
+    if (!f) return out;
+    const cars = Math.min(f.c1.cars, f.c2.cars);
     for (let car = 0; car < cars; car++) {
-      const p = i1 * c1.cars + car;
-      const q = i2 * c2.cars + car;
-      if (c1.x[p] === 0 && c1.z[p] === 0) continue;
-      const gone = c2.x[q] === 0 && c2.z[q] === 0;
-      // Hermite curve with tangents from the neighbouring rows (Catmull-Rom on uneven times)
-      const pa = a[1] * a[0].cars + car;
-      const pn = n2[1] * n2[0].cars + car;
-      const tA = a[0].t[a[1]];
-      const tN = n2[0].t[n2[1]];
-      const x = gone ? c1.x[p] : hermite(a[0].x[pa], c1.x[p], c2.x[q], n2[0].x[pn], tA, ta, tb, tN, u);
-      const z = gone ? c1.z[p] : hermite(a[0].z[pa], c1.z[p], c2.z[q], n2[0].z[pn], tA, ta, tb, tN, u);
-      const h1 = c1.heading[p] / 10000;
-      const h2 = gone ? h1 : c2.heading[q] / 10000;
-      const dh = wrapPi(h2 - h1);
-      // heading and inputs follow the same curve as the position, so turns and pedals stay smooth in slow motion
-      const h2u = h1 + dh;
-      const h0u = h1 + wrapPi(a[0].heading[pa] / 10000 - h1);
-      const h3u = h2u + wrapPi(n2[0].heading[pn] / 10000 - h2);
-      const curve = (v0: number, v1: number, v2: number, v3: number) => (gone ? v1 : cubic(v0, v1, v2, v3, tA, ta, tb, tN, u));
-      const input = (col: "throttle" | "brake" | "steer", scale: number, lo: number) =>
-        Math.max(lo, Math.min(1, curve(a[0][col][pa], c1[col][p], c2[col][q], n2[0][col][pn]) / scale));
-      // direction of travel over this row, for the slide angle
-      const mx = c2.x[q] - c1.x[p];
-      const mz = c2.z[q] - c1.z[p];
-      let slip = 0;
-      if (!gone && Math.hypot(mx, mz) > 0.3) {
-        slip = h1 + dh / 2 - Math.atan2(mz, mx); // the chord matches the heading halfway along
-        while (slip > Math.PI) slip -= Math.PI * 2;
-        while (slip < -Math.PI) slip += Math.PI * 2;
+      let s: CarState | undefined = pool ? pool[car] : undefined;
+      if (!s) {
+        s = blank(car);
+        if (pool) pool[car] = s;
       }
-      out.push({
-        car,
-        x,
-        z,
-        y: gone ? c1.y[p] : c1.y[p] + (c2.y[q] - c1.y[p]) * u,
-        heading: curve(h0u, h1, h2u, h3u),
-        speed: Math.max(0, curve(a[0].speed[pa], c1.speed[p], c2.speed[q], n2[0].speed[pn]) / 10),
-        throttle: input("throttle", 255, 0),
-        brake: input("brake", 255, 0),
-        steer: input("steer", 127, -1),
-        gear: (u < 0.5 ? c1 : c2).gear[u < 0.5 ? p : q],
-        lap: c1.lap[p],
-        pos: c1.pos[p],
-        dist: c1.dist[p],
-        off: c1.off[p],
-        slip,
-        ghost: !!this.ghosts[car]?.some(([a, b]) => t >= a && t <= b),
-      });
+      if (this.fill(f, car, t, s)) out.push(s);
     }
     return out;
   }
+
+  /** One car at time t (the input trace), or null. Allocates nothing. */
+  sampleCar(t: number, car: number, into: CarState): CarState | null {
+    const f = this.frameAt(t);
+    if (!f || car >= Math.min(f.c1.cars, f.c2.cars)) return null;
+    return this.fill(f, car, t, into) ? into : null;
+  }
+
+  private pools = new WeakMap<CarState[], CarState[]>();
+  private newPool(key: CarState[]) {
+    const p: CarState[] = [];
+    this.pools.set(key, p);
+    return p;
+  }
+
+  /** The four rows around t (reused object). */
+  private fr = { a: null as unknown as Chunk, ai: 0, c1: null as unknown as Chunk, i1: 0, c2: null as unknown as Chunk, i2: 0, n: null as unknown as Chunk, ni: 0, u: 0 };
+  private frameAt(t: number) {
+    const at = this.locate(t);
+    if (!at) return null;
+    const [c1, i1] = at;
+    const b = this.step(c1, i1, 1);
+    const a = this.step(c1, i1, -1) ?? at;
+    const d = b ?? at;
+    const n2 = this.step(d[0], d[1], 1) ?? d;
+    const f = this.fr;
+    f.a = a[0];
+    f.ai = a[1];
+    f.c1 = c1;
+    f.i1 = i1;
+    f.c2 = d[0];
+    f.i2 = d[1];
+    f.n = n2[0];
+    f.ni = n2[1];
+    const ta = c1.t[i1];
+    const span = f.c2.t[f.i2] - ta;
+    f.u = span > 1e-4 ? Math.min(1, Math.max(0, (t - ta) / span)) : 0;
+    return f;
+  }
+
+  /** One car on the curve through the four rows; false when the car isn't on track. */
+  private fill(f: ChunkStore["fr"], car: number, t: number, s: CarState): boolean {
+    const { c1, c2, u } = f;
+    const A = f.a;
+    const N = f.n;
+    const p = f.i1 * c1.cars + car;
+    const q = f.i2 * c2.cars + car;
+    if (c1.x[p] === 0 && c1.z[p] === 0) return false;
+    const gone = c2.x[q] === 0 && c2.z[q] === 0;
+    // Hermite curve with tangents from the neighbouring rows (Catmull-Rom on uneven times)
+    const pa = f.ai * A.cars + car;
+    const pn = f.ni * N.cars + car;
+    const tA = A.t[f.ai];
+    const ta = c1.t[f.i1];
+    const tb = c2.t[f.i2];
+    const tN = N.t[f.ni];
+    s.car = car;
+    s.x = gone ? c1.x[p] : hermite(A.x[pa], c1.x[p], c2.x[q], N.x[pn], tA, ta, tb, tN, u);
+    s.z = gone ? c1.z[p] : hermite(A.z[pa], c1.z[p], c2.z[q], N.z[pn], tA, ta, tb, tN, u);
+    const h1 = c1.heading[p] / 10000;
+    const h2 = gone ? h1 : c2.heading[q] / 10000;
+    const dh = wrapPi(h2 - h1);
+    // heading and inputs follow the same curve as the position, so turns and pedals stay smooth in slow motion
+    const h2u = h1 + dh;
+    const h0u = h1 + wrapPi(A.heading[pa] / 10000 - h1);
+    const h3u = h2u + wrapPi(N.heading[pn] / 10000 - h2);
+    const w = gone ? 0 : u; // the curve at 0 is the row itself
+    // direction of travel over this row, for the slide angle
+    const mx = c2.x[q] - c1.x[p];
+    const mz = c2.z[q] - c1.z[p];
+    let slip = 0;
+    if (!gone && Math.hypot(mx, mz) > 0.3) slip = wrapPi(h1 + dh / 2 - Math.atan2(mz, mx)); // the chord matches the heading halfway along
+    s.y = gone ? c1.y[p] : c1.y[p] + (c2.y[q] - c1.y[p]) * u;
+    s.heading = cubic(h0u, h1, h2u, h3u, tA, ta, tb, tN, w);
+    s.speed = Math.max(0, cubic(A.speed[pa], c1.speed[p], c2.speed[q], N.speed[pn], tA, ta, tb, tN, w) / 10);
+    s.throttle = Math.max(0, Math.min(1, cubic(A.throttle[pa], c1.throttle[p], c2.throttle[q], N.throttle[pn], tA, ta, tb, tN, w) / 255));
+    s.brake = Math.max(0, Math.min(1, cubic(A.brake[pa], c1.brake[p], c2.brake[q], N.brake[pn], tA, ta, tb, tN, w) / 255));
+    s.steer = Math.max(-1, Math.min(1, cubic(A.steer[pa], c1.steer[p], c2.steer[q], N.steer[pn], tA, ta, tb, tN, w) / 127));
+    s.gear = u < 0.5 ? c1.gear[p] : c2.gear[q];
+    s.lap = c1.lap[p];
+    s.pos = c1.pos[p];
+    s.dist = c1.dist[p];
+    s.off = c1.off[p];
+    s.slip = slip;
+    let ghost = false;
+    const g = this.ghosts[car];
+    if (g) for (let k = 0; k < g.length; k++) if (t >= g[k][0] && t <= g[k][1]) ghost = true;
+    s.ghost = ghost;
+    return true;
+  }
 }
+
+const blank = (car: number): CarState => ({
+  car, x: 0, z: 0, y: 0, heading: 0, speed: 0, throttle: 0, brake: 0, steer: 0, gear: 0, lap: 0, pos: 0, dist: 0, off: 0, slip: 0, ghost: false,
+});
 
 /** Two chunks of the same 10 s as one: every frame of both in time order (a frame in both is kept once). */
 export function mergeChunks(a: Chunk, b: Chunk): Chunk {

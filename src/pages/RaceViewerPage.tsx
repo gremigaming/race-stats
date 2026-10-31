@@ -25,6 +25,10 @@ const TOWER_SPACE = 252; // the timing tower on the left (wide screens)
 const LIGHT_STEP = 1; // seconds between start lights coming on
 const STATUS: Record<number, string> = { 4: "DNF", 5: "DSQ", 6: "NC", 7: "DNF" };
 const SIDE_KEY = "race-viewer-side";
+const UI_MS = 100; // panels refresh at 10 Hz; the map at the display's frame rate
+const TRACE_N = 41;
+const TRACE_STEP = 0.25;
+const byPos = (a: CarState, b: CarState) => (a.pos || 99) - (b.pos || 99);
 
 /** The right-hand column's last state (open, tab), remembered per browser. */
 function readSide(): { open: boolean; tab: SideTab } {
@@ -162,9 +166,9 @@ function Viewer({ manifest: initial, base, back }: { manifest: RaceManifest; bas
   const [liveries, setLiveries] = useState<Record<string, Livery>>({});
   const [loads, setLoads] = useState(0);
   const [pip, setPip] = useState<number[]>([]);
+  const [pipRun, setPipRun] = useState(0);
   const pipT = useRef(play.current.t);
   const lastUi = useRef(0);
-  const lastTrace = useRef(0);
   const incidentsRef = useRef(incidents);
   incidentsRef.current = incidents;
   const manifestRef = useRef(manifest);
@@ -229,7 +233,33 @@ function Viewer({ manifest: initial, base, back }: { manifest: RaceManifest; bas
     const el = host.current;
     if (!el) return;
     const p = play.current;
-    store.wantAll();
+    const pool = { states: [] as CarState[], order: [] as CarState[], marker: { x: 0, z: 0, strength: 1 } };
+    // the input trace: 41 points 0.25 s apart, kept in a ring so each refresh only samples the new ones
+    const ring = { car: -1, slot: new Float64Array(TRACE_N).fill(NaN), th: new Float32Array(TRACE_N), br: new Float32Array(TRACE_N), st: new Float32Array(TRACE_N) };
+    const one = { car: 0 } as CarState;
+    const traceOf = (t: number, car: number | null): Trace | undefined => {
+      if (car === null) return undefined;
+      if (ring.car !== car) {
+        ring.car = car;
+        ring.slot.fill(NaN);
+      }
+      const last = Math.floor(t / TRACE_STEP);
+      const tr: Trace = { throttle: [], brake: [], steer: [] };
+      for (let slot = last - TRACE_N + 1; slot <= last; slot++) {
+        const i = ((slot % TRACE_N) + TRACE_N) % TRACE_N;
+        if (ring.slot[i] !== slot) {
+          const x = store.sampleCar(slot * TRACE_STEP, car, one);
+          ring.th[i] = x?.throttle ?? 0;
+          ring.br[i] = x?.brake ?? 0;
+          ring.st[i] = x?.steer ?? 0;
+          if (x) ring.slot[i] = slot; // a chunk still loading is asked again next time
+        }
+        tr.throttle.push(ring.th[i]);
+        tr.brake.push(ring.br[i]);
+        tr.steer.push(ring.st[i]);
+      }
+      return tr;
+    };
     let loadTimer = 0;
     store.onLoad = () => {
       if (!loadTimer) loadTimer = window.setTimeout(() => ((loadTimer = 0), setLoads((n) => n + 1)), 300);
@@ -266,9 +296,13 @@ function Viewer({ manifest: initial, base, back }: { manifest: RaceManifest; bas
         if (fresh.length) window.setTimeout(() => setPip((q) => [...q, ...fresh.filter((i) => !q.includes(i))].slice(-3)), 0);
       }
       pipT.current = p.t;
-      store.want(p.t);
-      const states = store.sample(p.t);
-      const order = [...states].sort((a, b) => (a.pos || 99) - (b.pos || 99));
+      store.want(p.t, p.playing ? p.rate : 1);
+      // pooled: the same arrays and car objects every frame (no garbage, so no GC hitches)
+      const states = store.sample(p.t, pool.states);
+      const order = pool.order;
+      order.length = 0;
+      for (const st of states) order.push(st);
+      order.sort(byPos);
       // the broadcast camera
       if (s.mode === "tv") {
         const shot = director.update(p.t, order, (car) => intervalIn(order, car, p.t));
@@ -280,10 +314,15 @@ function Viewer({ manifest: initial, base, back }: { manifest: RaceManifest; bas
       }
       // the incident marker: on the track only from the moment of contact
       const incs = incidentsRef.current;
-      const k = incs.findIndex((i) => p.t >= i.t0 && p.t <= i.t1 + 1);
+      let k = -1;
+      for (let n = 0; n < incs.length && k < 0; n++) if (p.t >= incs[n].t0 && p.t <= incs[n].t1 + 1) k = n;
       if (k >= 0) {
         const i = incs[k];
-        s.incident = { x: i.x, z: i.z, strength: p.t > i.t1 + 0.3 ? 1 - (p.t - i.t1 - 0.3) / 0.7 : 1 };
+        const m = pool.marker;
+        m.x = i.x;
+        m.z = i.z;
+        m.strength = p.t > i.t1 + 0.3 ? 1 - (p.t - i.t1 - 0.3) / 0.7 : 1;
+        s.incident = m;
       } else s.incident = null;
       // an opened incident has played (or the user went elsewhere): back to what the camera did before
       const R = restore.current;
@@ -291,31 +330,19 @@ function Viewer({ manifest: initial, base, back }: { manifest: RaceManifest; bas
         const inc = incs[R.inc];
         if (!inc || p.t > inc.t1 + 3 || p.t < inc.t0 - 6) window.setTimeout(() => endIncidentRef.current(), 0);
       }
-      if (now - lastUi.current > 33) {
+      // the panels (tower, bar, side column) refresh at 10 Hz from a copy; the map itself runs every frame
+      if (now - lastUi.current > UI_MS) {
         lastUi.current = now;
-        setView((v) => {
-          let trace = v.trace;
-          const car = focusRef.current;
-          if (now - lastTrace.current > 150) {
-            lastTrace.current = now;
-            trace = undefined;
-            if (car !== null) {
-              const tr: Trace = { throttle: [], brake: [], steer: [] };
-              for (let k2 = 40; k2 >= 0; k2--) {
-                const x = store.sample(p.t - k2 * 0.25).find((c) => c.car === car);
-                tr.throttle.push(x?.throttle ?? 0);
-                tr.brake.push(x?.brake ?? 0);
-                tr.steer.push(x?.steer ?? 0);
-              }
-              trace = tr;
-            }
-          }
-          return { t: p.t, states, rot: s.rotation, trace, lights: lit };
-        });
+        const snap = states.map((st) => ({ ...st }));
+        const trace = traceOf(p.t, focusRef.current);
+        const rot = s.rotation;
+        setView({ t: p.t, states: snap, rot, trace, lights: lit });
       }
       return { t: p.t, states };
     });
-    s.bounds = () => store.bounds;
+    // the race's own extent (recordings), else the map's: fixed, so the full-track view never creeps as chunks load
+    s.bounds = () => manifestRef.current.bounds ?? null;
+    s.carBounds = () => store.bounds;
     s.conditions = initial;
     s.onPick = (car, add) => pickRef.current(car, add);
     s.onModeChange = (m, cars) => {
@@ -824,21 +851,25 @@ function Viewer({ manifest: initial, base, back }: { manifest: RaceManifest; bas
             />
           </div>
         )}
-        {pipInc && !clean && (
+        {!clean && (
           <div className="pointer-events-none absolute right-2 flex justify-end md:right-3" style={{ bottom: BAR_SPACE + 8 }}>
             <IncidentPip
-              key={pip[0]}
+              run={pipRun}
               incident={pipInc}
               store={store}
               cars={manifest.cars}
               track={manifest.track}
-              label={pipInc.drivers
+              label={(pipInc?.drivers ?? [])
                 .filter((d) => d.role === "contact")
                 .map((d) => name(d.car))
                 .join(" & ")}
-              onDone={() => setPip((q) => q.slice(1))}
+              onDone={() => {
+                setPipRun((n) => n + 1);
+                setPip((q) => q.slice(1));
+              }}
               onOpen={() => {
                 const k = pip[0];
+                setPipRun((n) => n + 1);
                 setPip([]);
                 pickIncident(k);
               }}

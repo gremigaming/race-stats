@@ -214,7 +214,10 @@ export function StartLights({ lit, fade }: { lit: number; fade: number }) {
  * while the main camera stays on the live race, then closes. Click it to watch it big.
  */
 export function IncidentPip(props: {
-  incident: RaceIncident;
+  /** Undefined: nothing to replay, the view hides and stops drawing (kept for the next one: no new WebGL context per incident). */
+  incident: RaceIncident | undefined;
+  /** Changes for every new replay (the same incident may play again after a seek). */
+  run: number;
   store: ChunkStore;
   cars: Record<string, RaceCar>;
   track: string;
@@ -226,32 +229,53 @@ export function IncidentPip(props: {
   const done = useRef(props.onDone);
   done.current = props.onDone;
   const { incident: inc, store } = props;
+  const scene = useRef<RaceScene | null>(null);
+  const clip = useRef({ t: 0, end: 0, finished: true });
+  // one scene for as long as the race is open
   useEffect(() => {
     const el = host.current;
     if (!el) return;
-    let t = inc.t0 - 3;
-    const end = inc.t1 + 3;
-    let finished = false;
+    const pool: CarState[] = [];
+    const c = clip.current;
     const s = new RaceScene(el, props.cars, props.track, (dtMs) => {
-      if (store.loaded(t)) t += (dtMs / 1000) * 0.5;
-      store.want(t);
-      if (t >= end && !finished) {
-        finished = true;
+      if (c.finished) return { t: c.t, states: pool };
+      if (store.loaded(c.t)) c.t += (dtMs / 1000) * 0.5;
+      store.want(c.t, 0.5);
+      if (c.t >= c.end && !c.finished) {
+        c.finished = true;
         window.setTimeout(() => done.current(), 0);
       }
-      return { t, states: store.sample(Math.min(t, end)) };
+      return { t: c.t, states: store.sample(Math.min(c.t, c.end), pool) };
     });
+    scene.current = s;
+    return () => {
+      scene.current = null;
+      s.destroy();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [store]);
+  // each replay: 3 s before to 3 s after, at half speed, locked on everyone involved
+  useEffect(() => {
+    const s = scene.current;
+    const c = clip.current;
+    if (!s) return;
+    if (!inc) {
+      c.finished = true;
+      s.setRunning(false);
+      return;
+    }
+    c.t = inc.t0 - 3;
+    c.end = inc.t1 + 3;
+    c.finished = false;
     s.follow(
       inc.drivers.map((d) => d.car),
       45,
     );
     s.incident = Number.isFinite(inc.x) ? { x: inc.x, z: inc.z, strength: 1 } : null;
-    return () => s.destroy();
-    // one view per incident
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [inc]);
+    s.setRunning(true);
+  }, [inc, props.run]);
   return (
-    <div className="pointer-events-auto w-80 max-w-[60vw] overflow-hidden rounded-lg border-2 border-amber-400/70 bg-[#0c0e11] shadow-2xl">
+    <div className={`pointer-events-auto w-80 max-w-[60vw] overflow-hidden rounded-lg border-2 border-amber-400/70 bg-[#0c0e11] shadow-2xl ${inc ? "" : "hidden"}`}>
       <div className="flex items-center gap-2 bg-amber-400/15 px-2 py-1 text-xs">
         <span className="h-2 w-2 rotate-45 rounded-[1px] bg-amber-400" />
         <span className="min-w-0 flex-1 truncate font-semibold">Incident replay · {props.label}</span>

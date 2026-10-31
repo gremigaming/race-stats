@@ -36,7 +36,7 @@ import gmtel  # noqa: E402
 RELEASE = "https://api.github.com/repos/gremigaming/race-stats/releases/tags/telemetry"
 DOWNLOAD = "https://github.com/gremigaming/race-stats/releases/download/telemetry/"
 
-VERSION = 8          # bump to rebuild every bundle
+VERSION = 9          # bump to rebuild every bundle
 KEEP = 40            # newest races published on the site (R2 keeps everything later)
 CHUNK_SECONDS = 10
 CHUNK_HEAD = struct.Struct("<4sBBHd")
@@ -531,6 +531,10 @@ def bundle(path, rid, outdir):
             f.write(gzip.compress(encode_chunk(k * CHUNK_SECONDS, by[k]), 9))
         chunks.append(name)
     seen = {i for _, c in frames for i in c}
+    # where the cars drove: the viewer's full-track frame, known before any chunk loads
+    xs = [v[0] for _, c in frames for v in c.values() if v[0] or v[1]]
+    zs = [v[1] for _, c in frames for v in c.values() if v[0] or v[1]]
+    bounds = [round(min(xs), 1), round(min(zs), 1), round(max(xs), 1), round(max(zs), 1)] if xs else None
     ghost_windows = ghosts([(t, a, b) for t, c in frames for a, b in overlaps(c)], sess.collisions)
     cars = {str(i): {"name": shown_name(p), "team": p.get("team"), "team_name": team_name(p.get("team")),
                      "number": p.get("race_number"), "ai": bool(p.get("ai"))}
@@ -548,7 +552,7 @@ def bundle(path, rid, outdir):
                 "lap_starts": lap_starts(frames),
                 "timing": {str(i): v for i, v in timing_of(sess).items() if str(i) in cars},
                 "cars": cars, "events": events, "finished": True, "source": "recording", "bundle": VERSION,
-                "ghosts": ghost_windows, "weather": sess.weather, "tod": sess.tod,
+                "ghosts": ghost_windows, "weather": sess.weather, "tod": sess.tod, "bounds": bounds,
                 "incidents": incidents(frames, sess.collisions, sess.info.get("track_length", 0), ghost_windows)}
     add_surfaces(sess, manifest["incidents"])
     with open(os.path.join(rdir, "manifest.json"), "w") as f:
