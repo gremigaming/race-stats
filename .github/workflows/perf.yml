@@ -1,0 +1,47 @@
+name: Race viewer frame-time trace
+
+# Plays one race in the viewer in a few setups (desktop, 4x speed, slow CPU, phone) and reports
+# frame times, long tasks and the hottest functions (scripts/perf-trace.mjs).
+on:
+  workflow_dispatch:
+    inputs:
+      race:
+        description: "Recording in the telemetry release"
+        default: "2026-10-30_15-51-13_Miami_Race.gmtel.gz"
+      seconds:
+        description: "Seconds per setup"
+        default: "30"
+
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile || pnpm install --no-frozen-lockfile
+      - run: node scripts/build-league-data.mjs
+      - name: One race bundle
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python3 scripts/telemetry/race_bundles.py /tmp/telemetry-cache --only "${{ inputs.race }}"
+      - name: Build (not minified, so the profile has names)
+        env:
+          VITE_BASE_PATH: /race-stats/
+          VITE_APP_NAME: GreMi Gang Race Stats
+          VITE_DISABLE_ANALYTICS: "true"
+          VITE_SKIP_API: "true"
+        run: pnpm exec vite build --minify false
+      - name: Trace
+        run: |
+          mkdir -p /tmp/shots && cd /tmp/shots && npm init -y >/dev/null && npm i --silent playwright@1
+          uid="$(basename "${{ inputs.race }}" .gmtel.gz)"
+          PW_CHANNEL=chrome node "$GITHUB_WORKSPACE/scripts/perf-trace.mjs" "$GITHUB_WORKSPACE/dist" "$uid" /tmp/perf "${{ inputs.seconds }}"
+          cat /tmp/perf/perf.md >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: perf
+          path: /tmp/perf
