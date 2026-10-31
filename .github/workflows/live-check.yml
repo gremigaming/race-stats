@@ -24,6 +24,7 @@ jobs:
           bad = 0
           for name, url in [
               ("live status", "https://live.gremigaming.com/status"),
+              ("live sessions", "https://live.gremigaming.com/live.json"),
               ("replays index", "https://replays.gremigaming.com/index.json"),
               ("maps index (R2)", "https://replays.gremigaming.com/maps/index.json"),
               ("maps site", "https://maps.gremigaming.com/index.json"),
@@ -48,4 +49,24 @@ jobs:
                   except Exception as e:
                       print(f"    not JSON: {e}")
           print(f"\n{bad} problem(s)")
+          PY
+      - name: Live viewer socket (wss://live.gremigaming.com/watch)
+        run: |
+          python3 -m pip install --quiet "websockets>=13,<16"
+          python3 - <<'PY'
+          import asyncio, json, time
+          from websockets.asyncio.client import connect
+          async def main():
+              t = time.time()
+              async with connect("wss://live.gremigaming.com/watch", open_timeout=15) as ws:
+                  first = json.loads(await asyncio.wait_for(ws.recv(), 10))
+                  print(f"OK  socket answered in {round((time.time() - t) * 1000)} ms: {first['type']}, {len(first['sessions'])} live")
+                  for s in first["sessions"][:1]:
+                      await ws.send(json.dumps({"watch": s["uid"]}))
+                      frames, start = 0, time.time()
+                      while time.time() - start < 5:
+                          msg = await asyncio.wait_for(ws.recv(), 5)
+                          frames += isinstance(msg, bytes)
+                      print(f"    {s['track']} {s['session']}: {frames} pushes in 5 s")
+          asyncio.run(main())
           PY
