@@ -137,7 +137,8 @@ if (raceHref) {
   for (const [tab, file] of [["Safety", "safety"], ["Race stats", "stats"], ["Points", "points"]]) {
     const b = page.locator(`nav[aria-label="Panels"] button[title="${tab}"]`);
     if (await b.count()) {
-      await b.click({ timeout: 5000 });
+      // a busy viewer can hold Playwright's post-click wait past the timeout: a missing tab shot must not drop all previews
+      if (!(await b.click({ timeout: 5000 }).then(() => true, () => false))) continue;
       await page.waitForTimeout(800);
       await page.screenshot({ path: `${outDir}/race-viewer-${file}.jpg`, type: "jpeg", quality: 80 });
     }
