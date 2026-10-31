@@ -236,6 +236,11 @@ export class TrackMap {
 
   /** Called every frame with the visible world rectangle and the zoom (pixels per metre). */
   update(x0: number, z0: number, x1: number, z1: number, scale: number) {
+    // photo tiles outside the screen aren't drawn (each is its own texture: fewer draw calls)
+    for (const sp of this.base.children) {
+      const vis = sp.x + TILE > x0 && sp.x < x1 && sp.y + TILE > z0 && sp.y < z1;
+      if (sp.visible !== vis) sp.visible = vis;
+    }
     const svg = this.svg;
     if (!svg) return;
     let level = -1;
@@ -259,10 +264,16 @@ export class TrackMap {
         }
       }
     }
-    // tiles far out of view go, so a long session doesn't fill the GPU
+    // tiles far out of view go, so a long session doesn't fill the GPU; kept ones outside the screen aren't drawn
+    const T = svg.tile;
     for (const [key, d] of this.drawn) {
-      if (seen.has(key)) continue;
       const { i, j } = d;
+      const vis = (i + 1) * T > x0 && i * T < x1 && (j + 1) * T > z0 && j * T < z1;
+      if (d.sprite.visible !== vis) {
+        d.sprite.visible = vis;
+        for (const sp of d.over) sp.visible = vis;
+      }
+      if (seen.has(key)) continue;
       const far = (i + 1) * svg.tile < x0 - 400 || i * svg.tile > x1 + 400 || (j + 1) * svg.tile < z0 - 400 || j * svg.tile > z1 + 400;
       if (far || level < 0) {
         this.drop(d);
@@ -366,7 +377,9 @@ export class TrackMap {
   }
 
   stats() {
-    return { photoTiles: this.base.children.length, sharpTiles: this.drawn.size, rasters: rasters.size };
+    let shown = 0;
+    for (const d of this.drawn.values()) if (d.sprite.visible) shown++;
+    return { photoTiles: this.base.children.filter((c) => c.visible).length, sharpTiles: shown, kept: this.drawn.size, rasters: rasters.size };
   }
 
   /** How solid a tunnel or roof is drawn (1 solid .. 0 gone). */
