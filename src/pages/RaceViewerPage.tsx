@@ -14,6 +14,8 @@ import { bits, RaceScene, type CameraMode } from "../viewer/scene";
 import { Empty, PointsPanel, SafetyPanel, Sidebar, StatsPanel, type SafetyRow, type SideTab, type StatsRow } from "../viewer/sidebar";
 import { readShared, ShareMenu } from "../viewer/share";
 import { ChunkStore, type CarState } from "../viewer/store";
+import { useLiveFeed } from "../viewer/live";
+import { GoLive, LiveNow } from "../viewer/LiveTab";
 import { TimingTower, type TowerRow } from "../viewer/tower";
 
 const MAX_SELECTED = 4;
@@ -188,20 +190,12 @@ function Viewer({ manifest: initial, base, back }: { manifest: RaceManifest; bas
     void loadLiveries().then(setLiveries);
   }, []);
 
-  // a race still running: pick up new chunks every few seconds (phase 3 swaps this for the socket)
-  useEffect(() => {
-    if (initial.finished) return;
-    const timer = window.setInterval(async () => {
-      const r = await loadManifest(initial.uid);
-      if (r) {
-        store.addNames(r.manifest.chunks);
-        if (r.manifest.ghosts) store.ghosts = r.manifest.ghosts;
-        if (r.manifest.track_length) store.lapLength = r.manifest.track_length;
-        setManifest(r.manifest);
-      }
-    }, 5000);
-    return () => window.clearInterval(timer);
-  }, [initial, store]);
+  // a race still running: every new frame pushed by the live server, the clock ~1-2 s behind the game
+  const live = useLiveFeed(initial, store, setManifest, (t) => {
+    play.current.t = t;
+    play.current.playing = true;
+    setPlaying(true);
+  });
 
   // live races: a new incident pops up as a picture-in-picture replay
   const seenInc = useRef(incidents.length);
@@ -252,7 +246,7 @@ function Viewer({ manifest: initial, base, back }: { manifest: RaceManifest; bas
         else lights.current = null;
       }
       const holding = !!L && now - L.at < L.out;
-      if (p.playing && !holding && store.loaded(p.t)) {
+      if (!live.current?.advance(p, dtMs) && p.playing && !holding && store.loaded(p.t)) {
         p.t += (dtMs / 1000) * p.rate;
         if (p.t >= end) {
           p.t = end;
@@ -722,13 +716,14 @@ function Viewer({ manifest: initial, base, back }: { manifest: RaceManifest; bas
             <div className="truncate text-xs font-semibold md:text-sm">
               {manifest.track}
               <span className="hidden sm:inline"> · {manifest.session}</span>
-              {!manifest.finished && <span className="ml-2 font-semibold text-red-400 sm:hidden">LIVE</span>}
+              {!manifest.finished && <GoLive className="ml-2 sm:hidden" edge={!!live.current?.atEdge(play.current)} onClick={() => live.current?.goLive(play.current)} />}
             </div>
             <div className="hidden text-xs text-zinc-500 sm:block">
               {date}
-              {!manifest.finished && <span className="ml-2 font-semibold text-red-400">LIVE</span>}
+              {!manifest.finished && <GoLive className="ml-2" edge={!!live.current?.atEdge(play.current)} onClick={() => live.current?.goLive(play.current)} />}
             </div>
           </div>
+          <LiveNow current={manifest.uid} base={back} />
           <div className="pointer-events-auto ml-auto flex shrink-0 items-center justify-end gap-0.5 rounded-lg border border-white/10 bg-[#0c0e11]/85 p-0.5 backdrop-blur">
             <IconButton label="Broadcast camera: follows the action" active={mode === "tv"} onClick={() => scene.current?.tv()}>
               <Tv className="h-4 w-4" />

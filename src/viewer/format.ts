@@ -80,6 +80,8 @@ export interface RaceIndexEntry {
   chaos?: number;
   /** Weather codes in the order they happened (0 clear .. 5 storm); more than one = changed mid-race. */
   weather?: number[];
+  /** The game's session uid (16 hex digits), on site bundles: the live server's uid for the same race. */
+  session_uid?: string;
 }
 
 export interface CarTiming {
@@ -188,16 +190,21 @@ export async function loadRaceIndex(): Promise<(RaceIndexEntry & { base: string 
   );
   // a race in more than one source keeps the first source; picker stats it lacks come from the others
   const byUid = new Map<string, RaceIndexEntry & { base: string }>();
+  // the site's bundle of a race the live server published carries its session uid: the same race
   for (const r of lists.flat()) {
-    const had = byUid.get(r.uid);
-    byUid.set(r.uid, had ? { ...r, ...Object.fromEntries(Object.entries(had).filter(([, v]) => v !== undefined)), base: had.base } : r);
+    const key = r.session_uid ?? r.uid;
+    const had = byUid.get(key);
+    byUid.set(key, had ? { ...r, ...Object.fromEntries(Object.entries(had).filter(([, v]) => v !== undefined)), base: had.base } : r);
   }
   return [...byUid.values()].sort((a, b) => b.started.localeCompare(a.started));
 }
 
-/** The manifest of one race and the base URL its chunks come from. */
+/** The live race server (gremigaming/race-control-stats live/server.py): sessions still running. */
+export const LIVE_SERVER = "https://live.gremigaming.com";
+
+/** The manifest of one race and the base URL its chunks come from (a running race: the live server). */
 export async function loadManifest(uid: string): Promise<{ manifest: RaceManifest; base: string } | null> {
-  for (const base of RACE_SOURCES) {
+  for (const base of [...RACE_SOURCES, `${LIVE_SERVER}/s/`]) {
     const manifest = await getJson<RaceManifest>(`${base}${encodeURIComponent(uid)}/manifest.json`);
     if (manifest) return { manifest, base: `${base}${encodeURIComponent(uid)}/` };
   }

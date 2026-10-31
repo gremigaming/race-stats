@@ -505,6 +505,13 @@ def race_summary(m):
     return out
 
 
+def session_uid(path):
+    """The game's session uid (16 hex digits): the live server publishes the same race under it."""
+    for h, _, _ in gmtel.records(path):
+        return f"{h[6]:016x}"
+    return None
+
+
 def bundle(path, rid, outdir):
     sess = gmtel.Session(path)
     if sess.info.get("session_type") not in ("Race", "Race 2", "Race 3") or not sess.field:
@@ -536,6 +543,7 @@ def bundle(path, rid, outdir):
     manifest = {"v": 1, "uid": rid, "started": base[:10] + "T" + base[11:19].replace("-", ":"),
                 "track": sess.info.get("track") or "Unknown", "session": sess.info.get("session_type"),
                 "laps": sess.info.get("total_laps", 0), "track_length": sess.info.get("track_length", 0),
+                "session_uid": session_uid(path),
                 "chunk_seconds": CHUNK_SECONDS, "chunks": chunks, "duration": round(frames[-1][0], 2),
                 "lap_starts": lap_starts(frames),
                 "timing": {str(i): v for i, v in timing_of(sess).items() if str(i) in cars},
@@ -598,7 +606,8 @@ def main():
                 shutil.copytree(os.path.join(a.out, rid), kept)
             print(rid, f"{len(m['chunks'])} chunks, {len(m['incidents'])} incidents")
         index.append({"uid": rid, "started": m["started"], "track": m["track"], "session": m["session"],
-                      "laps": m["laps"], "cars": len(m["cars"]), "incidents": len(m["incidents"]), **race_summary(m)})
+                      "laps": m["laps"], "cars": len(m["cars"]), "incidents": len(m["incidents"]), **race_summary(m),
+                      **({"session_uid": m["session_uid"]} if m.get("session_uid") else {})})
     with open(os.path.join(a.out, "index.json"), "w") as f:
         json.dump({"races": index}, f, separators=(",", ":"))
     print("race bundles:", len(index))

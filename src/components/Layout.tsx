@@ -16,7 +16,7 @@ import {
   X,
   type LucideIcon,
 } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import changelog from "virtual:changelog";
 import { SESSIONS_ROUTE_SEGMENT, TRACKS_ROUTE_SEGMENT } from "../constants/routes";
@@ -32,6 +32,7 @@ import {
 } from "../hooks/useSessionFilters";
 import { useGameScope } from "../hooks/useGameScope";
 import { cn } from "../utils/cn";
+import { LiveDot, useIsLive } from "../viewer/LiveTab";
 import { dashboardPath } from "../utils/routes";
 import {
   readStoredNumber,
@@ -58,6 +59,7 @@ const DEFAULT_WIDTH = 288; // 72 * 4 (w-72)
 
 export function Layout() {
   const { mode, setShowUploadModal, scopeKey, league } = useTelemetry();
+  const isLive = useIsLive();
   const mySafety = league?.safety.get(league.selectedDriver);
   const [sessionFilters] = useSessionFilters();
   const game = useGameScope();
@@ -277,6 +279,7 @@ export function Layout() {
               active={section === "race"}
               icon={Clapperboard}
               label="Race viewer"
+              badge={isLive ? <LiveDot className="ml-auto" /> : null}
             />
             {SETUP_MANAGER_ON && (
               <MenuLink
@@ -401,16 +404,19 @@ function MenuLink({
   active,
   icon: Icon,
   label,
+  badge,
 }: {
   to: string;
   active: boolean;
   icon: LucideIcon;
   label: string;
+  badge?: ReactNode;
 }) {
   return (
     <NavLink to={to} className={menuItemClass(active)}>
       <Icon className="h-4 w-4 shrink-0" />
       {label}
+      {badge}
     </NavLink>
   );
 }

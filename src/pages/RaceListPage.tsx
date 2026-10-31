@@ -10,6 +10,8 @@ import { cn } from "../utils/cn";
 import { msToLapTime } from "../utils/format";
 import { getTrackDisplayName } from "../utils/tracks";
 import { loadRaceIndex, type RaceIndexEntry } from "../viewer/format";
+import { useLiveSessions } from "../viewer/live";
+import { PickerTabs } from "../viewer/LiveTab";
 
 type Race = RaceIndexEntry & { base: string };
 type Sort = "newest" | "chaos" | "incidents" | "cars" | "closest";
@@ -62,6 +64,10 @@ export function RaceListPage() {
   const driver = params.get("driver") ?? "";
   const night = params.get("night") ?? "";
   const sort = (params.get("sort") as Sort) || "newest";
+  // the Live tab opens by itself while a session streams, unless the visitor picked a tab
+  const liveNow = useLiveSessions().length > 0;
+  const [tabPick, setTabPick] = useState<"races" | "live" | null>(null);
+  const tab = liveNow && tabPick !== "races" ? "live" : "races";
 
   const set = (key: string, value: string) =>
     setParams(
@@ -142,6 +148,9 @@ export function RaceListPage() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
+      <PickerTabs tab={tab} onTab={setTabPick} formulaKey={formulaKey} />
+      {tab === "races" && (
+        <>
       <section className={cn(cardClass, "relative overflow-hidden")}>
         <div className="pointer-events-none absolute -right-10 -top-16 h-56 w-56 rounded-full bg-red-500/10 blur-3xl" />
         <div className="relative flex flex-wrap items-end justify-between gap-4">
@@ -232,6 +241,8 @@ export function RaceListPage() {
           ))
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{sorted.map(card)}</div>
+      )}
+        </>
       )}
     </div>
   );

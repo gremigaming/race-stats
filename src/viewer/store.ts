@@ -69,6 +69,12 @@ export class ChunkStore {
     );
   }
 
+  /** Load chunks from somewhere else from now on (a live race once it is on R2). */
+  setBase(base: string) {
+    this.base = base;
+    this.failed.clear();
+  }
+
   /** The decoding worker, started on first use (and again after dispose). */
   private decoder() {
     if (this.worker) return this.worker;
@@ -97,9 +103,36 @@ export class ChunkStore {
     this.waiting.clear();
   }
 
+  /** Session time of the newest frame pushed by the live server (null: not a live race). */
+  newest: number | null = null;
+  /** Chunks built from live pushes that aren't in the manifest yet (the open 10 s). */
+  private liveKeys = new Set<number>();
+
+  /**
+   * Frames pushed by the live server (live.ts): a GMLC chunk holding only new frames. Merged into
+   * the chunk they belong to, in time order, without duplicates. A chunk the manifest already
+   * lists comes over HTTP instead, whole (a push may hold only its last seconds).
+   */
+  appendLive(c: Chunk) {
+    if (!c.n) return;
+    const k = Math.round(c.t0 / this.chunkSeconds);
+    const last = c.t[c.n - 1];
+    if (this.newest === null || last > this.newest) this.newest = last;
+    if (this.names.has(k) && !this.liveKeys.has(k)) {
+      this.request(k);
+      return;
+    }
+    const old = this.chunks.get(k);
+    const merged = old ? mergeChunks(old, c) : c;
+    this.liveKeys.add(k);
+    this.chunks.set(k, merged);
+    this.grow(c);
+    this.time(k, merged);
+  }
+
   /** The first and last session time the race has chunks for. */
   span(): [number, number] {
-    const keys = [...this.names.keys()];
+    const keys = [...this.names.keys(), ...this.liveKeys];
     if (!keys.length) return [0, 0];
     return [Math.min(...keys) * this.chunkSeconds, (Math.max(...keys) + 1) * this.chunkSeconds];
   }
@@ -322,6 +355,56 @@ export class ChunkStore {
     }
     return out;
   }
+}
+
+/** Two chunks of the same 10 s as one: every frame of both in time order (a frame in both is kept once). */
+export function mergeChunks(a: Chunk, b: Chunk): Chunk {
+  const order: [Chunk, number][] = [];
+  let i = 0;
+  let j = 0;
+  while (i < a.n || j < b.n) {
+    const ta = i < a.n ? a.t[i] : Infinity;
+    const tb = j < b.n ? b.t[j] : Infinity;
+    if (Math.abs(ta - tb) < 1e-3) {
+      order.push([b, j++]);
+      i++;
+    } else if (ta < tb) order.push([a, i++]);
+    else order.push([b, j++]);
+  }
+  const cars = Math.max(a.cars, b.cars);
+  const n = order.length;
+  const m = n * cars;
+  const out: Chunk = {
+    t0: a.t0,
+    cars,
+    n,
+    t: new Float32Array(n),
+    x: new Float32Array(m),
+    z: new Float32Array(m),
+    y: new Float32Array(m),
+    dist: new Float32Array(m),
+    heading: new Int16Array(m),
+    speed: new Uint16Array(m),
+    throttle: new Uint8Array(m),
+    brake: new Uint8Array(m),
+    steer: new Int8Array(m),
+    gear: new Int8Array(m),
+    off: new Uint8Array(m),
+    lap: new Uint8Array(m),
+    pos: new Uint8Array(m),
+    gap: a.gap || b.gap ? new Uint32Array(m) : null,
+  };
+  const cols = ["x", "z", "y", "dist", "heading", "speed", "throttle", "brake", "steer", "gear", "off", "lap", "pos"] as const;
+  order.forEach(([c, f], row) => {
+    out.t[row] = c.t[f];
+    for (let car = 0; car < c.cars; car++) {
+      const from = f * c.cars + car;
+      const to = row * cars + car;
+      for (const col of cols) out[col][to] = c[col][from];
+      if (out.gap && c.gap) out.gap[to] = c.gap[from];
+    }
+  });
+  return out;
 }
 
 const wrapPi = (a: number) => {
