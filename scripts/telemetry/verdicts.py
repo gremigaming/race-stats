@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""Rulebook v0: who is at fault in an incident, and how bad it was.
+"""Rulebook v1: who is at fault in an incident, and how bad it was.
 
-Calibrated with GreMi on 30 Oct 2026 from his grades of 20 incidents (batch 1). It replaces the
-game's own collision calls, which are not used at all. Input is one incident from
-race_bundles.incidents(); the first contact in it is the one that is judged (later contacts in a
-chain are its consequences).
+v0 was calibrated with GreMi on 30 Oct 2026 from his grades of 20 incidents (batch 1), v1 adds
+his batch-2 rules (R1 squeeze limit, R7, R8, R9). It replaces the game's own collision calls,
+which are not used at all. Input is one incident from race_bundles.incidents(). Every contact in
+it is judged; a contact that is the aftermath of an earlier one (R7) blames nobody, so a chain
+still blames only the car that started it.
 
   R1  A contact that did no harm (nobody slid, lost a place or went off) is not an incident when
       it was a light touch: side by side, a tap from behind under TAP_KMH, or a move across
@@ -20,9 +21,19 @@ chain are its consequences).
       car is always the rejoining car's fault.
   R6  Contacts with AI cars don't count. "AI" means AI at the start of the race: the game also
       flags humans who quit as AI.
+  R7  Reaction time. When the car ahead slid, spun or went off in the REACT_S before the contact,
+      the car behind is not at fault: its own slide = racing incident. A contact less than 2 s
+      after an earlier contact of either car in the same incident = aftermath, nobody blamed.
+      (A late move across by the car ahead is not a rule yet: batch 1 disagreed with it.)
+  R8  Shared fault: both cars moved across into each other alongside (SHARED_M+ each), or one
+      incident blames each of the two for a different contact. Both are at fault.
+  R9  Hitting the same car again within REPEAT_S after being at fault for a contact with it,
+      having been REPEAT_GAP_M+ apart in between (it came back for it): deliberate, severity 10.
+  R5 also covers a car rejoining in front of a car that runs into it: the rejoining car.
 
 Severity 1-10: 1 for the contact, plus what it did (slides and spins, cars involved, places
-lost, cars off track) and +1 when one driver is clearly at fault.
+lost, cars off track) and +1 when one driver is clearly at fault. The incident takes the
+highest severity of its contacts that blame someone (or of the first contact when none does).
 
     python3 scripts/telemetry/verdicts.py FILE.gmtel.gz     # every incident in a race
 """
@@ -38,6 +49,7 @@ import gmtel  # noqa: E402
 import incident_replays  # noqa: E402
 import race_bundles as rb  # noqa: E402
 
+RULES = "v1"         # bump when a rule changes: fault_engine.py judges every race again
 ALONGSIDE_M = 4.0    # less than this apart along the track = alongside (a car is ~5.6 m long)
 MOVE_M = 1.0         # moving across this much in the last 1.2 s counts as moving into the other car
 MOVE_MORE_M = 0.7    # ... and this much more than the other car did
@@ -47,8 +59,13 @@ SMALL_KMH = 15       # a chain started below this closing speed with nobody movi
 CHAIN_CARS = 4
 SLIP_HARM = 20       # a slide under this, no place lost, nobody off track = no harm done
 TAP_KMH = 22         # harmless and closing slower than this = a tap, not an incident
-TAP_MOVE_M = 2.5     # harmless and moved across less than this = a touch, not an incident
+TAP_MOVE_M = 3.0     # harmless and moved across less than this = a squeeze, not an incident (v1: 2.8 m = none)
 OFF_LINE_M = 3.0     # further than this outside the track's normal width = rejoining
+REACT_S = 1.0        # the car ahead got upset this soon before the contact = no time to react
+SHARED_M = 2.0       # both moved across this much into each other = shared fault
+REPEAT_S = 10.0      # hitting the same car again this soon = deliberate ...
+REPEAT_GAP_M = 35.0  # ... after the two cars had been this far apart (not one long scrape)
+UPSET_DEG = 20
 
 
 def ai_at_start(path):
@@ -66,6 +83,20 @@ class Judge:
         self.race = incident_replays.Race(sess)
         self.ai = ai_at_start(path)
         self.slip = rb.slip_angles(frames)
+
+    def upset(self, car, t0, t1):
+        """First time in [t0, t1] the car slid (UPSET_DEG+) or had 2+ wheels off, or None."""
+        k0, k1 = bisect.bisect_left(self.times, t0), bisect.bisect_right(self.times, t1)
+        for t, cars in self.frames[k0:k1]:
+            c = cars.get(car)
+            if c and (self.slip.get((car, t), 0) > UPSET_DEG or bin(c[9]).count("1") >= 2):
+                return t
+        return None
+
+    def apart(self, a, b, t0, t1):
+        """Furthest the two cars were apart between t0 and t1 (metres)."""
+        k0, k1 = bisect.bisect_left(self.times, t0), bisect.bisect_right(self.times, t1)
+        return max((math.hypot(c[a][0] - c[b][0], c[a][1] - c[b][1]) for _, c in self.frames[k0:k1] if a in c and b in c), default=0)
 
     def at(self, t):
         k = min(max(bisect.bisect_left(self.times, t), 0), len(self.frames) - 1)
@@ -108,14 +139,16 @@ class Judge:
                 o1, o0 = self.offset(track, me, t - 1.2)[0], self.offset(track, me, t)[0]
                 side = 1 if (oo or 0) > (om or 0) else -1
                 f["moved"][me] = round((o0 - o1) * side, 2) if o1 is not None and o0 is not None else 0.0
+
                 # rejoining: off the track (or far off its normal width) in the 2.5 s before
-                off = False
+                off = 0
                 for dt in (2.5, 2.0, 1.5, 1.0, 0.6):
                     o, half = self.offset(track, me, t - dt)
                     row = self.at(t - dt).get(me)
                     if (row and bin(row[9]).count("1") >= 2) or (o is not None and abs(o) > half + OFF_LINE_M):
-                        off = True
-                f["rejoin"][me] = off
+                        off += 1
+                f["rejoin"][me] = off > 0
+                f.setdefault("off_n", {})[me] = off
         else:
             f["moved"] = {a: 0.0, b: 0.0}
             f["rejoin"] = {a: False, b: False}
@@ -130,19 +163,41 @@ class Judge:
         return {"places_lost": max(lost, 0), "max_slide_deg": round(slide), "cars": len(inc["drivers"]), "off_track": off}
 
     def judge(self, inc, name=str):
-        """The incident's verdict (its first contact with no AI car) plus one per contact."""
+        """The incident's verdict plus one per contact. Contacts with AI cars don't count (R6);
+        the incident blames every car at fault for one of its contacts (two different cars = R8)."""
         per = []
-        for c in inc["contacts"]:
+        for k, c in enumerate(inc["contacts"]):
             if c["a"] in self.ai or c["b"] in self.ai:
-                per.append({"a": c["a"], "b": c["b"], "verdict": "Not counted (AI)", "at_fault": None, "rule": "R6", "severity": 1,
-                            "why": "contact with an AI car"})
+                per.append({"a": c["a"], "b": c["b"], "t": c["t"], "verdict": "Not counted (AI)", "at_fault": None, "rule": "R6",
+                            "severity": 1, "why": "contact with an AI car"})
                 continue
             first = not any(p["rule"] != "R6" for p in per)
-            per.append(dict(self.judge_contact(inc, c, first, name), a=c["a"], b=c["b"]))
-        main = next((p for p in per if p["rule"] != "R6"), per[0])
-        return dict(main, contacts=per)
+            earlier = [x for x in inc["contacts"][:k] if c["t"] - 2.0 <= x["t"] < c["t"] - 0.05]
+            per.append(dict(self.judge_contact(inc, c, first, name, earlier), a=c["a"], b=c["b"], t=c["t"]))
+        counted = [p for p in per if p["rule"] != "R6"]
+        if not counted:
+            return dict(per[0], at_fault_all=[], contacts=per)
+        blamed = [p for p in counted if p.get("at_fault_all")]
+        cars = []
+        for p in blamed:
+            cars += [x for x in p["at_fault_all"] if x not in cars]
+        if not blamed:
+            main = counted[0]
+            return dict(main, at_fault_all=[], contacts=per)
+        main = max(blamed, key=lambda p: p["severity"])
+        if len(cars) > 1 and main["rule"] != "R8":
+            main = dict(main, rule="R8", verdict=" + ".join(name(x) for x in cars) + " at fault",
+                        why="; ".join(dict.fromkeys(p["why"] for p in blamed)))
+        return dict(main, at_fault=cars[0], at_fault_all=cars, contacts=per)
 
-    def judge_contact(self, inc, c, first, name):
+    def judge_contact(self, inc, c, first, name, earlier=()):
+        v = self._judge_contact(inc, c, first, name, earlier)
+        if v["at_fault"] is not None and "at_fault_all" not in v:
+            v["at_fault_all"] = [v["at_fault"]]
+        v.setdefault("at_fault_all", [])
+        return v
+
+    def _judge_contact(self, inc, c, first, name, earlier):
         f = self.contact(c)
         a, b = f["a"], f["b"]
         eff = self.effects(inc, (a, b))
@@ -152,12 +207,21 @@ class Judge:
         front, back = (a, b) if f["a_ahead_m"] > 0 else (b, a)
         closing = f["closing_a_kmh"] if back == a else -f["closing_a_kmh"]
         rej = [i for i in (a, b) if f["rejoin"].get(i) and f["moved"].get(i, 0) >= MOVE_M]
-        if rej:
+        if not rej and f.get("off_n", {}).get(front, 0) >= 2 and not alongside and closing >= CLOSING_KMH:
+            rej = [front]
+        if earlier:
+            rule = "R7"
+            why = f"aftermath of a contact just before; {name(a)} and {name(b)} had no time to react"
+        elif rej:
             fault, rule = rej[0], "R5"
-            why = f"{name(rej[0])} came back onto the track and moved {f['moved'][rej[0]]:.1f} m across into {name(b if rej[0] == a else a)}"
-        elif alongside and inc.get("kind") == "tap":
+            why = (f"{name(rej[0])} came back onto the track and moved {f['moved'][rej[0]]:.1f} m across into {name(b if rej[0] == a else a)}"
+                   if f["moved"].get(rej[0], 0) >= MOVE_M else f"{name(rej[0])} came back onto the track right in front of {name(back)}")
+        elif alongside and inc.get("kind") == "tap" and not eff["places_lost"]:
             return {"verdict": "Not an incident", "at_fault": None, "rule": "R1", "severity": 1,
                     "why": "light side-by-side contact, nobody slowed, slid or went off", "features": f, "effects": eff}
+        elif alongside and ma >= SHARED_M and mb >= SHARED_M:
+            fault, rule = "both", "R8"
+            why = f"side by side, both moved across into each other ({ma:.1f} m / {mb:.1f} m)"
         elif alongside:
             if ma >= MOVE_M and ma - mb >= MOVE_MORE_M:
                 fault = a
@@ -166,13 +230,16 @@ class Judge:
             rule = "R2"
             why = (f"side by side; {name(fault)} moved {max(ma, mb):.1f} m across into the other car" if fault is not None
                    else f"side by side, both or neither moved across ({ma:.1f} m / {mb:.1f} m)")
+        elif self.upset(front, c["t"] - REACT_S, c["t"] - 0.1) is not None:
+            rule = "R7"
+            why = f"{name(front)} slid or went off just before; {name(back)} had no time to react"
         elif f["moved"].get(front, 0) >= SWEEP_M and f["moved"][front] > f["moved"].get(back, 0) + MOVE_MORE_M and closing < CLOSING_KMH:
             fault, rule = front, "R2"
             why = f"{name(front)} was ahead but swept {f['moved'][front]:.1f} m across into {name(back)}"
         elif closing >= CLOSING_KMH:
             fault, rule = back, "R3"
             why = f"{name(back)} ran into the back of {name(front)}, closing at {closing:.0f} km/h"
-        elif inc.get("kind") == "tap":
+        elif inc.get("kind") == "tap" and not eff["places_lost"]:
             return {"verdict": "Not an incident", "at_fault": None, "rule": "R1", "severity": 1,
                     "why": f"light touch from behind ({closing:.0f} km/h), nobody slowed, slid or went off", "features": f, "effects": eff}
         else:
@@ -188,20 +255,54 @@ class Judge:
         sev = 1 + (2 if eff["max_slide_deg"] > 45 else 1 if eff["max_slide_deg"] > 20 else 0)
         sev += (2 if eff["places_lost"] >= 3 else 1 if eff["places_lost"] >= 1 else 0) + min(eff["off_track"], 2)
         sev += (1 if first and eff["cars"] >= CHAIN_CARS else 0) + (1 if fault is not None else 0)
+        if fault == "both":
+            return {"verdict": f"{name(a)} + {name(b)} at fault", "at_fault": a, "at_fault_all": [a, b], "rule": rule,
+                    "severity": max(1, min(10, sev)), "why": why, "features": f, "effects": eff}
         verdict = f"{name(fault)} at fault" if fault is not None else "Racing incident"
         return {"verdict": verdict, "at_fault": fault, "rule": rule, "severity": max(1, min(10, sev)), "why": why,
                 "features": f, "effects": eff}
 
 
-def judge_race(path):
+def prepare(path):
+    """Parse a race recording: (session, incidents, Judge). The slow part (about a minute)."""
     sess = gmtel.Session(path)
     frames = rb.frames_of(sess)
     gw = rb.ghosts([(t, a, b) for t, c in frames for a, b in rb.overlaps(c)], sess.collisions)
     incs = rb.incidents(frames, sess.collisions, sess.info.get("track_length", 0), gw)
     rb.add_surfaces(sess, incs)
-    j = Judge(sess, frames, path)
+    return sess, incs, Judge(sess, frames, path)
+
+
+def judge_all(j, incs, name=str):
+    """Verdicts for every incident of a race, then R9 (hitting the same car again on purpose)."""
+    out = [j.judge(inc, name) for inc in incs]
+    faults = []   # (t, at fault, other car) of every contact that blames one car
+    for v in out:
+        for p in v["contacts"]:
+            if len(p.get("at_fault_all") or []) == 1:
+                x = p["at_fault"]
+                faults.append((p["t"], x, p["b"] if x == p["a"] else p["a"]))
+    for v in out:
+        for p in v["contacts"]:
+            if p["rule"] == "R6":
+                continue
+            for t0, x, y in faults:
+                if ({x, y} == {p["a"], p["b"]} and 0.5 < p["t"] - t0 <= REPEAT_S and y not in (p.get("at_fault_all") or [])
+                        and j.apart(x, y, t0, p["t"]) >= REPEAT_GAP_M):
+                    p.update(at_fault=x, at_fault_all=[x], rule="R9", severity=10, verdict=f"{name(x)} at fault",
+                             why=f"{name(x)} hit {name(y)} again {p['t'] - t0:.1f} s after a contact that was already {name(x)}'s fault")
+                    if x not in v["at_fault_all"]:
+                        v["at_fault_all"] = v["at_fault_all"] + [x]
+                    v.update(at_fault=v["at_fault_all"][0], rule="R9", severity=10, why=p["why"],
+                             verdict=" + ".join(name(c) for c in v["at_fault_all"]) + " at fault")
+                    break
+    return out
+
+
+def judge_race(path):
+    sess, incs, j = prepare(path)
     name = lambda i: f"#{sess.drivers[i]['race_number']} {sess.drivers[i]['name']}" if i in sess.drivers else f"car {i}"
-    return sess, incs, [j.judge(inc, name) for inc in incs]
+    return sess, incs, judge_all(j, incs, name)
 
 
 if __name__ == "__main__":

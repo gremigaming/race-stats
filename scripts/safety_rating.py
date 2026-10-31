@@ -4,6 +4,12 @@ Reads the session files build-league-data.mjs wrote to public/league/sessions
 and writes public/league/safety.json. The rules are in the GreMi Gang SR rules
 (penalty points per incident, bonus points for clean driving; the SR comes from
 your average points per race, older streams count 10% less each stream).
+
+SR_RULES=v1 (GreMi, 31 Oct 2026; preview until he signs it off): only races from
+19 Oct on count, all contact blame comes from our fault engine
+(scripts/telemetry/fault_engine.py, verdict files in SR_VERDICTS), and of the
+game's own penalties only track limits / corner cutting still count. Without it
+the old game-based rules run, as the site does today. SR_OUT: output folder.
 """
 import json, glob, re, sys, os, collections, statistics, math
 AI = re.compile(r" #\d+$")  # AI and hidden names, e.g. "Ferrari '26 #28", "RB #46"
@@ -11,6 +17,16 @@ SEV = {"LOW": 0, "MEDIUM": 1, "HIGH": 2}
 BASE = {"LOW": 0, "MEDIUM": 2, "HIGH": 4}
 NAME = {"LOW": "light", "MEDIUM": "medium", "HIGH": "heavy"}
 CAP = 25
+V1 = os.environ.get("SR_RULES", "game") == "v1"
+VERDICTS = os.environ.get("SR_VERDICTS", "/tmp/telemetry-cache/verdicts")
+OUT = os.environ.get("SR_OUT", os.path.join("public", "league"))
+TRACK_LIMITS = re.compile(r"Corner Cutting|Crossed Pit Exit", re.I)   # the only game rulings v1 keeps
+R9_PTS = 10             # v1: hitting the same car again on purpose
+no_verdicts = []        # v1: races the fault engine could not judge (no recording)
+
+def v1_points(sev):
+    """v1 penalty for a contact you are at fault for: half its severity (1-10), at least 0.5."""
+    return max(0.5, math.floor(sev + 0.5) / 2)
 SESSIONS = os.path.join("public", "league", "sessions")  # written by build-league-data.mjs (aliases applied, backups dropped)
 nm_ = lambda n: re.sub(r"\s+", " ", n).strip()  # same as the leaderboard: "conor\xa0\xa0racing1" is "conor racing1"
 stamp = lambda f: re.search(r"(\d{4}_\d\d_\d\d_\d\d_\d\d_\d\d)", f).group(1)
@@ -35,6 +51,44 @@ def pace_ratio(x, y, skip):
     """Typical lap-time ratio x/y over earlier shared races (median), or None."""
     r = [b[x] / b[y] for f, b in best.items() if f != skip and x in b and y in b]
     return statistics.median(r) if len(r) >= 2 else None
+
+def v1_rows(path, names, cols, game_incs):
+    """Contact rows from the fault engine's verdicts (same shape as the game-based rows)."""
+    vf = os.path.join(VERDICTS, os.path.basename(path))
+    if not os.path.exists(vf):
+        if "Race_" in os.path.basename(path): no_verdicts.append(os.path.basename(path))
+        return []
+    data = json.load(open(vf)); rows = []
+    for inc in data["incidents"]:
+        counted = [c for c in inc["contacts"] if c["rule"] != "R6"]
+        if not counted or inc["rule"] in ("R1", "R6"): continue
+        cars = [int(k) for k, r in inc["roles"].items() if r == "contact" and int(k) in names]
+        if len(cars) < 2: continue
+        first = counted[0]; pair = tuple(sorted((first["a"], first["b"])))
+        # where: the game's contact for this pair closest in time (its segment name)
+        near = min((c for c in cols if set(c["involved-drivers"]) & set(cars)), key=lambda c: abs(c["timestamp"] - first["t"]), default=None)
+        seg = (near or {}).get("segment-info") or {}
+        where = seg.get("name") or (f"turn {seg.get('corner_number')}" if seg.get("corner_number") else f"lap {inc['lap']}")
+        if near and abs(near["timestamp"] - first["t"]) > 5: where = f"lap {inc['lap']}"
+        sev = inc["severity"]; word = "LOW" if sev <= 3 else "MEDIUM" if sev <= 6 else "HIGH"
+        lines = {}
+        for x in cars:
+            mine = [c for c in counted if x in c["at_fault"]]
+            if x in inc["at_fault"] or mine:
+                s_ = max([c["severity"] for c in mine] or [sev])
+                r9 = any(c["rule"] == "R9" for c in mine)
+                pts = R9_PTS if r9 else v1_points(s_)
+                why = next((c["why"] for c in mine), inc["why"])
+                rule = "R9" if r9 else (mine[0]["rule"] if mine else inc["rule"])
+                lines[x] = (pts, [f"severity {s_}/10, to blame ({rule}) {pts:g}", why])
+            else:
+                lines[x] = (0, [f"severity {sev}/10, not to blame ({inc['rule']}) 0", inc["why"]])
+        rows.append({"file": path.split("/")[-1].rsplit("_2026", 1)[0], "pair": pair, "t": inc["t0"], "t_end": inc["t1"], "sev": word,
+                     "severity": sev, "rule": inc["rule"], "lap": inc["lap"], "dist": None, "sector": None, "corner": None, "where": where,
+                     "pn": [names[pair[0]], names[pair[1]]] if pair[0] in names and pair[1] in names else [names[c] for c in cars[:2]],
+                     "lines": {names[k]: v for k, v in lines.items()},
+                     "vs": {names[x]: ", ".join(names[y] for y in cars if y != x) for x in cars}})
+    return rows
 
 def analyse(path):
     quali = "Qualifying" in path
@@ -212,7 +266,7 @@ def analyse(path):
         return min(pts, CAP)
 
     pair_count = collections.Counter()
-    for inc in incs:
+    for inc in ([] if V1 else incs):
         a, b = inc["pair"]; t, te = inc["t"], inc["t_end"]
         repeat = pair_count[inc["pair"]] > 0; pair_count[inc["pair"]] += 1
         votes = collections.Counter(); why = collections.defaultdict(list); game = None
@@ -272,11 +326,14 @@ def analyse(path):
             lines[other] = (0, p2)
         rows.append({"file": path.split("/")[-1].rsplit("_2026", 1)[0], **inc, "pn": [names[a], names[b]], "lines": {names[k]: v for k, v in lines.items()},
                      "vs": {names[a]: names[b], names[b]: names[a]}})
+    if V1:
+        rows = v1_rows(path, names, cols, incs)
     other = []
     for p in pens:
         if p["id"] in used: continue
         n, typ, inf = names.get(p["vehicle-index"]), p["penalty-type"], p["infringement-type"]
         if "Multiple Warnings" in inf or "collision" in inf.lower() or typ == "Retired": continue
+        if V1 and not TRACK_LIMITS.search(inf): continue  # v1: game rules only for track limits
         if typ == "Warning": continue
         elif typ == "Time Penalty": v = 2 if "Extreme" in inf else 1
         elif "Drive" in typ: v = 4
@@ -289,7 +346,7 @@ def analyse(path):
     for i, c in cls.items():
         if not quali and joke[i] and "DISQUALIF" in ((c.get("final-classification") or {}).get("result-status") or ""):
             other.append((names[i], 0, "disqualified on wrong tyres for the weather, not counted", "-", path.split("/")[-1].rsplit("_2026", 1)[0])); continue
-        if not quali and "DISQUALIF" in ((c.get("final-classification") or {}).get("result-status") or ""):
+        if not quali and not V1 and "DISQUALIF" in ((c.get("final-classification") or {}).get("result-status") or ""):
             other.append((names[i], 10, "disqualified", "-", path.split("/")[-1].rsplit("_2026", 1)[0]))
     if not quali:
         for i, c in cls.items():
@@ -383,7 +440,7 @@ def analyse(path):
     return rows, other, would, pos_pts
 
 
-FIRST_DAY = "2026_10_07"  # older files have no blame data
+FIRST_DAY = "2026_10_19" if V1 else "2026_10_07"  # v1: earlier races have no all-car telemetry, no SR
 STREAM_GAP_H = 3
 half = lambda x: math.floor(x * 2 + 0.5) / 2
 when = lambda f: __import__("datetime").datetime.strptime(stamp(f), "%Y_%m_%d_%H_%M_%S")
@@ -593,8 +650,11 @@ drivers.sort(key=lambda x: (-x["sr"], x["name"].lower()))
 out = {"generated": __import__("datetime").datetime.now(__import__("datetime").timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
        "streams": [{"date": when(s[0]).strftime("%Y-%m-%d"), "files": [os.path.basename(f) for f in s]} for s in streams],
        "drivers": drivers}
-with open(os.path.join("public", "league", "safety.json"), "w") as fh:
+os.makedirs(OUT, exist_ok=True)
+if V1: out["rules"] = "v1"; out["unjudged"] = no_verdicts
+with open(os.path.join(OUT, "safety.json"), "w") as fh:
     json.dump(out, fh, separators=(",", ":"))
-with open(os.path.join("public", "league", "incidents.json"), "w") as fh:
+with open(os.path.join(OUT, "incidents.json"), "w") as fh:
     json.dump({"incidents": all_incs}, fh, separators=(",", ":"))
-print(f"safety rating: {len(drivers)} drivers over {len(streams)} streams, {len(all_incs)} collisions")
+print(f"safety rating{' (v1, fault engine)' if V1 else ''}: {len(drivers)} drivers over {len(streams)} streams, {len(all_incs)} {'incidents' if V1 else 'collisions'}"
+      + (f", not judged (no recording): {', '.join(no_verdicts)}" if V1 and no_verdicts else ""))
