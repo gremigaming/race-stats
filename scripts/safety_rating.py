@@ -550,36 +550,26 @@ def current(n, now, detail=False):
             sr = min(sr, max(float(FORM_ABOVE), half(form + FORM_MARGIN)))
     return (min(100.0, half(sr)), avg) if detail else min(100.0, half(sr))
 
-# ---- SR v2.1 (GreMi, 1 Nov 2026): no bonuses, no ageing. Everyone starts at 50 and goes race by race:
-# a clean race (no penalty points) climbs along a curve with diminishing returns (10 clean races in a
-# row: 50 -> 80, about 20: 90+, 22: 100); penalty points cost V21_DROP SR each, straight down, also
-# below 50. Penalties in a driver's last 3 races count 1.5x. Below 50 a clean race climbs V21_LOW_UP.
-V21_N, V21_P = 22, 1.508       # 50 + 50 * (1 - (1 - c / N) ** P) after c clean races in a row
-V21_DROP = float(os.environ.get("SR_V21_DROP", "1"))  # SR lost per penalty point (not in the spec: tunable)
+# ---- SR v2.1 (GreMi, 1 Nov 2026; recalibrated the same day to his reference drivers: sprintstar-1 85-89,
+# DDRK 80-85, GreMi 70-80, NEX 65-70). No bonuses, no ageing. Two parts:
+#   experience: 100 - 50 * e^(-races / V21_TAU)  (1 race 57.5, 5: 78, 10: 91, 20: 98.2)
+#   penalty:    V21_K * r ** V21_EXP, r = penalty points per race, spread over V21_PRIOR extra clean races
+#               (so a few points in a long career weigh less), points in the last 3 races 1.5x.
+# The penalty grows faster than the points (power 2.5): steady small faults cost little, dirty
+# drivers fall fast and keep falling (below 0 = banned).
+V21_TAU = 6.0
+V21_PRIOR = 15
+V21_K, V21_EXP = 22.5, 2.5
 V21_RECENT, V21_RECENT_X = 3, 1.5
-V21_CLEAN_MAX = 0.5            # a race with at most this many points (before the 1.5x) still climbs (GreMi, 1 Nov)
-V21_LOW_UP = 50 * V21_P / V21_N  # below 50: the curve's first step (~3.4 per clean race)
-
-def v21_up(sr):
-    """SR after one more clean race."""
-    if sr < 50: return min(50.0, sr + V21_LOW_UP)
-    c = V21_N * (1 - (max(0.0, 100 - sr) / 50) ** (1 / V21_P))  # clean races this SR is worth
-    c = min(V21_N, c + 1)
-    return 100 - 50 * (1 - c / V21_N) ** V21_P
 
 def v21_current(n, now, detail=False):
     es = [e for e in entries[n] if e["stream"] <= now]
     races = [k for k, e in enumerate(es) if e["race"]]; recent = set(races[-V21_RECENT:])
-    sr = 50.0; pts_total = 0.0
-    for k, e in enumerate(es):
-        raw = -sum(i["pts"] for i in e["items"] if i["pts"] < 0)
-        pts = raw * (V21_RECENT_X if k in recent else 1)
-        pts_total += pts
-        sr -= V21_DROP * pts                      # the points still cost SR ...
-        if e["race"] and raw <= V21_CLEAN_MAX:    # ... but a race within the tolerance keeps the climb going
-            sr = v21_up(sr)
-    sr = min(100.0, half(sr))
-    return (sr, pts_total / max(1, len(races))) if detail else sr
+    pts = sum(-sum(i["pts"] for i in e["items"] if i["pts"] < 0) * (V21_RECENT_X if k in recent else 1) for k, e in enumerate(es))
+    if not races: return (50.0, 0.0) if detail else 50.0
+    r = pts / (len(races) + V21_PRIOR)
+    sr = min(100.0, half(100 - 50 * math.exp(-len(races) / V21_TAU) - V21_K * r ** V21_EXP))
+    return (sr, pts / len(races)) if detail else sr
 
 def stream_avg(n, si):
     """Points per race in stream si, counted the way the SR counts them (recent penalties 1.5x, -6 floor)."""
