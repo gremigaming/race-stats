@@ -168,6 +168,11 @@ export class RaceScene {
       return;
     }
     this.host.appendChild(this.app.canvas);
+    // map tiles are uploaded by hand inside a frame budget (map.ts / tiles.ts) and freed by their own LRU:
+    // Pixi's texture GC would drop idle ones from the GPU and re-upload them, unbudgeted, when they show again
+    const r = this.app.renderer as unknown as { textureGC?: { active: boolean } };
+    if (r.textureGC) r.textureGC.active = false;
+    this.map.attach(this.app.renderer);
     this.liveries = await loadLiveries();
     if (this.destroyed) return;
     this.carLayer.sortableChildren = true;
@@ -213,6 +218,11 @@ export class RaceScene {
     this.map.destroy();
     this.app.destroy(true, { children: true });
     clearCarTextures();
+  }
+
+  /** 0..1 while the whole track map loads (playback waits for 1). */
+  mapProgress() {
+    return this.ready ? this.map.progress() : 0;
   }
 
   /** Stop or start drawing (a hidden picture-in-picture costs nothing while stopped). */

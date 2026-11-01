@@ -138,6 +138,8 @@ function Viewer({ manifest: initial, base, back }: { manifest: RaceManifest; bas
   const lightsShown = useRef(false);
   const [view, setView] = useState<View>({ t: play.current.t, states: [], rot: 0, trace: undefined, lights: null });
   const [playing, setPlaying] = useState(false);
+  /** The whole-track map loading (0..1): the clock waits for it, so no camera cut ever waits on a tile. */
+  const [mapPct, setMapPct] = useState(0);
   const [rate, setRate] = useState(1);
   const [surface, setSurface] = useState<SurfacePick>("auto");
   const [timePick, setTimePick] = useState<TimePick>("auto");
@@ -264,7 +266,11 @@ function Viewer({ manifest: initial, base, back }: { manifest: RaceManifest; bas
     store.onLoad = () => {
       if (!loadTimer) loadTimer = window.setTimeout(() => ((loadTimer = 0), setLoads((n) => n + 1)), 300);
     };
+    let mapOk = false;
+    // a very slow connection never holds the race longer than this (the map then fills in as it plays)
+    const mapGiveUp = performance.now() + 15000;
     const s = new RaceScene(el, initial.cars, initial.track, (dtMs) => {
+      if (!mapOk) mapOk = s.mapProgress() >= 1 || performance.now() > mapGiveUp;
       const now = performance.now();
       // start lights: the clock waits while they come on, and runs the moment they go out
       const L = lights.current;
@@ -276,7 +282,7 @@ function Viewer({ manifest: initial, base, back }: { manifest: RaceManifest; bas
         else lights.current = null;
       }
       const holding = !!L && now - L.at < L.out;
-      if (!live.current?.advance(p, dtMs) && p.playing && !holding && store.loaded(p.t)) {
+      if (!live.current?.advance(p, dtMs) && p.playing && !holding && mapOk && store.loaded(p.t)) {
         p.t += (dtMs / 1000) * p.rate;
         if (p.t >= end) {
           p.t = end;
@@ -351,10 +357,16 @@ function Viewer({ manifest: initial, base, back }: { manifest: RaceManifest; bas
     };
     s.tv();
     scene.current = s;
+    const mapTimer = window.setInterval(() => {
+      const v = performance.now() > mapGiveUp ? 1 : s.mapProgress();
+      setMapPct(v);
+      if (v >= 1) window.clearInterval(mapTimer);
+    }, 120);
     // the frame-time trace (scripts/perf-trace.mjs) reads the camera and toggles layers to measure them
     if (/[?&]perf\b/.test(window.location.search)) (window as unknown as { __scene?: RaceScene }).__scene = s;
     return () => {
       window.clearTimeout(loadTimer);
+      window.clearInterval(mapTimer);
       store.onLoad = null;
       s.destroy();
       scene.current = null;
@@ -733,6 +745,16 @@ function Viewer({ manifest: initial, base, back }: { manifest: RaceManifest; bas
     <div className="fixed inset-0 flex flex-col bg-[#0c0e11] text-zinc-100 md:flex-row">
       <div className="relative min-h-0 min-w-0 flex-1 overflow-hidden">
         <div ref={host} className="absolute inset-0" />
+        {mapPct < 1 && (
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+            <div className="rounded-lg border border-white/10 bg-[#0c0e11]/85 px-4 py-2.5 text-center backdrop-blur">
+              <div className="text-sm font-semibold">Loading track</div>
+              <div className="mt-1.5 h-1 w-40 overflow-hidden rounded bg-white/10">
+                <div className="h-full bg-red-500 transition-[width] duration-150" style={{ width: `${Math.round(mapPct * 100)}%` }} />
+              </div>
+            </div>
+          </div>
+        )}
         <div className="pointer-events-none absolute inset-x-0 top-0 flex items-start gap-2 p-2 md:p-3">
           <Link
             to={back}
