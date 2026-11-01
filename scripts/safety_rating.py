@@ -17,7 +17,9 @@ SEV = {"LOW": 0, "MEDIUM": 1, "HIGH": 2}
 BASE = {"LOW": 0, "MEDIUM": 2, "HIGH": 4}
 NAME = {"LOW": "light", "MEDIUM": "medium", "HIGH": "heavy"}
 CAP = 25
-V1 = os.environ.get("SR_RULES", "game") == "v1"
+RULESET = os.environ.get("SR_RULES", "game")
+V21 = RULESET == "v2.1"
+V1 = RULESET in ("v1", "v2.1")   # v2.1 takes contact blame from the fault engine too
 VERDICTS = os.environ.get("SR_VERDICTS", "/tmp/telemetry-cache/verdicts")
 OUT = os.environ.get("SR_OUT", os.path.join("public", "league"))
 TRACK_LIMITS = re.compile(r"Corner Cutting|Crossed Pit Exit", re.I)   # the only game rulings v1 keeps
@@ -25,7 +27,9 @@ R9_PTS = 10             # v1: hitting the same car again on purpose
 no_verdicts = []        # v1: races the fault engine could not judge (no recording)
 
 def v1_points(sev):
-    """v1 penalty for a contact you are at fault for: half its severity (1-10), at least 0.5."""
+    """v1 penalty for a contact you are at fault for: half its severity (1-10), at least 0.5.
+    v2.1 (GreMi, 1 Nov 2026): severity 1-3 = 0.5, 4-5 = 1.5, 6-7 = 3, 8-10 = 5."""
+    if V21: return 0.5 if sev <= 3 else 1.5 if sev <= 5 else 3.0 if sev <= 7 else 5.0
     return max(0.5, math.floor(sev + 0.5) / 2)
 SESSIONS = os.path.join("public", "league", "sessions")  # written by build-league-data.mjs (aliases applied, backups dropped)
 nm_ = lambda n: re.sub(r"\s+", " ", n).strip()  # same as the leaderboard: "conor\xa0\xa0racing1" is "conor racing1"
@@ -355,6 +359,8 @@ def analyse(path):
                     other.append((names[i], 0, "retired after crossing the finish line, not counted", "-", path.split("/")[-1].rsplit("_2026", 1)[0])); continue
                 r = next((r for r in rets if i in r["involved-drivers"]), None)
                 win = next((m["timestamp"] for m in ev if m["message-type"] == "RACE_WINNER"), None)
+                if V21 and r and (r.get("reason") or "").lower() == "finished":
+                    other.append((names[i], 0, "lapped, the game marked it 'retired (finished)': not counted", "-", "")); continue
                 if r and win and r["timestamp"] >= win:
                     other.append((names[i], 0, "left after the winner finished, not counted", "-", "")); continue
                 if r and "damage" in (r.get("reason") or "").lower():
@@ -526,6 +532,7 @@ def weights(n, now):
 
 def current(n, now, detail=False):
     """SR of driver n at the end of stream `now` (with detail: also the average per race it came from)."""
+    if V21: return v21_current(n, now, detail)
     es = entries[n]; total = races_w = sting = 0.0; races_after = 0
     for e, w in zip(reversed(es), reversed(weights(n, now))):
         net, loss = session_net(e, races_after < RECENT)
@@ -542,6 +549,35 @@ def current(n, now, detail=False):
             form = scale(sum(session_net(e, True)[0] for e in ls) / nr)
             sr = min(sr, max(float(FORM_ABOVE), half(form + FORM_MARGIN)))
     return (min(100.0, half(sr)), avg) if detail else min(100.0, half(sr))
+
+# ---- SR v2.1 (GreMi, 1 Nov 2026): no bonuses, no ageing. Everyone starts at 50 and goes race by race:
+# a clean race (no penalty points) climbs along a curve with diminishing returns (10 clean races in a
+# row: 50 -> 80, about 20: 90+, 22: 100); penalty points cost V21_DROP SR each, straight down, also
+# below 50. Penalties in a driver's last 3 races count 1.5x. Below 50 a clean race climbs V21_LOW_UP.
+V21_N, V21_P = 22, 1.508       # 50 + 50 * (1 - (1 - c / N) ** P) after c clean races in a row
+V21_DROP = float(os.environ.get("SR_V21_DROP", "1"))  # SR lost per penalty point (not in the spec: tunable)
+V21_RECENT, V21_RECENT_X = 3, 1.5
+V21_LOW_UP = 50 * V21_P / V21_N  # below 50: the curve's first step (~3.4 per clean race)
+
+def v21_up(sr):
+    """SR after one more clean race."""
+    if sr < 50: return min(50.0, sr + V21_LOW_UP)
+    c = V21_N * (1 - (max(0.0, 100 - sr) / 50) ** (1 / V21_P))  # clean races this SR is worth
+    c = min(V21_N, c + 1)
+    return 100 - 50 * (1 - c / V21_N) ** V21_P
+
+def v21_current(n, now, detail=False):
+    es = [e for e in entries[n] if e["stream"] <= now]
+    races = [k for k, e in enumerate(es) if e["race"]]; recent = set(races[-V21_RECENT:])
+    sr = 50.0; pts_total = 0.0
+    for k, e in enumerate(es):
+        pts = -sum(i["pts"] for i in e["items"] if i["pts"] < 0)
+        if k in recent: pts *= V21_RECENT_X
+        pts_total += pts
+        if pts: sr -= V21_DROP * pts
+        elif e["race"]: sr = v21_up(sr)
+    sr = min(100.0, half(sr))
+    return (sr, pts_total / max(1, len(races))) if detail else sr
 
 def stream_avg(n, si):
     """Points per race in stream si, counted the way the SR counts them (recent penalties 1.5x, -6 floor)."""
@@ -651,10 +687,10 @@ out = {"generated": __import__("datetime").datetime.now(__import__("datetime").t
        "streams": [{"date": when(s[0]).strftime("%Y-%m-%d"), "files": [os.path.basename(f) for f in s]} for s in streams],
        "drivers": drivers}
 os.makedirs(OUT, exist_ok=True)
-if V1: out["rules"] = "v1"; out["unjudged"] = no_verdicts
+if V1: out["rules"] = RULESET; out["unjudged"] = no_verdicts
 with open(os.path.join(OUT, "safety.json"), "w") as fh:
     json.dump(out, fh, separators=(",", ":"))
 with open(os.path.join(OUT, "incidents.json"), "w") as fh:
     json.dump({"incidents": all_incs}, fh, separators=(",", ":"))
-print(f"safety rating{' (v1, fault engine)' if V1 else ''}: {len(drivers)} drivers over {len(streams)} streams, {len(all_incs)} {'incidents' if V1 else 'collisions'}"
+print(f"safety rating{f' ({RULESET}, fault engine)' if V1 else ''}: {len(drivers)} drivers over {len(streams)} streams, {len(all_incs)} {'incidents' if V1 else 'collisions'}"
       + (f", not judged (no recording): {', '.join(no_verdicts)}" if V1 and no_verdicts else ""))
