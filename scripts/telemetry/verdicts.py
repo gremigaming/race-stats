@@ -49,7 +49,7 @@ import gmtel  # noqa: E402
 import incident_replays  # noqa: E402
 import race_bundles as rb  # noqa: E402
 
-RULES = "v1"         # bump when a rule changes: fault_engine.py judges every race again
+RULES = "v1.1"       # bump when a rule changes: fault_engine.py judges every race again
 ALONGSIDE_M = 4.0    # less than this apart along the track = alongside (a car is ~5.6 m long)
 MOVE_M = 1.0         # moving across this much in the last 1.2 s counts as moving into the other car
 MOVE_MORE_M = 0.7    # ... and this much more than the other car did
@@ -252,8 +252,11 @@ class Judge:
         if first and fault == back and rule == "R3" and eff["cars"] >= CHAIN_CARS and closing < SMALL_KMH and max(ma, mb) < MOVE_M:
             fault, rule = None, "R4"
             why = f"chain of {eff['cars']} cars started by a small error ({name(back)} closing at {closing:.0f} km/h)"
-        sev = 1 + (2 if eff["max_slide_deg"] > 45 else 1 if eff["max_slide_deg"] > 20 else 0)
-        sev += (2 if eff["places_lost"] >= 3 else 1 if eff["places_lost"] >= 1 else 0) + min(eff["off_track"], 2)
+        # v1.1 (GreMi, 1 Nov 2026): severity is the harm done to the OTHER car. When one car is at
+        # fault, its own slide, lost places and trip off the track don't make its penalty bigger.
+        hurt = eff if fault is None or fault == "both" else self.effects(inc, (b if fault == a else a,))
+        sev = 1 + (2 if hurt["max_slide_deg"] > 45 else 1 if hurt["max_slide_deg"] > 20 else 0)
+        sev += (2 if hurt["places_lost"] >= 3 else 1 if hurt["places_lost"] >= 1 else 0) + min(hurt["off_track"], 2)
         sev += (1 if first and eff["cars"] >= CHAIN_CARS else 0) + (1 if fault is not None else 0)
         if fault == "both":
             return {"verdict": f"{name(a)} + {name(b)} at fault", "at_fault": a, "at_fault_all": [a, b], "rule": rule,

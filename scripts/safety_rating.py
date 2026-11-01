@@ -550,24 +550,15 @@ def current(n, now, detail=False):
             sr = min(sr, max(float(FORM_ABOVE), half(form + FORM_MARGIN)))
     return (min(100.0, half(sr)), avg) if detail else min(100.0, half(sr))
 
-# ---- SR v2.1 (GreMi, 1 Nov 2026; recalibrated twice the same day to his anchor drivers). No bonuses, no ageing.
-#   experience: 100 - 50 * e^(-races / V21_TAU)            (1 race 59, 5: 81.6, 10: 93.2, 20: 99.1)
-#   penalty:    an S-curve of r (0 at r = 0, flattening at V21_L), so steady small faults cost little,
-#               the SR falls fastest around r = V21_R0 and penalty-heavy veterans level off instead of
-#               going negative.
-#   r = sum over races of min(points, V21_CAP) (one disaster race counts at most V21_CAP; the last 3
-#       races 1.5x) / (races + V21_PRIOR).
-# Fit: /mnt/project-files/sr-rebalance/v2.1_fit.py.
-V21_TAU = 5.0
+# ---- SR v2.1 (GreMi, 1 Nov 2026; anchor fit #3, after rulebook v1.1 and without a floor). No bonuses, no ageing.
+#   SR = 100 - 50 * e^(-races / V21_TAU) - V21_K * r          (experience minus a straight-line penalty)
+#   r  = sum over races of min(points, V21_CAP), the last 3 races 2x, / (races + V21_PRIOR)
+# No floor: penalty-heavy drivers keep sinking (below 0 = banned). Fit: /mnt/project-files/sr-rebalance/v2.1_fit.py.
+V21_TAU = 4.0
 V21_CAP = 3.0
-V21_PRIOR = 20
-V21_L, V21_R0, V21_S = 45.0, 0.6, 0.2
-V21_RECENT, V21_RECENT_X = 3, 1.5
-
-def v21_penalty(r):
-    sig = lambda x: 1 / (1 + math.exp(-x))
-    z = sig(-V21_R0 / V21_S)
-    return V21_L * (sig((r - V21_R0) / V21_S) - z) / (1 - z)
+V21_PRIOR = 15
+V21_K = 42.5
+V21_RECENT, V21_RECENT_X = 3, 2.0
 
 def v21_current(n, now, detail=False):
     es = [e for e in entries[n] if e["stream"] <= now]
@@ -576,7 +567,7 @@ def v21_current(n, now, detail=False):
     pts = sum(min(-sum(i["pts"] for i in e["items"] if i["pts"] < 0), V21_CAP) * (V21_RECENT_X if k in recent else 1)
               for k, e in enumerate(es))
     r = pts / (len(races) + V21_PRIOR)
-    sr = min(100.0, half(100 - 50 * math.exp(-len(races) / V21_TAU) - v21_penalty(r)))
+    sr = min(100.0, half(100 - 50 * math.exp(-len(races) / V21_TAU) - V21_K * r))
     return (sr, pts / len(races)) if detail else sr
 
 def stream_avg(n, si):
