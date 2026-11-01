@@ -557,6 +557,7 @@ def current(n, now, detail=False):
 V21_N, V21_P = 22, 1.508       # 50 + 50 * (1 - (1 - c / N) ** P) after c clean races in a row
 V21_DROP = float(os.environ.get("SR_V21_DROP", "1"))  # SR lost per penalty point (not in the spec: tunable)
 V21_RECENT, V21_RECENT_X = 3, 1.5
+V21_CLEAN_MAX = 0.5            # a race with at most this many points (before the 1.5x) still climbs (GreMi, 1 Nov)
 V21_LOW_UP = 50 * V21_P / V21_N  # below 50: the curve's first step (~3.4 per clean race)
 
 def v21_up(sr):
@@ -571,11 +572,12 @@ def v21_current(n, now, detail=False):
     races = [k for k, e in enumerate(es) if e["race"]]; recent = set(races[-V21_RECENT:])
     sr = 50.0; pts_total = 0.0
     for k, e in enumerate(es):
-        pts = -sum(i["pts"] for i in e["items"] if i["pts"] < 0)
-        if k in recent: pts *= V21_RECENT_X
+        raw = -sum(i["pts"] for i in e["items"] if i["pts"] < 0)
+        pts = raw * (V21_RECENT_X if k in recent else 1)
         pts_total += pts
-        if pts: sr -= V21_DROP * pts
-        elif e["race"]: sr = v21_up(sr)
+        sr -= V21_DROP * pts                      # the points still cost SR ...
+        if e["race"] and raw <= V21_CLEAN_MAX:    # ... but a race within the tolerance keeps the climb going
+            sr = v21_up(sr)
     sr = min(100.0, half(sr))
     return (sr, pts_total / max(1, len(races))) if detail else sr
 
