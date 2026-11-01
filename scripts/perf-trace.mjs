@@ -62,12 +62,19 @@ for (const s of SETUPS) {
       /* no long task timing */
     }
   });
+  // R2 only allows the real site's origin (CORS): hand the map pyramid to this localhost copy as if it were
+  await page.route("https://replays.gremigaming.com/maps/**", async (route) => {
+    const res = await route.fetch();
+    await route.fulfill({ response: res, headers: { ...res.headers(), "access-control-allow-origin": "*" } });
+  });
   await page.goto(base);
   await page.waitForTimeout(3000);
   const scope = new URL(page.url()).pathname.replace(/^\/race-stats\//, "").split("/")[0] || "f1";
   await page.goto(`${base}${scope}/race/${encodeURIComponent(uid)}?t=240&perf`);
   await page.waitForSelector("canvas", { timeout: 30000 });
-  await page.waitForTimeout(6000); // map tiles and chunks around the playhead
+  // the whole-track map ("Loading track") and chunks around the playhead
+  await page.waitForFunction(() => !document.body.innerText.includes("Loading track"), null, { timeout: 30000 }).catch(() => undefined);
+  await page.waitForTimeout(3000);
   const cdp = await ctx.newCDPSession(page);
   if (s.cpu > 1) await cdp.send("Emulation.setCPUThrottlingRate", { rate: s.cpu });
   const speed = page.locator(`button:has-text("${s.rate}")`).first();
