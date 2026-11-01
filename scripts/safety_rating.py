@@ -550,25 +550,33 @@ def current(n, now, detail=False):
             sr = min(sr, max(float(FORM_ABOVE), half(form + FORM_MARGIN)))
     return (min(100.0, half(sr)), avg) if detail else min(100.0, half(sr))
 
-# ---- SR v2.1 (GreMi, 1 Nov 2026; recalibrated the same day to his reference drivers: sprintstar-1 85-89,
-# DDRK 80-85, GreMi 70-80, NEX 65-70). No bonuses, no ageing. Two parts:
-#   experience: 100 - 50 * e^(-races / V21_TAU)  (1 race 57.5, 5: 78, 10: 91, 20: 98.2)
-#   penalty:    V21_K * r ** V21_EXP, r = penalty points per race, spread over V21_PRIOR extra clean races
-#               (so a few points in a long career weigh less), points in the last 3 races 1.5x.
-# The penalty grows faster than the points (power 2.5): steady small faults cost little, dirty
-# drivers fall fast and keep falling (below 0 = banned).
-V21_TAU = 6.0
-V21_PRIOR = 15
-V21_K, V21_EXP = 22.5, 2.5
+# ---- SR v2.1 (GreMi, 1 Nov 2026; recalibrated twice the same day to his anchor drivers). No bonuses, no ageing.
+#   experience: 100 - 50 * e^(-races / V21_TAU)            (1 race 59, 5: 81.6, 10: 93.2, 20: 99.1)
+#   penalty:    an S-curve of r (0 at r = 0, flattening at V21_L), so steady small faults cost little,
+#               the SR falls fastest around r = V21_R0 and penalty-heavy veterans level off instead of
+#               going negative.
+#   r = sum over races of min(points, V21_CAP) (one disaster race counts at most V21_CAP; the last 3
+#       races 1.5x) / (races + V21_PRIOR).
+# Fit: /mnt/project-files/sr-rebalance/v2.1_fit.py.
+V21_TAU = 5.0
+V21_CAP = 3.0
+V21_PRIOR = 20
+V21_L, V21_R0, V21_S = 45.0, 0.6, 0.2
 V21_RECENT, V21_RECENT_X = 3, 1.5
+
+def v21_penalty(r):
+    sig = lambda x: 1 / (1 + math.exp(-x))
+    z = sig(-V21_R0 / V21_S)
+    return V21_L * (sig((r - V21_R0) / V21_S) - z) / (1 - z)
 
 def v21_current(n, now, detail=False):
     es = [e for e in entries[n] if e["stream"] <= now]
     races = [k for k, e in enumerate(es) if e["race"]]; recent = set(races[-V21_RECENT:])
-    pts = sum(-sum(i["pts"] for i in e["items"] if i["pts"] < 0) * (V21_RECENT_X if k in recent else 1) for k, e in enumerate(es))
     if not races: return (50.0, 0.0) if detail else 50.0
+    pts = sum(min(-sum(i["pts"] for i in e["items"] if i["pts"] < 0), V21_CAP) * (V21_RECENT_X if k in recent else 1)
+              for k, e in enumerate(es))
     r = pts / (len(races) + V21_PRIOR)
-    sr = min(100.0, half(100 - 50 * math.exp(-len(races) / V21_TAU) - V21_K * r ** V21_EXP))
+    sr = min(100.0, half(100 - 50 * math.exp(-len(races) / V21_TAU) - v21_penalty(r)))
     return (sr, pts / len(races)) if detail else sr
 
 def stream_avg(n, si):
