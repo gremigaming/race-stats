@@ -8,7 +8,7 @@
   "requested": null,
   "last": "2026-11-02"
  },
- "pending": 1,
+ "pending": 2,
  "tracks": [
   {
    "track": "Melbourne",
@@ -95,6 +95,58 @@
        "change": null,
        "text": "Starting setup",
        "why": "Your last race setup.",
+       "sessions": [
+        {
+         "file": "2026-11-02_20-47-28_Melbourne_Race.gmtel.gz",
+         "date": "2026-11-02",
+         "session": "race",
+         "weather": 0,
+         "pace": 84382,
+         "best": 82179,
+         "mean": 84382,
+         "laps": 3
+        }
+       ],
+       "verdict": {
+        "result": "baseline",
+        "text": "Starting point: 1:24.382 over 1 session."
+       }
+      },
+      {
+       "v": 2,
+       "base": 1,
+       "created": "2026-11-02",
+       "saved": null,
+       "values": {
+        "fw": 45,
+        "rw": 17,
+        "don": 100,
+        "doff": 25,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 30,
+        "farb": 1,
+        "rarb": 14,
+        "frh": 21,
+        "rrh": 45,
+        "bb": 57,
+        "bp": 100,
+        "fr": 27.0,
+        "fl": 27.0,
+        "rr": 20.5,
+        "rl": 20.5
+       },
+       "change": {
+        "rw": [
+         15,
+         17
+        ]
+       },
+       "text": "Rear wing 15 → 17",
+       "why": "More rear wing for a calmer rear in fast corners.",
        "sessions": [],
        "verdict": {
         "result": "untested",
