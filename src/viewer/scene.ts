@@ -29,7 +29,6 @@ const FOLLOW_CAP = 500; // metres: followed cars further apart get an edge arrow
 const TV_MIN_SCALE = 3.4; // px per metre: the broadcast camera never zooms out so far that cars turn into dots
 const TV_WIDE_MIN_SCALE = 1.6; // the lap 1 pack shot may go wider to keep the whole field in frame
 const FOLLOW_GLIDE_MS = 350; // follow mode: glide onto the car once, then lock it dead centre
-const CUT_MS = 1800; // a broadcast cut: zoom out a little, pan, zoom back in
 const FONT = "Geist Variable, system-ui, sans-serif";
 const TV_EASE_MS = 420; // the broadcast camera glides; follow mode stays tight
 const TV_ZOOM_EASE_MS = 1100;
@@ -454,11 +453,6 @@ export class RaceScene {
       // hold the zoom while the framing only breathes a little: no constant pumping in and out
       if (this.tvScale !== null && Math.abs(scale / this.tvScale - 1) < TV_ZOOM_HOLD) scale = this.tvScale;
       else this.tvScale = scale;
-      if (this.cut !== null) {
-        const p = (this.clockMs - this.cut) / CUT_MS;
-        if (p >= 1) this.cut = null;
-        else scale = Math.max(scale * (1 - 0.18 * Math.sin(Math.PI * p)), min * 0.9);
-      }
       return this.centreOnScaled(f, scale / f.scale);
     }
     if (this.snapRot) return { ...this.cam, rot: 0 };
@@ -500,16 +494,20 @@ export class RaceScene {
     const aim = this.aim(inFrame);
     if (aim) {
       const tv = this.mode === "tv";
-      const k = 1 - Math.exp(-dtMs / (tv ? (this.cut !== null ? 700 : TV_EASE_MS) : this.mode === "follow" ? 110 : 220));
-      const kz = tv ? 1 - Math.exp(-dtMs / (this.cut !== null ? 700 : TV_ZOOM_EASE_MS)) : k;
-      // one followed car: locked dead centre with no lag at any playback speed (only a short glide when follow starts)
-      const lock = this.mode === "follow" && this.followCars.length === 1 && inFrame.length === 1;
+      // a broadcast cut is a hard cut, like TV: the new shot is there the next frame (no fly-over across the track)
+      const hardCut = tv && this.cut !== null;
+      this.cut = null;
+      const k = hardCut ? 1 : 1 - Math.exp(-dtMs / (tv ? TV_EASE_MS : this.mode === "follow" ? 110 : 220));
+      const kz = hardCut ? 1 : tv ? 1 - Math.exp(-dtMs / TV_ZOOM_EASE_MS) : k;
+      // follow mode: locked with no lag at any playback speed (only a short glide when follow starts);
+      // one car dead centre, several cars (an incident) the middle of their frame
+      const lock = this.mode === "follow" && inFrame.length >= 1;
       const kp = lock ? Math.max(k, Math.min(1, (this.clockMs - this.followAt) / FOLLOW_GLIDE_MS)) : k;
       this.cam.x += (aim.x - this.cam.x) * kp;
       this.cam.z += (aim.z - this.cam.z) * kp;
       this.cam.scale *= Math.pow(aim.scale / this.cam.scale, kz);
       this.cam.rot = wrap(this.cam.rot + wrap(aim.rot - this.cam.rot) * k);
-      if (lock && kp >= 1) {
+      if (lock && kp >= 1 && this.followCars.length === 1 && inFrame.length === 1) {
         // exact: centred for the scale and rotation actually shown this frame, not the ones being eased to
         const c = this.centreOn(inFrame[0].x, inFrame[0].z, this.cam.scale, this.cam.rot);
         this.cam.x = c.x;

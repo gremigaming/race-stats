@@ -223,6 +223,8 @@ export function IncidentPip(props: {
   track: string;
   label: string;
   onDone: () => void;
+  /** The close button: this replay and the ones queued behind it go. */
+  onClose: () => void;
   onOpen: () => void;
 }) {
   const host = useRef<HTMLDivElement>(null);
@@ -275,18 +277,27 @@ export function IncidentPip(props: {
     s.setRunning(true);
   }, [inc, props.run]);
   return (
-    <div className={`pointer-events-auto w-80 max-w-[60vw] overflow-hidden rounded-lg border-2 border-amber-400/70 bg-[#0c0e11] shadow-2xl ${inc ? "" : "hidden"}`}>
-      <div className="flex items-center gap-2 bg-amber-400/15 px-2 py-1 text-xs">
-        <span className="h-2 w-2 rotate-45 rounded-[1px] bg-amber-400" />
-        <span className="min-w-0 flex-1 truncate font-semibold">Incident replay · {props.label}</span>
-        <button type="button" className="text-zinc-300 hover:text-white" onClick={props.onOpen}>
+    // fixed size (the canvas sits absolute inside a box with its own aspect ratio, so it can never push the box taller)
+    <div className={`pointer-events-auto w-64 max-w-[45vw] overflow-hidden rounded-lg border-2 border-amber-400/70 bg-[#0c0e11] shadow-2xl sm:w-72 ${inc ? "" : "hidden"}`}>
+      <div className="flex items-center gap-1.5 bg-amber-400/15 py-0.5 pl-2 pr-0.5 text-xs">
+        <span className="h-2 w-2 shrink-0 rotate-45 rounded-[1px] bg-amber-400" />
+        <span className="min-w-0 flex-1 truncate font-semibold">Incident · {props.label}</span>
+        <button type="button" className="shrink-0 rounded px-1.5 py-1 text-zinc-200 hover:bg-white/10 hover:text-white" onClick={props.onOpen}>
           Watch
         </button>
-        <button type="button" aria-label="Close" className="text-zinc-400 hover:text-white" onClick={props.onDone}>
-          <X className="h-3.5 w-3.5" />
+        <button
+          type="button"
+          aria-label="Close incident replay"
+          title="Close"
+          className="flex h-7 w-7 shrink-0 items-center justify-center rounded text-zinc-200 hover:bg-white/15 hover:text-white"
+          onClick={props.onClose}
+        >
+          <X className="h-4 w-4" />
         </button>
       </div>
-      <div ref={host} className="relative aspect-video w-full" />
+      <div className="relative aspect-video w-full overflow-hidden">
+        <div ref={host} className="absolute inset-0" />
+      </div>
     </div>
   );
 }

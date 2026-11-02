@@ -34,6 +34,23 @@ export interface RaceIncident {
   contacts: { t: number; a: number; b: number; severity: number }[];
   /** surfaces: what each wheel (rl, rr, fl, fr) touched off the tarmac around the incident. */
   drivers: { car: number; role: string; verdict?: string; rules?: string[]; surfaces?: Record<string, string> }[];
+  /** The fault engine's call (rulebook verdicts.py): severity 1..10 is the harm done to the other car. */
+  verdict?: { verdict?: string; at_fault?: number | null; rule?: string; severity?: number; why?: string };
+}
+
+/** Incidents from this severity up get the PiP replay, the pop-ups and the broadcast camera (GreMi, 2 Nov 2026). */
+export const MAJOR_SEVERITY = 6;
+
+/**
+ * Worth a PiP / pop-up / camera cut: rulebook severity 6+. An incident the fault engine hasn't judged
+ * (older bundle) counts when it is no light tap and a car spun or went off because of it; a raw live
+ * contact (no grouping yet) never does.
+ */
+export function isMajor(inc: RaceIncident): boolean {
+  const sev = inc.verdict?.severity;
+  if (typeof sev === "number") return sev >= MAJOR_SEVERITY;
+  if (!Number.isFinite(inc.x) || inc.kind === "tap") return false;
+  return inc.drivers.some((d) => d.role !== "contact");
 }
 
 export interface RaceManifest {

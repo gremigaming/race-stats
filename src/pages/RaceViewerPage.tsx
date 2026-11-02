@@ -7,7 +7,7 @@ import { liveryOf, loadLiveries, type Livery } from "../viewer/cars";
 import { IncidentFeed, IncidentPip, StartLights, TvStrip } from "../viewer/broadcast";
 import { DriverCard } from "../viewer/DriverCard";
 import { Director } from "../viewer/director";
-import { incidentsOf, loadManifest, type RaceIncident, type RaceManifest } from "../viewer/format";
+import { incidentsOf, isMajor, loadManifest, type RaceIncident, type RaceManifest } from "../viewer/format";
 import type { SurfacePick, TimePick } from "../viewer/look";
 import { IconButton, IncidentDetail, PlayerBar, type IncidentDriverStats, type Trace } from "../viewer/panels";
 import { bits, RaceScene, type CameraMode } from "../viewer/scene";
@@ -203,15 +203,15 @@ function Viewer({ manifest: initial, base, back }: { manifest: RaceManifest; bas
     setPlaying(true);
   });
 
-  // live races: a new incident pops up as a picture-in-picture replay
+  // live races: a new major incident (severity 6+) pops up as a picture-in-picture replay
   const seenInc = useRef(incidents.length);
   useEffect(() => {
     if (manifest.finished) return;
     const n = incidents.length;
     if (n > seenInc.current) {
-      const fresh = Array.from({ length: n - seenInc.current }, (_, i) => seenInc.current + i);
+      const fresh = Array.from({ length: n - seenInc.current }, (_, i) => seenInc.current + i).filter((i) => isMajor(incidents[i]));
       seenInc.current = n;
-      setPip((q) => [...q, ...fresh]);
+      if (fresh.length) setPip((q) => [...q, ...fresh]);
     }
   }, [incidents, manifest.finished]);
 
@@ -445,7 +445,7 @@ function Viewer({ manifest: initial, base, back }: { manifest: RaceManifest; bas
     play.current.playing = true;
     setPlaying(true);
   };
-  /** Back to the picked driver(s) or the broadcast camera, at the speed from before. */
+  /** Back to the picked driver(s), else the broadcast camera (dynamic view), at the speed from before. */
   const endIncident = () => {
     const R = restore.current;
     restore.current = null;
@@ -455,8 +455,6 @@ function Viewer({ manifest: initial, base, back }: { manifest: RaceManifest; bas
     const s = scene.current;
     if (!s) return;
     if (R.mode === "follow" && R.cars.length) s.follow(R.cars);
-    else if (R.mode === "track") s.showTrack();
-    else if (R.mode === "free") s.free();
     else s.tv();
   };
   endIncidentRef.current = endIncident;
@@ -890,6 +888,10 @@ function Viewer({ manifest: initial, base, back }: { manifest: RaceManifest; bas
               onDone={() => {
                 setPipRun((n) => n + 1);
                 setPip((q) => q.slice(1));
+              }}
+              onClose={() => {
+                setPipRun((n) => n + 1);
+                setPip([]);
               }}
               onOpen={() => {
                 const k = pip[0];

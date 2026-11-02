@@ -4,14 +4,17 @@
  *
  * - Lap 1 opens on one wide pack shot of the whole field through the first corners.
  * - A shot is held at least MIN_HOLD seconds. Nothing cuts in mid-shot, collisions included:
- *   a collision is first in line for the next cut. (Every incident also plays in the PiP.)
+ *   a collision is first in line for the next cut. (Every major incident also plays in the PiP.)
+ * - Only major incidents (format.isMajor: severity 6+) steer the camera or go to the PiP.
+ * - A shot keeps its anchor car (the car it opened on) until it ends: cars join and leave the
+ *   frame around it, the camera never slides over to a different group mid-shot.
  * - A battle keeps one shot identity while its cars reshuffle; when a shot ends early it stays
  *   on a shot with some of the same cars, or on the same cars, until MIN_HOLD is up.
  * - On a finished race it knows a collision is coming: it holds the current shot rather than
  *   starting a new one that would still be running when the collision happens, and arrives a few
  *   seconds early.
  */
-import type { RaceEvent, RaceIncident } from "./format";
+import { isMajor, type RaceEvent, type RaceIncident } from "./format";
 import type { CarState } from "./store";
 
 export interface Shot {
@@ -37,6 +40,8 @@ export class Director {
   private shot: Shot | null = null;
   private since = 0;
   private lastPick = -Infinity;
+  /** The car the current shot opened on: it stays in frame until the shot ends. */
+  private anchor: number | null = null;
 
   private incidents: () => RaceIncident[];
   private events: () => RaceEvent[];
@@ -53,6 +58,7 @@ export class Director {
   /** Start over (after a seek). */
   reset() {
     this.shot = null;
+    this.anchor = null;
     this.lastPick = -Infinity;
   }
 
@@ -63,7 +69,7 @@ export class Director {
     const incs = this.incidents();
     for (let i = 0; i < incs.length; i++) {
       const at = Math.min(incs[i].t1, incs[i].t0 + 3);
-      if (at > from && at <= to) (out ??= []).push(i);
+      if (at > from && at <= to && isMajor(incs[i])) (out ??= []).push(i);
     }
     return out ?? NONE; // called every frame: no new array when nothing was crossed
   }
@@ -74,7 +80,10 @@ export class Director {
     if (this.shot && (t < this.lastPick || t - this.lastPick > 30)) this.reset();
     this.lastPick = t;
     const next = this.pick(t, order, interval);
-    if (next && (!this.shot || next.key !== this.shot.key)) this.since = t;
+    if (next && (!this.shot || next.key !== this.shot.key)) {
+      this.since = t;
+      this.anchor = next.cars[0] ?? null;
+    }
     this.shot = next;
     return next;
   }
@@ -90,8 +99,7 @@ export class Director {
     const held = t - this.since;
     const ready = held >= MIN_HOLD;
     const collision = options.filter((o) => o.kind === "collision" && o.key !== shot.key).sort((a, b) => overlap(b.cars, shot.cars) - overlap(a.cars, shot.cars))[0];
-    // a collision among the cars already in shot is no cut: the camera is already there
-    if (collision && overlap(collision.cars, shot.cars) > 0 && shot.kind !== "pack") return collision;
+    // (a collision among the cars already in shot needs no cut: the shot carries on, the camera is already there)
     if (ready && collision) return collision; // first in line once the shot has run its time
     const cur = this.same(shot, options);
     if (cur) {
@@ -102,9 +110,15 @@ export class Director {
       return cur;
     }
     // the shot is over (battle broke up, overtake done): stay near the same cars
-    const near = options.filter((o) => o.kind !== "collision" && overlap(o.cars, shot.cars) > 0).sort((a, b) => b.score - a.score)[0];
+    // (with the anchor car in it: never a slide over to another group mid-shot)
+    const a = this.anchor;
+    const anchored = a !== null && live.has(a);
+    const near = options
+      .filter((o) => o.kind !== "collision" && overlap(o.cars, shot.cars) > 0 && (!anchored || o.cars.includes(a!)))
+      .sort((x, y) => y.score - x.score)[0];
     if (!ready) {
       if (near) return { ...near, key: shot.key }; // same shot, cars refreshed
+      if (shot.kind !== "pack" && anchored) return { ...shot, cars: [a!] }; // hold on the anchor car
       if (shot.kind !== "pack" && shot.cars.some((c) => live.has(c))) return shot; // hold the same cars
       return best;
     }
@@ -118,8 +132,9 @@ export class Director {
     if (exact) return exact;
     if (shot.kind === "pack" || shot.kind === "collision") return undefined;
     const need = Math.min(2, shot.cars.length);
+    const a = this.anchor;
     const m = options
-      .filter((o) => (o.kind === "battle" || o.kind === "overtake") && overlap(o.cars, shot.cars) >= need)
+      .filter((o) => (o.kind === "battle" || o.kind === "overtake") && overlap(o.cars, shot.cars) >= need && (a === null || o.cars.includes(a)))
       .sort((a, b) => overlap(b.cars, shot.cars) - overlap(a.cars, shot.cars) || b.score - a.score)[0];
     return m ? { ...m, key: shot.key } : undefined;
   }
@@ -127,7 +142,7 @@ export class Director {
   /** Finished race: a collision starts its lead-in within the next MIN_HOLD seconds. */
   private collisionSoon(t: number) {
     if (!this.finished) return false;
-    return this.incidents().some((inc) => inc.t0 - LEAD_IN > t && inc.t0 - LEAD_IN <= t + MIN_HOLD);
+    return this.incidents().some((inc) => inc.t0 - LEAD_IN > t && inc.t0 - LEAD_IN <= t + MIN_HOLD && isMajor(inc));
   }
 
   /** Lap 1: one wide shot of the whole field from the grid through the first corners. */
@@ -148,6 +163,7 @@ export class Director {
   private candidates(t: number, order: CarState[], interval: (car: number) => number | null): Shot[] {
     const out: Shot[] = [];
     this.incidents().forEach((inc, i) => {
+      if (!isMajor(inc)) return;
       const from = this.finished ? inc.t0 - LEAD_IN : inc.t0;
       if (t >= from && t <= inc.t1 + 2) {
         const cars = [...inc.drivers.filter((d) => d.role === "contact"), ...inc.drivers.filter((d) => d.role !== "contact")].map((d) => d.car);

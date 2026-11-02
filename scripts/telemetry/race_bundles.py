@@ -36,7 +36,7 @@ import gmtel  # noqa: E402
 RELEASE = "https://api.github.com/repos/gremigaming/race-stats/releases/tags/telemetry"
 DOWNLOAD = "https://github.com/gremigaming/race-stats/releases/download/telemetry/"
 
-VERSION = 9          # bump to rebuild every bundle
+VERSION = 10         # bump to rebuild every bundle (10: fault engine verdicts per incident)
 KEEP = 40            # newest races published on the site (R2 keeps everything later)
 CHUNK_SECONDS = 10
 CHUNK_HEAD = struct.Struct("<4sBBHd")
@@ -512,6 +512,28 @@ def session_uid(path):
     return None
 
 
+VERDICT_KEYS = ("verdict", "at_fault", "rule", "severity", "why")
+
+
+def add_verdicts(sess, frames, path, m):
+    """The fault engine's verdict on every incident, as the live server's final.py adds them: the
+    viewer only replays severity 6+ in the PiP and lets only those steer the broadcast camera."""
+    try:
+        import verdicts   # noqa: E402 (imports this module's helpers itself)
+        j = verdicts.Judge(sess, frames, path)
+        name = lambda i: m["cars"].get(str(i), {}).get("name", f"car {i}")  # noqa: E731
+        m["rulebook"] = getattr(verdicts, "RULES", "v0")
+        for inc, v in zip(m["incidents"], verdicts.judge_all(j, m["incidents"], name)):
+            inc["verdict"] = {k: v[k] for k in VERDICT_KEYS if k in v}
+            for d in inc["drivers"]:
+                if v.get("at_fault") is not None:
+                    d["verdict"] = "At fault" if d["car"] == v["at_fault"] else "Not at fault"
+                else:
+                    d["verdict"] = v.get("verdict", "")
+    except Exception as ex:
+        m["verdict_error"] = str(ex)[:200]
+
+
 def bundle(path, rid, outdir):
     sess = gmtel.Session(path)
     if sess.info.get("session_type") not in ("Race", "Race 2", "Race 3") or not sess.field:
@@ -555,6 +577,7 @@ def bundle(path, rid, outdir):
                 "ghosts": ghost_windows, "weather": sess.weather, "tod": sess.tod, "bounds": bounds,
                 "incidents": incidents(frames, sess.collisions, sess.info.get("track_length", 0), ghost_windows)}
     add_surfaces(sess, manifest["incidents"])
+    add_verdicts(sess, frames, path, manifest)
     with open(os.path.join(rdir, "manifest.json"), "w") as f:
         json.dump(manifest, f, separators=(",", ":"))
     return manifest
