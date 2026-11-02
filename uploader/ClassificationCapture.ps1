@@ -32,7 +32,7 @@ param(
     [string]$KeepDir = "",
     [string]$ImagePath = "",
     [string]$PublicKeyXml = "",
-    [int]$Seconds = 480,
+    [int]$Seconds = 900,
     [int]$Every = 3,
     [int]$WantScreens = 4
 )
@@ -188,15 +188,21 @@ $frames = New-Object System.Collections.ArrayList
 $good = 0; $goodFinal = 0
 $best = $null; $bestScore = 0
 $started = Get-Date
-$resultsAtStart = if ($Recorder) { $Recorder.ResultsCount } else { 0 }
+# Everything is tied to this race's session id: packets of the next session (the lobby moved
+# on) are never mixed in, and a new session ends the capture.
+function UidOf($b) { if ($b -and $b.Length -ge 15) { [BitConverter]::ToUInt64($b, 7) } else { [uint64]0 } }
+$sessionUid = if ($FinishLap) { UidOf ([Convert]::FromBase64String($FinishLap)) }
+              elseif ($Recorder) { UidOf $Recorder.LatestLap } else { [uint64]0 }
+$startParts = if ($Recorder -and (UidOf $Recorder.LatestParticipants) -eq $sessionUid) { $Recorder.LatestParticipants } else { $null }
 $resultsSince = $null
 $inv = [Globalization.CultureInfo]::InvariantCulture
 while ($true) {
     $t = [math]::Round(((Get-Date) - $started).TotalSeconds, 1)
+    if ($Recorder -and $sessionUid -and (UidOf $Recorder.LatestLap) -ne $sessionUid) { break }   # next session started
     # the live standings as the game sees them right now: the anchor for the tower rows
     $lap = if ($Recorder -and $Recorder.LatestLap) { [Convert]::ToBase64String($Recorder.LatestLap) } else { $FinishLap }
     $st = if ($Recorder -and $Recorder.LatestLap) { [BitConverter]::ToSingle($Recorder.LatestLap, 15) } else { $FinishTime }
-    $final = $Recorder -and $Recorder.ResultsCount -ne $resultsAtStart
+    $final = $Recorder -and $sessionUid -and (UidOf $Recorder.ResultsPacket) -eq $sessionUid
     if ($final -and -not $resultsSince) { $resultsSince = Get-Date }
     $si = 0
     foreach ($shot in (Shots)) {
@@ -229,8 +235,9 @@ while ($true) {
 }
 
 if ($Recorder) {
-    if ($Recorder.ResultsCount -ne $resultsAtStart -and $Recorder.ResultsPacket) { $Results = [Convert]::ToBase64String($Recorder.ResultsPacket) }
-    if ($Recorder.LatestParticipants) { $Participants = [Convert]::ToBase64String($Recorder.LatestParticipants) }
+    if ((UidOf $Recorder.ResultsPacket) -eq $sessionUid) { $Results = [Convert]::ToBase64String($Recorder.ResultsPacket) }
+    if ((UidOf $Recorder.LatestParticipants) -eq $sessionUid) { $startParts = $Recorder.LatestParticipants }
+    if ($startParts) { $Participants = [Convert]::ToBase64String($startParts) }
 }
 
 # Payload: the packets and every kept frame's words

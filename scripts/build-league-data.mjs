@@ -231,6 +231,13 @@ function carsOf(data) {
 }
 const bestLaps = (data) =>
   Object.fromEntries(data["classification-data"].map((d) => [d.index, d["final-classification"]?.["best-lap-time-ms"] ?? 0]));
+const raceNumbers = (data) =>
+  Object.fromEntries(data["classification-data"].map((d) => [d.index, d["participant-data"]?.["race-number"] ?? null]));
+// "2026-11-03_00-25-04_Brazil_Race.gmcls" -> ms, on the same clock as fileTime()
+const captureTime = (asset) => {
+  const m = /^(\d{4})-(\d{2})-(\d{2})_(\d{2})-(\d{2})/.exec(asset ?? "");
+  return m ? Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5]) : 0;
+};
 
 // Classification screen (GreMi 2026-11-02: racing in his lobbies means your
 // identity is recorded, hidden name or not). After each race the racing PC reads
@@ -257,15 +264,32 @@ function likeness(a, b) {
   }
   return 1 - prev[b.length] / Math.max(a.length, b.length);
 }
+function linkedFile(c) {
+  if (c._file !== undefined) return c._file;
+  const t0 = captureTime(c.asset);
+  const fits = firstPass.filter((s) => {
+    const dt = fileTime(s.name) - t0;
+    const numbered = Object.entries(s.numbers).filter(([, n]) => n != null);
+    const nums = numbered.filter(([ix, n]) => c.cars?.[ix]?.race_number === n).length;
+    return /^Race_/.test(s.name) && dt >= 0 && dt <= 30 * 60 * 1000 && numbered.length >= 4 && nums >= 0.8 * numbered.length;
+  });
+  fits.sort((a, b) => fileTime(a.name) - fileTime(b.name));
+  c._file = fits[0]?.name ?? null;
+  return c._file;
+}
 function screenNames(stream, known) {
   const found = []; // {i, file, index, name, read, votes}
   stream.forEach((s, i) => {
     const hidden = s.cars.filter((c) => c.hidden);
     if (!hidden.length) return;
     const withLap = Object.entries(s.bests).filter(([, ms]) => ms > 0);
+    const numbered = Object.entries(s.numbers).filter(([, n]) => n != null);
     const cap = ocrCaptures.find((c) => {
       const same = withLap.filter(([ix, ms]) => c.cars?.[ix]?.best_ms === ms).length;
-      return withLap.length >= 3 && same >= Math.max(3, 0.75 * withLap.length);
+      if (withLap.length >= 3 && same >= Math.max(3, 0.75 * withLap.length)) return true;
+      // no results packet in the capture (it ended first): the first race file saved after the
+      // recording started (within 30 min) with the same race numbers in the same car slots
+      return !c.has_results && linkedFile(c) === s.name;
     });
     if (!cap) return;
     const present = new Set(s.cars.filter((c) => !c.hidden).map((c) => c.name.toLowerCase()));
@@ -279,7 +303,7 @@ function screenNames(stream, known) {
         if (v > score) [best, score] = [k, v];
       }
       const name = score >= 0.85 ? best
-        : e.votes >= 2 && e.votes / e.seen >= 0.6 && key.length >= 3 ? e.ocr : null;
+        : e.votes >= 2 && e.votes / e.seen >= 0.5 && key.length >= 3 ? e.ocr : null;
       if (!name || present.has(name.toLowerCase())) continue;
       found.push({ i, file: s.name, index: c.index, name, read: e.ocr, votes: `${e.votes}/${e.seen}`, combo: c.shared ? null : c.combo });
     }
@@ -422,7 +446,7 @@ for (const path of SOURCES.flatMap(walk)) {
   const name = data && realName(base, data);
   if (data && !firstPassSeen.has(name) && !isTest(name)) {
     firstPassSeen.add(name);
-    firstPass.push({ name, cars: carsOf(data), bests: bestLaps(data) });
+    firstPass.push({ name, cars: carsOf(data), bests: bestLaps(data), numbers: raceNumbers(data) });
   }
 }
 const { merges: merged, list: mergeList } = findMerges(firstPass);

@@ -74,9 +74,11 @@ def parse_participants(packet):
     per = (len(b) - 1) // 24 if (len(b) - 1) % 24 == 0 else (len(b) - 1) // 22
     name_at = 10 if per >= 60 else 7
     out = {}
-    for i in range(n):
+    for i in range((len(b) - 1) // per):   # every slot: players who left leave gaps below numActiveCars
         r = b[1 + i * per:1 + (i + 1) * per]
         name = r[name_at:name_at + 32].split(b"\0", 1)[0].decode("utf-8", "replace")
+        if not name:
+            continue
         out[i] = {"name": name, "ai": bool(r[0]), "race_number": r[name_at - 2],
                   "hidden": r[name_at + 33] == 0}
     return out
@@ -289,7 +291,8 @@ def match_frame(words, results, lap=None):
     rows_all = lines_of(words)
     lap_times = sum(token_kind(w[0])[0] == "lap" for r in rows_all for w in r)
     if lap and (lap_times < 4 or not results):
-        rows = [r for r in rows_all if token_kind(r[0][0])[0] == "int" and name_in(r[1:])]
+        rows = [r for r in rows_all if token_kind(r[0][0])[0] == "int" and name_in(r[1:])
+                and any(token_kind(w[0])[0] in ("gap", "status") for w in r)]
         pairs = sorted(((tower_score(r, c), ri, ci) for ri, r in enumerate(rows) for ci, c in lap.items()), reverse=True)
     elif results:
         rows = [r for r in rows_all if any(token_kind(w[0])[0] in ("lap", "gap", "status") for w in r)]
@@ -307,6 +310,126 @@ def match_frame(words, results, lap=None):
         n = name_in(rows[ri][1:] if lap and token_kind(rows[ri][0][0])[0] == "int" else rows[ri])
         if n:
             out[ci] = n
+    return out if len(out) >= 3 else {}   # fewer = not the game's standings (a browser, a menu)
+
+
+def similar(a, b):
+    return difflib.SequenceMatcher(None, a, b).ratio()
+
+
+def calibrate(words, pos_of, parts):
+    """Rows and the name column of one screenshot, measured on the drivers whose names show in the
+    game's data: their name words give (position, y, x). Rows are evenly spaced, so a straight line
+    y = a + b * position puts every other position on the screen. Returns (a, b, col_x, col_end) or None."""
+    named = {ci: norm(p["name"]) for ci, p in parts.items()
+             if not p["hidden"] and not p["ai"] and p["name"] and ci in pos_of and len(norm(p["name"])) >= 3}
+    found = []
+    used = set()
+    for ci, key in named.items():
+        best, score = None, 0.0
+        for wi, w in enumerate(words):
+            k = norm(str(w[0]))
+            if wi in used or len(k) < 3:
+                continue
+            v = similar(k, key)
+            if len(k) >= 4 and key.startswith(k):
+                v = max(v, 0.85)   # "[LCR]" "Turbodruif": the first word of a name with spaces
+            if v > score:
+                best, score = wi, v
+        if best is not None and score >= 0.75:
+            used.add(best)
+            w = words[best]
+            found.append((pos_of[ci], w[2] + w[4] / 2, w[1], w[3], w[4], best))
+    if len({f[0] for f in found}) < 3:
+        return None
+    pts = found
+    for _ in range(3):   # least squares, then drop anchors far off the line
+        n = len(pts)
+        mx = sum(p[0] for p in pts) / n
+        my = sum(p[1] for p in pts) / n
+        vx = sum((p[0] - mx) ** 2 for p in pts)
+        if not vx:
+            return None
+        b = sum((p[0] - mx) * (p[1] - my) for p in pts) / vx
+        a = my - b * mx
+        h = sorted(p[4] for p in pts)[len(pts) // 2]
+        if not (1.2 * h <= b <= 6 * h):
+            return None
+        keep = [p for p in pts if abs(p[1] - (a + b * p[0])) <= 0.3 * b]
+        if len(keep) == len(pts):
+            break
+        pts = keep
+        if len({p[0] for p in pts}) < 3:
+            return None
+    xs = sorted(p[2] for p in pts)
+    col_x = xs[len(xs) // 2]
+    # a visible name sitting a row off from where the game puts it: the screen lags the game around
+    # there (places just changed), so positions next to it aren't trusted in this screenshot
+    shaky = {f[0] + d for f in found if abs(f[1] - (a + b * f[0])) > 0.3 * b for d in (-1, 0, 1)}
+    # the next column starts at the first word right of a name, in the anchors' rows
+    ends = []
+    for p in pts:
+        nw = words[p[5]]
+        right = [w[1] for w in words if abs(w[2] + w[4] / 2 - p[1]) <= 0.4 * b and w[1] > nw[1] + nw[3] + 0.3 * h]
+        if right:
+            ends.append(min(right))
+    col_end = sorted(ends)[len(ends) // 2] if ends else col_x + 14 * h
+    return a, b, col_x, col_end, h, shaky
+
+
+ICONISH = set("OoQ0X@G")
+
+
+def name_at(words, y, b, col_x, col_end, h):
+    """The text in the name column at height y (a word starting left of the column, e.g. an icon read
+    into the name, loses that many characters)."""
+    band = sorted((w for w in words if abs(w[2] + w[4] / 2 - y) <= 0.38 * b
+                   and w[1] + w[3] > col_x + 0.3 * h and w[1] < col_end - 0.3 * h), key=lambda w: w[1])
+    parts, last = [], None
+    for w in band:
+        t = str(w[0])
+        kind = token_kind(t)[0]
+        gap = None if last is None else w[1] - (last[1] + last[3])
+        if gap is not None and gap > 1.5 * h:
+            break                        # past the name: a colour bar, a team, a time
+        if kind in ("lap", "gap", "status", "laps") or t.startswith("+") or (kind == "word" and t.upper().strip(".") in WORDS_DATA):
+            if last is None:
+                continue
+            break
+        if kind == "int" and gap is not None and gap > 0.4 * h:
+            break
+        if w[1] < col_x - 0.35 * h and len(t) > 1:
+            # glued in front: the platform / team icons, read as O, Q, X, G, @, colons...
+            room = int((col_x - w[1]) / (w[3] / len(t))) + 1
+            k = 0
+            while k < min(room, len(t) - 1) and (t[k] in ICONISH or not t[k].isalnum()):
+                k += 1
+            t = t[k:]
+        if not t:
+            continue
+        parts.append(("" if gap is None or gap < 0.25 * h else " ") + t)
+        last = w
+    text = "".join(parts).strip(" .,:;|•")
+    return text if len(norm(text)) >= 2 and not is_team(text) else None
+
+
+def match_geometry(words, pos_of, parts, check):
+    """{car index: name} via calibrate(); check(ci, row words) can veto a car (numbers that disagree)."""
+    cal = calibrate(words, pos_of, parts)
+    if not cal:
+        return {}
+    a, b, col_x, col_end, h, shaky = cal
+    out = {}
+    for ci, pos in pos_of.items():
+        if pos in shaky:
+            continue
+        y = a + b * pos
+        n = name_at(words, y, b, col_x, col_end, h)
+        if not n:
+            continue
+        row = [w for w in words if abs(w[2] + w[4] / 2 - y) <= 0.38 * b]
+        if check(ci, row):
+            out[ci] = n
     return out
 
 
@@ -319,7 +442,29 @@ def read_capture(payload):
     raw = collections.defaultdict(collections.Counter)
     for fr in payload.get("frames", []):
         lap = parse_lap(base64.b64decode(fr["lap"])) if fr.get("lap") else None
-        for ci, n in match_frame(fr["words"], results, lap).items():
+        words = fr["words"]
+        final = sum(token_kind(str(w[0]))[0] == "lap" for w in words) >= 4 and results
+        if final:
+            pos_of = {ci: c["position"] for ci, c in results.items()}
+
+            def check(ci, row, c=results):
+                laps = [v for k, v in (token_kind(str(w[0])) for w in row) if k == "lap"]
+                # a readable best lap that isn't this car's = wrong row
+                return not laps or not c[ci]["best_ms"] or any(abs(v - c[ci]["best_ms"]) <= 1 or v > 600000 for v in laps)
+        elif lap:
+            pos_of = {ci: c["position"] for ci, c in lap.items()}
+
+            def check(ci, row, c=lap):
+                gaps = [v for k, v in (token_kind(str(w[0])) for w in row) if k == "gap"]
+                if gaps and c[ci]["status"] == "active" and c[ci]["position"] > 1:
+                    return abs(gaps[-1] - c[ci]["gap_front"]) <= 0.5
+                return True
+        else:
+            pos_of = {}
+        got = match_geometry(words, pos_of, parts, check) if pos_of and parts else {}
+        if not got:   # too few visible names on this screenshot to calibrate: the row anchors
+            got = match_frame(words, results, lap)
+        for ci, n in got.items():
             votes[ci][norm(n)] += 1
             raw[(ci, norm(n))][n] += 1
     frames = len(payload.get("frames", []))
@@ -331,12 +476,28 @@ def read_capture(payload):
              "finish_position": finish.get(ci, {}).get("position"),
              "udp_name": p.get("name"), "hidden": p.get("hidden"), "ai": p.get("ai")}
         if votes[ci]:
-            key, n = votes[ci].most_common(1)[0]
+            # near-identical readings ("JORDZINOIO", "JORDZIN0IO") count together
+            keys = votes[ci].most_common()
+            pooled = {k: sum(n for k2, n in keys if similar(k, k2) >= 0.85) for k, _ in keys}
+            key = max(pooled, key=lambda k: (pooled[k], votes[ci][k]))
+            n = pooled[key]
             e.update(ocr=raw[(ci, key)].most_common(1)[0][0], votes=n, seen=sum(votes[ci].values()))
             if p and not p["hidden"] and not p["ai"] and p["name"]:
                 checked += 1
                 ok += norm(p["name"]) == key
+        if p:
+            e["race_number"] = p.get("race_number")
         cars[ci] = e
+    # one name, one car: when two cars got the same reading, the weaker one loses it
+    by_name = collections.defaultdict(list)
+    for e in cars.values():
+        if e.get("ocr"):
+            by_name[norm(e["ocr"])].append(e)
+    for es in by_name.values():
+        es.sort(key=lambda e: (-e["votes"], -e["votes"] / e["seen"]))
+        for e in es[1:]:
+            for k in ("ocr", "votes", "seen"):
+                e.pop(k, None)
     return {"recording": payload.get("recording"), "captured": payload.get("captured"), "frames": frames,
             "finish_time": payload.get("finish_time"), "has_results": bool(results),
             "cars": cars, "check": {"named_cars": checked, "ocr_correct": ok}}
