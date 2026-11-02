@@ -27,7 +27,7 @@ $Api = "https://api.github.com/repos/$Repo"
 $ConfigDir = Join-Path $env:APPDATA "GreMiRaceUploader"
 $ConfigFile = Join-Path $ConfigDir "config.json"
 $DoneFile = Join-Path $ConfigDir "uploaded.txt"
-$CheckEverySeconds = 20
+$CheckEverySeconds = 5
 $TelemetryPort = 20778
 $TelemetryDir = Join-Path $ConfigDir "telemetry"
 $TelemetrySentDir = Join-Path $TelemetryDir "sent"
@@ -142,19 +142,29 @@ function Send-Race($file, $token) {
     $day = $file.Directory.Parent.Name
     $path = "races/$day/" + [Uri]::EscapeDataString($file.Name)
     $url = "$Api/contents/$path"
+    $liveResult = $null
+    $liveError = $null
+    if ($script:LiveToken) {
+        try {
+            $liveResult = [GmLiveArtifactUploader]::Upload($LiveUrl, $script:LiveToken, "race", $day, $file.Name, $file.FullName)
+        } catch { $liveError = $_.Exception.Message }
+    }
+    $archiveResult = "uploaded"
     try {
         Invoke-RestMethod -Uri ("{0}?ref=main" -f $url) -Headers (Headers $token) | Out-Null
-        return "already there"
+        $archiveResult = "already there"
     } catch {
         if ((StatusOf $_) -ne 404) { throw }
+        $body = @{
+            message = "race: $($file.Name)"
+            content = [Convert]::ToBase64String([IO.File]::ReadAllBytes($file.FullName))
+            branch  = "main"
+        } | ConvertTo-Json
+        Invoke-RestMethod -Method Put -Uri $url -Headers (Headers $token) -Body $body -ContentType "application/json" | Out-Null
     }
-    $body = @{
-        message = "race: $($file.Name)"
-        content = [Convert]::ToBase64String([IO.File]::ReadAllBytes($file.FullName))
-        branch  = "main"
-    } | ConvertTo-Json
-    Invoke-RestMethod -Method Put -Uri $url -Headers (Headers $token) -Body $body -ContentType "application/json" | Out-Null
-    return "uploaded"
+    if ($liveError) { throw "archived on GitHub; live publish will retry ($liveError)" }
+    if ($liveResult) { return "$archiveResult, $liveResult" }
+    return $archiveResult
 }
 
 # ------------------------------------------------------------------ telemetry
@@ -181,7 +191,7 @@ function Start-Recorder {
 # (gremigaming/race-control-stats live/). Asks once for the live token that the
 # server setup printed; Enter skips it (delete live.json to be asked again).
 function Start-Live($recorder) {
-    if (-not $recorder) { return $null }
+    $script:LiveToken = $null
     if (-not (Test-Path $LiveFile)) {
         Write-Host ""
         Write-Host "Live Race Viewer: paste the live token from the server setup and press Enter."
@@ -196,6 +206,21 @@ function Start-Live($recorder) {
     if ($c.off -or -not $c.token) { return $null }
     $token = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
         [Runtime.InteropServices.Marshal]::SecureStringToBSTR(($c.token | ConvertTo-SecureString))).Trim()
+    $script:LiveToken = $token
+    if (-not ("GmLiveArtifactUploader" -as [type])) {
+        $source = Join-Path $PSScriptRoot "TelemetryRecorder.cs"
+        if (-not (Test-Path $source)) {
+            Say "TelemetryRecorder.cs is missing, so direct live publishing is unavailable." Yellow
+            $script:LiveToken = $null
+            return $null
+        }
+        try { Add-Type -Path $source } catch {
+            Say "Live artifact uploader couldn't load ($($_.Exception.Message))." Yellow
+            $script:LiveToken = $null
+            return $null
+        }
+    }
+    if (-not $recorder) { return $null }
     try {
         $live = New-Object GmLiveUplink -ArgumentList $LiveUrl, $token
         $live.Start()
@@ -228,6 +253,15 @@ function Get-TelemetryRelease($token) {
 }
 
 function Send-Telemetry($file, $token, $type = "application/gzip") {
+    $liveResult = $null
+    $liveError = $null
+    if ($script:LiveToken) {
+        $kind = if ($file.Name.EndsWith(".gmcls", [StringComparison]::OrdinalIgnoreCase)) { "classification" } else { "telemetry" }
+        $day = if ($file.Name -match '^(\d{4})-(\d{2})-(\d{2})') { "$($Matches[1])_$($Matches[2])_$($Matches[3])" } else { throw "Couldn't read race day from $($file.Name)" }
+        try {
+            $liveResult = [GmLiveArtifactUploader]::Upload($LiveUrl, $script:LiveToken, $kind, $day, $file.Name, $file.FullName)
+        } catch { $liveError = $_.Exception.Message }
+    }
     $release = Get-TelemetryRelease $token
     $url = "https://uploads.github.com/repos/$Repo/releases/$($release.id)/assets?name=" + [Uri]::EscapeDataString($file.Name)
     try {
@@ -237,6 +271,8 @@ function Send-Telemetry($file, $token, $type = "application/gzip") {
         if ((StatusOf $_) -ne 422) { throw }
         $result = "already there"
     }
+    if ($liveError) { throw "archived on GitHub; live publish will retry ($liveError)" }
+    if ($liveResult) { $result += ", $liveResult" }
     New-Item -ItemType Directory -Force -Path $TelemetrySentDir | Out-Null
     Move-Item -Force -Path $file.FullName -Destination (Join-Path $TelemetrySentDir $file.Name)
     return $result
@@ -298,7 +334,7 @@ $settings = Get-Settings
 $done = New-Object System.Collections.Generic.HashSet[string]
 if (Test-Path $DoneFile) { Get-Content $DoneFile | ForEach-Object { [void]$done.Add($_) } }
 Say "Watching $($settings.DataDir)" Cyan
-Say "New races go to https://gremigaming.github.io/race-stats/ a few minutes after they're saved."
+Say "Race results publish live when saved; GitHub keeps the archive and fallback."
 $recorder = Start-Recorder
 $recorderStatus = ""
 $live = Start-Live $recorder
@@ -307,8 +343,28 @@ $resultsSeen = 0
 $finishSeen = 0
 
 while ($true) {
-    # Telemetry first: the recorder closes a session's file when its results come in, so
-    # the recording is on GitHub before the race file starts the site build (replays at once)
+    # Publish finalized results before sending potentially large recordings. The live
+    # league worker can show provisional standings while replay analysis catches up.
+    $files = Get-ChildItem -Path $settings.DataDir -Recurse -Filter "*.json" -ErrorAction SilentlyContinue |
+        Where-Object { $_.Directory.Name -eq "race-info" -and -not $done.Contains($_.Name) } |
+        Sort-Object LastWriteTime
+    foreach ($file in $files) {
+        # Pits n' Giggles may still be writing it
+        if ($file.LastWriteTime -gt (Get-Date).AddSeconds(-15)) { continue }
+        try {
+            $result = Send-Race $file $settings.Token
+            [void]$done.Add($file.Name)
+            Add-Content -Path $DoneFile -Value $file.Name
+            Say "$($file.Name): $result" Green
+        } catch {
+            if ((StatusOf $_) -eq 401) {
+                Say "GitHub refused the token (expired?). Delete $ConfigFile and start the uploader again." Red
+            } else {
+                Say "$($file.Name): upload failed, trying again soon ($($_.Exception.Message))" Yellow
+            }
+        }
+    }
+
     if ($recorder) {
         if ($recorder.Status -ne $recorderStatus) {
             $recorderStatus = $recorder.Status
@@ -339,26 +395,6 @@ while ($true) {
     if ($live -and $live.Status -ne $liveStatus) {
         $liveStatus = $live.Status
         Say "Live: $liveStatus"
-    }
-
-    $files = Get-ChildItem -Path $settings.DataDir -Recurse -Filter "*.json" -ErrorAction SilentlyContinue |
-        Where-Object { $_.Directory.Name -eq "race-info" -and -not $done.Contains($_.Name) } |
-        Sort-Object LastWriteTime
-    foreach ($file in $files) {
-        # Pits n' Giggles may still be writing it
-        if ($file.LastWriteTime -gt (Get-Date).AddSeconds(-15)) { continue }
-        try {
-            $result = Send-Race $file $settings.Token
-            [void]$done.Add($file.Name)
-            Add-Content -Path $DoneFile -Value $file.Name
-            Say "$($file.Name): $result" Green
-        } catch {
-            if ((StatusOf $_) -eq 401) {
-                Say "GitHub refused the token (expired?). Delete $ConfigFile and start the uploader again." Red
-            } else {
-                Say "$($file.Name): upload failed, trying again soon ($($_.Exception.Message))" Yellow
-            }
-        }
     }
 
     # wait, but start the classification capture the moment a race's results come in

@@ -31,7 +31,7 @@ def v1_points(sev):
     v2.1 (GreMi, 1 Nov 2026): severity 1-3 = 0.5, 4-5 = 1.5, 6-7 = 3, 8-10 = 5."""
     if V21: return 0.5 if sev <= 3 else 1.5 if sev <= 5 else 3.0 if sev <= 7 else 5.0
     return max(0.5, math.floor(sev + 0.5) / 2)
-SESSIONS = os.path.join("public", "league", "sessions")  # written by build-league-data.mjs (aliases applied, backups dropped)
+SESSIONS = os.environ.get("LEAGUE_SESSIONS_DIR", os.path.join("public", "league", "sessions"))  # written by build-league-data.mjs (aliases applied, backups dropped)
 nm_ = lambda n: re.sub(r"\s+", " ", n).strip()  # same as the leaderboard: "conor\xa0\xa0racing1" is "conor racing1"
 stamp = lambda f: re.search(r"(\d{4}_\d\d_\d\d_\d\d_\d\d_\d\d)", f).group(1)
 
@@ -465,7 +465,7 @@ for f in files:
 # by an id built from the file, the car index and the kind of item, so a later
 # name change doesn't lose the correction.
 try:
-    CHANGES = json.load(open(os.path.join("races", "corrections.json"))).get("changes", [])
+    CHANGES = json.load(open(os.path.join(os.environ.get("LEAGUE_RACES_DIR", "races"), "corrections.json"))).get("changes", [])
 except FileNotFoundError:
     CHANGES = []
 FIX = {c["id"]: c for c in CHANGES if c.get("type") == "incident"}
@@ -626,7 +626,7 @@ for si, stream in enumerate(streams):
         car = {nm_(c["driver-name"]): c["index"] for c in d["classification-data"]}
         # a driver kicked by staff is gone from this session for everyone else,
         # but still answers for their own incidents (from the untouched copy)
-        full = os.path.join(".cache", "kicked", name)
+        full = os.path.join(os.environ.get("LEAGUE_CACHE_DIR", ".cache"), "kicked", name)
         if os.path.exists(full):
             fd = json.load(open(full))
             kicked = {nm_(c["driver-name"]): c["index"] for c in fd["classification-data"]

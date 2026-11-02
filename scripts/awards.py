@@ -20,8 +20,8 @@ import json
 import os
 import re
 
-SESSIONS = os.path.join("public", "league", "sessions")
-OUT = os.path.join("public", "league", "awards.json")
+SESSIONS = os.environ.get("LEAGUE_SESSIONS_DIR", os.path.join("public", "league", "sessions"))
+OUT = os.environ.get("AWARDS_OUT", os.path.join("public", "league", "awards.json"))
 STREAMS = 5
 STREAM_GAP_H = 3
 MIN_RACES = 3

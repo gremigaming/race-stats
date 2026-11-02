@@ -28,7 +28,7 @@ import gmtel  # noqa: E402
 
 RELEASE = "https://api.github.com/repos/gremigaming/race-stats/releases/tags/telemetry"
 DOWNLOAD = "https://github.com/gremigaming/race-stats/releases/download/telemetry/"
-LEAGUE = os.path.join("public", "league")
+LEAGUE = os.environ.get("LEAGUE_OUT_DIR", os.path.join("public", "league"))
 BEFORE, AFTER, FPS = 3.0, 2.5, 30
 MARGIN = 40.0          # metres of track drawn around the pair's path
 VERSION = 4            # bump to rebuild every replay
@@ -336,11 +336,12 @@ def main():
     incs = json.load(open(ipath)) if os.path.exists(ipath) else {"incidents": []}
     for it in incs["incidents"]:
         todo[it["file"]].append(it)
+    assets = {os.path.basename(p) for p in __import__("glob").glob(os.path.join(cache, "*.gmtel.gz"))}
     try:
-        assets = sorted(a["name"] for a in http_json(RELEASE)["assets"] if a["name"].endswith(".gmtel.gz"))
+        assets.update(a["name"] for a in http_json(RELEASE)["assets"] if a["name"].endswith(".gmtel.gz"))
     except Exception as ex:
-        print("telemetry release not reachable:", ex)
-        assets = []
+        print("telemetry release not reachable; using locally uploaded recordings:", ex)
+    assets = sorted(assets)
     outdir = os.path.join(LEAGUE, "replays")
     os.makedirs(os.path.join(cache, "replays"), exist_ok=True)
     os.makedirs(outdir, exist_ok=True)

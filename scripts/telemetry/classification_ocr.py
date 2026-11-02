@@ -356,6 +356,9 @@ def http_json(url):
 def main():
     args = sys.argv[1:]
     key_pem = os.environ.get("CLASSIFICATION_KEY", "").encode()
+    if not key_pem and os.environ.get("CLASSIFICATION_KEY_B64"):
+        import base64
+        key_pem = base64.b64decode(os.environ["CLASSIFICATION_KEY_B64"])
     if "--key" in args:
         i = args.index("--key")
         key_pem = open(args[i + 1], "rb").read()
@@ -372,11 +375,12 @@ def main():
     else:
         folder = os.path.join(cache, "classification")
         os.makedirs(folder, exist_ok=True)
+        assets = {f for f in os.listdir(folder) if f.endswith(".gmcls")}
         try:
-            assets = sorted(a["name"] for a in http_json(RELEASE)["assets"] if a["name"].endswith(".gmcls"))
+            assets.update(a["name"] for a in http_json(RELEASE)["assets"] if a["name"].endswith(".gmcls"))
         except Exception as ex:
-            print("classification OCR: telemetry release not reachable:", ex)
-            assets = sorted(f for f in os.listdir(folder) if f.endswith(".gmcls"))
+            print("classification OCR: telemetry release not reachable; using local captures:", ex)
+        assets = sorted(assets)
         for name in assets:
             done = os.path.join(folder, f"{name}.v{VERSION}.json")
             try:

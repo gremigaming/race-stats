@@ -1,17 +1,22 @@
 # Race uploader
 
-A small Windows script that watches the Pits n' Giggles save folder and sends
-every new race file to `races/<date>/` in this repo. Each upload rebuilds the
-site, and open pages pick up new races within a minute.
+A small Windows script that watches the Pits n' Giggles save folder. With the
+live-server token enabled, each finalized session is sent straight to the warm
+publisher and appears on the site in seconds; GitHub still receives the archive
+copy. The site polls live data every 10 seconds and falls back to its Pages data
+when the live service is unavailable. Pages rebuilds still reconcile archive
+and code changes on their scheduled run.
 
 Setup on the racing PC:
 
 1. Make a token: github.com > Settings > Developer settings > Personal access
    tokens > Fine-grained tokens > Generate new token. Repository access: Only
    select repositories > `race-stats`. Permissions: Contents > Read and write.
-2. Download `RaceUploader.ps1` and `Start Race Uploader.bat` into one folder.
+2. Download `RaceUploader.ps1`, `TelemetryRecorder.cs`, and `Start Race Uploader.bat`
+   into one folder. The C# file also contains the authenticated live file uploader.
 3. Double-click `Start Race Uploader.bat`. The first run finds the save folder,
-   asks for the token and offers to start with Windows.
+   asks for the GitHub token and the live-server token, then offers to start
+   with Windows. Press Enter at the live-token prompt to keep archive-only mode.
 
 Settings live in `%APPDATA%\GreMiRaceUploader` (delete that folder to start over).
 
@@ -37,7 +42,8 @@ these for every car, Restricted telemetry included.
 
 Each session (practice, quali, race, time trial) becomes one file in
 `%APPDATA%\GreMiRaceUploader\telemetry`, which goes to the `telemetry`
-release of this repo. `scripts/telemetry/gmtel.py` turns a file into laps;
+release of this repo and, when live upload is enabled, directly to the warm
+publisher. `scripts/telemetry/gmtel.py` turns a file into laps;
 `--collisions` shows where both cars were at each contact.
 
 ### Standings on screen (hidden names)
@@ -50,8 +56,9 @@ built-in OCR: first the live standings tower (the whole grid, while the others
 finish), then the final classification screen, stopping 60 s after the results.
 Every screenshot is stored with the game's live lap data of that moment, so each
 row is tied to a car even if places change later. Only the words (encrypted,
-`.gmcls`) go to the `telemetry` release; the site build gives hidden cars their
-name. The best screenshot of each race stays in
+`.gmcls`) go to the `telemetry` release and the live server. The live server
+publishes provisional results immediately, then updates hidden names when its
+classification decryption key is configured and analysis finishes. The best screenshot of each race stays in
 `%APPDATA%\GreMiRaceUploader\classification` for checking (kept 30 days).
 
 - Stay on the game (don't tab out) for a minute after you finish.

@@ -1,6 +1,7 @@
 import { queryOptions, type QueryClient } from "@tanstack/react-query";
 import type { SessionSummary, TelemetrySession } from "../types/telemetry";
 import { normalizeSession } from "../utils/normalizeSession";
+import { loadLeagueSource } from "../league/liveData";
 
 export type Mode = "detecting" | "api" | "demo" | "upload" | "league";
 export type DataSourceMode = Exclude<Mode, "detecting">;
@@ -59,11 +60,8 @@ export async function detectDataSource(
 ): Promise<DataSourceDetection> {
   // GreMi Gang league site: all lobby races published as static files
   try {
-    const res = await fetch(`${import.meta.env.BASE_URL}league/index.json`);
-    if (res.ok) {
-      await res.json();
-      return { mode: "league", sessions: [] };
-    }
+    await loadLeagueSource();
+    return { mode: "league", sessions: [] };
   } catch {
     // no league data — fall through
   }

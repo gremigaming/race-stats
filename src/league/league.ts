@@ -15,6 +15,14 @@ export interface LeagueIndex {
   files: string[];
   /** Driver key shown when the visitor hasn't picked anyone yet. */
   defaultDriver?: string;
+  /** Changes on every live publish; legacy Pages indexes omit it. */
+  generation?: string;
+  /** SHA-256 revision for each published session. */
+  revisions?: Record<string, string>;
+  /** Immutable R2 object paths, keyed by paths such as `sessions/<file>`. */
+  assetPaths?: Record<string, string>;
+  /** True while the first results are visible and race analysis is still finishing. */
+  pending?: boolean;
 }
 
 export interface LeagueRace {

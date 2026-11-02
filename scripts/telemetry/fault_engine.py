@@ -24,7 +24,7 @@ import incident_replays as ir  # noqa: E402
 import verdicts  # noqa: E402
 
 FIRST_DAY = "2026_10_19"   # races before this have no telemetry for every car: no SR (GreMi, 31 Oct)
-SESSIONS = os.path.join("public", "league", "sessions")
+SESSIONS = os.environ.get("LEAGUE_SESSIONS_DIR", os.path.join("public", "league", "sessions"))
 WINDOW_MIN = 60            # the recording started at most this long before the race file was saved
 
 
@@ -77,11 +77,12 @@ def judge(args):
 def main():
     cache = sys.argv[1] if len(sys.argv) > 1 else "/tmp/telemetry-cache"
     os.makedirs(os.path.join(cache, "verdicts"), exist_ok=True)
+    assets = {os.path.basename(p) for p in glob.glob(os.path.join(cache, "*_Race.gmtel.gz"))}
     try:
-        assets = sorted(a["name"] for a in ir.http_json(ir.RELEASE)["assets"] if a["name"].endswith("_Race.gmtel.gz"))
+        assets.update(a["name"] for a in ir.http_json(ir.RELEASE)["assets"] if a["name"].endswith("_Race.gmtel.gz"))
     except Exception as ex:
         print("telemetry release not reachable, using the kept recordings:", ex)
-        assets = sorted(os.path.basename(p) for p in glob.glob(os.path.join(cache, "*_Race.gmtel.gz")))
+    assets = sorted(assets)
     todo, used = [], set()
     for f in sorted(glob.glob(os.path.join(SESSIONS, "Race_*.json")), key=lambda f: stamp(f)):
         file = os.path.basename(f)

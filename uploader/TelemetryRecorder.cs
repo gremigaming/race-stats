@@ -626,3 +626,64 @@ public class GmLiveUplink
         ws = null;
     }
 }
+
+// Uploads completed files over the same authenticated live-server token used
+// by GmLiveUplink. The server accepts one JSON header followed by <=64 KB binary
+// frames, so large recordings never exceed the WebSocket frame limit.
+public class GmLiveArtifactUploader
+{
+    public static string Upload(string ingestUrl, string token, string kind, string day, string name, string path)
+    {
+        string url = ingestUrl.EndsWith("/ingest", StringComparison.OrdinalIgnoreCase)
+            ? ingestUrl.Substring(0, ingestUrl.Length - 7) + "/publish"
+            : ingestUrl.TrimEnd('/') + "/publish";
+        ClientWebSocket ws = new ClientWebSocket();
+        ws.Options.SetRequestHeader("Authorization", "Bearer " + token);
+        ws.Options.KeepAliveInterval = TimeSpan.FromSeconds(20);
+        try
+        {
+            if (!ws.ConnectAsync(new Uri(url), CancellationToken.None).Wait(15000))
+                throw new Exception("connect timed out");
+            long size = new FileInfo(path).Length;
+            string header = "{\"type\":\"artifact\",\"kind\":\"" + Escape(kind) +
+                "\",\"day\":\"" + Escape(day) + "\",\"name\":\"" + Escape(name) +
+                "\",\"size\":" + size.ToString(System.Globalization.CultureInfo.InvariantCulture) + "}";
+            byte[] h = Encoding.UTF8.GetBytes(header);
+            if (!ws.SendAsync(new ArraySegment<byte>(h), WebSocketMessageType.Text, true, CancellationToken.None).Wait(15000))
+                throw new Exception("header send timed out");
+
+            byte[] buffer = new byte[64 * 1024];
+            long sent = 0;
+            using (FileStream f = File.OpenRead(path))
+            {
+                int n;
+                while ((n = f.Read(buffer, 0, buffer.Length)) > 0)
+                {
+                    if (!ws.SendAsync(new ArraySegment<byte>(buffer, 0, n), WebSocketMessageType.Binary, true,
+                                      CancellationToken.None).Wait(30000))
+                        throw new Exception("file send timed out");
+                    sent += n;
+                }
+            }
+            if (sent != size) throw new Exception("file changed during upload");
+
+            byte[] response = new byte[1024];
+            WebSocketReceiveResult received = ws.ReceiveAsync(new ArraySegment<byte>(response), CancellationToken.None).Result;
+            if (received.MessageType != WebSocketMessageType.Text)
+                throw new Exception("server returned an invalid acknowledgement");
+            string answer = Encoding.UTF8.GetString(response, 0, received.Count);
+            if (answer.IndexOf("\"ok\":true", StringComparison.Ordinal) < 0)
+                throw new Exception("server rejected the upload: " + answer);
+            return answer.IndexOf("\"status\":\"duplicate\"", StringComparison.Ordinal) >= 0 ? "already live" : "live";
+        }
+        finally
+        {
+            try { ws.Abort(); ws.Dispose(); } catch (Exception) { }
+        }
+    }
+
+    static string Escape(string value)
+    {
+        return value.Replace("\\", "\\\\").Replace("\"", "\\\"");
+    }
+}

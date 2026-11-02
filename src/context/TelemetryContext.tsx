@@ -41,6 +41,7 @@ import {
   type LeagueRace,
 } from "../league/league";
 import { safetyByKey, type SafetyData, type SafetyDriver } from "../league/safety";
+import { leagueRevision, loadLeagueJson, loadLeagueSource } from "../league/liveData";
 import {
   allowedFiles,
   buildStreams,
@@ -66,13 +67,15 @@ export interface LeagueState {
   /** Safety rating per driver key. Never date-filtered. */
   safety: Map<string, SafetyDriver>;
   safetyData: SafetyData | null;
+  /** Race results are visible while telemetry analysis is still finishing. */
+  analysisPending: boolean;
 }
 
 const LEAGUE_DRIVER_STORAGE_KEY = "league-driver";
 
-// Session files never change once published, so they are fetched once; only
-// the index is re-read to pick up new races while the page is open.
-const leagueSessionCache = new Map<string, TelemetrySession>();
+// Session content is cached by its published hash; corrections and late
+// classification reads replace only the affected sessions.
+const leagueSessionCache = new Map<string, { revision: string; session: TelemetrySession }>();
 let lastLeague: { index: LeagueIndex; races: LeagueRace[]; safety: SafetyData | null } | null = null;
 
 async function fetchLeague(): Promise<{
@@ -80,29 +83,33 @@ async function fetchLeague(): Promise<{
   races: LeagueRace[];
   safety: SafetyData | null;
 }> {
-  const base = `${import.meta.env.BASE_URL}league/`;
-  const res = await fetch(`${base}index.json?t=${Date.now()}`, { cache: "no-store" });
-  if (!res.ok) throw new Error("Failed to load league index");
-  const index = (await res.json()) as LeagueIndex;
-  if (lastLeague && lastLeague.index.files.join("\n") === index.files.join("\n")) {
+  const source = await loadLeagueSource();
+  const { index } = source;
+  const oldRevision = lastLeague
+    ? lastLeague.index.generation ?? JSON.stringify(lastLeague.index.revisions ?? {})
+    : "";
+  const newRevision = index.generation ?? JSON.stringify(index.revisions ?? {});
+  if (
+    lastLeague &&
+    oldRevision === newRevision &&
+    lastLeague.index.files.join("\n") === index.files.join("\n")
+  ) {
     return lastLeague;
   }
   const races = await Promise.all(
     index.files.map(async (file) => {
-      let session = leagueSessionCache.get(file);
-      if (!session) {
-        const r = await fetch(`${base}sessions/${encodeURIComponent(file)}`);
-        if (!r.ok) throw new Error(`Failed to load ${file}`);
-        session = (await r.json()) as TelemetrySession;
-        leagueSessionCache.set(file, session);
+      const revision = leagueRevision(source, file);
+      let cached = leagueSessionCache.get(file);
+      if (!cached || cached.revision !== revision) {
+        const session = await loadLeagueJson<TelemetrySession>(`sessions/${file}`, source);
+        cached = { revision, session };
+        leagueSessionCache.set(file, cached);
       }
-      return { file, session };
+      return { file, session: cached.session };
     }),
   );
   // The rating is built alongside the race files; a missing file just hides it
-  const safety = await fetch(`${base}safety.json?t=${Date.now()}`, { cache: "no-store" })
-    .then((r) => (r.ok ? (r.json() as Promise<SafetyData>) : null))
-    .catch(() => null);
+  const safety = await loadLeagueJson<SafetyData>("safety.json", source).catch(() => null);
   lastLeague = { index, races, safety };
   return lastLeague;
 }
@@ -185,7 +192,7 @@ export function TelemetryProvider({ children }: { children: ReactNode }) {
     gcTime: Infinity,
     refetchOnWindowFocus: false,
     // New races show up without a reload; unchanged data keeps its identity
-    refetchInterval: 60_000,
+    refetchInterval: 10_000,
     structuralSharing: false,
   });
   const [pickedDriver, setPickedDriver] = useState<string | null>(initialDriver);
@@ -276,6 +283,7 @@ export function TelemetryProvider({ children }: { children: ReactNode }) {
           streams,
           safety,
           safetyData,
+          analysisPending: leagueQuery.data.index.pending === true,
         }
       : null;
 
