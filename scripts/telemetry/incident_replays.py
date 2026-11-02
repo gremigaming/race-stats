@@ -19,6 +19,7 @@ import os
 import re
 import shutil
 import sys
+import time
 import urllib.request
 
 import numpy as np
@@ -350,6 +351,12 @@ def main():
         index = json.load(open(idx_path))
     except Exception:
         index = {}
+    # Which recording matched each race file, so later builds skip the slow scan.
+    # [asset, offset] = matched; {"none": candidates} = nothing matched among those recordings.
+    matches = index.setdefault("_match", {})
+    failed = set(index.get("_failed", []))   # replays that came out empty; not retried every build
+    budget = float(os.environ.get("REPLAY_BUDGET_S") or 0)   # live server: stop starting new days after this
+    deadline = time.time() + budget if budget else None
     made = 0
     pending = {}
     for file, items in sorted(todo.items()):
@@ -361,16 +368,19 @@ def main():
             if os.path.exists(kept):
                 shutil.copy(kept, os.path.join(outdir, rid + ".json"))
                 it["replay"] = rid
-            else:
+            elif rid not in failed:
                 left.append((it, rid))
         if left:
             pending[file] = left
     by_day = collections.defaultdict(list)
     for file in pending:
         by_day[day_of(file)].append(file)
-    for day, files in sorted(by_day.items()):
+    for day, files in sorted(by_day.items(), reverse=True):   # newest races first
         if not day:
             continue
+        if deadline and time.time() > deadline:
+            print(f"replay time budget used up; {day} and older wait for the next build")
+            break
         pngs = {}
         for file in files:
             sp = os.path.join(LEAGUE, "sessions", file if file.endswith(".json") else file + ".json")
@@ -380,7 +390,14 @@ def main():
             continue
         cands = [n for n in assets if n.startswith(day) and index.get(n) is not False]
         best = {}    # file -> (share, asset, offset)
-        for n in cands:
+        scan = []
+        for file in pngs:
+            m = matches.get(file)
+            if isinstance(m, list) and m[0] in cands:
+                best[file] = (1.0, m[0], m[1])
+            elif not (isinstance(m, dict) and m.get("none") == cands):
+                scan.append(file)
+        for n in cands if scan else []:
             try:
                 if index.get(n) is None:
                     index[n] = has_field(download(n, cache))
@@ -390,11 +407,14 @@ def main():
             except Exception as ex:
                 print("  skipped", n, ex)
                 continue
-            for file, png in pngs.items():
-                o, share = offset(png, sess)
+            for file in scan:
+                o, share = offset(pngs[file], sess)
                 if o is not None and share >= 0.5 and share > best.get(file, (0,))[0]:
                     best[file] = (share, n, o)
             del sess
+        for file in scan:
+            matches[file] = [best[file][1], best[file][2]] if file in best else {"none": cands}
+        json.dump(index, open(idx_path, "w"))   # keep the scan even if a later day is cut off
         for n in sorted({b[1] for b in best.values()}):
             race = Race(gmtel.Session(download(n, cache)))
             for file, (share, bn, off) in best.items():
@@ -408,6 +428,7 @@ def main():
                         print("  replay failed:", ex)
                         r = None
                     if not r:
+                        failed.add(rid)
                         continue
                     # team of every car, for the car drawings (public/cars)
                     r["teams"] = {str(c["index"]): (c.get("participant-data") or {}).get("team-id") or c.get("team")
@@ -418,9 +439,12 @@ def main():
                     it["replay"] = rid
                     made += 1
             del race
+            index["_failed"] = sorted(failed)
+            json.dump(index, open(idx_path, "w"))
         for file in files:
             if file not in best:
                 print(file, ": no recording with every car")
+    index["_failed"] = sorted(failed)
     json.dump(index, open(idx_path, "w"))
     for d in data["drivers"]:
         for s in d["sessions"]:
