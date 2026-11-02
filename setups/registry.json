@@ -1,0 +1,3406 @@
+{
+ "about": "GreMi's in-game setups (F1 25 Time Trial, F1 2026 car, Red Bull), 3 per track. Written by scripts/telemetry/setup_loop.py, the staff server (Finish setup) and the Apply run (docs/setup-apply.md).",
+ "game": {
+  "category": "F1 2026",
+  "team": "Red Bull"
+ },
+ "apply": {
+  "requested": null,
+  "last": "2026-11-02"
+ },
+ "pending": 0,
+ "tracks": [
+  {
+   "track": "Melbourne",
+   "name": "AUSTRALIA",
+   "post": "Australia",
+   "trackIds": [
+    "Melbourne",
+    "Australia"
+   ],
+   "row": 0,
+   "finished": null,
+   "kinds": {
+    "quali": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 0,
+       "values": {
+        "fw": 45,
+        "rw": 15,
+        "don": 100,
+        "doff": 25,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 30,
+        "farb": 1,
+        "rarb": 14,
+        "frh": 21,
+        "rrh": 45,
+        "bb": 56,
+        "bp": 100,
+        "fr": 27.0,
+        "fl": 27.0,
+        "rr": 20.5,
+        "rl": 20.5
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Your last quali setup.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    },
+    "race": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 1,
+       "values": {
+        "fw": 45,
+        "rw": 15,
+        "don": 100,
+        "doff": 25,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 30,
+        "farb": 1,
+        "rarb": 14,
+        "frh": 21,
+        "rrh": 45,
+        "bb": 57,
+        "bp": 100,
+        "fr": 27.0,
+        "fl": 27.0,
+        "rr": 20.5,
+        "rl": 20.5
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Your last race setup.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    },
+    "wet": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 2,
+       "values": {
+        "fw": 50,
+        "rw": 23,
+        "don": 75,
+        "doff": 30,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 35,
+        "rs": 27,
+        "farb": 1,
+        "rarb": 13,
+        "frh": 24,
+        "rrh": 48,
+        "bb": 56,
+        "bp": 95,
+        "fr": 27.0,
+        "fl": 27.0,
+        "rr": 20.5,
+        "rl": 20.5
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Derived from your race setup: +wings, softer, higher, open diff, less brake pressure.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    }
+   }
+  },
+  {
+   "track": "Shanghai",
+   "name": "CHINA",
+   "post": "China",
+   "trackIds": [
+    "Shanghai",
+    "China"
+   ],
+   "row": 1,
+   "finished": null,
+   "kinds": {
+    "quali": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 3,
+       "values": {
+        "fw": 50,
+        "rw": 35,
+        "don": 100,
+        "doff": 50,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 32,
+        "farb": 1,
+        "rarb": 9,
+        "frh": 22,
+        "rrh": 40,
+        "bb": 55,
+        "bp": 100,
+        "fr": 29.5,
+        "fl": 29.5,
+        "rr": 23.0,
+        "rl": 23.0
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Your last quali setup.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    },
+    "race": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 4,
+       "values": {
+        "fw": 50,
+        "rw": 35,
+        "don": 100,
+        "doff": 50,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 32,
+        "farb": 1,
+        "rarb": 9,
+        "frh": 22,
+        "rrh": 40,
+        "bb": 55,
+        "bp": 100,
+        "fr": 29.5,
+        "fl": 29.5,
+        "rr": 23.0,
+        "rl": 23.0
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Your last race setup.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    },
+    "wet": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 5,
+       "values": {
+        "fw": 50,
+        "rw": 43,
+        "don": 75,
+        "doff": 55,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 35,
+        "rs": 29,
+        "farb": 1,
+        "rarb": 8,
+        "frh": 25,
+        "rrh": 43,
+        "bb": 54,
+        "bp": 95,
+        "fr": 29.5,
+        "fl": 29.5,
+        "rr": 23.0,
+        "rl": 23.0
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Derived from your race setup: +wings, softer, higher, open diff, less brake pressure.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    }
+   }
+  },
+  {
+   "track": "Suzuka",
+   "name": "JAPAN",
+   "post": "Japan",
+   "trackIds": [
+    "Suzuka",
+    "Japan"
+   ],
+   "row": 2,
+   "finished": null,
+   "kinds": {
+    "quali": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 6,
+       "values": {
+        "fw": 50,
+        "rw": 22,
+        "don": 100,
+        "doff": 35,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 13,
+        "farb": 2,
+        "rarb": 10,
+        "frh": 21,
+        "rrh": 42,
+        "bb": 56,
+        "bp": 100,
+        "fr": 29.5,
+        "fl": 29.5,
+        "rr": 26.0,
+        "rl": 26.0
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Your last quali setup.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    },
+    "race": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 7,
+       "values": {
+        "fw": 50,
+        "rw": 22,
+        "don": 100,
+        "doff": 35,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 13,
+        "farb": 2,
+        "rarb": 10,
+        "frh": 21,
+        "rrh": 42,
+        "bb": 56,
+        "bp": 100,
+        "fr": 29.5,
+        "fl": 29.5,
+        "rr": 26.0,
+        "rl": 26.0
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Your last race setup.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    },
+    "wet": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 8,
+       "values": {
+        "fw": 50,
+        "rw": 25,
+        "don": 100,
+        "doff": 35,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 13,
+        "farb": 2,
+        "rarb": 10,
+        "frh": 21,
+        "rrh": 42,
+        "bb": 56,
+        "bp": 100,
+        "fr": 29.5,
+        "fl": 29.5,
+        "rr": 26.0,
+        "rl": 26.0
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Your last wet setup.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    }
+   }
+  },
+  {
+   "track": "Bahrain",
+   "name": "BAHRAIN",
+   "post": "Bahrain",
+   "trackIds": [
+    "Bahrain",
+    "Sakhir"
+   ],
+   "row": 3,
+   "finished": null,
+   "kinds": {
+    "quali": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 9,
+       "values": {
+        "fw": 50,
+        "rw": 30,
+        "don": 100,
+        "doff": 50,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 5,
+        "farb": 8,
+        "rarb": 16,
+        "frh": 20,
+        "rrh": 44,
+        "bb": 56,
+        "bp": 100,
+        "fr": 25.0,
+        "fl": 25.0,
+        "rr": 20.5,
+        "rl": 20.5
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Your last quali setup.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    },
+    "race": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 10,
+       "values": {
+        "fw": 50,
+        "rw": 30,
+        "don": 100,
+        "doff": 50,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 5,
+        "farb": 8,
+        "rarb": 16,
+        "frh": 20,
+        "rrh": 44,
+        "bb": 56,
+        "bp": 100,
+        "fr": 25.0,
+        "fl": 25.0,
+        "rr": 20.5,
+        "rl": 20.5
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Your last race setup.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    },
+    "wet": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 11,
+       "values": {
+        "fw": 50,
+        "rw": 38,
+        "don": 75,
+        "doff": 55,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 35,
+        "rs": 2,
+        "farb": 5,
+        "rarb": 15,
+        "frh": 23,
+        "rrh": 47,
+        "bb": 55,
+        "bp": 95,
+        "fr": 25.0,
+        "fl": 25.0,
+        "rr": 20.5,
+        "rl": 20.5
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Derived from your race setup: +wings, softer, higher, open diff, less brake pressure.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    }
+   }
+  },
+  {
+   "track": "Jeddah",
+   "name": "SAUDI ARABIA",
+   "post": "Saudi Arabia",
+   "trackIds": [
+    "Jeddah",
+    "Saudi Arabia"
+   ],
+   "row": 4,
+   "finished": null,
+   "kinds": {
+    "quali": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 12,
+       "values": {
+        "fw": 35,
+        "rw": 0,
+        "don": 100,
+        "doff": 50,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 12,
+        "farb": 4,
+        "rarb": 8,
+        "frh": 21,
+        "rrh": 46,
+        "bb": 56,
+        "bp": 100,
+        "fr": 29.0,
+        "fl": 29.0,
+        "rr": 23.5,
+        "rl": 23.5
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Your last quali setup.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    },
+    "race": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 13,
+       "values": {
+        "fw": 14,
+        "rw": 11,
+        "don": 85,
+        "doff": 35,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.02,
+        "rt": 0.12,
+        "fs": 41,
+        "rs": 10,
+        "farb": 10,
+        "rarb": 18,
+        "frh": 23,
+        "rrh": 49,
+        "bb": 58,
+        "bp": 100,
+        "fr": 23.7,
+        "fl": 23.7,
+        "rr": 22.4,
+        "rl": 22.4
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Your last race setup.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    },
+    "wet": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 14,
+       "values": {
+        "fw": 20,
+        "rw": 19,
+        "don": 60,
+        "doff": 40,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.02,
+        "rt": 0.12,
+        "fs": 35,
+        "rs": 7,
+        "farb": 7,
+        "rarb": 17,
+        "frh": 26,
+        "rrh": 52,
+        "bb": 57,
+        "bp": 95,
+        "fr": 23.7,
+        "fl": 23.7,
+        "rr": 22.4,
+        "rl": 22.4
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Derived from your race setup: +wings, softer, higher, open diff, less brake pressure.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    }
+   }
+  },
+  {
+   "track": "Miami",
+   "name": "MIAMI",
+   "post": "Miami",
+   "trackIds": [
+    "Miami"
+   ],
+   "row": 5,
+   "finished": null,
+   "kinds": {
+    "quali": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 15,
+       "values": {
+        "fw": 35,
+        "rw": 13,
+        "don": 100,
+        "doff": 45,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 40,
+        "rs": 12,
+        "farb": 7,
+        "rarb": 8,
+        "frh": 22,
+        "rrh": 43,
+        "bb": 56,
+        "bp": 100,
+        "fr": 28.5,
+        "fl": 28.5,
+        "rr": 21.5,
+        "rl": 21.5
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Your last quali setup.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    },
+    "race": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 16,
+       "values": {
+        "fw": 35,
+        "rw": 13,
+        "don": 100,
+        "doff": 45,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 40,
+        "rs": 12,
+        "farb": 7,
+        "rarb": 8,
+        "frh": 22,
+        "rrh": 43,
+        "bb": 56,
+        "bp": 100,
+        "fr": 28.5,
+        "fl": 28.5,
+        "rr": 21.5,
+        "rl": 21.5
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Your quali setup (no race setup recorded).",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    },
+    "wet": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 17,
+       "values": {
+        "fw": 35,
+        "rw": 15,
+        "don": 100,
+        "doff": 45,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 40,
+        "rs": 12,
+        "farb": 7,
+        "rarb": 8,
+        "frh": 22,
+        "rrh": 43,
+        "bb": 55,
+        "bp": 100,
+        "fr": 28.5,
+        "fl": 28.5,
+        "rr": 21.5,
+        "rl": 21.5
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Your last wet setup.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    }
+   }
+  },
+  {
+   "track": "Montreal",
+   "name": "CANADA",
+   "post": "Canada",
+   "trackIds": [
+    "Montreal",
+    "Canada"
+   ],
+   "row": 6,
+   "finished": null,
+   "kinds": {
+    "quali": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 18,
+       "values": {
+        "fw": 50,
+        "rw": 37,
+        "don": 100,
+        "doff": 35,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 29,
+        "farb": 3,
+        "rarb": 7,
+        "frh": 21,
+        "rrh": 41,
+        "bb": 56,
+        "bp": 100,
+        "fr": 29.0,
+        "fl": 29.0,
+        "rr": 21.5,
+        "rl": 21.5
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Your last quali setup.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    },
+    "race": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 19,
+       "values": {
+        "fw": 50,
+        "rw": 37,
+        "don": 100,
+        "doff": 35,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 29,
+        "farb": 3,
+        "rarb": 7,
+        "frh": 21,
+        "rrh": 41,
+        "bb": 56,
+        "bp": 100,
+        "fr": 29.0,
+        "fl": 29.0,
+        "rr": 21.5,
+        "rl": 21.5
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Your last race setup.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    },
+    "wet": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 20,
+       "values": {
+        "fw": 50,
+        "rw": 37,
+        "don": 100,
+        "doff": 35,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 29,
+        "farb": 3,
+        "rarb": 7,
+        "frh": 21,
+        "rrh": 41,
+        "bb": 56,
+        "bp": 100,
+        "fr": 29.0,
+        "fl": 29.0,
+        "rr": 21.5,
+        "rl": 21.5
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Your last wet setup.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    }
+   }
+  },
+  {
+   "track": "Monaco",
+   "name": "MONACO",
+   "post": "Monaco",
+   "trackIds": [
+    "Monaco"
+   ],
+   "row": 7,
+   "finished": null,
+   "kinds": {
+    "quali": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 21,
+       "values": {
+        "fw": 50,
+        "rw": 45,
+        "don": 100,
+        "doff": 20,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 10,
+        "farb": 1,
+        "rarb": 6,
+        "frh": 21,
+        "rrh": 43,
+        "bb": 56,
+        "bp": 100,
+        "fr": 24.0,
+        "fl": 24.0,
+        "rr": 21.0,
+        "rl": 21.0
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Your last quali setup.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    },
+    "race": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 22,
+       "values": {
+        "fw": 50,
+        "rw": 45,
+        "don": 100,
+        "doff": 20,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 10,
+        "farb": 1,
+        "rarb": 6,
+        "frh": 21,
+        "rrh": 43,
+        "bb": 57,
+        "bp": 100,
+        "fr": 24.0,
+        "fl": 24.0,
+        "rr": 21.0,
+        "rl": 21.0
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Your last race setup.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    },
+    "wet": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 23,
+       "values": {
+        "fw": 50,
+        "rw": 50,
+        "don": 75,
+        "doff": 25,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 35,
+        "rs": 7,
+        "farb": 1,
+        "rarb": 5,
+        "frh": 24,
+        "rrh": 46,
+        "bb": 56,
+        "bp": 95,
+        "fr": 24.0,
+        "fl": 24.0,
+        "rr": 21.0,
+        "rl": 21.0
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Derived from your race setup: +wings, softer, higher, open diff, less brake pressure.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    }
+   }
+  },
+  {
+   "track": "Catalunya",
+   "name": "BARCELONA",
+   "post": "Barcelona",
+   "trackIds": [
+    "Catalunya",
+    "Spain",
+    "Barcelona"
+   ],
+   "row": 8,
+   "finished": null,
+   "kinds": {
+    "quali": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 24,
+       "values": {
+        "fw": 50,
+        "rw": 35,
+        "don": 100,
+        "doff": 30,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 34,
+        "farb": 4,
+        "rarb": 9,
+        "frh": 21,
+        "rrh": 43,
+        "bb": 55,
+        "bp": 100,
+        "fr": 28.5,
+        "fl": 28.5,
+        "rr": 22.0,
+        "rl": 22.0
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Your last quali setup.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    },
+    "race": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 25,
+       "values": {
+        "fw": 50,
+        "rw": 35,
+        "don": 100,
+        "doff": 30,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 34,
+        "farb": 4,
+        "rarb": 9,
+        "frh": 21,
+        "rrh": 43,
+        "bb": 55,
+        "bp": 100,
+        "fr": 28.5,
+        "fl": 28.5,
+        "rr": 22.0,
+        "rl": 22.0
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Your last race setup.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    },
+    "wet": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 26,
+       "values": {
+        "fw": 50,
+        "rw": 43,
+        "don": 75,
+        "doff": 35,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 35,
+        "rs": 31,
+        "farb": 1,
+        "rarb": 8,
+        "frh": 24,
+        "rrh": 46,
+        "bb": 54,
+        "bp": 95,
+        "fr": 28.5,
+        "fl": 28.5,
+        "rr": 22.0,
+        "rl": 22.0
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Derived from your race setup: +wings, softer, higher, open diff, less brake pressure.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    }
+   }
+  },
+  {
+   "track": "Austria",
+   "name": "AUSTRIA",
+   "post": "Austria",
+   "trackIds": [
+    "Austria"
+   ],
+   "row": 9,
+   "finished": null,
+   "kinds": {
+    "quali": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 27,
+       "values": {
+        "fw": 50,
+        "rw": 28,
+        "don": 100,
+        "doff": 40,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 40,
+        "rs": 34,
+        "farb": 3,
+        "rarb": 8,
+        "frh": 22,
+        "rrh": 42,
+        "bb": 56,
+        "bp": 100,
+        "fr": 29.0,
+        "fl": 29.0,
+        "rr": 22.0,
+        "rl": 22.0
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Your race setup (no quali recorded).",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    },
+    "race": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 28,
+       "values": {
+        "fw": 50,
+        "rw": 28,
+        "don": 100,
+        "doff": 40,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 40,
+        "rs": 34,
+        "farb": 3,
+        "rarb": 8,
+        "frh": 22,
+        "rrh": 42,
+        "bb": 56,
+        "bp": 100,
+        "fr": 29.0,
+        "fl": 29.0,
+        "rr": 22.0,
+        "rl": 22.0
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Your last race setup.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    },
+    "wet": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 29,
+       "values": {
+        "fw": 50,
+        "rw": 32,
+        "don": 100,
+        "doff": 40,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 40,
+        "rs": 34,
+        "farb": 3,
+        "rarb": 8,
+        "frh": 22,
+        "rrh": 42,
+        "bb": 56,
+        "bp": 100,
+        "fr": 29.0,
+        "fl": 29.0,
+        "rr": 22.0,
+        "rl": 22.0
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Your last wet setup.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    }
+   }
+  },
+  {
+   "track": "Silverstone",
+   "name": "GREAT BRITAIN",
+   "post": "Great Britain",
+   "trackIds": [
+    "Silverstone",
+    "Great Britain"
+   ],
+   "row": 11,
+   "finished": null,
+   "kinds": {
+    "quali": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 30,
+       "values": {
+        "fw": 35,
+        "rw": 8,
+        "don": 100,
+        "doff": 25,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 41,
+        "farb": 3,
+        "rarb": 7,
+        "frh": 21,
+        "rrh": 42,
+        "bb": 56,
+        "bp": 100,
+        "fr": 29.0,
+        "fl": 29.0,
+        "rr": 21.5,
+        "rl": 21.5
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Your last quali setup.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    },
+    "race": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 31,
+       "values": {
+        "fw": 35,
+        "rw": 8,
+        "don": 100,
+        "doff": 25,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 41,
+        "farb": 3,
+        "rarb": 7,
+        "frh": 21,
+        "rrh": 42,
+        "bb": 56,
+        "bp": 100,
+        "fr": 29.0,
+        "fl": 29.0,
+        "rr": 21.5,
+        "rl": 21.5
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Your last race setup.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    },
+    "wet": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 32,
+       "values": {
+        "fw": 41,
+        "rw": 16,
+        "don": 75,
+        "doff": 30,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 35,
+        "rs": 38,
+        "farb": 1,
+        "rarb": 6,
+        "frh": 24,
+        "rrh": 45,
+        "bb": 55,
+        "bp": 95,
+        "fr": 29.0,
+        "fl": 29.0,
+        "rr": 21.5,
+        "rl": 21.5
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Derived from your race setup: +wings, softer, higher, open diff, less brake pressure.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    }
+   }
+  },
+  {
+   "track": "Spa",
+   "name": "BELGIUM",
+   "post": "Belgium",
+   "trackIds": [
+    "Spa",
+    "Belgium"
+   ],
+   "row": 13,
+   "finished": null,
+   "kinds": {
+    "quali": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 33,
+       "values": {
+        "fw": 48,
+        "rw": 32,
+        "don": 100,
+        "doff": 30,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 37,
+        "rs": 17,
+        "farb": 13,
+        "rarb": 8,
+        "frh": 23,
+        "rrh": 41,
+        "bb": 55,
+        "bp": 100,
+        "fr": 24.2,
+        "fl": 24.2,
+        "rr": 20.5,
+        "rl": 20.5
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Your last quali setup.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    },
+    "race": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 34,
+       "values": {
+        "fw": 24,
+        "rw": 0,
+        "don": 100,
+        "doff": 35,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 30,
+        "farb": 3,
+        "rarb": 8,
+        "frh": 21,
+        "rrh": 41,
+        "bb": 56,
+        "bp": 100,
+        "fr": 29.5,
+        "fl": 29.5,
+        "rr": 25.5,
+        "rl": 25.5
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Your last race setup.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    },
+    "wet": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 35,
+       "values": {
+        "fw": 30,
+        "rw": 8,
+        "don": 75,
+        "doff": 40,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 35,
+        "rs": 27,
+        "farb": 1,
+        "rarb": 7,
+        "frh": 24,
+        "rrh": 44,
+        "bb": 55,
+        "bp": 95,
+        "fr": 29.5,
+        "fl": 29.5,
+        "rr": 25.5,
+        "rl": 25.5
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Derived from your race setup: +wings, softer, higher, open diff, less brake pressure.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    }
+   }
+  },
+  {
+   "track": "Hungaroring",
+   "name": "HUNGARY",
+   "post": "Hungary",
+   "trackIds": [
+    "Hungaroring",
+    "Hungary"
+   ],
+   "row": 14,
+   "finished": null,
+   "kinds": {
+    "quali": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 36,
+       "values": {
+        "fw": 50,
+        "rw": 36,
+        "don": 100,
+        "doff": 35,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 28,
+        "farb": 2,
+        "rarb": 7,
+        "frh": 21,
+        "rrh": 42,
+        "bb": 57,
+        "bp": 100,
+        "fr": 28.2,
+        "fl": 28.2,
+        "rr": 21.0,
+        "rl": 21.0
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Your race setup (no quali recorded).",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    },
+    "race": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 37,
+       "values": {
+        "fw": 50,
+        "rw": 36,
+        "don": 100,
+        "doff": 35,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 28,
+        "farb": 2,
+        "rarb": 7,
+        "frh": 21,
+        "rrh": 42,
+        "bb": 57,
+        "bp": 100,
+        "fr": 28.2,
+        "fl": 28.2,
+        "rr": 21.0,
+        "rl": 21.0
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Your last race setup.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    },
+    "wet": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 38,
+       "values": {
+        "fw": 50,
+        "rw": 36,
+        "don": 100,
+        "doff": 35,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 28,
+        "farb": 2,
+        "rarb": 7,
+        "frh": 21,
+        "rrh": 42,
+        "bb": 56,
+        "bp": 100,
+        "fr": 28.2,
+        "fl": 28.2,
+        "rr": 21.0,
+        "rl": 21.0
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Your last wet setup.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    }
+   }
+  },
+  {
+   "track": "Zandvoort",
+   "name": "NETHERLANDS",
+   "post": "Netherlands",
+   "trackIds": [
+    "Zandvoort",
+    "Netherlands"
+   ],
+   "row": 15,
+   "finished": null,
+   "kinds": {
+    "quali": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 39,
+       "values": {
+        "fw": 50,
+        "rw": 34,
+        "don": 100,
+        "doff": 30,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 39,
+        "farb": 4,
+        "rarb": 9,
+        "frh": 22,
+        "rrh": 44,
+        "bb": 55,
+        "bp": 100,
+        "fr": 28.0,
+        "fl": 28.0,
+        "rr": 22.0,
+        "rl": 22.0
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Your last quali setup.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    },
+    "race": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 40,
+       "values": {
+        "fw": 50,
+        "rw": 34,
+        "don": 100,
+        "doff": 30,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 39,
+        "farb": 4,
+        "rarb": 9,
+        "frh": 22,
+        "rrh": 44,
+        "bb": 55,
+        "bp": 100,
+        "fr": 28.0,
+        "fl": 28.0,
+        "rr": 22.0,
+        "rl": 22.0
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Your last race setup.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    },
+    "wet": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 41,
+       "values": {
+        "fw": 50,
+        "rw": 35,
+        "don": 100,
+        "doff": 30,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 39,
+        "farb": 4,
+        "rarb": 9,
+        "frh": 22,
+        "rrh": 44,
+        "bb": 55,
+        "bp": 100,
+        "fr": 28.0,
+        "fl": 28.0,
+        "rr": 22.0,
+        "rl": 22.0
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Your last wet setup.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    }
+   }
+  },
+  {
+   "track": "Monza",
+   "name": "MONZA",
+   "post": "Monza",
+   "trackIds": [
+    "Monza",
+    "Italy"
+   ],
+   "row": 17,
+   "finished": null,
+   "kinds": {
+    "quali": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 42,
+       "values": {
+        "fw": 18,
+        "rw": 0,
+        "don": 100,
+        "doff": 35,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 30,
+        "farb": 2,
+        "rarb": 6,
+        "frh": 21,
+        "rrh": 42,
+        "bb": 58,
+        "bp": 100,
+        "fr": 29.5,
+        "fl": 29.5,
+        "rr": 25.5,
+        "rl": 25.5
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Your last quali setup.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    },
+    "race": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 43,
+       "values": {
+        "fw": 18,
+        "rw": 0,
+        "don": 100,
+        "doff": 35,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 30,
+        "farb": 2,
+        "rarb": 6,
+        "frh": 21,
+        "rrh": 42,
+        "bb": 58,
+        "bp": 100,
+        "fr": 29.5,
+        "fl": 29.5,
+        "rr": 25.5,
+        "rl": 25.5
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Your last race setup.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    },
+    "wet": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 44,
+       "values": {
+        "fw": 24,
+        "rw": 8,
+        "don": 75,
+        "doff": 40,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 35,
+        "rs": 27,
+        "farb": 1,
+        "rarb": 5,
+        "frh": 24,
+        "rrh": 45,
+        "bb": 57,
+        "bp": 95,
+        "fr": 29.5,
+        "fl": 29.5,
+        "rr": 25.5,
+        "rl": 25.5
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Derived from your race setup: +wings, softer, higher, open diff, less brake pressure.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    }
+   }
+  },
+  {
+   "track": "Madrid",
+   "name": "MADRID",
+   "post": "Madrid",
+   "trackIds": [
+    "Madrid"
+   ],
+   "row": 18,
+   "finished": null,
+   "kinds": {
+    "quali": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 45,
+       "values": {
+        "fw": 50,
+        "rw": 34,
+        "don": 100,
+        "doff": 25,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 28,
+        "farb": 2,
+        "rarb": 7,
+        "frh": 21,
+        "rrh": 42,
+        "bb": 56,
+        "bp": 100,
+        "fr": 29.0,
+        "fl": 29.0,
+        "rr": 21.5,
+        "rl": 21.5
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Your last quali setup.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    },
+    "race": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 46,
+       "values": {
+        "fw": 50,
+        "rw": 34,
+        "don": 100,
+        "doff": 25,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 28,
+        "farb": 2,
+        "rarb": 7,
+        "frh": 21,
+        "rrh": 43,
+        "bb": 56,
+        "bp": 100,
+        "fr": 29.0,
+        "fl": 29.0,
+        "rr": 21.5,
+        "rl": 21.5
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Your last race setup.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    },
+    "wet": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 47,
+       "values": {
+        "fw": 50,
+        "rw": 42,
+        "don": 75,
+        "doff": 30,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 35,
+        "rs": 25,
+        "farb": 1,
+        "rarb": 6,
+        "frh": 24,
+        "rrh": 46,
+        "bb": 55,
+        "bp": 95,
+        "fr": 29.0,
+        "fl": 29.0,
+        "rr": 21.5,
+        "rl": 21.5
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Derived from your race setup: +wings, softer, higher, open diff, less brake pressure.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    }
+   }
+  },
+  {
+   "track": "Baku",
+   "name": "AZERBAIJAN",
+   "post": "Azerbaijan",
+   "trackIds": [
+    "Baku",
+    "Azerbaijan"
+   ],
+   "row": 19,
+   "finished": null,
+   "kinds": {
+    "quali": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 48,
+       "values": {
+        "fw": 20,
+        "rw": 2,
+        "don": 100,
+        "doff": 45,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 30,
+        "farb": 3,
+        "rarb": 5,
+        "frh": 21,
+        "rrh": 44,
+        "bb": 57,
+        "bp": 100,
+        "fr": 29.0,
+        "fl": 29.0,
+        "rr": 24.5,
+        "rl": 24.5
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Your last quali setup.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    },
+    "race": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 49,
+       "values": {
+        "fw": 20,
+        "rw": 2,
+        "don": 100,
+        "doff": 45,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 30,
+        "farb": 3,
+        "rarb": 5,
+        "frh": 21,
+        "rrh": 44,
+        "bb": 57,
+        "bp": 100,
+        "fr": 29.0,
+        "fl": 29.0,
+        "rr": 24.5,
+        "rl": 24.5
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Your last race setup.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    },
+    "wet": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 50,
+       "values": {
+        "fw": 26,
+        "rw": 10,
+        "don": 75,
+        "doff": 50,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 35,
+        "rs": 27,
+        "farb": 1,
+        "rarb": 4,
+        "frh": 24,
+        "rrh": 47,
+        "bb": 56,
+        "bp": 95,
+        "fr": 29.0,
+        "fl": 29.0,
+        "rr": 24.5,
+        "rl": 24.5
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Derived from your race setup: +wings, softer, higher, open diff, less brake pressure.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    }
+   }
+  },
+  {
+   "track": "Singapore",
+   "name": "SINGAPORE",
+   "post": "Singapore",
+   "trackIds": [
+    "Singapore"
+   ],
+   "row": 20,
+   "finished": null,
+   "kinds": {
+    "quali": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 51,
+       "values": {
+        "fw": 50,
+        "rw": 36,
+        "don": 100,
+        "doff": 35,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 30,
+        "farb": 2,
+        "rarb": 6,
+        "frh": 20,
+        "rrh": 42,
+        "bb": 56,
+        "bp": 100,
+        "fr": 29.0,
+        "fl": 29.0,
+        "rr": 21.0,
+        "rl": 21.0
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Your last quali setup.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    },
+    "race": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 52,
+       "values": {
+        "fw": 50,
+        "rw": 36,
+        "don": 100,
+        "doff": 35,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 30,
+        "farb": 2,
+        "rarb": 6,
+        "frh": 20,
+        "rrh": 42,
+        "bb": 56,
+        "bp": 100,
+        "fr": 29.0,
+        "fl": 29.0,
+        "rr": 21.0,
+        "rl": 21.0
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Your last race setup.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    },
+    "wet": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 53,
+       "values": {
+        "fw": 50,
+        "rw": 44,
+        "don": 75,
+        "doff": 40,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 35,
+        "rs": 27,
+        "farb": 1,
+        "rarb": 5,
+        "frh": 23,
+        "rrh": 45,
+        "bb": 55,
+        "bp": 95,
+        "fr": 29.0,
+        "fl": 29.0,
+        "rr": 21.0,
+        "rl": 21.0
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Derived from your race setup: +wings, softer, higher, open diff, less brake pressure.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    }
+   }
+  },
+  {
+   "track": "Texas",
+   "name": "AUSTIN",
+   "post": "Austin",
+   "trackIds": [
+    "Texas",
+    "Austin"
+   ],
+   "row": 21,
+   "finished": null,
+   "kinds": {
+    "quali": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 54,
+       "values": {
+        "fw": 50,
+        "rw": 35,
+        "don": 100,
+        "doff": 40,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 35,
+        "rs": 41,
+        "farb": 13,
+        "rarb": 18,
+        "frh": 19,
+        "rrh": 44,
+        "bb": 57,
+        "bp": 100,
+        "fr": 28.0,
+        "fl": 28.0,
+        "rr": 20.5,
+        "rl": 20.5
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Your last quali setup.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    },
+    "race": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 55,
+       "values": {
+        "fw": 50,
+        "rw": 35,
+        "don": 100,
+        "doff": 40,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 35,
+        "rs": 41,
+        "farb": 13,
+        "rarb": 18,
+        "frh": 19,
+        "rrh": 44,
+        "bb": 57,
+        "bp": 100,
+        "fr": 28.0,
+        "fl": 28.0,
+        "rr": 20.5,
+        "rl": 20.5
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Your last race setup.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    },
+    "wet": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 56,
+       "values": {
+        "fw": 50,
+        "rw": 43,
+        "don": 75,
+        "doff": 45,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 29,
+        "rs": 38,
+        "farb": 10,
+        "rarb": 17,
+        "frh": 22,
+        "rrh": 47,
+        "bb": 56,
+        "bp": 95,
+        "fr": 28.0,
+        "fl": 28.0,
+        "rr": 20.5,
+        "rl": 20.5
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Derived from your race setup: +wings, softer, higher, open diff, less brake pressure.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    }
+   }
+  },
+  {
+   "track": "Mexico",
+   "name": "MEXICO",
+   "post": "Mexico",
+   "trackIds": [
+    "Mexico"
+   ],
+   "row": 22,
+   "finished": null,
+   "kinds": {
+    "quali": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 57,
+       "values": {
+        "fw": 48,
+        "rw": 32,
+        "don": 100,
+        "doff": 30,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 37,
+        "rs": 17,
+        "farb": 13,
+        "rarb": 8,
+        "frh": 23,
+        "rrh": 41,
+        "bb": 55,
+        "bp": 100,
+        "fr": 24.2,
+        "fl": 24.2,
+        "rr": 20.5,
+        "rl": 20.5
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Your last quali setup.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    },
+    "race": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 58,
+       "values": {
+        "fw": 48,
+        "rw": 32,
+        "don": 100,
+        "doff": 30,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 37,
+        "rs": 17,
+        "farb": 13,
+        "rarb": 8,
+        "frh": 23,
+        "rrh": 41,
+        "bb": 55,
+        "bp": 100,
+        "fr": 24.2,
+        "fl": 24.2,
+        "rr": 20.5,
+        "rl": 20.5
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Your last race setup.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    },
+    "wet": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 59,
+       "values": {
+        "fw": 48,
+        "rw": 32,
+        "don": 100,
+        "doff": 30,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 37,
+        "rs": 17,
+        "farb": 13,
+        "rarb": 8,
+        "frh": 23,
+        "rrh": 41,
+        "bb": 55,
+        "bp": 100,
+        "fr": 24.2,
+        "fl": 24.2,
+        "rr": 20.5,
+        "rl": 20.5
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Your last wet setup.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    }
+   }
+  },
+  {
+   "track": "Brazil",
+   "name": "BRAZIL",
+   "post": "Brazil",
+   "trackIds": [
+    "Brazil"
+   ],
+   "row": 23,
+   "finished": null,
+   "kinds": {
+    "quali": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 60,
+       "values": {
+        "fw": 50,
+        "rw": 22,
+        "don": 100,
+        "doff": 30,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 14,
+        "farb": 2,
+        "rarb": 3,
+        "frh": 22,
+        "rrh": 46,
+        "bb": 54,
+        "bp": 100,
+        "fr": 29.5,
+        "fl": 29.5,
+        "rr": 22.0,
+        "rl": 22.0
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Your last quali setup.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    },
+    "race": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 61,
+       "values": {
+        "fw": 50,
+        "rw": 22,
+        "don": 100,
+        "doff": 30,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 14,
+        "farb": 2,
+        "rarb": 3,
+        "frh": 22,
+        "rrh": 46,
+        "bb": 54,
+        "bp": 100,
+        "fr": 29.5,
+        "fl": 29.5,
+        "rr": 22.0,
+        "rl": 22.0
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Your last race setup.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    },
+    "wet": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 62,
+       "values": {
+        "fw": 50,
+        "rw": 30,
+        "don": 75,
+        "doff": 35,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 35,
+        "rs": 11,
+        "farb": 1,
+        "rarb": 2,
+        "frh": 25,
+        "rrh": 49,
+        "bb": 53,
+        "bp": 95,
+        "fr": 29.5,
+        "fl": 29.5,
+        "rr": 22.0,
+        "rl": 22.0
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Derived from your race setup: +wings, softer, higher, open diff, less brake pressure.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    }
+   }
+  },
+  {
+   "track": "Las Vegas",
+   "name": "LAS VEGAS",
+   "post": "Las Vegas",
+   "trackIds": [
+    "Las Vegas"
+   ],
+   "row": 24,
+   "finished": null,
+   "kinds": {
+    "quali": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 63,
+       "values": {
+        "fw": 30,
+        "rw": 5,
+        "don": 90,
+        "doff": 30,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 14,
+        "farb": 3,
+        "rarb": 4,
+        "frh": 22,
+        "rrh": 45,
+        "bb": 57,
+        "bp": 100,
+        "fr": 28.0,
+        "fl": 28.0,
+        "rr": 22.0,
+        "rl": 22.0
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Your last quali setup.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    },
+    "race": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 64,
+       "values": {
+        "fw": 30,
+        "rw": 5,
+        "don": 90,
+        "doff": 30,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 14,
+        "farb": 3,
+        "rarb": 4,
+        "frh": 22,
+        "rrh": 45,
+        "bb": 57,
+        "bp": 100,
+        "fr": 28.0,
+        "fl": 28.0,
+        "rr": 22.0,
+        "rl": 22.0
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Your last race setup.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    },
+    "wet": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 65,
+       "values": {
+        "fw": 35,
+        "rw": 10,
+        "don": 90,
+        "doff": 30,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 14,
+        "farb": 3,
+        "rarb": 4,
+        "frh": 22,
+        "rrh": 45,
+        "bb": 57,
+        "bp": 100,
+        "fr": 28.0,
+        "fl": 28.0,
+        "rr": 22.0,
+        "rl": 22.0
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Your last wet setup.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    }
+   }
+  },
+  {
+   "track": "Losail",
+   "name": "QATAR",
+   "post": "Qatar",
+   "trackIds": [
+    "Losail",
+    "Qatar"
+   ],
+   "row": 25,
+   "finished": null,
+   "kinds": {
+    "quali": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 66,
+       "values": {
+        "fw": 48,
+        "rw": 26,
+        "don": 100,
+        "doff": 40,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 39,
+        "rs": 41,
+        "farb": 3,
+        "rarb": 10,
+        "frh": 22,
+        "rrh": 45,
+        "bb": 57,
+        "bp": 100,
+        "fr": 29.2,
+        "fl": 29.2,
+        "rr": 20.5,
+        "rl": 20.5
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Your last quali setup.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    },
+    "race": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 67,
+       "values": {
+        "fw": 48,
+        "rw": 26,
+        "don": 100,
+        "doff": 40,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 39,
+        "rs": 41,
+        "farb": 3,
+        "rarb": 10,
+        "frh": 22,
+        "rrh": 45,
+        "bb": 57,
+        "bp": 100,
+        "fr": 29.2,
+        "fl": 29.2,
+        "rr": 20.5,
+        "rl": 20.5
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Your last race setup.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    },
+    "wet": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 68,
+       "values": {
+        "fw": 50,
+        "rw": 34,
+        "don": 75,
+        "doff": 45,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 33,
+        "rs": 38,
+        "farb": 1,
+        "rarb": 9,
+        "frh": 25,
+        "rrh": 48,
+        "bb": 56,
+        "bp": 95,
+        "fr": 29.2,
+        "fl": 29.2,
+        "rr": 20.5,
+        "rl": 20.5
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Derived from your race setup: +wings, softer, higher, open diff, less brake pressure.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    }
+   }
+  },
+  {
+   "track": "Abu Dhabi",
+   "name": "ABU DHABI",
+   "post": "Abu Dhabi",
+   "trackIds": [
+    "Abu Dhabi"
+   ],
+   "row": 26,
+   "finished": null,
+   "kinds": {
+    "quali": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 69,
+       "values": {
+        "fw": 50,
+        "rw": 23,
+        "don": 100,
+        "doff": 20,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 13,
+        "farb": 18,
+        "rarb": 1,
+        "frh": 21,
+        "rrh": 44,
+        "bb": 54,
+        "bp": 100,
+        "fr": 27.5,
+        "fl": 27.5,
+        "rr": 20.5,
+        "rl": 20.5
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Your last quali setup.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    },
+    "race": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 70,
+       "values": {
+        "fw": 50,
+        "rw": 23,
+        "don": 100,
+        "doff": 20,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 13,
+        "farb": 18,
+        "rarb": 1,
+        "frh": 21,
+        "rrh": 44,
+        "bb": 54,
+        "bp": 100,
+        "fr": 27.5,
+        "fl": 27.5,
+        "rr": 20.5,
+        "rl": 20.5
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Your last race setup.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    },
+    "wet": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 71,
+       "values": {
+        "fw": 50,
+        "rw": 31,
+        "don": 75,
+        "doff": 25,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 35,
+        "rs": 10,
+        "farb": 15,
+        "rarb": 1,
+        "frh": 24,
+        "rrh": 47,
+        "bb": 53,
+        "bp": 95,
+        "fr": 27.5,
+        "fl": 27.5,
+        "rr": 20.5,
+        "rl": 20.5
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Derived from your race setup: +wings, softer, higher, open diff, less brake pressure.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    }
+   }
+  },
+  {
+   "track": "Imola",
+   "name": "IMOLA",
+   "post": "Emilia-Romagna",
+   "trackIds": [
+    "Imola",
+    "Emilia Romagna"
+   ],
+   "row": 27,
+   "finished": null,
+   "kinds": {
+    "quali": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 72,
+       "values": {
+        "fw": 50,
+        "rw": 28,
+        "don": 100,
+        "doff": 20,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 20,
+        "farb": 1,
+        "rarb": 1,
+        "frh": 22,
+        "rrh": 45,
+        "bb": 57,
+        "bp": 100,
+        "fr": 27.5,
+        "fl": 27.5,
+        "rr": 24.5,
+        "rl": 24.5
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Your last quali setup.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    },
+    "race": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 73,
+       "values": {
+        "fw": 50,
+        "rw": 28,
+        "don": 100,
+        "doff": 20,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 20,
+        "farb": 1,
+        "rarb": 1,
+        "frh": 22,
+        "rrh": 45,
+        "bb": 57,
+        "bp": 100,
+        "fr": 27.5,
+        "fl": 27.5,
+        "rr": 24.5,
+        "rl": 24.5
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Your last race setup.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    },
+    "wet": {
+     "versions": [
+      {
+       "v": 1,
+       "base": null,
+       "created": "2026-11-02",
+       "saved": "2026-11-02",
+       "slot": 74,
+       "values": {
+        "fw": 50,
+        "rw": 28,
+        "don": 100,
+        "doff": 20,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 20,
+        "farb": 1,
+        "rarb": 1,
+        "frh": 22,
+        "rrh": 45,
+        "bb": 57,
+        "bp": 100,
+        "fr": 27.5,
+        "fl": 27.5,
+        "rr": 24.5,
+        "rl": 24.5
+       },
+       "change": null,
+       "text": "Starting setup",
+       "why": "Your last wet setup.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Not driven yet."
+       }
+      }
+     ]
+    }
+   }
+  }
+ ]
+}

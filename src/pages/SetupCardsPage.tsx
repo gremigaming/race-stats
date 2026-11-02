@@ -16,6 +16,10 @@ interface SetupCardData {
   setup?: CarSetup;
   file?: string;
   session?: string;
+  /** yyyy-mm-dd the version was saved in the game (setups/registry.json) */
+  saved?: string;
+  /** its name in the game, "AUSTRALIA - RACE - V2" */
+  name?: string;
   placeholder?: boolean;
 }
 
@@ -39,6 +43,11 @@ export const setupCardId = (post: string, kind: string) =>
   `setup-${post.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${kind}`;
 
 function savedOn(card: SetupCardData): string {
+  if (card.saved) {
+    const [y, mo, d] = card.saved.split("-").map(Number);
+    const day = new Date(Date.UTC(y, mo - 1, d)).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
+    return `${card.name ?? "Saved"} · saved ${day}`;
+  }
   const m = card.file?.match(/(\d{4})_(\d{2})_(\d{2})_\d{2}_\d{2}_\d{2}\.json$/);
   if (!m) return "";
   const date = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]));

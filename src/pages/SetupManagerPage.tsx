@@ -1,5 +1,8 @@
 import {
   CircleCheck,
+  Flag,
+  Play,
+  RotateCcw,
   FlaskConical,
   Gauge,
   Lock,
@@ -23,7 +26,11 @@ import {
   loginUrl,
   readKey,
   SetupDataMissing,
+  setupActionUrl,
   takeLoginResult,
+  type ManagedTrack,
+  type SetupRegistry,
+  type SetupVersion,
   type SetupAdvice,
   type SetupData,
   type SetupKind,
@@ -239,10 +246,17 @@ function LockedCard({ denied, expired }: { denied?: boolean; expired?: boolean }
 }
 
 function SetupManager({ data }: { data: SetupData }) {
+  const reg = data.manager;
   const tracks = useMemo(() => {
+    if (reg) {
+      return [...reg.tracks]
+        .sort((a, b) => a.row - b.row)
+        .map((m) => ({ track: m.track, kinds: data.tracks.find((t) => t.track === m.track)?.kinds ?? {} }));
+    }
     const order = sortTracksByCalendar(data.tracks.map((t) => t.track));
     return order.map((name) => data.tracks.find((t) => t.track === name)!);
-  }, [data]);
+  }, [data, reg]);
+  const managed = (name: string) => reg?.tracks.find((m) => m.track === name);
   const [view, setView] = useState<{ track: string; kind: SetupKind }>(() => {
     try {
       const saved = JSON.parse(sessionStorage.getItem(TRACK_STORAGE) ?? "null");
@@ -253,8 +267,8 @@ function SetupManager({ data }: { data: SetupData }) {
     return { track: tracks[0]?.track ?? "", kind: "race" };
   });
   const track = tracks.find((t) => t.track === view.track) ?? tracks[0];
-  const kinds = KINDS.filter((k) => track?.kinds[k]);
-  const kind = track?.kinds[view.kind] ? view.kind : (kinds.includes("race") ? "race" : kinds[0]);
+  const kinds = KINDS.filter((k) => reg || track?.kinds[k]);
+  const kind = kinds.includes(view.kind) ? view.kind : (kinds.includes("race") ? "race" : kinds[0]);
 
   useEffect(() => {
     try {
@@ -267,9 +281,12 @@ function SetupManager({ data }: { data: SetupData }) {
   if (!track || !kind) {
     return <section className={cn(cardClass, "text-sm text-zinc-400")}>No setups recorded yet.</section>;
   }
-  const advice = track.kinds[kind]!;
+  const advice = track.kinds[kind];
+  const m = managed(track.track);
 
   return (
+    <div className="space-y-6">
+    {reg && <ApplyBar reg={reg} />}
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-[240px_minmax(0,1fr)]">
       <nav aria-label="Tracks" className={cn(cardClass, "h-fit min-w-0 p-2")}>
         <div className="px-2.5 pb-2 pt-1.5">
@@ -297,14 +314,23 @@ function SetupManager({ data }: { data: SetupData }) {
                 >
                   <TrackFlag track={t.track} size="smaller" />
                   {getTrackDisplayName(t.track)}
+                  {managed(t.track)?.finished && <CircleCheck className="h-3.5 w-3.5 text-emerald-400" aria-label="Finished" />}
                 </span>
                 <span className="flex gap-2.5 font-mono text-3xs font-semibold uppercase tracking-wider">
-                  {KINDS.filter((k) => t.kinds[k]).map((k) => (
-                    <span key={k} className={KIND_TEXT[k]}>
-                      {k === "quali" ? "Quali" : KIND_LABEL[k]}
-                      {changeCount(t.kinds[k]) > 0 && <span className="ml-1 text-zinc-400">{changeCount(t.kinds[k])}</span>}
-                    </span>
-                  ))}
+                  {KINDS.filter((k) => reg || t.kinds[k]).map((k) => {
+                    const vs = managed(t.track)?.kinds[k].versions;
+                    const last = vs?.[vs.length - 1];
+                    return (
+                      <span key={k} className={KIND_TEXT[k]}>
+                        {k === "quali" ? "Quali" : KIND_LABEL[k]}
+                        {last ? (
+                          <span className={cn("ml-1", last.saved ? "text-zinc-400" : "text-amber-300")}>V{last.v}</span>
+                        ) : (
+                          changeCount(t.kinds[k]) > 0 && <span className="ml-1 text-zinc-400">{changeCount(t.kinds[k])}</span>
+                        )}
+                      </span>
+                    );
+                  })}
                 </span>
               </button>
             );
@@ -325,9 +351,163 @@ function SetupManager({ data }: { data: SetupData }) {
             onChange={(k) => setView({ track: track.track, kind: k })}
           />
         </div>
-        <AdviceView advice={advice} kind={kind} trackName={getTrackDisplayName(track.track)} />
+        {m && <VersionsView track={m} kind={kind} />}
+        {advice ? (
+          <AdviceView advice={advice} kind={kind} trackName={getTrackDisplayName(track.track)} />
+        ) : (
+          !m && <section className={cn(cardClass, "text-sm text-zinc-400")}>No advice for this setup yet.</section>
+        )}
       </div>
     </div>
+    </div>
+  );
+}
+
+const actionClass =
+  "flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-sm font-medium transition-colors";
+
+/** The waiting versions and the button that saves them in the game. */
+function ApplyBar({ reg }: { reg: SetupRegistry }) {
+  const waiting = reg.pending;
+  return (
+    <section className={cn(cardClass, "flex flex-wrap items-center justify-between gap-3 py-4")}>
+      <div className="space-y-0.5">
+        <p className="text-sm font-medium text-zinc-100">
+          {waiting > 0
+            ? `${waiting} new ${waiting === 1 ? "version waits" : "versions wait"} to be saved in the game`
+            : "Every version is saved in the game"}
+        </p>
+        <p className="text-xs text-zinc-500">
+          {reg.apply.requested
+            ? `Apply run started ${formatDay(reg.apply.requested.slice(0, 10))} · Claude saves them on your PC`
+            : `Last saved in the game ${reg.apply.last ? formatDay(reg.apply.last) : "never"} · new versions come after every stream`}
+        </p>
+      </div>
+      {waiting > 0 && (
+        <a
+          href={setupActionUrl("apply")}
+          className={cn(actionClass, "bg-red-700/95 text-white shadow-lg shadow-red-950/40 hover:bg-red-600")}
+        >
+          <Play className="h-4 w-4" />
+          Apply in the game
+        </a>
+      )}
+    </section>
+  );
+}
+
+const VERDICT_STYLE: Record<SetupVersion["verdict"]["result"], string> = {
+  better: "bg-emerald-500/15 text-emerald-300",
+  worse: "bg-red-500/15 text-red-300",
+  same: "bg-zinc-700/40 text-zinc-300",
+  baseline: "bg-blue-500/15 text-blue-300",
+  untested: "bg-zinc-800 text-zinc-500",
+};
+const VERDICT_LABEL: Record<SetupVersion["verdict"]["result"], string> = {
+  better: "Better",
+  worse: "Worse",
+  same: "No difference",
+  baseline: "Baseline",
+  untested: "Not driven",
+};
+
+// Registry short keys, in the order of the in-game tabs
+const SHORT: [string, string][] = [
+  ["fw", "front_wing"], ["rw", "rear_wing"], ["don", "diff_on_throttle"], ["doff", "diff_off_throttle"],
+  ["fc", "front_camber"], ["rc", "rear_camber"], ["ft", "front_toe"], ["rt", "rear_toe"],
+  ["fs", "front_suspension"], ["rs", "rear_suspension"], ["farb", "front_arb"], ["rarb", "rear_arb"],
+  ["frh", "front_ride_height"], ["rrh", "rear_ride_height"], ["bb", "brake_bias"], ["bp", "brake_pressure"],
+  ["fl", "fl_psi"], ["fr", "fr_psi"], ["rl", "rl_psi"], ["rr", "rr_psi"],
+];
+
+function VersionsView({ track, kind }: { track: ManagedTrack; kind: SetupKind }) {
+  const versions = track.kinds[kind].versions;
+  const newest = versions[versions.length - 1];
+  const inGame = [...versions].reverse().find((v) => v.saved);
+  const changed = new Set(Object.keys(newest.change ?? {}));
+  return (
+    <section className={cardClass}>
+      <SectionHeader
+        size="sm"
+        title="Setup versions"
+        hint={inGame ? `In the game: ${track.name} - ${kind.toUpperCase()} - V${inGame.v}` : "Not in the game yet"}
+        className="mb-4"
+        action={
+          <a
+            href={setupActionUrl(track.finished ? "reopen" : "finish", track.name)}
+            className={cn(
+              actionClass,
+              "-my-1.5 py-1.5 text-xs",
+              track.finished
+                ? "text-zinc-400 hover:bg-zinc-900/70 hover:text-zinc-200"
+                : "bg-emerald-600/90 text-white hover:bg-emerald-500",
+            )}
+          >
+            {track.finished ? <RotateCcw className="h-3.5 w-3.5" /> : <Flag className="h-3.5 w-3.5" />}
+            {track.finished ? "Reopen setup" : "Finish setup"}
+          </a>
+        }
+      />
+      {track.finished && (
+        <p className="mb-4 rounded-xl bg-emerald-500/[0.08] px-3 py-2.5 text-xs text-emerald-200">
+          Finished {formatDay(track.finished)}: no new versions for {getTrackDisplayName(track.track)}.
+        </p>
+      )}
+      <ol className="space-y-3">
+        {[...versions].reverse().map((v) => (
+          <li key={v.v} className="rounded-xl border border-zinc-800/80 bg-zinc-950/40 p-3.5">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="font-mono text-sm font-semibold text-zinc-100">V{v.v}</span>
+              <span className="text-sm text-zinc-200">{v.text}</span>
+              {v.base != null && v.change && <span className="text-xs text-zinc-500">on V{v.base}</span>}
+              <span className="flex-1" />
+              <span
+                className={cn(
+                  "rounded-full px-2.5 py-0.5 font-mono text-3xs font-semibold uppercase tracking-wider",
+                  v.saved ? "bg-zinc-800 text-zinc-400" : "bg-amber-500/15 text-amber-300",
+                )}
+              >
+                {v.saved ? `Saved ${v.saved}` : "Waits for Apply"}
+              </span>
+              <span
+                className={cn(
+                  "rounded-full px-2.5 py-0.5 font-mono text-3xs font-semibold uppercase tracking-wider",
+                  VERDICT_STYLE[v.verdict.result],
+                )}
+              >
+                {VERDICT_LABEL[v.verdict.result]}
+              </span>
+            </div>
+            <p className="mt-1.5 text-xs text-zinc-400">{v.why}</p>
+            <p className="mt-1 text-xs text-zinc-300">{v.verdict.text}</p>
+            {v.sessions.length > 0 && (
+              <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 font-mono text-2xs tabular-nums text-zinc-500">
+                {v.sessions.map((x) => (
+                  <span key={x.file}>
+                    {x.date} {x.session === "quali" ? "Quali" : "Race"}
+                    {(x.weather ?? 0) >= 3 ? " (wet)" : ""} {formatLap(x.pace)}
+                    {x.session === "race" ? ` · ${x.laps} laps` : ""}
+                  </span>
+                ))}
+              </div>
+            )}
+          </li>
+        ))}
+      </ol>
+      <div className="mt-4">
+        <Eyebrow className="text-zinc-400">V{newest.v} values</Eyebrow>
+        <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-xs sm:grid-cols-4">
+          {SHORT.map(([k, key]) => (
+            <span key={k} className="flex justify-between gap-2">
+              <span className={changed.has(k) ? "text-orange-300" : "text-zinc-500"}>{LABEL[key] ?? key}</span>
+              <span className={cn("font-mono tabular-nums", changed.has(k) ? "text-orange-300" : "text-zinc-300")}>
+                {formatValue(key, newest.values[k])}
+              </span>
+            </span>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }
 

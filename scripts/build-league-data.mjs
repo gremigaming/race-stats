@@ -617,12 +617,35 @@ for (const name of [...files].reverse()) {
 }
 // In GreMi's order: quali, race, wet; a kind without a setup is a placeholder
 const SETUP_ORDER = [["quali", "Dry quali"], ["race", "Dry race"], ["wet", "Wet"]];
-const setupCards = SETUP_TRACKS.map(([post]) => {
-  const slots = setupSlots.get(post);
-  const cards = SETUP_ORDER.map(([kind, label]) =>
-    slots[kind] ? { kind, label, ...slots[kind] } : { kind, label, placeholder: true });
-  return { post, cards };
-});
+// GreMi (2026-11-02): the forum shows the setups saved in his game, the newest
+// saved version of each kind in setups/registry.json (scripts/telemetry/
+// setup_loop.py, saved by the Apply run). Without the registry, the setups
+// found in the race files.
+const REGISTRY_KEYS = {
+  fw: "front-wing", rw: "rear-wing", don: "on-throttle", doff: "off-throttle", fc: "front-camber",
+  rc: "rear-camber", ft: "front-toe", rt: "rear-toe", fs: "front-suspension", rs: "rear-suspension",
+  farb: "front-anti-roll-bar", rarb: "rear-anti-roll-bar", frh: "front-suspension-height",
+  rrh: "rear-suspension-height", bp: "brake-pressure", bb: "brake-bias", fl: "front-left-tyre-pressure",
+  fr: "front-right-tyre-pressure", rl: "rear-left-tyre-pressure", rr: "rear-right-tyre-pressure",
+};
+const registryFile = join("setups", "registry.json");
+const registry = existsSync(registryFile) ? JSON.parse(readFileSync(registryFile, "utf8")) : null;
+const setupCards = registry
+  ? [...registry.tracks].sort((a, b) => a.row - b.row).map((t) => ({
+      post: t.post,
+      cards: SETUP_ORDER.map(([kind, label]) => {
+        const v = [...(t.kinds[kind]?.versions ?? [])].reverse().find((x) => x.saved);
+        if (!v) return { kind, label, placeholder: true };
+        const setup = Object.fromEntries(Object.entries(REGISTRY_KEYS).map(([k, key]) => [key, v.values[k]]));
+        return { kind, label, setup: { ...setup, "is-valid": true }, saved: v.saved, name: `${t.name} - ${kind.toUpperCase()} - V${v.v}` };
+      }),
+    }))
+  : SETUP_TRACKS.map(([post]) => {
+      const slots = setupSlots.get(post);
+      const cards = SETUP_ORDER.map(([kind, label]) =>
+        slots[kind] ? { kind, label, ...slots[kind] } : { kind, label, placeholder: true });
+      return { post, cards };
+    });
 writeFileSync(join(OUT, "setups.json"), JSON.stringify({ tracks: setupCards }, null, 2));
 console.log(`setups: ${setupCards.filter((t) => t.cards.some((c) => !c.placeholder)).length} tracks with a setup`);
 

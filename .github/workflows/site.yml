@@ -91,6 +91,18 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: python3 scripts/telemetry/setup_manager.py /tmp/telemetry-cache /tmp/setups.json || echo "setup advice failed, page shows the last build's data is missing"
+      # Versioned in-game setups (setups/registry.json): verdict per change and
+      # the next change to try, saved in the game by the Apply run
+      - name: Setup loop
+        run: |
+          python3 scripts/telemetry/setup_loop.py /tmp/telemetry-cache /tmp/setups.json || echo "setup loop failed, the registry stays as it was"
+          if [ -n "$(git status --porcelain setups)" ]; then
+            git config user.name "github-actions"
+            git config user.email "github-actions@users.noreply.github.com"
+            git add setups
+            git commit -m "Setup loop: verdicts and next versions [skip ci]"
+            git pull --rebase --autostash origin main && git push origin HEAD:main || echo "setup loop not saved, the next build makes it again"
+          fi
       - name: Incident replays for the safety rating page
         env:
           GITHUB_TOKEN: ${{ github.token }}

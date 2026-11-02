@@ -47,9 +47,63 @@ export interface SetupTrack {
   kinds: Partial<Record<SetupKind, SetupAdvice>>;
 }
 
+/** One driven session on a saved version (scripts/telemetry/setup_loop.py) */
+export interface VersionSession {
+  file: string;
+  date: string;
+  session: "quali" | "race";
+  weather: number | null;
+  pace: number | null;
+  best: number | null;
+  mean: number | null;
+  laps: number;
+}
+
+export interface SetupVersion {
+  v: number;
+  /** the version this one changes */
+  base: number | null;
+  created: string;
+  /** yyyy-mm-dd saved in the game; null while it waits for the Apply run */
+  saved: string | null;
+  /** short keys (fw, rw, don...) */
+  values: Record<string, number>;
+  change: Record<string, [number, number]> | null;
+  text: string;
+  why: string;
+  sessions: VersionSession[];
+  verdict: { result: "untested" | "baseline" | "better" | "worse" | "same"; text: string; delta?: number };
+}
+
+export interface ManagedTrack {
+  /** telemetry track name, the same as SetupTrack.track */
+  track: string;
+  /** in-game name, "AUSTRALIA" */
+  name: string;
+  post: string;
+  row: number;
+  finished: string | null;
+  kinds: Record<SetupKind, { versions: SetupVersion[] }>;
+}
+
+/** setups/registry.json: GreMi's versioned in-game setups */
+export interface SetupRegistry {
+  apply: { requested: string | null; last: string | null };
+  pending: number;
+  tracks: ManagedTrack[];
+}
+
 export interface SetupData {
   generated: string | null;
   tracks: SetupTrack[];
+  manager?: SetupRegistry;
+}
+
+/** The staff server page that finishes/reopens a track or starts the Apply run */
+export function setupActionUrl(action: "finish" | "reopen" | "apply", track = ""): string {
+  const site = window.location.origin + window.location.pathname;
+  const q = new URLSearchParams({ do: action, ...(track ? { track } : {}), site });
+  return `${STAFF_URL}/setup-action?${q}`;
 }
 
 const KEY_STORAGE = "setup-manager-key";
