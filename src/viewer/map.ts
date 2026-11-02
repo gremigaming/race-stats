@@ -460,10 +460,14 @@ export class TrackMap {
   /** Called every frame with the visible world rectangle and the zoom (pixels per metre). */
   update(x0: number, z0: number, x1: number, z1: number, scale: number) {
     const loading = this.mode !== "svg" && !this.ready;
+    // the pyramid has its own flat ground everywhere (GreMi, 2 Nov: no photo textures): photos only
+    // under the SVG fallback, and never uploaded while the pyramid is drawn
+    const photos = this.mode !== "pyramid";
+    if (this.base.visible !== photos) this.base.visible = photos;
     // photo tiles outside the screen aren't drawn (each is its own texture: fewer draw calls);
     // all of them go to the GPU while the map loads, a late one only inside the frame budget
     let photosUp = true;
-    for (const sp of this.base.children as Sprite[]) {
+    if (photos) for (const sp of this.base.children as Sprite[]) {
       const src = sp.texture.source;
       const up = this.isUp(src) || (canUpload(loading ? 12 : undefined) && this.up(src));
       if (!up) photosUp = false;
