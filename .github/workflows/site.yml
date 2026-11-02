@@ -45,17 +45,25 @@ jobs:
           fi
       - name: Turn race files into site data
         run: node scripts/build-league-data.mjs
-      - name: Work out the safety rating
-        run: python3 scripts/safety_rating.py
-      - name: Rank the Discord award roles
-        run: python3 scripts/awards.py
-      # GreMi's Setup manager: advice from his telemetry, published only
-      # encrypted (the key comes from the staff server after his Discord login)
       - uses: actions/cache@v4
         with:
           path: /tmp/telemetry-cache
           key: telemetry-${{ github.run_id }}
           restore-keys: telemetry-
+      - name: Fault engine verdicts for the safety rating
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          python3 -m pip install --quiet --break-system-packages numpy || true
+          python3 scripts/telemetry/fault_engine.py /tmp/telemetry-cache || echo "fault engine failed, races without verdicts show as not judged"
+      - name: Work out the safety rating
+        env:
+          SR_RULES: v2.1   # GreMi, 2 Nov 2026: SR v2.1 live
+        run: python3 scripts/safety_rating.py
+      - name: Rank the Discord award roles
+        run: python3 scripts/awards.py
+      # GreMi's Setup manager: advice from his telemetry, published only
+      # encrypted (the key comes from the staff server after his Discord login)
       - name: Setup manager advice
         env:
           GITHUB_TOKEN: ${{ github.token }}
