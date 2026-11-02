@@ -29,6 +29,10 @@ const FOLLOW_CAP = 500; // metres: followed cars further apart get an edge arrow
 const TV_MIN_SCALE = 3.4; // px per metre: the broadcast camera never zooms out so far that cars turn into dots
 const TV_WIDE_MIN_SCALE = 1.6; // the lap 1 pack shot may go wider to keep the whole field in frame
 const FOLLOW_GLIDE_MS = 350; // follow mode: glide onto the car once, then lock it dead centre
+const CUT_MS = 500; // a broadcast cut: a quick zoom out, pan across, zoom back in
+const CUT_DIP = 0.82; // ... zooming out at least this much (scale factor) at the midpoint
+const CUT_DIP_MAX = 0.4; // ... and never more than this, however far apart the shots are
+const CUT_TRAVEL = 1.4; // screen widths the pan may sweep at the zoomed-out midpoint
 const FONT = "Geist Variable, system-ui, sans-serif";
 const TV_EASE_MS = 420; // the broadcast camera glides; follow mode stays tight
 const TV_ZOOM_EASE_MS = 1100;
@@ -117,6 +121,8 @@ export class RaceScene {
   tvCars: number[] = [];
   tvContext: number[] = [];
   private cut: number | null = null;
+  /** A broadcast cut in progress: where it started (clockMs) and the camera it left. */
+  private cutMove: { at: number; from: Cam } | null = null;
   private tvScale: number | null = null;
   /** The director's wide shot (lap 1 pack): may zoom out further than a battle shot. */
   private tvWide = false;
@@ -494,11 +500,14 @@ export class RaceScene {
     const aim = this.aim(inFrame);
     if (aim) {
       const tv = this.mode === "tv";
-      // a broadcast cut is a hard cut, like TV: the new shot is there the next frame (no fly-over across the track)
-      const hardCut = tv && this.cut !== null;
+      // a broadcast cut: a quick CUT_MS move (zoom out a little, pan across, zoom back in), timed in real time
+      // so it is the same at any playback speed; a cut during a cut starts again from where the camera is
+      if (tv && this.cut !== null) this.cutMove = { at: this.clockMs, from: { ...this.cam } };
       this.cut = null;
-      const k = hardCut ? 1 : 1 - Math.exp(-dtMs / (tv ? TV_EASE_MS : this.mode === "follow" ? 110 : 220));
-      const kz = hardCut ? 1 : tv ? 1 - Math.exp(-dtMs / TV_ZOOM_EASE_MS) : k;
+      if (!tv) this.cutMove = null;
+      if (this.cutMove && this.cutStep(aim)) return this.render(outside, dtMs);
+      const k = 1 - Math.exp(-dtMs / (tv ? TV_EASE_MS : this.mode === "follow" ? 110 : 220));
+      const kz = tv ? 1 - Math.exp(-dtMs / TV_ZOOM_EASE_MS) : k;
       // follow mode: locked with no lag at any playback speed (only a short glide when follow starts);
       // one car dead centre, several cars (an incident) the middle of their frame
       const lock = this.mode === "follow" && inFrame.length >= 1;
@@ -518,6 +527,40 @@ export class RaceScene {
         this.snapRot = false;
       }
     }
+    this.render(outside, dtMs);
+  }
+
+  /**
+   * One frame of a broadcast cut. Position eases from the old camera to the new shot (tracked live, the cars
+   * keep moving); the scale eases between the two in log space with a dip in the middle, deeper the further
+   * the pan goes so it never smears across the track. Returns false once the cut is done (normal glide again).
+   */
+  private cutStep(aim: Cam): boolean {
+    const m = this.cutMove!;
+    const p = (this.clockMs - m.at) / CUT_MS;
+    if (p >= 1) {
+      this.cutMove = null;
+      this.cam.x = aim.x;
+      this.cam.z = aim.z;
+      this.cam.scale = aim.scale;
+      this.cam.rot = aim.rot;
+      return true;
+    }
+    const e = p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2; // ease in-out
+    const a = m.from;
+    const base = a.scale * Math.pow(aim.scale / a.scale, e);
+    const dist = Math.hypot(aim.x - a.x, aim.z - a.z);
+    const mid = Math.sqrt(a.scale * aim.scale);
+    const fit = dist > 0 ? (CUT_TRAVEL * this.size().w) / dist / mid : 1; // midpoint scale factor that keeps the sweep short
+    const dip = clamp(Math.min(CUT_DIP, fit), CUT_DIP_MAX, CUT_DIP);
+    this.cam.x = a.x + (aim.x - a.x) * e;
+    this.cam.z = a.z + (aim.z - a.z) * e;
+    this.cam.scale = clamp(base * (1 - (1 - dip) * Math.sin(Math.PI * p)), MIN_SCALE, MAX_SCALE);
+    this.cam.rot = wrap(a.rot + wrap(aim.rot - a.rot) * e);
+    return true;
+  }
+
+  private render(outside: CarState[], dtMs: number) {
     const { w, h } = this.size();
     const { x, z, scale, rot } = this.cam;
     this.world.pivot.set(x, z);
