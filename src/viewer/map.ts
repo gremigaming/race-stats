@@ -37,7 +37,8 @@ const OVER_PX = 1600;
 const OVER_SIZES = [256, 512, 1024, OVER_PX];
 
 interface PyramidIndex {
-  [track: string]: { px: number; levels: number; tile0: number; tiles: Record<string, [number, number][]> };
+  /** v: render time, added to tile URLs so a re-rendered pyramid isn't served from a day-old cache. */
+  [track: string]: { px: number; levels: number; tile0: number; v?: number; tiles: Record<string, [number, number][]> };
 }
 
 interface PhotoIndex {
@@ -247,7 +248,7 @@ async function pyramidFor(
   for (const [z, l] of levels) for (const [x, y] of l) all.push([z, x, y]);
   p.ready = (async () => {
     await inParallel(all, 12, async ([z, x, y]) => {
-      const b = await blob(`${PYRAMID}${folder}/${z}/${x}_${y}.webp`);
+      const b = await blob(`${PYRAMID}${folder}/${z}/${x}_${y}.webp${m.v ? `?v=${m.v}` : ""}`);
       if (b) p.files.set(`${z}/${x}_${y}`, b);
       p.done++;
     });
