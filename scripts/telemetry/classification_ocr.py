@@ -177,7 +177,8 @@ def lines_of(words):
 
 
 def norm(name):
-    return re.sub(r"[^A-Z0-9]", "", name.upper().replace("0", "O").replace("|", "I"))
+    # letters OCR mixes up count as the same: 0/O, 1/I/l/|
+    return re.sub(r"[^A-Z0-9]", "", name.upper().replace("0", "O").replace("|", "I").replace("1", "I").replace("L", "I"))
 
 
 def is_team(text):
@@ -206,8 +207,8 @@ def name_in(row):
     if cur:
         groups.append(cur)
     for g in groups:
-        # team logos and flags before the name read as a stray letter or two: drop them
-        while len(g) > 1 and len(norm(g[0][0])) <= 2:
+        # team logos and flags before the name read as a stray letter: drop it
+        while len(g) > 1 and len(norm(g[0][0])) <= 1:
             g = g[1:]
         text = g[0][0]
         for a, b in zip(g, g[1:]):

@@ -242,7 +242,7 @@ const bestLaps = (data) =>
 // merge; staff "unmerge" undoes it.
 const OCR_FILE = join(".cache", "classification.json");
 const ocrCaptures = existsSync(OCR_FILE) ? (JSON.parse(readFileSync(OCR_FILE, "utf8")).captures ?? []) : [];
-const ocrKey = (s) => s.toUpperCase().replace(/0/g, "O").replace(/\|/g, "I").replace(/[^A-Z0-9]/g, "");
+const ocrKey = (s) => s.toUpperCase().replace(/0/g, "O").replace(/[|1L]/g, "I").replace(/[^A-Z0-9]/g, ""); // same as norm() in classification_ocr.py
 function likeness(a, b) {
   if (!a.length || !b.length) return 0;
   let prev = Array.from({ length: b.length + 1 }, (_, j) => j);
