@@ -117,7 +117,8 @@ DIGITISH = str.maketrans({"O": "0", "o": "0", "D": "0", "Q": "0", "I": "1", "l":
 LAP = re.compile(r"^(?:(\d):)?(\d{1,2})[:.](\d{2})[.:](\d{3})$")
 GAP = re.compile(r"^\+?(\d{1,4})[.:](\d{3})s?$")  # Windows OCR sometimes drops the +
 INT = re.compile(r"^\d{1,2}$")
-WORDS_DATA = {"LAP", "LAPS", "PTS", "DNF", "DSQ", "DNS", "RET", "NC", "S", "+", "-", "POS", "BEST", "TIME", "GAP"}
+WORDS_DATA = {"LAP", "LAPS", "PTS", "DNF", "DSQ", "DNS", "RET", "NC", "S", "+", "-", "POS", "BEST", "TIME", "GAP",
+              "INTERVAL", "LEADER", "PIT", "OUT"}
 STATUS_WORDS = {"DNF": "dnf", "RET": "dnf", "DSQ": "dsq", "DNS": "dns", "NC": "not classified"}
 
 
@@ -205,6 +206,9 @@ def name_in(row):
     if cur:
         groups.append(cur)
     for g in groups:
+        # team logos and flags before the name read as a stray letter or two: drop them
+        while len(g) > 1 and len(norm(g[0][0])) <= 2:
+            g = g[1:]
         text = g[0][0]
         for a, b in zip(g, g[1:]):
             text += ("" if b[1] - (a[1] + a[3]) < 0.25 * b[4] else " ") + b[0]
@@ -247,19 +251,59 @@ def score(row, car, leader):
     return s
 
 
-def match_frame(words, results):
-    """{car index: name} for one frame."""
-    rows = [r for r in lines_of(words) if any(token_kind(w[0])[0] in ("lap", "gap", "status") for w in r)]
-    leader = next((c for c in results.values() if c["position"] == 1), None)
-    pairs = sorted(((score(r, c, leader), ri, ci) for ri, r in enumerate(rows) for ci, c in results.items()),
-                   reverse=True)
+def parse_lap(packet):
+    """Lap data packet -> {car index: {position, gap_front (s), status}} (the live standings)."""
+    b = packet[HEADER_LEN:]
+    cars = 24 if struct.unpack_from("<H", packet, 0)[0] >= 2026 else 22
+    per = (len(b) - 2) // cars    # 2 trailing bytes: time trial car indexes
+    out = {}
+    for i in range(cars):
+        r = b[i * per:(i + 1) * per]
+        if len(r) < 46 or not r[32] or r[45] < 2:
+            continue   # empty slot, or a car not racing
+        gap = (struct.unpack_from("<H", r, 14)[0] + r[16] * 60000) / 1000
+        out[i] = {"position": r[32], "gap_front": gap, "status": STATUS.get(r[45], str(r[45]))}
+    return out
+
+
+def tower_score(row, car):
+    """The live standings tower: position first, then the name, then the interval or DNF."""
+    kinds = [token_kind(w[0]) for w in row]
+    if not kinds or kinds[0] != ("int", car["position"]):
+        return 0
+    s = 6
+    gaps = [v for k, v in kinds if k == "gap"]
+    if gaps and car["position"] > 1 and car["status"] == "active":
+        # the tower updates at timing lines, the lap data all the time: a big difference = places changed
+        # (a frame where they disagree is skipped: losing a vote beats naming the wrong car)
+        s += 3 if abs(gaps[0] - car["gap_front"]) <= 0.5 else -6
+    if any(k == "status" for k, _ in kinds):
+        s += 3 if car["status"] in ("dnf", "retired", "dsq") else -6
+    return s
+
+
+def match_frame(words, results, lap=None):
+    """{car index: name} for one frame. Lap times on screen = classification screen (anchored on the
+    final results); otherwise the standings tower (anchored on the live lap data of that moment)."""
+    rows_all = lines_of(words)
+    lap_times = sum(token_kind(w[0])[0] == "lap" for r in rows_all for w in r)
+    if lap and (lap_times < 4 or not results):
+        rows = [r for r in rows_all if token_kind(r[0][0])[0] == "int" and name_in(r[1:])]
+        pairs = sorted(((tower_score(r, c), ri, ci) for ri, r in enumerate(rows) for ci, c in lap.items()), reverse=True)
+    elif results:
+        rows = [r for r in rows_all if any(token_kind(w[0])[0] in ("lap", "gap", "status") for w in r)]
+        leader = next((c for c in results.values() if c["position"] == 1), None)
+        pairs = sorted(((score(r, c, leader), ri, ci) for ri, r in enumerate(rows) for ci, c in results.items()),
+                       reverse=True)
+    else:
+        return {}
     used_r, used_c, out = set(), set(), {}
     for s, ri, ci in pairs:
         if s < 6 or ri in used_r or ci in used_c:
             continue
         used_r.add(ri)
         used_c.add(ci)
-        n = name_in(rows[ri])
+        n = name_in(rows[ri][1:] if lap and token_kind(rows[ri][0][0])[0] == "int" else rows[ri])
         if n:
             out[ci] = n
     return out
@@ -267,19 +311,23 @@ def match_frame(words, results):
 
 def read_capture(payload):
     """Capture payload -> {"recording", "captured", "cars": {index: {...}}, "check": {...}}."""
-    results = parse_results(base64.b64decode(payload["results"]))
+    results = parse_results(base64.b64decode(payload["results"])) if payload.get("results") else {}
     parts = parse_participants(base64.b64decode(payload["participants"])) if payload.get("participants") else {}
+    finish = parse_lap(base64.b64decode(payload["finish_lap"])) if payload.get("finish_lap") else {}
     votes = collections.defaultdict(collections.Counter)
     raw = collections.defaultdict(collections.Counter)
     for fr in payload.get("frames", []):
-        for ci, n in match_frame(fr["words"], results).items():
+        lap = parse_lap(base64.b64decode(fr["lap"])) if fr.get("lap") else None
+        for ci, n in match_frame(fr["words"], results, lap).items():
             votes[ci][norm(n)] += 1
             raw[(ci, norm(n))][n] += 1
     frames = len(payload.get("frames", []))
     cars, ok, checked = {}, 0, 0
-    for ci, c in sorted(results.items()):
+    for ci in sorted(set(results) | set(finish) | set(votes)):
+        c = results.get(ci) or finish.get(ci) or {}
         p = parts.get(ci, {})
-        e = {"index": ci, "position": c["position"], "best_ms": c["best_ms"], "status": c["status"],
+        e = {"index": ci, "position": c.get("position"), "best_ms": c.get("best_ms"), "status": c.get("status"),
+             "finish_position": finish.get(ci, {}).get("position"),
              "udp_name": p.get("name"), "hidden": p.get("hidden"), "ai": p.get("ai")}
         if votes[ci]:
             key, n = votes[ci].most_common(1)[0]
@@ -289,6 +337,7 @@ def read_capture(payload):
                 ok += norm(p["name"]) == key
         cars[ci] = e
     return {"recording": payload.get("recording"), "captured": payload.get("captured"), "frames": frames,
+            "finish_time": payload.get("finish_time"), "has_results": bool(results),
             "cars": cars, "check": {"named_cars": checked, "ocr_correct": ok}}
 
 

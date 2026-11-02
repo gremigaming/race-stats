@@ -40,18 +40,21 @@ Each session (practice, quali, race, time trial) becomes one file in
 release of this repo. `scripts/telemetry/gmtel.py` turns a file into laps;
 `--collisions` shows where both cars were at each contact.
 
-### Classification screen (hidden names)
+### Standings on screen (hidden names)
 
 Download `ClassificationCapture.ps1` into the same folder (with the newest
-`RaceUploader.ps1` and `TelemetryRecorder.cs`) and restart the uploader. When a
-race's results come in, it takes a screenshot every 3 s for up to 4 minutes,
-reads them with Windows' built-in OCR and keeps the ones that show the final
-classification. Only the words (encrypted, `.gmcls`) go to the `telemetry`
-release; the site build ties each row to a car by best lap, gap and position
-and gives hidden cars their name. The best screenshot of each race stays in
+`RaceUploader.ps1` and `TelemetryRecorder.cs`) and restart the uploader. The
+moment you cross the finish line in a race (or when the results come in, if you
+didn't finish), it takes a screenshot every 3 s and reads it with Windows'
+built-in OCR: first the live standings tower (the whole grid, while the others
+finish), then the final classification screen, stopping 60 s after the results.
+Every screenshot is stored with the game's live lap data of that moment, so each
+row is tied to a car even if places change later. Only the words (encrypted,
+`.gmcls`) go to the `telemetry` release; the site build gives hidden cars their
+name. The best screenshot of each race stays in
 `%APPDATA%\GreMiRaceUploader\classification` for checking (kept 30 days).
 
-- Stay on the classification screen for a few seconds after the race.
+- Stay on the game (don't tab out) for a minute after you finish.
 - The game must show online names on your screen, and run borderless or windowed
   (exclusive fullscreen can give black screenshots).
 

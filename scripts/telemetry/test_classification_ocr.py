@@ -167,6 +167,111 @@ def encrypt_like_dotnet(data, pub):
     return co.MAGIC + struct.pack("<H", len(wrapped)) + wrapped + iv + ct + hmac.new(mac, iv + ct, hashlib.sha256).digest()
 
 
+# ------------------------------------------------------------------ standings tower (GreMi finished)
+
+# position, name on screen, name in the game's data, hidden, interval shown, lap status (2 racing, 3 finished, 4 DNF)
+TOWER = [
+    (1, "RedLine77", "RedLine77", False, None, 3),
+    (2, "TTV/Host_Car", "TTV/Host_Car", False, 0.907, 3),
+    (3, "LCR-Volt872", "Player", True, 2.877, 2),
+    (4, "QWERTY5", "QWERTY5", False, 1.785, 2),
+    (5, "Gridl0ck", "Player", True, 0.343, 2),
+    (6, "ZED", "ZED", False, 0.947, 2),
+    (7, "pablo_turbo", "pablo_turbo", False, 10.976, 2),
+    (8, "Ondrej_m18_F1", "Player", True, 9.133, 2),
+    (9, "Vexlo", "Vexlo", False, 0.818, 2),
+    (10, "TTV_kanto", "TTV_kanto", False, 5.721, 2),
+    (11, "chapa_999", "Player", True, 11.176, 2),
+    (12, "Brakelate_99", "Brakelate_99", False, 3.004, 2),
+    (13, "Mt_Driver", "Player", True, 7.250, 2),
+    (14, "Bolt4ik", "Bolt4ik", False, 55.050, 2),
+    (15, "NotHereYet", "Player", True, None, 4),
+    (16, "Quin_x01", "Quin_x01", False, None, 4),
+]
+
+
+def tower_packets(tower=TOWER, swap=None):
+    """Lap data (the moment GreMi finished) + participants for the tower. swap=(a, b) swaps two cars' places."""
+    lap, par = bytearray(), bytearray([len(tower)])
+    for i in range(22):
+        if i < len(tower):
+            pos, _, name, hidden, gap, status = tower[i]
+            if swap and pos in swap:
+                pos = swap[1] if pos == swap[0] else swap[0]
+            ms = int(round((gap or 0) * 1000))
+            r = bytearray(57)
+            struct.pack_into("<HB", r, 14, ms % 60000, ms // 60000)
+            r[32], r[45] = pos, status
+            lap += r
+            par += bytes([0, 255, i, 0, 0, 10 + i, 1]) + name.encode().ljust(32, b"\0") + bytes([1, 0 if hidden else 1]) + bytes(16)
+        else:
+            lap += bytes(57)
+            par += bytes(57)
+    return header(2) + bytes(lap) + bytes(2), header(4) + bytes(par)
+
+
+def tower_rows(tower=TOWER):
+    out = []
+    for pos, shown, _, _, gap, status in tower:
+        right = "DNF" if status == 4 else "Interval" if pos == 1 else f"+{gap:.3f}"
+        out.append([str(pos), "@", shown, right])
+    return out
+
+
+def tower_words(rows, x0=20, y0=120, h=14, step=21, glue_underscores=False):
+    ws = [["LAP", x0, y0 - 60, 30, h], ["5/5", x0 + 36, y0 - 60, 24, h], ["SECTOR", x0, y0 - 40, 50, h], ["1", x0 + 56, y0 - 40, 6, h]]
+    for i, (pos, icon, name, right) in enumerate(rows):
+        y = y0 + i * step
+        ws.append([pos, x0, y, 8 * len(pos), h])
+        ws.append([icon, x0 + 22, y, 10, h])
+        if glue_underscores and "_" in name:
+            a, b = name.split("_", 1)
+            ws += [[a, x0 + 40, y, 8 * len(a), h], [b, x0 + 40 + 8 * len(a) + 9, y, 8 * len(b), h]]
+        else:
+            ws.append([name, x0 + 40, y, 8 * len(name), h])
+        ws.append([right, x0 + 190, y, 8 * len(right), h])
+    return ws
+
+
+def tower_payload(frames, laps, results=""):
+    _, par = tower_packets()
+    return {"recording": "test", "results": results, "participants": base64.b64encode(par).decode(),
+            "finish_lap": base64.b64encode(laps[0]).decode(),
+            "frames": [{"words": f, "lap": base64.b64encode(l).decode()} for f, l in zip(frames, laps)]}
+
+
+def expect_tower(cap):
+    bad = []
+    for i, row in enumerate(TOWER):
+        c = cap["cars"].get(i, {})
+        if co.norm(c.get("ocr") or "") != co.norm(row[1]):
+            bad.append(f"car {i}: wanted {row[1]!r}, read {c.get('ocr')!r}")
+    return bad
+
+
+def test_tower():
+    lap, _ = tower_packets()
+    rows = tower_rows()
+    clean = tower_words(rows)
+    glued = tower_words(rows, y0=140, glue_underscores=True)
+    # places 5 and 6 changed in the game, the tower on screen still shows the old order:
+    # the interval check must not hand the names to the wrong cars
+    swapped_lap, _ = tower_packets(swap=(5, 6))
+    stale = tower_words(rows)
+    one = co.read_capture(tower_payload([clean], [lap]))
+    assert not expect_tower(one), expect_tower(one)
+    cap = co.read_capture(tower_payload([clean, glued, stale], [lap, lap, swapped_lap]))
+    bad = expect_tower(cap)
+    assert not bad, bad
+    assert cap["check"]["named_cars"] == 10 and cap["check"]["ocr_correct"] == 10, cap["check"]
+    # a stale frame alone: cars 5 and 6 get no name rather than each other's
+    alone = co.read_capture(tower_payload([stale], [swapped_lap]))
+    for i in (4, 5):
+        got = alone["cars"].get(i, {}).get("ocr")
+        assert not got or co.norm(got) == co.norm(TOWER[i][1]), (i, got)
+    print("tower: ok")
+
+
 # ------------------------------------------------------------------ Windows end-to-end
 
 def render(folder):
@@ -195,6 +300,30 @@ def render(folder):
         for x, t in zip(xs, row):
             d.text((x, y), t, fill=(255, 255, 255), font=font)
     img.save(os.path.join(folder, "screen.png"))
+    # the live standings tower, top left over a track picture, like the game after GreMi's finish
+    small = None
+    for f in ("C:/Windows/Fonts/arialbd.ttf", "C:/Windows/Fonts/segoeuib.ttf", "DejaVuSans-Bold.ttf"):
+        try:
+            small = ImageFont.truetype(f, 17)
+            break
+        except OSError:
+            pass
+    tw = Image.new("RGB", (1920, 1080), (90, 110, 80))
+    td = ImageDraw.Draw(tw)
+    td.rectangle((20, 40, 300, 120), fill=(240, 200, 0))
+    td.text((30, 50), "LAP 5/5", fill=(0, 0, 0), font=small)
+    td.text((30, 80), "SECTOR 1", fill=(0, 0, 0), font=small)
+    for i, (pos, _, name, right) in enumerate(tower_rows()):
+        y = 130 + i * 28
+        td.rectangle((20, y - 4, 300, y + 22), fill=(225, 6, 0) if i == 1 else (25, 25, 35))
+        td.text((28, y), pos, fill=(255, 255, 255), font=small)
+        td.ellipse((60, y + 2, 74, y + 16), fill=(200, 200, 200))
+        td.text((84, y), name, fill=(255, 255, 255), font=small)
+        td.text((300 - 8 - td.textlength(right, font=small), y), right, fill=(255, 255, 255), font=small)
+    tw.save(os.path.join(folder, "tower.png"))
+    lap, par = tower_packets()
+    json.dump({"finish_lap": base64.b64encode(lap).decode(), "participants": base64.b64encode(par).decode()},
+              open(os.path.join(folder, "tower.json"), "w"))
     res, par = packets()
     json.dump({"results": base64.b64encode(res).decode(), "participants": base64.b64encode(par).decode()},
               open(os.path.join(folder, "packets.json"), "w"))
@@ -208,8 +337,8 @@ def render(folder):
     print("rendered", folder)
 
 
-def check(folder):
-    files = glob.glob(os.path.join(folder, "out", "*.gmcls"))
+def check(folder, tower=False):
+    files = glob.glob(os.path.join(folder, "out-tower" if tower else "out", "*.gmcls"))
     assert files, "no .gmcls written"
     payload = co.decrypt(open(files[0], "rb").read(), open(os.path.join(folder, "key.pem"), "rb").read())
     print("frames:", len(payload["frames"]), "words in the first:", len(payload["frames"][0]["words"]) if payload["frames"] else 0)
@@ -218,7 +347,7 @@ def check(folder):
     cap = co.read_capture(payload)
     for c in cap["cars"].values():
         print(c["position"], c.get("ocr"), c.get("votes"), "/", c.get("seen"))
-    bad = expect(cap)
+    bad = expect_tower(cap) if tower else expect(cap)
     print("check:", cap["check"], "problems:", bad or "none")
     assert not bad, bad
 
@@ -228,7 +357,10 @@ if __name__ == "__main__":
         render(sys.argv[2])
     elif len(sys.argv) > 2 and sys.argv[1] == "check":
         check(sys.argv[2])
+    elif len(sys.argv) > 2 and sys.argv[1] == "check-tower":
+        check(sys.argv[2], tower=True)
     else:
         test_tokens()
         test_parser()
+        test_tower()
         test_crypto()

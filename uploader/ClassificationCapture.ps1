@@ -1,29 +1,38 @@
-# GreMi Gang classification capture (started by RaceUploader.ps1 after every race).
+# GreMi Gang classification capture (started by RaceUploader.ps1 in every race).
 #
-# When the game sends its final classification, this takes a screenshot of every
-# monitor every few seconds, reads each one with Windows' own OCR (no install
-# needed) and keeps the frames that look like the classification screen (several
-# lap times on screen). The words and where they sit, plus the game's results
-# and participants packets, are encrypted with the public key below and written
-# as one .gmcls file next to the telemetry; the uploader sends it to the
-# "telemetry" release. scripts/telemetry/classification_ocr.py (site build)
-# decrypts it, ties every row to a car by best lap / gap / position, and so
-# knows who drove the cars with hidden names.
+# Starts the moment GreMi crosses the finish line (the live standings tower then
+# shows the whole grid while the others finish), or when the final
+# classification comes in if he didn't finish. Every few seconds it takes a
+# screenshot of every monitor, reads it with Windows' own OCR (no install
+# needed) and keeps the frames that look like the standings tower (gaps, DNFs)
+# or the classification screen (lap times). Each frame is stored with the
+# game's live lap data of that moment (position + gap of every car), so a row is
+# tied to a car index even if places change later; the final classification
+# packet is added when it arrives (up to 60 s of classification frames after
+# it). All of it is encrypted with the public key below into one .gmcls file
+# next to the telemetry; the uploader sends it to the "telemetry" release.
+# scripts/telemetry/classification_ocr.py (site build) decrypts it and names
+# the cars with hidden names.
 #
 # Screenshots stay on this PC (the best one is kept in -KeepDir for checking).
+# Tabbed out of the game = nothing to read: stay on the game for a minute after
+# the flag.
 #
-# Test without the game: -ImagePath screen.png reads that picture instead.
+# Test without the game: -ImagePath screen.png (and -Results/-FinishLap) reads that picture.
 # Needs Windows PowerShell 5.1 (Windows' OCR is not reachable from PowerShell 7).
 
 param(
     [Parameter(Mandatory = $true)][string]$OutFile,
-    [Parameter(Mandatory = $true)][string]$Results,       # base64 final classification packet
+    [object]$Recorder = $null,                            # GmTelemetryRecorder (same process)
+    [string]$Results = "",                                # base64 final classification packet
     [string]$Participants = "",                           # base64 participants packet
+    [string]$FinishLap = "",                              # base64 lap data packet when GreMi finished
+    [double]$FinishTime = 0,                              # session time (s) when GreMi finished
     [string]$Recording = "",
     [string]$KeepDir = "",
     [string]$ImagePath = "",
     [string]$PublicKeyXml = "",
-    [int]$Seconds = 240,
+    [int]$Seconds = 480,
     [int]$Every = 3,
     [int]$WantScreens = 4
 )
@@ -37,10 +46,12 @@ if (-not $PublicKeyXml) { $PublicKeyXml = $DefaultKey }
 Add-Type -AssemblyName System.Drawing
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Runtime.WindowsRuntime
-Add-Type @"
+if (-not ("GmDpi" -as [type])) {
+    Add-Type @"
 using System.Runtime.InteropServices;
 public static class GmDpi { [DllImport("user32.dll")] public static extern bool SetProcessDPIAware(); }
 "@
+}
 [void][GmDpi]::SetProcessDPIAware()  # real pixels, not Windows' scaled ones
 
 $null = [Windows.Storage.StorageFile, Windows.Storage, ContentType = WindowsRuntime]
@@ -63,6 +74,7 @@ $maxDim = [int][Windows.Media.Ocr.OcrEngine]::MaxImageDimension
 $tmp = Join-Path $env:TEMP ("gmcls_" + [guid]::NewGuid().ToString("N"))
 New-Item -ItemType Directory -Force -Path $tmp | Out-Null
 $LapLike = '^\d{1,2}[:.]\d{2}[.,:]\d{3}$'
+$GapLike = '^(\+\d{1,3}[.,]\d{3}|DNF|DSQ)$'
 
 # OCR of one picture file -> words @(text, x, y, w, h) in that picture's pixels
 function Read-File($path) {
@@ -173,44 +185,64 @@ function Json-Text($s) {
 }
 
 $frames = New-Object System.Collections.ArrayList
-$good = 0
-$best = $null; $bestLaps = 0
+$good = 0; $goodFinal = 0
+$best = $null; $bestScore = 0
 $started = Get-Date
+$resultsAtStart = if ($Recorder) { $Recorder.ResultsCount } else { 0 }
+$resultsSince = $null
+$inv = [Globalization.CultureInfo]::InvariantCulture
 while ($true) {
     $t = [math]::Round(((Get-Date) - $started).TotalSeconds, 1)
+    # the live standings as the game sees them right now: the anchor for the tower rows
+    $lap = if ($Recorder -and $Recorder.LatestLap) { [Convert]::ToBase64String($Recorder.LatestLap) } else { $FinishLap }
+    $st = if ($Recorder -and $Recorder.LatestLap) { [BitConverter]::ToSingle($Recorder.LatestLap, 15) } else { $FinishTime }
+    $final = $Recorder -and $Recorder.ResultsCount -ne $resultsAtStart
+    if ($final -and -not $resultsSince) { $resultsSince = Get-Date }
     $si = 0
     foreach ($shot in (Shots)) {
         $kept = $false
         foreach ($v in (Variants $shot)) {
             $words = Read-Bitmap $v[1] $v[2]
             $v[1].Dispose()
+            # classification screen: lap times; standings tower: gaps (+1.234) and DNFs
             $laps = @($words | Where-Object { $_[0] -match $LapLike }).Count
-            if ($laps -ge 4) {
-                [void]$frames.Add(@{ t = $t; screen = $si; variant = $v[0]; w = $shot.Width; h = $shot.Height; words = $words })
+            $gaps = @($words | Where-Object { $_[0] -match $GapLike }).Count
+            if ($laps -ge 4 -or $gaps -ge 4) {
+                [void]$frames.Add(@{ t = $t; st = $st; lap = $lap; screen = $si; variant = $v[0]; w = $shot.Width; h = $shot.Height; words = $words })
                 $kept = $true
-                if ($laps -gt $bestLaps -and $KeepDir) {
+                if ($laps + $gaps -gt $bestScore -and $KeepDir) {
                     if ($best) { $best.Dispose() }
-                    $best = $shot.Clone(); $bestLaps = $laps
+                    $best = $shot.Clone(); $bestScore = $laps + $gaps
                 }
             }
         }
-        if ($kept) { $good++ }
+        if ($kept) { $good++; if ($final) { $goodFinal++ } }
         $shot.Dispose()
         $si++
     }
-    if ($ImagePath -or $good -ge $WantScreens -or ((Get-Date) - $started).TotalSeconds -ge $Seconds) { break }
+    $elapsed = ((Get-Date) - $started).TotalSeconds
+    if ($ImagePath -or $elapsed -ge $Seconds) { break }
+    if (-not $Recorder -and $good -ge $WantScreens) { break }
+    # after the results packet: a few frames of the classification screen, or 60 s, then stop
+    if ($resultsSince -and ($goodFinal -ge $WantScreens -or ((Get-Date) - $resultsSince).TotalSeconds -ge 60)) { break }
     Start-Sleep -Seconds $Every
+}
+
+if ($Recorder) {
+    if ($Recorder.ResultsCount -ne $resultsAtStart -and $Recorder.ResultsPacket) { $Results = [Convert]::ToBase64String($Recorder.ResultsPacket) }
+    if ($Recorder.LatestParticipants) { $Participants = [Convert]::ToBase64String($Recorder.LatestParticipants) }
 }
 
 # Payload: the packets and every kept frame's words
 $sb = New-Object System.Text.StringBuilder
-[void]$sb.Append('{"v":1,"recording":' + (Json-Text $Recording) + ',"captured":"' + (Get-Date).ToString("s") +
+[void]$sb.Append('{"v":2,"recording":' + (Json-Text $Recording) + ',"captured":"' + (Get-Date).ToString("s") +
+    '","finish_time":' + $FinishTime.ToString($inv) + ',"finish_lap":"' + $FinishLap +
     '","results":"' + $Results + '","participants":"' + $Participants + '","frames":[')
 for ($i = 0; $i -lt $frames.Count; $i++) {
     $f = $frames[$i]
     if ($i) { [void]$sb.Append(',') }
-    [void]$sb.Append('{"t":' + $f.t.ToString([Globalization.CultureInfo]::InvariantCulture) + ',"screen":' + $f.screen +
-        ',"variant":"' + $f.variant + '","w":' + $f.w + ',"h":' + $f.h + ',"words":[')
+    [void]$sb.Append('{"t":' + $f.t.ToString($inv) + ',"st":' + ([double]$f.st).ToString($inv) + ',"lap":"' + $f.lap +
+        '","screen":' + $f.screen + ',"variant":"' + $f.variant + '","w":' + $f.w + ',"h":' + $f.h + ',"words":[')
     for ($j = 0; $j -lt $f.words.Count; $j++) {
         $w = $f.words[$j]
         if ($j) { [void]$sb.Append(',') }

@@ -75,6 +75,16 @@ public class GmTelemetryRecorder
     public int ResultsSessionType;     // 15-17 = race
     public string ResultsName = "";    // the session's telemetry file name
     byte[] latestParticipants;
+    public byte[] LatestParticipants { get { return latestParticipants; } }
+
+    // GreMi crossing the finish line in a race: the live standings tower shows the
+    // whole grid now, so RaceUploader.ps1 starts the capture when FinishCount goes up.
+    public volatile byte[] LatestLap;  // newest lap data packet, every car
+    public volatile int FinishCount = 0;
+    public byte[] FinishLap;           // lap data packet of the moment he finished
+    public float FinishTime;           // session time then
+    public string FinishName = "";     // the session's telemetry file name
+    ulong finishedUid;
     int resultsCount;
 
     FileStream file;
@@ -246,6 +256,20 @@ public class GmTelemetryRecorder
         }
         int size = body / numCars;
         Write(1, p, HeaderLen + player * size, size, p, p.Length - trailer, trailer);
+
+        if (id == 2 && size > 45)
+        {
+            LatestLap = p;
+            // result status 3 = finished (lap data byte 45)
+            if (sessionType >= 15 && sessionType <= 17 && finishedUid != uid && p[HeaderLen + player * size + 45] == 3)
+            {
+                finishedUid = uid;
+                FinishLap = p;
+                FinishTime = BitConverter.ToSingle(p, 15);
+                FinishName = FileName();
+                FinishCount++;
+            }
+        }
 
         if (id == 0) Field(0, p, numCars, size, MotionRow, FieldIntervalMs);
         else if (id == 2) Field(1, p, numCars, size, LapRow, LapFieldIntervalMs);

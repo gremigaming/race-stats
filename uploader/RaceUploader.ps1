@@ -14,8 +14,8 @@
 # Forwarding > Target 1 = 127.0.0.1:20778. One file per session goes to the
 # "telemetry" release of gremigaming/race-stats.
 #
-# After every race, ClassificationCapture.ps1 (also next to this script) reads the
-# game's final classification screen with Windows' OCR, so the site knows who
+# In every race, ClassificationCapture.ps1 (also next to this script) reads the
+# standings on screen (from the moment you finish) with Windows' OCR, so the site knows who
 # drove the cars with hidden names. Only the words go out, encrypted (.gmcls);
 # the best screenshot stays in %APPDATA%\GreMiRaceUploader\classification.
 
@@ -249,33 +249,38 @@ function Remove-OldTelemetry {
         Remove-Item -Force -ErrorAction SilentlyContinue
 }
 
-# Classification screen: when a race's results come in, a background job takes
-# screenshots for a few minutes and reads them (ClassificationCapture.ps1).
-function Start-Classification($recorder) {
+# Classification screen (ClassificationCapture.ps1): starts when GreMi crosses the
+# finish line (the standings tower shows the whole grid then), or when the race's
+# results come in if he didn't finish. It runs next to this loop in the same
+# process, so it can read the recorder's live lap data for every screenshot.
+$script:Captures = @()
+$script:CapturedSessions = New-Object System.Collections.Generic.HashSet[string]
+
+function Start-Classification($recorder, $name, $finishLap, $finishTime, $why) {
     $script = Join-Path $PSScriptRoot "ClassificationCapture.ps1"
-    if (-not (Test-Path $script)) { return }
-    if ($recorder.ResultsSessionType -lt 15 -or $recorder.ResultsSessionType -gt 17) { return }
-    $packet = $recorder.ResultsPacket
-    if (-not $packet) { return }
-    $parts = if ($recorder.ResultsParticipants) { [Convert]::ToBase64String($recorder.ResultsParticipants) } else { "" }
-    $out = Join-Path $TelemetryDir ($recorder.ResultsName -replace '\.gmtel\.gz$', '.gmcls')
-    Start-Job -Name "classification" -ScriptBlock {
-        param($s, $o, $r, $p, $n, $k)
-        Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
-        & $s -OutFile $o -Results $r -Participants $p -Recording $n -KeepDir $k
-    } -ArgumentList $script, $out, ([Convert]::ToBase64String($packet)), $parts, $recorder.ResultsName, $ShotsDir | Out-Null
-    Say "Race results in: reading the classification screen for the next few minutes." Cyan
+    if (-not (Test-Path $script) -or -not $name) { return }
+    if (-not $script:CapturedSessions.Add($name)) { return }  # this race is already being read
+    $ps = [powershell]::Create()
+    [void]$ps.AddCommand($script).AddParameter("OutFile", (Join-Path $TelemetryDir ($name -replace '\.gmtel\.gz$', '.gmcls'))).
+        AddParameter("Recorder", $recorder).AddParameter("Recording", $name).AddParameter("KeepDir", $ShotsDir).
+        AddParameter("FinishLap", $finishLap).AddParameter("FinishTime", [double]$finishTime)
+    $script:Captures += , @($ps, $ps.BeginInvoke())
+    Say "$why`: reading the standings on screen for the next few minutes (stay on the game)." Cyan
 }
 
 function Show-ClassificationJobs {
-    foreach ($job in @(Get-Job -Name "classification" -ErrorAction SilentlyContinue | Where-Object { $_.State -ne "Running" })) {
+    $left = @()
+    foreach ($c in $script:Captures) {
+        if (-not $c[1].IsCompleted) { $left += , $c; continue }
         try {
-            Receive-Job $job -ErrorAction Stop | ForEach-Object { Say "$_" Green }
+            $c[0].EndInvoke($c[1]) | ForEach-Object { Say "$_" Green }
+            foreach ($e in $c[0].Streams.Error) { Say "Classification: $e" Yellow }
         } catch {
             Say "Classification screen not read ($($_.Exception.Message))" Yellow
         }
-        Remove-Job $job -Force
+        $c[0].Dispose()
     }
+    $script:Captures = $left
 }
 
 function Remove-OldShots {
@@ -299,6 +304,7 @@ $recorderStatus = ""
 $live = Start-Live $recorder
 $liveStatus = ""
 $resultsSeen = 0
+$finishSeen = 0
 
 while ($true) {
     # Telemetry first: the recorder closes a session's file when its results come in, so
@@ -357,10 +363,18 @@ while ($true) {
 
     # wait, but start the classification capture the moment a race's results come in
     for ($i = 0; $i -lt $CheckEverySeconds; $i++) {
-        if ($recorder -and $recorder.ResultsCount -ne $resultsSeen) {
-            $resultsSeen = $recorder.ResultsCount
-            try { Start-Classification $recorder } catch { Say "Classification capture didn't start ($($_.Exception.Message))" Yellow }
-        }
+        try {
+            if ($recorder -and $recorder.FinishCount -ne $finishSeen) {
+                $finishSeen = $recorder.FinishCount
+                Start-Classification $recorder $recorder.FinishName ([Convert]::ToBase64String($recorder.FinishLap)) $recorder.FinishTime "You finished"
+            }
+            if ($recorder -and $recorder.ResultsCount -ne $resultsSeen) {
+                $resultsSeen = $recorder.ResultsCount
+                $race = $recorder.ResultsSessionType -ge 15 -and $recorder.ResultsSessionType -le 17
+                if ($race) { Start-Classification $recorder $recorder.ResultsName "" 0 "Race results in" }
+            }
+            if ($script:Captures.Count) { Show-ClassificationJobs }
+        } catch { Say "Classification capture didn't start ($($_.Exception.Message))" Yellow }
         Start-Sleep -Seconds 1
     }
 }
