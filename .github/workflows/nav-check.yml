@@ -1,0 +1,37 @@
+name: Race picker round trip
+
+# Opens races from the picker and goes back (Races button, browser Back) in a real browser and fails
+# on a page error or a picker that comes back empty (scripts/nav-check.mjs).
+on:
+  workflow_dispatch:
+
+jobs:
+  nav:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile || pnpm install --no-frozen-lockfile
+      - run: node scripts/build-league-data.mjs
+      - name: Build
+        env:
+          VITE_BASE_PATH: /race-stats/
+          VITE_APP_NAME: GreMi Gang Race Stats
+          VITE_DISABLE_ANALYTICS: "true"
+          VITE_SKIP_API: "true"
+        run: pnpm exec vite build
+      - name: Round trip
+        run: |
+          mkdir -p /tmp/shots && cd /tmp/shots && npm init -y >/dev/null && npm i --silent playwright@1
+          PW_CHANNEL=chrome node "$GITHUB_WORKSPACE/scripts/nav-check.mjs" "$GITHUB_WORKSPACE/dist" /tmp/nav
+      - if: always()
+        run: cat /tmp/nav/nav.md >> "$GITHUB_STEP_SUMMARY" || true
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nav
+          path: /tmp/nav
