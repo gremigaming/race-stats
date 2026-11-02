@@ -2,7 +2,6 @@ import {
   ChevronDown,
   ChevronRight,
   Flag,
-  Play,
   Search,
   ShieldAlert,
   Sparkles,
@@ -32,7 +31,8 @@ import {
 import { cn } from "../../utils/cn";
 import { toSlug } from "../../utils/parseFilename";
 import { sessionPath } from "../../utils/routes";
-import { IncidentReplay } from "./IncidentReplay";
+import { driverKey } from "../../league/league";
+import { RaceIncidentList, useRaceIncidents } from "./RaceIncidents";
 import { RankTile } from "./RankTile";
 
 const half = (n: number) => Math.floor(n * 2 + 0.5) / 2;
@@ -386,6 +386,7 @@ function Sessions({ driver, data }: { driver: SafetyDriver; data: SafetyData }) 
               perRace={h?.streamAvg ?? undefined}
               avgBefore={prev?.avg ?? 0}
               sessions={g.sessions}
+              driver={driver.name}
               defaultOpen={gi === 0 || query.trim() !== ""}
             />
           );
@@ -402,6 +403,7 @@ function StreamGroup({
   perRace,
   avgBefore,
   sessions,
+  driver,
   defaultOpen,
 }: {
   date: string;
@@ -410,6 +412,7 @@ function StreamGroup({
   perRace?: number;
   avgBefore: number;
   sessions: SafetySession[];
+  driver: string;
   defaultOpen: boolean;
 }) {
   const [open, setOpen] = useState(defaultOpen);
@@ -454,7 +457,7 @@ function StreamGroup({
       {open && (
         <div className="space-y-1 px-2 pb-2">
           {sessions.map((s) => (
-            <SessionRow key={s.file} session={s} />
+            <SessionRow key={s.file} session={s} driver={driver} />
           ))}
         </div>
       )}
@@ -462,11 +465,12 @@ function StreamGroup({
   );
 }
 
-function SessionRow({ session }: { session: SafetySession }) {
+function SessionRow({ session, driver }: { session: SafetySession; driver: string }) {
   const { scopeKey } = useTelemetry();
   const [open, setOpen] = useState(false);
-  const [replay, setReplay] = useState<string | null>(null);
   const { quali, track, time } = parseSessionFile(session.file);
+  // contacts live in the incident list below, with both sides and the replay
+  const points = session.items.filter((it) => it.cat !== "contact");
   const lost = session.items.filter((i) => i.pts < 0).length;
   return (
     <div className="rounded-lg bg-zinc-900/60">
@@ -508,8 +512,11 @@ function SessionRow({ session }: { session: SafetySession }) {
       </button>
       {open && (
         <div className="space-y-1.5 border-t border-white/[0.04] px-3 py-2.5 text-xs">
-          {session.items.length === 0 && <p className="text-zinc-500">No points in this session.</p>}
-          {session.items.map((it, i) => (
+          <div className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500">Incidents</div>
+          <SessionIncidents file={session.file} driver={driver} />
+          <div className="pt-1 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">Other points</div>
+          {points.length === 0 && <p className="text-zinc-500">No other points in this session.</p>}
+          {points.map((it, i) => (
             <div key={i}>
             <p className="flex items-start gap-2.5">
               <span
@@ -529,20 +536,6 @@ function SessionRow({ session }: { session: SafetySession }) {
                   </span>
                 )}
               </span>
-              {it.replay && (
-                <button
-                  type="button"
-                  onClick={() => setReplay(replay === it.replay ? null : it.replay!)}
-                  title="Watch this contact from above"
-                  className={cn(
-                    "ml-auto inline-flex shrink-0 items-center gap-1 rounded px-1.5 py-0.5 text-[11px] hover:bg-white/[0.06]",
-                    replay === it.replay ? "text-orange-300" : "text-zinc-400",
-                  )}
-                >
-                  <Play className="h-3 w-3" />
-                  Replay
-                </button>
-              )}
               {it.pts < 0 && it.id && it.staff == null && (
                 <a
                   href={`${STAFF_URL}/protest?item=${encodeURIComponent(it.id)}`}
@@ -550,13 +543,12 @@ function SessionRow({ session }: { session: SafetySession }) {
                   rel="noopener"
                   title="Don't agree? Protest this incident"
                   aria-label="Protest this incident"
-                  className={cn("shrink-0 rounded p-0.5 text-zinc-500 hover:bg-red-500/10 hover:text-red-300", !it.replay && "ml-auto")}
+                  className="ml-auto shrink-0 rounded p-0.5 text-zinc-500 hover:bg-red-500/10 hover:text-red-300"
                 >
                   <Flag className="h-3.5 w-3.5" />
                 </a>
               )}
             </p>
-            {it.replay && replay === it.replay && <IncidentReplay id={it.replay} track={track} />}
             </div>
           ))}
           <div className="flex items-center justify-between pt-1">
@@ -574,4 +566,11 @@ function SessionRow({ session }: { session: SafetySession }) {
       )}
     </div>
   );
+}
+
+/** Only mounted when the race is opened, so incidents.json loads on demand. */
+function SessionIncidents({ file, driver }: { file: string; driver: string }) {
+  const key = driverKey(driver);
+  const incidents = useRaceIncidents([file], key);
+  return <RaceIncidentList incidents={incidents} driver={key} />;
 }

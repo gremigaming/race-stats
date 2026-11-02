@@ -15,7 +15,6 @@ import { TrackProgressPage } from "./pages/TrackProgressPage";
 import { DriversPage } from "./pages/DriversPage";
 import { HeadToHeadPage } from "./pages/HeadToHeadPage";
 import { SafetyPage } from "./pages/SafetyPage";
-import { IncidentsPage } from "./pages/IncidentsPage";
 import { RaceListPage } from "./pages/RaceListPage";
 import { RaceViewerPage } from "./pages/RaceViewerPage";
 import { SetupCardsPage } from "./pages/SetupCardsPage";
@@ -96,13 +95,10 @@ function AppRoutes() {
               </ScopedFormulaRoute>
             }
           />
+          {/* The old Incidents tab: incidents now live per race on the safety rating page */}
           <Route
             path=":formulaKey/incidents"
-            element={
-              <ScopedFormulaRoute>
-                <IncidentsPage />
-              </ScopedFormulaRoute>
-            }
+            element={<Navigate to="../safety?tab=personal" relative="path" replace />}
           />
           <Route
             path=":formulaKey/race"
