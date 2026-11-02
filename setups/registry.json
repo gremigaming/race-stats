@@ -8,7 +8,7 @@
   "requested": null,
   "last": "2026-11-02"
  },
- "pending": 0,
+ "pending": 1,
  "tracks": [
   {
    "track": "Melbourne",
@@ -2903,7 +2903,18 @@
        "change": null,
        "text": "Starting setup",
        "why": "Your last quali setup.",
-       "sessions": [],
+       "sessions": [
+        {
+         "file": "2026-11-02_19-47-01_Las_Vegas_Race.gmtel.gz",
+         "date": "2026-11-02",
+         "session": "race",
+         "weather": 0,
+         "pace": 95217,
+         "best": 94616,
+         "mean": 95217,
+         "laps": 3
+        }
+       ],
        "verdict": {
         "result": "untested",
         "text": "Not driven yet."
@@ -2944,6 +2955,58 @@
        "change": null,
        "text": "Starting setup",
        "why": "Your last race setup.",
+       "sessions": [
+        {
+         "file": "2026-11-02_19-47-01_Las_Vegas_Race.gmtel.gz",
+         "date": "2026-11-02",
+         "session": "race",
+         "weather": 0,
+         "pace": 95217,
+         "best": 94616,
+         "mean": 95217,
+         "laps": 3
+        }
+       ],
+       "verdict": {
+        "result": "baseline",
+        "text": "Starting point: 1:35.217 over 1 session."
+       }
+      },
+      {
+       "v": 2,
+       "base": 1,
+       "created": "2026-11-02",
+       "saved": null,
+       "values": {
+        "fw": 30,
+        "rw": 5,
+        "don": 90,
+        "doff": 30,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 30,
+        "farb": 3,
+        "rarb": 4,
+        "frh": 22,
+        "rrh": 45,
+        "bb": 57,
+        "bp": 100,
+        "fr": 28.0,
+        "fl": 28.0,
+        "rr": 22.0,
+        "rl": 22.0
+       },
+       "change": {
+        "rs": [
+         14,
+         30
+        ]
+       },
+       "text": "Rear springs 14 → 30",
+       "why": "The soft rear lets the floor scrape. 30 keeps it off the ground and makes laps more consistent.",
        "sessions": [],
        "verdict": {
         "result": "untested",
