@@ -17,6 +17,10 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile || pnpm install --no-frozen-lockfile
       - run: node scripts/build-league-data.mjs
+      - name: One race bundle
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python3 scripts/telemetry/race_bundles.py /tmp/telemetry-cache --only 2026-10-30_15-51-13_Miami_Race.gmtel.gz
       - name: Build
         env:
           VITE_BASE_PATH: /race-stats/
