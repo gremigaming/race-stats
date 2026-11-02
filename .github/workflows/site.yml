@@ -43,13 +43,22 @@ jobs:
             git commit -m "chore: update pnpm-lock.yaml [skip ci]"
             git push origin HEAD:main || echo "lockfile not saved, the next build installs again"
           fi
-      - name: Turn race files into site data
-        run: node scripts/build-league-data.mjs
       - uses: actions/cache@v4
         with:
           path: /tmp/telemetry-cache
           key: telemetry-${{ github.run_id }}
           restore-keys: telemetry-
+      # Hidden names from the classification screen (uploader/ClassificationCapture.ps1):
+      # decrypted here only, written to .cache (never committed), used by the next step
+      - name: Read the classification screens
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          CLASSIFICATION_KEY: ${{ secrets.CLASSIFICATION_KEY }}
+        run: |
+          python3 -m pip install --quiet --break-system-packages cryptography || true
+          python3 scripts/telemetry/classification_ocr.py /tmp/telemetry-cache .cache/classification.json || echo "classification OCR failed, hidden cars keep the usual rules"
+      - name: Turn race files into site data
+        run: node scripts/build-league-data.mjs
       - name: Fault engine verdicts for the safety rating
         env:
           GITHUB_TOKEN: ${{ github.token }}

@@ -1,7 +1,7 @@
 // Turns the race files in races/ into the static data the site loads:
 // public/league/index.json and public/league/sessions/<file>.json.
 // Fields nobody needs on a public site (platform, network slot) are dropped.
-import { mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { createHash } from "node:crypto";
 
@@ -218,12 +218,84 @@ function carsOf(data) {
   return data["classification-data"].flatMap((d) => {
     const p = d["participant-data"];
     if (!p || p["ai-controlled"]) return [];
-    if (p["race-number"] === 2 && (p.nationality ?? "Unspecified") === "Unspecified") return [];
+    // the shared default (#2, Unspecified) never links sessions; only the classification screen names it
+    const shared = p["race-number"] === 2 && (p.nationality ?? "Unspecified") === "Unspecified";
     const hidden = p["show-online-names"] === false;
     const name = renameDrivers(d["driver-name"] ?? "");
     if (!hidden && (!name || / #\d+$/.test(name))) return [];
-    return [{ index: d.index, name, hidden, combo: `${p["race-number"]}|${p.nationality}|${p.platform}` }];
+    return [{ index: d.index, name, hidden, shared, combo: `${p["race-number"]}|${p.nationality}|${p.platform}` }];
   });
+}
+const bestLaps = (data) =>
+  Object.fromEntries(data["classification-data"].map((d) => [d.index, d["final-classification"]?.["best-lap-time-ms"] ?? 0]));
+
+// Classification screen (GreMi 2026-11-02: racing in his lobbies means your
+// identity is recorded, hidden name or not). After each race the racing PC reads
+// the final classification screen (uploader/ClassificationCapture.ps1), and
+// scripts/telemetry/classification_ocr.py ties every screen row to a car and
+// writes .cache/classification.json (never committed or published). A capture
+// belongs to the race file whose cars have the same best laps. A hidden car
+// takes the name read for it when that name is a known driver (close spelling),
+// or when most screenshots read the same new name. Within the stream the name
+// also goes to that car's other sessions (same race number + nationality +
+// platform, not the shared default). Listed in league/merges.json like every
+// merge; staff "unmerge" undoes it.
+const OCR_FILE = join(".cache", "classification.json");
+const ocrCaptures = existsSync(OCR_FILE) ? (JSON.parse(readFileSync(OCR_FILE, "utf8")).captures ?? []) : [];
+const ocrKey = (s) => s.toUpperCase().replace(/0/g, "O").replace(/\|/g, "I").replace(/[^A-Z0-9]/g, "");
+function likeness(a, b) {
+  if (!a.length || !b.length) return 0;
+  let prev = Array.from({ length: b.length + 1 }, (_, j) => j);
+  for (let i = 1; i <= a.length; i++) {
+    const cur = [i];
+    for (let j = 1; j <= b.length; j++)
+      cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+    prev = cur;
+  }
+  return 1 - prev[b.length] / Math.max(a.length, b.length);
+}
+function screenNames(stream, known) {
+  const found = []; // {i, file, index, name, read, votes}
+  stream.forEach((s, i) => {
+    const hidden = s.cars.filter((c) => c.hidden);
+    if (!hidden.length) return;
+    const withLap = Object.entries(s.bests).filter(([, ms]) => ms > 0);
+    const cap = ocrCaptures.find((c) => {
+      const same = withLap.filter(([ix, ms]) => c.cars?.[ix]?.best_ms === ms).length;
+      return withLap.length >= 3 && same >= Math.max(3, 0.75 * withLap.length);
+    });
+    if (!cap) return;
+    const present = new Set(s.cars.filter((c) => !c.hidden).map((c) => c.name.toLowerCase()));
+    for (const c of hidden) {
+      const e = cap.cars[c.index];
+      if (!e?.ocr) continue;
+      const key = ocrKey(e.ocr);
+      let best = null, score = 0;
+      for (const k of known) {
+        const v = likeness(key, ocrKey(k));
+        if (v > score) [best, score] = [k, v];
+      }
+      const name = score >= 0.85 ? best
+        : e.votes >= 2 && e.votes / e.seen >= 0.6 && key.length >= 3 ? e.ocr : null;
+      if (!name || present.has(name.toLowerCase())) continue;
+      found.push({ i, file: s.name, index: c.index, name, read: e.ocr, votes: `${e.votes}/${e.seen}`, combo: c.shared ? null : c.combo });
+    }
+  });
+  // the same car (combo) in the stream's other sessions, when the screen gave it one name only
+  const byCombo = new Map();
+  for (const f of found) if (f.combo) byCombo.set(f.combo, [...(byCombo.get(f.combo) ?? []), f]);
+  const out = [...found];
+  for (const [combo, fs] of byCombo) {
+    const names = new Set(fs.map((f) => f.name.toLowerCase()));
+    if (names.size !== 1) continue;
+    stream.forEach((s, i) => {
+      const same = s.cars.filter((c) => c.hidden && !c.shared && c.combo === combo);
+      if (same.length !== 1 || out.some((f) => f.i === i && f.index === same[0].index)) return;
+      if (s.cars.some((c) => !c.hidden && c.name.toLowerCase() === fs[0].name.toLowerCase())) return;
+      out.push({ ...fs[0], i, file: s.name, index: same[0].index, linked: true });
+    });
+  }
+  return out;
 }
 function findMerges(sessions) {
   sessions.sort((a, b) => fileTime(a.name) - fileTime(b.name));
@@ -235,10 +307,28 @@ function findMerges(sessions) {
   }
   const merges = new Map(); // file -> Map(car index -> name)
   const list = [];
+  const known = [...new Set(sessions.flatMap((s) => s.cars.filter((c) => !c.hidden).map((c) => c.name)))];
   for (const stream of streams) {
+    const day = stream[0].name.match(/(\d{4})_(\d{2})_(\d{2})_\d{2}_\d{2}_\d{2}\.json$/).slice(1).join("-");
+    const byName = new Map();
+    for (const f of screenNames(stream, known)) byName.set(f.name, [...(byName.get(f.name) ?? []), f]);
+    for (const [to, fs] of byName) {
+      const id = `${day}|${to.toLowerCase()}|screen`;
+      const entry = { id, day, name: to, car: "classification screen", source: "screen",
+        read: [...new Set(fs.filter((f) => !f.linked).map((f) => `${f.read} (${f.votes})`))],
+        hidden: [...new Set(fs.map((f) => stream[f.i].cars.find((c) => c.index === f.index)?.name).filter(Boolean))],
+        files: [...new Set(fs.map((f) => f.file))], off: unmerged.has(id) };
+      list.push(entry);
+      if (entry.off) continue;
+      for (const f of fs) {
+        if (!merges.has(f.file)) merges.set(f.file, new Map());
+        merges.get(f.file).set(f.index, to);
+      }
+    }
     const combos = new Map();
     stream.forEach((s, i) =>
       s.cars.forEach((c) => {
+        if (c.shared || (c.hidden && merges.get(s.name)?.has(c.index))) return;
         if (!combos.has(c.combo)) combos.set(c.combo, []);
         combos.get(c.combo).push({ ...c, i, file: s.name });
       }),
@@ -254,7 +344,6 @@ function findMerges(sessions) {
       if (Math.max(...hidden.map((c) => c.i)) > Math.min(...named.map((c) => c.i))) continue;
       const to = named.at(-1).name;
       const [number, nationality, platform] = combo.split("|");
-      const day = stream[0].name.match(/(\d{4})_(\d{2})_(\d{2})_\d{2}_\d{2}_\d{2}\.json$/).slice(1).join("-");
       const id = `${day}|${to.toLowerCase()}`;
       const entry = { id, day, name: to, car: `#${number} ${nationality} ${platform}`, hidden: [...new Set(hidden.map((c) => c.name))],
         files: hidden.map((c) => c.file), off: unmerged.has(id) };
@@ -326,7 +415,7 @@ for (const path of walk(SRC)) {
   const base = path.split(/[\\/]/).pop();
   if (OWN_FILES.has(base)) continue;
   const data = readSave(path);
-  if (data && !isTest(realName(base, data))) firstPass.push({ name: realName(base, data), cars: carsOf(data) });
+  if (data && !isTest(realName(base, data))) firstPass.push({ name: realName(base, data), cars: carsOf(data), bests: bestLaps(data) });
 }
 const { merges: merged, list: mergeList } = findMerges(firstPass);
 

@@ -67,6 +67,16 @@ public class GmTelemetryRecorder
     public volatile int SavedCount = 0;
     public GmLiveUplink Live; // set by RaceUploader.ps1 when a live token is saved
 
+    // A session's final classification, for ClassificationCapture.ps1: RaceUploader.ps1
+    // watches ResultsCount and reads the rest when it goes up.
+    public volatile int ResultsCount = 0;
+    public byte[] ResultsPacket;       // final classification packet, whole
+    public byte[] ResultsParticipants; // the session's latest participants packet, whole
+    public int ResultsSessionType;     // 15-17 = race
+    public string ResultsName = "";    // the session's telemetry file name
+    byte[] latestParticipants;
+    int resultsCount;
+
     FileStream file;
     GZipStream zip;
     BufferedStream gz;
@@ -164,6 +174,7 @@ public class GmTelemetryRecorder
         int player = p[27];
         if (uid == 0 || player == 255) return; // menus or spectating
         if (Live != null) Live.Offer(p);
+        if (id == 4) latestParticipants = p;
         if (uid == doneUid) return;            // results are in, the file has gone to the uploader
         int numCars = format >= 2026 ? 24 : 22;
 
@@ -214,7 +225,17 @@ public class GmTelemetryRecorder
             Write(0, p, 0, p.Length, null, 0, 0);
             // final classification: the session is over, so close the file now (not when the
             // next session starts) and the incident replays reach the site within a minute
-            if (id == 8) { doneUid = uid; Close(); }
+            if (id == 8)
+            {
+                doneUid = uid;
+                ResultsPacket = p;
+                ResultsParticipants = latestParticipants;
+                ResultsSessionType = sessionType;
+                ResultsName = FileName();
+                Close();
+                Interlocked.Increment(ref resultsCount);
+                ResultsCount = resultsCount;
+            }
             return;
         }
         int body = p.Length - HeaderLen - trailer;
@@ -324,6 +345,13 @@ public class GmTelemetryRecorder
         Status = "recording";
     }
 
+    string FileName()
+    {
+        string track = trackId >= 0 && trackId < Tracks.Length ? Tracks[trackId] : "Unknown";
+        string kind = sessionType >= 0 && sessionType < SessionTypes.Length ? SessionTypes[sessionType] : "s" + sessionType;
+        return startedAt.ToString("yyyy-MM-dd_HH-mm-ss") + "_" + track + "_" + kind + ".gmtel.gz";
+    }
+
     void Close()
     {
         if (file == null) return;
@@ -337,9 +365,7 @@ public class GmTelemetryRecorder
         }
         else
         {
-            string track = trackId >= 0 && trackId < Tracks.Length ? Tracks[trackId] : "Unknown";
-            string kind = sessionType >= 0 && sessionType < SessionTypes.Length ? SessionTypes[sessionType] : "s" + sessionType;
-            string name = startedAt.ToString("yyyy-MM-dd_HH-mm-ss") + "_" + track + "_" + kind + ".gmtel.gz";
+            string name = FileName();
             File.Move(partPath, Path.Combine(outDir, name));
             LastSaved = name;
             SavedCount++;

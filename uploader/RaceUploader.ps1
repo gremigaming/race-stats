@@ -13,6 +13,11 @@
 # script. Pits n' Giggles forwards the game's data to it: Settings > UDP
 # Forwarding > Target 1 = 127.0.0.1:20778. One file per session goes to the
 # "telemetry" release of gremigaming/race-stats.
+#
+# After every race, ClassificationCapture.ps1 (also next to this script) reads the
+# game's final classification screen with Windows' OCR, so the site knows who
+# drove the cars with hidden names. Only the words go out, encrypted (.gmcls);
+# the best screenshot stays in %APPDATA%\GreMiRaceUploader\classification.
 
 $ErrorActionPreference = "Stop"
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
@@ -30,6 +35,7 @@ $TelemetryTag = "telemetry"
 $KeepSentDays = 30
 $LiveFile = Join-Path $ConfigDir "live.json"
 $LiveUrl = "wss://live.gremigaming.com/ingest"
+$ShotsDir = Join-Path $ConfigDir "classification"
 
 function Say($text, $color = "Gray") {
     Write-Host ("[{0}] {1}" -f (Get-Date -Format "HH:mm:ss"), $text) -ForegroundColor $color
@@ -221,11 +227,11 @@ function Get-TelemetryRelease($token) {
     return $script:TelemetryRelease
 }
 
-function Send-Telemetry($file, $token) {
+function Send-Telemetry($file, $token, $type = "application/gzip") {
     $release = Get-TelemetryRelease $token
     $url = "https://uploads.github.com/repos/$Repo/releases/$($release.id)/assets?name=" + [Uri]::EscapeDataString($file.Name)
     try {
-        Invoke-RestMethod -Method Post -Uri $url -Headers (Headers $token) -InFile $file.FullName -ContentType "application/gzip" | Out-Null
+        Invoke-RestMethod -Method Post -Uri $url -Headers (Headers $token) -InFile $file.FullName -ContentType $type | Out-Null
         $result = "uploaded"
     } catch {
         if ((StatusOf $_) -ne 422) { throw }
@@ -243,6 +249,42 @@ function Remove-OldTelemetry {
         Remove-Item -Force -ErrorAction SilentlyContinue
 }
 
+# Classification screen: when a race's results come in, a background job takes
+# screenshots for a few minutes and reads them (ClassificationCapture.ps1).
+function Start-Classification($recorder) {
+    $script = Join-Path $PSScriptRoot "ClassificationCapture.ps1"
+    if (-not (Test-Path $script)) { return }
+    if ($recorder.ResultsSessionType -lt 15 -or $recorder.ResultsSessionType -gt 17) { return }
+    $packet = $recorder.ResultsPacket
+    if (-not $packet) { return }
+    $parts = if ($recorder.ResultsParticipants) { [Convert]::ToBase64String($recorder.ResultsParticipants) } else { "" }
+    $out = Join-Path $TelemetryDir ($recorder.ResultsName -replace '\.gmtel\.gz$', '.gmcls')
+    Start-Job -Name "classification" -ScriptBlock {
+        param($s, $o, $r, $p, $n, $k)
+        Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
+        & $s -OutFile $o -Results $r -Participants $p -Recording $n -KeepDir $k
+    } -ArgumentList $script, $out, ([Convert]::ToBase64String($packet)), $parts, $recorder.ResultsName, $ShotsDir | Out-Null
+    Say "Race results in: reading the classification screen for the next few minutes." Cyan
+}
+
+function Show-ClassificationJobs {
+    foreach ($job in @(Get-Job -Name "classification" -ErrorAction SilentlyContinue | Where-Object { $_.State -ne "Running" })) {
+        try {
+            Receive-Job $job -ErrorAction Stop | ForEach-Object { Say "$_" Green }
+        } catch {
+            Say "Classification screen not read ($($_.Exception.Message))" Yellow
+        }
+        Remove-Job $job -Force
+    }
+}
+
+function Remove-OldShots {
+    if (-not (Test-Path $ShotsDir)) { return }
+    Get-ChildItem -Path $ShotsDir -File |
+        Where-Object { $_.LastWriteTime -lt (Get-Date).AddDays(-$KeepSentDays) } |
+        Remove-Item -Force -ErrorAction SilentlyContinue
+}
+
 # ------------------------------------------------------------------ main
 
 $Host.UI.RawUI.WindowTitle = "GreMi Race Uploader"
@@ -256,6 +298,7 @@ $recorder = Start-Recorder
 $recorderStatus = ""
 $live = Start-Live $recorder
 $liveStatus = ""
+$resultsSeen = 0
 
 while ($true) {
     # Telemetry first: the recorder closes a session's file when its results come in, so
@@ -274,7 +317,18 @@ while ($true) {
                 Say "Telemetry $($file.Name): upload failed, trying again soon ($($_.Exception.Message))" Yellow
             }
         }
+        $captures = Get-ChildItem -Path $TelemetryDir -Filter "*.gmcls" -File -ErrorAction SilentlyContinue
+        foreach ($file in $captures) {
+            try {
+                $result = Send-Telemetry $file $settings.Token "application/octet-stream"
+                Say "Classification $($file.Name): $result" Green
+            } catch {
+                Say "Classification $($file.Name): upload failed, trying again soon ($($_.Exception.Message))" Yellow
+            }
+        }
+        Show-ClassificationJobs
         Remove-OldTelemetry
+        Remove-OldShots
     }
     if ($live -and $live.Status -ne $liveStatus) {
         $liveStatus = $live.Status
@@ -301,5 +355,12 @@ while ($true) {
         }
     }
 
-    Start-Sleep -Seconds $CheckEverySeconds
+    # wait, but start the classification capture the moment a race's results come in
+    for ($i = 0; $i -lt $CheckEverySeconds; $i++) {
+        if ($recorder -and $recorder.ResultsCount -ne $resultsSeen) {
+            $resultsSeen = $recorder.ResultsCount
+            try { Start-Classification $recorder } catch { Say "Classification capture didn't start ($($_.Exception.Message))" Yellow }
+        }
+        Start-Sleep -Seconds 1
+    }
 }
