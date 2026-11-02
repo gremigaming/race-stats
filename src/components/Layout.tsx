@@ -226,6 +226,11 @@ export function Layout() {
                 )}
               </div>
               <LeagueFilterPanel />
+              {league.analysisPending && (
+                <p className="px-1 pt-1 text-[11px] text-amber-300/80">
+                  Race analysis updating
+                </p>
+              )}
             </div>
           )}
         </div>

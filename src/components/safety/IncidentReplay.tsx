@@ -1,5 +1,6 @@
 import { Pause, Play } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { loadLeagueJson } from "../../league/liveData";
 
 /** One replay written by scripts/telemetry/incident_replays.py (metres, the pair's direction of travel up). */
 export interface ReplayData {
@@ -228,17 +229,27 @@ export function IncidentReplay({
 
   useEffect(() => {
     let alive = true;
-    fetch(`${import.meta.env.BASE_URL}league/replays/${id}.json`)
-      .then((r) => (r.ok ? r.json() : Promise.reject()))
-      .then((d: ReplayData) => {
-        if (!alive) return;
-        state.current.t = 0;
-        setData(d);
-        onData?.(d);
-      })
-      .catch(() => alive && setFailed(true));
+    let found = false;
+    setData(null);
+    setFailed(false);
+    const load = () => {
+      if (found) return;
+      loadLeagueJson<ReplayData>(`replays/${id}.json`)
+        .then((d) => {
+          if (!alive) return;
+          found = true;
+          state.current.t = 0;
+          setData(d);
+          setFailed(false);
+          onData?.(d);
+        })
+        .catch(() => alive && setFailed(true));
+    };
+    void load();
+    const timer = window.setInterval(load, 10_000);
     return () => {
       alive = false;
+      window.clearInterval(timer);
     };
   }, [id]);
 

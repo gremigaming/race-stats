@@ -1,8 +1,10 @@
 import { ChevronDown, Flag, Play } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useTelemetry } from "../../context/TelemetryContext";
 import { driverKey } from "../../league/league";
 import { signedHalf, STAFF_URL, type SafetyData, type SafetyItem } from "../../league/safety";
+import { loadLeagueJson } from "../../league/liveData";
 import { cn } from "../../utils/cn";
 import { IncidentReplay, replayStats, type CarStats, type ReplayData } from "./IncidentReplay";
 
@@ -43,22 +45,15 @@ interface AllIncidents {
   }[];
 }
 
-let allPromise: Promise<AllIncidents | null> | null = null;
-
-/** league/incidents.json, fetched once per page load and shared by every list. */
+/** league/incidents.json, refreshed as the live analysis publishes. */
 function useAllIncidents(): AllIncidents | null {
-  const [all, setAll] = useState<AllIncidents | null>(null);
-  useEffect(() => {
-    allPromise ??= fetch(`${import.meta.env.BASE_URL}league/incidents.json?t=${Date.now()}`, { cache: "no-store" })
-      .then((r) => (r.ok ? (r.json() as Promise<AllIncidents>) : null))
-      .catch(() => null);
-    let live = true;
-    allPromise.then((d) => live && setAll(d));
-    return () => {
-      live = false;
-    };
-  }, []);
-  return all;
+  const { data } = useQuery({
+    queryKey: ["league-incidents"],
+    queryFn: () => loadLeagueJson<AllIncidents>("incidents.json"),
+    staleTime: 0,
+    refetchInterval: 10_000,
+  });
+  return data ?? null;
 }
 
 const base = (file: string) => file.split("/").pop() ?? file;

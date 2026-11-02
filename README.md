@@ -7,10 +7,12 @@ Live at https://gremigaming.github.io/race-stats/
 
 ## How it works
 
-1. Pits n' Giggles saves a JSON file after every race.
-2. Those files go in [`races/`](races/).
-3. On every push, GitHub Actions turns them into site data
-   (`scripts/build-league-data.mjs`) and publishes the site to GitHub Pages.
+1. Pits n' Giggles saves a JSON file after every session.
+2. The uploader sends each save and its telemetry to the warm live publisher,
+   and keeps the archive copy in [`races/`](races/) and the telemetry release.
+3. The live server runs the same builders as Pages and publishes versioned data
+   to R2. Open pages poll its index every 10 seconds; GitHub Pages remains the
+   fallback and scheduled reconciliation path.
 
 Pick your name at the top left and the whole app shows your races. Drivers who
 hide their online name in the game can't get their own stats.

@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ACCENT_TOKENS, type AccentColor } from "../../constants/accents";
 import { driverKey } from "../../league/league";
+import { loadLeagueJson } from "../../league/liveData";
 import { Badge } from "../ui/Badge";
 import { InsightDetail, InsightValue } from "../ui/InsightText";
 import { InsightTile } from "../ui/InsightTile";
@@ -59,10 +60,10 @@ export function useAwards() {
   return useQuery({
     queryKey: ["league-awards"],
     queryFn: async () => {
-      const r = await fetch(`${import.meta.env.BASE_URL}league/awards.json?t=${Date.now()}`, { cache: "no-store" });
-      return r.ok ? ((await r.json()) as AwardsData) : null;
+      return await loadLeagueJson<AwardsData>("awards.json");
     },
-    staleTime: 5 * 60 * 1000,
+    staleTime: 0,
+    refetchInterval: 10_000,
   });
 }
 

@@ -5,8 +5,11 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync
 import { join } from "node:path";
 import { createHash } from "node:crypto";
 
-const SRC = "races";
-const OUT = join("public", "league");
+const SRC = process.env.LEAGUE_RACES_DIR || "races";
+// The live publisher supplies recently uploaded race saves as an overlay while
+// the sparse source checkout catches up. Prefer the overlay for duplicate names.
+const SOURCES = [process.env.LEAGUE_EXTRA_RACES_DIR, SRC].filter((p) => p && existsSync(p));
+const OUT = process.env.LEAGUE_OUT_DIR || join("public", "league");
 // Shown first when a visitor hasn't picked a driver yet
 const DEFAULT_DRIVER = "ttv/gremi_gaming";
 
@@ -99,7 +102,7 @@ function fixResults(name, data) {
 // and record that involves their car. The untouched session is kept in
 // .cache/kicked/ so the safety rating can still charge the kicked driver for
 // their own incidents.
-const KICKED_DIR = join(".cache", "kicked");
+const KICKED_DIR = join(process.env.LEAGUE_CACHE_DIR || ".cache", "kicked");
 function kickCars(name, data) {
   const cars = new Set(
     changes.filter((c) => c.type === "kick").flatMap((c) => c.cars ?? []).filter((k) => k.file === name).map((k) => Number(k.car)),
@@ -240,7 +243,7 @@ const bestLaps = (data) =>
 // also goes to that car's other sessions (same race number + nationality +
 // platform, not the shared default). Listed in league/merges.json like every
 // merge; staff "unmerge" undoes it.
-const OCR_FILE = join(".cache", "classification.json");
+const OCR_FILE = process.env.CLASSIFICATION_FILE || join(process.env.LEAGUE_CACHE_DIR || ".cache", "classification.json");
 const ocrCaptures = existsSync(OCR_FILE) ? (JSON.parse(readFileSync(OCR_FILE, "utf8")).captures ?? []) : [];
 const ocrKey = (s) => s.toUpperCase().replace(/0/g, "O").replace(/[|1L]/g, "I").replace(/[^A-Z0-9]/g, ""); // same as norm() in classification_ocr.py
 function likeness(a, b) {
@@ -411,18 +414,23 @@ const isTest = (name) => {
 const OWN_FILES = new Set(["aliases.json", "corrections.json", "test-sessions.json"]);
 
 const firstPass = [];
-for (const path of walk(SRC)) {
+const firstPassSeen = new Set();
+for (const path of SOURCES.flatMap(walk)) {
   const base = path.split(/[\\/]/).pop();
   if (OWN_FILES.has(base)) continue;
   const data = readSave(path);
-  if (data && !isTest(realName(base, data))) firstPass.push({ name: realName(base, data), cars: carsOf(data), bests: bestLaps(data) });
+  const name = data && realName(base, data);
+  if (data && !firstPassSeen.has(name) && !isTest(name)) {
+    firstPassSeen.add(name);
+    firstPass.push({ name, cars: carsOf(data), bests: bestLaps(data) });
+  }
 }
 const { merges: merged, list: mergeList } = findMerges(firstPass);
 
 const seen = new Set();
 const fingerprints = new Map();
 const files = [];
-for (const path of walk(SRC)) {
+for (const path of SOURCES.flatMap(walk)) {
   let name = path.split(/[\\/]/).pop();
   if (OWN_FILES.has(name) || seen.has(name)) continue;
   let data;
@@ -494,7 +502,11 @@ for (const backup of backups) {
 files.sort((a, b) => dateKey(b).localeCompare(dateKey(a)));
 writeFileSync(join(OUT, "merges.json"), JSON.stringify({ merges: mergeList }, null, 2));
 console.log(`hidden-name merges: ${mergeList.filter((m) => !m.off).length} (${mergeList.filter((m) => m.off).length} undone by staff)`);
-writeFileSync(join(OUT, "index.json"), JSON.stringify({ files, defaultDriver: DEFAULT_DRIVER }, null, 2));
+const revisions = Object.fromEntries(files.map((name) => [
+  name,
+  createHash("sha256").update(readFileSync(join(OUT, "sessions", name))).digest("hex"),
+]));
+writeFileSync(join(OUT, "index.json"), JSON.stringify({ files, defaultDriver: DEFAULT_DRIVER, revisions }, null, 2));
 
 // Every named driver in the published races, for the name pickers on the staff page
 const allNames = new Map();
