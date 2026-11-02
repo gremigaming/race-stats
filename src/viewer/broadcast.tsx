@@ -252,7 +252,11 @@ export function IncidentPip(props: {
     scene.current = s;
     return () => {
       scene.current = null;
-      s.destroy();
+      try {
+        s.destroy();
+      } catch (e) {
+        console.error("incident replay teardown", e);
+      }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [store]);

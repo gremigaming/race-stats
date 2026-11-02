@@ -148,6 +148,7 @@ function evict() {
 }
 
 function free(tex: Texture) {
+  if (tex.destroyed || !tex.source) return;
   const res = tex.source.resource as ImageBitmap | null;
   tex.destroy(true);
   res?.close?.();

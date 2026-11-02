@@ -368,8 +368,13 @@ function Viewer({ manifest: initial, base, back }: { manifest: RaceManifest; bas
       window.clearTimeout(loadTimer);
       window.clearInterval(mapTimer);
       store.onLoad = null;
-      s.destroy();
       scene.current = null;
+      // a teardown error must never take the whole site down (black page on the way back to the races)
+      try {
+        s.destroy();
+      } catch (e) {
+        console.error("race viewer teardown", e);
+      }
       store.dispose();
     };
     // the scene lives as long as this race is open

@@ -179,7 +179,10 @@ export class RaceScene {
     if (r.textureGC) r.textureGC.active = false;
     this.map.attach(this.app.renderer);
     this.liveries = await loadLiveries();
-    if (this.destroyed) return;
+    if (this.destroyed) {
+      this.app.destroy(true, { children: true });
+      return;
+    }
     this.carLayer.sortableChildren = true;
     this.carsBelow.sortableChildren = true;
     this.dotLayer.sortableChildren = true;
@@ -207,8 +210,11 @@ export class RaceScene {
   }
 
   destroy() {
+    if (this.destroyed) return;
     this.destroyed = true;
     if (!this.ready) {
+      // still starting: init() destroys the app once it notices; the map is already loading its tiles
+      this.map.destroy();
       clearCarTextures();
       return;
     }

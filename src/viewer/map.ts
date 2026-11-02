@@ -398,6 +398,7 @@ export class TrackMap {
   }
 
   destroy() {
+    if (!this.alive) return;
     this.alive = false;
     for (const d of this.drawn.values()) this.drop(d);
     this.drawn.clear();
@@ -410,8 +411,10 @@ export class TrackMap {
       forget(`${this.pyr.folder}/`);
       forget(`over:${this.pyr.folder}/`);
     }
-    // the photo tiles are this map's own
-    this.view.destroy({ children: true, texture: true, textureSource: true });
+    // only the photo tiles are this map's own: the resident and sharp tiles live in the shared tile cache
+    // (tiles.ts), which the picture-in-picture map and the next race of this track still use
+    this.base.destroy({ children: true, texture: true, textureSource: true });
+    this.view.destroy({ children: true });
     this.over.destroy({ children: true });
   }
 
