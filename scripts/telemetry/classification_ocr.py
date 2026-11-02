@@ -115,7 +115,7 @@ def decrypt(blob, private_pem):
 DIGITISH = str.maketrans({"O": "0", "o": "0", "D": "0", "Q": "0", "I": "1", "l": "1", "|": "1", "i": "1",
                           "S": "5", "s": "5", "B": "8", "Z": "2", "z": "2", "G": "6", ";": ":", ",": "."})
 LAP = re.compile(r"^(?:(\d):)?(\d{1,2})[:.](\d{2})[.:](\d{3})$")
-GAP = re.compile(r"^\+(\d{1,4})[.:](\d{3})s?$")
+GAP = re.compile(r"^\+?(\d{1,4})[.:](\d{3})s?$")  # Windows OCR sometimes drops the +
 INT = re.compile(r"^\d{1,2}$")
 WORDS_DATA = {"LAP", "LAPS", "PTS", "DNF", "DSQ", "DNS", "RET", "NC", "S", "+", "-", "POS", "BEST", "TIME", "GAP"}
 STATUS_WORDS = {"DNF": "dnf", "RET": "dnf", "DSQ": "dsq", "DNS": "dns", "NC": "not classified"}
@@ -189,8 +189,8 @@ def name_in(row):
     groups, cur, last = [], [], None
     for w in row:
         kind = token_kind(w[0])[0]
-        # digits glued to a name ("Driver 2396" read as two words) stay part of it
-        if kind in ("int", "word") and cur and w[1] - (last[1] + last[3]) < 0.4 * w[4]:
+        # digits right after a name ("Ghost_0815" read as "Ghost" "0815") stay part of it
+        if kind in ("int", "word") and cur and w[1] - (last[1] + last[3]) < 1.0 * w[4]:
             kind = "text"
         if kind != "text" or not re.search(r"[A-Za-z0-9]", w[0]):
             if cur:

@@ -109,6 +109,9 @@ def test_parser():
     clean = words(rows)
     # OCR slips: O for 0 in a lap time, l for 1 in a gap, a split gamertag, a row read twice as wide
     noisy = words(rows, y0=230, misread={(1, "1:30.412"): "1:3O.412", (2, "+7.767"): "+7.767", (4, "+29.016"): "+29.0l6"})
+    # Windows OCR drops underscores: "Ghost_0815" comes back as "Ghost" + "0815", "+3.333" as "3.333"
+    noisy = [w for w in noisy if w[0] != "Ghost_0815"] + [["Ghost", 160, 230 + 4 * 42, 55, 20], ["0815", 229, 230 + 4 * 42, 44, 20]]
+    noisy = [[("3.333" if w[0] == "+3.333" else w[0])] + w[1:] for w in noisy]
     noisy = [w for w in noisy if w[0] != "SlipStream2396"] + [["SlipStream", 160, 230 + 2 * 42, 121, 20], ["2396", 283, 230 + 2 * 42, 44, 20]]
     # one frame where the screen was half drawn: only the top three rows
     partial = words(rows[:3], y0=180)
