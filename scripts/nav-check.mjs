@@ -56,9 +56,10 @@ async function openRace(k) {
 let crash = null;
 try {
   await page.goto(base);
-  await page.waitForTimeout(3000);
-  const scope = new URL(page.url()).pathname.replace(/^\/race-stats\//, "").split("/")[0] || "f1";
-  await page.goto(`${base}${scope}/race`);
+  // the site's own menu link to the race picker (whatever the default game scope is)
+  const menu = page.locator('a[href$="/race"]').first();
+  await menu.waitFor({ timeout: 30000 });
+  await menu.click();
   await cards().first().waitFor({ timeout: 30000 });
   await shot("picker");
   const total = await cards().count();
