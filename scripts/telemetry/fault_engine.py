@@ -37,6 +37,15 @@ def rec_time(n):
     return datetime.datetime.strptime(n[:19], "%Y-%m-%d_%H-%M-%S")
 
 
+def feats(p):
+    """The numbers a contact's call rests on, for the staff grading batches (scripts/telemetry/grading_batch.py)."""
+    f, eff = p["features"], p.get("effects") or {}
+    return {"ahead_m": f.get("a_ahead_m"), "closing_kmh": round(f.get("closing_a_kmh") or 0, 1),
+            "moved": {str(k): v for k, v in (f.get("moved") or {}).items()},
+            "rejoin": [int(k) for k, v in (f.get("rejoin") or {}).items() if v],
+            "slide_deg": eff.get("max_slide_deg"), "places_lost": eff.get("places_lost"), "off_track": eff.get("off_track")}
+
+
 def judge(args):
     file, rec, cache = args
     out = os.path.join(cache, "verdicts", file)
@@ -50,7 +59,8 @@ def judge(args):
     name = lambda i: names.get(i, f"car {i}")  # noqa: E731
     vs = verdicts.judge_all(j, incs, name)
     keep = lambda p: {"a": p["a"], "b": p["b"], "t": round(p["t"] + off, 2), "rule": p["rule"], "severity": p["severity"],  # noqa: E731
-                      "verdict": p["verdict"], "why": p["why"], "at_fault": p.get("at_fault_all") or []}
+                      "verdict": p["verdict"], "why": p["why"], "at_fault": p.get("at_fault_all") or [],
+                      **({"f": feats(p)} if p.get("features") else {})}
     data = {"rules": verdicts.RULES, "recording": rec, "offset": round(off, 2), "matched": round(share, 2),
             "incidents": [{"t0": round(inc["t0"] + off, 2), "t1": round(inc["t1"] + off, 2), "lap": inc["lap"],
                            "kind": inc.get("kind"), "cars": [d["car"] for d in inc["drivers"]],
