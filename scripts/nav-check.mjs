@@ -53,32 +53,41 @@ async function openRace(k) {
   await page.waitForTimeout(4000);
 }
 
-await page.goto(base);
-await page.waitForTimeout(3000);
-const scope = new URL(page.url()).pathname.replace(/^\/race-stats\//, "").split("/")[0] || "f1";
-await page.goto(`${base}${scope}/race`);
-await cards().first().waitFor({ timeout: 30000 });
-await shot("picker");
-const total = await cards().count();
-await openRace(0);
-await shot("viewer-1");
-await page.locator('a[aria-label="All races"]').click();
-await page.waitForTimeout(3000);
-await shot("picker-after-races-button");
-await openRace(Math.min(1, total - 1));
-await shot("viewer-2");
-await page.goBack();
-await page.waitForTimeout(3000);
-await shot("picker-after-browser-back");
-await openRace(0);
-await shot("viewer-3-same-track-again");
+let crash = null;
+try {
+  await page.goto(base);
+  await page.waitForTimeout(3000);
+  const scope = new URL(page.url()).pathname.replace(/^\/race-stats\//, "").split("/")[0] || "f1";
+  await page.goto(`${base}${scope}/race`);
+  await cards().first().waitFor({ timeout: 30000 });
+  await shot("picker");
+  const total = await cards().count();
+  await openRace(0);
+  await shot("viewer-1");
+  await page.locator('a[aria-label="All races"]').click();
+  await page.waitForTimeout(3000);
+  await shot("picker-after-races-button");
+  await openRace(Math.min(1, total - 1));
+  await shot("viewer-2");
+  await page.goBack();
+  await page.waitForTimeout(3000);
+  await shot("picker-after-browser-back");
+  await openRace(0);
+  await shot("viewer-3-same-track-again");
 
+} catch (e) {
+  crash = String(e).split("\n")[0];
+  await page.screenshot({ path: `${outDir}/crash.png` }).catch(() => undefined);
+  errors.push(`page text: ${(await page.locator("body").innerText().catch(() => "")).slice(0, 400).replace(/\s+/g, " ")}`);
+  steps.push({ name: "crash", url: page.url().replace(base, "/"), cards: await cards().count(), text: 0, canvas: 0 });
+}
 await browser.close();
 server.close();
 const pickers = steps.filter((s) => s.name.startsWith("picker"));
-const ok = !errors.some((e) => e.startsWith("pageerror")) && pickers.every((s) => s.cards > 0) && steps.filter((s) => s.name.startsWith("viewer")).every((s) => s.canvas > 0);
+const ok = !crash && !errors.some((e) => e.startsWith("pageerror")) && pickers.every((s) => s.cards > 0) && steps.filter((s) => s.name.startsWith("viewer")).every((s) => s.canvas > 0);
 let md = `## Race picker round trip: ${ok ? "OK" : "FAILED"}\n\n| step | url | race cards | canvases | text chars |\n|---|---|---|---|---|\n`;
 for (const s of steps) md += `| ${s.name} | ${s.url} | ${s.cards} | ${s.canvas} | ${s.text} |\n`;
+md += crash ? `\n**Stopped:** ${crash}\n` : "";
 md += `\n${errors.length ? errors.map((e) => `- ${e.slice(0, 300)}`).join("\n") : "No errors."}\n`;
 writeFileSync(`${outDir}/nav.md`, md);
 console.log(md);
