@@ -744,6 +744,42 @@
         "at_fault": [],
         "contacts": 1
       }
+    },
+    "b4-15": {
+      "verdict": "Not an incident",
+      "by": "staff",
+      "real": false,
+      "at_fault": [],
+      "severity": 0,
+      "note": "",
+      "votes": 1,
+      "agree": 100,
+      "drivers": [
+        {
+          "car": 9,
+          "name": "Hidden #21 (Ferrari '26)"
+        },
+        {
+          "car": 14,
+          "name": "Hidden #28 (Ferrari '26)"
+        }
+      ],
+      "track": "Imola",
+      "date": "2026-10-30",
+      "race_file": "Race_Imola_2026_10_30_16_56_33.json",
+      "recording": "2026-10-30_16-46-43_Imola_Race.gmtel.gz",
+      "replay": "https://gremigaming.github.io/race-stats/f1/race/2026-10-30_16-46-43_Imola_Race?inc=34.0&car=9,14",
+      "engine": {
+        "rules": "v1",
+        "verdict": "Ferrari '26 #21 at fault",
+        "rule": "R5",
+        "severity": 3,
+        "why": "Ferrari '26 #21 came back onto the track and moved 2.2 m across into Ferrari '26 #28",
+        "at_fault": [
+          "Hidden #21 (Ferrari '26)"
+        ],
+        "contacts": 1
+      }
     }
   }
 }
