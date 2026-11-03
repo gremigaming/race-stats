@@ -319,6 +319,18 @@
       "car": 7,
       "pts": -3.0,
       "was": -6.0
+    },
+    {
+      "id": "Race_Catalunya_2026_10_30_16_38_55.json|4|contact|4|0",
+      "type": "incident",
+      "reason": "Both should have left space, next time they get the penalty",
+      "by": "319544045435224067",
+      "at": "2026-11-03T13:21:38Z",
+      "file": "Race_Catalunya_2026_10_30_16_38_55.json",
+      "driver": "niketys2",
+      "car": 4,
+      "pts": 0.0,
+      "was": -6.0
     }
   ]
 }
