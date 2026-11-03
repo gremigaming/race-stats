@@ -472,6 +472,10 @@ function SessionRow({ session, driver }: { session: SafetySession; driver: strin
   // contacts live in the incident list below, with both sides and the replay
   const points = session.items.filter((it) => it.cat !== "contact");
   const lost = session.items.filter((i) => i.pts < 0).length;
+  // SR v2.2: the card shows what the race counts for (net) and its sting, not the raw sum of its points
+  const shown = session.net ?? session.total;
+  const sting = session.sting ?? 0;
+  const fmt = (x: number) => x.toFixed(1).replace(/\.0$/, "");
   return (
     <div className="rounded-lg bg-zinc-900/60">
       <button
@@ -503,8 +507,19 @@ function SessionRow({ session, driver }: { session: SafetySession; driver: strin
             {lost} {lost === 1 ? "incident" : "incidents"}
           </span>
         )}
-        <span className={cn("w-12 text-right font-mono", changeClass(session.total))}>
-          {signedHalf(session.total)}
+        {sting > 0 && (
+          <span
+            className="rounded bg-red-500/15 px-1 font-mono text-[11px] text-red-300"
+            title="Sting: half of this race's incident points, straight off your SR"
+          >
+            −{fmt(sting)} SR
+          </span>
+        )}
+        <span
+          className={cn("w-12 text-right font-mono", changeClass(shown))}
+          title={session.net != null ? "Net score this race counts for in your average" : undefined}
+        >
+          {signedHalf(shown)}
         </span>
         <ChevronDown
           className={cn("h-3.5 w-3.5 shrink-0 text-zinc-600 transition-transform", open && "rotate-180")}
@@ -551,11 +566,40 @@ function SessionRow({ session, driver }: { session: SafetySession; driver: strin
             </p>
             </div>
           ))}
-          {session.sting != null && session.sting > 0 && (
-            <p className="text-red-300/90">
-              Instant sting: −{session.sting.toFixed(1).replace(/\.0$/, "")} SR (half of this race's incident points,
-              fading as you race on)
-            </p>
+          {session.net != null && (
+            <div className="mt-1 space-y-0.5 rounded-md bg-zinc-950/50 px-2.5 py-2 text-zinc-400">
+              <div className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
+                How this {session.race ? "race" : "qualifying"} counts{session.withQuali ? " (with its qualifying)" : ""}
+              </div>
+              <p className="flex justify-between gap-3">
+                <span>
+                  Bonus{session.race && (session.bonus ?? 0) > (session.bonusCounted ?? 0) ? ` ${fmt(session.bonus ?? 0)}, max 4 counts` : ""}
+                </span>
+                <span className="font-mono text-emerald-300">+{fmt(session.bonusCounted ?? session.bonus ?? 0)}</span>
+              </p>
+              {(session.incident ?? 0) > 0 && (
+                <p className="flex justify-between gap-3">
+                  <span>Incidents {fmt(session.incident ?? 0)}: half lowers the race</span>
+                  <span className="font-mono text-red-300">−{fmt((session.incident ?? 0) / 2)}</span>
+                </p>
+              )}
+              {(session.other ?? 0) > 0 && (
+                <p className="flex justify-between gap-3">
+                  <span>Track limits, pit exit, retirements (full)</span>
+                  <span className="font-mono text-red-300">−{fmt(session.other ?? 0)}</span>
+                </p>
+              )}
+              <p className="flex justify-between gap-3 border-t border-white/[0.06] pt-0.5 text-zinc-200">
+                <span>{session.race ? "Net score in your average" : "Joins your next race"}</span>
+                <span className={cn("font-mono", changeClass(session.net))}>{signedHalf(session.net)}</span>
+              </p>
+              {sting > 0 && (
+                <p className="flex justify-between gap-3 text-red-300">
+                  <span>Sting: other half of the incidents, straight off your SR (fades as you race on)</span>
+                  <span className="font-mono">−{fmt(sting)} SR</span>
+                </p>
+              )}
+            </div>
           )}
           <div className="flex items-center justify-between pt-1">
             <Link

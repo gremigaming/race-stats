@@ -48,8 +48,8 @@ const HOW_IT_WORKS: { title: string; body: ReactNode }[] = [
     body: li([
       "Every contact is judged from our own telemetry: who moved across, who ran into the back, who rejoined unsafely. The game's own collision penalties are not used.",
       "Contact you caused, by severity (1-10): 1-3 costs 1, 4-5 costs 3, 6-7 costs 6, 8-10 costs 10. Hitting the same car again on purpose costs 20. Not to blame costs nothing.",
-      "Track-limit time penalties and crossing the pit exit line: 2.",
-      "Quitting a race: 2. Retiring because someone else wrecked you, or after you already finished, doesn't count.",
+      "Track-limit time penalties and crossing the pit exit line: 1.",
+      "Quitting a race: 1. Retiring because someone else wrecked you, or after you already finished, doesn't count.",
       "Contacts with AI cars don't count. Staff can change or add a penalty.",
     ]),
   },
@@ -69,11 +69,11 @@ const HOW_IT_WORKS: { title: string; body: ReactNode }[] = [
     body: (
       <>
         <p>
-          Every race gets a net score: your bonus (max 4) minus half your penalty points. Your SR is{" "}
+          Every race gets a net score: your bonus (max 4) minus half your incident points, minus your track-limit, pit exit and retirement points in full. Your SR is{" "}
           {SR_START} + 25 × your average net score, at most 100, minus your sting, never below 0.
         </p>
         {li([
-          "Instant sting: for incidents (contacts), the other half of their points also comes straight off your SR, shown on that race's card. Track limits, pit exit and retirements only lower your average.",
+          "Instant sting: the other half of your incident points comes straight off your SR, shown in red on that race's card. So a 6-point contact costs 3 in that race's net score and 3 SR directly. Track limits, pit exit and retirements have no sting.",
           "History: your last 50 races count. Every 10 races you drive after a race, it counts 20% less, sting included. Only races you drive age your history, so sitting out doesn't wash anything away.",
           "New drivers start with 3 neutral races (net 0) in their history, so a few clean races can't jump you straight to S.",
           "Above 50, every stream you skip moves your SR 10% back towards 50.",

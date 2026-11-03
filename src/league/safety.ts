@@ -43,8 +43,20 @@ export interface SafetySession {
   /** How much this session counts now: 20% less for every 10 races you drove since (0 after 47). */
   weight: number;
   total: number;
-  /** SR v2.2: half of this race's penalty points, taken straight off the SR (fades like the race). */
+  /** SR v2.2: half of this session's incident points, taken straight off the SR (fades like the race). */
   sting?: number;
+  /** SR v2.2: what this session counts for. A race's bonus/incident/other include its qualifying (withQuali). */
+  net?: number;
+  bonus?: number;
+  /** Bonus that counts (max 4 per race). */
+  bonusCounted?: number;
+  /** Incident penalty points (contacts, staff incident calls): half lowers the race, half is the sting. */
+  incident?: number;
+  /** Track limits, pit exit, retirements: count in full in the race. */
+  other?: number;
+  /** Qualifying: its points join the next race. */
+  carry?: boolean;
+  withQuali?: boolean;
   items: SafetyItem[];
 }
 

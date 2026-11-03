@@ -621,8 +621,10 @@ def v21_current(n, now, detail=False):
     return (sr, pts / len(races)) if detail else sr
 
 # ---- SR v2.2 (GreMi, 3 Nov 2026; simulation only until he approves it)
-#   Every race: P = penalty points, B = bonus points (qualifying bonuses join the next race).
-#   Ledger: net = min(B, V22_BONUS_CAP) - V22_DILUTE x P. History starts with V22_BUFFER neutral
+#   Every race: B = bonus points, I = incident penalty points (contacts, staff incident calls),
+#   O = other penalty points (track limits, pit exit, retirements); qualifying joins the next race.
+#   50/50 split (GreMi, 3 Nov 2026): half of I lowers the race, the other half is the sting.
+#   Ledger: net = min(B, V22_BONUS_CAP) - V22_DILUTE x I - O. History starts with V22_BUFFER neutral
 #           virtual races (net 0 = SR 50) that age out like real ones. Last V22_WINDOW races,
 #           each 10 races back weighs 20% less (counted in races driven, not in time).
 #   Sting: V22_STING x incident P (contacts, staff calls; not track limits/DNF) comes off on that race's card and then fades with the same race-based
@@ -635,11 +637,34 @@ V22_STING, V22_DILUTE = 0.5, 0.5
 V22_WINDOW, V22_DECAY = 50, 0.8          # weight 0.8 per 10 races back
 V22_BUFFER = 3                           # neutral virtual races at the start of everyone's history
 V22_K = 25.0                             # SR = 50 + 25 x average net
-V22_PEN_X = 2.0                          # penalty points are double the v2.1 table
+# Contacts use the doubled v2.1 table (v1_points); track limits, pit exit and retirements keep their
+# v2.1 value of 1 (GreMi, 3 Nov 2026: "only keep the incidents double").
 V22_BONUS_CAP = 4.0                      # bonus points that count per race (pace can't outweigh penalties)
 V22_PROV = 1                             # live score from race 1 (the buffer cushions it)
 V22_DRIFT = 0.1
 V22_STING_FADES = os.environ.get("SR_STING_FADES", "1") != "0"
+
+def v22_ledger(es):
+    """One row per race: (stream, B, O, I) with qualifying carried into the next race, and per session
+    the parts its card shows (bonus, incident, other, net, sting)."""
+    races = []; pb = po = pi = 0.0; cards = []
+    for e in es:
+        b = sum(i["pts"] for i in e["items"] if i["pts"] > 0); i_ = v22_sting_pts(e)
+        o = -sum(i["pts"] for i in e["items"] if i["pts"] < 0) - i_
+        if not e["race"]:
+            pb += b; po += o; pi += i_
+            cards.append({"bonus": half(b), "incident": half(i_), "other": half(o), "net": half(b - V22_DILUTE * i_ - o),
+                          "sting": half(V22_STING * i_), "carry": True})
+            continue
+        B, O, I = b + pb, o + po, i_ + pi
+        races.append((e["stream"], B, O, I)); pb = po = pi = 0.0
+        cards.append({"bonus": half(B), "bonusCounted": half(min(B, V22_BONUS_CAP)), "incident": half(I), "other": half(O),
+                      "net": half(min(B, V22_BONUS_CAP) - V22_DILUTE * I - O), "sting": half(V22_STING * i_),
+                      **({"withQuali": True} if B != b or O != o or I != i_ else {})})
+    return races, cards
+
+def v22_net(b, o, i_):
+    return min(b, V22_BONUS_CAP) - V22_DILUTE * i_ - o
 
 def v22_sting_pts(e):
     """Penalty points that sting (GreMi, 3 Nov 2026): race incidents only (contacts and staff incident
@@ -647,18 +672,12 @@ def v22_sting_pts(e):
     return -sum(i["pts"] for i in e["items"] if i["pts"] < 0 and i["cat"] in ("contact", "staff"))
 
 def v22_current(n, now, detail=False):
-    es = [e for e in entries[n] if e["stream"] <= now]
-    races = []; pb = pp = pc = 0.0
-    for e in es:
-        b = sum(i["pts"] for i in e["items"] if i["pts"] > 0); p = -sum(i["pts"] for i in e["items"] if i["pts"] < 0)
-        c = v22_sting_pts(e)
-        if not e["race"]: pb += b; pp += p; pc += c; continue
-        races.append((e["stream"], b + pb, p + pp, c + pc)); pb = pp = pc = 0.0
+    races, _ = v22_ledger([e for e in entries[n] if e["stream"] <= now])
     if len(races) < V22_PROV: return (50.0, 0.0) if detail else 50.0
     win = ([(None, 0.0, 0.0, 0.0)] * V22_BUFFER + races)[-V22_WINDOW:]
     ws = [V22_DECAY ** (k / 10) for k in range(len(win) - 1, -1, -1)]
-    avg = sum(w * (min(b, V22_BONUS_CAP) - V22_DILUTE * p) for w, (_, b, p, _c) in zip(ws, win)) / sum(ws)
-    sting = V22_STING * (sum(w * c for w, (_, _, _p, c) in zip(ws, win)) if V22_STING_FADES else races[-1][3])
+    avg = sum(w * v22_net(b, o, i_) for w, (_, b, o, i_) in zip(ws, win)) / sum(ws)
+    sting = V22_STING * (sum(w * i_ for w, (_, _, _o, i_) in zip(ws, win)) if V22_STING_FADES else races[-1][3])
     sr = max(0.0, min(100.0, 50 + V22_K * avg) - sting)   # hard floor 0
     missed = now - races[-1][0]                            # streams skipped since your last race
     if sr > 50 and missed > 0: sr = 50 + (sr - 50) * (1 - V22_DRIFT) ** missed
@@ -666,12 +685,9 @@ def v22_current(n, now, detail=False):
 
 def stream_avg(n, si):
     """Points per race in stream si, counted the way the SR counts them (recent penalties 1.5x, -6 floor)."""
-    if V22:   # v2.2 race net: min(bonus, cap) - 0.5 x penalty (qualifying counts with the stream's races)
-        nets = []; pb = pp = 0.0
-        for e in (e for e in entries[n] if e["stream"] == si):
-            b = sum(i["pts"] for i in e["items"] if i["pts"] > 0) + pb; p = -sum(i["pts"] for i in e["items"] if i["pts"] < 0) + pp
-            if not e["race"]: pb, pp = b, p; continue
-            nets.append(min(b, V22_BONUS_CAP) - V22_DILUTE * p); pb = pp = 0.0
+    if V22:   # v2.2 race net: min(bonus, cap) - 0.5 x incident points - other points (qualifying joins the race)
+        races, _ = v22_ledger([e for e in entries[n] if e["stream"] == si])
+        nets = [v22_net(b, o, i_) for _, b, o, i_ in races]
         return round(sum(nets) / len(nets), 2) if nets else None
     es = entries[n]; recent = set(); races_after = 0
     for k in range(len(es) - 1, -1, -1):
@@ -680,7 +696,7 @@ def stream_avg(n, si):
     ks = [k for k, e in enumerate(es) if e["stream"] == si]; nr = sum(es[k]["race"] for k in ks)
     return round(sum(session_net(es[k], k in recent)[0] for k in ks) / nr, 2) if nr else None
 
-KICK_RACE, KICK_STREAM = (40, 80) if V22 else (20, 40)   # v2.2 points are doubled, so the kick lines are too
+KICK_RACE, KICK_STREAM = (40, 80) if V22 else (20, 40)   # v2.2 contact points are doubled, so the kick lines are too
 all_incs = []
 for si, stream in enumerate(streams):
     seen_stream = set(); stream_loss = collections.defaultdict(float)
@@ -749,12 +765,6 @@ for si, stream in enumerate(streams):
                     items[n].append({"pts": 0, "text": "Kicked from the lobby by staff: removed from this session's results", "lap": None, "cat": "staff"})
                 car.update(kicked); present += list(kicked)
         apply_staff(name, items, car, is_race, would)
-        if V22:   # v2.2 doubles every penalty: contacts already come doubled (v1_points), track limits
-            for its in items.values():   # and retirements here. A staff value is typed on the page as the live
-                for i in its:            # (v2.2) number, so it stays as typed; its "was" is shown doubled too.
-                    if "staff" in i:
-                        if i["cat"] != "contact" and i.get("orig", 0) < 0: i["orig"] *= V22_PEN_X
-                    elif i["pts"] < 0 and i["cat"] != "contact": i["pts"] *= V22_PEN_X
         for n in set(present) | set(items):
             loss = -sum(i["pts"] for i in items[n] if i["pts"] < 0)
             stream_loss[n] += loss
@@ -772,14 +782,14 @@ for n, es in entries.items():
     now = len(streams) - 1; sr = current(n, now); h = history[n]
     races = sum(e["race"] for e in es)
     prev = h[-2]["sr"] if len(h) > 1 else 50.0
+    cards = v22_ledger(es)[1] if V22 else [{}] * len(es)
     drivers.append({
         "name": n, "sr": sr, "change": half(sr - prev), "races": races,
         "provisional": races < 3, "banned": sr <= 0 if V22 else sr < 0,
         "history": [x for x in h],
         "sessions": [{"file": e["file"], "race": e["race"], "stream": e["stream"], "weight": w,
-                      "total": half(sum(i["pts"] for i in e["items"])), "items": e["items"],
-                      **({"sting": half(V22_STING * v22_sting_pts(e))} if V22 else {})}
-                     for e, w in zip(es, weights(n, now))],
+                      "total": half(sum(i["pts"] for i in e["items"])), "items": e["items"], **card}
+                     for e, w, card in zip(es, weights(n, now), cards)],
         "flags": flags[n],
     })
 drivers.sort(key=lambda x: (-x["sr"], x["name"].lower()))
@@ -792,5 +802,7 @@ with open(os.path.join(OUT, "safety.json"), "w") as fh:
     json.dump(out, fh, separators=(",", ":"))
 with open(os.path.join(OUT, "incidents.json"), "w") as fh:
     json.dump({"incidents": all_incs}, fh, separators=(",", ":"))
+for x in drivers:   # key scores in the build log
+    print(f"  SR {x['sr']:5.1f}  {x['name']}  ({x['races']} races)")
 print(f"safety rating{f' ({RULESET}, fault engine)' if V1 else ''}: {len(drivers)} drivers over {len(streams)} streams, {len(all_incs)} {'incidents' if V1 else 'collisions'}"
       + (f", not judged (no recording): {', '.join(no_verdicts)}" if V1 and no_verdicts else ""))
