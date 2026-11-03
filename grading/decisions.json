@@ -711,14 +711,15 @@
       }
     },
     "b4-14": {
-      "verdict": "Racing incident",
-      "by": "staff",
+      "verdict": "Hidden #99 (Audi '26) at fault",
+      "by": "GreMi",
       "real": true,
-      "at_fault": [],
-      "severity": 3.0,
-      "note": "",
-      "votes": 1,
-      "agree": 100,
+      "at_fault": [
+        "Hidden #99 (Audi '26)"
+      ],
+      "severity": 4,
+      "note": "Reckless driving from car 99 after a crash",
+      "at": 1793709673,
       "drivers": [
         {
           "car": 17,
