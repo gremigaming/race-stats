@@ -396,8 +396,8 @@ def name_at(words, y, b, col_x, col_end, h):
             if last is None:
                 continue
             break
-        if kind == "int" and gap is not None and gap > 0.4 * h:
-            break
+        if kind == "int" and gap is not None and gap > 1.0 * h:
+            break                        # a number further out is the next column
         if w[1] < col_x - 0.35 * h and len(t) > 1:
             # glued in front: the platform / team icons, read as O, Q, X, G, @, colons...
             room = int((col_x - w[1]) / (w[3] / len(t))) + 1
@@ -407,7 +407,8 @@ def name_at(words, y, b, col_x, col_end, h):
             t = t[k:]
         if not t:
             continue
-        parts.append(("" if gap is None or gap < 0.25 * h else " ") + t)
+        glue = gap is None or gap < 0.25 * h or kind == "int"   # OCR drops the "_" before digits
+        parts.append(("" if glue else " ") + t)
         last = w
     text = "".join(parts).strip(" .,:;|•")
     return text if len(norm(text)) >= 2 and not is_team(text) else None
