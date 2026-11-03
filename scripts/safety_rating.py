@@ -37,13 +37,14 @@ BASE = {"LOW": 0, "MEDIUM": 2, "HIGH": 4}
 NAME = {"LOW": "light", "MEDIUM": "medium", "HIGH": "heavy"}
 CAP = 25
 RULESET = os.environ.get("SR_RULES", "game")
-V22 = RULESET == "v2.2"
-V21 = RULESET in ("v2.1", "v2.2")   # v2.2 keeps the v2.1 contact points (0.5/1.5/3/5, R9 10)
-V1 = RULESET in ("v1", "v2.1", "v2.2")   # v2.1/v2.2 take contact blame from the fault engine too
+V23 = RULESET == "v2.3"   # simulation (GreMi, 3 Nov 2026): running SR, x10, bonus max 7.5
+V22 = RULESET in ("v2.2", "v2.3")
+V21 = RULESET in ("v2.1", "v2.2", "v2.3")   # v2.2 keeps the v2.1 contact points (0.5/1.5/3/5, R9 10)
+V1 = RULESET in ("v1", "v2.1", "v2.2", "v2.3")   # v2.1/v2.2 take contact blame from the fault engine too
 VERDICTS = os.environ.get("SR_VERDICTS", "/tmp/telemetry-cache/verdicts")
 OUT = os.environ.get("SR_OUT", os.path.join("public", "league"))
 TRACK_LIMITS = re.compile(r"Corner Cutting|Crossed Pit Exit", re.I)   # the only game rulings v1 keeps
-R9_PTS = 20 if RULESET == "v2.2" else 10   # hitting the same car again on purpose (v2.2 doubles it)
+R9_PTS = 20 if V22 else 10   # hitting the same car again on purpose (v2.2 doubles it)
 no_verdicts = []        # v1: races the fault engine could not judge (no recording)
 
 def v1_points(sev):
@@ -581,6 +582,7 @@ def weights(n, now):
 
 def current(n, now, detail=False):
     """SR of driver n at the end of stream `now` (with detail: also the average per race it came from)."""
+    if V23: return v23_current(n, now, detail)
     if V22: return v22_current(n, now, detail)
     if V21: return v21_current(n, now, detail)
     es = entries[n]; total = races_w = sting = 0.0; races_after = 0
@@ -636,10 +638,10 @@ def v21_current(n, now, detail=False):
 V22_STING, V22_DILUTE = 0.5, 0.5
 V22_WINDOW, V22_DECAY = 50, 0.8          # weight 0.8 per 10 races back
 V22_BUFFER = 3                           # neutral virtual races at the start of everyone's history
-V22_K = 25.0                             # SR = 50 + 25 x average net
+V22_K = 10.0 if V23 else 25.0            # SR = 50 + 25 x average net (v2.3: 10)
 # Contacts use the doubled v2.1 table (v1_points); track limits, pit exit and retirements keep their
 # v2.1 value of 1 (GreMi, 3 Nov 2026: "only keep the incidents double").
-V22_BONUS_CAP = 4.0                      # bonus points that count per race (pace can't outweigh penalties)
+V22_BONUS_CAP = 7.5 if V23 else 4.0                      # bonus points that count per race (pace can't outweigh penalties)
 V22_PROV = 1                             # live score from race 1 (the buffer cushions it)
 V22_DRIFT = 0.1
 V22_STING_FADES = os.environ.get("SR_STING_FADES", "1") != "0"
@@ -687,6 +689,30 @@ def v22_current(n, now, detail=False):
     missed = now - races[-1][0]                            # streams skipped since your last race
     if sr > 50 and missed > 0: sr = 50 + (sr - 50) * (1 - V22_DRIFT) ** missed
     V22_PARTS[n] = {"base": round(base, 1), "sting": round(sting, 1), "drift": round(raw - sr, 1)}   # for the stream headers
+    return (half(sr), avg) if detail else half(sr)
+
+# ---- SR v2.3 (simulation, GreMi 3 Nov 2026): a running SR. Each stream you race:
+#   new SR = SR after last stream + (base now - base after last stream) - this stream's sting
+#   base = min(100, 50 + 10 x weighted average net), sting = 0.5 x this stream's incident points.
+#   The sting is not added up and does not fade: it is taken off once and the result is your new start.
+#   Streams you skip: drift 10% toward 50 (above 50 only). SR stays within 0..100.
+def v23_current(n, now, detail=False):
+    V22_PARTS.pop(n, None)
+    sr = 50.0; prev_base = 50.0; raced = False; avg = 0.0; base = 50.0; st = 0.0
+    for t in range(now + 1):
+        es_t = [e for e in entries[n] if e["stream"] == t]
+        if not any(e["race"] for e in es_t):
+            if raced and sr > 50: sr = 50 + (sr - 50) * (1 - V22_DRIFT)
+            continue
+        raced = True
+        races, _ = v22_ledger([e for e in entries[n] if e["stream"] <= t])
+        win = ([(None, 0.0, 0.0, 0.0)] * V22_BUFFER + races)[-V22_WINDOW:]
+        ws = [V22_DECAY ** (k / 10) for k in range(len(win) - 1, -1, -1)]
+        avg = sum(w * v22_net(b, o, i_) for w, (_, b, o, i_) in zip(ws, win)) / sum(ws)
+        base = min(100.0, 50 + V22_K * avg)
+        st = V22_STING * sum(v22_sting_pts(e) for e in es_t)
+        sr = max(0.0, min(100.0, sr + (base - prev_base) - st)); prev_base = base
+    if raced: V22_PARTS[n] = {"base": round(base, 1), "sting": round(st, 1), "drift": 0.0}
     return (half(sr), avg) if detail else half(sr)
 
 def stream_avg(n, si):
@@ -808,6 +834,9 @@ with open(os.path.join(OUT, "safety.json"), "w") as fh:
     json.dump(out, fh, separators=(",", ":"))
 with open(os.path.join(OUT, "incidents.json"), "w") as fh:
     json.dump({"incidents": all_incs}, fh, separators=(",", ":"))
+for x in drivers:   # stream by stream for a few drivers, in the build log
+    if x["name"] in ("TTV/GreMi_Gaming", "Lucas_ostepoppen", "FPR_SAMUEL", "Stepino81", "NEX", "DDRK"):
+        print(f"  PATH {x['name']}: " + " | ".join(f"{h['date'][5:]} avg {h['avg']:+.2f} base {h.get('base', 0):.1f} sting {h.get('sting', 0):.1f} SR {h['sr']:.1f}" for h in x["history"] if h["raced"]))
 for x in drivers:   # key scores in the build log
     print(f"  SR {x['sr']:5.1f}  {x['name']}  ({x['races']} races)")
 print(f"safety rating{f' ({RULESET}, fault engine)' if V1 else ''}: {len(drivers)} drivers over {len(streams)} streams, {len(all_incs)} {'incidents' if V1 else 'collisions'}"

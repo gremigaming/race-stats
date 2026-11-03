@@ -100,6 +100,12 @@ jobs:
         env:
           SR_RULES: v2.2   # GreMi, 3 Nov 2026: SR v2.2 live
         run: python3 scripts/safety_rating.py
+      # SR v2.3 simulation (running SR, x10, bonus max 7.5): build log only, the site keeps v2.2
+      - name: SR v2.3 simulation (log only)
+        env:
+          SR_RULES: v2.3
+          SR_OUT: /tmp/sr-v23
+        run: python3 scripts/safety_rating.py || echo "v2.3 simulation failed"
       - name: Rank the Discord award roles
         run: python3 scripts/awards.py
       # GreMi's Setup manager: advice from his telemetry, published only
