@@ -149,7 +149,8 @@ jobs:
       - name: Discord leaderboard picture
         run: |
           mkdir -p /tmp/shots && cd /tmp/shots && npm init -y >/dev/null && npm i --silent playwright@1
-          cd /tmp/shots && PW_CHANNEL=chrome node "$GITHUB_WORKSPACE/scripts/discord-card.mjs" "$GITHUB_WORKSPACE/dist"
+          # a slow page here (e.g. the live server mid-rebuild) must not stop the site from publishing
+          cd /tmp/shots && PW_CHANNEL=chrome node "$GITHUB_WORKSPACE/scripts/discord-card.mjs" "$GITHUB_WORKSPACE/dist" || echo "leaderboard picture failed in this build"
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
