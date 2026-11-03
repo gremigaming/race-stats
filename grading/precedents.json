@@ -3211,13 +3211,13 @@
    ]
   },
   "b4-14": {
-   "key": "80ee833ba23b",
-   "by": "staff",
+   "key": "77987dcf819a",
+   "by": "GreMi",
    "track": "Baku",
    "date": "2026-10-30",
-   "verdict": "Racing incident",
-   "severity": 3.0,
-   "note": "",
+   "verdict": "Hidden #99 (Audi '26) at fault",
+   "severity": 4,
+   "note": "Reckless driving from car 99 after a crash",
    "recording": "2026-10-30_16-11-10_Baku_Race.gmtel.gz",
    "t": 379.4,
    "cars": [
@@ -3247,7 +3247,7 @@
       "reaction": 1.0,
       "aftermath": 0.0
      },
-     "label": "none",
+     "label": "front",
      "rulebook": "none",
      "rule": "R7"
     }
