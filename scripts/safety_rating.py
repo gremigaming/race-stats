@@ -18,8 +18,9 @@ BASE = {"LOW": 0, "MEDIUM": 2, "HIGH": 4}
 NAME = {"LOW": "light", "MEDIUM": "medium", "HIGH": "heavy"}
 CAP = 25
 RULESET = os.environ.get("SR_RULES", "game")
-V21 = RULESET == "v2.1"
-V1 = RULESET in ("v1", "v2.1")   # v2.1 takes contact blame from the fault engine too
+V22 = RULESET == "v2.2"
+V21 = RULESET in ("v2.1", "v2.2")   # v2.2 keeps the v2.1 contact points (0.5/1.5/3/5, R9 10)
+V1 = RULESET in ("v1", "v2.1", "v2.2")   # v2.1/v2.2 take contact blame from the fault engine too
 VERDICTS = os.environ.get("SR_VERDICTS", "/tmp/telemetry-cache/verdicts")
 OUT = os.environ.get("SR_OUT", os.path.join("public", "league"))
 TRACK_LIMITS = re.compile(r"Corner Cutting|Crossed Pit Exit", re.I)   # the only game rulings v1 keeps
@@ -534,6 +535,7 @@ def weights(n, now):
 
 def current(n, now, detail=False):
     """SR of driver n at the end of stream `now` (with detail: also the average per race it came from)."""
+    if V22: return v22_current(n, now, detail)
     if V21: return v21_current(n, now, detail)
     es = entries[n]; total = races_w = sting = 0.0; races_after = 0
     for e, w in zip(reversed(es), reversed(weights(n, now))):
@@ -571,6 +573,39 @@ def v21_current(n, now, detail=False):
     r = pts / (len(races) + V21_PRIOR)
     sr = min(100.0, half(100 - 50 * math.exp(-len(races) / V21_TAU) - V21_K * r))
     return (sr, pts / len(races)) if detail else sr
+
+# ---- SR v2.2 (GreMi, 3 Nov 2026; simulation only until he approves it)
+#   Every race: P = penalty points, B = bonus points (qualifying bonuses join the next race).
+#   Sting: V22_STING x P comes straight off the SR (permanent unless V22_STING_FADES).
+#   Ledger: net = min(B, V22_BONUS_CAP) - V22_DILUTE x P, averaged over your last V22_WINDOW races,
+#           each 10 races back weighs 20% less (counted in races you drove, not in time).
+#   SR = min(100, 50 + V22_K x average) - sting; provisional (shown as 50) under 3 races.
+#   Drift: above 50, each stream you skip after your last race pulls you V22_DRIFT of the way back to 50.
+# Tuned on the races since 19 Oct: /mnt/project-files/sr-rebalance/v2.2/.
+V22_STING, V22_DILUTE = 0.5, 0.5
+V22_WINDOW, V22_DECAY = 50, 0.8          # weight 0.8 per 10 races back
+V22_K = 21.5                             # SR per point of average net race score
+V22_BONUS_CAP = 2.5                      # bonus points that count per race (pace/close-racing bonuses can't buy SR)
+V22_PROV = 3
+V22_DRIFT = 0.1
+V22_STING_FADES = os.environ.get("SR_STING_FADES") == "1"   # alternative: sting fades with the same race-based decay
+
+def v22_current(n, now, detail=False):
+    es = [e for e in entries[n] if e["stream"] <= now]
+    races = []; pb = pp = 0.0
+    for e in es:
+        b = sum(i["pts"] for i in e["items"] if i["pts"] > 0); p = -sum(i["pts"] for i in e["items"] if i["pts"] < 0)
+        if not e["race"]: pb += b; pp += p; continue
+        races.append((e["stream"], b + pb, p + pp)); pb = pp = 0.0
+    if len(races) < V22_PROV: return (50.0, 0.0) if detail else 50.0
+    win = races[-V22_WINDOW:]
+    ws = [V22_DECAY ** (k / 10) for k in range(len(win) - 1, -1, -1)]
+    avg = sum(w * (min(b, V22_BONUS_CAP) - V22_DILUTE * p) for w, (_, b, p) in zip(ws, win)) / sum(ws)
+    sting = V22_STING * (sum(w * p for w, (_, _, p) in zip(ws, win)) if V22_STING_FADES else sum(p for _, _, p in races))
+    sr = min(100.0, 50 + V22_K * avg) - sting
+    missed = now - races[-1][0]
+    if sr > 50 and missed > 0: sr = 50 + (sr - 50) * (1 - V22_DRIFT) ** missed
+    return (half(sr), avg) if detail else half(sr)
 
 def stream_avg(n, si):
     """Points per race in stream si, counted the way the SR counts them (recent penalties 1.5x, -6 floor)."""
@@ -671,7 +706,8 @@ for n, es in entries.items():
         "provisional": races < 3, "banned": sr < 0,
         "history": [x for x in h],
         "sessions": [{"file": e["file"], "race": e["race"], "stream": e["stream"], "weight": w,
-                      "total": half(sum(i["pts"] for i in e["items"])), "items": e["items"]}
+                      "total": half(sum(i["pts"] for i in e["items"])), "items": e["items"],
+                      **({"sting": half(V22_STING * -sum(i["pts"] for i in e["items"] if i["pts"] < 0))} if V22 else {})}
                      for e, w in zip(es, weights(n, now))],
         "flags": flags[n],
     })
