@@ -64,9 +64,26 @@ jobs:
       - name: Fault engine verdicts for the safety rating
         env:
           GITHUB_TOKEN: ${{ github.token }}
+          FAULT_JOBS: "4"   # GitHub runners have 4 cores; a rulebook change judges every race again
         run: |
           python3 -m pip install --quiet --break-system-packages numpy || true
           python3 scripts/telemetry/fault_engine.py /tmp/telemetry-cache || echo "fault engine failed, races without verdicts show as not judged"
+      # Precedents (GreMi, 3 Nov 2026): every graded incident is saved with its numbers
+      # (grading/precedents.json); calls on similar contacts follow the graded call, and a graded
+      # incident always gets the grade itself. Needs the race recordings of new grades.
+      - name: Precedents from graded incidents
+        env:
+          FAULT_JOBS: "4"
+        run: |
+          python3 scripts/telemetry/precedents.py build /tmp/telemetry-cache || echo "precedents not built, the kept ones are used"
+          python3 scripts/telemetry/precedents.py apply /tmp/telemetry-cache || echo "precedents not applied, verdicts are the rulebook's"
+          if [ -n "$(git status --porcelain grading/precedents.json)" ]; then
+            git config user.name "github-actions"
+            git config user.email "github-actions@users.noreply.github.com"
+            git add grading/precedents.json
+            git commit -m "Precedents from graded incidents [skip ci]"
+            git pull --rebase --autostash origin main && git push origin HEAD:main || echo "precedents not saved, the next build makes them again"
+          fi
       # Five incidents for the staff to grade after every stream (1 low, 1 high severity,
       # 3 gray areas with Claude's take), saved once in grading/ and read by the staff page
       - name: Staff grading picks

@@ -56,6 +56,8 @@ def pace_ratio(x, y, skip):
     r = [b[x] / b[y] for f, b in best.items() if f != skip and x in b and y in b]
     return statistics.median(r) if len(r) >= 2 else None
 
+RULE_LABEL = {"G": "graded", "P": "like a graded one"}   # precedents.py: GreMi's own call / a similar graded call
+
 def v1_rows(path, names, cols, game_incs):
     """Contact rows from the fault engine's verdicts (same shape as the game-based rows)."""
     vf = os.path.join(VERDICTS, os.path.basename(path))
@@ -84,9 +86,9 @@ def v1_rows(path, names, cols, game_incs):
                 pts = R9_PTS if r9 else v1_points(s_)
                 why = next((c["why"] for c in mine), inc["why"])
                 rule = "R9" if r9 else (mine[0]["rule"] if mine else inc["rule"])
-                lines[x] = (pts, [f"severity {s_}/10, to blame ({rule}) {pts:g}", why])
+                lines[x] = (pts, [f"severity {s_}/10, to blame ({RULE_LABEL.get(rule, rule)}) {pts:g}", why])
             else:
-                lines[x] = (0, [f"severity {sev}/10, not to blame ({inc['rule']}) 0", inc["why"]])
+                lines[x] = (0, [f"severity {sev}/10, not to blame ({RULE_LABEL.get(inc['rule'], inc['rule'])}) 0", inc["why"]])
         rows.append({"file": path.split("/")[-1].rsplit("_2026", 1)[0], "pair": pair, "t": inc["t0"], "t_end": inc["t1"], "sev": word,
                      "severity": sev, "rule": inc["rule"], "lap": inc["lap"], "dist": None, "sector": None, "corner": None, "where": where,
                      "pn": [names[pair[0]], names[pair[1]]] if pair[0] in names and pair[1] in names else [names[c] for c in cars[:2]],

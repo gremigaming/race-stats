@@ -1,0 +1,1012 @@
+{
+ "about": "GreMi's grades of calibration batches 1-3 (30 Oct - 1 Nov 2026, grading page artifact), same shape as decisions.json.",
+ "decisions": {
+  "b1-01": {
+   "verdict": "Stepino81 at fault",
+   "by": "GreMi",
+   "real": true,
+   "at_fault": [
+    "Stepino81"
+   ],
+   "severity": 4,
+   "note": "It is a pretty good call, the only thing i wanna see it when i watch this is see that they touch the next corner agian, when the Redbull car almost spins, why do i not see a collision. That should be 1 incident btw. Because it was part of one battle and they never returned to normal racing lines.",
+   "drivers": [
+    {
+     "car": 1,
+     "name": "Hidden #2 (Unspecified, PlayStation)"
+    },
+    {
+     "car": 2,
+     "name": "Stepino81"
+    }
+   ],
+   "track": "Melbourne",
+   "date": "2026-10-20",
+   "recording": "2026-10-20_18-47-34_Melbourne_Race.gmtel.gz",
+   "t": 391.0,
+   "race_file": "Race_Melbourne_2026_10_20_18_56_00.json"
+  },
+  "b1-02": {
+   "verdict": "Not an incident",
+   "by": "GreMi",
+   "real": false,
+   "at_fault": [],
+   "severity": 0,
+   "note": "This is just a tapp, not an incident or collision, I do only see the driver number, I am watching the incident between car 53 and 99, i might be watching the wrong incident, but i dont think so.",
+   "drivers": [
+    {
+     "car": 6,
+     "name": "TTV_shimadaseba"
+    },
+    {
+     "car": 7,
+     "name": "niketys2"
+    }
+   ],
+   "track": "Madrid",
+   "date": "2026-10-20",
+   "recording": "2026-10-20_19-07-08_Madrid_Race.gmtel.gz",
+   "t": 93.0,
+   "race_file": "Race_Madrid_2026_10_20_19_17_17.json"
+  },
+  "b1-03": {
+   "verdict": "niketys2 at fault",
+   "by": "GreMi",
+   "real": true,
+   "at_fault": [
+    "niketys2"
+   ],
+   "severity": 7,
+   "note": "Okey this is an interessting one, it will taka a bit longer to explain. Let me start that this is a great example of a multi corner incident. At first i wanna say that Car 83 should also be part of the incident, even tho no one collided with them, Stepino had to change his line because of him. If you look purely at the incident you send me, it would not be an incident at all. But the corner after they collide and stepino spins. I have to say at first look i thought Stepino was at fault for cutting off Car 99, but after looking closer it is car 99 who first turns right, their tires touch and hook and drive into the wall togheter. Stepino left enough space till their tires touched so this one is fully on car 99.",
+   "drivers": [
+    {
+     "car": 2,
+     "name": "Stepino81"
+    },
+    {
+     "car": 5,
+     "name": "niketys2"
+    }
+   ],
+   "track": "Baku",
+   "date": "2026-10-20",
+   "recording": "2026-10-20_19-45-13_Baku_Race.gmtel.gz",
+   "t": 345.0,
+   "race_file": "Race_Baku_2026_10_20_19_56_34.json"
+  },
+  "b1-04": {
+   "verdict": "Racing incident",
+   "by": "GreMi",
+   "real": true,
+   "at_fault": [],
+   "severity": 3,
+   "note": "Racing incident but i do think aloxowitsh triggers it, and gremi is a bit too eager their. Cause Alexo goes off his racing line a little bit on the right hand corner, a gap opens up, gremi goes for it but doesnt have enough speed. It looks like alexo is about to run into stepino and want to pass to the right but doesnt see gremi and they collide, not really any ones fault.",
+   "drivers": [
+    {
+     "car": 0,
+     "name": "TTV/GreMi_Gaming"
+    },
+    {
+     "car": 1,
+     "name": "Alexowitsh77"
+    }
+   ],
+   "track": "Mexico",
+   "date": "2026-10-20",
+   "recording": "2026-10-20_20-05-21_Mexico_Race.gmtel.gz",
+   "t": 391.0,
+   "race_file": "Race_Mexico_2026_10_20_20_13_46.json"
+  },
+  "b1-05": {
+   "verdict": "Hidden #15 (Polish, PlayStation) at fault",
+   "by": "GreMi",
+   "real": true,
+   "at_fault": [
+    "Hidden #15 (Polish, PlayStation)"
+   ],
+   "severity": 2,
+   "note": "This is only a small incident, the reason i still say it should be counted as an incident is cause DDRK does a nice move is full along side and even overtakes car 15. Until they collide car 15 keeps going more towards DDRK even when he is clearly there. DDRK should have been more carefull but if this endend more badly it would have been because car 15 didnt give a bit more space.",
+   "drivers": [
+    {
+     "car": 6,
+     "name": "Hidden #15 (Polish, PlayStation)"
+    },
+    {
+     "car": 7,
+     "name": "DDRK"
+    }
+   ],
+   "track": "Abu Dhabi",
+   "date": "2026-10-20",
+   "recording": "2026-10-20_20-21-09_Abu_Dhabi_Race.gmtel.gz",
+   "t": 107.0,
+   "race_file": "Race_Abu_Dhabi_Manual_2026_10_20_20_39_07.json"
+  },
+  "b1-06": {
+   "verdict": "Hidden #2 (Czech, PlayStation) at fault",
+   "by": "GreMi",
+   "real": true,
+   "at_fault": [
+    "Hidden #2 (Czech, PlayStation)"
+   ],
+   "severity": 6,
+   "note": "I dont really know what happend here, You said i was involved, but i was nowhere near this incident. The way i see it is car 34 hits car 8 first, which is just a tap, then car 2 in the RB hits car 34 trying to still fit in and spins himself. Im not sure if car 86 also collide with car 2 RB. You need to keep in mind that ghosting is on in my lobbies, but ill explain a bit more about that. But Gremi was not involved in this incident at all, to please check why you thought so.",
+   "drivers": [
+    {
+     "car": 6,
+     "name": "[LCR] Turbodruif"
+    },
+    {
+     "car": 7,
+     "name": "Hidden #2 (Czech, PlayStation)"
+    }
+   ],
+   "track": "Monaco",
+   "date": "2026-10-23",
+   "recording": "2026-10-23_19-54-17_Monaco_Race.gmtel.gz",
+   "t": 58.0,
+   "race_file": "Race_Monaco_2026_10_23_20_03_16.json"
+  },
+  "b1-07": {
+   "verdict": "Not an incident",
+   "by": "GreMi",
+   "real": false,
+   "at_fault": [],
+   "severity": 0,
+   "note": "First i wanna say, The Redbull car number 2 is not an AI here, he is called lucas_ostepoppen. Car 77 is an AI BOTTAS. Collisions with them dont count. I do see that the race viewer labels this as a 10 car incident, which is not true, so maybe we need to confire a little bit more when you should count cars as part of an incident.",
+   "drivers": [
+    {
+     "car": 8,
+     "name": "AI #2"
+    },
+    {
+     "car": 14,
+     "name": "AI #77"
+    }
+   ],
+   "track": "Jeddah",
+   "date": "2026-10-23",
+   "recording": "2026-10-23_21-00-10_Jeddah_Race.gmtel.gz",
+   "t": 7.0,
+   "race_file": "Race_Jeddah_Manual_2026_10_23_21_13_31.json"
+  },
+  "b1-08": {
+   "verdict": "NEX at fault",
+   "by": "GreMi",
+   "real": true,
+   "at_fault": [
+    "NEX"
+   ],
+   "severity": 2,
+   "note": "",
+   "drivers": [
+    {
+     "car": 7,
+     "name": "DABBINMAN123"
+    },
+    {
+     "car": 10,
+     "name": "NEX"
+    }
+   ],
+   "track": "Imola",
+   "date": "2026-10-25",
+   "recording": "2026-10-25_15-12-35_Imola_Race.gmtel.gz",
+   "t": 176.0,
+   "race_file": "Race_Imola_2026_10_25_15_20_36.json"
+  },
+  "b1-09": {
+   "verdict": "Not an incident",
+   "by": "GreMi",
+   "real": false,
+   "at_fault": [],
+   "severity": 0,
+   "note": "",
+   "drivers": [
+    {
+     "car": 0,
+     "name": "TTV/GreMi_Gaming"
+    },
+    {
+     "car": 9,
+     "name": "NEX"
+    }
+   ],
+   "track": "Spa",
+   "date": "2026-10-25",
+   "recording": "2026-10-25_15-42-41_Spa_Race.gmtel.gz",
+   "t": 402.0,
+   "race_file": "Race_Spa_2026_10_25_15_54_11.json"
+  },
+  "b1-10": {
+   "verdict": "Overfast-_ at fault",
+   "by": "GreMi",
+   "real": true,
+   "at_fault": [
+    "Overfast-_"
+   ],
+   "severity": 6,
+   "note": "Again i dont know where you see car 11, there is not even a car 11 in this race. But the incident im looking at is betweern cars 53, 54, and 86 (I dont see overfast his name but i think he is number 86). Car 86 is at fault here for hitting the mercedes 54 on the rear, which causes Car 54 to hit car 53. If car 86 backed out there would have been no incident.",
+   "drivers": [
+    {
+     "car": 10,
+     "name": "Overfast-_"
+    },
+    {
+     "car": 12,
+     "name": "Hidden #54 (Pakistani, Origin)"
+    }
+   ],
+   "track": "Catalunya",
+   "date": "2026-10-25",
+   "recording": "2026-10-25_15-59-16_Catalunya_Race.gmtel.gz",
+   "t": 7.0,
+   "race_file": "Race_Catalunya_2026_10_25_16_07_58.json"
+  },
+  "b1-11": {
+   "verdict": "DevilDriver2396 at fault",
+   "by": "GreMi",
+   "real": true,
+   "at_fault": [
+    "DevilDriver2396"
+   ],
+   "severity": 3,
+   "note": "Devildriver goes around the outside, it is not an inside dive. This should probably not be a penalty but devildriver does push the limit here and could have left a bit more space.",
+   "drivers": [
+    {
+     "car": 1,
+     "name": "DevilDriver2396"
+    },
+    {
+     "car": 4,
+     "name": "Alexowitsh77"
+    }
+   ],
+   "track": "Sakhir",
+   "date": "2026-10-25",
+   "recording": "2026-10-25_16-12-29_Bahrain_Race.gmtel.gz",
+   "t": 209.0,
+   "race_file": "Race_Sakhir_2026_10_25_16_22_33.json"
+  },
+  "b1-12": {
+   "verdict": "Not an incident",
+   "by": "GreMi",
+   "real": false,
+   "at_fault": [],
+   "severity": 0,
+   "note": "car 93 is not an AI, his name is javarionx. But this was just a little tap.",
+   "drivers": [
+    {
+     "car": 1,
+     "name": "DevilDriver2396"
+    },
+    {
+     "car": 5,
+     "name": "AI #93"
+    }
+   ],
+   "track": "Jeddah",
+   "date": "2026-10-25",
+   "recording": "2026-10-25_16-27-27_Jeddah_Race.gmtel.gz",
+   "t": 270.0,
+   "race_file": "Race_Jeddah_2026_10_25_16_37_02.json"
+  },
+  "b1-13": {
+   "verdict": "Racing incident",
+   "by": "GreMi",
+   "real": true,
+   "at_fault": [],
+   "severity": 5,
+   "note": "This is indeed a chain collision, I do just wanna point out that there is again no car 17. Let me tell you what happend. Car 2 ferrari hits Car 2 Audi, which makes him spin, and then chaos unfolds, Car 2 ferrari does start it but it looks like a small brake error and a huge incident. no one is fully responsible. I do see that there are 4 audi's on track which is wrong, and i dont see any cadillacs on track, that is wrong.",
+   "drivers": [
+    {
+     "car": 3,
+     "name": "Stepino81"
+    },
+    {
+     "car": 11,
+     "name": "Hidden #2 (Unspecified, Steam)"
+    }
+   ],
+   "track": "Shanghai",
+   "date": "2026-10-25",
+   "recording": "2026-10-25_16-42-14_Shanghai_Race.gmtel.gz",
+   "t": 54.0,
+   "race_file": "Race_Shanghai_2026_10_25_16_53_29.json"
+  },
+  "b1-14": {
+   "verdict": "Not an incident",
+   "by": "GreMi",
+   "real": false,
+   "at_fault": [],
+   "severity": 0,
+   "note": "",
+   "drivers": [
+    {
+     "car": 7,
+     "name": "Hidden #54 (Pakistani, Origin)"
+    },
+    {
+     "car": 11,
+     "name": "FPR_SAMUEL"
+    }
+   ],
+   "track": "Brazil",
+   "date": "2026-10-25",
+   "recording": "2026-10-25_16-57-26_Brazil_Race.gmtel.gz",
+   "t": 234.0,
+   "race_file": "Race_Brazil_Manual_2026_10_25_17_06_47.json"
+  },
+  "b1-15": {
+   "verdict": "DevilDriver2396 at fault",
+   "by": "GreMi",
+   "real": true,
+   "at_fault": [
+    "DevilDriver2396"
+   ],
+   "severity": 3,
+   "note": "I do think ethan could have left a little more room. But devil was wrong here.",
+   "drivers": [
+    {
+     "car": 2,
+     "name": "DevilDriver2396"
+    },
+    {
+     "car": 4,
+     "name": "EthanMoonski"
+    }
+   ],
+   "track": "Mexico",
+   "date": "2026-10-28",
+   "recording": "2026-10-28_19-14-35_Mexico_Race.gmtel.gz",
+   "t": 111.0,
+   "race_file": "Race_Mexico_2026_10_28_19_22_23.json"
+  },
+  "b1-16": {
+   "verdict": "EthanMoonski at fault",
+   "by": "GreMi",
+   "real": true,
+   "at_fault": [
+    "EthanMoonski"
+   ],
+   "severity": 3,
+   "note": "",
+   "drivers": [
+    {
+     "car": 3,
+     "name": "EthanMoonski"
+    },
+    {
+     "car": 5,
+     "name": "Hidden #28 (Barbadian, Steam)"
+    }
+   ],
+   "track": "Losail",
+   "date": "2026-10-28",
+   "recording": "2026-10-28_19-31-38_Losail_Race.gmtel.gz",
+   "t": 199.0,
+   "race_file": "Race_Losail_2026_10_28_19_39_49.json"
+  },
+  "b1-17": {
+   "verdict": "Not an incident",
+   "by": "GreMi",
+   "real": false,
+   "at_fault": [],
+   "severity": 0,
+   "note": "",
+   "drivers": [
+    {
+     "car": 1,
+     "name": "Typr3k"
+    },
+    {
+     "car": 2,
+     "name": "DABBINMAN123"
+    }
+   ],
+   "track": "Singapore",
+   "date": "2026-10-28",
+   "recording": "2026-10-28_19-47-35_Singapore_Race.gmtel.gz",
+   "t": 58.0,
+   "race_file": "Race_Singapore_2026_10_28_19_57_08.json"
+  },
+  "b1-18": {
+   "verdict": "Not an incident",
+   "by": "GreMi",
+   "real": false,
+   "at_fault": [],
+   "severity": 0,
+   "note": "I do need to say alot happend there including dabbinman spinning, which is his own fault.",
+   "drivers": [
+    {
+     "car": 7,
+     "name": "DDRK"
+    },
+    {
+     "car": 9,
+     "name": "Hidden #32 (Dutch, PlayStation)"
+    }
+   ],
+   "track": "Monza",
+   "date": "2026-10-28",
+   "recording": "2026-10-28_20-06-08_Monza_Race.gmtel.gz",
+   "t": 118.0,
+   "race_file": "Race_Monza_2026_10_28_20_14_22.json"
+  },
+  "b1-19": {
+   "verdict": "Typr3k at fault",
+   "by": "GreMi",
+   "real": true,
+   "at_fault": [
+    "Typr3k"
+   ],
+   "severity": 4,
+   "note": "",
+   "drivers": [
+    {
+     "car": 1,
+     "name": "Typr3k"
+    },
+    {
+     "car": 2,
+     "name": "Stepino81"
+    }
+   ],
+   "track": "Montreal",
+   "date": "2026-10-28",
+   "recording": "2026-10-28_20-22-05_Montreal_Race.gmtel.gz",
+   "t": 126.0,
+   "race_file": "Race_Montreal_2026_10_28_20_29_49.json"
+  },
+  "b1-20": {
+   "verdict": "TTV/GreMi_Gaming at fault",
+   "by": "GreMi",
+   "real": true,
+   "at_fault": [
+    "TTV/GreMi_Gaming"
+   ],
+   "severity": 4,
+   "note": "There was a really big incident before why gremi rejoins weird, but it was an unsafe rejoin.",
+   "drivers": [
+    {
+     "car": 0,
+     "name": "TTV/GreMi_Gaming"
+    },
+    {
+     "car": 8,
+     "name": "stijntjegeffie"
+    }
+   ],
+   "track": "Suzuka",
+   "date": "2026-10-28",
+   "recording": "2026-10-28_20-40-25_Suzuka_Race.gmtel.gz",
+   "t": 183.0,
+   "race_file": "Race_Suzuka_Just_in_case_2026_10_28_20_53_25.json"
+  },
+  "b2-01": {
+   "verdict": "Racing incident",
+   "by": "GreMi",
+   "real": true,
+   "at_fault": [],
+   "severity": 8,
+   "note": "I spun by hitting the grass, so you could argue that is was at fault, but this shouldnt get me a massive amount of penalty points because it was just a mistake. Fajeckaaa just drives his normal line, i would ay he didnt try to avoid it at all but this is not on him, then ddrk and car 32 are just part of the aftermath, not on them at all. You should always keep in mind human reaction. Same for when someone moves within 0.5 second before someone starts an overtake and they hit, if you feel the car behind has no time to respond, it could be the fault of the car ahead.",
+   "drivers": [
+    {
+     "car": 10,
+     "name": "#2 fajeckaaa"
+    },
+    {
+     "car": 0,
+     "name": "#3 TTV/GreMi_Gaming"
+    },
+    {
+     "car": 7,
+     "name": "#19 DDRK"
+    },
+    {
+     "car": 9,
+     "name": "Hidden #32"
+    }
+   ],
+   "track": "Monza",
+   "date": "2026-10-28",
+   "recording": "2026-10-28_20-06-08_Monza_Race.gmtel.gz",
+   "t": 161.0,
+   "race_file": "Race_Monza_2026_10_28_20_14_22.json"
+  },
+  "b2-02": {
+   "verdict": "#8 Stepino81 at fault",
+   "by": "GreMi",
+   "real": true,
+   "at_fault": [
+    "#8 Stepino81"
+   ],
+   "severity": 10,
+   "note": "Stepino hitting car 2 ferrari twice on purpouse.",
+   "drivers": [
+    {
+     "car": 14,
+     "name": "Hidden #2"
+    },
+    {
+     "car": 2,
+     "name": "#8 Stepino81"
+    }
+   ],
+   "track": "Brazil",
+   "date": "2026-10-25",
+   "recording": "2026-10-25_16-57-26_Brazil_Race.gmtel.gz",
+   "t": 194.0,
+   "race_file": "Race_Brazil_Manual_2026_10_25_17_06_47.json"
+  },
+  "b2-03": {
+   "verdict": "#50 DevilDriver2396 + Hidden #54 at fault",
+   "by": "GreMi",
+   "real": true,
+   "at_fault": [
+    "#50 DevilDriver2396",
+    "Hidden #54"
+   ],
+   "severity": 8,
+   "note": "Car 54 and devildriver were both at fault for this. both not a massive mistake, but just reckless driving.",
+   "drivers": [
+    {
+     "car": 2,
+     "name": "#50 DevilDriver2396"
+    },
+    {
+     "car": 8,
+     "name": "Hidden #54"
+    },
+    {
+     "car": 9,
+     "name": "#15 stijntjegeffie"
+    },
+    {
+     "car": 1,
+     "name": "#8 Stepino81"
+    },
+    {
+     "car": 4,
+     "name": "#19 DDRK"
+    },
+    {
+     "car": 11,
+     "name": "#36 George Plaster"
+    },
+    {
+     "car": 5,
+     "name": "#2 fajeckaaa"
+    }
+   ],
+   "track": "Texas",
+   "date": "2026-10-28",
+   "recording": "2026-10-28_20-57-01_Texas_Race.gmtel.gz",
+   "t": 27.0,
+   "race_file": "Race_Texas_2026_10_28_21_06_48.json"
+  },
+  "b2-04": {
+   "verdict": "#99 niketys2 at fault",
+   "by": "GreMi",
+   "real": true,
+   "at_fault": [
+    "#99 niketys2"
+   ],
+   "severity": 2,
+   "note": "",
+   "drivers": [
+    {
+     "car": 7,
+     "name": "#99 niketys2"
+    },
+    {
+     "car": 11,
+     "name": "Hidden #29"
+    }
+   ],
+   "track": "Zandvoort",
+   "date": "2026-10-23",
+   "recording": "2026-10-23_20-11-07_Zandvoort_Race.gmtel.gz",
+   "t": 153.0,
+   "race_file": "Race_Zandvoort_2026_10_23_20_19_12.json"
+  },
+  "b2-05": {
+   "verdict": "Not an incident",
+   "by": "GreMi",
+   "real": false,
+   "at_fault": [],
+   "severity": 0,
+   "note": "",
+   "drivers": [
+    {
+     "car": 7,
+     "name": "#2 fajeckaaa"
+    },
+    {
+     "car": 11,
+     "name": "#13 LCR-Sab872"
+    }
+   ],
+   "track": "Montreal",
+   "date": "2026-10-28",
+   "recording": "2026-10-28_20-22-05_Montreal_Race.gmtel.gz",
+   "t": 14.0,
+   "race_file": "Race_Montreal_2026_10_28_20_29_49.json"
+  },
+  "b3-01": {
+   "verdict": "Not an incident",
+   "by": "GreMi",
+   "real": false,
+   "at_fault": [],
+   "severity": 0,
+   "note": "",
+   "drivers": [
+    {
+     "car": 9,
+     "name": "#19 Enexvery"
+    },
+    {
+     "car": 7,
+     "name": "#24 rubengggarcia"
+    }
+   ],
+   "track": "Miami",
+   "date": "2026-10-30",
+   "recording": "2026-10-30_15-51-13_Miami_Race.gmtel.gz",
+   "t": 293.1,
+   "race_file": ""
+  },
+  "b3-02": {
+   "verdict": "Not an incident",
+   "by": "GreMi",
+   "real": false,
+   "at_fault": [],
+   "severity": 0,
+   "note": "",
+   "drivers": [
+    {
+     "car": 2,
+     "name": "#58 NEX"
+    },
+    {
+     "car": 1,
+     "name": "Hidden #2 (Mercedes '26)"
+    },
+    {
+     "car": 0,
+     "name": "#3 TTV/GreMi_Gaming"
+    }
+   ],
+   "track": "Miami",
+   "date": "2026-10-30",
+   "recording": "2026-10-30_15-51-13_Miami_Race.gmtel.gz",
+   "t": 322.1,
+   "race_file": ""
+  },
+  "b3-03": {
+   "verdict": "#13 Jakubm18_F1 at fault",
+   "by": "GreMi",
+   "real": true,
+   "at_fault": [
+    "#13 Jakubm18_F1"
+   ],
+   "severity": 7,
+   "note": "",
+   "drivers": [
+    {
+     "car": 6,
+     "name": "Hidden #21 (Ferrari '26)"
+    },
+    {
+     "car": 4,
+     "name": "#13 Jakubm18_F1"
+    }
+   ],
+   "track": "Miami",
+   "date": "2026-10-30",
+   "recording": "2026-10-30_15-51-13_Miami_Race.gmtel.gz",
+   "t": 429.0,
+   "race_file": ""
+  },
+  "b3-04": {
+   "verdict": "Not an incident",
+   "by": "GreMi",
+   "real": false,
+   "at_fault": [],
+   "severity": 0,
+   "note": "",
+   "drivers": [
+    {
+     "car": 0,
+     "name": "#3 TTV/GreMi_Gaming"
+    },
+    {
+     "car": 10,
+     "name": "Hidden #2 (Alpine '26)"
+    }
+   ],
+   "track": "Miami",
+   "date": "2026-10-30",
+   "recording": "2026-10-30_15-51-13_Miami_Race.gmtel.gz",
+   "t": 527.8,
+   "race_file": ""
+  },
+  "b3-05": {
+   "verdict": "Not an incident",
+   "by": "GreMi",
+   "real": false,
+   "at_fault": [],
+   "severity": 0,
+   "note": "",
+   "drivers": [
+    {
+     "car": 7,
+     "name": "Hidden #28 (McLaren '26)"
+    },
+    {
+     "car": 17,
+     "name": "Hidden #99 (Audi '26)"
+    }
+   ],
+   "track": "Baku",
+   "date": "2026-10-30",
+   "recording": "2026-10-30_16-11-10_Baku_Race.gmtel.gz",
+   "t": 9.8,
+   "race_file": ""
+  },
+  "b3-06": {
+   "verdict": "Hidden #99 (Audi '26) at fault",
+   "by": "GreMi",
+   "real": true,
+   "at_fault": [
+    "Hidden #99 (Audi '26)"
+   ],
+   "severity": 6,
+   "note": "This was only an incident between car 99 and jakub",
+   "drivers": [
+    {
+     "car": 17,
+     "name": "Hidden #99 (Audi '26)"
+    },
+    {
+     "car": 3,
+     "name": "#13 Jakubm18_F1"
+    },
+    {
+     "car": 5,
+     "name": "#24 rubengggarcia"
+    },
+    {
+     "car": 10,
+     "name": "#8 Stepino81"
+    }
+   ],
+   "track": "Baku",
+   "date": "2026-10-30",
+   "recording": "2026-10-30_16-11-10_Baku_Race.gmtel.gz",
+   "t": 322.3,
+   "race_file": ""
+  },
+  "b3-07": {
+   "verdict": "Racing incident",
+   "by": "GreMi",
+   "real": true,
+   "at_fault": [],
+   "severity": 7,
+   "note": "NEx told me his wheel disconnected, the input that happens after is probably the ai taking over",
+   "drivers": [
+    {
+     "car": 15,
+     "name": "Hidden #28 (Racing Bulls '26)"
+    },
+    {
+     "car": 2,
+     "name": "#58 NEX"
+    },
+    {
+     "car": 5,
+     "name": "#2 Damian"
+    },
+    {
+     "car": 7,
+     "name": "#8 Stepino81"
+    },
+    {
+     "car": 12,
+     "name": "#24 rubengggarcia"
+    },
+    {
+     "car": 17,
+     "name": "Hidden #2 (Aston Martin '26)"
+    },
+    {
+     "car": 6,
+     "name": "Hidden #21 (Audi '26)"
+    },
+    {
+     "car": 3,
+     "name": "#13 Jakubm18_F1"
+    }
+   ],
+   "track": "Catalunya",
+   "date": "2026-10-30",
+   "recording": "2026-10-30_16-30-46_Catalunya_Race.gmtel.gz",
+   "t": 12.1,
+   "race_file": ""
+  },
+  "b3-08": {
+   "verdict": "#8 Stepino81 at fault",
+   "by": "GreMi",
+   "real": true,
+   "at_fault": [
+    "#8 Stepino81"
+   ],
+   "severity": 6,
+   "note": "Your decision is wrong. Stepino runs into him, car 21 is as far to the side of the track as he can and stepino still runs into him.",
+   "drivers": [
+    {
+     "car": 7,
+     "name": "#8 Stepino81"
+    },
+    {
+     "car": 11,
+     "name": "Hidden #21 (Ferrari '26)"
+    }
+   ],
+   "track": "Catalunya",
+   "date": "2026-10-30",
+   "recording": "2026-10-30_16-30-46_Catalunya_Race.gmtel.gz",
+   "t": 35.8,
+   "race_file": ""
+  },
+  "b3-09": {
+   "verdict": "#8 Stepino81 + #99 niketys2 at fault",
+   "by": "GreMi",
+   "real": true,
+   "at_fault": [
+    "#8 Stepino81",
+    "#99 niketys2"
+   ],
+   "severity": 6,
+   "note": "They both are not trying to avoid hitting each other, there for both at fault.",
+   "drivers": [
+    {
+     "car": 4,
+     "name": "#99 niketys2"
+    },
+    {
+     "car": 7,
+     "name": "#8 Stepino81"
+    }
+   ],
+   "track": "Catalunya",
+   "date": "2026-10-30",
+   "recording": "2026-10-30_16-30-46_Catalunya_Race.gmtel.gz",
+   "t": 249.4,
+   "race_file": ""
+  },
+  "b3-10": {
+   "verdict": "#56 frostopsss at fault",
+   "by": "GreMi",
+   "real": true,
+   "at_fault": [
+    "#56 frostopsss"
+   ],
+   "severity": 6,
+   "note": "Lars does get back on track after driving off a little bit, but leaves enough space for car 56. Car 56 goes too fast and too wide so they collide",
+   "drivers": [
+    {
+     "car": 12,
+     "name": "#56 frostopsss"
+    },
+    {
+     "car": 13,
+     "name": "#8 niet_Lars123"
+    },
+    {
+     "car": 10,
+     "name": "Hidden #2 (Mercedes '26)"
+    },
+    {
+     "car": 5,
+     "name": "Hidden #21 (Audi '26)"
+    },
+    {
+     "car": 6,
+     "name": "#8 Stepino81"
+    },
+    {
+     "car": 16,
+     "name": "Hidden #2 (Racing Bulls '26)"
+    }
+   ],
+   "track": "Imola",
+   "date": "2026-10-30",
+   "recording": "2026-10-30_16-46-43_Imola_Race.gmtel.gz",
+   "t": 17.1,
+   "race_file": ""
+  },
+  "b3-11": {
+   "verdict": "Hidden #21 (Ferrari '26) at fault",
+   "by": "GreMi",
+   "real": true,
+   "at_fault": [
+    "Hidden #21 (Ferrari '26)"
+   ],
+   "severity": 6,
+   "note": "",
+   "drivers": [
+    {
+     "car": 9,
+     "name": "Hidden #21 (Ferrari '26)"
+    },
+    {
+     "car": 14,
+     "name": "Hidden #28 (Ferrari '26)"
+    },
+    {
+     "car": 8,
+     "name": "Hidden #99 (Audi '26)"
+    }
+   ],
+   "track": "Imola",
+   "date": "2026-10-30",
+   "recording": "2026-10-30_16-46-43_Imola_Race.gmtel.gz",
+   "t": 63.3,
+   "race_file": ""
+  },
+  "b3-12": {
+   "verdict": "Hidden #2 (Racing Bulls '26) at fault",
+   "by": "GreMi",
+   "real": true,
+   "at_fault": [
+    "Hidden #2 (Racing Bulls '26)"
+   ],
+   "severity": 9,
+   "note": "This incident is chained togheter waay too long, i think the max length of an incident should be like 15 sec. Also a max of 6 drivers, if you think there are more involved, try to split it up cause this was impossible to follow. Car 2 in RB was atfault at the begining going into turn 1",
+   "drivers": [
+    {
+     "car": 9,
+     "name": "Hidden #21 (Ferrari '26)"
+    },
+    {
+     "car": 10,
+     "name": "Hidden #2 (Mercedes '26)"
+    },
+    {
+     "car": 16,
+     "name": "Hidden #2 (Racing Bulls '26)"
+    },
+    {
+     "car": 6,
+     "name": "#8 Stepino81"
+    },
+    {
+     "car": 15,
+     "name": "Hidden #19 (Haas '26)"
+    },
+    {
+     "car": 12,
+     "name": "#56 frostopsss"
+    },
+    {
+     "car": 2,
+     "name": "#13 Jakubm18_F1"
+    },
+    {
+     "car": 0,
+     "name": "#3 TTV/GreMi_Gaming"
+    },
+    {
+     "car": 13,
+     "name": "#8 niet_Lars123"
+    }
+   ],
+   "track": "Imola",
+   "date": "2026-10-30",
+   "recording": "2026-10-30_16-46-43_Imola_Race.gmtel.gz",
+   "t": 111.1,
+   "race_file": ""
+  }
+ }
+}

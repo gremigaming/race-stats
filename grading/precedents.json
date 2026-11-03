@@ -1,0 +1,3172 @@
+{
+ "precedents": {
+  "1102b-1": {
+   "key": "10a38cf3da5b",
+   "by": "GreMi",
+   "track": "Brazil",
+   "date": "2026-11-02",
+   "verdict": "Not an incident",
+   "severity": 0,
+   "note": "",
+   "recording": "2026-11-02_19-14-53_Brazil_Race.gmtel.gz",
+   "t": 37.6,
+   "cars": [
+    1,
+    9
+   ],
+   "rulebook": {
+    "verdict": "Not an incident",
+    "rule": "R1"
+   },
+   "contacts": [
+    {
+     "a": 1,
+     "b": 9,
+     "t": 37.6,
+     "x": {
+      "gap": 6.7,
+      "closing": 19,
+      "moved_front": 2.49,
+      "moved_back": -0.46,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 6,
+      "lost": 0,
+      "off": 1,
+      "cars": 2,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "no",
+     "rulebook": "no",
+     "rule": "R1"
+    }
+   ]
+  },
+  "1102b-2": {
+   "key": "ead13f98d357",
+   "by": "GreMi",
+   "track": "Brazil",
+   "date": "2026-11-02",
+   "verdict": "#20 ERC | Samy #13 at fault",
+   "severity": 7,
+   "note": "Bananensaus is not involved in the incident., it should end after turbodruif crashes, the crash later where bananensaus crashes is another incident with car 45",
+   "recording": "2026-11-02_19-14-53_Brazil_Race.gmtel.gz",
+   "t": 88.9,
+   "cars": [
+    2,
+    5,
+    7
+   ],
+   "rulebook": {
+    "verdict": "7 + 5 at fault",
+    "rule": "R8"
+   },
+   "contacts": [
+    {
+     "a": 7,
+     "b": 2,
+     "t": 88.9,
+     "x": {
+      "gap": 0.3,
+      "closing": -18,
+      "moved_front": 3.26,
+      "moved_back": -0.7,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 63,
+      "lost": 6,
+      "off": 1,
+      "cars": 3,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "front",
+     "rulebook": "front",
+     "rule": "R2"
+    },
+    {
+     "a": 7,
+     "b": 5,
+     "t": 97.3,
+     "x": {
+      "gap": 8.5,
+      "closing": 35,
+      "moved_front": -6.0,
+      "moved_back": 6.0,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 93,
+      "lost": 0,
+      "off": 0,
+      "cars": 3,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "front",
+     "rulebook": "back",
+     "rule": "R3"
+    }
+   ]
+  },
+  "1102b-3": {
+   "key": "47583e4774d2",
+   "by": "GreMi",
+   "track": "Abu Dhabi",
+   "date": "2026-11-02",
+   "verdict": "Not an incident",
+   "severity": 0,
+   "note": "It is mostly just driving contact, but flash does turn in too early, it went fine but if that resulted in a crash it would have been his fault.",
+   "recording": "2026-11-02_20-21-25_Abu_Dhabi_Race.gmtel.gz",
+   "t": 84.6,
+   "cars": [
+    7,
+    8,
+    9
+   ],
+   "rulebook": {
+    "verdict": "7 + 8 at fault",
+    "rule": "R8"
+   },
+   "contacts": [
+    {
+     "a": 8,
+     "b": 7,
+     "t": 84.6,
+     "x": {
+      "gap": 2.7,
+      "closing": 5,
+      "moved_front": 3.41,
+      "moved_back": -0.19,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 6,
+      "lost": 1,
+      "off": 0,
+      "cars": 3,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "no",
+     "rulebook": "front",
+     "rule": "R2"
+    },
+    {
+     "a": 7,
+     "b": 9,
+     "t": 85.6,
+     "x": {
+      "gap": 13.8,
+      "closing": 41,
+      "moved_front": 0.0,
+      "moved_back": 0.0,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 6,
+      "lost": 1,
+      "off": 0,
+      "cars": 3,
+      "reaction": 0.0,
+      "aftermath": 1.0
+     },
+     "label": "no",
+     "rulebook": "none",
+     "rule": "R7"
+    },
+    {
+     "a": 7,
+     "b": 8,
+     "t": 89.6,
+     "x": {
+      "gap": 4.0,
+      "closing": 16,
+      "moved_front": 2.69,
+      "moved_back": 0.7,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 6,
+      "lost": 1,
+      "off": 0,
+      "cars": 3,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "no",
+     "rulebook": "back",
+     "rule": "R3"
+    }
+   ]
+  },
+  "1102b-4": {
+   "key": "9080617ddfa9",
+   "by": "GreMi",
+   "track": "Las Vegas",
+   "date": "2026-11-02",
+   "verdict": "#38 Ugzz98 at fault",
+   "severity": 5,
+   "note": "This is indeed a difficult one, cause it is not really ugzz causing a collision, but it is him losing control of his car, resulting in the crash.",
+   "recording": "2026-11-02_19-47-01_Las_Vegas_Race.gmtel.gz",
+   "t": 129.6,
+   "cars": [
+    8,
+    13,
+    14
+   ],
+   "rulebook": {
+    "verdict": "Not an incident",
+    "rule": "R1"
+   },
+   "contacts": [
+    {
+     "a": 14,
+     "b": 8,
+     "t": 129.6,
+     "x": {
+      "gap": 9.8,
+      "closing": 24,
+      "moved_front": 2.13,
+      "moved_back": 0.86,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 12,
+      "lost": 0,
+      "off": 0,
+      "cars": 3,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "front",
+     "rulebook": "no",
+     "rule": "R1"
+    },
+    {
+     "a": 14,
+     "b": 13,
+     "t": 130.0,
+     "x": {
+      "gap": 8.8,
+      "closing": 26,
+      "moved_front": -0.36,
+      "moved_back": -2.64,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 120,
+      "lost": 2,
+      "off": 0,
+      "cars": 3,
+      "reaction": 0.0,
+      "aftermath": 1.0
+     },
+     "label": "none",
+     "rulebook": "none",
+     "rule": "R7"
+    }
+   ]
+  },
+  "1102b-5": {
+   "key": "f3f1a11f2cc3",
+   "by": "GreMi",
+   "track": "Las Vegas",
+   "date": "2026-11-02",
+   "verdict": "#2 Alexowitsh77 at fault",
+   "severity": 6,
+   "note": "Alexowitsh just sends it in too fast, hitting stepino. almost causing a crash, this is reckless driving",
+   "recording": "2026-11-02_19-47-01_Las_Vegas_Race.gmtel.gz",
+   "t": 237.2,
+   "cars": [
+    0,
+    7,
+    16
+   ],
+   "rulebook": {
+    "verdict": "Not an incident",
+    "rule": "R1"
+   },
+   "contacts": [
+    {
+     "a": 16,
+     "b": 7,
+     "t": 237.2,
+     "x": {
+      "gap": 1.1,
+      "closing": -7,
+      "moved_front": -0.98,
+      "moved_back": 2.38,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 9,
+      "lost": 0,
+      "off": 0,
+      "cars": 3,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "front",
+     "rulebook": "no",
+     "rule": "R1"
+    }
+   ]
+  },
+  "b1-01": {
+   "key": "207b0529f979",
+   "by": "GreMi",
+   "track": "Melbourne",
+   "date": "2026-10-20",
+   "verdict": "Stepino81 at fault",
+   "severity": 4,
+   "note": "It is a pretty good call, the only thing i wanna see it when i watch this is see that they touch the next corner agian, when the Redbull car almost spins, why do i not see a collision. That should be 1 incident btw. Because it was part of one battle and they never returned to normal racing lines.",
+   "recording": "2026-10-20_18-47-34_Melbourne_Race.gmtel.gz",
+   "t": 391.0,
+   "cars": [
+    1,
+    2
+   ],
+   "rulebook": {
+    "verdict": "Racing incident",
+    "rule": "R2"
+   },
+   "contacts": [
+    {
+     "a": 2,
+     "b": 1,
+     "t": 391.8,
+     "x": {
+      "gap": 3.6,
+      "closing": 9,
+      "moved_front": 0.72,
+      "moved_back": 0.38,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 23,
+      "lost": 1,
+      "off": 0,
+      "cars": 2,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "front",
+     "rulebook": "none",
+     "rule": "R2"
+    }
+   ]
+  },
+  "b1-02": {
+   "key": "e25edaf55641",
+   "by": "GreMi",
+   "track": "Madrid",
+   "date": "2026-10-20",
+   "verdict": "Not an incident",
+   "severity": 0,
+   "note": "This is just a tapp, not an incident or collision, I do only see the driver number, I am watching the incident between car 53 and 99, i might be watching the wrong incident, but i dont think so.",
+   "recording": "2026-10-20_19-07-08_Madrid_Race.gmtel.gz",
+   "t": 93.0,
+   "cars": [
+    6,
+    7
+   ],
+   "rulebook": {
+    "verdict": "Not an incident",
+    "rule": "R1"
+   },
+   "contacts": [
+    {
+     "a": 6,
+     "b": 7,
+     "t": 93.4,
+     "x": {
+      "gap": 5.8,
+      "closing": 15,
+      "moved_front": 4.82,
+      "moved_back": -3.93,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 1,
+      "lost": 0,
+      "off": 0,
+      "cars": 2,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "no",
+     "rulebook": "no",
+     "rule": "R1"
+    }
+   ]
+  },
+  "b1-03": {
+   "key": "9e7fbc43b819",
+   "by": "GreMi",
+   "track": "Baku",
+   "date": "2026-10-20",
+   "verdict": "niketys2 at fault",
+   "severity": 7,
+   "note": "Okey this is an interessting one, it will taka a bit longer to explain. Let me start that this is a great example of a multi corner incident. At first i wanna say that Car 83 should also be part of the incident, even tho no one collided with them, Stepino had to change his line because of him. If yo",
+   "recording": "2026-10-20_19-45-13_Baku_Race.gmtel.gz",
+   "t": 345.0,
+   "cars": [
+    2,
+    3,
+    5
+   ],
+   "rulebook": {
+    "verdict": "2 at fault",
+    "rule": "R2"
+   },
+   "contacts": [
+    {
+     "a": 2,
+     "b": 3,
+     "t": 340.4,
+     "x": {
+      "gap": 1.3,
+      "closing": 20,
+      "moved_front": 3.1,
+      "moved_back": -1.75,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 61,
+      "lost": 1,
+      "off": 0,
+      "cars": 3,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "none",
+     "rulebook": "front",
+     "rule": "R2"
+    },
+    {
+     "a": 2,
+     "b": 5,
+     "t": 345.4,
+     "x": {
+      "gap": 0.7,
+      "closing": 14,
+      "moved_front": 2.61,
+      "moved_back": -1.09,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 61,
+      "lost": 1,
+      "off": 0,
+      "cars": 3,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "back",
+     "rulebook": "front",
+     "rule": "R2"
+    }
+   ]
+  },
+  "b1-04": {
+   "key": "0e487605ec89",
+   "by": "GreMi",
+   "track": "Mexico",
+   "date": "2026-10-20",
+   "verdict": "Racing incident",
+   "severity": 3,
+   "note": "Racing incident but i do think aloxowitsh triggers it, and gremi is a bit too eager their. Cause Alexo goes off his racing line a little bit on the right hand corner, a gap opens up, gremi goes for it but doesnt have enough speed. It looks like alexo is about to run into stepino and want to pass to ",
+   "recording": "2026-10-20_20-05-21_Mexico_Race.gmtel.gz",
+   "t": 391.0,
+   "cars": [
+    0,
+    1,
+    2
+   ],
+   "rulebook": {
+    "verdict": "1 at fault",
+    "rule": "R2"
+   },
+   "contacts": [
+    {
+     "a": 2,
+     "b": 1,
+     "t": 387.8,
+     "x": {
+      "gap": 3.6,
+      "closing": 21,
+      "moved_front": 0.04,
+      "moved_back": 0.38,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 19,
+      "lost": 0,
+      "off": 0,
+      "cars": 3,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "none",
+     "rulebook": "no",
+     "rule": "R1"
+    },
+    {
+     "a": 0,
+     "b": 1,
+     "t": 391.9,
+     "x": {
+      "gap": 3.8,
+      "closing": 3,
+      "moved_front": 4.37,
+      "moved_back": -3.43,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 19,
+      "lost": 0,
+      "off": 0,
+      "cars": 3,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "none",
+     "rulebook": "front",
+     "rule": "R2"
+    }
+   ]
+  },
+  "b1-05": {
+   "key": "6017de7bf428",
+   "by": "GreMi",
+   "track": "Abu Dhabi",
+   "date": "2026-10-20",
+   "verdict": "Hidden #15 (Polish, PlayStation) at fault",
+   "severity": 2,
+   "note": "This is only a small incident, the reason i still say it should be counted as an incident is cause DDRK does a nice move is full along side and even overtakes car 15. Until they collide car 15 keeps going more towards DDRK even when he is clearly there. DDRK should have been more carefull but if thi",
+   "recording": "2026-10-20_20-21-09_Abu_Dhabi_Race.gmtel.gz",
+   "t": 107.0,
+   "cars": [
+    6,
+    7
+   ],
+   "rulebook": {
+    "verdict": "6 at fault",
+    "rule": "R2"
+   },
+   "contacts": [
+    {
+     "a": 7,
+     "b": 6,
+     "t": 108.0,
+     "x": {
+      "gap": 1.0,
+      "closing": -16,
+      "moved_front": -0.4,
+      "moved_back": 1.71,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 3,
+      "lost": 2,
+      "off": 0,
+      "cars": 2,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "back",
+     "rulebook": "back",
+     "rule": "R2"
+    }
+   ]
+  },
+  "b1-06": {
+   "key": "ea213f35e8d6",
+   "by": "GreMi",
+   "track": "Monaco",
+   "date": "2026-10-23",
+   "verdict": "Hidden #2 (Czech, PlayStation) at fault",
+   "severity": 6,
+   "note": "I dont really know what happend here, You said i was involved, but i was nowhere near this incident. The way i see it is car 34 hits car 8 first, which is just a tap, then car 2 in the RB hits car 34 trying to still fit in and spins himself. Im not sure if car 86 also collide with car 2 RB. You need",
+   "recording": "2026-10-23_19-54-17_Monaco_Race.gmtel.gz",
+   "t": 58.0,
+   "cars": [
+    6,
+    7
+   ],
+   "rulebook": {
+    "verdict": "6 at fault",
+    "rule": "R3"
+   },
+   "contacts": [
+    {
+     "a": 7,
+     "b": 6,
+     "t": 52.8,
+     "x": {
+      "gap": 8.6,
+      "closing": 21,
+      "moved_front": 0.0,
+      "moved_back": 0.0,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 14,
+      "lost": 1,
+      "off": 0,
+      "cars": 2,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "front",
+     "rulebook": "back",
+     "rule": "R3"
+    }
+   ]
+  },
+  "b1-07": {
+   "key": "e31e618cebba",
+   "by": "GreMi",
+   "track": "Jeddah",
+   "date": "2026-10-23",
+   "verdict": "Not an incident",
+   "severity": 0,
+   "note": "First i wanna say, The Redbull car number 2 is not an AI here, he is called lucas_ostepoppen. Car 77 is an AI BOTTAS. Collisions with them dont count. I do see that the race viewer labels this as a 10 car incident, which is not true, so maybe we need to confire a little bit more when you should coun",
+   "recording": "2026-10-23_21-00-10_Jeddah_Race.gmtel.gz",
+   "t": 7.0,
+   "cars": [
+    8,
+    12,
+    14
+   ],
+   "rulebook": {
+    "verdict": "Not counted (AI)",
+    "rule": "R6"
+   },
+   "contacts": []
+  },
+  "b1-08": {
+   "key": "e49093a2e066",
+   "by": "GreMi",
+   "track": "Imola",
+   "date": "2026-10-25",
+   "verdict": "NEX at fault",
+   "severity": 2,
+   "note": "",
+   "recording": "2026-10-25_15-12-35_Imola_Race.gmtel.gz",
+   "t": 176.0,
+   "cars": [
+    7,
+    10
+   ],
+   "rulebook": {
+    "verdict": "Not an incident",
+    "rule": "R1"
+   },
+   "contacts": [
+    {
+     "a": 7,
+     "b": 10,
+     "t": 176.4,
+     "x": {
+      "gap": 7.8,
+      "closing": 31,
+      "moved_front": 0.02,
+      "moved_back": -0.86,
+      "rejoin_front": 1.0,
+      "rejoin_back": 0.0,
+      "slide": 3,
+      "lost": 0,
+      "off": 1,
+      "cars": 2,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "back",
+     "rulebook": "no",
+     "rule": "R1"
+    }
+   ]
+  },
+  "b1-09": {
+   "key": "8c63f3cd1d0d",
+   "by": "GreMi",
+   "track": "Spa",
+   "date": "2026-10-25",
+   "verdict": "Not an incident",
+   "severity": 0,
+   "note": "",
+   "recording": "2026-10-25_15-42-41_Spa_Race.gmtel.gz",
+   "t": 402.0,
+   "cars": [
+    0,
+    9
+   ],
+   "rulebook": {
+    "verdict": "Racing incident",
+    "rule": "R2"
+   },
+   "contacts": [
+    {
+     "a": 0,
+     "b": 9,
+     "t": 402.7,
+     "x": {
+      "gap": 0.8,
+      "closing": -5,
+      "moved_front": 0.0,
+      "moved_back": 0.26,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 3,
+      "lost": 1,
+      "off": 0,
+      "cars": 2,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "no",
+     "rulebook": "none",
+     "rule": "R2"
+    }
+   ]
+  },
+  "b1-10": {
+   "key": "b85053cdc857",
+   "by": "GreMi",
+   "track": "Catalunya",
+   "date": "2026-10-25",
+   "verdict": "Overfast-_ at fault",
+   "severity": 6,
+   "note": "Again i dont know where you see car 11, there is not even a car 11 in this race. But the incident im looking at is betweern cars 53, 54, and 86 (I dont see overfast his name but i think he is number 86). Car 86 is at fault here for hitting the mercedes 54 on the rear, which causes Car 54 to hit car ",
+   "recording": "2026-10-25_15-59-16_Catalunya_Race.gmtel.gz",
+   "t": 7.0,
+   "cars": [
+    10,
+    11,
+    12
+   ],
+   "rulebook": {
+    "verdict": "Not an incident",
+    "rule": "R1"
+   },
+   "contacts": [
+    {
+     "a": 12,
+     "b": 10,
+     "t": 7.2,
+     "x": {
+      "gap": 4.1,
+      "closing": 7,
+      "moved_front": 0.01,
+      "moved_back": 0.91,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 8,
+      "lost": 0,
+      "off": 1,
+      "cars": 3,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "back",
+     "rulebook": "no",
+     "rule": "R1"
+    },
+    {
+     "a": 12,
+     "b": 11,
+     "t": 7.9,
+     "x": {
+      "gap": 2.2,
+      "closing": 5,
+      "moved_front": -0.46,
+      "moved_back": 2.14,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 8,
+      "lost": 1,
+      "off": 0,
+      "cars": 3,
+      "reaction": 0.0,
+      "aftermath": 1.0
+     },
+     "label": "none",
+     "rulebook": "none",
+     "rule": "R7"
+    }
+   ]
+  },
+  "b1-11": {
+   "key": "1d00d7f9c17b",
+   "by": "GreMi",
+   "track": "Sakhir",
+   "date": "2026-10-25",
+   "verdict": "DevilDriver2396 at fault",
+   "severity": 3,
+   "note": "Devildriver goes around the outside, it is not an inside dive. This should probably not be a penalty but devildriver does push the limit here and could have left a bit more space.",
+   "recording": "2026-10-25_16-12-29_Bahrain_Race.gmtel.gz",
+   "t": 209.0,
+   "cars": [
+    1,
+    4
+   ],
+   "rulebook": {
+    "verdict": "1 at fault",
+    "rule": "R2"
+   },
+   "contacts": [
+    {
+     "a": 1,
+     "b": 4,
+     "t": 209.4,
+     "x": {
+      "gap": 0.6,
+      "closing": 16,
+      "moved_front": -0.23,
+      "moved_back": 2.25,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 5,
+      "lost": 1,
+      "off": 0,
+      "cars": 2,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "back",
+     "rulebook": "back",
+     "rule": "R2"
+    }
+   ]
+  },
+  "b1-12": {
+   "key": "c27d4013b76e",
+   "by": "GreMi",
+   "track": "Jeddah",
+   "date": "2026-10-25",
+   "verdict": "Not an incident",
+   "severity": 0,
+   "note": "car 93 is not an AI, his name is javarionx. But this was just a little tap.",
+   "recording": "2026-10-25_16-27-27_Jeddah_Race.gmtel.gz",
+   "t": 270.0,
+   "cars": [
+    1,
+    5
+   ],
+   "rulebook": {
+    "verdict": "5 at fault",
+    "rule": "R2"
+   },
+   "contacts": [
+    {
+     "a": 5,
+     "b": 1,
+     "t": 270.0,
+     "x": {
+      "gap": 0.6,
+      "closing": 31,
+      "moved_front": 1.6,
+      "moved_back": 0.0,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 18,
+      "lost": 2,
+      "off": 0,
+      "cars": 2,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "no",
+     "rulebook": "front",
+     "rule": "R2"
+    }
+   ]
+  },
+  "b1-13": {
+   "key": "2497428539e9",
+   "by": "GreMi",
+   "track": "Shanghai",
+   "date": "2026-10-25",
+   "verdict": "Racing incident",
+   "severity": 5,
+   "note": "This is indeed a chain collision, I do just wanna point out that there is again no car 17. Let me tell you what happend. Car 2 ferrari hits Car 2 Audi, which makes him spin, and then chaos unfolds, Car 2 ferrari does start it but it looks like a small brake error and a huge incident. no one is fully",
+   "recording": "2026-10-25_16-42-14_Shanghai_Race.gmtel.gz",
+   "t": 54.0,
+   "cars": [
+    3,
+    11,
+    21
+   ],
+   "rulebook": {
+    "verdict": "3 at fault",
+    "rule": "R3"
+   },
+   "contacts": [
+    {
+     "a": 3,
+     "b": 21,
+     "t": 45.5,
+     "x": {
+      "gap": 5.2,
+      "closing": 10,
+      "moved_front": 6.0,
+      "moved_back": -4.71,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 57,
+      "lost": 4,
+      "off": 2,
+      "cars": 3,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "none",
+     "rulebook": "back",
+     "rule": "R3"
+    }
+   ]
+  },
+  "b1-14": {
+   "key": "fe52cf4be971",
+   "by": "GreMi",
+   "track": "Brazil",
+   "date": "2026-10-25",
+   "verdict": "Not an incident",
+   "severity": 0,
+   "note": "",
+   "recording": "2026-10-25_16-57-26_Brazil_Race.gmtel.gz",
+   "t": 234.0,
+   "cars": [
+    7,
+    11
+   ],
+   "rulebook": {
+    "verdict": "Not an incident",
+    "rule": "R1"
+   },
+   "contacts": [
+    {
+     "a": 11,
+     "b": 7,
+     "t": 234.2,
+     "x": {
+      "gap": 5.1,
+      "closing": 20,
+      "moved_front": 3.11,
+      "moved_back": -1.99,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 3,
+      "lost": 0,
+      "off": 0,
+      "cars": 2,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "no",
+     "rulebook": "no",
+     "rule": "R1"
+    }
+   ]
+  },
+  "b1-15": {
+   "key": "f4298cf0e8e5",
+   "by": "GreMi",
+   "track": "Mexico",
+   "date": "2026-10-28",
+   "verdict": "DevilDriver2396 at fault",
+   "severity": 3,
+   "note": "I do think ethan could have left a little more room. But devil was wrong here.",
+   "recording": "2026-10-28_19-14-35_Mexico_Race.gmtel.gz",
+   "t": 111.0,
+   "cars": [
+    2,
+    4
+   ],
+   "rulebook": {
+    "verdict": "Racing incident",
+    "rule": "R2"
+   },
+   "contacts": [
+    {
+     "a": 2,
+     "b": 4,
+     "t": 111.9,
+     "x": {
+      "gap": 2.0,
+      "closing": -10,
+      "moved_front": 0.75,
+      "moved_back": 0.72,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 10,
+      "lost": 1,
+      "off": 2,
+      "cars": 2,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "back",
+     "rulebook": "none",
+     "rule": "R2"
+    }
+   ]
+  },
+  "b1-16": {
+   "key": "175d7979929e",
+   "by": "GreMi",
+   "track": "Losail",
+   "date": "2026-10-28",
+   "verdict": "EthanMoonski at fault",
+   "severity": 3,
+   "note": "",
+   "recording": "2026-10-28_19-31-38_Losail_Race.gmtel.gz",
+   "t": 199.0,
+   "cars": [
+    3,
+    5
+   ],
+   "rulebook": {
+    "verdict": "Not an incident",
+    "rule": "R1"
+   },
+   "contacts": [
+    {
+     "a": 3,
+     "b": 5,
+     "t": 199.8,
+     "x": {
+      "gap": 8.6,
+      "closing": 25,
+      "moved_front": -0.63,
+      "moved_back": 0.19,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 3,
+      "lost": 0,
+      "off": 0,
+      "cars": 2,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "back",
+     "rulebook": "no",
+     "rule": "R1"
+    }
+   ]
+  },
+  "b1-17": {
+   "key": "06c6abeffd74",
+   "by": "GreMi",
+   "track": "Singapore",
+   "date": "2026-10-28",
+   "verdict": "Not an incident",
+   "severity": 0,
+   "note": "",
+   "recording": "2026-10-28_19-47-35_Singapore_Race.gmtel.gz",
+   "t": 58.0,
+   "cars": [
+    1,
+    2
+   ],
+   "rulebook": {
+    "verdict": "Not an incident",
+    "rule": "R1"
+   },
+   "contacts": [
+    {
+     "a": 2,
+     "b": 1,
+     "t": 58.9,
+     "x": {
+      "gap": 2.3,
+      "closing": 15,
+      "moved_front": 2.27,
+      "moved_back": -1.24,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 4,
+      "lost": 0,
+      "off": 0,
+      "cars": 2,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "no",
+     "rulebook": "no",
+     "rule": "R1"
+    }
+   ]
+  },
+  "b1-18": {
+   "key": "abd6dc77b121",
+   "by": "GreMi",
+   "track": "Monza",
+   "date": "2026-10-28",
+   "verdict": "Not an incident",
+   "severity": 0,
+   "note": "I do need to say alot happend there including dabbinman spinning, which is his own fault.",
+   "recording": "2026-10-28_20-06-08_Monza_Race.gmtel.gz",
+   "t": 118.0,
+   "cars": [
+    2,
+    7,
+    9,
+    10
+   ],
+   "rulebook": {
+    "verdict": "Not an incident",
+    "rule": "R1"
+   },
+   "contacts": [
+    {
+     "a": 10,
+     "b": 7,
+     "t": 117.6,
+     "x": {
+      "gap": 9.3,
+      "closing": 44,
+      "moved_front": 1.0,
+      "moved_back": 4.15,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 7,
+      "lost": 0,
+      "off": 0,
+      "cars": 4,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "no",
+     "rulebook": "no",
+     "rule": "R1"
+    },
+    {
+     "a": 7,
+     "b": 9,
+     "t": 118.5,
+     "x": {
+      "gap": 4.1,
+      "closing": 15,
+      "moved_front": 0.88,
+      "moved_back": -0.05,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 7,
+      "lost": 0,
+      "off": 1,
+      "cars": 4,
+      "reaction": 0.0,
+      "aftermath": 1.0
+     },
+     "label": "no",
+     "rulebook": "none",
+     "rule": "R7"
+    }
+   ]
+  },
+  "b1-19": {
+   "key": "66c8a42bacf4",
+   "by": "GreMi",
+   "track": "Montreal",
+   "date": "2026-10-28",
+   "verdict": "Typr3k at fault",
+   "severity": 4,
+   "note": "",
+   "recording": "2026-10-28_20-22-05_Montreal_Race.gmtel.gz",
+   "t": 126.0,
+   "cars": [
+    1,
+    2,
+    5
+   ],
+   "rulebook": {
+    "verdict": "1 at fault",
+    "rule": "R3"
+   },
+   "contacts": [
+    {
+     "a": 1,
+     "b": 2,
+     "t": 126.8,
+     "x": {
+      "gap": 13.4,
+      "closing": 60.0,
+      "moved_front": 3.15,
+      "moved_back": -1.19,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 5,
+      "lost": 1,
+      "off": 0,
+      "cars": 3,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "back",
+     "rulebook": "back",
+     "rule": "R3"
+    },
+    {
+     "a": 2,
+     "b": 5,
+     "t": 127.8,
+     "x": {
+      "gap": 7.6,
+      "closing": -18,
+      "moved_front": -6.0,
+      "moved_back": 6.0,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 5,
+      "lost": 0,
+      "off": 0,
+      "cars": 3,
+      "reaction": 0.0,
+      "aftermath": 1.0
+     },
+     "label": "none",
+     "rulebook": "none",
+     "rule": "R7"
+    }
+   ]
+  },
+  "b1-20": {
+   "key": "a22d6b941045",
+   "by": "GreMi",
+   "track": "Suzuka",
+   "date": "2026-10-28",
+   "verdict": "TTV/GreMi_Gaming at fault",
+   "severity": 4,
+   "note": "There was a really big incident before why gremi rejoins weird, but it was an unsafe rejoin.",
+   "recording": "2026-10-28_20-40-25_Suzuka_Race.gmtel.gz",
+   "t": 183.0,
+   "cars": [
+    0,
+    1,
+    2,
+    6,
+    8,
+    10
+   ],
+   "rulebook": {
+    "verdict": "Racing incident",
+    "rule": "R2"
+   },
+   "contacts": [
+    {
+     "a": 2,
+     "b": 0,
+     "t": 172.6,
+     "x": {
+      "gap": 3.0,
+      "closing": 15,
+      "moved_front": 0.0,
+      "moved_back": 0.0,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 64,
+      "lost": 3,
+      "off": 2,
+      "cars": 6,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "front",
+     "rulebook": "none",
+     "rule": "R2"
+    },
+    {
+     "a": 0,
+     "b": 10,
+     "t": 172.7,
+     "x": {
+      "gap": 2.5,
+      "closing": 24,
+      "moved_front": 0.0,
+      "moved_back": 0.0,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 64,
+      "lost": 3,
+      "off": 2,
+      "cars": 6,
+      "reaction": 0.0,
+      "aftermath": 1.0
+     },
+     "label": "back",
+     "rulebook": "none",
+     "rule": "R7"
+    }
+   ]
+  },
+  "b2-01": {
+   "key": "dea5affb362a",
+   "by": "GreMi",
+   "track": "Monza",
+   "date": "2026-10-28",
+   "verdict": "Racing incident",
+   "severity": 8,
+   "note": "I spun by hitting the grass, so you could argue that is was at fault, but this shouldnt get me a massive amount of penalty points because it was just a mistake. Fajeckaaa just drives his normal line, i would ay he didnt try to avoid it at all but this is not on him, then ddrk and car 32 are just par",
+   "recording": "2026-10-28_20-06-08_Monza_Race.gmtel.gz",
+   "t": 161.0,
+   "cars": [
+    0,
+    7,
+    9,
+    10
+   ],
+   "rulebook": {
+    "verdict": "Racing incident",
+    "rule": "R7"
+   },
+   "contacts": [
+    {
+     "a": 10,
+     "b": 0,
+     "t": 161.7,
+     "x": {
+      "gap": 12.6,
+      "closing": 60.0,
+      "moved_front": 1.97,
+      "moved_back": 1.67,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 53,
+      "lost": 6,
+      "off": 2,
+      "cars": 4,
+      "reaction": 1.0,
+      "aftermath": 0.0
+     },
+     "label": "none",
+     "rulebook": "none",
+     "rule": "R7"
+    },
+    {
+     "a": 10,
+     "b": 7,
+     "t": 162.1,
+     "x": {
+      "gap": 13.7,
+      "closing": 40,
+      "moved_front": 2.23,
+      "moved_back": -0.64,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 53,
+      "lost": 4,
+      "off": 1,
+      "cars": 4,
+      "reaction": 0.0,
+      "aftermath": 1.0
+     },
+     "label": "none",
+     "rulebook": "none",
+     "rule": "R7"
+    },
+    {
+     "a": 7,
+     "b": 9,
+     "t": 163.2,
+     "x": {
+      "gap": 17.4,
+      "closing": 60.0,
+      "moved_front": -0.76,
+      "moved_back": -2.11,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 17,
+      "lost": 0,
+      "off": 0,
+      "cars": 4,
+      "reaction": 0.0,
+      "aftermath": 1.0
+     },
+     "label": "none",
+     "rulebook": "none",
+     "rule": "R7"
+    }
+   ]
+  },
+  "b2-02": {
+   "key": "5a1776de52c2",
+   "by": "GreMi",
+   "track": "Brazil",
+   "date": "2026-10-25",
+   "verdict": "#8 Stepino81 at fault",
+   "severity": 10,
+   "note": "Stepino hitting car 2 ferrari twice on purpouse.",
+   "recording": "2026-10-25_16-57-26_Brazil_Race.gmtel.gz",
+   "t": 194.0,
+   "cars": [
+    2,
+    14
+   ],
+   "rulebook": {
+    "verdict": "2 at fault",
+    "rule": "R9"
+   },
+   "contacts": [
+    {
+     "a": 14,
+     "b": 2,
+     "t": 194.4,
+     "x": {
+      "gap": 7.6,
+      "closing": 60.0,
+      "moved_front": 6.0,
+      "moved_back": 2.26,
+      "rejoin_front": 1.0,
+      "rejoin_back": 0.0,
+      "slide": 97,
+      "lost": 5,
+      "off": 2,
+      "cars": 2,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "front",
+     "rulebook": "front",
+     "rule": "R5"
+    },
+    {
+     "a": 14,
+     "b": 2,
+     "t": 201.3,
+     "x": {
+      "gap": 1.2,
+      "closing": -28,
+      "moved_front": 0.37,
+      "moved_back": 0.0,
+      "rejoin_front": 0.0,
+      "rejoin_back": 1.0,
+      "slide": 97,
+      "lost": 5,
+      "off": 2,
+      "cars": 2,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "back",
+     "rulebook": "back",
+     "rule": "R9"
+    }
+   ]
+  },
+  "b2-03": {
+   "key": "48118c1a38fb",
+   "by": "GreMi",
+   "track": "Texas",
+   "date": "2026-10-28",
+   "verdict": "#50 DevilDriver2396 + Hidden #54 at fault",
+   "severity": 8,
+   "note": "Car 54 and devildriver were both at fault for this. both not a massive mistake, but just reckless driving.",
+   "recording": "2026-10-28_20-57-01_Texas_Race.gmtel.gz",
+   "t": 27.0,
+   "cars": [
+    1,
+    2,
+    4,
+    5,
+    8,
+    9,
+    11
+   ],
+   "rulebook": {
+    "verdict": "8 + 2 at fault",
+    "rule": "R8"
+   },
+   "contacts": [
+    {
+     "a": 2,
+     "b": 8,
+     "t": 27.9,
+     "x": {
+      "gap": 2.3,
+      "closing": -19,
+      "moved_front": 6.0,
+      "moved_back": -3.66,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 111,
+      "lost": 6,
+      "off": 1,
+      "cars": 7,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "both",
+     "rulebook": "front",
+     "rule": "R2"
+    },
+    {
+     "a": 8,
+     "b": 2,
+     "t": 34.4,
+     "x": {
+      "gap": 6.8,
+      "closing": 45,
+      "moved_front": -5.35,
+      "moved_back": -2.37,
+      "rejoin_front": 1.0,
+      "rejoin_back": 0.0,
+      "slide": 111,
+      "lost": 6,
+      "off": 1,
+      "cars": 7,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "both",
+     "rulebook": "front",
+     "rule": "R5"
+    }
+   ]
+  },
+  "b2-04": {
+   "key": "36e1abeafcc5",
+   "by": "GreMi",
+   "track": "Zandvoort",
+   "date": "2026-10-23",
+   "verdict": "#99 niketys2 at fault",
+   "severity": 2,
+   "note": "",
+   "recording": "2026-10-23_20-11-07_Zandvoort_Race.gmtel.gz",
+   "t": 153.0,
+   "cars": [
+    7,
+    11
+   ],
+   "rulebook": {
+    "verdict": "Not an incident",
+    "rule": "R1"
+   },
+   "contacts": [
+    {
+     "a": 7,
+     "b": 11,
+     "t": 153.6,
+     "x": {
+      "gap": 8.6,
+      "closing": 28,
+      "moved_front": -0.29,
+      "moved_back": -0.55,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 4,
+      "lost": 0,
+      "off": 0,
+      "cars": 2,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "back",
+     "rulebook": "no",
+     "rule": "R1"
+    }
+   ]
+  },
+  "b2-05": {
+   "key": "fc7c9c66e8e0",
+   "by": "GreMi",
+   "track": "Montreal",
+   "date": "2026-10-28",
+   "verdict": "Not an incident",
+   "severity": 0,
+   "note": "",
+   "recording": "2026-10-28_20-22-05_Montreal_Race.gmtel.gz",
+   "t": 14.0,
+   "cars": [
+    7,
+    11
+   ],
+   "rulebook": {
+    "verdict": "Not an incident",
+    "rule": "R1"
+   },
+   "contacts": [
+    {
+     "a": 7,
+     "b": 11,
+     "t": 14.7,
+     "x": {
+      "gap": 2.4,
+      "closing": -8,
+      "moved_front": 2.83,
+      "moved_back": -2.31,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 3,
+      "lost": 0,
+      "off": 0,
+      "cars": 2,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "no",
+     "rulebook": "no",
+     "rule": "R1"
+    }
+   ]
+  },
+  "b3-01": {
+   "key": "5282451b4aca",
+   "by": "GreMi",
+   "track": "Miami",
+   "date": "2026-10-30",
+   "verdict": "Not an incident",
+   "severity": 0,
+   "note": "",
+   "recording": "2026-10-30_15-51-13_Miami_Race.gmtel.gz",
+   "t": 293.1,
+   "cars": [
+    7,
+    9
+   ],
+   "rulebook": {
+    "verdict": "Racing incident",
+    "rule": "R7"
+   },
+   "contacts": [
+    {
+     "a": 9,
+     "b": 7,
+     "t": 293.1,
+     "x": {
+      "gap": 4.0,
+      "closing": 13,
+      "moved_front": -0.67,
+      "moved_back": 1.25,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 16,
+      "lost": 1,
+      "off": 2,
+      "cars": 2,
+      "reaction": 1.0,
+      "aftermath": 0.0
+     },
+     "label": "no",
+     "rulebook": "none",
+     "rule": "R7"
+    },
+    {
+     "a": 7,
+     "b": 9,
+     "t": 298.2,
+     "x": {
+      "gap": 4.7,
+      "closing": -11,
+      "moved_front": -5.26,
+      "moved_back": 3.88,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 16,
+      "lost": 1,
+      "off": 2,
+      "cars": 2,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "no",
+     "rulebook": "none",
+     "rule": "R3"
+    }
+   ]
+  },
+  "b3-02": {
+   "key": "71f0902f45e3",
+   "by": "GreMi",
+   "track": "Miami",
+   "date": "2026-10-30",
+   "verdict": "Not an incident",
+   "severity": 0,
+   "note": "",
+   "recording": "2026-10-30_15-51-13_Miami_Race.gmtel.gz",
+   "t": 322.1,
+   "cars": [
+    0,
+    1,
+    2
+   ],
+   "rulebook": {
+    "verdict": "Not an incident",
+    "rule": "R1"
+   },
+   "contacts": [
+    {
+     "a": 2,
+     "b": 1,
+     "t": 322.1,
+     "x": {
+      "gap": 5.6,
+      "closing": 7,
+      "moved_front": 0.0,
+      "moved_back": 0.0,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 6,
+      "lost": 0,
+      "off": 2,
+      "cars": 3,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "no",
+     "rulebook": "no",
+     "rule": "R1"
+    },
+    {
+     "a": 1,
+     "b": 0,
+     "t": 325.6,
+     "x": {
+      "gap": 5.3,
+      "closing": 11,
+      "moved_front": 1.74,
+      "moved_back": -2.93,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 5,
+      "lost": 0,
+      "off": 2,
+      "cars": 3,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "no",
+     "rulebook": "no",
+     "rule": "R1"
+    }
+   ]
+  },
+  "b3-03": {
+   "key": "cf618ece8756",
+   "by": "GreMi",
+   "track": "Miami",
+   "date": "2026-10-30",
+   "verdict": "#13 Jakubm18_F1 at fault",
+   "severity": 7,
+   "note": "",
+   "recording": "2026-10-30_15-51-13_Miami_Race.gmtel.gz",
+   "t": 429.0,
+   "cars": [
+    3,
+    4,
+    6,
+    7
+   ],
+   "rulebook": {
+    "verdict": "7 + 3 at fault",
+    "rule": "R8"
+   },
+   "contacts": [
+    {
+     "a": 7,
+     "b": 4,
+     "t": 420.6,
+     "x": {
+      "gap": 6.9,
+      "closing": 8,
+      "moved_front": 1.88,
+      "moved_back": 0.0,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 16,
+      "lost": 2,
+      "off": 2,
+      "cars": 4,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "front",
+     "rulebook": "back",
+     "rule": "R3"
+    },
+    {
+     "a": 4,
+     "b": 3,
+     "t": 424.1,
+     "x": {
+      "gap": 0.1,
+      "closing": -14,
+      "moved_front": 2.57,
+      "moved_back": -1.1,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 18,
+      "lost": 2,
+      "off": 2,
+      "cars": 4,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "back",
+     "rulebook": "front",
+     "rule": "R2"
+    },
+    {
+     "a": 3,
+     "b": 7,
+     "t": 426.6,
+     "x": {
+      "gap": 1.5,
+      "closing": 12,
+      "moved_front": -3.77,
+      "moved_back": 5.13,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 18,
+      "lost": 0,
+      "off": 2,
+      "cars": 4,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "none",
+     "rulebook": "back",
+     "rule": "R2"
+    }
+   ]
+  },
+  "b3-04": {
+   "key": "abb442b1896a",
+   "by": "GreMi",
+   "track": "Miami",
+   "date": "2026-10-30",
+   "verdict": "Not an incident",
+   "severity": 0,
+   "note": "",
+   "recording": "2026-10-30_15-51-13_Miami_Race.gmtel.gz",
+   "t": 527.8,
+   "cars": [
+    0,
+    10
+   ],
+   "rulebook": {
+    "verdict": "10 at fault",
+    "rule": "R5"
+   },
+   "contacts": [
+    {
+     "a": 0,
+     "b": 10,
+     "t": 527.8,
+     "x": {
+      "gap": 2.1,
+      "closing": -30.0,
+      "moved_front": -4.97,
+      "moved_back": 5.36,
+      "rejoin_front": 0.0,
+      "rejoin_back": 1.0,
+      "slide": 7,
+      "lost": 1,
+      "off": 1,
+      "cars": 2,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "no",
+     "rulebook": "back",
+     "rule": "R5"
+    }
+   ]
+  },
+  "b3-05": {
+   "key": "580afcbd693e",
+   "by": "GreMi",
+   "track": "Baku",
+   "date": "2026-10-30",
+   "verdict": "Not an incident",
+   "severity": 0,
+   "note": "",
+   "recording": "2026-10-30_16-11-10_Baku_Race.gmtel.gz",
+   "t": 9.8,
+   "cars": [
+    7,
+    17
+   ],
+   "rulebook": {
+    "verdict": "7 + 17 at fault",
+    "rule": "R8"
+   },
+   "contacts": [
+    {
+     "a": 7,
+     "b": 17,
+     "t": 9.8,
+     "x": {
+      "gap": 0.2,
+      "closing": 7,
+      "moved_front": 4.28,
+      "moved_back": 2.14,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 11,
+      "lost": 0,
+      "off": 0,
+      "cars": 2,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "no",
+     "rulebook": "both",
+     "rule": "R8"
+    }
+   ]
+  },
+  "b3-06": {
+   "key": "1c5b8e2f9687",
+   "by": "GreMi",
+   "track": "Baku",
+   "date": "2026-10-30",
+   "verdict": "Hidden #99 (Audi '26) at fault",
+   "severity": 6,
+   "note": "This was only an incident between car 99 and jakub",
+   "recording": "2026-10-30_16-11-10_Baku_Race.gmtel.gz",
+   "t": 322.3,
+   "cars": [
+    3,
+    5,
+    10,
+    17
+   ],
+   "rulebook": {
+    "verdict": "17 at fault",
+    "rule": "R3"
+   },
+   "contacts": [
+    {
+     "a": 17,
+     "b": 3,
+     "t": 322.3,
+     "x": {
+      "gap": 13.7,
+      "closing": 56,
+      "moved_front": 5.93,
+      "moved_back": -5.9,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 117,
+      "lost": 6,
+      "off": 0,
+      "cars": 4,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "back",
+     "rulebook": "back",
+     "rule": "R3"
+    },
+    {
+     "a": 5,
+     "b": 17,
+     "t": 332.7,
+     "x": {
+      "gap": 1.8,
+      "closing": 3,
+      "moved_front": -0.79,
+      "moved_back": 3.5,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 72,
+      "lost": 0,
+      "off": 0,
+      "cars": 4,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "back",
+     "rulebook": "back",
+     "rule": "R2"
+    }
+   ]
+  },
+  "b3-07": {
+   "key": "2714d667d8d8",
+   "by": "GreMi",
+   "track": "Catalunya",
+   "date": "2026-10-30",
+   "verdict": "Racing incident",
+   "severity": 7,
+   "note": "NEx told me his wheel disconnected, the input that happens after is probably the ai taking over",
+   "recording": "2026-10-30_16-30-46_Catalunya_Race.gmtel.gz",
+   "t": 12.1,
+   "cars": [
+    2,
+    3,
+    5,
+    6,
+    7,
+    12,
+    15,
+    17
+   ],
+   "rulebook": {
+    "verdict": "Racing incident",
+    "rule": "R2"
+   },
+   "contacts": [
+    {
+     "a": 15,
+     "b": 2,
+     "t": 12.1,
+     "x": {
+      "gap": 3.9,
+      "closing": -9,
+      "moved_front": 1.07,
+      "moved_back": 0.98,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 120,
+      "lost": 6,
+      "off": 1,
+      "cars": 8,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "none",
+     "rulebook": "none",
+     "rule": "R2"
+    },
+    {
+     "a": 2,
+     "b": 5,
+     "t": 12.5,
+     "x": {
+      "gap": 13.1,
+      "closing": 55,
+      "moved_front": -0.83,
+      "moved_back": 0.13,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 120,
+      "lost": 6,
+      "off": 2,
+      "cars": 8,
+      "reaction": 0.0,
+      "aftermath": 1.0
+     },
+     "label": "none",
+     "rulebook": "none",
+     "rule": "R7"
+    }
+   ]
+  },
+  "b3-08": {
+   "key": "f414079c1d2b",
+   "by": "GreMi",
+   "track": "Catalunya",
+   "date": "2026-10-30",
+   "verdict": "#8 Stepino81 at fault",
+   "severity": 6,
+   "note": "Your decision is wrong. Stepino runs into him, car 21 is as far to the side of the track as he can and stepino still runs into him.",
+   "recording": "2026-10-30_16-30-46_Catalunya_Race.gmtel.gz",
+   "t": 35.8,
+   "cars": [
+    7,
+    11
+   ],
+   "rulebook": {
+    "verdict": "11 at fault",
+    "rule": "R2"
+   },
+   "contacts": [
+    {
+     "a": 7,
+     "b": 11,
+     "t": 35.8,
+     "x": {
+      "gap": 1.7,
+      "closing": -9,
+      "moved_front": -2.0,
+      "moved_back": 4.11,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 37,
+      "lost": 6,
+      "off": 2,
+      "cars": 2,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "front",
+     "rulebook": "back",
+     "rule": "R2"
+    }
+   ]
+  },
+  "b3-09": {
+   "key": "ed545fa499e4",
+   "by": "GreMi",
+   "track": "Catalunya",
+   "date": "2026-10-30",
+   "verdict": "#8 Stepino81 + #99 niketys2 at fault",
+   "severity": 6,
+   "note": "They both are not trying to avoid hitting each other, there for both at fault.",
+   "recording": "2026-10-30_16-30-46_Catalunya_Race.gmtel.gz",
+   "t": 249.4,
+   "cars": [
+    4,
+    7
+   ],
+   "rulebook": {
+    "verdict": "4 at fault",
+    "rule": "R3"
+   },
+   "contacts": [
+    {
+     "a": 4,
+     "b": 7,
+     "t": 249.4,
+     "x": {
+      "gap": 4.7,
+      "closing": 14,
+      "moved_front": 6.0,
+      "moved_back": -6.0,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 120,
+      "lost": 6,
+      "off": 2,
+      "cars": 2,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "both",
+     "rulebook": "back",
+     "rule": "R3"
+    }
+   ]
+  },
+  "b3-10": {
+   "key": "9fecb0bac8ae",
+   "by": "GreMi",
+   "track": "Imola",
+   "date": "2026-10-30",
+   "verdict": "#56 frostopsss at fault",
+   "severity": 6,
+   "note": "Lars does get back on track after driving off a little bit, but leaves enough space for car 56. Car 56 goes too fast and too wide so they collide",
+   "recording": "2026-10-30_16-46-43_Imola_Race.gmtel.gz",
+   "t": 17.1,
+   "cars": [
+    5,
+    6,
+    10,
+    12,
+    13,
+    16
+   ],
+   "rulebook": {
+    "verdict": "13 + 12 at fault",
+    "rule": "R8"
+   },
+   "contacts": [
+    {
+     "a": 12,
+     "b": 13,
+     "t": 17.1,
+     "x": {
+      "gap": 3.6,
+      "closing": 36,
+      "moved_front": 1.51,
+      "moved_back": 1.61,
+      "rejoin_front": 1.0,
+      "rejoin_back": 0.0,
+      "slide": 36,
+      "lost": 6,
+      "off": 1,
+      "cars": 6,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "back",
+     "rulebook": "front",
+     "rule": "R5"
+    },
+    {
+     "a": 13,
+     "b": 10,
+     "t": 19.0,
+     "x": {
+      "gap": 5.8,
+      "closing": 40,
+      "moved_front": 6.0,
+      "moved_back": -5.59,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 36,
+      "lost": 6,
+      "off": 2,
+      "cars": 6,
+      "reaction": 0.0,
+      "aftermath": 1.0
+     },
+     "label": "none",
+     "rulebook": "none",
+     "rule": "R7"
+    },
+    {
+     "a": 5,
+     "b": 12,
+     "t": 33.8,
+     "x": {
+      "gap": 5.3,
+      "closing": 28,
+      "moved_front": 1.88,
+      "moved_back": -0.33,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 23,
+      "lost": 3,
+      "off": 0,
+      "cars": 6,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "back",
+     "rulebook": "back",
+     "rule": "R3"
+    }
+   ]
+  },
+  "b3-11": {
+   "key": "3cb97ce2403e",
+   "by": "GreMi",
+   "track": "Imola",
+   "date": "2026-10-30",
+   "verdict": "Hidden #21 (Ferrari '26) at fault",
+   "severity": 6,
+   "note": "",
+   "recording": "2026-10-30_16-46-43_Imola_Race.gmtel.gz",
+   "t": 63.3,
+   "cars": [
+    8,
+    9,
+    14
+   ],
+   "rulebook": {
+    "verdict": "9 at fault",
+    "rule": "R5"
+   },
+   "contacts": [
+    {
+     "a": 9,
+     "b": 14,
+     "t": 63.3,
+     "x": {
+      "gap": 2.7,
+      "closing": 32,
+      "moved_front": 2.43,
+      "moved_back": -1.36,
+      "rejoin_front": 1.0,
+      "rejoin_back": 0.0,
+      "slide": 21,
+      "lost": 3,
+      "off": 1,
+      "cars": 3,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "front",
+     "rulebook": "front",
+     "rule": "R5"
+    }
+   ]
+  },
+  "b3-12": {
+   "key": "6e75823c0cc1",
+   "by": "GreMi",
+   "track": "Imola",
+   "date": "2026-10-30",
+   "verdict": "Hidden #2 (Racing Bulls '26) at fault",
+   "severity": 9,
+   "note": "This incident is chained togheter waay too long, i think the max length of an incident should be like 15 sec. Also a max of 6 drivers, if you think there are more involved, try to split it up cause this was impossible to follow. Car 2 in RB was atfault at the begining going into turn 1",
+   "recording": "2026-10-30_16-46-43_Imola_Race.gmtel.gz",
+   "t": 111.1,
+   "cars": [
+    0,
+    2,
+    6,
+    9,
+    10,
+    12,
+    13,
+    15,
+    16
+   ],
+   "rulebook": {
+    "verdict": "10 + 16 at fault",
+    "rule": "R8"
+   },
+   "contacts": [
+    {
+     "a": 9,
+     "b": 10,
+     "t": 111.1,
+     "x": {
+      "gap": 7.4,
+      "closing": 18,
+      "moved_front": 0.23,
+      "moved_back": 0.06,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 23,
+      "lost": 6,
+      "off": 1,
+      "cars": 8,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "none",
+     "rulebook": "back",
+     "rule": "R3"
+    },
+    {
+     "a": 9,
+     "b": 16,
+     "t": 113.7,
+     "x": {
+      "gap": 1.2,
+      "closing": 10,
+      "moved_front": 6.0,
+      "moved_back": -6.0,
+      "rejoin_front": 0.0,
+      "rejoin_back": 1.0,
+      "slide": 72,
+      "lost": 6,
+      "off": 2,
+      "cars": 8,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "front",
+     "rulebook": "front",
+     "rule": "R2"
+    },
+    {
+     "a": 9,
+     "b": 6,
+     "t": 115.2,
+     "x": {
+      "gap": 5.2,
+      "closing": -4,
+      "moved_front": 3.87,
+      "moved_back": -0.99,
+      "rejoin_front": 1.0,
+      "rejoin_back": 1.0,
+      "slide": 23,
+      "lost": 6,
+      "off": 2,
+      "cars": 8,
+      "reaction": 0.0,
+      "aftermath": 1.0
+     },
+     "label": "none",
+     "rulebook": "none",
+     "rule": "R7"
+    },
+    {
+     "a": 10,
+     "b": 15,
+     "t": 128.2,
+     "x": {
+      "gap": 7.1,
+      "closing": 12,
+      "moved_front": 3.22,
+      "moved_back": -0.56,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 16,
+      "lost": 0,
+      "off": 0,
+      "cars": 8,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "none",
+     "rulebook": "no",
+     "rule": "R1"
+    },
+    {
+     "a": 15,
+     "b": 10,
+     "t": 133.5,
+     "x": {
+      "gap": 5.9,
+      "closing": 18,
+      "moved_front": 0.51,
+      "moved_back": -0.49,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 16,
+      "lost": 0,
+      "off": 0,
+      "cars": 8,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "none",
+     "rulebook": "no",
+     "rule": "R1"
+    },
+    {
+     "a": 10,
+     "b": 15,
+     "t": 145.3,
+     "x": {
+      "gap": 6.3,
+      "closing": 22,
+      "moved_front": -1.4,
+      "moved_back": -0.72,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 16,
+      "lost": 0,
+      "off": 0,
+      "cars": 8,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "none",
+     "rulebook": "no",
+     "rule": "R1"
+    }
+   ]
+  },
+  "b4-01": {
+   "key": "a05878c2d806",
+   "by": "GreMi",
+   "track": "Mexico",
+   "date": "2026-10-20",
+   "verdict": "Not an incident",
+   "severity": 0,
+   "note": "",
+   "recording": "2026-10-20_20-05-21_Mexico_Race.gmtel.gz",
+   "t": 55.6,
+   "cars": [
+    1,
+    9
+   ],
+   "rulebook": {
+    "verdict": "Not an incident",
+    "rule": "R1"
+   },
+   "contacts": [
+    {
+     "a": 1,
+     "b": 9,
+     "t": 55.6,
+     "x": {
+      "gap": 6.2,
+      "closing": 39,
+      "moved_front": -0.1,
+      "moved_back": 0.74,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 11,
+      "lost": 0,
+      "off": 0,
+      "cars": 2,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "no",
+     "rulebook": "no",
+     "rule": "R1"
+    }
+   ]
+  },
+  "b4-02": {
+   "key": "7636b5ddc726",
+   "by": "GreMi",
+   "track": "Abu Dhabi",
+   "date": "2026-10-20",
+   "verdict": "Hidden #54 (Ferrari '26) at fault",
+   "severity": 4,
+   "note": "",
+   "recording": "2026-10-20_20-21-09_Abu_Dhabi_Race.gmtel.gz",
+   "t": 281.5,
+   "cars": [
+    6,
+    9
+   ],
+   "rulebook": {
+    "verdict": "6 at fault",
+    "rule": "R3"
+   },
+   "contacts": [
+    {
+     "a": 6,
+     "b": 9,
+     "t": 281.5,
+     "x": {
+      "gap": 10.2,
+      "closing": 28,
+      "moved_front": 4.59,
+      "moved_back": -3.33,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 27,
+      "lost": 1,
+      "off": 0,
+      "cars": 2,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "front",
+     "rulebook": "back",
+     "rule": "R3"
+    }
+   ]
+  },
+  "b4-03": {
+   "key": "76543687d635",
+   "by": "GreMi",
+   "track": "Brazil",
+   "date": "2026-10-23",
+   "verdict": "#2 MrOIDIOI at fault",
+   "severity": 4,
+   "note": "Technicly the corner was for car number 2, but i expect clean racing and room for others.",
+   "recording": "2026-10-23_20-25-40_Brazil_Race.gmtel.gz",
+   "t": 52.3,
+   "cars": [
+    6,
+    7
+   ],
+   "rulebook": {
+    "verdict": "6 at fault",
+    "rule": "R3"
+   },
+   "contacts": [
+    {
+     "a": 7,
+     "b": 6,
+     "t": 52.3,
+     "x": {
+      "gap": 4.3,
+      "closing": 14,
+      "moved_front": 3.0,
+      "moved_back": -2.31,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 110,
+      "lost": 3,
+      "off": 0,
+      "cars": 2,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "front",
+     "rulebook": "back",
+     "rule": "R3"
+    }
+   ]
+  },
+  "b4-04": {
+   "key": "3ff436d84a6c",
+   "by": "GreMi",
+   "track": "Qatar",
+   "date": "2026-10-23",
+   "verdict": "#2 MrOIDIOI at fault",
+   "severity": 5,
+   "note": "Unsafe overtake by mrOidioi.",
+   "recording": "2026-10-23_20-42-00_Losail_Race.gmtel.gz",
+   "t": 82.5,
+   "cars": [
+    2,
+    8
+   ],
+   "rulebook": {
+    "verdict": "2 at fault",
+    "rule": "R2"
+   },
+   "contacts": [
+    {
+     "a": 2,
+     "b": 8,
+     "t": 82.5,
+     "x": {
+      "gap": 1.1,
+      "closing": 20,
+      "moved_front": 2.92,
+      "moved_back": -0.42,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 5,
+      "lost": 1,
+      "off": 0,
+      "cars": 2,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "back",
+     "rulebook": "front",
+     "rule": "R2"
+    }
+   ]
+  },
+  "b4-05": {
+   "key": "6023454149d5",
+   "by": "GreMi",
+   "track": "Austin",
+   "date": "2026-10-25",
+   "verdict": "Not an incident",
+   "severity": 0,
+   "note": "",
+   "recording": "2026-10-25_15-26-25_Texas_Race.gmtel.gz",
+   "t": 173.6,
+   "cars": [
+    4,
+    5
+   ],
+   "rulebook": {
+    "verdict": "4 at fault",
+    "rule": "R5"
+   },
+   "contacts": [
+    {
+     "a": 4,
+     "b": 5,
+     "t": 173.6,
+     "x": {
+      "gap": 4.6,
+      "closing": -12,
+      "moved_front": -1.6,
+      "moved_back": 6.0,
+      "rejoin_front": 0.0,
+      "rejoin_back": 1.0,
+      "slide": 5,
+      "lost": 0,
+      "off": 0,
+      "cars": 2,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "no",
+     "rulebook": "back",
+     "rule": "R5"
+    }
+   ]
+  },
+  "b4-06": {
+   "key": "8945b57b7839",
+   "by": "GreMi",
+   "track": "Catalunya",
+   "date": "2026-10-25",
+   "verdict": "#50 DevilDriver2396 at fault",
+   "severity": 4,
+   "note": "",
+   "recording": "2026-10-25_15-59-16_Catalunya_Race.gmtel.gz",
+   "t": 58.6,
+   "cars": [
+    1,
+    11
+   ],
+   "rulebook": {
+    "verdict": "11 at fault",
+    "rule": "R2"
+   },
+   "contacts": [
+    {
+     "a": 11,
+     "b": 1,
+     "t": 58.6,
+     "x": {
+      "gap": 3.8,
+      "closing": -15,
+      "moved_front": -3.17,
+      "moved_back": 3.97,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 57,
+      "lost": 6,
+      "off": 0,
+      "cars": 2,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "front",
+     "rulebook": "back",
+     "rule": "R2"
+    }
+   ]
+  },
+  "b4-07": {
+   "key": "5fb551aa509f",
+   "by": "GreMi",
+   "track": "Bahrain",
+   "date": "2026-10-25",
+   "verdict": "Hidden #99 (Audi '26) at fault",
+   "severity": 4,
+   "note": "",
+   "recording": "2026-10-25_16-12-29_Bahrain_Race.gmtel.gz",
+   "t": 55.4,
+   "cars": [
+    8,
+    9,
+    14,
+    15,
+    16,
+    17
+   ],
+   "rulebook": {
+    "verdict": "14 + 15 at fault",
+    "rule": "R8"
+   },
+   "contacts": [
+    {
+     "a": 16,
+     "b": 14,
+     "t": 55.4,
+     "x": {
+      "gap": 12.6,
+      "closing": 60.0,
+      "moved_front": -1.04,
+      "moved_back": 4.2,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 26,
+      "lost": 3,
+      "off": 0,
+      "cars": 6,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "back",
+     "rulebook": "back",
+     "rule": "R3"
+    },
+    {
+     "a": 14,
+     "b": 9,
+     "t": 55.6,
+     "x": {
+      "gap": 1.7,
+      "closing": -30.0,
+      "moved_front": 6.0,
+      "moved_back": -1.73,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 4,
+      "lost": 6,
+      "off": 0,
+      "cars": 6,
+      "reaction": 0.0,
+      "aftermath": 1.0
+     },
+     "label": "front",
+     "rulebook": "none",
+     "rule": "R7"
+    },
+    {
+     "a": 16,
+     "b": 17,
+     "t": 55.6,
+     "x": {
+      "gap": 1.1,
+      "closing": 5,
+      "moved_front": 2.55,
+      "moved_back": -0.98,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 26,
+      "lost": 3,
+      "off": 0,
+      "cars": 6,
+      "reaction": 0.0,
+      "aftermath": 1.0
+     },
+     "label": "none",
+     "rulebook": "none",
+     "rule": "R7"
+    },
+    {
+     "a": 17,
+     "b": 8,
+     "t": 56.5,
+     "x": {
+      "gap": 0.5,
+      "closing": -17,
+      "moved_front": 4.46,
+      "moved_back": -2.29,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 10,
+      "lost": 0,
+      "off": 0,
+      "cars": 6,
+      "reaction": 0.0,
+      "aftermath": 1.0
+     },
+     "label": "none",
+     "rulebook": "none",
+     "rule": "R7"
+    },
+    {
+     "a": 15,
+     "b": 9,
+     "t": 60.3,
+     "x": {
+      "gap": 4.8,
+      "closing": 11,
+      "moved_front": 2.63,
+      "moved_back": -2.67,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 4,
+      "lost": 6,
+      "off": 0,
+      "cars": 6,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "none",
+     "rulebook": "back",
+     "rule": "R3"
+    }
+   ]
+  },
+  "b4-08": {
+   "key": "56653fed7dad",
+   "by": "GreMi",
+   "track": "Jeddah",
+   "date": "2026-10-25",
+   "verdict": "Hidden #54 (Mercedes '26) at fault",
+   "severity": 5,
+   "note": "",
+   "recording": "2026-10-25_16-27-27_Jeddah_Race.gmtel.gz",
+   "t": 149.8,
+   "cars": [
+    9,
+    12
+   ],
+   "rulebook": {
+    "verdict": "9 at fault",
+    "rule": "R2"
+   },
+   "contacts": [
+    {
+     "a": 9,
+     "b": 12,
+     "t": 149.8,
+     "x": {
+      "gap": 3.6,
+      "closing": -25,
+      "moved_front": 4.34,
+      "moved_back": -1.87,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 120,
+      "lost": 6,
+      "off": 0,
+      "cars": 2,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "front",
+     "rulebook": "front",
+     "rule": "R2"
+    }
+   ]
+  },
+  "b4-09": {
+   "key": "5a6612e50d7d",
+   "by": "GreMi",
+   "track": "Shanghai",
+   "date": "2026-10-25",
+   "verdict": "Not an incident",
+   "severity": 0,
+   "note": "Niketys is not involved in any way in that incident.",
+   "recording": "2026-10-25_16-42-14_Shanghai_Race.gmtel.gz",
+   "t": 32.4,
+   "cars": [
+    1,
+    15,
+    21
+   ],
+   "rulebook": {
+    "verdict": "1 at fault",
+    "rule": "R2"
+   },
+   "contacts": [
+    {
+     "a": 21,
+     "b": 1,
+     "t": 32.4,
+     "x": {
+      "gap": 1.3,
+      "closing": -29,
+      "moved_front": 3.68,
+      "moved_back": -1.82,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 4,
+      "lost": 0,
+      "off": 1,
+      "cars": 3,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "no",
+     "rulebook": "front",
+     "rule": "R2"
+    }
+   ]
+  },
+  "b4-10": {
+   "key": "a3cef147a59a",
+   "by": "GreMi",
+   "track": "Suzuka",
+   "date": "2026-10-28",
+   "verdict": "#50 DevilDriver2396 at fault",
+   "severity": 8,
+   "note": "",
+   "recording": "2026-10-28_20-40-25_Suzuka_Race.gmtel.gz",
+   "t": 276.5,
+   "cars": [
+    3,
+    9
+   ],
+   "rulebook": {
+    "verdict": "9 at fault",
+    "rule": "R2"
+   },
+   "contacts": [
+    {
+     "a": 3,
+     "b": 9,
+     "t": 276.5,
+     "x": {
+      "gap": 3.4,
+      "closing": 3,
+      "moved_front": 1.29,
+      "moved_back": 2.15,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 99,
+      "lost": 1,
+      "off": 0,
+      "cars": 2,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "front",
+     "rulebook": "back",
+     "rule": "R2"
+    }
+   ]
+  },
+  "b4-11": {
+   "key": "99fb9c8ed2e5",
+   "by": "GreMi",
+   "track": "Silverstone (reverse)",
+   "date": "2026-10-30",
+   "verdict": "Not an incident",
+   "severity": 0,
+   "note": "",
+   "recording": "2026-10-30_15-10-21_Silverstone_Reverse_Race.gmtel.gz",
+   "t": 131.5,
+   "cars": [
+    1,
+    3
+   ],
+   "rulebook": {
+    "verdict": "Not an incident",
+    "rule": "R1"
+   },
+   "contacts": [
+    {
+     "a": 3,
+     "b": 1,
+     "t": 131.5,
+     "x": {
+      "gap": 7.2,
+      "closing": 18,
+      "moved_front": -1.09,
+      "moved_back": 2.5,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 6,
+      "lost": 0,
+      "off": 0,
+      "cars": 2,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "no",
+     "rulebook": "no",
+     "rule": "R1"
+    }
+   ]
+  },
+  "b4-12": {
+   "key": "e89cd1327513",
+   "by": "GreMi",
+   "track": "Las Vegas",
+   "date": "2026-10-30",
+   "verdict": "#13 Jakubm18_F1 + #24 rubengggarcia + #8 Stepino81 + Hidden #21 (Ferrari '26) at fault",
+   "severity": 9,
+   "note": "This incident is multiple incidents, make sure to split them. The one at 32 sec is on stepino (about 6/10 severity). Then there are a couple of innocent touches, at 46 sec car 21 goes for a dangerout move (4/10). and then finally the incident at 55 sec is a shared incident by all 3 drivers. stepino,",
+   "recording": "2026-10-30_15-29-57_Las_Vegas_Race.gmtel.gz",
+   "t": 32.8,
+   "cars": [
+    2,
+    8,
+    9,
+    12,
+    14
+   ],
+   "rulebook": {
+    "verdict": "2 + 8 + 14 at fault",
+    "rule": "R8"
+   },
+   "contacts": [
+    {
+     "a": 2,
+     "b": 9,
+     "t": 32.8,
+     "x": {
+      "gap": 2.9,
+      "closing": -2,
+      "moved_front": 3.25,
+      "moved_back": -3.08,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 14,
+      "lost": 3,
+      "off": 0,
+      "cars": 5,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "both",
+     "rulebook": "front",
+     "rule": "R2"
+    },
+    {
+     "a": 9,
+     "b": 8,
+     "t": 35.6,
+     "x": {
+      "gap": 6.3,
+      "closing": 60.0,
+      "moved_front": 1.25,
+      "moved_back": 0.04,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 11,
+      "lost": 1,
+      "off": 0,
+      "cars": 5,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "both",
+     "rulebook": "back",
+     "rule": "R3"
+    },
+    {
+     "a": 14,
+     "b": 9,
+     "t": 40.7,
+     "x": {
+      "gap": 4.1,
+      "closing": 12,
+      "moved_front": 4.38,
+      "moved_back": -1.5,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 12,
+      "lost": 1,
+      "off": 0,
+      "cars": 5,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "both",
+     "rulebook": "back",
+     "rule": "R3"
+    },
+    {
+     "a": 14,
+     "b": 12,
+     "t": 41.1,
+     "x": {
+      "gap": 9.0,
+      "closing": 16,
+      "moved_front": 0.97,
+      "moved_back": 0.17,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 13,
+      "lost": 0,
+      "off": 0,
+      "cars": 5,
+      "reaction": 0.0,
+      "aftermath": 1.0
+     },
+     "label": "front",
+     "rulebook": "none",
+     "rule": "R7"
+    },
+    {
+     "a": 9,
+     "b": 14,
+     "t": 46.5,
+     "x": {
+      "gap": 5.2,
+      "closing": 14,
+      "moved_front": 1.55,
+      "moved_back": 0.24,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 12,
+      "lost": 1,
+      "off": 0,
+      "cars": 5,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "both",
+     "rulebook": "back",
+     "rule": "R3"
+    },
+    {
+     "a": 14,
+     "b": 12,
+     "t": 47.2,
+     "x": {
+      "gap": 12.4,
+      "closing": 38,
+      "moved_front": -0.82,
+      "moved_back": -2.02,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 13,
+      "lost": 0,
+      "off": 0,
+      "cars": 5,
+      "reaction": 0.0,
+      "aftermath": 1.0
+     },
+     "label": "front",
+     "rulebook": "none",
+     "rule": "R7"
+    },
+    {
+     "a": 8,
+     "b": 2,
+     "t": 48.5,
+     "x": {
+      "gap": 2.9,
+      "closing": -10,
+      "moved_front": 0.0,
+      "moved_back": 0.0,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 14,
+      "lost": 3,
+      "off": 0,
+      "cars": 5,
+      "reaction": 0.0,
+      "aftermath": 1.0
+     },
+     "label": "both",
+     "rulebook": "none",
+     "rule": "R7"
+    }
+   ]
+  }
+ },
+ "about": "Numbers of every graded incident's contacts and the final call (scripts/telemetry/precedents.py)."
+}

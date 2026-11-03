@@ -9,7 +9,11 @@ still blames only the car that started it.
 
   R1  A contact that did no harm (nobody slid, lost a place or went off) is not an incident when
       it was a light touch: side by side, a tap from behind under TAP_KMH, or a move across
-      under TAP_MOVE_M. R5 always applies.
+      under TAP_MOVE_M. R5 always applies. v1.2: one car behind the other and nobody slid or
+      lost a place is never an incident (wheels off alone is no harm).
+
+Precedents (precedents.py) come on top: a graded incident gets its grade, and a contact that
+looks like graded ones follows them when they agree.
   R2  Alongside (less than ALONGSIDE_M apart along the track): the car that kept moving across
       into the other is at fault, whichever one is ahead. Both or neither: racing incident.
   R3  One car clearly behind: the car behind is at fault when it closed in on the other
@@ -49,7 +53,7 @@ import gmtel  # noqa: E402
 import incident_replays  # noqa: E402
 import race_bundles as rb  # noqa: E402
 
-RULES = "v1.1"       # bump when a rule changes: fault_engine.py judges every race again
+RULES = "v1.2"       # bump when a rule changes: fault_engine.py judges every race again
 ALONGSIDE_M = 4.0    # less than this apart along the track = alongside (a car is ~5.6 m long)
 MOVE_M = 1.0         # moving across this much in the last 1.2 s counts as moving into the other car
 MOVE_MORE_M = 0.7    # ... and this much more than the other car did
@@ -249,6 +253,12 @@ class Judge:
         if harmless and ((rule == "R3" and fault is not None and closing < TAP_KMH) or (rule == "R2" and max(ma, mb) < TAP_MOVE_M)):
             return {"verdict": "Not an incident", "at_fault": None, "rule": "R1", "severity": 1,
                     "why": f"{why}, but nobody slid, lost a place or went off", "features": f, "effects": eff}
+        # v1.2 (GreMi's grades, 3 Nov 2026): one car behind the other and nobody slid or lost a place =
+        # not an incident, however fast it closed and even with wheels off (that alone is no harm).
+        if (fault is not None and not alongside and rule in ("R2", "R3") and eff["max_slide_deg"] <= SLIP_HARM
+                and not eff["places_lost"]):
+            return {"verdict": "Not an incident", "at_fault": None, "rule": "R1", "severity": 1,
+                    "why": f"{why}, but nobody slid or lost a place", "features": f, "effects": eff}
         if first and fault == back and rule == "R3" and eff["cars"] >= CHAIN_CARS and closing < SMALL_KMH and max(ma, mb) < MOVE_M:
             fault, rule = None, "R4"
             why = f"chain of {eff['cars']} cars started by a small error ({name(back)} closing at {closing:.0f} km/h)"
