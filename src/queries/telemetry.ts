@@ -52,9 +52,9 @@ export async function fetchSessionList(url: string): Promise<SessionSummary[]> {
   return res.json() as Promise<SessionSummary[]>;
 }
 
-// One-shot startup probe deciding where session data comes from: the local dev
-// API when available, the committed demo data otherwise, and finally in-browser
-// uploads. VITE_SKIP_API (dev:prod) forces the production demo → upload path.
+// One-shot startup probe: published league data first, then the local dev API,
+// committed demo data, and finally in-browser uploads. VITE_SKIP_API
+// (dev:prod) skips the local API and forces the demo → upload fallback path.
 export async function detectDataSource(
   queryClient: QueryClient,
 ): Promise<DataSourceDetection> {

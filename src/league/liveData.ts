@@ -1,7 +1,9 @@
 import type { LeagueIndex } from "./league";
 
 const LIVE_BASE = "https://replays.gremigaming.com/league/";
-const PAGES_BASE = `${import.meta.env.BASE_URL}league/`;
+const PAGES_BASE = import.meta.env.DEV
+  ? "/__league-pages/"
+  : `${import.meta.env.BASE_URL}league/`;
 
 export interface LeagueSource {
   index: LeagueIndex;

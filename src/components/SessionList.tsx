@@ -1,5 +1,6 @@
-import { CalendarDays, Route } from "lucide-react";
+import { ArrowRight, CalendarDays, Route } from "lucide-react";
 import { useEffect, useState } from "react";
+import { NavLink } from "react-router-dom";
 import { SESSION_LIST_TAB_STORAGE_KEY } from "../constants/storage";
 import { useTelemetry } from "../context/TelemetryContext";
 import {
@@ -21,10 +22,11 @@ import {
   isQualifyingSessionType,
   isTimeTrialSessionType,
 } from "../utils/sessionTypes";
-import { linkScopeKey } from "../utils/routes";
+import { linkScopeKey, sessionsPath, tracksPath } from "../utils/routes";
 import { readStoredString, writeStoredString } from "../utils/storage";
 import { getTrackId, sortTracksByCalendar } from "../utils/tracks";
 import { SessionListActiveFilters } from "./SessionListActiveFilters";
+import { SessionDatePicker } from "./SessionDatePicker";
 import { SessionListFilterMenu } from "./SessionListFilterMenu";
 import { SessionListItem } from "./SessionListItem";
 import { resolveSessionMode } from "./sessionModeMeta";
@@ -80,6 +82,8 @@ function groupModeLabel(sessions: SessionSummary[]): string | null {
 }
 
 const PAGE_SIZE = 50;
+const SIDEBAR_TRACK_LIMIT = 5;
+const SIDEBAR_SESSION_LIMIT = 5;
 
 type SidebarTab = "sessions" | "tracks";
 
@@ -144,7 +148,13 @@ function getTrackListBestLap(
  * `section` pins the list to sessions or tracks and hides the tabs; the
  * league sidebar shows each one under its own folding menu item.
  */
-export function SessionList({ section }: { section?: SidebarTab } = {}) {
+export function SessionList({
+  section,
+  showAllSessions = false,
+}: {
+  section?: SidebarTab;
+  showAllSessions?: boolean;
+} = {}) {
   const { sessions, loading, error } = useSessionList();
   const { scopeKey, activeFormulaKey, formulaOptions, league } = useTelemetry();
   const game = useGameScope();
@@ -156,6 +166,7 @@ export function SessionList({ section }: { section?: SidebarTab } = {}) {
   const tab = section ?? storedTab;
   const [filters, setFilters] = useSessionFilters();
   const [page, setPage] = useState(0);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
   // Keep the active tab scoped to this browser tab; filters are a longer-lived
   // preference shared with the dashboard via useSessionFilters().
@@ -165,7 +176,7 @@ export function SessionList({ section }: { section?: SidebarTab } = {}) {
 
   useEffect(() => {
     setPage(0);
-  }, [filters.type, filters.mode]);
+  }, [filters.type, filters.mode, selectedDate]);
 
   const updateFilters = (next: typeof filters) => {
     setFilters(next);
@@ -206,20 +217,41 @@ export function SessionList({ section }: { section?: SidebarTab } = {}) {
   const filteredSessions = scopedSessions.filter((s) =>
     matchesSessionFilters(s, filters),
   );
+  const availableSessionDates = [
+    ...new Set(filteredSessions.map((session) => session.date.split("T")[0])),
+  ].sort();
   const filtersActive = !areSessionFiltersDefault(filters) || game.isFiltered;
   const resetFilters = () => {
     updateFilters(DEFAULT_FILTERS);
     game.setGame(ALL_FORMULA_SCOPE_KEY);
   };
 
-  const pageCount = Math.ceil(filteredSessions.length / PAGE_SIZE);
+  const dateFilteredSessions =
+    showAllSessions && tab === "sessions" && selectedDate
+      ? filteredSessions.filter(
+          (session) => session.date.split("T")[0] === selectedDate,
+        )
+      : filteredSessions;
+  const orderedSessions = [...dateFilteredSessions].sort((a, b) => {
+    const aDate = Date.parse(a.date);
+    const bDate = Date.parse(b.date);
+    return (
+      (Number.isFinite(bDate) ? bDate : 0) -
+      (Number.isFinite(aDate) ? aDate : 0)
+    );
+  });
+  const pageCount = Math.ceil(orderedSessions.length / PAGE_SIZE);
   const safePage = Math.min(page, Math.max(0, pageCount - 1));
-  const pagedSessions = filteredSessions.slice(
+  const pagedSessions = orderedSessions.slice(
     safePage * PAGE_SIZE,
     (safePage + 1) * PAGE_SIZE,
   );
 
-  const grouped = groupByDate(pagedSessions);
+  const isRecentSessionsSidebar = section === "sessions" && !showAllSessions;
+  const sessionRows = isRecentSessionsSidebar
+    ? orderedSessions.slice(0, SIDEBAR_SESSION_LIMIT)
+    : pagedSessions;
+  const grouped = groupByDate(sessionRows);
   const trackSessionsById = new Map<string, SessionSummary[]>();
   for (const session of filteredSessions) {
     const trackId = getTrackId(session.track);
@@ -231,6 +263,25 @@ export function SessionList({ section }: { section?: SidebarTab } = {}) {
     [...trackSessionsById.keys()],
     activeFormulaKey,
   );
+  const recentTracks = tracks
+    .map((trackId, calendarOrder) => ({
+      trackId,
+      calendarOrder,
+      latestSessionAt: Math.max(
+        ...(trackSessionsById.get(trackId) ?? []).map((session) => {
+          const date = Date.parse(session.date);
+          return Number.isFinite(date) ? date : 0;
+        }),
+      ),
+    }))
+    .sort(
+      (a, b) =>
+        b.latestSessionAt - a.latestSessionAt ||
+        a.calendarOrder - b.calendarOrder,
+    )
+    .slice(0, SIDEBAR_TRACK_LIMIT)
+    .map(({ trackId }) => trackId);
+  const visibleTracks = section === "tracks" ? recentTracks : tracks;
 
   // Best lap time per track, split by session-type group. Time Trial is its
   // own leaderboard in-game, so the user expects the fastest TT lap at a
@@ -254,7 +305,60 @@ export function SessionList({ section }: { section?: SidebarTab } = {}) {
     <nav className="flex flex-col">
       {/* Sticky header: tabs + filter */}
       <div className="sticky top-0 z-10 bg-black/85 backdrop-blur">
-        <HStack className="px-2 pt-2" justify={section ? "end" : undefined}>
+        <HStack
+          className="px-2 pt-2"
+          justify={
+            showAllSessions || section === "tracks" || isRecentSessionsSidebar
+              ? "between"
+              : section
+                ? "end"
+                : undefined
+          }
+        >
+          {showAllSessions && tab === "sessions" && (
+            <SessionDatePicker
+              availableDates={availableSessionDates}
+              selectedDate={selectedDate}
+              onSelect={(date) => {
+                setSelectedDate(date);
+                setPage(0);
+              }}
+            />
+          )}
+          {isRecentSessionsSidebar && scopeKey && (
+            <NavLink
+              to={sessionsPath(scopeKey)}
+              end
+              className={({ isActive }) =>
+                cn(
+                  "flex min-w-0 flex-1 items-center justify-between gap-2 rounded-md px-2 py-1.5 text-xs font-medium transition-colors",
+                  isActive
+                    ? "bg-white/[0.07] text-zinc-200"
+                    : "text-zinc-400 hover:bg-white/[0.045] hover:text-zinc-200",
+                )
+              }
+            >
+              <span className="truncate">View all sessions</span>
+              <ArrowRight className="size-3.5 shrink-0" />
+            </NavLink>
+          )}
+          {section === "tracks" && scopeKey && (
+            <NavLink
+              to={tracksPath(scopeKey)}
+              end
+              className={({ isActive }) =>
+                cn(
+                  "flex min-w-0 flex-1 items-center justify-between gap-2 rounded-md px-2 py-1.5 text-xs font-medium transition-colors",
+                  isActive
+                    ? "bg-white/[0.07] text-zinc-200"
+                    : "text-zinc-400 hover:bg-white/[0.045] hover:text-zinc-200",
+                )
+              }
+            >
+              <span className="truncate">View all tracks</span>
+              <ArrowRight className="size-3.5 shrink-0" />
+            </NavLink>
+          )}
           {!section && (
             <Tabs
               className="flex-1"
@@ -284,7 +388,7 @@ export function SessionList({ section }: { section?: SidebarTab } = {}) {
           />
         )}
 
-        {tab === "sessions" && pageCount > 1 && (
+        {tab === "sessions" && !isRecentSessionsSidebar && pageCount > 1 && (
           <HStack justify="between" className="mt-1 px-2 py-1">
             <button
               onClick={() => setPage((p) => Math.max(0, p - 1))}
@@ -310,6 +414,14 @@ export function SessionList({ section }: { section?: SidebarTab } = {}) {
       <div
         className={cn("p-2", tab === "sessions" ? "space-y-4" : "space-y-0.5")}
       >
+        {tab === "tracks" &&
+          section === "tracks" &&
+          recentTracks.length > 0 && (
+            <p className="px-2 pb-1 font-mono text-2xs font-semibold uppercase tracking-wider text-zinc-600">
+              {recentTracks.length} most recent{" "}
+              {recentTracks.length === 1 ? "track" : "tracks"}
+            </p>
+          )}
         {tab === "sessions" && filteredSessions.length === 0 && (
           <div className="px-2 py-4 text-sm text-zinc-500">
             No sessions match these filters.{" "}
@@ -363,7 +475,7 @@ export function SessionList({ section }: { section?: SidebarTab } = {}) {
           })}
 
         {tab === "tracks" &&
-          tracks.map((trackId) => {
+          visibleTracks.map((trackId) => {
             const trackSessions = trackSessionsById.get(trackId) ?? [];
             const track = trackSessions[0]?.track ?? trackId;
             const count = trackSessions.length;

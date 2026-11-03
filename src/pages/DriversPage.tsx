@@ -1,8 +1,10 @@
 import { Trophy } from "lucide-react";
+import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { cardClass } from "../components/Card";
 import { LeagueHighlights } from "../components/league/LeagueHighlights";
 import { SectionHeader } from "../components/ui/SectionHeader";
+import { SegmentedControl } from "../components/ui/SegmentedControl";
 import { SortHeader, sortRows, useSort } from "../components/ui/SortHeader";
 import {
   tableCellClass,
@@ -16,6 +18,7 @@ import {
   isRaceSession,
   leaderboard,
   raceFormulaKey,
+  teamLeaderboard,
 } from "../league/league";
 import { cn } from "../utils/cn";
 import { dashboardPath } from "../utils/routes";
@@ -36,6 +39,21 @@ type SortKey =
   | "avgGain"
   | "dnfs";
 
+type LeaderboardSeries = "f1-26" | "f1-25" | "f2";
+
+const SERIES_OPTIONS: { value: LeaderboardSeries; label: string }[] = [
+  { value: "f1-26", label: "F1 26" },
+  { value: "f1-25", label: "F1 25" },
+  { value: "f2", label: "F2" },
+];
+
+function seriesForFormula(key: string): LeaderboardSeries | null {
+  if (key === "f1-26") return "f1-26";
+  if (key === "f1-25" || key === "f1-modern") return "f1-25";
+  if (key.startsWith("f2")) return "f2";
+  return null;
+}
+
 const fmt = (n: number | null, digits = 1) =>
   n == null ? "—" : n.toFixed(digits);
 
@@ -43,8 +61,12 @@ export function DriversPage() {
   const { league, scopeKey, activeFormulaKey, activeFormula } = useTelemetry();
   const navigate = useNavigate();
   const location = useLocation();
+  const [mode, setMode] = useState<"drivers" | "teams">("drivers");
+  const [selectedSeries, setSelectedSeries] =
+    useState<LeaderboardSeries>("f1-26");
   // The Discord picture: same table, top 15, with the site address
   const embed = new URLSearchParams(location.search).has("embed");
+  const activeMode = embed ? "drivers" : mode;
   const { sort, toggle } = useSort<SortKey>();
   if (!league) {
     return (
@@ -58,15 +80,34 @@ export function DriversPage() {
       isRaceSession(r.session) &&
       (!activeFormulaKey || raceFormulaKey(r.session) === activeFormulaKey),
   );
+  const selectedFormulaSeries = embed
+    ? null
+    : activeFormulaKey
+      ? seriesForFormula(activeFormulaKey)
+      : selectedSeries;
+  const visibleRaces = selectedFormulaSeries
+    ? races.filter(
+        (r) =>
+          seriesForFormula(raceFormulaKey(r.session)) === selectedFormulaSeries,
+      )
+    : races;
+  const formulaLabel =
+    selectedFormulaSeries
+      ? SERIES_OPTIONS.find(
+          (option) => option.value === selectedFormulaSeries,
+        )?.label
+      : activeFormula?.label;
   const rangeLabel = league.filterLabel;
-  const allRows = leaderboard(races);
+  const driverRows = leaderboard(visibleRaces);
+  const allRows =
+    activeMode === "drivers" ? driverRows : teamLeaderboard(visibleRaces);
   const rows = embed ? allRows.slice(0, EMBED_ROWS) : allRows;
   const position = new Map(allRows.map((r, i) => [r.key, i]));
   const sortedRows = sortRows(rows, sort, (r, k) =>
     k === "pos" ? position.get(r.key) : k === "bestFinish" ? r.bestFinish || null : r[k],
   );
   const sortProps = { sort, toggle };
-  const hidden = races.reduce(
+  const hidden = visibleRaces.reduce(
     (n, r) =>
       n +
       (r.session["classification-data"] ?? []).filter((d) => !isNamedDriver(d))
@@ -77,23 +118,49 @@ export function DriversPage() {
   return (
     <div
       id="leaderboard-card"
-      data-races={races.length}
+      data-races={visibleRaces.length}
       className={cn("mx-auto max-w-5xl space-y-8 p-6", embed && "space-y-6 p-8")}
     >
-      <div>
-        <h2 className="mb-1 flex items-center gap-2 text-xl font-bold">
-          <Trophy className="h-5 w-5 text-amber-400" />
-          {embed ? "GreMi Gang Leaderboard" : "Leaderboard"}
-        </h2>
-        <p className="text-sm text-zinc-500">
-          {activeFormula?.label ?? "All games"} · {rangeLabel} · {races.length}{" "}
-          {races.length === 1 ? "race" : "races"} · {allRows.length} drivers
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-2">
+        <div>
+          <h2 className="mb-1 flex items-center gap-2 text-xl font-bold">
+            <Trophy className="h-5 w-5 text-amber-400" />
+            {embed ? "GreMi Gang Leaderboard" : "Leaderboard"}
+          </h2>
+          <p className="text-sm text-zinc-500">
+            {formulaLabel ?? "All games"} · {rangeLabel} · {visibleRaces.length}{" "}
+            {visibleRaces.length === 1 ? "race" : "races"} · {allRows.length}{" "}
+            {activeMode === "drivers" ? "drivers" : "teams"}
+          </p>
+        </div>
+        {!embed && (
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            <SegmentedControl<"drivers" | "teams">
+              size="sm"
+              ariaLabel="Leaderboard standings"
+              value={activeMode}
+              onChange={setMode}
+              options={[
+                { value: "drivers", label: "Drivers" },
+                { value: "teams", label: "Teams" },
+              ]}
+            />
+            {!activeFormulaKey && (
+              <SegmentedControl<LeaderboardSeries>
+                size="sm"
+                ariaLabel="Leaderboard series"
+                value={selectedSeries}
+                onChange={setSelectedSeries}
+                options={SERIES_OPTIONS}
+              />
+            )}
+          </div>
+        )}
       </div>
 
       {rows.length === 0 ? (
         <section className={cn(cardClass, "text-center text-sm text-zinc-400")}>
-          No races in this period ({rangeLabel}).{" "}
+          No {activeMode} in this period ({rangeLabel}).{" "}
           {league.filter.kind !== "all" && (
             <button
               type="button"
@@ -107,13 +174,15 @@ export function DriversPage() {
       ) : (
       <section className={cardClass}>
         <SectionHeader
-          title="Drivers"
+          title={activeMode === "drivers" ? "Drivers" : "Teams"}
           hint={
-            embed
-              ? allRows.length > rows.length
-                ? `Top ${rows.length} · full standings at gremigaming.github.io/race-stats`
-                : "Full stats at gremigaming.github.io/race-stats"
-              : "Points as awarded in the lobby · click a driver to see their stats"
+            activeMode === "teams"
+              ? "Points as awarded in the lobby · team totals include every classified car"
+              : embed
+                ? allRows.length > rows.length
+                  ? `Top ${rows.length} · full standings at gremigaming.github.io/race-stats`
+                  : "Full stats at gremigaming.github.io/race-stats"
+                : "Points as awarded in the lobby · click a driver to see their stats"
           }
         />
         <div className="overflow-x-auto">
@@ -121,7 +190,9 @@ export function DriversPage() {
             <thead className={tableHeadClass}>
               <tr>
                 <SortHeader column="pos" firstDir="asc" {...sortProps}>#</SortHeader>
-                <SortHeader column="name" firstDir="asc" align="left" {...sortProps}>Driver</SortHeader>
+                <SortHeader column="name" firstDir="asc" align="left" {...sortProps}>
+                  {activeMode === "drivers" ? "Driver" : "Team"}
+                </SortHeader>
                 <SortHeader column="races" {...sortProps}>Races</SortHeader>
                 <SortHeader column="points" {...sortProps}>Points</SortHeader>
                 <SortHeader column="wins" {...sortProps}>Wins</SortHeader>
@@ -137,17 +208,25 @@ export function DriversPage() {
             <tbody>
               {sortedRows.map((row) => {
                 const i = position.get(row.key) ?? 0;
-                const isSelected = !embed && row.key === league.selectedDriver;
+                const isSelected =
+                  activeMode === "drivers" &&
+                  !embed &&
+                  row.key === league.selectedDriver;
                 return (
                   <tr
                     key={row.key}
-                    onClick={() => {
-                      league.setSelectedDriver(row.key);
-                      navigate(dashboardPath(scopeKey));
-                    }}
+                    onClick={
+                      activeMode === "drivers"
+                        ? () => {
+                            league.setSelectedDriver(row.key);
+                            navigate(dashboardPath(scopeKey));
+                          }
+                        : undefined
+                    }
                     className={cn(
                       tableRowClass,
-                      "cursor-pointer transition-colors hover:bg-white/[0.03]",
+                      "transition-colors hover:bg-white/[0.03]",
+                      activeMode === "drivers" && "cursor-pointer",
                       isSelected && "bg-red-500/[0.07]",
                     )}
                   >
@@ -194,7 +273,7 @@ export function DriversPage() {
             </tbody>
           </table>
         </div>
-        {hidden > 0 && !embed && (
+        {hidden > 0 && !embed && activeMode === "drivers" && (
           <p className="mt-4 text-xs text-zinc-500">
             {hidden} {hidden === 1 ? "entry is" : "entries are"} left out
             because those drivers hide their online name in the game. Turn on
@@ -204,7 +283,9 @@ export function DriversPage() {
       </section>
       )}
 
-      {!embed && rows.length > 0 && <LeagueHighlights rows={allRows} />}
+      {!embed && activeMode === "drivers" && rows.length > 0 && (
+        <LeagueHighlights rows={allRows} />
+      )}
     </div>
   );
 }

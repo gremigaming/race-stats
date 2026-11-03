@@ -58,6 +58,14 @@ export function trackPath(
     : path;
 }
 
+export function tracksPath(formulaKey: string): string {
+  return `/${encodeURIComponent(formulaKey)}/${TRACKS_ROUTE_SEGMENT}`;
+}
+
+export function sessionsPath(formulaKey: string): string {
+  return `/${encodeURIComponent(formulaKey)}/${SESSIONS_ROUTE_SEGMENT}`;
+}
+
 export function sessionPath(formulaKey: string, slug: string): string {
   return `/${encodeURIComponent(formulaKey)}/${SESSIONS_ROUTE_SEGMENT}/${slug}`;
 }

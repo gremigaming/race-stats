@@ -11,7 +11,9 @@ import { Analytics } from "@vercel/analytics/react";
 import { Layout } from "./components/Layout";
 import { DashboardPage } from "./pages/DashboardPage";
 import { SessionPage } from "./pages/SessionPage";
+import { SessionsPage } from "./pages/SessionsPage";
 import { TrackProgressPage } from "./pages/TrackProgressPage";
+import { TracksPage } from "./pages/TracksPage";
 import { DriversPage } from "./pages/DriversPage";
 import { HeadToHeadPage } from "./pages/HeadToHeadPage";
 import { SafetyPage } from "./pages/SafetyPage";
@@ -98,7 +100,9 @@ function AppRoutes() {
           {/* The old Incidents tab: incidents now live per race on the safety rating page */}
           <Route
             path=":formulaKey/incidents"
-            element={<Navigate to="../safety?tab=personal" relative="path" replace />}
+            element={
+              <Navigate to="../safety?tab=personal" relative="path" replace />
+            }
           />
           <Route
             path=":formulaKey/race"
@@ -127,10 +131,26 @@ function AppRoutes() {
             />
           )}
           <Route
+            path=":formulaKey/sessions"
+            element={
+              <ScopedFormulaRoute>
+                <SessionsPage />
+              </ScopedFormulaRoute>
+            }
+          />
+          <Route
             path=":formulaKey/sessions/*"
             element={
               <ScopedFormulaRoute>
                 <SessionPage />
+              </ScopedFormulaRoute>
+            }
+          />
+          <Route
+            path=":formulaKey/tracks"
+            element={
+              <ScopedFormulaRoute>
+                <TracksPage />
               </ScopedFormulaRoute>
             }
           />

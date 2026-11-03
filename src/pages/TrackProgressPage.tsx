@@ -35,6 +35,7 @@ import { RaceSetupComparison } from "../components/RaceSetupComparison";
 import { getSessionTypeMeta } from "../components/sessionTypeMeta";
 import { PaceEvolutionChart } from "../components/track/PaceEvolutionChart";
 import { TrackKeyInsights } from "../components/track/TrackKeyInsights";
+import { CornerAnalysisPanel } from "../components/track/CornerAnalysisPanel";
 import { TrackQualifyingInsights } from "../components/track/TrackQualifyingInsights";
 import { TrackSessionHistory } from "../components/track/TrackSessionHistory";
 import { TrackStrategySection } from "../components/track/TrackStrategySection";
@@ -1307,6 +1308,11 @@ export function TrackProgressPage() {
                   rivalBenchmark={trackRivalBenchmark}
                 />
               )}
+
+              <CornerAnalysisPanel
+                sessions={raceData}
+                trackId={canonicalTrackId || trackId || ""}
+              />
 
               {/* Compound tyre life cards */}
               {selectedCompoundLifeStats.length > 0 && (

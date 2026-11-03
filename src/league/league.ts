@@ -1,5 +1,6 @@
 import type { DriverData, TelemetrySession } from "../types/telemetry";
 import { getFormulaComparisonKey } from "../utils/sessionTypes";
+import { getTeamName } from "../utils/colors";
 
 /**
  * GreMi Gang league mode.
@@ -42,6 +43,31 @@ export function displayName(name: string): string {
 
 export function driverKey(name: string): string {
   return displayName(name).toLowerCase();
+}
+
+const LEAGUE_TEAM_NAMES: Record<string, string> = {
+  "art gp": "ART Grand Prix",
+  "dams": "DAMS Lucas Oil",
+  "hitech": "Hitech TGR",
+  "invicta": "Invicta Racing",
+  "mp motorsport": "MP Motorsport",
+  "prema": "Prema Racing",
+  "rb": "Racing Bulls",
+  "rb f1 team": "Racing Bulls",
+  "racing bulls": "Racing Bulls",
+  "red bull": "Red Bull Racing",
+  "kick sauber": "Sauber",
+  "stake f1 team": "Sauber",
+  "vcarb": "Racing Bulls",
+  "visa cash app rb": "Racing Bulls",
+  "van amersfoort": "Van Amersfoort Racing",
+  mclaren: "McLaren",
+};
+
+function leaderboardTeamName(team: string): string {
+  const resolved = displayName(getTeamName(displayName(team)));
+  const withoutSeason = resolved.replace(/\s+[’']\d{2}$/, "");
+  return LEAGUE_TEAM_NAMES[driverKey(withoutSeason)] ?? withoutSeason;
 }
 
 /**
@@ -196,48 +222,55 @@ function resultFromLapData(d: DriverData) {
   };
 }
 
-/** One result per named driver per race. */
-export function raceResults(race: LeagueRace): Map<string, DriverResult> {
+function resultForDriver(race: LeagueRace, d: DriverData): DriverResult {
   const { session, file } = race;
-  const drivers = session["classification-data"] ?? [];
+  const key = driverKey(d["driver-name"]);
   const fastest = session.records?.fastest?.lap;
   const overtakes = session.overtakes?.records ?? [];
+  const fc = d["final-classification"];
+  const r = fc
+    ? {
+        position: fc.position ?? null,
+        grid: fc["grid-position"] || null,
+        status: fc["result-status"] ?? "",
+        points: fc.points ?? 0,
+        best: fc["best-lap-time-ms"] ?? 0,
+      }
+    : resultFromLapData(d);
+
+  return {
+    file,
+    track: session["session-info"]?.["track-id"] ?? "",
+    date: sessionDate(file),
+    position: r.position,
+    grid: r.grid,
+    status: r.status,
+    points: r.points,
+    bestLapMs: r.best > 0 ? r.best : null,
+    fastestLap:
+      fastest != null &&
+      (fastest["driver-index"] === d.index ||
+        (fastest["driver-index"] == null &&
+          driverKey(fastest["driver-name"] ?? "") === key)),
+    pole: r.grid === 1,
+    field: (session["classification-data"] ?? []).length,
+    racePaceMs: racePace(d),
+    overtakes: overtakes.filter(
+      (o) => driverKey(o["overtaking-driver-name"] ?? "") === key,
+    ).length,
+    topSpeed: d["top-speed-kmph"] || null,
+    incidents: (d["warning-penalty-history"] ?? []).length,
+  };
+}
+
+/** One result per named driver per race. */
+export function raceResults(race: LeagueRace): Map<string, DriverResult> {
   const out = new Map<string, DriverResult>();
-  for (const d of drivers) {
+  for (const d of race.session["classification-data"] ?? []) {
     if (!isNamedDriver(d)) continue;
     const key = driverKey(d["driver-name"]);
     if (out.has(key)) continue;
-    const fc = d["final-classification"];
-    const r = fc
-      ? {
-          position: fc.position ?? null,
-          grid: fc["grid-position"] || null,
-          status: fc["result-status"] ?? "",
-          points: fc.points ?? 0,
-          best: fc["best-lap-time-ms"] ?? 0,
-        }
-      : resultFromLapData(d);
-    out.set(key, {
-      file,
-      track: session["session-info"]?.["track-id"] ?? "",
-      date: sessionDate(file),
-      position: r.position,
-      grid: r.grid,
-      status: r.status,
-      points: r.points,
-      bestLapMs: r.best > 0 ? r.best : null,
-      fastestLap:
-        fastest != null &&
-        driverKey(fastest["driver-name"] ?? "") === key,
-      pole: r.grid === 1,
-      field: drivers.length,
-      racePaceMs: racePace(d),
-      overtakes: overtakes.filter(
-        (o) => driverKey(o["overtaking-driver-name"] ?? "") === key,
-      ).length,
-      topSpeed: d["top-speed-kmph"] || null,
-      incidents: (d["warning-penalty-history"] ?? []).length,
-    });
+    out.set(key, resultForDriver(race, d));
   }
   return out;
 }
@@ -305,6 +338,87 @@ export function leaderboard(races: LeagueRace[]): LeaderboardRow[] {
   return [...rows.values()]
     .map(({ finishes, gains, ...row }) => ({
       ...row,
+      avgFinish: avg(finishes),
+      bestFinish: finishes.length ? Math.min(...finishes) : null,
+      avgGain: avg(gains),
+    }))
+    .sort(
+      (a, b) =>
+        b.points - a.points ||
+        b.wins - a.wins ||
+        (a.avgFinish ?? 99) - (b.avgFinish ?? 99),
+    );
+}
+
+/** Team standings include every classified car, even when its driver name is hidden. */
+export function teamLeaderboard(races: LeagueRace[]): LeaderboardRow[] {
+  const lastSeen = new Map<string, number>();
+  const rows = new Map<
+    string,
+    LeaderboardRow & {
+      finishes: number[];
+      gains: number[];
+      raceFiles: Set<string>;
+    }
+  >();
+
+  for (const race of races) {
+    if (!isRaceSession(race.session)) continue;
+    const date = raceDate(race.file)?.getTime() ?? 0;
+    for (const d of race.session["classification-data"] ?? []) {
+      const name = leaderboardTeamName(d.team ?? "");
+      if (!name) continue;
+      const key = driverKey(name);
+      const row =
+        rows.get(key) ??
+        {
+          key,
+          name,
+          races: 0,
+          wins: 0,
+          podiums: 0,
+          poles: 0,
+          fastestLaps: 0,
+          points: 0,
+          avgFinish: null,
+          bestFinish: null,
+          avgGain: null,
+          dnfs: 0,
+          finishes: [],
+          gains: [],
+          raceFiles: new Set<string>(),
+        };
+      row.raceFiles.add(race.file);
+      if (date >= (lastSeen.get(key) ?? Number.NEGATIVE_INFINITY)) {
+        row.name = name;
+        lastSeen.set(key, date);
+      }
+
+      const result = resultForDriver(race, d);
+      row.points += result.points;
+      if (result.pole) row.poles += 1;
+      if (result.fastestLap) row.fastestLaps += 1;
+      if (!finished(result.status)) row.dnfs += 1;
+      else if (result.position != null) {
+        row.finishes.push(result.position);
+        if (result.position === 1) row.wins += 1;
+        if (result.position <= 3) row.podiums += 1;
+        if (result.grid != null && result.grid > 0) {
+          row.gains.push(result.grid - result.position);
+        }
+      }
+      rows.set(key, row);
+    }
+  }
+
+  const avg = (values: number[]) =>
+    values.length
+      ? values.reduce((sum, value) => sum + value, 0) / values.length
+      : null;
+  return [...rows.values()]
+    .map(({ finishes, gains, raceFiles, ...row }) => ({
+      ...row,
+      races: raceFiles.size,
       avgFinish: avg(finishes),
       bestFinish: finishes.length ? Math.min(...finishes) : null,
       avgGain: avg(gains),

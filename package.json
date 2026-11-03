@@ -5,7 +5,7 @@
   "author": "linuz90",
   "license": "MIT",
   "type": "module",
-  "packageManager": "pnpm@10.33.2",
+  "packageManager": "pnpm@12.16.1",
   "engines": {
     "pnpm": ">=10.26.0"
   },
@@ -17,7 +17,7 @@
     "dev:prod": "vite --mode devprod",
     "build": "pnpm typecheck:node && tsc && vite build",
     "typecheck:node": "tsc -p tsconfig.node.json --noEmit",
-    "test": "pnpm test:session-index && pnpm test:tracks && pnpm test:lap-stats && pnpm test:race-pace && pnpm test:energy-stats && pnpm test:fuel && pnpm test:speed && pnpm test:event-locations && pnpm test:normalization && pnpm test:share-text && pnpm test:strategy",
+    "test": "pnpm test:session-index && pnpm test:tracks && pnpm test:lap-stats && pnpm test:race-pace && pnpm test:energy-stats && pnpm test:fuel && pnpm test:speed && pnpm test:event-locations && pnpm test:corners && pnpm test:normalization && pnpm test:share-text && pnpm test:strategy",
     "test:session-index": "tsx --test src/plugin/session-summary-index.test.ts",
     "test:tracks": "tsx --test src/utils/tracks.test.ts",
     "test:lap-stats": "tsx --test tests/lap-stats.test.ts",
@@ -26,6 +26,7 @@
     "test:fuel": "tsx --test src/utils/stats/energy.test.ts src/utils/stats/trackAggregates.test.ts",
     "test:speed": "tsx --test tests/speed-analysis.test.ts",
     "test:event-locations": "tsx --test src/analysis/eventLocationBreakdown.test.ts",
+    "test:corners": "tsx --test src/analysis/cornerAnalysis.test.ts src/analysis/cornerReplay.test.ts",
     "test:normalization": "tsx --test src/utils/normalizeSession.test.ts",
     "test:share-text": "tsx --test tests/share-text.test.ts",
     "test:strategy": "tsx --test tests/track-strategy.test.ts",

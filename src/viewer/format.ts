@@ -33,9 +33,21 @@ export interface RaceIncident {
   kind?: "incident" | "tap";
   contacts: { t: number; a: number; b: number; severity: number }[];
   /** surfaces: what each wheel (rl, rr, fl, fr) touched off the tarmac around the incident. */
-  drivers: { car: number; role: string; verdict?: string; rules?: string[]; surfaces?: Record<string, string> }[];
+  drivers: {
+    car: number;
+    role: string;
+    verdict?: string;
+    rules?: string[];
+    surfaces?: Record<string, string>;
+  }[];
   /** The fault engine's call (rulebook verdicts.py): severity 1..10 is the harm done to the other car. */
-  verdict?: { verdict?: string; at_fault?: number | null; rule?: string; severity?: number; why?: string };
+  verdict?: {
+    verdict?: string;
+    at_fault?: number | null;
+    rule?: string;
+    severity?: number;
+    why?: string;
+  };
 }
 
 /** Incidents from this severity up get the PiP replay, the pop-ups and the broadcast camera (GreMi, 2 Nov 2026). */
@@ -139,7 +151,12 @@ export interface Chunk {
 /** Decode a GMLC chunk (see live/race.py). The buffer must start at byte 0 of its ArrayBuffer. */
 export function decodeChunk(buf: ArrayBuffer): Chunk {
   const dv = new DataView(buf);
-  const magic = String.fromCharCode(dv.getUint8(0), dv.getUint8(1), dv.getUint8(2), dv.getUint8(3));
+  const magic = String.fromCharCode(
+    dv.getUint8(0),
+    dv.getUint8(1),
+    dv.getUint8(2),
+    dv.getUint8(3),
+  );
   if (magic !== "GMLC") throw new Error("not a race chunk");
   const version = dv.getUint8(4);
   const cars = dv.getUint8(5);
@@ -181,14 +198,35 @@ export function decodeChunk(buf: ArrayBuffer): Chunk {
     gap = new Uint32Array(m);
     for (let i = 0; i < m; i++) gap[i] = dv.getUint16(pos + i * 2, true) * 10;
   }
-  return { t0, cars, n, t, x, z, y, dist, heading, speed, throttle, brake, steer, gear, off, lap, pos: place, gap };
+  return {
+    t0,
+    cars,
+    n,
+    t,
+    x,
+    z,
+    y,
+    dist,
+    heading,
+    speed,
+    throttle,
+    brake,
+    steer,
+    gear,
+    off,
+    lap,
+    pos: place,
+    gap,
+  };
 }
 
-/** Where races are read from: Cloudflare R2 (the live server publishes there), then this site. */
-export const RACE_SOURCES = [
-  "https://replays.gremigaming.com/",
-  `${import.meta.env.BASE_URL}league/races/`,
-];
+/** Where races are read from: local dev proxy, Cloudflare R2, then this site. */
+export const RACE_SOURCES = import.meta.env.DEV
+  ? ["/__replays/", "/__replays-pages/"]
+  : [
+      "https://replays.gremigaming.com/",
+      `${import.meta.env.BASE_URL}league/races/`,
+    ];
 
 async function getJson<T>(url: string): Promise<T | null> {
   try {
@@ -199,33 +237,71 @@ async function getJson<T>(url: string): Promise<T | null> {
   }
 }
 
+export interface RaceIndexLoadResult {
+  races: (RaceIndexEntry & { base: string })[];
+  /** Number of sources that returned a readable index. */
+  availableSources: number;
+}
+
 /** Every race from every source, newest first, each with the source it lives in. */
-export async function loadRaceIndex(): Promise<(RaceIndexEntry & { base: string })[]> {
+export async function loadRaceIndexDetailed(): Promise<RaceIndexLoadResult> {
   const lists = await Promise.all(
     RACE_SOURCES.map(async (base) => {
-      const idx = await getJson<{ races: RaceIndexEntry[] }>(`${base}index.json`);
-      return (idx?.races ?? []).map((r) => ({ ...r, base }));
+      const idx = await getJson<{ races: RaceIndexEntry[] }>(
+        `${base}index.json`,
+      );
+      return {
+        available: idx != null,
+        races: (idx?.races ?? []).map((r) => ({ ...r, base })),
+      };
     }),
   );
   // a race in more than one source keeps the first source; picker stats it lacks come from the others
   const byUid = new Map<string, RaceIndexEntry & { base: string }>();
   // the site's bundle of a race the live server published carries its session uid: the same race
-  for (const r of lists.flat()) {
+  for (const r of lists.flatMap((list) => list.races)) {
     const key = r.session_uid ?? r.uid;
     const had = byUid.get(key);
-    byUid.set(key, had ? { ...r, ...Object.fromEntries(Object.entries(had).filter(([, v]) => v !== undefined)), base: had.base } : r);
+    byUid.set(
+      key,
+      had
+        ? {
+            ...r,
+            ...Object.fromEntries(
+              Object.entries(had).filter(([, v]) => v !== undefined),
+            ),
+            base: had.base,
+          }
+        : r,
+    );
   }
-  return [...byUid.values()].sort((a, b) => b.started.localeCompare(a.started));
+  return {
+    races: [...byUid.values()].sort((a, b) =>
+      b.started.localeCompare(a.started),
+    ),
+    availableSources: lists.filter((list) => list.available).length,
+  };
+}
+
+export async function loadRaceIndex(): Promise<
+  (RaceIndexEntry & { base: string })[]
+> {
+  return (await loadRaceIndexDetailed()).races;
 }
 
 /** The live race server (gremigaming/race-control-stats live/server.py): sessions still running. */
 export const LIVE_SERVER = "https://live.gremigaming.com";
 
 /** The manifest of one race and the base URL its chunks come from (a running race: the live server). */
-export async function loadManifest(uid: string): Promise<{ manifest: RaceManifest; base: string } | null> {
+export async function loadManifest(
+  uid: string,
+): Promise<{ manifest: RaceManifest; base: string } | null> {
   for (const base of [...RACE_SOURCES, `${LIVE_SERVER}/s/`]) {
-    const manifest = await getJson<RaceManifest>(`${base}${encodeURIComponent(uid)}/manifest.json`);
-    if (manifest) return { manifest, base: `${base}${encodeURIComponent(uid)}/` };
+    const manifest = await getJson<RaceManifest>(
+      `${base}${encodeURIComponent(uid)}/manifest.json`,
+    );
+    if (manifest)
+      return { manifest, base: `${base}${encodeURIComponent(uid)}/` };
   }
   return null;
 }

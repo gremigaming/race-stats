@@ -99,6 +99,15 @@ body {
   outline-offset: 1px;
 }
 
+/* Touchscreens cannot hover to reveal the track-map zoom controls. Keep them
+   expanded there so every action is available without an extra tap. */
+@media (hover: none), (pointer: coarse) {
+  .track-map-zoom-details {
+    max-width: 8rem;
+    opacity: 1;
+  }
+}
+
 /* Scroll-driven masks hide the fade at the edge you're already touching. */
 @property --scroll-mask-top-fade {
   syntax: "<length>";

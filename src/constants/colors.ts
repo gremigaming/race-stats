@@ -43,6 +43,19 @@ export const TEAM_COLORS: Record<string, string> = {
 };
 
 export const TEAM_NAMES: Record<string, string> = {
+  // F2 team IDs from the 2025 roster.
+  "209": "ART Grand Prix",
+  "210": "Campos Racing",
+  "211": "Rodin Motorsport",
+  "212": "AIX Racing",
+  "213": "DAMS Lucas Oil",
+  "214": "Hitech TGR",
+  "215": "MP Motorsport",
+  "216": "Prema Racing",
+  "217": "Trident",
+  "218": "Van Amersfoort Racing",
+  "219": "Invicta Racing",
+  // F1 team IDs from newer telemetry exports.
   "220": "Mercedes",
   "221": "Ferrari",
   "222": "Red Bull Racing",
