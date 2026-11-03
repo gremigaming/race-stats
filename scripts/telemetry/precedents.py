@@ -19,6 +19,9 @@ its own precedent, so the numbers learn each call separately.
   grading/decisions-seed.json   GreMi's grades of calibration batches 1-3 (grading page artifact)
   grading/decisions.json        final calls from the staff page (written by the staff server)
   grading/precedents.json       the numbers of every graded incident (built here, committed)
+  races/corrections.json        staff changes of SR points and accepted protests: each one is a
+                                lesson too (an incident the engine judged wrongly), unless "learn"
+                                is false (GreMi, 3 Nov 2026: that day's changes were leniency)
 
     python3 scripts/telemetry/precedents.py build CACHE   # numbers for new grades (needs telemetry)
     python3 scripts/telemetry/precedents.py apply CACHE   # precedents into CACHE/verdicts/*.json
@@ -42,6 +45,8 @@ ROOT = os.path.dirname(os.path.dirname(HERE))
 DECISIONS = os.path.join(ROOT, "grading", "decisions.json")
 SEED = os.path.join(ROOT, "grading", "decisions-seed.json")
 STORE = os.path.join(ROOT, "grading", "precedents.json")
+CORRECTIONS = os.path.join(ROOT, "races", "corrections.json")
+NO_LESSON_DAYS = ("2026-11-03",)   # GreMi: penalties changed that day were leniency, not wrong calls
 SESSIONS = os.environ.get("LEAGUE_SESSIONS_DIR", os.path.join(ROOT, "public", "league", "sessions"))
 
 ALONGSIDE_M = 4.0 # same as verdicts.ALONGSIDE_M
@@ -136,6 +141,57 @@ def load_decisions():
                 out[k] = d
         except (OSError, ValueError):
             continue
+    return out
+
+
+def _sev_of(pts):
+    """The severity behind v2.2 contact points (1 / 3 / 6 / 10)."""
+    a = abs(pts)
+    return 9 if a >= 10 else 6 if a >= 6 else 4 if a >= 3 else 2
+
+
+def load_lessons(cache):
+    """Staff changes of contact points (and accepted protests) as graded incidents: the engine's
+    call on that contact with the changed driver cleared (points to 0), blamed (points from 0) or
+    kept (points changed). Needs CACHE/verdicts (the race's incidents and recording)."""
+    try:
+        changes = json.load(open(CORRECTIONS, encoding="utf-8")).get("changes", [])
+    except (OSError, ValueError):
+        return {}
+    groups = {}
+    for c in changes:
+        if c.get("type") != "incident" or not c.get("inc") or "|contact|" not in c.get("id", ""):
+            continue
+        if c.get("learn") is False or (c.get("at") or "")[:10] in NO_LESSON_DAYS:
+            continue
+        groups.setdefault((c["file"], round(c["inc"]["t"], 1)), []).append(c)
+    out = {}
+    for (file, t), cs in groups.items():
+        try:
+            data = json.load(open(os.path.join(cache, "verdicts", file), encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        pair = set(cs[0]["inc"].get("pair") or [])
+        inc = next((i for i in data["incidents"] if abs(i["t0"] - t) < 0.2 and pair <= set(i["cars"])), None)
+        if inc is None:
+            continue
+        names = names_of(file)
+        name = lambda i: names.get(i, f"car {i}")  # noqa: E731
+        fault = set(inc.get("at_fault") or [])
+        sev = inc.get("severity") or 1
+        for c in cs:
+            if float(c["pts"]) >= 0:
+                fault.discard(c["car"])
+            else:
+                fault.add(c["car"])
+                sev = _sev_of(float(c["pts"]))
+        lid = "s-" + hashlib.sha1(f"{file}|{t}".encode()).hexdigest()[:8]
+        out[lid] = {"id": lid, "by": "GreMi" if all(c.get("owner") for c in cs) else "staff", "lesson": True,
+                    "real": True, "at_fault": [name(x) for x in sorted(fault)], "severity": sev if fault else 0,
+                    "verdict": blame_text(sorted(fault), name), "note": "; ".join(c.get("reason", "") for c in cs)[:300],
+                    "drivers": [{"car": x, "name": name(x)} for x in inc["cars"]], "recording": data["recording"],
+                    "t": round(inc["t0"] - (data.get("offset") or 0), 1), "track": re.sub(r"^Race_|_\d{4}_.*$", "", file).replace("_", " "),
+                    "date": "-".join(re.search(r"(\d{4})_(\d\d)_(\d\d)", file).groups())}
     return out
 
 
@@ -296,6 +352,9 @@ def _build_parts(d, rec, incs, vs):
 def build(cache):
     store = load_store()
     decs = load_decisions()
+    lessons = load_lessons(cache)
+    print(len(lessons), "staff changes / protests as lessons")
+    decs.update({k: v for k, v in lessons.items() if k not in decs})
     todo = {}
     for k, d in decs.items():
         mine = [p for pid, p in store["precedents"].items() if parent_of(pid, p) == k]

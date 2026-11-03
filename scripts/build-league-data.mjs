@@ -161,6 +161,14 @@ const renameDrivers = (value) => {
   return value;
 };
 
+// An AI car or a hidden name, from the game's own flags (a name ending in "#13" can be a real
+// driver's name). A human who drops out turns ai-controlled but keeps driver id 255/65535.
+function isBotCar(d) {
+  const p = d["participant-data"];
+  if (!p) return / #\d+$/.test((d["driver-name"] ?? "").replace(/[\s\u00a0]+/g, " ").trim());
+  return p["show-online-names"] === false || (p["ai-controlled"] && ![255, 65535].includes(p["driver-id"]));
+}
+
 // Game AI drivers carry real F1 names (NORRIS, PÉREZ...). Give them the same
 // "Team #number" name as the other AI cars so they never show up as drivers.
 // A human who drops out also turns ai-controlled, but keeps driver id 255/65535.
@@ -225,7 +233,7 @@ function carsOf(data) {
     const shared = p["race-number"] === 2 && (p.nationality ?? "Unspecified") === "Unspecified";
     const hidden = p["show-online-names"] === false;
     const name = renameDrivers(d["driver-name"] ?? "");
-    if (!hidden && (!name || / #\d+$/.test(name))) return [];
+    if (!hidden && !name) return [];   // AI cars are gone above; "ERC | Samy #13" is a real name
     return [{ index: d.index, name, hidden, shared, combo: `${p["race-number"]}|${p.nationality}|${p.platform}` }];
   });
 }
@@ -538,7 +546,7 @@ for (const name of files) {
   const data = JSON.parse(readFileSync(join(OUT, "sessions", name), "utf8"));
   for (const d of data["classification-data"]) {
     const shown = (d["driver-name"] ?? "").replace(/[\s\u00a0]+/g, " ").trim();
-    if (!shown || d["participant-data"]?.["show-online-names"] === false || / #\d+$/.test(shown)) continue;
+    if (!shown || isBotCar(d)) continue;
     allNames.set(norm(shown), shown);
   }
 }

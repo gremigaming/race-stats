@@ -12,7 +12,26 @@ game's own penalties only track limits / corner cutting still count. Without it
 the old game-based rules run, as the site does today. SR_OUT: output folder.
 """
 import json, glob, re, sys, os, collections, statistics, math
-AI = re.compile(r" #\d+$")  # AI and hidden names, e.g. "Ferrari '26 #28", "RB #46"
+AI_RE = re.compile(r" #\d+$")  # AI and hidden names look like "Ferrari '26 #28", "RB #46"
+REAL = set()   # names the game showed as a human's own name somewhere ("ERC | Samy #13" is a real name)
+
+
+def is_real(c):
+    """A human with their name shown: not hidden, not an AI car (a human who quit turns AI but keeps driver id 255/65535)."""
+    p = c.get("participant-data")
+    if not p:
+        return not AI_RE.search(nm_(c["driver-name"]))
+    return p.get("show-online-names") is not False and not (p.get("ai-controlled") and p.get("driver-id") not in (255, 65535))
+
+
+class _AI:
+    """AI.search(name): an AI car or a hidden name; a real driver whose name ends in "#13" is neither."""
+    @staticmethod
+    def search(n):
+        return bool(AI_RE.search(n)) and n not in REAL
+
+
+AI = _AI()
 SEV = {"LOW": 0, "MEDIUM": 1, "HIGH": 2}
 BASE = {"LOW": 0, "MEDIUM": 2, "HIGH": 4}
 NAME = {"LOW": "light", "MEDIUM": "medium", "HIGH": "heavy"}
@@ -46,6 +65,8 @@ for f in ALL:
     try: d = json.load(open(f))
     except Exception: continue
     best[f] = {}
+    for c in d.get("classification-data") or []:
+        if is_real(c): REAL.add(nm_(c["driver-name"]))
     for c in d.get("classification-data") or []:
         n = nm_(c["driver-name"])
         if AI.search(n): continue
@@ -483,6 +504,9 @@ try:
 except FileNotFoundError:
     CHANGES = []
 FIX = {c["id"]: c for c in CHANGES if c.get("type") == "incident"}
+# a change made on the staff page also keeps its contact (race-file time): it stays on that contact even
+# when the items of a race are numbered differently later (a split or a new call moves the counters)
+FIX_INC = {(c["file"], c.get("car"), round(c["inc"]["t"], 1)): c for c in FIX.values() if c.get("inc")}
 ADD = collections.defaultdict(list)
 for c in CHANGES:
     if c.get("type") == "add": ADD[c["file"]].append(c)
@@ -493,12 +517,17 @@ def incref(r):
 
 def apply_staff(name, items, car, is_race, would):
     """Gives every item its id and applies the staff corrections for this file."""
+    here = {(name, car.get(n), round(it["inc"]["t"], 1)) for n, its in items.items() for it in its if it.get("inc")}
     for n, its in items.items():
         k = collections.Counter()
         for it in its:
             key = f"{name}|{car.get(n, '?')}|{it['cat']}|{it['lap'] or 0}"
             it["id"] = f"{key}|{k[key]}"; k[key] += 1
-            fx = FIX.get(it["id"])
+            fx = FIX_INC.get((name, car.get(n), round(it["inc"]["t"], 1))) if it.get("inc") else None
+            if fx is None:   # older changes have only the item id; one whose contact is still here waits for that item
+                fx = FIX.get(it["id"])
+                if fx and fx.get("inc") and (fx["file"], fx.get("car"), round(fx["inc"]["t"], 1)) in here:
+                    fx = None
             if fx:
                 it["orig"] = it["pts"]; it["pts"] = half(float(fx["pts"])); it["staff"] = fx.get("reason") or "changed by staff"
     by_car = {v: n for n, v in car.items()}
