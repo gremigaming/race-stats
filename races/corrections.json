@@ -307,6 +307,18 @@
       "car": 7,
       "pts": -3.0,
       "was": -6.0
+    },
+    {
+      "id": "Race_Catalunya_2026_10_30_16_38_55.json|7|contact|1|1",
+      "type": "incident",
+      "reason": "His fault but not that bad",
+      "by": "319544045435224067",
+      "at": "2026-11-03T13:20:55Z",
+      "file": "Race_Catalunya_2026_10_30_16_38_55.json",
+      "driver": "Stepino81",
+      "car": 7,
+      "pts": -3.0,
+      "was": -6.0
     }
   ]
 }
