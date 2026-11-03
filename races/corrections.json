@@ -280,6 +280,21 @@
       "reason": "Protest accepted: Agreed",
       "by": "452166434588590080",
       "at": "2026-11-03T08:18:16Z"
+    },
+    {
+      "id": "a0067eeb6ddb",
+      "type": "kick",
+      "reason": "Hitting nex on purpose",
+      "by": "319544045435224067",
+      "at": "2026-11-03T12:53:56Z",
+      "day": "2026-10-30",
+      "driver": "Lilleludde2012",
+      "cars": [
+        {
+          "file": "Race_Baku_2026_10_30_16_22_36.json",
+          "car": 13
+        }
+      ]
     }
   ]
 }
