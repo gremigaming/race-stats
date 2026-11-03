@@ -2,7 +2,6 @@ import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import { telemetryServer } from "./src/plugin/telemetry-server";
-import { changelogPlugin } from "./src/plugin/changelog";
 import { resolveDevServerPort } from "./scripts/dev-server-port.ts";
 
 export default defineConfig(({ mode }) => {
@@ -52,7 +51,6 @@ export default defineConfig(({ mode }) => {
     plugins: [
       react(),
       tailwindcss(),
-      changelogPlugin(),
       telemetryServer(env.TELEMETRY_DIR, base),
     ],
   };

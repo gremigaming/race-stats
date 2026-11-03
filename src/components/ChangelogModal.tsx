@@ -1,15 +1,12 @@
 import { type ComponentType } from "react";
-import { FileText, Github, Sparkles, Wrench } from "lucide-react";
-import changelog from "virtual:changelog";
-import { XIcon } from "./ui/icons";
+import { ArrowRight, FileText, Sparkles, Wrench } from "lucide-react";
+import { Link } from "react-router-dom";
+import changelog from "../data/changelog";
+import { useTelemetry } from "../context/TelemetryContext";
+import { ALL_FORMULA_SCOPE_KEY } from "../utils/formulaScope";
+import { dashboardPath } from "../utils/routes";
 import { Modal } from "./ui/Modal";
 import { ScrollArea } from "./ui/ScrollArea";
-import {
-  AUTHOR_TWITTER_HANDLE,
-  AUTHOR_TWITTER_URL,
-  REPO_URL,
-} from "../constants/links";
-import { pullRequestUrl } from "../utils/links";
 import { cn } from "../utils/cn";
 
 const TYPE_CONFIG: Record<
@@ -19,6 +16,17 @@ const TYPE_CONFIG: Record<
   feat: { icon: Sparkles, bg: "bg-emerald-500/15", fg: "text-emerald-400" },
   fix: { icon: Wrench, bg: "bg-amber-500/15", fg: "text-amber-400" },
   docs: { icon: FileText, bg: "bg-blue-500/15", fg: "text-blue-400" },
+};
+
+const DESTINATION_PATHS: Record<
+  (typeof changelog)[number]["destination"],
+  string
+> = {
+  tracks: "/tracks",
+  drivers: "/drivers",
+  safety: "/safety",
+  "personal-safety": "/safety?tab=personal",
+  race: "/race",
 };
 
 function groupByDate(
@@ -40,34 +48,16 @@ function formatDate(iso: string): string {
 }
 
 export function ChangelogModal({ onClose }: { onClose: () => void }) {
+  const { scopeKey } = useTelemetry();
   const grouped = groupByDate(changelog);
   const dates = Object.keys(grouped);
+  const scopePath = dashboardPath(scopeKey ?? ALL_FORMULA_SCOPE_KEY);
 
   return (
     <Modal onClose={onClose} className="max-w-[680px] max-h-[70vh]">
       {/* Header */}
-      <div className="flex items-center gap-4 px-6 pt-5 pb-4 border-b border-white/[0.05] pr-14">
+      <div className="flex items-center px-6 pt-5 pb-4 border-b border-white/[0.05] pr-14">
         <h2 className="text-base font-semibold text-zinc-100">What's new</h2>
-        <div className="flex items-center gap-1">
-          <a
-            href={REPO_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1.5 rounded-md px-2 py-1 text-xs text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04] transition-colors"
-          >
-            <Github className="h-3.5 w-3.5" />
-            GitHub
-          </a>
-          <a
-            href={AUTHOR_TWITTER_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1.5 rounded-md px-2 py-1 text-xs text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04] transition-colors"
-          >
-            <XIcon className="h-3 w-3" />
-            {AUTHOR_TWITTER_HANDLE}
-          </a>
-        </div>
       </div>
 
       {/* Content */}
@@ -84,33 +74,31 @@ export function ChangelogModal({ onClose }: { onClose: () => void }) {
               {grouped[date].map((entry) => {
                 const config = TYPE_CONFIG[entry.type];
                 return (
-                  <li key={entry.hash} className="flex items-start gap-2.5">
-                    {config && (
-                      <span
-                        className={cn(
-                          "shrink-0 mt-0.5 flex h-5 w-5 items-center justify-center rounded",
-                          config.bg,
-                        )}
-                      >
-                        <config.icon className={cn("h-3 w-3", config.fg)} />
-                      </span>
-                    )}
-                    <span className="text-sm text-zinc-300 leading-snug">
-                      {entry.message}
-                      {entry.pr && (
-                        <>
-                          {" "}
-                          <a
-                            href={pullRequestUrl(entry.pr)}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center rounded px-1.5 py-0.5 text-2xs leading-none font-medium bg-zinc-800 text-zinc-500 hover:bg-zinc-700 hover:text-zinc-300 transition-colors align-middle"
-                          >
-                            #{entry.pr}
-                          </a>
-                        </>
+                  <li key={entry.id}>
+                    <Link
+                      to={`${scopePath}${DESTINATION_PATHS[entry.destination]}`}
+                      onClick={onClose}
+                      className="group -mx-2 flex items-start gap-2.5 rounded-md px-2 py-1 transition-colors hover:bg-white/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/70"
+                    >
+                      {config && (
+                        <span
+                          aria-hidden="true"
+                          className={cn(
+                            "shrink-0 mt-0.5 flex h-5 w-5 items-center justify-center rounded",
+                            config.bg,
+                          )}
+                        >
+                          <config.icon className={cn("h-3 w-3", config.fg)} />
+                        </span>
                       )}
-                    </span>
+                      <span className="flex-1 text-sm leading-snug text-zinc-300 group-hover:text-zinc-100">
+                        {entry.message}
+                      </span>
+                      <ArrowRight
+                        aria-hidden="true"
+                        className="mt-0.5 h-3.5 w-3.5 shrink-0 text-zinc-500 opacity-50 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100"
+                      />
+                    </Link>
                   </li>
                 );
               })}

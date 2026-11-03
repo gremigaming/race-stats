@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
-import changelog from "virtual:changelog";
+import changelog from "../data/changelog";
 import { SESSIONS_ROUTE_SEGMENT, TRACKS_ROUTE_SEGMENT } from "../constants/routes";
 import {
   CHANGELOG_SEEN_STORAGE_KEY,
@@ -72,11 +72,11 @@ export function Layout() {
   const [showChangelog, setShowChangelog] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
-  const latestHash = changelog[0]?.hash ?? "";
+  const latestChangelogId = changelog[0]?.id ?? "";
   const [hasUnseen, setHasUnseen] = useState(
     () =>
-      latestHash !== "" &&
-      readStoredString(CHANGELOG_SEEN_STORAGE_KEY) !== latestHash,
+      latestChangelogId !== "" &&
+      readStoredString(CHANGELOG_SEEN_STORAGE_KEY) !== latestChangelogId,
   );
   const dragging = useRef(false);
   const filtersActive =
@@ -100,11 +100,11 @@ export function Layout() {
 
   const openChangelog = useCallback(() => {
     setShowChangelog(true);
-    if (latestHash) {
-      writeStoredString(CHANGELOG_SEEN_STORAGE_KEY, latestHash);
+    if (latestChangelogId) {
+      writeStoredString(CHANGELOG_SEEN_STORAGE_KEY, latestChangelogId);
       setHasUnseen(false);
     }
-  }, [latestHash]);
+  }, [latestChangelogId]);
 
   const onMouseDown = useCallback((e: React.MouseEvent) => {
     e.preventDefault();

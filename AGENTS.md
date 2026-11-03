@@ -12,3 +12,10 @@ on GitHub Pages by `.github/workflows/site.yml`.
 - Run the site workflow by hand with `previews` on to get screenshots of the
   main pages committed to `previews/` (`scripts/screenshots.mjs`).
 - New race files arrive from `uploader/RaceUploader.ps1` on the racing PC.
+- Keep the in-app “What's new” list in `src/data/changelog.ts` current when
+  making user-facing changes. Turn relevant recent commits into concise,
+  GreMi Gang Race Stats-specific highlights. Give each row one distinct
+  feature or fix, group related details of that feature together, and give
+  each row a relevant in-app destination. Omit routine race uploads and
+  staff-only or driver-specific corrections. Keep upstream repository and
+  author links out of the modal.
