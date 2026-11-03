@@ -677,13 +677,12 @@
     },
     "b4-13": {
       "verdict": "Racing incident",
-      "by": "staff",
+      "by": "GreMi",
       "real": true,
       "at_fault": [],
-      "severity": 3.0,
+      "severity": 2,
       "note": "",
-      "votes": 1,
-      "agree": 100,
+      "at": 1793709613,
       "drivers": [
         {
           "car": 1,
