@@ -674,6 +674,42 @@
         ],
         "contacts": 7
       }
+    },
+    "b4-13": {
+      "verdict": "Not an incident",
+      "by": "staff",
+      "real": false,
+      "at_fault": [],
+      "severity": 0,
+      "note": "",
+      "votes": 1,
+      "agree": 100,
+      "drivers": [
+        {
+          "car": 1,
+          "name": "Hidden #2 (Mercedes '26)"
+        },
+        {
+          "car": 13,
+          "name": "#13 SethOnHere"
+        }
+      ],
+      "track": "Miami",
+      "date": "2026-10-30",
+      "race_file": "Race_Miami_2026_10_30_16_01_59.json",
+      "recording": "2026-10-30_15-51-13_Miami_Race.gmtel.gz",
+      "replay": "https://gremigaming.github.io/race-stats/f1/race/2026-10-30_15-51-13_Miami_Race?inc=139.1&car=1,13",
+      "engine": {
+        "rules": "v1",
+        "verdict": "Mercedes '26 #2 at fault",
+        "rule": "R2",
+        "severity": 4,
+        "why": "side by side; Mercedes '26 #2 moved 2.0 m across into the other car",
+        "at_fault": [
+          "Hidden #2 (Mercedes '26)"
+        ],
+        "contacts": 1
+      }
     }
   }
 }
