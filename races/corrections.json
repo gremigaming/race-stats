@@ -256,6 +256,18 @@
       "reason": "Protest accepted: Nowhere near, sorry",
       "by": "319544045435224067",
       "at": "2026-11-02T16:03:16Z"
+    },
+    {
+      "id": "Race_Monza_2026_10_28_20_14_22.json|7|contact|1|0",
+      "type": "incident",
+      "file": "Race_Monza_2026_10_28_20_14_22.json",
+      "driver": "DDRK",
+      "car": 7,
+      "pts": 0.0,
+      "was": -4.0,
+      "reason": "Protest accepted: Agreed",
+      "by": "452166434588590080",
+      "at": "2026-11-03T08:18:03Z"
     }
   ]
 }
