@@ -343,6 +343,18 @@
       "car": 4,
       "pts": 0.0,
       "was": -6.0
+    },
+    {
+      "id": "Race_Brazil_2026_10_25_17_04_22.json|2|contact|3|1",
+      "type": "incident",
+      "reason": "One time only, next time full penalty",
+      "by": "319544045435224067",
+      "at": "2026-11-03T13:27:51Z",
+      "file": "Race_Brazil_2026_10_25_17_04_22.json",
+      "driver": "Stepino81",
+      "car": 2,
+      "pts": -3.0,
+      "was": -10.0
     }
   ]
 }
