@@ -553,7 +553,7 @@ function SessionRow({ session, driver }: { session: SafetySession; driver: strin
           ))}
           {session.sting != null && session.sting > 0 && (
             <p className="text-red-300/90">
-              Instant sting: −{session.sting.toFixed(1).replace(/\.0$/, "")} SR (half of this race's penalty points,
+              Instant sting: −{session.sting.toFixed(1).replace(/\.0$/, "")} SR (half of this race's incident points,
               fading as you race on)
             </p>
           )}

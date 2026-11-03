@@ -73,7 +73,7 @@ const HOW_IT_WORKS: { title: string; body: ReactNode }[] = [
           {SR_START} + 25 × your average net score, at most 100, minus your sting, never below 0.
         </p>
         {li([
-          "Instant sting: the other half of a race's penalty points comes straight off your SR, shown on that race's card.",
+          "Instant sting: for incidents (contacts), the other half of their points also comes straight off your SR, shown on that race's card. Track limits, pit exit and retirements only lower your average.",
           "History: your last 50 races count. Every 10 races you drive after a race, it counts 20% less, sting included. Only races you drive age your history, so sitting out doesn't wash anything away.",
           "New drivers start with 3 neutral races (net 0) in their history, so a few clean races can't jump you straight to S.",
           "Above 50, every stream you skip moves your SR 10% back towards 50.",

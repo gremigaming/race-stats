@@ -586,7 +586,7 @@ def v21_current(n, now, detail=False):
 #   Ledger: net = min(B, V22_BONUS_CAP) - V22_DILUTE x P. History starts with V22_BUFFER neutral
 #           virtual races (net 0 = SR 50) that age out like real ones. Last V22_WINDOW races,
 #           each 10 races back weighs 20% less (counted in races driven, not in time).
-#   Sting: V22_STING x P comes off on that race's card and then fades with the same race-based
+#   Sting: V22_STING x incident P (contacts, staff calls; not track limits/DNF) comes off on that race's card and then fades with the same race-based
 #          weights (0.8 per 10 races, gone after the window): no lifetime debt, but chronic
 #          crashers stay below 50. SR_STING_FADES=0 makes it one-time (latest race only).
 #   SR = max(0, min(100, 50 + V22_K x average) - sting); live from race 1 (still marked provisional under 3 races).
@@ -602,18 +602,24 @@ V22_PROV = 1                             # live score from race 1 (the buffer cu
 V22_DRIFT = 0.1
 V22_STING_FADES = os.environ.get("SR_STING_FADES", "1") != "0"
 
+def v22_sting_pts(e):
+    """Penalty points that sting (GreMi, 3 Nov 2026): race incidents only (contacts and staff incident
+    calls). Track limits, pit exit and retirements only lower the average."""
+    return -sum(i["pts"] for i in e["items"] if i["pts"] < 0 and i["cat"] in ("contact", "staff"))
+
 def v22_current(n, now, detail=False):
     es = [e for e in entries[n] if e["stream"] <= now]
-    races = []; pb = pp = 0.0
+    races = []; pb = pp = pc = 0.0
     for e in es:
         b = sum(i["pts"] for i in e["items"] if i["pts"] > 0); p = -sum(i["pts"] for i in e["items"] if i["pts"] < 0)
-        if not e["race"]: pb += b; pp += p; continue
-        races.append((e["stream"], b + pb, p + pp)); pb = pp = 0.0
+        c = v22_sting_pts(e)
+        if not e["race"]: pb += b; pp += p; pc += c; continue
+        races.append((e["stream"], b + pb, p + pp, c + pc)); pb = pp = pc = 0.0
     if len(races) < V22_PROV: return (50.0, 0.0) if detail else 50.0
-    win = ([(None, 0.0, 0.0)] * V22_BUFFER + races)[-V22_WINDOW:]
+    win = ([(None, 0.0, 0.0, 0.0)] * V22_BUFFER + races)[-V22_WINDOW:]
     ws = [V22_DECAY ** (k / 10) for k in range(len(win) - 1, -1, -1)]
-    avg = sum(w * (min(b, V22_BONUS_CAP) - V22_DILUTE * p) for w, (_, b, p) in zip(ws, win)) / sum(ws)
-    sting = V22_STING * (sum(w * p for w, (_, _, p) in zip(ws, win)) if V22_STING_FADES else races[-1][2])
+    avg = sum(w * (min(b, V22_BONUS_CAP) - V22_DILUTE * p) for w, (_, b, p, _c) in zip(ws, win)) / sum(ws)
+    sting = V22_STING * (sum(w * c for w, (_, _, _p, c) in zip(ws, win)) if V22_STING_FADES else races[-1][3])
     sr = max(0.0, min(100.0, 50 + V22_K * avg) - sting)   # hard floor 0
     missed = now - races[-1][0]                            # streams skipped since your last race
     if sr > 50 and missed > 0: sr = 50 + (sr - 50) * (1 - V22_DRIFT) ** missed
@@ -731,7 +737,7 @@ for n, es in entries.items():
         "history": [x for x in h],
         "sessions": [{"file": e["file"], "race": e["race"], "stream": e["stream"], "weight": w,
                       "total": half(sum(i["pts"] for i in e["items"])), "items": e["items"],
-                      **({"sting": half(V22_STING * -sum(i["pts"] for i in e["items"] if i["pts"] < 0))} if V22 else {})}
+                      **({"sting": half(V22_STING * v22_sting_pts(e))} if V22 else {})}
                      for e, w in zip(es, weights(n, now))],
         "flags": flags[n],
     })
