@@ -671,7 +671,7 @@ public class GmLiveArtifactUploader
             WebSocketReceiveResult received = ws.ReceiveAsync(new ArraySegment<byte>(response), CancellationToken.None).Result;
             if (received.MessageType != WebSocketMessageType.Text)
                 throw new Exception("server returned an invalid acknowledgement");
-            string answer = Encoding.UTF8.GetString(response, 0, received.Count);
+            string answer = Encoding.UTF8.GetString(response, 0, received.Count).Replace(" ", "");
             if (answer.IndexOf("\"ok\":true", StringComparison.Ordinal) < 0)
                 throw new Exception("server rejected the upload: " + answer);
             return answer.IndexOf("\"status\":\"duplicate\"", StringComparison.Ordinal) >= 0 ? "already live" : "live";
