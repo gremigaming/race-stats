@@ -8,7 +8,7 @@
   "requested": null,
   "last": "2026-11-02"
  },
- "pending": 2,
+ "pending": 3,
  "tracks": [
   {
    "track": "Melbourne",
@@ -3154,7 +3154,18 @@
        "change": null,
        "text": "Starting setup",
        "why": "Your last quali setup.",
-       "sessions": [],
+       "sessions": [
+        {
+         "file": "2026-11-03_00-58-53_Losail_Race.gmtel.gz",
+         "date": "2026-11-03",
+         "session": "race",
+         "weather": 1,
+         "pace": 87006,
+         "best": 85412,
+         "mean": 87006,
+         "laps": 3
+        }
+       ],
        "verdict": {
         "result": "untested",
         "text": "Not driven yet."
@@ -3195,6 +3206,58 @@
        "change": null,
        "text": "Starting setup",
        "why": "Your last race setup.",
+       "sessions": [
+        {
+         "file": "2026-11-03_00-58-53_Losail_Race.gmtel.gz",
+         "date": "2026-11-03",
+         "session": "race",
+         "weather": 1,
+         "pace": 87006,
+         "best": 85412,
+         "mean": 87006,
+         "laps": 3
+        }
+       ],
+       "verdict": {
+        "result": "baseline",
+        "text": "Starting point: 1:27.006 over 1 session."
+       }
+      },
+      {
+       "v": 2,
+       "base": 1,
+       "created": "2026-11-03",
+       "saved": null,
+       "values": {
+        "fw": 50,
+        "rw": 26,
+        "don": 100,
+        "doff": 40,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 39,
+        "rs": 41,
+        "farb": 3,
+        "rarb": 10,
+        "frh": 22,
+        "rrh": 45,
+        "bb": 57,
+        "bp": 100,
+        "fr": 29.2,
+        "fl": 29.2,
+        "rr": 20.5,
+        "rl": 20.5
+       },
+       "change": {
+        "fw": [
+         48,
+         50
+        ]
+       },
+       "text": "Front wing 48 → 50",
+       "why": "More front grip against the mid-corner understeer.",
        "sessions": [],
        "verdict": {
         "result": "untested",
