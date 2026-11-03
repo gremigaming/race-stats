@@ -579,18 +579,20 @@ def v21_current(n, now, detail=False):
 #   Ledger: net = min(B, V22_BONUS_CAP) - V22_DILUTE x P. History starts with V22_BUFFER neutral
 #           virtual races (net 0 = SR 50) that age out like real ones. Last V22_WINDOW races,
 #           each 10 races back weighs 20% less (counted in races driven, not in time).
-#   Sting: V22_STING x P of your latest race comes off once (shown on that race's card);
-#          the next race replaces it, no lifetime debt.
+#   Sting: V22_STING x P comes off on that race's card and then fades with the same race-based
+#          weights (0.8 per 10 races, gone after the window): no lifetime debt, but chronic
+#          crashers stay below 50. SR_STING_FADES=0 makes it one-time (latest race only).
 #   SR = min(100, 50 + V22_K x average) - sting; provisional (shown as 50) under 3 races.
 #   Drift: above 50, each stream you skip after your last race pulls you V22_DRIFT of the way back to 50.
 # Tuned on the races since 19 Oct: /mnt/project-files/sr-rebalance/v2.2/.
 V22_STING, V22_DILUTE = 0.5, 0.5
 V22_WINDOW, V22_DECAY = 50, 0.8          # weight 0.8 per 10 races back
 V22_BUFFER = 5                           # neutral virtual races at the start of everyone's history
-V22_K = 47.0                             # SR per point of average net race score
+V22_K = 50.0                             # SR = 50 + 50 x average net
 V22_BONUS_CAP = 1.25                     # bonus points that count per race (pace can't outweigh penalties)
 V22_PROV = 3
 V22_DRIFT = 0.1
+V22_STING_FADES = os.environ.get("SR_STING_FADES", "1") != "0"
 
 def v22_current(n, now, detail=False):
     es = [e for e in entries[n] if e["stream"] <= now]
@@ -603,7 +605,8 @@ def v22_current(n, now, detail=False):
     win = ([(None, 0.0, 0.0)] * V22_BUFFER + races)[-V22_WINDOW:]
     ws = [V22_DECAY ** (k / 10) for k in range(len(win) - 1, -1, -1)]
     avg = sum(w * (min(b, V22_BONUS_CAP) - V22_DILUTE * p) for w, (_, b, p) in zip(ws, win)) / sum(ws)
-    sr = min(100.0, 50 + V22_K * avg) - V22_STING * races[-1][2]
+    sting = V22_STING * (sum(w * p for w, (_, _, p) in zip(ws, win)) if V22_STING_FADES else races[-1][2])
+    sr = min(100.0, 50 + V22_K * avg) - sting
     missed = now - races[-1][0]
     if sr > 50 and missed > 0: sr = 50 + (sr - 50) * (1 - V22_DRIFT) ** missed
     return (half(sr), avg) if detail else half(sr)
