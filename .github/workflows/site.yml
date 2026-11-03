@@ -98,7 +98,7 @@ jobs:
           fi
       - name: Work out the safety rating
         env:
-          SR_RULES: v2.1   # GreMi, 2 Nov 2026: SR v2.1 live
+          SR_RULES: v2.2   # GreMi, 3 Nov 2026: SR v2.2 live
         run: python3 scripts/safety_rating.py
       - name: Rank the Discord award roles
         run: python3 scripts/awards.py

@@ -34,12 +34,11 @@ const HOW_IT_WORKS: { title: string; body: ReactNode }[] = [
       <>
         <p>
           Every driver gets a safety rating (SR) from 0 to 100, and everyone starts at {SR_START}.
-          It's worked out automatically from the race data after every stream, in races and
-          qualifying. Drivers who hide their name don't get a rating.
+          It's worked out automatically from the race data after every stream, from races since
+          19 October. Drivers who hide their name don't get a rating.
         </p>
         <p>
-          A rating is provisional until you've done 3 races. The rating is never filtered by
-          date: it always shows where you stand right now.
+          Your rating shows from your first race. It's marked provisional until you've done 3 races.
         </p>
       </>
     ),
@@ -47,24 +46,22 @@ const HOW_IT_WORKS: { title: string; body: ReactNode }[] = [
   {
     title: "How you lose points",
     body: li([
-      "Causing contact. Light touches cost nothing on their own; medium and heavy hits do, and more when the other driver loses places, time or gets damage. One incident costs at most 25.",
-      "Who is to blame: a game penalty decides it, or two signs that agree (only you got a warning, only your wing broke, you were right behind the other car, or you passed right after). Otherwise the blame is shared.",
-      "Not to blame costs nothing. Shared blame costs half, and you only pay for half of the harm to the other car. Places someone loses in a pile-up count once, not once per car that touched them.",
-      "Hitting a car that was already damaged costs half, and contacts with a driver in their first 3 races don't count against you, unless the game blames you.",
-      "Track-limit time penalties (1, extreme cuts 2), drive-throughs (4), stop-go's (6) and disqualifications (10). Warnings and invalid qualifying laps cost nothing.",
-      "Quitting a race (1). Retiring because someone else wrecked you, after the winner finished, or after you already finished doesn't count.",
-      "On the wrong tyres for the weather, game penalties that don't involve anyone else are free, but contacts still count.",
+      "Every contact is judged from our own telemetry: who moved across, who ran into the back, who rejoined unsafely. The game's own collision penalties are not used.",
+      "Contact you caused, by severity (1-10): 1-3 costs 1, 4-5 costs 3, 6-7 costs 6, 8-10 costs 10. Hitting the same car again on purpose costs 20. Not to blame costs nothing.",
+      "Track-limit time penalties and crossing the pit exit line: 2.",
+      "Quitting a race: 2. Retiring because someone else wrecked you, or after you already finished, doesn't count.",
+      "Contacts with AI cars don't count. Staff can change or add a penalty.",
     ]),
   },
   {
     title: "How you gain points",
     body: li([
       "Finishing a race: +0.5, or +1 when there was no qualifying for that race.",
-      "Every clean lap: +0.3 (the race total is rounded to 0.5). A perfect race, every lap clean and no warnings at all: +1 extra.",
+      "Every clean lap: +0.3. A perfect race, every lap clean and no warnings at all: +1 extra.",
       "A clean qualifying lap within 107% of pole: +0.5.",
-      "Clean overtakes: +0.5 for every 3 passes in a row on different cars without contact, up to +1.5 per race.",
-      "Close racing: +0.2 for every sector you start and end within half a second of another car without an incident, and +0.1 within a second.",
-      "Your first race of a stream: +1, and +1 more if you share your full telemetry, because that lets us judge incidents better.",
+      "Clean overtakes and close racing without contact.",
+      "Your first race of a stream: +1, and +1 more if you share your full telemetry.",
+      "At most +4 counts per race, so pace can never make up for a bad safety record.",
     ]),
   },
   {
@@ -72,17 +69,14 @@ const HOW_IT_WORKS: { title: string; body: ReactNode }[] = [
     body: (
       <>
         <p>
-          Your SR comes from your average points per race, so racing more doesn't push you up, racing
-          clean does. An average of 0 is {SR_START}, +1 is 60, +2.3 is 76, +3 is 90 (S) and +3.8 is
-          100 (S+). Below 0, every point of average costs 10 SR.
+          Every race gets a net score: your bonus (max 4) minus half your penalty points. Your SR is{" "}
+          {SR_START} + 25 × your average net score, at most 100, minus your sting, never below 0.
         </p>
         {li([
-          "New drivers start close to 50: a good average counts as if you had 5 extra empty races, a bad one as if you had 3. After a few races it's clear where you belong.",
-          "Penalty points from your last 10 races count 1.5 times, and one race counts for at most −6.",
-          "A quarter of what you lose in a race also comes straight off your SR, and that fades out over your next 4 races.",
-          "A stream where you score less per race than your average so far lowers your SR, even if every race in it was positive. Each stream on your page shows its points per race next to your average before it.",
-          "After every stream, all older races count 10% less. What you do now matters most, and if you stop racing your SR slowly moves back to 50.",
-          "Above 70, your SR can be at most 15 above what your latest stream alone would give you. One dirty stream costs you your S or S+ straight away (this rule never takes you below 70).",
+          "Instant sting: the other half of a race's penalty points comes straight off your SR, shown on that race's card.",
+          "History: your last 50 races count. Every 10 races you drive after a race, it counts 20% less, sting included. Only races you drive age your history, so sitting out doesn't wash anything away.",
+          "New drivers start with 3 neutral races (net 0) in their history, so a few clean races can't jump you straight to S.",
+          "Above 50, every stream you skip moves your SR 10% back towards 50.",
         ])}
       </>
     ),
@@ -99,8 +93,8 @@ const HOW_IT_WORKS: { title: string; body: ReactNode }[] = [
   {
     title: "Kicks and bans",
     body: li([
-      "Lose 20 SR in one race or 40 SR in one stream and you sit out the rest of that stream.",
-      "Drop below 0 and you're no longer welcome in the lobby.",
+      "Lose 40 points in one race or 80 in one stream and you sit out the rest of that stream.",
+      "Drop to 0 and you're no longer welcome in the lobby.",
       "Staff check flagged incidents. If you think a penalty was wrong, let us know.",
     ]),
   },

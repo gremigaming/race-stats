@@ -24,12 +24,13 @@ V1 = RULESET in ("v1", "v2.1", "v2.2")   # v2.1/v2.2 take contact blame from the
 VERDICTS = os.environ.get("SR_VERDICTS", "/tmp/telemetry-cache/verdicts")
 OUT = os.environ.get("SR_OUT", os.path.join("public", "league"))
 TRACK_LIMITS = re.compile(r"Corner Cutting|Crossed Pit Exit", re.I)   # the only game rulings v1 keeps
-R9_PTS = 10             # v1: hitting the same car again on purpose
+R9_PTS = 20 if RULESET == "v2.2" else 10   # hitting the same car again on purpose (v2.2 doubles it)
 no_verdicts = []        # v1: races the fault engine could not judge (no recording)
 
 def v1_points(sev):
     """v1 penalty for a contact you are at fault for: half its severity (1-10), at least 0.5.
     v2.1 (GreMi, 1 Nov 2026): severity 1-3 = 0.5, 4-5 = 1.5, 6-7 = 3, 8-10 = 5."""
+    if V22: return 1.0 if sev <= 3 else 3.0 if sev <= 5 else 6.0 if sev <= 7 else 10.0   # v2.2: double v2.1
     if V21: return 0.5 if sev <= 3 else 1.5 if sev <= 5 else 3.0 if sev <= 7 else 5.0
     return max(0.5, math.floor(sev + 0.5) / 2)
 SESSIONS = os.environ.get("LEAGUE_SESSIONS_DIR", os.path.join("public", "league", "sessions"))  # written by build-league-data.mjs (aliases applied, backups dropped)
@@ -531,6 +532,12 @@ def session_net(e, recent):
     return max(pos + neg * (1.5 if recent else 1), RACE_FLOOR), -neg
 
 def weights(n, now):
+    if V22:   # race-based: 0.8 per 10 of your races since, 0 once out of the 50-race window (buffer included)
+        es = entries[n]; out = []; after = 0
+        for e in reversed(es):
+            out.append(V22_DECAY ** (after / 10) if after < V22_WINDOW - V22_BUFFER else 0.0)
+            if e["race"]: after += 1
+        return out[::-1]
     return [AGE ** (now - e["stream"]) for e in entries[n]]
 
 def current(n, now, detail=False):
@@ -614,6 +621,13 @@ def v22_current(n, now, detail=False):
 
 def stream_avg(n, si):
     """Points per race in stream si, counted the way the SR counts them (recent penalties 1.5x, -6 floor)."""
+    if V22:   # v2.2 race net: min(bonus, cap) - 0.5 x penalty (qualifying counts with the stream's races)
+        nets = []; pb = pp = 0.0
+        for e in (e for e in entries[n] if e["stream"] == si):
+            b = sum(i["pts"] for i in e["items"] if i["pts"] > 0) + pb; p = -sum(i["pts"] for i in e["items"] if i["pts"] < 0) + pp
+            if not e["race"]: pb, pp = b, p; continue
+            nets.append(min(b, V22_BONUS_CAP) - V22_DILUTE * p); pb = pp = 0.0
+        return round(sum(nets) / len(nets), 2) if nets else None
     es = entries[n]; recent = set(); races_after = 0
     for k in range(len(es) - 1, -1, -1):
         if races_after < RECENT: recent.add(k)
@@ -621,6 +635,7 @@ def stream_avg(n, si):
     ks = [k for k, e in enumerate(es) if e["stream"] == si]; nr = sum(es[k]["race"] for k in ks)
     return round(sum(session_net(es[k], k in recent)[0] for k in ks) / nr, 2) if nr else None
 
+KICK_RACE, KICK_STREAM = (40, 80) if V22 else (20, 40)   # v2.2 points are doubled, so the kick lines are too
 all_incs = []
 for si, stream in enumerate(streams):
     seen_stream = set(); stream_loss = collections.defaultdict(float)
@@ -689,17 +704,17 @@ for si, stream in enumerate(streams):
                     items[n].append({"pts": 0, "text": "Kicked from the lobby by staff: removed from this session's results", "lap": None, "cat": "staff"})
                 car.update(kicked); present += list(kicked)
         apply_staff(name, items, car, is_race, would)
-        if V22:   # v2.2 doubles every penalty: contacts 1/3/6/10, R9 20, track limits and retirement 2
-            for its in items.values():
+        if V22:   # v2.2 doubles every penalty: contacts already come doubled (v1_points), the rest
+            for its in items.values():   # (track limits, retirement, staff values set on the v2.1 scale) here
                 for i in its:
-                    if i["pts"] < 0: i["pts"] *= V22_PEN_X
+                    if i["pts"] < 0 and (i["cat"] != "contact" or "staff" in i): i["pts"] *= V22_PEN_X
         for n in set(present) | set(items):
             loss = -sum(i["pts"] for i in items[n] if i["pts"] < 0)
             stream_loss[n] += loss
-            if is_race and loss >= 20: flags[n].append(f"{short(f)}: lost {loss:g} in one race (kick line 20)")
+            if is_race and loss >= KICK_RACE: flags[n].append(f"{short(f)}: lost {loss:g} in one race (kick line {KICK_RACE})")
             entries[n].append({"file": name, "race": is_race, "items": items[n], "stream": si})
     for n, loss in stream_loss.items():
-        if loss >= 40: flags[n].append(f"Stream of {when(stream[0]):%d %b %Y}: lost {loss:g} (kick line 40)")
+        if loss >= KICK_STREAM: flags[n].append(f"Stream of {when(stream[0]):%d %b %Y}: lost {loss:g} (kick line {KICK_STREAM})")
     for n in entries:
         sr, avg = current(n, si, True)
         history[n].append({"stream": si, "date": when(stream[0]).strftime("%Y-%m-%d"), "sr": sr, "raced": n in stream_loss,
@@ -712,7 +727,7 @@ for n, es in entries.items():
     prev = h[-2]["sr"] if len(h) > 1 else 50.0
     drivers.append({
         "name": n, "sr": sr, "change": half(sr - prev), "races": races,
-        "provisional": races < 3, "banned": sr < 0,
+        "provisional": races < 3, "banned": sr <= 0 if V22 else sr < 0,
         "history": [x for x in h],
         "sessions": [{"file": e["file"], "race": e["race"], "stream": e["stream"], "weight": w,
                       "total": half(sum(i["pts"] for i in e["items"])), "items": e["items"],

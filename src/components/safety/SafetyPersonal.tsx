@@ -551,6 +551,12 @@ function SessionRow({ session, driver }: { session: SafetySession; driver: strin
             </p>
             </div>
           ))}
+          {session.sting != null && session.sting > 0 && (
+            <p className="text-red-300/90">
+              Instant sting: −{session.sting.toFixed(1).replace(/\.0$/, "")} SR (half of this race's penalty points,
+              fading as you race on)
+            </p>
+          )}
           <div className="flex items-center justify-between pt-1">
             <Link
               to={sessionPath(scopeKey ?? "all", toSlug(session.file))}

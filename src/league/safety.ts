@@ -40,9 +40,11 @@ export interface SafetySession {
   race: boolean;
   /** Index into SafetyData.streams. */
   stream: number;
-  /** How much this session counts now: 90% of that for every stream since. */
+  /** How much this session counts now: 20% less for every 10 races you drove since (0 after 47). */
   weight: number;
   total: number;
+  /** SR v2.2: half of this race's penalty points, taken straight off the SR (fades like the race). */
+  sting?: number;
   items: SafetyItem[];
 }
 
