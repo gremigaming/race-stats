@@ -1,0 +1,185 @@
+{
+ "title": "Stream 3 Nov · 5 picks",
+ "stream": "1103a",
+ "made": "2026-11-03",
+ "rules": "v1.1",
+ "incidents": [
+  {
+   "id": "1103a-1",
+   "pick": "low",
+   "track": "Mexico",
+   "date": "2026-11-03",
+   "lap": 3,
+   "race_time": "3:53",
+   "replay": "https://gremigaming.github.io/race-stats/f1/race/2026-11-03_00-35-19_Mexico_Race?inc=233.2&car=2,3",
+   "race_file": "Race_Mexico_2026_11_03_00_43_51.json",
+   "recording": "2026-11-03_00-35-19_Mexico_Race.gmtel.gz",
+   "drivers": [
+    {
+     "car": 2,
+     "name": "Hidden #2 (Aston Martin '26)"
+    },
+    {
+     "car": 3,
+     "name": "Hidden #94 (Ferrari '26)"
+    }
+   ],
+   "engine": {
+    "rules": "v1.1",
+    "verdict": "Aston Martin '26 #2 at fault",
+    "rule": "R3",
+    "severity": 2,
+    "why": "Aston Martin '26 #2 ran into the back of Ferrari '26 #94, closing at 29 km/h",
+    "at_fault": [
+     "Hidden #2 (Aston Martin '26)"
+    ],
+    "contacts": 1,
+    "gray_score": 0.12
+   },
+   "claude": "Picked as the low-severity case. My call: Hidden #2 (Aston Martin '26) at fault (rule R3: the car behind ran into the one ahead), severity 2, blame on Hidden #2 (Aston Martin '26). What I saw: Hidden #2 (Aston Martin '26) ran into the back of Hidden #94 (Ferrari '26), closing at 29 km/h. I'm fairly confident: the numbers are clear of every limit; this one is here for its severity."
+  },
+  {
+   "id": "1103a-2",
+   "pick": "high",
+   "track": "Mexico",
+   "date": "2026-11-03",
+   "lap": 4,
+   "race_time": "5:07",
+   "replay": "https://gremigaming.github.io/race-stats/f1/race/2026-11-03_00-35-19_Mexico_Race?inc=307.2&car=6,4,7",
+   "race_file": "Race_Mexico_2026_11_03_00_43_51.json",
+   "recording": "2026-11-03_00-35-19_Mexico_Race.gmtel.gz",
+   "drivers": [
+    {
+     "car": 6,
+     "name": "Hidden #2 (Cadillac '26)"
+    },
+    {
+     "car": 4,
+     "name": "#8 halissonesbell16"
+    },
+    {
+     "car": 7,
+     "name": "#54 Simply_AustinXx"
+    }
+   ],
+   "engine": {
+    "rules": "v1.1",
+    "verdict": "halissonesbell16 at fault",
+    "rule": "R3",
+    "severity": 6,
+    "why": "halissonesbell16 ran into the back of Cadillac '26 #2, closing at 43 km/h",
+    "at_fault": [
+     "#8 halissonesbell16"
+    ],
+    "contacts": 2,
+    "gray_score": 0.4
+   },
+   "claude": "Picked as the high-severity case. My call: halissonesbell16 at fault (rule R3: the car behind ran into the one ahead), severity 6, blame on #8 halissonesbell16. What I saw: halissonesbell16 ran into the back of Hidden #2 (Cadillac '26), closing at 43 km/h. I'm fairly confident: its 2 contacts don't point the same way (halissonesbell16 at fault; Racing incident)."
+  },
+  {
+   "id": "1103a-3",
+   "pick": "gray",
+   "track": "Brazil",
+   "date": "2026-11-03",
+   "lap": 1,
+   "race_time": "0:08",
+   "replay": "https://gremigaming.github.io/race-stats/f1/race/2026-11-03_00-25-04_Brazil_Race?inc=8.5&car=4,1,5",
+   "race_file": "Race_Brazil_2026_11_03_00_32_19.json",
+   "recording": "2026-11-03_00-25-04_Brazil_Race.gmtel.gz",
+   "drivers": [
+    {
+     "car": 4,
+     "name": "Hidden #94 (Ferrari '26)"
+    },
+    {
+     "car": 1,
+     "name": "#13 R10 Chris117"
+    },
+    {
+     "car": 5,
+     "name": "#51 censor-nevoso"
+    }
+   ],
+   "engine": {
+    "rules": "v1.1",
+    "verdict": "Ferrari '26 #94 + R10 Chris117 at fault",
+    "rule": "R8",
+    "severity": 6,
+    "why": "Ferrari '26 #94 ran into the back of R10 Chris117, closing at 37 km/h; R10 Chris117 came back onto the track and moved 1.0 m across into censor-nevoso",
+    "at_fault": [
+     "Hidden #94 (Ferrari '26)",
+     "#13 R10 Chris117"
+    ],
+    "contacts": 2,
+    "gray_score": 1.74
+   },
+   "claude": "Picked because it's a gray area for me. My call: Hidden #94 (Ferrari '26) + R10 Chris117 at fault (rule R8: shared fault), severity 6, blame on Hidden #94 (Ferrari '26), #13 R10 Chris117. What I saw: Hidden #94 (Ferrari '26) ran into the back of R10 Chris117, closing at 37 km/h; R10 Chris117 came back onto the track and moved 1.0 m across into censor-nevoso. Why I'm not sure: more than one car gets the blame, and splitting it is a judgement call; the rejoining car moved 1.0 m across, close to the 1 m that makes it an unsafe rejoin; its 2 contacts don't point the same way (Hidden #94 (Ferrari '26) at fault; R10 Chris117 at fault)."
+  },
+  {
+   "id": "1103a-4",
+   "pick": "gray",
+   "track": "Mexico",
+   "date": "2026-11-03",
+   "lap": 3,
+   "race_time": "3:19",
+   "replay": "https://gremigaming.github.io/race-stats/f1/race/2026-11-03_00-35-19_Mexico_Race?inc=199.2&car=7,3",
+   "race_file": "Race_Mexico_2026_11_03_00_43_51.json",
+   "recording": "2026-11-03_00-35-19_Mexico_Race.gmtel.gz",
+   "drivers": [
+    {
+     "car": 7,
+     "name": "#54 Simply_AustinXx"
+    },
+    {
+     "car": 3,
+     "name": "Hidden #94 (Ferrari '26)"
+    }
+   ],
+   "engine": {
+    "rules": "v1.1",
+    "verdict": "Not an incident",
+    "rule": "R1",
+    "severity": 1,
+    "why": "Simply_AustinXx ran into the back of Ferrari '26 #94, closing at 7 km/h, but nobody slid, lost a place or went off",
+    "at_fault": [],
+    "contacts": 1,
+    "gray_score": 1.0
+   },
+   "claude": "Picked because it's a gray area for me. My call: not an incident (rule R1: no incident (light tap or squeeze)), severity 1, blame on nobody. What I saw: Simply_AustinXx ran into the back of Hidden #94 (Ferrari '26), closing at 7 km/h, but nobody slid, lost a place or went off. Why I'm not sure: the car behind was closing at only 7 km/h, near the 7 km/h where I stop calling it 'ran into the back'."
+  },
+  {
+   "id": "1103a-5",
+   "pick": "gray",
+   "track": "Mexico",
+   "date": "2026-11-03",
+   "lap": 1,
+   "race_time": "0:39",
+   "replay": "https://gremigaming.github.io/race-stats/f1/race/2026-11-03_00-35-19_Mexico_Race?inc=39.1&car=7,6",
+   "race_file": "Race_Mexico_2026_11_03_00_43_51.json",
+   "recording": "2026-11-03_00-35-19_Mexico_Race.gmtel.gz",
+   "drivers": [
+    {
+     "car": 7,
+     "name": "#54 Simply_AustinXx"
+    },
+    {
+     "car": 6,
+     "name": "Hidden #2 (Cadillac '26)"
+    }
+   ],
+   "engine": {
+    "rules": "v1.1",
+    "verdict": "Simply_AustinXx at fault",
+    "rule": "R3",
+    "severity": 4,
+    "why": "Simply_AustinXx ran into the back of Cadillac '26 #2, closing at 14 km/h",
+    "at_fault": [
+     "#54 Simply_AustinXx"
+    ],
+    "contacts": 1,
+    "gray_score": 0.8
+   },
+   "claude": "Picked because it's a gray area for me. My call: Simply_AustinXx at fault (rule R3: the car behind ran into the one ahead), severity 4, blame on #54 Simply_AustinXx. What I saw: Simply_AustinXx ran into the back of Hidden #2 (Cadillac '26), closing at 14 km/h. Why I'm not sure: the cars were 4.3 m apart along the track, right at the 4 m line between 'side by side' (the car moving over is to blame) and 'one behind the other' (the car behind is to blame)."
+  }
+ ]
+}
