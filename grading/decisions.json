@@ -710,6 +710,40 @@
         ],
         "contacts": 1
       }
+    },
+    "b4-14": {
+      "verdict": "Racing incident",
+      "by": "staff",
+      "real": true,
+      "at_fault": [],
+      "severity": 3.0,
+      "note": "",
+      "votes": 1,
+      "agree": 100,
+      "drivers": [
+        {
+          "car": 17,
+          "name": "Hidden #99 (Audi '26)"
+        },
+        {
+          "car": 10,
+          "name": "#8 Stepino81"
+        }
+      ],
+      "track": "Baku",
+      "date": "2026-10-30",
+      "race_file": "Race_Baku_2026_10_30_16_22_36.json",
+      "recording": "2026-10-30_16-11-10_Baku_Race.gmtel.gz",
+      "replay": "https://gremigaming.github.io/race-stats/f1/race/2026-10-30_16-11-10_Baku_Race?inc=379.4&car=17,10",
+      "engine": {
+        "rules": "v1",
+        "verdict": "Racing incident",
+        "rule": "R7",
+        "severity": 3,
+        "why": "Audi '26 #99 slid or went off just before; Stepino81 had no time to react",
+        "at_fault": [],
+        "contacts": 1
+      }
     }
   }
 }
