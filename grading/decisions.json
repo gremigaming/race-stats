@@ -676,11 +676,11 @@
       }
     },
     "b4-13": {
-      "verdict": "Not an incident",
+      "verdict": "Racing incident",
       "by": "staff",
-      "real": false,
+      "real": true,
       "at_fault": [],
-      "severity": 0,
+      "severity": 3.0,
       "note": "",
       "votes": 1,
       "agree": 100,
