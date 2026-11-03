@@ -8,6 +8,14 @@ graded contacts. If they are close enough and agree with each other, their call 
 rulebook's, and the verdict says which past incident it followed. An incident that was graded
 itself always gets GreMi's own call.
 
+A graded incident can be split into parts (staff page: "split"): each part has its own time
+window (replay clock), the drivers in it and a call per driver (at fault / shared / not at fault /
+not involved) with its own severity, note and reason tags. `apply` then makes one incident per
+part out of the contacts in its window between its drivers, contacts of the graded incident that
+fall in no part between involved drivers become "not an incident" (innocent touches), and contacts
+with a driver marked "not involved" go back to the rulebook as their own incident. Every part is
+its own precedent, so the numbers learn each call separately.
+
   grading/decisions-seed.json   GreMi's grades of calibration batches 1-3 (grading page artifact)
   grading/decisions.json        final calls from the staff page (written by the staff server)
   grading/precedents.json       the numbers of every graded incident (built here, committed)
@@ -42,7 +50,7 @@ K = 7             # look at this many nearest graded contacts
 AGREE = 0.75      # ... and follow them when this share of their weight agrees
 STAFF_W = 0.5     # a staff-majority call counts half as much as GreMi's own
 SAME_S = 3.0      # an incident within this many seconds of a graded one, same cars = that incident
-APPLY_V = 3        # bump when apply() changes: every verdict file is redone
+APPLY_V = 4        # bump when apply() changes: every verdict file is redone
 LABELS = {"front": "the car ahead at fault", "back": "the car behind at fault", "both": "both at fault",
           "none": "a racing incident", "no": "not an incident"}
 
@@ -136,10 +144,42 @@ def fault_cars(d):
     return {by_name[n] for n in d.get("at_fault") or [] if n in by_name}
 
 
+CALLS = ("fault", "shared", "clear", "out")   # per driver in a part; shared = half the points in the SR
+
+
+def parts_of(d):
+    """The parts of a graded incident; an unsplit one is one part covering it (calls from at_fault)."""
+    return d.get("parts") or []
+
+
+def part_cars(p):
+    return {x["car"] for x in p["drivers"] if x.get("call") != "out"}
+
+
+def part_fault(p):
+    return {x["car"] for x in p["drivers"] if x.get("call") in ("fault", "shared")} if p.get("real", True) else set()
+
+
+def in_part(t, a, b, p, slack=0.6):
+    cars = part_cars(p)
+    return p["t0"] - slack <= t <= p["t1"] + slack and a in cars and b in cars
+
+
+def part_id(d, n):
+    return f"{d['id']}{chr(97 + n)}"
+
+
 def key_of(d):
     """Changes when the call on a graded incident changes: its numbers are then made again."""
     import verdicts  # noqa: E402  (the rulebook's call is stored too: made again when it changes)
-    return hashlib.sha1(json.dumps([d["recording"], d["t"], d["verdict"], sorted(d.get("at_fault") or []), verdicts.RULES]).encode()).hexdigest()[:12]
+    k = [d["recording"], d["t"], d["verdict"], sorted(d.get("at_fault") or []), verdicts.RULES]
+    if parts_of(d):   # unsplit grades keep their old key (no rebuild)
+        k.append(parts_of(d))
+    return hashlib.sha1(json.dumps(k, sort_keys=True).encode()).hexdigest()[:12]
+
+
+def parent_of(pid, p):
+    return p.get("parent") or pid
 
 
 def load_store():
@@ -181,6 +221,9 @@ def _build_one(job):
         return [(d["id"], None, f"{d['id']}: recording {rec} not read: {ex}") for d in ds]
     vs = verdicts.judge_all(j, incs)
     for d in ds:
+        if parts_of(d):
+            out += _build_parts(d, rec, incs, vs)
+            continue
         k = find_incident(incs, d)
         if k is None:
             out.append((d["id"], None, f"{d['id']}: incident not found in {rec}"))
@@ -205,23 +248,75 @@ def _build_one(job):
     return out
 
 
+def _contact_entry(p, cars, fault, real):
+    import fault_engine as fe  # noqa: E402
+    c = {"a": p["a"], "b": p["b"], "rule": p["rule"], "why": p["why"], "at_fault": p.get("at_fault_all") or [],
+         "f": fe.feats(p)}
+    front, back, x = vector(c, cars)
+    return {"a": p["a"], "b": p["b"], "t": round(p["t"], 1), "x": {n: round(val, 2) for n, val in x.items()},
+            "label": role(front, back, fault, real), "rulebook": rule_role(c, front, back), "rule": p["rule"]}
+
+
+def _build_parts(d, rec, incs, vs):
+    """One precedent per part of a split grade, plus one for its innocent touches."""
+    every = [(p, inc) for inc, v in zip(incs, vs) for p in v["contacts"] if p["rule"] != "R6" and p.get("features")]
+    taken, out, parts = set(), [], parts_of(d)
+    for n, part in enumerate(parts):
+        mine = [p for p, _ in every if id(p) not in taken and in_part(p["t"], p["a"], p["b"], part)]
+        taken.update(id(p) for p in mine)
+        cars, fault, real = len(part_cars(part)), part_fault(part), part.get("real", True)
+        sev = max([x.get("severity") or 0 for x in part["drivers"] if x["car"] in fault] or [0])
+        pid = part_id(d, n)
+        out.append((pid, {
+            "key": key_of(d), "parent": d["id"], "part": n + 1, "of": len(parts), "by": d.get("by", "GreMi"),
+            "track": d.get("track"), "date": d.get("date"), "verdict": part.get("verdict") or d["verdict"],
+            "severity": sev, "note": (part.get("note") or "")[:300], "tags": part.get("tags") or [],
+            "calls": {str(x["car"]): {k: x[k] for k in ("name", "call", "severity", "note") if x.get(k) not in (None, "")}
+                      for x in part["drivers"]},
+            "recording": rec, "t": part["t0"], "t1": part["t1"], "cars": sorted(part_cars(part)),
+            "contacts": [_contact_entry(p, cars, fault, real) for p in mine]},
+            f"{pid} {rec} {part['t0']}-{part['t1']} s -> {part.get('verdict') or ''} ({len(mine)} contacts)"))
+    k = find_incident(incs, d)
+    involved = set().union(*(part_cars(p) for p in parts))
+    lo, hi = min(p["t0"] for p in parts), max(p["t1"] for p in parts)
+    if k is not None:
+        touches = [p for p in vs[k]["contacts"] if p["rule"] != "R6" and p.get("features") and id(p) not in taken
+                   and p["a"] in involved and p["b"] in involved and lo - 1 <= p["t"] <= hi + 1]
+        if touches:
+            pid = d["id"] + "-touches"
+            out.append((pid, {"key": key_of(d), "parent": d["id"], "by": d.get("by", "GreMi"), "track": d.get("track"),
+                              "date": d.get("date"), "verdict": "Not an incident", "severity": 0,
+                              "note": "contacts in the graded incident outside its parts: innocent touches",
+                              "recording": rec, "t": lo, "t1": hi, "cars": sorted(involved),
+                              "contacts": [_contact_entry(p, len(involved), set(), False) for p in touches]},
+                        f"{pid} {rec}: {len(touches)} innocent touches"))
+    return out
+
+
 def build(cache):
     store = load_store()
     decs = load_decisions()
     todo = {}
     for k, d in decs.items():
-        p = store["precedents"].get(k)
-        if not p or p.get("key") != key_of(d):
+        mine = [p for pid, p in store["precedents"].items() if parent_of(pid, p) == k]
+        if not mine or any(p.get("key") != key_of(d) for p in mine):
             todo.setdefault(d["recording"], []).append(d)
     for k in list(store["precedents"]):
-        if k not in decs:
+        p = store["precedents"][k]
+        if parent_of(k, p) not in decs:
             del store["precedents"][k]
     jobs = [(rec, ds, cache) for rec, ds in sorted(todo.items())]
     with ProcessPoolExecutor(int(os.environ.get("FAULT_JOBS", "2"))) as ex:
         for done in ex.map(_build_one, jobs):
+            fresh = set()
             for pid, entry, msg in done:
                 print(msg)
                 if entry:
+                    parent = parent_of(pid, entry)
+                    if parent not in fresh:   # the old entries of this grade (a split changes their ids)
+                        fresh.add(parent)
+                        for old in [q for q, e in store["precedents"].items() if parent_of(q, e) == parent]:
+                            del store["precedents"][old]
                     store["precedents"][pid] = entry
     store["about"] = "Numbers of every graded incident's contacts and the final call (scripts/telemetry/precedents.py)."
     store["precedents"] = dict(sorted(store["precedents"].items()))
@@ -301,8 +396,10 @@ def evaluate(store=None):
 # ---------------------------------------------------------------- apply to the fault engine's verdicts
 
 
-def version(store):
-    return hashlib.sha1(json.dumps([APPLY_V, store["precedents"], RADIUS, K, AGREE, STAFF_W, FEATURES], sort_keys=True).encode()).hexdigest()[:10]
+def version(store, decs=None):
+    graded = sorted((k, d.get("verdict"), d.get("severity"), d.get("at_fault"), parts_of(d)) for k, d in (decs or {}).items())
+    return hashlib.sha1(json.dumps([APPLY_V, store["precedents"], RADIUS, K, AGREE, STAFF_W, FEATURES, graded],
+                                   sort_keys=True, default=str).encode()).hexdigest()[:10]
 
 
 def names_of(file):
@@ -317,6 +414,122 @@ def blame_text(cars, name):
     return " + ".join(name(x) for x in cars) + " at fault" if cars else "Racing incident"
 
 
+def summarize(inc, name):
+    """An incident's call from its contacts' calls (after some of them changed)."""
+    counted = [c for c in inc["contacts"] if c["rule"] != "R6"]
+    blamed = [c for c in counted if c.get("at_fault")]
+    cars = []
+    for c in blamed:
+        cars += [x for x in c["at_fault"] if x not in cars]
+    if blamed:
+        main = max(blamed, key=lambda c: c["severity"])
+        inc.update(rule=main["rule"] if len(cars) == 1 or main["rule"] == "R9" else "R8", severity=main["severity"],
+                   verdict=blame_text(cars, name), why="; ".join(dict.fromkeys(c["why"] for c in blamed)), at_fault=cars)
+    elif not counted or all(c["rule"] == "R1" for c in counted):
+        first = (counted or inc["contacts"])[0]
+        inc.update(rule="R1" if counted else first["rule"], severity=1, verdict="Not an incident", why=first["why"], at_fault=[])
+    else:
+        first = next(c for c in counted if c["rule"] != "R1")
+        inc.update(rule=first["rule"], severity=first["severity"], verdict="Racing incident", why=first["why"], at_fault=[])
+
+
+def match(d, incidents, off):
+    """The incident of this race that a graded one is: closest in time, most shared cars."""
+    best = None
+    for inc in incidents:
+        t0, t1 = inc["t0"] - off, inc["t1"] - off
+        shared = len({x["car"] for x in d["drivers"]} & set(inc["cars"]))
+        dt = 0 if t0 <= d["t"] <= t1 else min(abs(t0 - d["t"]), abs(t1 - d["t"]))
+        if shared >= min(2, len(d["drivers"])) and dt <= SAME_S and (best is None or (shared, -dt) > best[0]):
+            best = ((shared, -dt), inc)
+    return best[1] if best else None
+
+
+def call_text(part, name):
+    fault = sorted(x["car"] for x in part["drivers"] if x.get("call") == "fault")
+    shared = sorted(x["car"] for x in part["drivers"] if x.get("call") == "shared")
+    if not part.get("real", True):
+        return "Not an incident"
+    bits = []
+    if fault:
+        bits.append(" + ".join(name(x) for x in fault) + " at fault")
+    if shared:
+        bits.append(" + ".join(name(x) for x in shared) + (" share the blame" if len(shared) > 1 else " shares the blame"))
+    return "; ".join(bits) or "Racing incident"
+
+
+def split_graded(data, d, off, name):
+    """A graded incident split into parts: one incident per part (GreMi's call per driver), its other
+    contacts between involved drivers = innocent touches, contacts with a driver not involved go back
+    to the rulebook. Returns how many incidents changed."""
+    parts, who = parts_of(d), "GreMi" if d.get("by", "GreMi") == "GreMi" else "the staff"
+    home = match(d, data["incidents"], off)
+    claimed = {}   # id(contact) -> part number
+    found = [[] for _ in parts]
+    for n, part in enumerate(parts):
+        for inc in data["incidents"]:
+            for c in inc["contacts"]:
+                if c["rule"] != "R6" and id(c) not in claimed and in_part(c["t"] - off, c["a"], c["b"], part):
+                    claimed[id(c)] = n
+                    found[n].append((c, inc))
+    involved = set().union(*(part_cars(p) for p in parts))
+    lo, hi = min(p["t0"] for p in parts), max(p["t1"] for p in parts)
+    touched = set()
+    if home is not None:
+        for c in home["contacts"]:
+            if (id(c) not in claimed and c["rule"] != "R6" and c["a"] in involved and c["b"] in involved
+                    and lo - 1 <= c["t"] - off <= hi + 1):
+                why = f"graded by {who} ({d['id'].upper()}): an innocent touch, not part of the split incidents"
+                c.update(rule="R1", severity=1, verdict="Not an incident", why=why, at_fault=[], precedent={"id": d["id"], "own": True})
+                touched.add(id(home))
+    new = []
+    for n, part in enumerate(parts):
+        if not found[n]:
+            print(f"{d['id']} part {n + 1} ({part['t0']}-{part['t1']} s): no contacts between its drivers in that window")
+            continue
+        fault, real = part_fault(part), part.get("real", True)
+        calls = {str(x["car"]): {"call": x.get("call") or "clear", "severity": max(1, min(10, int(x.get("severity") or 1)))}
+                 for x in part["drivers"] if x.get("call") != "out"}
+        sev = max([calls[str(x)]["severity"] for x in fault] or [1])
+        pid = part_id(d, n)
+        why = f"graded by {who} ({d['id'].upper()}, part {n + 1} of {len(parts)}): {call_text(part, name)}"  # notes stay off the public site
+        contacts = []
+        for c, _ in sorted(found[n], key=lambda ci: ci[0]["t"]):
+            cf = [x for x in (c["a"], c["b"]) if x in fault]
+            if not real:
+                c.update(rule="R1", severity=1, verdict="Not an incident", why=why, at_fault=[])
+            else:
+                c.update(rule="G", severity=max([calls[str(x)]["severity"] for x in cf] or [sev]),
+                         verdict=blame_text(cf, name), why=why, at_fault=cf)
+            c["precedent"] = {"id": pid, "own": True}
+            contacts.append(c)
+        src = found[n][0][1]
+        cars = sorted(part_cars(part))
+        new.append({"t0": round(part["t0"] + off, 2), "t1": round(part["t1"] + off, 2), "lap": src["lap"], "kind": src.get("kind"),
+                    "cars": cars, "roles": {str(x): "contact" for x in cars},
+                    "rule": "G" if real else "R1", "severity": sev if real else 1,
+                    "verdict": call_text(part, name), "why": why, "at_fault": sorted(fault) if real else [],
+                    "calls": calls if real else {}, "contacts": contacts,
+                    "precedent": {"id": pid, "own": True, "parent": d["id"], "part": n + 1, "of": len(parts)}})
+    keep = []
+    for inc in data["incidents"]:
+        before = len(inc["contacts"])
+        inc["contacts"] = [c for c in inc["contacts"] if id(c) not in claimed]
+        if not inc["contacts"]:
+            continue
+        if len(inc["contacts"]) != before or id(inc) in touched:
+            inc["t0"], inc["t1"] = min(c["t"] for c in inc["contacts"]), max(c["t"] for c in inc["contacts"])
+            left = {x for c in inc["contacts"] for x in (c["a"], c["b"])}
+            inc["cars"] = [x for x in inc["cars"] if x in left] + sorted(left - set(inc["cars"]))
+            inc["roles"] = {str(x): (inc.get("roles") or {}).get(str(x), "contact") for x in inc["cars"]}
+            summarize(inc, name)
+            if inc is home and all(c.get("precedent", {}).get("own") for c in inc["contacts"] if c["rule"] != "R6"):
+                inc["precedent"] = {"id": d["id"], "own": True}
+        keep.append(inc)
+    data["incidents"] = sorted(keep + new, key=lambda inc: inc["t0"])
+    return len(new) + len(touched)
+
+
 def apply_file(path, store, decs, pts, ver):
     data = json.load(open(path, encoding="utf-8"))
     if data.get("precedents") == ver:
@@ -324,27 +537,35 @@ def apply_file(path, store, decs, pts, ver):
     names = names_of(os.path.basename(path))
     name = lambda i: names.get(i, f"car {i}")  # noqa: E731
     off = data.get("offset") or 0
+    # start from the rulebook's calls every time (a split changes the list of incidents itself)
+    if "rulebook_incidents" in data:
+        data["incidents"] = json.loads(json.dumps(data["rulebook_incidents"]))
+    else:
+        for inc in data["incidents"]:
+            inc.update(inc.get("rulebook") or {})
+            for c in inc["contacts"]:
+                c.update(c.get("rulebook") or {})
+                c.pop("precedent", None)
+            inc.pop("precedent", None)
+        data["rulebook_incidents"] = json.loads(json.dumps(data["incidents"]))
+    for inc in data["incidents"]:
+        inc.setdefault("rulebook", {k: inc[k] for k in ("rule", "severity", "verdict", "why", "at_fault")})
+        for c in inc["contacts"]:
+            c.setdefault("rulebook", {k: c[k] for k in ("rule", "severity", "verdict", "why", "at_fault")})
     graded = [d for d in decs.values() if d["recording"] == data.get("recording")]
+    changed = 0
+    for d in graded:   # 0. split grades first: they change the incidents themselves
+        if parts_of(d):
+            changed += split_graded(data, d, off, name)
     mine = {}   # graded incident id -> the incident of this race it is (closest, most shared cars)
     for d in graded:
-        best = None
-        for inc in data["incidents"]:
-            t0, t1 = inc["t0"] - off, inc["t1"] - off
-            shared = len({x["car"] for x in d["drivers"]} & set(inc["cars"]))
-            dt = 0 if t0 <= d["t"] <= t1 else min(abs(t0 - d["t"]), abs(t1 - d["t"]))
-            if shared >= min(2, len(d["drivers"])) and dt <= SAME_S and (best is None or (shared, -dt) > best[0]):
-                best = ((shared, -dt), inc)
-        if best:
-            mine[d["id"]] = best[1]
-    changed = 0
+        if not parts_of(d):
+            inc = match(d, data["incidents"], off)
+            if inc is not None:
+                mine[d["id"]] = inc
     for inc in data["incidents"]:
-        rb = inc.setdefault("rulebook", {k: inc[k] for k in ("rule", "severity", "verdict", "why", "at_fault")})
-        inc.update(rb)
-        for c in inc["contacts"]:
-            crb = c.setdefault("rulebook", {k: c[k] for k in ("rule", "severity", "verdict", "why", "at_fault")})
-            c.update(crb)
-            c.pop("precedent", None)
-        inc.pop("precedent", None)
+        if (inc.get("precedent") or {}).get("own"):
+            continue
         counted = [c for c in inc["contacts"] if c["rule"] != "R6"]
         if not counted:
             continue
@@ -370,7 +591,7 @@ def apply_file(path, store, decs, pts, ver):
         # 2. similar graded contacts
         moved = False
         for c in counted:
-            if not c.get("f") or c["rule"] == "R9":
+            if not c.get("f") or c["rule"] == "R9" or (c.get("precedent") or {}).get("own"):
                 continue
             front, back, x = vector(c, len(inc["cars"]))
             guess = predict(x, pts)
@@ -397,20 +618,7 @@ def apply_file(path, store, decs, pts, ver):
         if not moved:
             continue
         changed += 1
-        blamed = [c for c in counted if c.get("at_fault")]
-        cars = []
-        for c in blamed:
-            cars += [x for x in c["at_fault"] if x not in cars]
-        if blamed:
-            main = max(blamed, key=lambda c: c["severity"])
-            inc.update(rule=main["rule"] if len(cars) == 1 or main["rule"] == "R9" else "R8", severity=main["severity"],
-                       verdict=blame_text(cars, name), why="; ".join(dict.fromkeys(c["why"] for c in blamed)), at_fault=cars)
-        elif all(c["rule"] == "R1" for c in counted):
-            first = counted[0]
-            inc.update(rule="R1", severity=1, verdict="Not an incident", why=first["why"], at_fault=[])
-        else:
-            first = next(c for c in counted if c["rule"] != "R1")
-            inc.update(rule=first["rule"], severity=first["severity"], verdict="Racing incident", why=first["why"], at_fault=[])
+        summarize(inc, name)
         inc["precedent"] = next((c["precedent"] for c in counted if c.get("precedent")), None)
     data["precedents"] = ver
     json.dump(data, open(path + ".tmp", "w"), separators=(",", ":"))
@@ -422,7 +630,7 @@ def apply(cache):
     store = load_store()
     decs = load_decisions()
     pts = points(store)
-    ver = version(store)
+    ver = version(store, decs)
     total = 0
     for path in sorted(glob.glob(os.path.join(cache, "verdicts", "*.json"))):
         try:

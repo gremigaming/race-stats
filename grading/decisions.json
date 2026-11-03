@@ -47,6 +47,37 @@
       "severity": 7,
       "note": "Bananensaus is not involved in the incident., it should end after turbodruif crashes, the crash later where bananensaus crashes is another incident with car 45",
       "at": 1793692120,
+      "parts": [
+        {
+          "t0": 88.5,
+          "t1": 96.0,
+          "real": true,
+          "verdict": "#20 ERC | Samy #13 at fault",
+          "tags": [
+            "Moved across / squeezed"
+          ],
+          "note": "Ends after Turbodruif crashes.",
+          "drivers": [
+            {
+              "car": 7,
+              "name": "#20 ERC | Samy #13",
+              "call": "fault",
+              "severity": 7
+            },
+            {
+              "car": 2,
+              "name": "#34 [LCR] Turbodruif",
+              "call": "clear"
+            },
+            {
+              "car": 5,
+              "name": "#51 Bananensaus17",
+              "call": "out",
+              "note": "not involved; his later crash with car 45 is another incident"
+            }
+          ]
+        }
+      ],
       "drivers": [
         {
           "car": 7,
@@ -520,6 +551,34 @@
       "severity": 0,
       "note": "Niketys is not involved in any way in that incident.",
       "at": 1793634531,
+      "parts": [
+        {
+          "t0": 31.5,
+          "t1": 36.0,
+          "real": false,
+          "verdict": "Not an incident",
+          "tags": [],
+          "note": "",
+          "drivers": [
+            {
+              "car": 21,
+              "name": "#2 fajeckaaa",
+              "call": "clear"
+            },
+            {
+              "car": 1,
+              "name": "#50 DevilDriver2396",
+              "call": "clear"
+            },
+            {
+              "car": 15,
+              "name": "#99 niketys2",
+              "call": "out",
+              "note": "not involved in any way"
+            }
+          ]
+        }
+      ],
       "drivers": [
         {
           "car": 21,
@@ -622,7 +681,7 @@
       }
     },
     "b4-12": {
-      "verdict": "#13 Jakubm18_F1 + #24 rubengggarcia + #8 Stepino81 + Hidden #21 (Ferrari '26) at fault",
+      "verdict": "1) #8 Stepino81 at fault | 2) Hidden #21 (Ferrari '26) at fault | 3) #13 Jakubm18_F1 + #24 rubengggarcia + #8 Stepino81 shared",
       "by": "GreMi",
       "real": true,
       "at_fault": [
@@ -631,9 +690,127 @@
         "#8 Stepino81",
         "Hidden #21 (Ferrari '26)"
       ],
-      "severity": 9,
+      "severity": 7,
       "note": "This incident is multiple incidents, make sure to split them. The one at 32 sec is on stepino (about 6/10 severity). Then there are a couple of innocent touches, at 46 sec car 21 goes for a dangerout move (4/10). and then finally the incident at 55 sec is a shared incident by all 3 drivers. stepino, jakub and car 24. (7/10)",
       "at": 1793635080,
+      "parts": [
+        {
+          "t0": 32.0,
+          "t1": 34.0,
+          "real": true,
+          "verdict": "#8 Stepino81 at fault",
+          "tags": [
+            "Moved across / squeezed"
+          ],
+          "note": "The one at 32 sec is on Stepino.",
+          "drivers": [
+            {
+              "car": 2,
+              "name": "#8 Stepino81",
+              "call": "fault",
+              "severity": 6,
+              "note": "moved across into Jakub"
+            },
+            {
+              "car": 9,
+              "name": "#13 Jakubm18_F1",
+              "call": "clear"
+            },
+            {
+              "car": 8,
+              "name": "#24 rubengggarcia",
+              "call": "out"
+            },
+            {
+              "car": 14,
+              "name": "Hidden #21 (Ferrari '26)",
+              "call": "out"
+            },
+            {
+              "car": 12,
+              "name": "#20 HydraHaloF1",
+              "call": "out"
+            }
+          ]
+        },
+        {
+          "t0": 46.0,
+          "t1": 47.0,
+          "real": true,
+          "verdict": "Hidden #21 (Ferrari '26) at fault",
+          "tags": [
+            "Divebomb / unsafe overtake"
+          ],
+          "note": "At 46 sec car 21 goes for a dangerous move.",
+          "drivers": [
+            {
+              "car": 2,
+              "name": "#8 Stepino81",
+              "call": "out"
+            },
+            {
+              "car": 9,
+              "name": "#13 Jakubm18_F1",
+              "call": "clear"
+            },
+            {
+              "car": 8,
+              "name": "#24 rubengggarcia",
+              "call": "out"
+            },
+            {
+              "car": 14,
+              "name": "Hidden #21 (Ferrari '26)",
+              "call": "fault",
+              "severity": 4,
+              "note": "dangerous move"
+            },
+            {
+              "car": 12,
+              "name": "#20 HydraHaloF1",
+              "call": "out"
+            }
+          ]
+        },
+        {
+          "t0": 52.0,
+          "t1": 56.0,
+          "real": true,
+          "verdict": "#13 Jakubm18_F1 + #24 rubengggarcia + #8 Stepino81 shared",
+          "tags": [],
+          "note": "Shared incident by all 3 drivers.",
+          "drivers": [
+            {
+              "car": 2,
+              "name": "#8 Stepino81",
+              "call": "shared",
+              "severity": 7
+            },
+            {
+              "car": 9,
+              "name": "#13 Jakubm18_F1",
+              "call": "shared",
+              "severity": 7
+            },
+            {
+              "car": 8,
+              "name": "#24 rubengggarcia",
+              "call": "shared",
+              "severity": 7
+            },
+            {
+              "car": 14,
+              "name": "Hidden #21 (Ferrari '26)",
+              "call": "out"
+            },
+            {
+              "car": 12,
+              "name": "#20 HydraHaloF1",
+              "call": "out"
+            }
+          ]
+        }
+      ],
       "drivers": [
         {
           "car": 2,

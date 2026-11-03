@@ -233,6 +233,8 @@ def batch(key, files, cache):
             "lap": inc["lap"], "race_time": f"{int(rt // 60)}:{int(rt % 60):02d}",
             "replay": f"{SITE}{c['rec'].replace('.gmtel.gz', '')}?inc={rt:.1f}&car=" + ",".join(map(str, inc["cars"])),
             "race_file": c["file"], "recording": c["rec"],
+            "t0": round(rt, 1), "t1": round(rt + inc["t1"] - inc["t0"], 1),   # replay clock: the staff page's split windows
+            "contacts": [{"t": round(rt + x["t"] - inc["t0"], 1), "a": x["a"], "b": x["b"]} for x in inc["contacts"] if x["rule"] != "R6"],
             "drivers": [{"car": x, "name": nm(x)} for x in inc["cars"]],
             "engine": {"rules": V.RULES, "verdict": inc["verdict"], "rule": inc["rule"], "severity": inc["severity"],
                        "why": inc["why"], "at_fault": [nm(x) for x in inc["at_fault"]], "contacts": len(inc["contacts"]),

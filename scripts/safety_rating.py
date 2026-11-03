@@ -80,9 +80,19 @@ def v1_rows(path, names, cols, game_incs):
         if near and abs(near["timestamp"] - first["t"]) > 5: where = f"lap {inc['lap']}"
         sev = inc["severity"]; word = "LOW" if sev <= 3 else "MEDIUM" if sev <= 6 else "HIGH"
         lines = {}
+        calls = inc.get("calls") or {}   # a split graded incident: GreMi's call and severity per driver
         for x in cars:
             mine = [c for c in counted if x in c["at_fault"]]
-            if x in inc["at_fault"] or mine:
+            call = calls.get(str(x))
+            if call:
+                s_ = call["severity"]
+                if call["call"] in ("fault", "shared"):
+                    pts = v1_points(s_) / (2 if call["call"] == "shared" else 1)
+                    what = "shared, half points, graded" if call["call"] == "shared" else "graded"
+                    lines[x] = (pts, [f"severity {s_}/10, to blame ({what}) {pts:g}", inc["why"]])
+                else:
+                    lines[x] = (0, [f"severity {inc['severity']}/10, not to blame (graded) 0", inc["why"]])
+            elif x in inc["at_fault"] or mine:
                 s_ = max([c["severity"] for c in mine] or [sev])
                 r9 = any(c["rule"] == "R9" for c in mine)
                 pts = R9_PTS if r9 else v1_points(s_)

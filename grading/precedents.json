@@ -43,25 +43,43 @@
     }
    ]
   },
-  "1102b-2": {
-   "key": "ead13f98d357",
+  "1102b-2a": {
+   "key": "38ee89980f63",
+   "parent": "1102b-2",
+   "part": 1,
+   "of": 1,
    "by": "GreMi",
    "track": "Brazil",
    "date": "2026-11-02",
    "verdict": "#20 ERC | Samy #13 at fault",
    "severity": 7,
-   "note": "Bananensaus is not involved in the incident., it should end after turbodruif crashes, the crash later where bananensaus crashes is another incident with car 45",
+   "note": "Ends after Turbodruif crashes.",
+   "tags": [
+    "Moved across / squeezed"
+   ],
+   "calls": {
+    "7": {
+     "name": "#20 ERC | Samy #13",
+     "call": "fault",
+     "severity": 7
+    },
+    "2": {
+     "name": "#34 [LCR] Turbodruif",
+     "call": "clear"
+    },
+    "5": {
+     "name": "#51 Bananensaus17",
+     "call": "out",
+     "note": "not involved; his later crash with car 45 is another incident"
+    }
+   },
    "recording": "2026-11-02_19-14-53_Brazil_Race.gmtel.gz",
-   "t": 88.9,
+   "t": 88.5,
+   "t1": 96.0,
    "cars": [
     2,
-    5,
     7
    ],
-   "rulebook": {
-    "verdict": "7 + 5 at fault",
-    "rule": "R8"
-   },
    "contacts": [
     {
      "a": 7,
@@ -77,35 +95,13 @@
       "slide": 63,
       "lost": 6,
       "off": 1,
-      "cars": 3,
+      "cars": 2,
       "reaction": 0.0,
       "aftermath": 0.0
      },
      "label": "front",
      "rulebook": "front",
      "rule": "R2"
-    },
-    {
-     "a": 7,
-     "b": 5,
-     "t": 97.3,
-     "x": {
-      "gap": 8.5,
-      "closing": 35,
-      "moved_front": -6.0,
-      "moved_back": 6.0,
-      "rejoin_front": 0.0,
-      "rejoin_back": 0.0,
-      "slide": 93,
-      "lost": 0,
-      "off": 0,
-      "cars": 3,
-      "reaction": 0.0,
-      "aftermath": 0.0
-     },
-     "label": "front",
-     "rulebook": "back",
-     "rule": "R3"
     }
    ]
   },
@@ -2859,25 +2855,40 @@
     }
    ]
   },
-  "b4-09": {
-   "key": "5a6612e50d7d",
+  "b4-09a": {
+   "key": "863007a0917c",
+   "parent": "b4-09",
+   "part": 1,
+   "of": 1,
    "by": "GreMi",
    "track": "Shanghai",
    "date": "2026-10-25",
    "verdict": "Not an incident",
    "severity": 0,
-   "note": "Niketys is not involved in any way in that incident.",
+   "note": "",
+   "tags": [],
+   "calls": {
+    "21": {
+     "name": "#2 fajeckaaa",
+     "call": "clear"
+    },
+    "1": {
+     "name": "#50 DevilDriver2396",
+     "call": "clear"
+    },
+    "15": {
+     "name": "#99 niketys2",
+     "call": "out",
+     "note": "not involved in any way"
+    }
+   },
    "recording": "2026-10-25_16-42-14_Shanghai_Race.gmtel.gz",
-   "t": 32.4,
+   "t": 31.5,
+   "t1": 36.0,
    "cars": [
     1,
-    15,
     21
    ],
-   "rulebook": {
-    "verdict": "1 at fault",
-    "rule": "R2"
-   },
    "contacts": [
     {
      "a": 21,
@@ -2893,7 +2904,7 @@
       "slide": 4,
       "lost": 0,
       "off": 1,
-      "cars": 3,
+      "cars": 2,
       "reaction": 0.0,
       "aftermath": 0.0
      },
@@ -2989,50 +3000,25 @@
     }
    ]
   },
-  "b4-12": {
-   "key": "e89cd1327513",
+  "b4-12-touches": {
+   "key": "20b5cf50b483",
+   "parent": "b4-12",
    "by": "GreMi",
    "track": "Las Vegas",
    "date": "2026-10-30",
-   "verdict": "#13 Jakubm18_F1 + #24 rubengggarcia + #8 Stepino81 + Hidden #21 (Ferrari '26) at fault",
-   "severity": 9,
-   "note": "This incident is multiple incidents, make sure to split them. The one at 32 sec is on stepino (about 6/10 severity). Then there are a couple of innocent touches, at 46 sec car 21 goes for a dangerout move (4/10). and then finally the incident at 55 sec is a shared incident by all 3 drivers. stepino,",
+   "verdict": "Not an incident",
+   "severity": 0,
+   "note": "contacts in the graded incident outside its parts: innocent touches",
    "recording": "2026-10-30_15-29-57_Las_Vegas_Race.gmtel.gz",
-   "t": 32.8,
+   "t": 32.0,
+   "t1": 56.0,
    "cars": [
     2,
     8,
     9,
-    12,
     14
    ],
-   "rulebook": {
-    "verdict": "2 + 8 + 14 at fault",
-    "rule": "R8"
-   },
    "contacts": [
-    {
-     "a": 2,
-     "b": 9,
-     "t": 32.8,
-     "x": {
-      "gap": 2.9,
-      "closing": -2,
-      "moved_front": 3.25,
-      "moved_back": -3.08,
-      "rejoin_front": 0.0,
-      "rejoin_back": 0.0,
-      "slide": 14,
-      "lost": 3,
-      "off": 0,
-      "cars": 5,
-      "reaction": 0.0,
-      "aftermath": 0.0
-     },
-     "label": "both",
-     "rulebook": "front",
-     "rule": "R2"
-    },
     {
      "a": 9,
      "b": 8,
@@ -3047,11 +3033,11 @@
       "slide": 11,
       "lost": 1,
       "off": 0,
-      "cars": 5,
+      "cars": 4,
       "reaction": 0.0,
       "aftermath": 0.0
      },
-     "label": "both",
+     "label": "no",
      "rulebook": "back",
      "rule": "R3"
     },
@@ -3069,79 +3055,13 @@
       "slide": 12,
       "lost": 1,
       "off": 0,
-      "cars": 5,
+      "cars": 4,
       "reaction": 0.0,
       "aftermath": 0.0
      },
-     "label": "both",
+     "label": "no",
      "rulebook": "back",
      "rule": "R3"
-    },
-    {
-     "a": 14,
-     "b": 12,
-     "t": 41.1,
-     "x": {
-      "gap": 9.0,
-      "closing": 16,
-      "moved_front": 0.97,
-      "moved_back": 0.17,
-      "rejoin_front": 0.0,
-      "rejoin_back": 0.0,
-      "slide": 13,
-      "lost": 0,
-      "off": 0,
-      "cars": 5,
-      "reaction": 0.0,
-      "aftermath": 1.0
-     },
-     "label": "front",
-     "rulebook": "none",
-     "rule": "R7"
-    },
-    {
-     "a": 9,
-     "b": 14,
-     "t": 46.5,
-     "x": {
-      "gap": 5.2,
-      "closing": 14,
-      "moved_front": 1.55,
-      "moved_back": 0.24,
-      "rejoin_front": 0.0,
-      "rejoin_back": 0.0,
-      "slide": 12,
-      "lost": 1,
-      "off": 0,
-      "cars": 5,
-      "reaction": 0.0,
-      "aftermath": 0.0
-     },
-     "label": "both",
-     "rulebook": "back",
-     "rule": "R3"
-    },
-    {
-     "a": 14,
-     "b": 12,
-     "t": 47.2,
-     "x": {
-      "gap": 12.4,
-      "closing": 38,
-      "moved_front": -0.82,
-      "moved_back": -2.02,
-      "rejoin_front": 0.0,
-      "rejoin_back": 0.0,
-      "slide": 13,
-      "lost": 0,
-      "off": 0,
-      "cars": 5,
-      "reaction": 0.0,
-      "aftermath": 1.0
-     },
-     "label": "front",
-     "rulebook": "none",
-     "rule": "R7"
     },
     {
      "a": 8,
@@ -3157,13 +3077,245 @@
       "slide": 14,
       "lost": 3,
       "off": 0,
-      "cars": 5,
+      "cars": 4,
       "reaction": 0.0,
       "aftermath": 1.0
      },
-     "label": "both",
+     "label": "no",
      "rulebook": "none",
      "rule": "R7"
+    }
+   ]
+  },
+  "b4-12a": {
+   "key": "20b5cf50b483",
+   "parent": "b4-12",
+   "part": 1,
+   "of": 3,
+   "by": "GreMi",
+   "track": "Las Vegas",
+   "date": "2026-10-30",
+   "verdict": "#8 Stepino81 at fault",
+   "severity": 6,
+   "note": "The one at 32 sec is on Stepino.",
+   "tags": [
+    "Moved across / squeezed"
+   ],
+   "calls": {
+    "2": {
+     "name": "#8 Stepino81",
+     "call": "fault",
+     "severity": 6,
+     "note": "moved across into Jakub"
+    },
+    "9": {
+     "name": "#13 Jakubm18_F1",
+     "call": "clear"
+    },
+    "8": {
+     "name": "#24 rubengggarcia",
+     "call": "out"
+    },
+    "14": {
+     "name": "Hidden #21 (Ferrari '26)",
+     "call": "out"
+    },
+    "12": {
+     "name": "#20 HydraHaloF1",
+     "call": "out"
+    }
+   },
+   "recording": "2026-10-30_15-29-57_Las_Vegas_Race.gmtel.gz",
+   "t": 32.0,
+   "t1": 34.0,
+   "cars": [
+    2,
+    9
+   ],
+   "contacts": [
+    {
+     "a": 2,
+     "b": 9,
+     "t": 32.8,
+     "x": {
+      "gap": 2.9,
+      "closing": -2,
+      "moved_front": 3.25,
+      "moved_back": -3.08,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 14,
+      "lost": 3,
+      "off": 0,
+      "cars": 2,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "front",
+     "rulebook": "front",
+     "rule": "R2"
+    }
+   ]
+  },
+  "b4-12b": {
+   "key": "20b5cf50b483",
+   "parent": "b4-12",
+   "part": 2,
+   "of": 3,
+   "by": "GreMi",
+   "track": "Las Vegas",
+   "date": "2026-10-30",
+   "verdict": "Hidden #21 (Ferrari '26) at fault",
+   "severity": 4,
+   "note": "At 46 sec car 21 goes for a dangerous move.",
+   "tags": [
+    "Divebomb / unsafe overtake"
+   ],
+   "calls": {
+    "2": {
+     "name": "#8 Stepino81",
+     "call": "out"
+    },
+    "9": {
+     "name": "#13 Jakubm18_F1",
+     "call": "clear"
+    },
+    "8": {
+     "name": "#24 rubengggarcia",
+     "call": "out"
+    },
+    "14": {
+     "name": "Hidden #21 (Ferrari '26)",
+     "call": "fault",
+     "severity": 4,
+     "note": "dangerous move"
+    },
+    "12": {
+     "name": "#20 HydraHaloF1",
+     "call": "out"
+    }
+   },
+   "recording": "2026-10-30_15-29-57_Las_Vegas_Race.gmtel.gz",
+   "t": 46.0,
+   "t1": 47.0,
+   "cars": [
+    9,
+    14
+   ],
+   "contacts": [
+    {
+     "a": 9,
+     "b": 14,
+     "t": 46.5,
+     "x": {
+      "gap": 5.2,
+      "closing": 14,
+      "moved_front": 1.55,
+      "moved_back": 0.24,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 12,
+      "lost": 1,
+      "off": 0,
+      "cars": 2,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "back",
+     "rulebook": "back",
+     "rule": "R3"
+    }
+   ]
+  },
+  "b4-12c": {
+   "key": "20b5cf50b483",
+   "parent": "b4-12",
+   "part": 3,
+   "of": 3,
+   "by": "GreMi",
+   "track": "Las Vegas",
+   "date": "2026-10-30",
+   "verdict": "#13 Jakubm18_F1 + #24 rubengggarcia + #8 Stepino81 shared",
+   "severity": 7,
+   "note": "Shared incident by all 3 drivers.",
+   "tags": [],
+   "calls": {
+    "2": {
+     "name": "#8 Stepino81",
+     "call": "shared",
+     "severity": 7
+    },
+    "9": {
+     "name": "#13 Jakubm18_F1",
+     "call": "shared",
+     "severity": 7
+    },
+    "8": {
+     "name": "#24 rubengggarcia",
+     "call": "shared",
+     "severity": 7
+    },
+    "14": {
+     "name": "Hidden #21 (Ferrari '26)",
+     "call": "out"
+    },
+    "12": {
+     "name": "#20 HydraHaloF1",
+     "call": "out"
+    }
+   },
+   "recording": "2026-10-30_15-29-57_Las_Vegas_Race.gmtel.gz",
+   "t": 52.0,
+   "t1": 56.0,
+   "cars": [
+    2,
+    8,
+    9
+   ],
+   "contacts": [
+    {
+     "a": 2,
+     "b": 8,
+     "t": 52.6,
+     "x": {
+      "gap": 1.8,
+      "closing": 9,
+      "moved_front": 0.0,
+      "moved_back": 0.0,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 4,
+      "lost": 0,
+      "off": 0,
+      "cars": 3,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "both",
+     "rulebook": "no",
+     "rule": "R1"
+    },
+    {
+     "a": 8,
+     "b": 9,
+     "t": 52.9,
+     "x": {
+      "gap": 0.0,
+      "closing": -4,
+      "moved_front": -0.99,
+      "moved_back": 1.81,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 59,
+      "lost": 0,
+      "off": 0,
+      "cars": 3,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "both",
+     "rulebook": "no",
+     "rule": "R1"
     }
    ]
   },
