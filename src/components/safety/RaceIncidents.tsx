@@ -125,6 +125,14 @@ export function raceIncidents(
     const known = byKey.get(k);
     if (known) {
       known.sev = c.sev;
+      // a side without its own SR item (AI or hidden-name car) still shows its part of the call
+      for (const side of known.sides) {
+        const line = !side.item && c.lines[side.name];
+        if (line) {
+          const vs = c.names.find((n) => n !== side.name) ?? "";
+          side.item = { pts: line[0], text: `${c.where}, with ${vs}: ${line[1]}`, lap: c.lap, cat: "contact" as const };
+        }
+      }
       continue;
     }
     byKey.set(k, {
