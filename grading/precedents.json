@@ -3166,6 +3166,49 @@
      "rule": "R7"
     }
    ]
+  },
+  "b4-13": {
+   "key": "a0062af252cb",
+   "by": "staff",
+   "track": "Miami",
+   "date": "2026-10-30",
+   "verdict": "Not an incident",
+   "severity": 0,
+   "note": "",
+   "recording": "2026-10-30_15-51-13_Miami_Race.gmtel.gz",
+   "t": 139.1,
+   "cars": [
+    1,
+    13
+   ],
+   "rulebook": {
+    "verdict": "1 at fault",
+    "rule": "R2"
+   },
+   "contacts": [
+    {
+     "a": 1,
+     "b": 13,
+     "t": 139.1,
+     "x": {
+      "gap": 2.9,
+      "closing": 10,
+      "moved_front": -0.54,
+      "moved_back": 2.02,
+      "rejoin_front": 1.0,
+      "rejoin_back": 0.0,
+      "slide": 11,
+      "lost": 1,
+      "off": 1,
+      "cars": 2,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "no",
+     "rulebook": "back",
+     "rule": "R2"
+    }
+   ]
   }
  },
  "about": "Numbers of every graded incident's contacts and the final call (scripts/telemetry/precedents.py)."
