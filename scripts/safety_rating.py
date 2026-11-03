@@ -710,10 +710,12 @@ for si, stream in enumerate(streams):
                     items[n].append({"pts": 0, "text": "Kicked from the lobby by staff: removed from this session's results", "lap": None, "cat": "staff"})
                 car.update(kicked); present += list(kicked)
         apply_staff(name, items, car, is_race, would)
-        if V22:   # v2.2 doubles every penalty: contacts already come doubled (v1_points), the rest
-            for its in items.values():   # (track limits, retirement, staff values set on the v2.1 scale) here
-                for i in its:
-                    if i["pts"] < 0 and (i["cat"] != "contact" or "staff" in i): i["pts"] *= V22_PEN_X
+        if V22:   # v2.2 doubles every penalty: contacts already come doubled (v1_points), track limits
+            for its in items.values():   # and retirements here. A staff value is typed on the page as the live
+                for i in its:            # (v2.2) number, so it stays as typed; its "was" is shown doubled too.
+                    if "staff" in i:
+                        if i["cat"] != "contact" and i.get("orig", 0) < 0: i["orig"] *= V22_PEN_X
+                    elif i["pts"] < 0 and i["cat"] != "contact": i["pts"] *= V22_PEN_X
         for n in set(present) | set(items):
             loss = -sum(i["pts"] for i in items[n] if i["pts"] < 0)
             stream_loss[n] += loss
