@@ -582,15 +582,15 @@ def v21_current(n, now, detail=False):
 #   Sting: V22_STING x P comes off on that race's card and then fades with the same race-based
 #          weights (0.8 per 10 races, gone after the window): no lifetime debt, but chronic
 #          crashers stay below 50. SR_STING_FADES=0 makes it one-time (latest race only).
-#   SR = min(100, 50 + V22_K x average) - sting; provisional (shown as 50) under 3 races.
-#   Drift: above 50, every stream pulls everyone V22_DRIFT of the way back to 50 (raced or not).
+#   SR = max(0, min(100, 50 + V22_K x average) - sting); provisional (shown as 50) under 3 races.
+#   Drift: above 50, each stream you skip after your last race pulls you V22_DRIFT of the way back to 50.
 # Tuned on the races since 19 Oct: /mnt/project-files/sr-rebalance/v2.2/.
 V22_STING, V22_DILUTE = 0.5, 0.5
 V22_WINDOW, V22_DECAY = 50, 0.8          # weight 0.8 per 10 races back
 V22_BUFFER = 5                           # neutral virtual races at the start of everyone's history
 V22_K = 25.0                             # SR = 50 + 25 x average net
 V22_PEN_X = 2.0                          # penalty points are double the v2.1 table
-V22_BONUS_CAP = 2.5                      # bonus points that count per race (pace can't outweigh penalties)
+V22_BONUS_CAP = 4.0                      # bonus points that count per race (pace can't outweigh penalties)
 V22_PROV = 3
 V22_DRIFT = 0.1
 V22_STING_FADES = os.environ.get("SR_STING_FADES", "1") != "0"
@@ -607,8 +607,9 @@ def v22_current(n, now, detail=False):
     ws = [V22_DECAY ** (k / 10) for k in range(len(win) - 1, -1, -1)]
     avg = sum(w * (min(b, V22_BONUS_CAP) - V22_DILUTE * p) for w, (_, b, p) in zip(ws, win)) / sum(ws)
     sting = V22_STING * (sum(w * p for w, (_, _, p) in zip(ws, win)) if V22_STING_FADES else races[-1][2])
-    sr = min(100.0, 50 + V22_K * avg) - sting
-    if sr > 50: sr = 50 + (sr - 50) * (1 - V22_DRIFT)   # universal drift: every stream, raced or not
+    sr = max(0.0, min(100.0, 50 + V22_K * avg) - sting)   # hard floor 0
+    missed = now - races[-1][0]                            # streams skipped since your last race
+    if sr > 50 and missed > 0: sr = 50 + (sr - 50) * (1 - V22_DRIFT) ** missed
     return (half(sr), avg) if detail else half(sr)
 
 def stream_avg(n, si):
