@@ -355,6 +355,18 @@
       "car": 2,
       "pts": -3.0,
       "was": -10.0
+    },
+    {
+      "id": "Race_Shanghai_2026_10_25_16_53_29.json|3|contact|1|0",
+      "type": "incident",
+      "reason": "*",
+      "by": "319544045435224067",
+      "at": "2026-11-03T14:09:57Z",
+      "file": "Race_Shanghai_2026_10_25_16_53_29.json",
+      "driver": "Stepino81",
+      "car": 3,
+      "pts": -1.0,
+      "was": -3.0
     }
   ]
 }
