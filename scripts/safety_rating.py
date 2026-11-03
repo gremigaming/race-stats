@@ -582,16 +582,16 @@ def v21_current(n, now, detail=False):
 #   Sting: V22_STING x P comes off on that race's card and then fades with the same race-based
 #          weights (0.8 per 10 races, gone after the window): no lifetime debt, but chronic
 #          crashers stay below 50. SR_STING_FADES=0 makes it one-time (latest race only).
-#   SR = max(0, min(100, 50 + V22_K x average) - sting); provisional (shown as 50) under 3 races.
+#   SR = max(0, min(100, 50 + V22_K x average) - sting); live from race 1 (still marked provisional under 3 races).
 #   Drift: above 50, each stream you skip after your last race pulls you V22_DRIFT of the way back to 50.
 # Tuned on the races since 19 Oct: /mnt/project-files/sr-rebalance/v2.2/.
 V22_STING, V22_DILUTE = 0.5, 0.5
 V22_WINDOW, V22_DECAY = 50, 0.8          # weight 0.8 per 10 races back
-V22_BUFFER = 5                           # neutral virtual races at the start of everyone's history
+V22_BUFFER = 3                           # neutral virtual races at the start of everyone's history
 V22_K = 25.0                             # SR = 50 + 25 x average net
 V22_PEN_X = 2.0                          # penalty points are double the v2.1 table
 V22_BONUS_CAP = 4.0                      # bonus points that count per race (pace can't outweigh penalties)
-V22_PROV = 3
+V22_PROV = 1                             # live score from race 1 (the buffer cushions it)
 V22_DRIFT = 0.1
 V22_STING_FADES = os.environ.get("SR_STING_FADES", "1") != "0"
 
