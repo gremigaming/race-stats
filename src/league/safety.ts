@@ -69,7 +69,20 @@ export interface SafetyDriver {
   provisional: boolean;
   banned: boolean;
   /** avg: average points per race the SR came from; streamAvg: points per race in that stream. */
-  history: { stream: number; date: string; sr: number; raced: boolean; avg?: number; streamAvg?: number | null }[];
+  history: {
+    stream: number;
+    date: string;
+    sr: number;
+    raced: boolean;
+    avg?: number;
+    streamAvg?: number | null;
+    /** SR v2.2: 50 + 25 x average, at most 100. */
+    base?: number;
+    /** SR v2.2: all your stings together after this stream (each fading as you race on). */
+    sting?: number;
+    /** SR v2.2: taken off for streams skipped (above 50 only). */
+    drift?: number;
+  }[];
   sessions: SafetySession[];
   flags: string[];
 }

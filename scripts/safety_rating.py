@@ -671,16 +671,22 @@ def v22_sting_pts(e):
     calls). Track limits, pit exit and retirements only lower the average."""
     return -sum(i["pts"] for i in e["items"] if i["pts"] < 0 and i["cat"] in ("contact", "staff"))
 
+V22_PARTS = {}
+
 def v22_current(n, now, detail=False):
+    V22_PARTS.pop(n, None)
     races, _ = v22_ledger([e for e in entries[n] if e["stream"] <= now])
     if len(races) < V22_PROV: return (50.0, 0.0) if detail else 50.0
     win = ([(None, 0.0, 0.0, 0.0)] * V22_BUFFER + races)[-V22_WINDOW:]
     ws = [V22_DECAY ** (k / 10) for k in range(len(win) - 1, -1, -1)]
     avg = sum(w * v22_net(b, o, i_) for w, (_, b, o, i_) in zip(ws, win)) / sum(ws)
     sting = V22_STING * (sum(w * i_ for w, (_, _, _o, i_) in zip(ws, win)) if V22_STING_FADES else races[-1][3])
-    sr = max(0.0, min(100.0, 50 + V22_K * avg) - sting)   # hard floor 0
+    base = min(100.0, 50 + V22_K * avg)
+    sr = max(0.0, base - sting)   # hard floor 0
+    raw = sr
     missed = now - races[-1][0]                            # streams skipped since your last race
     if sr > 50 and missed > 0: sr = 50 + (sr - 50) * (1 - V22_DRIFT) ** missed
+    V22_PARTS[n] = {"base": round(base, 1), "sting": round(sting, 1), "drift": round(raw - sr, 1)}   # for the stream headers
     return (half(sr), avg) if detail else half(sr)
 
 def stream_avg(n, si):
@@ -775,7 +781,7 @@ for si, stream in enumerate(streams):
     for n in entries:
         sr, avg = current(n, si, True)
         history[n].append({"stream": si, "date": when(stream[0]).strftime("%Y-%m-%d"), "sr": sr, "raced": n in stream_loss,
-                           "avg": round(avg, 2), "streamAvg": stream_avg(n, si)})
+                           "avg": round(avg, 2), "streamAvg": stream_avg(n, si), **(V22_PARTS.get(n, {}) if V22 else {})})
 
 drivers = []
 for n, es in entries.items():

@@ -348,6 +348,16 @@ function Sessions({ driver, data }: { driver: SafetyDriver; data: SafetyData }) 
   return (
     <section className={cardClass}>
       <SectionHeader title="Races" hint={`${driver.sessions.length} sessions, newest first`} />
+      {driver.history.some((h) => h.base != null) && (
+        <p className="mb-3 rounded-lg bg-zinc-950/50 px-3 py-2 text-[11px] leading-relaxed text-zinc-400">
+          <span className="text-zinc-200">How it adds up:</span> SR = 50 + 25 × your average net score (at most 100),
+          minus your stings. A race's net score (right of each race) is its bonus (max 4), minus half its incident
+          points, minus track limits, pit exit and retirements. The other half of the incident points is the sting
+          (red badge): it comes straight off your SR, the same for everyone however many races you've done, and fades
+          as you race on. With an average above +2.0 you're at the 100 max, so then only new stings and old ones
+          fading move your SR.
+        </p>
+      )}
       <div className="mb-4 flex flex-wrap items-center gap-2">
         <SegmentedControl
           size="sm"
@@ -385,6 +395,11 @@ function Sessions({ driver, data }: { driver: SafetyDriver; data: SafetyData }) 
               change={h ? h.sr - before : undefined}
               perRace={h?.streamAvg ?? undefined}
               avgBefore={prev?.avg ?? 0}
+              avg={h?.avg}
+              base={h?.base}
+              sting={h?.sting}
+              stingBefore={prev?.sting ?? 0}
+              drift={h?.drift}
               sessions={g.sessions}
               driver={driver.name}
               defaultOpen={gi === 0 || query.trim() !== ""}
@@ -402,6 +417,11 @@ function StreamGroup({
   change,
   perRace,
   avgBefore,
+  avg,
+  base,
+  sting,
+  stingBefore,
+  drift,
   sessions,
   driver,
   defaultOpen,
@@ -411,6 +431,11 @@ function StreamGroup({
   change?: number;
   perRace?: number;
   avgBefore: number;
+  avg?: number;
+  base?: number;
+  sting?: number;
+  stingBefore: number;
+  drift?: number;
   sessions: SafetySession[];
   driver: string;
   defaultOpen: boolean;
@@ -439,6 +464,25 @@ function StreamGroup({
             <div className="text-[11px] text-zinc-500">
               <span className={changeClass(perRace - avgBefore)}>{signedHalf(perRace).replace(/\.0$/, "")} per race</span>
               {` vs your average of ${signedHalf(avgBefore)} before it`}
+            </div>
+          )}
+          {sr != null && base != null && sting != null && (
+            <div className="text-[11px] text-zinc-500">
+              <span title="50 + 25 × your average net score, at most 100">
+                Average {avg != null ? `${avg >= 0 ? "+" : "−"}${Math.abs(avg).toFixed(2)}` : ""} → {base.toFixed(1)}
+                {base >= 100 ? " (max)" : ""}
+              </span>
+              <span className="text-red-300/80" title="All your stings together, each fading as you race on">
+                {" "}− sting {sting.toFixed(1)}
+              </span>
+              {drift != null && drift > 0 && <span>{` − ${drift.toFixed(1)} for streams skipped`}</span>}
+              {` = ${sr.toFixed(1)}`}
+              {Math.abs(sting - stingBefore) >= 0.05 && (
+                <span>
+                  {` · sting this stream ${sting > stingBefore ? "+" : "−"}${Math.abs(sting - stingBefore).toFixed(1)}`}
+                  {sting < stingBefore ? " (old stings faded more than new ones came in)" : ""}
+                </span>
+              )}
             </div>
           )}
         </div>
