@@ -164,9 +164,11 @@ export function Layout() {
             aria-label="GreMi Gang Race Stats home"
             className="group flex min-w-0 shrink-0 items-center gap-2.5 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-red/70"
           >
-            <span className="brand-mark flex size-9 shrink-0 items-center justify-center rounded-xl text-sm font-black tracking-tight text-white shadow-lg shadow-rose-950/25">
-              GG
-            </span>
+            <img
+              src={`${import.meta.env.BASE_URL}gremigaming-logo.jpg`}
+              alt=""
+              className="size-9 shrink-0 rounded-xl object-cover shadow-lg shadow-rose-950/25"
+            />
             <span className="hidden min-w-0 sm:block">
               <span className="block truncate text-sm font-bold tracking-tight text-zinc-100 group-hover:text-white">
                 <AppBrand />

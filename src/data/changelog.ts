@@ -16,6 +16,13 @@ export interface ChangelogEntry {
 // raw commit history also contains routine uploads and staff-only corrections.
 const changelog: ChangelogEntry[] = [
   {
+    id: "gremi-gaming-brand-mark",
+    date: "2026-11-04",
+    type: "feat",
+    message: "See the GreMi Gaming logo in the site navigation and browser icon.",
+    destination: "home",
+  },
+  {
     id: "driver-first-home-navigation",
     date: "2026-11-04",
     type: "feat",
