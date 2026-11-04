@@ -409,6 +409,20 @@
       "was": -3.0,
       "learn": false,
       "owner": true
+    },
+    {
+      "id": "Race_Silverstone_Reverse_2026_10_30_15_19_42.json|13|contact|1|0",
+      "type": "incident",
+      "reason": "Medium incident,Jakub should have backed off but enexvery could have left a bit of space",
+      "by": "319544045435224067",
+      "at": "2026-11-04T13:02:02Z",
+      "file": "Race_Silverstone_Reverse_2026_10_30_15_19_42.json",
+      "driver": "Jakubm18_F1",
+      "car": 13,
+      "pts": -2.0,
+      "was": -6.0,
+      "learn": true,
+      "owner": true
     }
   ]
 }
