@@ -5,14 +5,14 @@
     "contact_big": 5.0,
     "contact_huge": 8.0,
     "contact_r9": 16.0,
-    "contact_other": 0.5,
+    "contact_other": 1.0,
     "penalty_track": 1.0,
     "penalty_dnf": 1.0,
     "bonus_scale": 1.0,
     "bonus_finish": 1.0,
-    "bonus_clean": 1.0,
-    "bonus_close": 1.0,
-    "bonus_overtakes": 1.0,
+    "bonus_clean": 1.5,
+    "bonus_close": 1.5,
+    "bonus_overtakes": 2.0,
     "bonus_quali": 1.0,
     "bonus_stream": 1.0,
     "bonus_cut": 0.1,
@@ -41,10 +41,33 @@
     "kick_race": 20.0,
     "kick_stream": 40.0
   },
-  "updated": "2026-11-04T13:28:48Z",
+  "updated": "2026-11-04T13:44:03Z",
   "by": "GreMi_Gaming",
-  "reason": "Not happy with the results so far.",
+  "reason": "Change 2",
   "history": [
+    {
+      "at": "2026-11-04T13:44:03Z",
+      "by": "GreMi_Gaming",
+      "reason": "Change 2",
+      "changed": {
+        "contact_other": [
+          0.5,
+          1.0
+        ],
+        "bonus_clean": [
+          1.0,
+          1.5
+        ],
+        "bonus_close": [
+          1.0,
+          1.5
+        ],
+        "bonus_overtakes": [
+          1.0,
+          2.0
+        ]
+      }
+    },
     {
       "at": "2026-11-04T13:28:48Z",
       "by": "GreMi_Gaming",
