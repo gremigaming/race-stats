@@ -145,6 +145,10 @@ export function applySafetyScale(data: SafetyData): SafetyData {
       for (const it of s.items) {
         if (it.orig != null) it.orig = scaledPts(it.orig, it.cat, sc);
         it.pts = scaledPts(it.pts, it.cat, sc);
+        if (it.pts > 0)   // the bonus texts name their v2.2 values
+          it.text = it.text
+            .replace("(+0.3 each)", `(+${+(0.3 * sc.bonus).toFixed(2)} each)`)
+            .replace(", perfect race +1", `, perfect race +${sc.bonus}`);
       }
       s.total = s.items.reduce((n, it) => n + it.pts, 0);
     }

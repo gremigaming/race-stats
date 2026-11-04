@@ -194,7 +194,7 @@ export function SafetyPage() {
               not filtered by date
             </span>
             )}
-            Live rating over each driver's last 80 races · {rows.length} drivers
+            Live rating over each driver's last {league.safetyData.rules === "v2.5" ? 30 : 50} races · {rows.length} drivers
           </p>
         </div>
         {!embed && (

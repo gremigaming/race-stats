@@ -317,7 +317,7 @@ function Breakdown({ driver }: { driver: SafetyDriver }) {
         </div>
       ))}
       <p className="pt-1 text-[11px] text-zinc-500">
-        Older streams count for less, so these are what's left of each kind today. Your SR comes from your average per race, not from this total.
+        Older races count for less, so these are what's left of each kind today, before the SR's other rules (see How it works).
       </p>
     </div>
   );
