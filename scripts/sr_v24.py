@@ -168,7 +168,9 @@ VARIANTS = [
 #   then gravity after every league race (raced or skipped). Qualifying joins the next race.
 LINEAR = dict(DEFAULT, BONUS_CAP=4.0, START=50.0, STREAK_MAX=None,
               GAIN=1.0,       # x bonus and penalties
-              GRAV_PCT=None)  # proportional gravity: -pct x (SR - 50) per league race instead of the flat tiers
+              GRAV_PCT=None,  # proportional gravity: -pct x (SR - 50) per league race instead of the flat tiers
+              GRAV_PCT_SKIP=None,  # proportional gravity on races you skip (None: same as GRAV_PCT)
+              BONUS_DIM=0.0)  # bonus x (1 - BONUS_DIM x (SR - 50) / 10) above 50 (third draft: 0.10)
 
 
 def simulate_linear(data, **kw):
@@ -177,7 +179,7 @@ def simulate_linear(data, **kw):
     pos_of = {f: k for k, f in enumerate(league)}
     rows = {d["name"]: {pos_of[f]: (b, its) for f, b, its in race_rows(d) if f in pos_of} for d in data["drivers"]}
     st = {n: dict(sr=P["START"], level=0, started=False, skips=0, dirty=0, best=0, grav=0.0, bonus=0.0, raw=0.0, adj=0.0,
-                  hit100=0, hit0=0) for n in rows}
+                  hit100=0, hit0=0, worst=0.0) for n in rows}
     for k in range(len(league)):
         for n, r in rows.items():
             s = st[n]
@@ -201,31 +203,37 @@ def simulate_linear(data, **kw):
                         dirty = True; lvl = s["level"] + 1
             if dirty: s["level"] += 1; s["dirty"] += 1; s["best"] = max(s["best"], s["level"])
             else: s["level"] = 0
-            bb = min(b, P["BONUS_CAP"]) * P["GAIN"]; pen *= P["GAIN"]; s["bonus"] += bb; s["adj"] += pen
+            bm = 1.0 - max(0.0, (s["sr"] - 50.0) / 10.0) * P["BONUS_DIM"]   # SR before this race
+            bb = (min(b, P["BONUS_CAP"]) if P["BONUS_CAP"] else b) * bm * P["GAIN"]; pen *= P["GAIN"]; s["bonus"] += bb; s["adj"] += pen
+            s["worst"] = max(s["worst"], pen - bb)
             s["sr"] = max(0.0, min(100.0, s["sr"] + bb - pen))
             s["hit100"] += s["sr"] >= 100; s["hit0"] += s["sr"] <= 0
         for n, s in st.items():
             if not s["started"]: continue
             if P["GRAV_SKIPPED_ONLY"] and k in rows[n]: continue
             if s["sr"] > 50:
-                g = P["GRAV_PCT"] * (s["sr"] - 50) if P["GRAV_PCT"] else min(tier(P["GRAV"], s["sr"], 0.0), s["sr"] - 50)
+                pct = P["GRAV_PCT_SKIP"] if P["GRAV_PCT_SKIP"] is not None and k not in rows[n] else P["GRAV_PCT"]
+                g = pct * (s["sr"] - 50) if pct else min(tier(P["GRAV"], s["sr"], 0.0), s["sr"] - 50)
                 s["sr"] -= g; s["grav"] += g
     return {n: dict(sr=half(s["sr"]), races=len(rows[n]), dirty=s["dirty"], streak_now=s["level"], streak_max=s["best"],
                     gravity=round(s["grav"], 1), bonus=round(s["bonus"], 1), pts_raw=round(s["raw"], 1), pts_adj=round(s["adj"], 1),
-                    hit100=s["hit100"], hit0=s["hit0"])
+                    hit100=s["hit100"], hit0=s["hit0"], worst=round(s["worst"], 1))
             for n, s in st.items() if rows[n]}
 
 LINEAR_TUNED = dict(GAIN=3.0, GRAV_PCT=0.04)
+# third draft (GreMi, 4 Nov 2026): no bonus cap, bonus -10% per 10 SR above 50, gravity 4% raced / 2% skipped
+LINEAR_V3 = dict(BONUS_CAP=None, BONUS_DIM=0.10, GRAV_PCT=0.04, GRAV_PCT_SKIP=0.02)
+LINEAR_V3_TUNED = dict(LINEAR_V3, GAIN=2.0)   # same rules, every point x2
 
 
 def table_linear(data, variants):
     live = {d["name"]: d["sr"] for d in data["drivers"]}
     res = [(lbl, simulate_linear(data, **kw)) for lbl, kw in variants]
     r0 = res[0][1]; names = sorted(r0, key=lambda n: (-r0[n]["sr"], n.lower()))
-    lines = ["| # | Driver | Races | Bonus | Penalty (raw -> scaled) | Dirty | Max streak | Gravity | v2.2 live | " + " | ".join(l for l, _ in res) + " |",
-             "|" + "---|" * (9 + len(res))]
+    lines = ["| # | Driver | Races | Bonus | Penalty (raw -> scaled) | Dirty | Max streak | Gravity | Worst race | v2.2 live | " + " | ".join(l for l, _ in res) + " |",
+             "|" + "---|" * (10 + len(res))]
     for k, n in enumerate(names, 1):
         x = r0[n]
         lines.append(f"| {k} | {n} | {x['races']} | +{x['bonus']:g} | {x['pts_raw']:g} -> {x['pts_adj']:g} | {x['dirty']} | {x['streak_max']} | "
-                     f"-{x['gravity']:g} | {live.get(n, 50.0):.1f} | " + " | ".join(f"{r[n]['sr']:.1f}" for _, r in res) + " |")
+                     f"-{x['gravity']:g} | -{x['worst']:g} | {live.get(n, 50.0):.1f} | " + " | ".join(f"{r[n]['sr']:.1f}" for _, r in res) + " |")
     return "\n".join(lines)
