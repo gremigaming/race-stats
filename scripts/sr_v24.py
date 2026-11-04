@@ -347,3 +347,5 @@ WINDOW7_P15_B2 = dict(WINDOW6_SHORT, TABLE={0.5: 0.75, 1.5: 2.25, 3.0: 4.5, 5.0:
 WINDOW7_P125_B15 = dict(WINDOW7_125, BONUS_SCALE=1.5)
 WINDOW7_VARIANTS = [("Draft 6 (points as now)", WINDOW6_SHORT), ("x1.25 all", WINDOW7_125),
                     ("penalties x1.25, bonus x1.5", WINDOW7_P125_B15), ("penalties x1.5, bonus x2", WINDOW7_P15_B2)]
+# penalties x1.5, bonus x2, gravity -4% of (SR - 50) after every league race, raced or skipped (GreMi, 4 Nov 2026)
+WINDOW7_P15_B2_G4 = dict(WINDOW7_P15_B2, GRAV_PCT=0.04, GRAV_PCT_SKIP=0.04)
