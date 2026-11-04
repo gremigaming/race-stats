@@ -345,9 +345,11 @@ WINDOW7_125 = dict(WINDOW6_SHORT, TABLE={0.5: 0.75, 1.5: 2.0, 3.0: 4.0, 5.0: 6.0
 WINDOW7_P15_B2 = dict(WINDOW6_SHORT, TABLE={0.5: 0.75, 1.5: 2.25, 3.0: 4.5, 5.0: 7.5, 10.0: 15.0}, OTHER_SCALE=1.5, BONUS_SCALE=2.0)
 # middle ground: penalties x1.25, bonuses x1.5
 WINDOW7_P125_B15 = dict(WINDOW7_125, BONUS_SCALE=1.5)
-# GreMi's pick (4 Nov 2026): penalties x1.5, bonuses x2, gravity back to -4% of (SR - 50) after every league race
-WINDOW7_PICK = dict(WINDOW7_P15_B2, GRAV_PCT=0.04, GRAV_PCT_SKIP=0.04)
-WINDOW7_VARIANTS = [("Pick: pen x1.5, bonus x2, gravity 4%", WINDOW7_PICK), ("Draft 6 (points as now)", WINDOW6_SHORT), ("x1.25 all", WINDOW7_125),
-                    ("penalties x1.25, bonus x1.5", WINDOW7_P125_B15), ("penalties x1.5, bonus x2", WINDOW7_P15_B2)]
-# penalties x1.5, bonus x2, gravity -4% of (SR - 50) after races you joined, -2% after races you skipped (GreMi, 4 Nov 2026)
-WINDOW7_P15_B2_G4 = dict(WINDOW7_P15_B2, GRAV_PCT=0.04, GRAV_PCT_SKIP=0.02)
+# GreMi's pick (4 Nov 2026): penalties x1.5, bonuses x2; gravity -4% of (SR - 50) after races you joined
+WINDOW7_PICK = dict(WINDOW7_P15_B2, GRAV_PCT=0.04, GRAV_PCT_SKIP=0.02)        # skipped races -2% (like drafts 3-4)
+WINDOW7_PICK_NOSKIP = dict(WINDOW7_P15_B2, GRAV_PCT=0.04, GRAV_PCT_SKIP=0.0)  # skipped races no gravity
+WINDOW7_PICK_ALL4 = dict(WINDOW7_P15_B2, GRAV_PCT=0.04, GRAV_PCT_SKIP=0.04)   # every race -4%
+WINDOW7_P15_B2_G4 = WINDOW7_PICK
+WINDOW7_VARIANTS = [("Pick: gravity 4% joined / 2% skipped", WINDOW7_PICK), ("4% joined / 0 skipped", WINDOW7_PICK_NOSKIP),
+                    ("4% every race", WINDOW7_PICK_ALL4), ("2% every race", WINDOW7_P15_B2), ("x1.25 all, 2%", WINDOW7_125),
+                    ("Draft 6", WINDOW6_SHORT)]
