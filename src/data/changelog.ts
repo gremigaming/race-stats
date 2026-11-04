@@ -10,6 +10,22 @@ export interface ChangelogEntry {
 // raw commit history also contains routine uploads and staff-only corrections.
 const changelog: ChangelogEntry[] = [
   {
+    id: "track-sorting-options",
+    date: "2026-11-04",
+    type: "feat",
+    message:
+      "Sort tracks by the default calendar order, session count, best race result, or race pace against the field.",
+    destination: "tracks",
+  },
+  {
+    id: "track-race-pace-vs-field",
+    date: "2026-11-04",
+    type: "feat",
+    message:
+      "Track cards now show your race pace against the field alongside Race and Qualifying, with a detailed pace comparison in track insights.",
+    destination: "tracks",
+  },
+  {
     id: "safety-rating-breakdown",
     date: "2026-11-04",
     type: "feat",

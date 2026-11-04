@@ -1,4 +1,5 @@
 import { Fuel, Gauge, History, Swords, Timer, Trophy, Zap } from "lucide-react";
+import type { TrackLapPaceBenchmark } from "../../analysis/trackLapPace";
 import {
   formatEnergyMj,
   formatFuelKg,
@@ -37,6 +38,7 @@ export function TrackKeyInsights({
   recommendation,
   raceLengthLabel,
   rivalBenchmark,
+  paceBenchmark,
 }: {
   recommendation: TrackRaceRecommendation;
   raceLengthLabel?: string;
@@ -47,6 +49,8 @@ export function TrackKeyInsights({
    * qualifying rival exists.
    */
   rivalBenchmark?: TrackRivalBenchmark | null;
+  /** Same-compound race-pace gap against the median human peer at this track. */
+  paceBenchmark?: TrackLapPaceBenchmark | null;
 }) {
   const {
     raceCount,
@@ -83,6 +87,8 @@ export function TrackKeyInsights({
         {raceVsQualiDeltaMs !== 0 && (
           <RaceVsQualiTile deltaMs={raceVsQualiDeltaMs} />
         )}
+
+        {paceBenchmark && <RacePaceVsFieldTile benchmark={paceBenchmark} />}
 
         {avgErsDeployMj > 0 && (
           <InsightTile title="Avg ERS Deployed" icon={Zap} accent="cyan">
@@ -151,6 +157,37 @@ function RaceVsQualiTile({ deltaMs }: { deltaMs: number }) {
       </InsightValue>
       <InsightDetail className="mt-1.5">
         best clean race lap vs. best quali lap
+      </InsightDetail>
+    </InsightTile>
+  );
+}
+
+function RacePaceVsFieldTile({
+  benchmark,
+}: {
+  benchmark: TrackLapPaceBenchmark;
+}) {
+  const gap = benchmark.gapMs;
+  const faster = gap < 0;
+  const matched = gap === 0;
+  const valueTone = matched
+    ? "text-zinc-100"
+    : faster
+      ? "text-ahead"
+      : "text-behind";
+  const sign = gap > 0 ? "+" : gap < 0 ? "−" : "";
+
+  return (
+    <InsightTile title="Race Pace vs. Field" icon={Gauge}>
+      <InsightValue>
+        <span className={valueTone}>
+          {sign}
+          {gap === 0 ? "0.000" : msToSectorTime(Math.abs(gap))}s
+        </span>
+      </InsightValue>
+      <InsightDetail className="mt-1.5">
+        {matched ? "Matched" : faster ? "Faster" : "Slower"} than the field
+        median
       </InsightDetail>
     </InsightTile>
   );

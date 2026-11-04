@@ -64,6 +64,7 @@ import {
   buildTrackLocationBreakdowns,
   hasLocationBreakdownEvents,
 } from "../analysis/eventLocationBreakdown";
+import { buildTrackLapPaceBenchmark } from "../analysis/trackLapPace";
 import { buildTrackRivalBenchmark } from "../analysis/rivalStats";
 import { CHART_THEME, SECTOR_COLORS, TOOLTIP_STYLE } from "../constants/colors";
 import { getSessionFormulaScopeKey } from "../utils/formulaScope";
@@ -306,6 +307,15 @@ export function TrackProgressPage() {
         (s) => isTrackSlugMatch(s.track, trackId),
       ),
     [sessions, activeFormulaKey, trackId],
+  );
+  const trackPaceBenchmark = useMemo(
+    () =>
+      buildTrackLapPaceBenchmark(
+        (selectedRaceAnalysisBucket?.raceData ?? raceDataAll).map(
+          (race) => race.summary,
+        ),
+      ),
+    [raceDataAll, selectedRaceAnalysisBucket],
   );
   const selectedRaceSetupCandidates = selectedRaceAnalysisBucket
     ? selectedRaceAnalysisBucket.setupCandidates
@@ -1306,6 +1316,7 @@ export function TrackProgressPage() {
                   recommendation={recommendation}
                   raceLengthLabel={selectedRaceLengthLabel}
                   rivalBenchmark={trackRivalBenchmark}
+                  paceBenchmark={trackPaceBenchmark}
                 />
               )}
 

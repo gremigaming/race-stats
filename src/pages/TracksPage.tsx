@@ -1,9 +1,16 @@
-import { useMemo } from "react";
+import { ArrowUpDown } from "lucide-react";
+import { useMemo, useState } from "react";
 import { SectionHeader } from "../components/ui/SectionHeader";
 import { SessionListActiveFilters } from "../components/SessionListActiveFilters";
 import { SessionListFilterMenu } from "../components/SessionListFilterMenu";
 import { TrackOverviewCard } from "../components/dashboard/TrackOverviewCard";
-import { buildTrackRecords } from "../components/dashboard/helpers";
+import {
+  buildTrackRecords,
+  isProblemStatus,
+  type TrackRecords,
+} from "../components/dashboard/helpers";
+import { PillSelect, type PillSelectOption } from "../components/ui/PillSelect";
+import { buildTrackLapPaceBenchmark } from "../analysis/trackLapPace";
 import { useTelemetry } from "../context/TelemetryContext";
 import {
   DEFAULT_FILTERS,
@@ -16,11 +23,29 @@ import type { SessionSummary } from "../types/telemetry";
 import { getSessionFormulaScopeKey } from "../utils/formulaScope";
 import { getTrackId, sortTracksByCalendar } from "../utils/tracks";
 
+type TrackSort = "default" | "sessions" | "race-result" | "race-pace";
+
+interface TrackCardData {
+  id: string;
+  track: string;
+  sessions: SessionSummary[];
+  records: TrackRecords;
+  paceGapMs: number | null;
+}
+
+const TRACK_SORT_OPTIONS: readonly PillSelectOption[] = [
+  { value: "default", label: "Default order" },
+  { value: "sessions", label: "Most sessions" },
+  { value: "race-result", label: "Best race result" },
+  { value: "race-pace", label: "Race pace vs. field" },
+];
+
 export function TracksPage() {
   const { sessions, loading, error } = useSessionList();
   const { scopeKey, activeFormulaKey, activeFormula, league } = useTelemetry();
   const [filters, setFilters] = useSessionFilters();
   const game = useGameScope();
+  const [trackSort, setTrackSort] = useState<TrackSort>("default");
 
   const filteredSessions = useMemo(
     () =>
@@ -44,10 +69,57 @@ export function TracksPage() {
     return grouped;
   }, [filteredSessions]);
 
-  const tracks = useMemo(
+  const calendarTracks = useMemo(
     () => sortTracksByCalendar([...sessionsByTrack.keys()], activeFormulaKey),
     [activeFormulaKey, sessionsByTrack],
   );
+
+  const trackCards = useMemo(() => {
+    const cards: TrackCardData[] = calendarTracks.map((id) => {
+      const trackSessions = sessionsByTrack.get(id) ?? [];
+      return {
+        id,
+        track: trackSessions[0]?.track ?? id,
+        sessions: trackSessions,
+        records: buildTrackRecords(trackSessions),
+        paceGapMs: buildTrackLapPaceBenchmark(trackSessions)?.gapMs ?? null,
+      };
+    });
+
+    if (trackSort === "default") return cards;
+
+    const calendarOrder = new Map<string, number>();
+    cards.forEach((card, index) => calendarOrder.set(card.id, index));
+    return [...cards].sort((a, b) => {
+      let comparison = 0;
+
+      if (trackSort === "sessions") {
+        comparison = b.sessions.length - a.sessions.length;
+      } else if (trackSort === "race-result") {
+        const aResult = a.records.race;
+        const bResult = b.records.race;
+        if (!aResult || !bResult) {
+          comparison = aResult ? -1 : bResult ? 1 : 0;
+        } else {
+          comparison =
+            Number(isProblemStatus(aResult.status)) -
+            Number(isProblemStatus(bResult.status));
+          if (comparison === 0) {
+            comparison = aResult.position - bResult.position;
+          }
+        }
+      } else if (trackSort === "race-pace") {
+        if (a.paceGapMs == null || b.paceGapMs == null) {
+          comparison =
+            a.paceGapMs == null ? (b.paceGapMs == null ? 0 : 1) : -1;
+        } else {
+          comparison = a.paceGapMs - b.paceGapMs;
+        }
+      }
+
+      return comparison || calendarOrder.get(a.id)! - calendarOrder.get(b.id)!;
+    });
+  }, [calendarTracks, sessionsByTrack, trackSort]);
 
   const resetFilters = () => {
     setFilters(DEFAULT_FILTERS);
@@ -84,14 +156,24 @@ export function TracksPage() {
     <div className="mx-auto max-w-5xl space-y-6 p-6">
       <SectionHeader
         title="All tracks"
-        hint={`${activeFormula?.label ?? "All games"} · ${league?.filterLabel ?? "All available dates"} · ${tracks.length} ${tracks.length === 1 ? "track" : "tracks"} · ${filteredSessions.length} ${filteredSessions.length === 1 ? "session" : "sessions"}`}
+        hint={`${activeFormula?.label ?? "All games"} · ${league?.filterLabel ?? "All available dates"} · ${trackCards.length} ${trackCards.length === 1 ? "track" : "tracks"} · ${filteredSessions.length} ${filteredSessions.length === 1 ? "session" : "sessions"}`}
         action={
-          <SessionListFilterMenu
-            value={filters}
-            onChange={setFilters}
-            game={game}
-            onReset={resetFilters}
-          />
+          <div className="flex items-center gap-2">
+            <PillSelect
+              ariaLabel="Sort tracks"
+              leadingIcon={ArrowUpDown}
+              value={trackSort}
+              onChange={(value) => setTrackSort(value as TrackSort)}
+              options={TRACK_SORT_OPTIONS}
+              size="sm"
+            />
+            <SessionListFilterMenu
+              value={filters}
+              onChange={setFilters}
+              game={game}
+              onReset={resetFilters}
+            />
+          </div>
         }
       />
 
@@ -105,21 +187,19 @@ export function TracksPage() {
         />
       )}
 
-      {tracks.length ? (
+      {trackCards.length ? (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          {tracks.map((trackId) => {
-            const trackSessions = sessionsByTrack.get(trackId) ?? [];
-            const track = trackSessions[0]?.track ?? trackId;
-            return (
+          {trackCards.map(
+            ({ id, track, sessions: trackSessions, records }) => (
               <TrackOverviewCard
-                key={trackId}
+                key={id}
                 track={track}
                 sessions={trackSessions}
                 scopeKey={scopeKey ?? undefined}
-                records={buildTrackRecords(trackSessions)}
+                records={records}
               />
-            );
-          })}
+            ),
+          )}
         </div>
       ) : (
         <div className="rounded-2xl bg-zinc-900/50 px-5 py-8 text-center">

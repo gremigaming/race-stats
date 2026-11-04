@@ -1,8 +1,9 @@
 import { Link } from "react-router-dom";
 import type { ReactNode } from "react";
 import type { SessionSummary } from "../../types/telemetry";
+import { buildTrackLapPaceBenchmark } from "../../analysis/trackLapPace";
 import { cn } from "../../utils/cn";
-import { formatShortDate } from "../../utils/format";
+import { formatShortDate, msToSectorTime } from "../../utils/format";
 import { cardClass } from "../Card";
 import { TrackFlag } from "../TrackFlag";
 import { getTrackDisplayName } from "../../utils/tracks";
@@ -115,6 +116,39 @@ function RaceMetric({ record }: { record: TrackRaceRecord | undefined }) {
   );
 }
 
+function PaceMetric({ sessions }: { sessions: SessionSummary[] }) {
+  const benchmark = buildTrackLapPaceBenchmark(sessions);
+  if (!benchmark) {
+    return (
+      <MetricShell label="Race pace vs. field" detail="No matched race data">
+        <div className="truncate font-mono text-md font-semibold tabular-nums text-zinc-700">
+          —
+        </div>
+      </MetricShell>
+    );
+  }
+
+  const gap = benchmark.gapMs;
+  const tone =
+    gap === 0 ? "text-zinc-200" : gap > 0 ? "text-behind" : "text-ahead";
+  const sign = gap > 0 ? "+" : gap < 0 ? "−" : "";
+  const paceLabel = gap === 0 ? "matched" : gap > 0 ? "slower" : "faster";
+
+  return (
+    <MetricShell label="Race pace vs. field">
+      <div
+        className={cn(
+          "truncate font-mono text-md font-semibold tabular-nums",
+          tone,
+        )}
+      >
+        {sign}
+        {gap === 0 ? "0.000" : msToSectorTime(Math.abs(gap))}s {paceLabel}
+      </div>
+    </MetricShell>
+  );
+}
+
 export function TrackOverviewCard({
   track,
   sessions,
@@ -161,16 +195,11 @@ export function TrackOverviewCard({
       <div className="relative mt-5 grid grid-cols-2 gap-x-5 gap-y-3 border-t border-white/[0.06] pt-4">
         <RaceMetric record={records.race} />
         <LapMetric
-          label="Online Q"
+          label="Qualifying"
           record={records.onlineQualifying}
           tone="text-best"
         />
-        <LapMetric label="TT" record={records.timeTrial} tone="text-cyan-300" />
-        <LapMetric
-          label="Offline Q"
-          record={records.offlineQualifying}
-          tone="text-best"
-        />
+        <PaceMetric sessions={sessions} />
       </div>
     </>
   );
