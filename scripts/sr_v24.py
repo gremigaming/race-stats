@@ -226,9 +226,9 @@ LINEAR_V3 = dict(BONUS_CAP=None, BONUS_DIM=0.10, GRAV_PCT=0.04, GRAV_PCT_SKIP=0.
 LINEAR_V3_TUNED = dict(LINEAR_V3, GAIN=2.0)   # same rules, every point x2
 
 
-def table_linear(data, variants):
+def table_linear(data, variants, sim=None):
     live = {d["name"]: d["sr"] for d in data["drivers"]}
-    res = [(lbl, simulate_linear(data, **kw)) for lbl, kw in variants]
+    res = [(lbl, (sim or simulate_linear)(data, **kw)) for lbl, kw in variants]
     r0 = res[0][1]; names = sorted(r0, key=lambda n: (-r0[n]["sr"], n.lower()))
     lines = ["| # | Driver | Races | Bonus | Penalty (raw -> scaled) | Dirty | Max streak | Gravity | Worst race | v2.2 live | " + " | ".join(l for l, _ in res) + " |",
              "|" + "---|" * (10 + len(res))]
@@ -237,3 +237,78 @@ def table_linear(data, variants):
         lines.append(f"| {k} | {n} | {x['races']} | +{x['bonus']:g} | {x['pts_raw']:g} -> {x['pts_adj']:g} | {x['dirty']} | {x['streak_max']} | "
                      f"-{x['gravity']:g} | -{x['worst']:g} | {live.get(n, 50.0):.1f} | " + " | ".join(f"{r[n]['sr']:.1f}" for _, r in res) + " |")
     return "\n".join(lines)
+
+
+# ---- SR v2.4 draft 4 (GreMi, 4 Nov 2026): linear points in a 50-race recency window.
+#   SR = 50 + sum over your last 50 races of weight x race net, within 0..100.
+#   weight: races 1-10 back 1.0, 11-20 0.8, 21-30 0.6, 31-40 0.4, 41-50 0.2, older 0.
+#   race net = bonus x (1 - 0.01 x (SR - 50)) - penalties x position x streak (SR before the race).
+#   Gravity after every league race (-4% of SR - 50 raced, -2% skipped, never below 50) is booked
+#   on your latest race, so it ages out of the window with it.
+WINDOW4 = dict(DEFAULT, BONUS_DIM=0.10, GRAV_PCT=0.04, GRAV_PCT_SKIP=0.02, STEPS=[1.0, 0.8, 0.6, 0.4, 0.2],
+               BONUS_SCALE=1.0, OTHER_SCALE=1.0, CLEAN_ONLY_BONUS=False, STREAK_RESET_SKIPS=None,
+               GRAV_ON_SKIP_ONLY=False)
+
+
+def simulate_window(data, **kw):
+    P = dict(WINDOW4, **kw)
+    league = [f for st in data["streams"] for f in st["files"] if f.startswith("Race_")]
+    pos_of = {f: k for k, f in enumerate(league)}
+    rows = {d["name"]: {pos_of[f]: (b, its) for f, b, its in race_rows(d) if f in pos_of} for d in data["drivers"]}
+    st = {n: dict(nets=[], sr=50.0, level=0, skips=0, dirty=0, best=0, grav=0.0, bonus=0.0, raw=0.0, adj=0.0, worst=0.0,
+                  hidden=0.0) for n in rows}
+    W = P["STEPS"]
+
+    def total(s):
+        nets = s["nets"]; L = len(nets)
+        return sum(W[(L - 1 - k) // 10] * v for k, v in enumerate(nets) if (L - 1 - k) // 10 < len(W))
+
+    def rescore(s):
+        raw = 50 + total(s); s["hidden"] = max(0.0, raw - 100)
+        s["sr"] = max(0.0, min(100.0, raw))
+
+    for k in range(len(league)):
+        for n, r in rows.items():
+            s = st[n]
+            if k not in r:
+                if s["nets"]: s["skips"] += 1
+                if P["STREAK_RESET_SKIPS"] is not None and s["skips"] >= P["STREAK_RESET_SKIPS"]: s["level"] = 0
+                continue
+            b, its = r[k]; s["skips"] = 0
+            pos = tier(P["POS"], s["sr"], 1.0)
+            cnt = dict(big=0, medium=0, small=0); dirty = False; pen = 0.0; lvl = s["level"]; ninc = 0
+            for _, kind, c, p in its:
+                sm = 1.0 if lvl == 0 else P["STREAK_FIRST"] + P["STREAK_STEP"] * (lvl - 1)
+                t_ = P["TABLE"] or {}
+                if kind == "inc":
+                    p = t_[p] if p in t_ else t_[p * 2] / 2 if p * 2 in t_ else p * P["INC_SCALE"]
+                    ninc += 1
+                else:
+                    p *= P["OTHER_SCALE"]
+                pen += p * pos * sm; s["raw"] += p
+                if kind == "inc":
+                    cnt[c] += 1
+                    if not dirty and any(cnt[x] >= P["DIRTY"][x] for x in cnt):
+                        dirty = True; lvl = s["level"] + 1
+            if dirty: s["level"] += 1; s["dirty"] += 1; s["best"] = max(s["best"], s["level"])
+            else: s["level"] = 0
+            bm = 1.0 - max(0.0, (s["sr"] - 50.0) / 10.0) * P["BONUS_DIM"]
+            bb = b * bm * P["BONUS_SCALE"]
+            if P["CLEAN_ONLY_BONUS"] and ninc: bb = 0.0
+            s["bonus"] += bb; s["adj"] += pen; s["worst"] = max(s["worst"], pen - bb)
+            s["nets"].append(bb - pen); rescore(s)
+        for n, s in st.items():
+            if not s["nets"]: continue
+            raced = k in rows[n]
+            if P["GRAV_ON_SKIP_ONLY"] and raced: continue
+            if s["sr"] > 50:
+                g = min((P["GRAV_PCT"] if raced else P["GRAV_PCT_SKIP"]) * (s["sr"] - 50), s["sr"] - 50)
+                s["nets"][-1] -= g; s["grav"] += g; rescore(s)
+    return {n: dict(sr=half(s["sr"]), races=len(rows[n]), dirty=s["dirty"], streak_now=s["level"], streak_max=s["best"],
+                    gravity=round(s["grav"], 1), bonus=round(s["bonus"], 1), pts_raw=round(s["raw"], 1), pts_adj=round(s["adj"], 1),
+                    worst=round(s["worst"], 1), hidden=round(s["hidden"], 1))
+            for n, s in st.items() if rows[n]}
+
+# draft 4 fix (no multipliers or caps): gravity only on races you skip (the window already fades old
+# races), contact points 1 / 2 / 4 / 6, R9 12 (track limits / pit exit / DNF stay 1)
+WINDOW4_FIX = dict(GRAV_ON_SKIP_ONLY=True, GRAV_PCT_SKIP=0.02, TABLE={0.5: 1.0, 1.5: 2.0, 3.0: 4.0, 5.0: 6.0, 10.0: 12.0})
