@@ -465,6 +465,20 @@
       "was": -6.0,
       "learn": true,
       "owner": true
+    },
+    {
+      "id": "Race_Miami_2026_10_30_16_01_59.json|4|contact|4|2",
+      "type": "incident",
+      "reason": "Lost control of his car in the wet. not ideal but not on purpose",
+      "by": "319544045435224067",
+      "at": "2026-11-04T13:11:39Z",
+      "file": "Race_Miami_2026_10_30_16_01_59.json",
+      "driver": "Jakubm18_F1",
+      "car": 4,
+      "pts": -3.0,
+      "was": -6.0,
+      "learn": true,
+      "owner": true
     }
   ]
 }
