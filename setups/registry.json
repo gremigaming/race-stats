@@ -8,7 +8,7 @@
   "requested": null,
   "last": "2026-11-02"
  },
- "pending": 3,
+ "pending": 4,
  "tracks": [
   {
    "track": "Melbourne",
@@ -1736,6 +1736,58 @@
        "change": null,
        "text": "Starting setup",
        "why": "Your race setup (no quali recorded).",
+       "sessions": [
+        {
+         "file": "2026-11-04_20-30-44_Hungaroring_OSQ.gmtel.gz",
+         "date": "2026-11-04",
+         "session": "quali",
+         "weather": 0,
+         "pace": 79117,
+         "best": 79117,
+         "mean": 79117,
+         "laps": 1
+        }
+       ],
+       "verdict": {
+        "result": "baseline",
+        "text": "Starting point: 1:19.117 over 1 session."
+       }
+      },
+      {
+       "v": 2,
+       "base": 1,
+       "created": "2026-11-04",
+       "saved": null,
+       "values": {
+        "fw": 50,
+        "rw": 36,
+        "don": 100,
+        "doff": 35,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 28,
+        "farb": 2,
+        "rarb": 7,
+        "frh": 21,
+        "rrh": 43,
+        "bb": 57,
+        "bp": 100,
+        "fr": 28.2,
+        "fl": 28.2,
+        "rr": 21.0,
+        "rl": 21.0
+       },
+       "change": {
+        "rrh": [
+         42,
+         43
+        ]
+       },
+       "text": "Rear ride height 42 → 43",
+       "why": "The rear floor still scrapes; a little higher.",
        "sessions": [],
        "verdict": {
         "result": "untested",
@@ -1777,7 +1829,18 @@
        "change": null,
        "text": "Starting setup",
        "why": "Your last race setup.",
-       "sessions": [],
+       "sessions": [
+        {
+         "file": "2026-11-04_20-30-44_Hungaroring_OSQ.gmtel.gz",
+         "date": "2026-11-04",
+         "session": "quali",
+         "weather": 0,
+         "pace": 79117,
+         "best": 79117,
+         "mean": 79117,
+         "laps": 1
+        }
+       ],
        "verdict": {
         "result": "untested",
         "text": "Not driven yet."
