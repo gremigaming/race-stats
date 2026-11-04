@@ -8,7 +8,7 @@
   "requested": null,
   "last": "2026-11-02"
  },
- "pending": 4,
+ "pending": 5,
  "tracks": [
   {
    "track": "Melbourne",
@@ -1746,6 +1746,16 @@
          "best": 79117,
          "mean": 79117,
          "laps": 1
+        },
+        {
+         "file": "2026-11-04_20-33-30_Hungaroring_Race.gmtel.gz",
+         "date": "2026-11-04",
+         "session": "race",
+         "weather": 0,
+         "pace": 79583,
+         "best": 78672,
+         "mean": 79583,
+         "laps": 4
         }
        ],
        "verdict": {
@@ -1839,8 +1849,59 @@
          "best": 79117,
          "mean": 79117,
          "laps": 1
+        },
+        {
+         "file": "2026-11-04_20-33-30_Hungaroring_Race.gmtel.gz",
+         "date": "2026-11-04",
+         "session": "race",
+         "weather": 0,
+         "pace": 79583,
+         "best": 78672,
+         "mean": 79583,
+         "laps": 4
         }
        ],
+       "verdict": {
+        "result": "baseline",
+        "text": "Starting point: 1:19.583 over 1 session."
+       }
+      },
+      {
+       "v": 2,
+       "base": 1,
+       "created": "2026-11-04",
+       "saved": null,
+       "values": {
+        "fw": 50,
+        "rw": 36,
+        "don": 100,
+        "doff": 35,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 28,
+        "farb": 2,
+        "rarb": 9,
+        "frh": 21,
+        "rrh": 42,
+        "bb": 57,
+        "bp": 100,
+        "fr": 28.2,
+        "fl": 28.2,
+        "rr": 21.0,
+        "rl": 21.0
+       },
+       "change": {
+        "rarb": [
+         7,
+         9
+        ]
+       },
+       "text": "Rear anti-roll bar 7 → 9",
+       "why": "The front wing is already at 50, so a slightly stiffer rear anti-roll bar helps the car rotate.",
+       "sessions": [],
        "verdict": {
         "result": "untested",
         "text": "Not driven yet."
