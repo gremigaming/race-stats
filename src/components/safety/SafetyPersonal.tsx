@@ -9,7 +9,7 @@ import {
   TriangleAlert,
   Trophy,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { cardClass, cardHighlight } from "../Card";
 import { SectionHeader } from "../ui/SectionHeader";
@@ -22,13 +22,15 @@ import {
   SR_RANKS,
   SR_START,
   signedHalf,
-  srPct,
+  SR_SETTINGS_DEFAULT,
   srSettings,
   srWindowRaces,
   type SafetyCategory,
   type SafetyData,
   type SafetyDriver,
+  type SrSettings,
   type SafetySession,
+  type StreamParts,
   STAFF_URL,
 } from "../../league/safety";
 import { cn } from "../../utils/cn";
@@ -343,6 +345,11 @@ function Sessions({ driver, data }: { driver: SafetyDriver; data: SafetyData }) 
       list.push({ ...s, items });
       byStream.set(s.stream, list);
     }
+    // SR v2.5: streams you skipped still move your SR (gravity), so they get a row too
+    if (!q && filter === "all")
+      for (const h of driver.history)
+        if (!byStream.has(h.stream) && h.parts && Math.abs(h.parts.after - h.parts.before) >= 0.05)
+          byStream.set(h.stream, []);
     return [...byStream.entries()]
       .sort((a, b) => b[0] - a[0])
       .map(([stream, sessions]) => ({ stream, sessions: sessions.reverse() }));
@@ -352,19 +359,7 @@ function Sessions({ driver, data }: { driver: SafetyDriver; data: SafetyData }) 
   return (
     <section className={cardClass}>
       <SectionHeader title="Races" hint={`${driver.sessions.length} sessions, newest first`} />
-      {data.rules === "v2.5" && (
-        <p className="mb-3 rounded-lg bg-zinc-950/50 px-3 py-2 text-[11px] leading-relaxed text-zinc-400">
-          <span className="text-zinc-200">How it adds up:</span> SR = 50 + the net scores of your last{" "}
-          {srWindowRaces(sr)} races, between 0 and 100. Your newest {sr.window_step} races count{" "}
-          {sr.window_weights[0] === 1 ? "in full" : srPct(sr.window_weights[0])}
-          {sr.window_weights.length > 1 &&
-            `, the ${sr.window_step} before that ${sr.window_weights.slice(1).map(srPct).join(", then ")}`}
-          . A race's net score (right of each race) is its bonus minus its penalties. The higher your SR, the less
-          bonus you get and the more a penalty costs{sr.no_bonus_dirty && ", and a dirty race gets no bonus at all"}.
-          Gravity pulls you back towards 50 after every league race: {srPct(sr.gravity_joined)} of the distance after
-          a race you join, {srPct(sr.gravity_skipped)} after one you skip.
-        </p>
-      )}
+      {data.rules === "v2.5" && <HowItAddsUp params={sr} />}
       {driver.history.some((h) => h.base != null) && (
         <p className="mb-3 rounded-lg bg-zinc-950/50 px-3 py-2 text-[11px] leading-relaxed text-zinc-400">
           <span className="text-zinc-200">How it adds up:</span> SR = 50 + 25 × your average net score (at most 100),
@@ -419,6 +414,8 @@ function Sessions({ driver, data }: { driver: SafetyDriver; data: SafetyData }) 
               drift={h?.drift}
               net={h?.net}
               gravity={h?.gravity}
+              parts={h?.parts}
+              params={sr}
               sessions={g.sessions}
               driver={driver.name}
               defaultOpen={gi === 0 || query.trim() !== ""}
@@ -443,6 +440,8 @@ function StreamGroup({
   drift,
   net,
   gravity,
+  parts,
+  params,
   sessions,
   driver,
   defaultOpen,
@@ -459,12 +458,17 @@ function StreamGroup({
   drift?: number;
   net?: number;
   gravity?: number;
+  parts?: StreamParts;
+  params?: SrSettings;
   sessions: SafetySession[];
   driver: string;
   defaultOpen: boolean;
 }) {
   const [open, setOpen] = useState(defaultOpen);
   const weight = sessions[0]?.weight ?? 1;
+  const skipped = sessions.length === 0;
+  // SR v2.5: the change from the exact split, so the header matches the sum in the box
+  const shownChange = parts ? Math.round((parts.after - parts.before) * 10) / 10 : half(change ?? 0);
   return (
     <div className="overflow-hidden rounded-xl bg-zinc-950/50">
       <button
@@ -480,8 +484,10 @@ function StreamGroup({
             {date ? `Stream of ${fmtDate(date)}` : "Stream"}
           </div>
           <div className="text-[11px] text-zinc-500">
-            {sessions.length} {sessions.length === 1 ? "session" : "sessions"}
-            {weight < 1 && ` · counts ${Math.round(weight * 100)}%`}
+            {skipped
+              ? `Skipped · ${parts?.skipped ?? 0} league ${parts?.skipped === 1 ? "race" : "races"}`
+              : `${sessions.length} ${sessions.length === 1 ? "session" : "sessions"}`}
+            {!skipped && weight < 1 && ` · counts ${Math.round(weight * 100)}% now`}
           </div>
           {perRace != null && (
             <div className="text-[11px] text-zinc-500">
@@ -489,7 +495,8 @@ function StreamGroup({
               {` vs your average of ${signedHalf(avgBefore)} before it`}
             </div>
           )}
-          {sr != null && (net != null || (gravity ?? 0) > 0) && (
+          {parts && <PartsLine parts={parts} />}
+          {!parts && sr != null && (net != null || (gravity ?? 0) > 0) && (
             <div className="text-[11px] text-zinc-500">
               {net != null && (
                 <span className={changeClass(net)}>{`${signedHalf(net).replace(/\.0$/, "")} net from races`}</span>
@@ -519,8 +526,8 @@ function StreamGroup({
         </div>
         {sr != null && (
           <div className="flex items-center gap-2">
-            <span className={cn("font-mono text-sm", changeClass(change ?? 0))}>
-              {signedHalf(half(change ?? 0))}
+            <span className={cn("font-mono text-sm", changeClass(shownChange))}>
+              {signedHalf(shownChange)}
             </span>
             <RankTile sr={sr} size={24} />
             <span className="w-10 text-right font-mono text-sm font-semibold text-zinc-200">
@@ -531,8 +538,9 @@ function StreamGroup({
       </button>
       {open && (
         <div className="space-y-1 px-2 pb-2">
+          {parts && <PartsBox parts={parts} params={params} sessions={sessions} />}
           {sessions.map((s) => (
-            <SessionRow key={s.file} session={s} driver={driver} />
+            <SessionRow key={s.file} session={s} driver={driver} params={params} />
           ))}
         </div>
       )}
@@ -540,7 +548,15 @@ function StreamGroup({
   );
 }
 
-function SessionRow({ session, driver }: { session: SafetySession; driver: string }) {
+function SessionRow({
+  session,
+  driver,
+  params,
+}: {
+  session: SafetySession;
+  driver: string;
+  params?: SrSettings;
+}) {
   const { scopeKey } = useTelemetry();
   const [open, setOpen] = useState(false);
   const { quali, track, time } = parseSessionFile(session.file);
@@ -548,7 +564,9 @@ function SessionRow({ session, driver }: { session: SafetySession; driver: strin
   const points = session.items.filter((it) => it.cat !== "contact");
   const lost = session.items.filter((i) => i.pts < 0).length;
   // SR v2.2: the card shows what the race counts for (net) and its sting, not the raw sum of its points
-  const shown = session.net ?? session.total;
+  // SR v2.5: a race shows its net with its gravity in; a qualifying's points are inside its race's number
+  const shown = session.netGrav ?? session.net ?? session.total;
+  const intoRace = session.carry === true;
   const sting = session.sting ?? 0;
   const fmt = (x: number) => x.toFixed(1).replace(/\.0$/, "");
   return (
@@ -591,10 +609,18 @@ function SessionRow({ session, driver }: { session: SafetySession; driver: strin
           </span>
         )}
         <span
-          className={cn("w-12 text-right font-mono", changeClass(shown))}
-          title={session.net != null ? "Net score this race counts for in your average" : undefined}
+          className={cn("w-12 text-right font-mono", intoRace ? "text-zinc-500" : changeClass(shown))}
+          title={
+            intoRace
+              ? "Counted in the next race's number"
+              : session.netGrav != null
+                ? "Net score of this race, gravity in"
+                : session.net != null
+                  ? "Net score this race counts for in your average"
+                  : undefined
+          }
         >
-          {signedHalf(shown)}
+          {intoRace ? `(${signedHalf(shown)})` : signedHalf(shown)}
         </span>
         <ChevronDown
           className={cn("h-3.5 w-3.5 shrink-0 text-zinc-600 transition-transform", open && "rotate-180")}
@@ -641,7 +667,13 @@ function SessionRow({ session, driver }: { session: SafetySession; driver: strin
             </p>
             </div>
           ))}
-          {session.net != null && (session.penalty != null) && (
+          {session.netGrav != null && <RaceMath session={session} params={params} />}
+          {intoRace && session.penalty != null && (
+            <p className="mt-1 rounded-md bg-zinc-950/50 px-2.5 py-2 text-zinc-400">
+              Qualifying points join your next race: they're in that race's number and its build-up.
+            </p>
+          )}
+          {session.netGrav == null && !intoRace && session.net != null && (session.penalty != null) && (
             <div className="mt-1 space-y-0.5 rounded-md bg-zinc-950/50 px-2.5 py-2 text-zinc-400">
               <div className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
                 How this {session.race ? "race" : "qualifying"} counts{session.withQuali ? " (with its qualifying)" : ""}
@@ -738,4 +770,236 @@ function SessionIncidents({ file, driver }: { file: string; driver: string }) {
   const key = driverKey(driver);
   const incidents = useRaceIncidents([file], key);
   return <RaceIncidentList incidents={incidents} driver={key} />;
+}
+
+const pct = (x: number) => `${Math.round(x * 100)}%`;
+const f1 = (x: number) => (Math.round(x * 10) / 10).toFixed(1);
+const f2 = (x: number) => String(+x.toFixed(2));
+const signed1 = (x: number) => signedHalf(Math.round(x * 10) / 10);
+
+/** The rules, with the values this build used (safety.json settings, so staff changes show up here). */
+function HowItAddsUp({ params }: { params?: SrSettings }) {
+  const p = params ?? SR_SETTINGS_DEFAULT;
+  const window = srWindowRaces(p);
+  const tiers = ([60, 70, 80, 90, 100] as const).map((from) => `x${f2(p[`tier_${from}`])} from ${from}`).join(", ");
+  return (
+    <div className="mb-3 space-y-1.5 rounded-lg bg-zinc-950/50 px-3 py-2 text-[11px] leading-relaxed text-zinc-400">
+      <p>
+        <span className="text-zinc-200">How it adds up:</span> SR = 50 + the net scores of your last {window} races,
+        between 0 and 100. Your newest {p.window_step} races count{" "}
+        {p.window_weights.map((w, i) => (i === 0 ? `${pct(w)}` : `the ${p.window_step} before that ${pct(w)}`)).join(", ")}. So
+        every race you join pushes your older races back a place, and every {p.window_step} places they count less: that's
+        the "older races count less" line in each stream.
+      </p>
+      <p>
+        A race's net score (right of each race) is its bonus minus its penalties minus its gravity. Bonus drops{" "}
+        {pct(p.bonus_cut)} for every 10 SR above 50{p.no_bonus_dirty ? ", and a dirty race gets none" : ""}. Each
+        penalty is multiplied by your SR tier before the race ({tiers}) and, after a dirty race, by the dirty streak
+        (x{f2(p.streak_first)}, then +{f2(p.streak_step)} for each dirty race in a row
+        {p.streak_max > 0 ? `, at most x${f2(p.streak_max)}` : ""}). A race is dirty after{" "}
+        {p.dirty_big} big, {p.dirty_medium} medium or {p.dirty_small} small incidents. Gravity pulls you back towards
+        50 after every league race: {pct(p.gravity_joined)} of the distance after a race you join, {pct(p.gravity_skipped)}{" "}
+        after one you skip. Open a stream or a race to see every step.
+      </p>
+    </div>
+  );
+}
+
+/** One line under the stream title: the parts of its SR change. */
+function PartsLine({ parts }: { parts: StreamParts }) {
+  const grav = parts.gravJoined + parts.gravSkipped;
+  const bits: { t: string; n: number }[] = [];
+  if (parts.joined > 0) bits.push({ t: "races", n: parts.races });
+  if (grav > 0.04) bits.push({ t: "gravity", n: -grav });
+  if (Math.abs(parts.window) >= 0.05) bits.push({ t: "older races count less", n: parts.window });
+  if (Math.abs(parts.limit) >= 0.05) bits.push({ t: "over the limit", n: parts.limit });
+  return (
+    <div className="text-[11px] text-zinc-500">
+      {bits.map((b, i) => (
+        <span key={b.t}>
+          {i > 0 && " "}
+          <span className={changeClass(b.n)}>{`${i > 0 ? (b.n < 0 ? "− " : "+ ") : b.n < 0 ? "−" : "+"}${f1(Math.abs(b.n))}`}</span>
+          {` ${b.t}`}
+        </span>
+      ))}
+      {` = ${signed1(parts.after - parts.before)}`}
+    </div>
+  );
+}
+
+function MathRow({
+  label,
+  value,
+  tone,
+  hint,
+  strong,
+  indent,
+}: {
+  label: ReactNode;
+  value: string;
+  tone?: string;
+  hint?: ReactNode;
+  strong?: boolean;
+  indent?: boolean;
+}) {
+  return (
+    <div className={cn(indent && "pl-3", strong && "border-t border-white/[0.06] pt-1 text-zinc-200")}>
+      <p className="flex justify-between gap-3">
+        <span>{label}</span>
+        <span className={cn("shrink-0 font-mono", tone)}>{value}</span>
+      </p>
+      {hint && <p className="text-[10.5px] text-zinc-500">{hint}</p>}
+    </div>
+  );
+}
+
+/** The stream's SR change, step by step: the rows add up to the SR after it. */
+function PartsBox({
+  parts,
+  params,
+  sessions,
+}: {
+  parts: StreamParts;
+  params?: SrSettings;
+  sessions: SafetySession[];
+}) {
+  const p = params ?? SR_SETTINGS_DEFAULT;
+  const races = sessions.filter((s) => s.netGrav != null);
+  const sumRows = races.reduce((n, s) => n + (s.netGrav ?? 0), 0);
+  return (
+    <div className="mb-1 space-y-1 rounded-lg bg-zinc-900/60 px-3 py-2.5 text-xs text-zinc-400">
+      <div className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500">How this stream adds up</div>
+      <MathRow label="SR before this stream" value={f1(parts.before)} tone="text-zinc-200" />
+      {parts.joined > 0 && (
+        <MathRow
+          label={`${parts.joined} ${parts.joined === 1 ? "race" : "races"} joined, gravity in (the race numbers below)`}
+          value={signed1(parts.races - parts.gravJoined)}
+          tone={changeClass(parts.races - parts.gravJoined)}
+          hint={
+            <>
+              bonus +{f1(parts.bonus)} − penalties {f1(parts.penalty)} − gravity {f1(parts.gravJoined)} (
+              {pct(p.gravity_joined)} of your SR above 50, after each race)
+              {Math.abs(sumRows - (parts.races - parts.gravJoined)) >= 0.15 && " · race numbers are rounded"}
+            </>
+          }
+        />
+      )}
+      {parts.gravSkipped > 0.004 && (
+        <MathRow
+          label={`Gravity: ${parts.skipped} league ${parts.skipped === 1 ? "race" : "races"} you skipped`}
+          value={`−${f1(parts.gravSkipped)}`}
+          tone="text-red-300"
+          hint={`${pct(p.gravity_skipped)} of your SR above 50 after each one`}
+        />
+      )}
+      {Math.abs(parts.window) >= 0.05 && (
+        <MathRow
+          label="Older races count less now"
+          value={signed1(parts.window)}
+          tone={changeClass(parts.window)}
+          hint={`These races pushed your earlier ones back. Every ${p.window_step} places back a race counts less (${p.window_weights
+            .map(pct)
+            .join(" → ")}, then it's gone), so part of what you earned before fades out of your SR.`}
+        />
+      )}
+      {Math.abs(parts.limit) >= 0.05 && (
+        <MathRow
+          label={parts.limit < 0 ? "Above the 100 maximum (kept in reserve)" : "Below the 0 minimum"}
+          value={signed1(parts.limit)}
+          tone={changeClass(parts.limit)}
+        />
+      )}
+      <MathRow
+        label="SR after this stream"
+        value={f1(parts.after)}
+        strong
+        hint={`Change ${signed1(parts.after - parts.before)}. Your SR is shown rounded to the nearest 0.5.`}
+      />
+    </div>
+  );
+}
+
+/** One race's net score, step by step: every penalty with its multipliers, the bonus cut and the gravity. */
+function RaceMath({ session, params }: { session: SafetySession; params?: SrSettings }) {
+  const p = params ?? SR_SETTINGS_DEFAULT;
+  const calc = session.calc ?? [];
+  const bonus = session.bonus ?? 0;
+  const counted = session.bonusCounted ?? 0;
+  const cut = session.bonusCut ?? 0;
+  const grav = session.gravity ?? 0;
+  return (
+    <div className="mt-1 space-y-1 rounded-md bg-zinc-950/50 px-2.5 py-2 text-zinc-400">
+      <div className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
+        How this race counts{session.withQuali ? " (with its qualifying)" : ""}
+      </div>
+      <MathRow
+        label={
+          session.dirty && p.no_bonus_dirty
+            ? `Bonus ${f1(bonus)}: none in a dirty race`
+            : cut > 0
+              ? `Bonus ${f1(bonus)} − ${pct(cut)} at your SR`
+              : "Bonus"
+        }
+        value={`+${f1(counted)}`}
+        tone="text-emerald-300"
+        hint={
+          !session.dirty && cut > 0
+            ? `${pct(p.bonus_cut)} less for every 10 SR above 50: ${f1(bonus)} × ${f2(1 - cut)} = ${f1(counted)}`
+            : undefined
+        }
+      />
+      {calc.map((c, i) => {
+        const mult = [`${f2(c.base)}`];
+        if (c.pos !== 1) mult.push(`${f2(c.pos)} SR tier`);
+        if (c.streak !== 1) mult.push(`${f2(c.streak)} dirty streak`);
+        return (
+          <MathRow
+            key={i}
+            indent
+            label={
+              <>
+                {c.quali && <span className="text-sky-300">Q · </span>}
+                {c.lap != null && <span className="text-zinc-300">Lap {c.lap} · </span>}
+                {c.cls ? `${c.cls} incident` : c.text}
+                {c.trigger && <span className="text-amber-300"> · made the race dirty</span>}
+              </>
+            }
+            value={`−${f2(c.cost)}`}
+            tone="text-red-300"
+            hint={`${mult.join(" × ")}${mult.length > 1 ? ` = ${f2(c.cost)}` : ""}${c.cls ? ` · ${c.text}` : ""}`}
+          />
+        );
+      })}
+      {calc.length > 0 && (
+        <MathRow label="Penalties" value={`−${f1(session.penalty ?? 0)}`} tone="text-red-300" />
+      )}
+      <MathRow
+        label={session.dirty ? "Net score (dirty race)" : "Net score"}
+        value={signedHalf(session.net ?? 0)}
+        tone={changeClass(session.net ?? 0)}
+        strong
+      />
+      {grav > 0 && (
+        <MathRow
+          label="Gravity after this race"
+          value={`−${f1(grav)}`}
+          tone="text-red-300"
+          hint={`${pct(p.gravity_joined)} of your SR above 50. It's booked on this race, so it fades out with it.`}
+        />
+      )}
+      <MathRow
+        label="Net with gravity (the race's number)"
+        value={signedHalf(session.netGrav ?? 0)}
+        tone={changeClass(session.netGrav ?? 0)}
+        strong
+        hint={
+          <>
+            {session.weight < 1 ? `Counts ${pct(session.weight)} in your SR now.` : "Counts in full in your SR now."}
+            {(session.gravityLater ?? 0) >= 0.05 &&
+              ` Gravity of −${f1(session.gravityLater ?? 0)} from league races you skipped later is booked on this race too (it shows in the stream where you skipped them).`}
+          </>
+        }
+      />
+    </div>
+  );
 }

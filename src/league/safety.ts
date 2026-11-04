@@ -68,10 +68,51 @@ export interface SafetySession {
   bonusCut?: number;
   /** SR v2.5: gravity booked on this race (it ages out with it). */
   gravity?: number;
+  /** SR v2.5: gravity from league races skipped after this one, booked on it (shown in the stream it happened). */
+  gravityLater?: number;
+  /** SR v2.5: net score with this race's gravity taken off (what the race card shows). */
+  netGrav?: number;
+  /** SR v2.5: how every penalty of this race (and its qualifying) was worked out, in order. */
+  calc?: SafetyCalc[];
   /** Qualifying: its points join the next race. */
   carry?: boolean;
   withQuali?: boolean;
   items: SafetyItem[];
+}
+
+/** SR v2.5: one penalty's build-up: base points x SR-tier multiplier x dirty-streak multiplier. */
+export interface SafetyCalc {
+  text: string;
+  lap: number | null;
+  cat: SafetyCategory;
+  /** From the qualifying that joined this race. */
+  quali: boolean;
+  base: number;
+  pos: number;
+  streak: number;
+  cost: number;
+  /** small / medium / big for contacts, null for track limits, pit exit, retirements. */
+  cls: string | null;
+  /** This incident made the race dirty. */
+  trigger: boolean;
+}
+
+/** SR v2.5: a stream's SR change, split so the parts add up exactly (after = before + all the rest). */
+export interface StreamParts {
+  before: number;
+  after: number;
+  bonus: number;
+  penalty: number;
+  /** bonus - penalty of the races joined */
+  races: number;
+  gravJoined: number;
+  gravSkipped: number;
+  /** older races moving back in the window (and dropping out of it) */
+  window: number;
+  /** cut off by the 0..100 limits */
+  limit: number;
+  joined: number;
+  skipped: number;
 }
 
 export interface SafetyDriver {
@@ -100,6 +141,8 @@ export interface SafetyDriver {
     net?: number;
     /** SR v2.5: gravity taken during this stream (joined and skipped races). */
     gravity?: number;
+    /** SR v2.5: the exact split of this stream's SR change. */
+    parts?: StreamParts;
   }[];
   sessions: SafetySession[];
   flags: string[];

@@ -855,15 +855,31 @@ if V25:   # SR v2.5: score the v2.2 data with the draft 7 rules (scripts/sr_v24.
         nets = [f for f in tr]   # races in order, for the window weights
         L = len(nets); SL = r["step_len"] if r else 6; W = r["steps"] if r else [1.0]
         wt = {f: (W[(L - 1 - j) // SL] if (L - 1 - j) // SL < len(W) else 0.0) for j, f in enumerate(nets)}
+        snap = (r or {}).get("snap", {}); glog = (r or {}).get("glog", [])
+        P_ = dict(P25, STEP_LEN=SL, STEPS=W)
+        def nets_at(si):   # the driver's race nets (gravity in) after stream si
+            ks = [x for x in snap if si >= 0 and x <= last_k[si]]
+            return snap[max(ks)] if ks else []
         for h in d["history"]:
             for key in ("base", "sting", "drift", "avg"): h.pop(key, None)
             h["sr"] = at(h["stream"]); h["streamAvg"] = None
-            ts = [tr[f] for f in out["streams"][h["stream"]]["files"] if f in tr]
+            si = h["stream"]; lo = last_k[si - 1] if si > 0 else -1
+            ts = [tr[f] for f in out["streams"][si]["files"] if f in tr]
+            gj = sum(g for k_, g, raced in glog if lo < k_ <= last_k[si] and raced)
+            gs = sum(g for k_, g, raced in glog if lo < k_ <= last_k[si] and not raced)
+            nb, na = nets_at(si - 1), nets_at(si)
+            tb, ta = sr_v24.window_total(nb, P_), sr_v24.window_total(na, P_)
+            races = sum(t["bonus"] - t["pen"] for t in ts)
+            clamp = lambda v: max(0.0, min(100.0, 50.0 + v))
+            # the stream's SR change, exactly: races + gravity + window shift + the 0..100 limits
+            h["parts"] = dict(before=round(clamp(tb), 2), after=round(clamp(ta), 2), bonus=round(sum(t["bonus"] for t in ts), 2),
+                              penalty=round(sum(t["pen"] for t in ts), 2), races=round(races, 2), gravJoined=round(gj, 2),
+                              gravSkipped=round(gs, 2), window=round((ta - tb) - (races - gj - gs), 2),
+                              limit=round((clamp(ta) - clamp(tb)) - (ta - tb), 2), count=len(na), raw=round(50 + ta, 2),
+                              joined=len(ts), skipped=(last_k[si] - lo) - len(ts))
             if ts:
-                h["net"] = round(sum(t["bonus"] - t["pen"] for t in ts), 1)
-            g = sum(t["grav"] for f, t in tr.items() if league_files.index(f) <= last_k[h["stream"]]) - sum(
-                t["grav"] for f, t in tr.items() if h["stream"] > 0 and league_files.index(f) <= last_k[h["stream"] - 1])
-            h["gravity"] = round(g, 1)
+                h["net"] = round(races, 1)
+            h["gravity"] = round(gj + gs, 1)
         d["sr"] = half(r["sr_raw"]) if r else SR_START_V25
         d["change"] = half(d["sr"] - (d["history"][-2]["sr"] if len(d["history"]) > 1 else SR_START_V25))
         d["banned"] = d["sr"] <= 0
@@ -878,8 +894,14 @@ if V25:   # SR v2.5: score the v2.2 data with the draft 7 rules (scripts/sr_v24.
             if t is None: continue
             s_.update(bonus=round(t["bonus_raw"], 1), bonusCounted=round(t["bonus"], 1), bonusCut=round(t["cut"], 2),
                       penalty=round(t["pen"], 1), penaltyBase=round(p + sum(q["penalty"] for q in pend), 1),
-                      posMult=t["pos"], streakMult=t["streak"], dirty=t["dirty"], gravity=round(t["grav"], 1),
+                      posMult=t["pos"], streakMult=t["streak"], dirty=t["dirty"],
                       net=round(t["bonus"] - t["pen"], 1), weight=wt.get(s_["file"], 0.0),
+                      netGrav=round(t["bonus"] - t["pen"] - t["grav_own"], 1), gravity=round(t["grav_own"], 2),
+                      gravityLater=round(t["grav_skip"], 2),
+                      calc=[dict(text=c["item"]["text"], lap=c["item"].get("lap"), cat=c["item"]["cat"],
+                                 quali=c["item"] not in s_["items"], base=round(c["base"], 2), pos=c["pos"],
+                                 streak=c["streak"], cost=round(c["cost"], 2), cls=c["cls"], trigger=c["trigger"])
+                            for c in t.get("calc", [])],
                       **({"withQuali": True} if pend else {}))
             for q in pend: q["weight"] = s_["weight"]
             pend = []

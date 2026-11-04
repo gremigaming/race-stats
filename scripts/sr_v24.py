@@ -49,9 +49,10 @@ def cls_of(item, p):
     return "small" if p <= 0.5 else "medium" if p <= 1.5 else "big"
 
 
-def race_rows(driver, skip_bonus=(), bonus_cat=None, other_cat=None):
+def race_rows(driver, skip_bonus=(), bonus_cat=None, other_cat=None, keep=False):
     """Per race of a driver: (file, bonus, [(order, kind, cls, pts)]) with qualifying joined to the next race.
-    bonus_cat / other_cat (SR settings): x per bonus type / per other penalty type ("*": any other type)."""
+    bonus_cat / other_cat (SR settings): x per bonus type / per other penalty type ("*": any other type).
+    keep=True adds the item itself as a 5th element (for the live SR's per-incident build-up)."""
     out = []; pend_b = 0.0; pend = []
     for s in driver["sessions"]:
         b = 0.0; its = []
@@ -66,13 +67,13 @@ def race_rows(driver, skip_bonus=(), bonus_cat=None, other_cat=None):
             order = (q, lap if isinstance(lap, int) else 999, t)
             if it["cat"] in ("contact", "staff"):
                 p = -v / 2                      # v2.2 table is double v2.4's
-                its.append((order, "inc", cls_of(it, p), p))
+                its.append((order, "inc", cls_of(it, p), p) + ((it,) if keep else ()))
             else:
                 oc = other_cat or {}
-                its.append((order, "other", None, -v * oc.get(it["cat"], oc.get("*", 1.0))))   # track limits, pit exit, DNF: 1 in both
+                its.append((order, "other", None, -v * oc.get(it["cat"], oc.get("*", 1.0))) + ((it,) if keep else ()))   # track limits, pit exit, DNF: 1 in both
         if not s["race"]:
             pend_b += b; pend += its; continue
-        out.append((s["file"], b + pend_b, sorted(pend + its)))
+        out.append((s["file"], b + pend_b, sorted(pend + its, key=lambda r: r[:4])))
         pend_b = 0.0; pend = []
     return out
 
@@ -255,11 +256,17 @@ WINDOW4 = dict(DEFAULT, BONUS_DIM=0.10, GRAV_PCT=0.04, GRAV_PCT_SKIP=0.02, STEPS
                BONUS_CAT=None, OTHER_CAT=None)   # SR settings: x per bonus type / other penalty type
 
 
+def window_total(nets, P):
+    """50 + this is the SR (before the 0..100 limits): newest STEP_LEN races in full, then the STEPS weights."""
+    L = len(nets); SL = P["STEP_LEN"]; W = P["STEPS"]
+    return sum(W[(L - 1 - k) // SL] * v for k, v in enumerate(nets) if (L - 1 - k) // SL < len(W))
+
+
 def simulate_window(data, **kw):
     P = dict(WINDOW4, **kw)
     league = [f for st in data["streams"] for f in st["files"] if f.startswith("Race_")]
     pos_of = {f: k for k, f in enumerate(league)}
-    rows = {d["name"]: {pos_of[f]: (b, its) for f, b, its in race_rows(d, P["BONUS_SKIP_CATS"], P["BONUS_CAT"], P["OTHER_CAT"]) if f in pos_of} for d in data["drivers"]}
+    rows = {d["name"]: {pos_of[f]: (b, its) for f, b, its in race_rows(d, P["BONUS_SKIP_CATS"], P["BONUS_CAT"], P["OTHER_CAT"], P["TRACE"]) if f in pos_of} for d in data["drivers"]}
     st = {n: dict(nets=[], sr=50.0, level=0, skips=0, dirty=0, best=0, grav=0.0, bonus=0.0, raw=0.0, adj=0.0, worst=0.0,
                   hidden=0.0) for n in rows}
     W = P["STEPS"]
@@ -283,7 +290,9 @@ def simulate_window(data, **kw):
             b, its = r[k]; s["skips"] = 0
             pos = tier(P["POS"], s["sr"], 1.0)
             cnt = dict(big=0, medium=0, small=0); dirty = False; pen = 0.0; lvl = s["level"]; ninc = 0; sm_max = 1.0
-            for _, kind, c, p in its:
+            calc = []
+            for row in its:
+                kind, c, p = row[1], row[2], row[3]
                 sm = 1.0 if lvl == 0 else P["STREAK_FIRST"] + P["STREAK_STEP"] * (lvl - 1)
                 if P["STREAK_MAX"]: sm = min(sm, P["STREAK_MAX"])
                 sm_max = max(sm_max, sm)
@@ -294,10 +303,13 @@ def simulate_window(data, **kw):
                 else:
                     p *= P["OTHER_SCALE"]
                 pen += p * pos * sm; s["raw"] += p
+                trig = False
                 if kind == "inc":
                     cnt[c] += 1
                     if not dirty and any(cnt[x] >= P["DIRTY"][x] for x in cnt):
-                        dirty = True; lvl = s["level"] + 1
+                        dirty = True; lvl = s["level"] + 1; trig = True
+                if P["TRACE"] and len(row) > 4:
+                    calc.append(dict(item=row[4], base=p, cls=c, pos=pos, streak=sm, cost=p * pos * sm, trigger=trig))
             if dirty: s["level"] += 1; s["dirty"] += 1; s["best"] = max(s["best"], s["level"])
             else: s["level"] = 0
             bm = 1.0 - max(0.0, (s["sr"] - 50.0) / 10.0) * P["BONUS_DIM"]
@@ -308,7 +320,7 @@ def simulate_window(data, **kw):
             s["nets"].append(bb - pen); rescore(s)
             if P["TRACE"]:   # per race, for the live SR's race cards (v2.5)
                 s.setdefault("trace", []).append(dict(k=k, bonus_raw=b * P["BONUS_SCALE"], bonus=bb, cut=1.0 - bm, pen=pen,
-                                                      dirty=dirty, pos=pos, streak=sm_max, grav=0.0))
+                                                      dirty=dirty, pos=pos, streak=sm_max, grav=0.0, grav_own=0.0, grav_skip=0.0, calc=calc))
         for n, s in st.items():
             if not s["nets"]: continue
             raced = k in rows[n]
@@ -316,13 +328,16 @@ def simulate_window(data, **kw):
             if s["sr"] > 50:
                 g = min((P["GRAV_PCT"] if raced else P["GRAV_PCT_SKIP"]) * (s["sr"] - 50), s["sr"] - 50)
                 s["nets"][-1] -= g; s["grav"] += g; rescore(s)
-                if P["TRACE"] and s.get("trace"): s["trace"][-1]["grav"] += g
-            if P["TRACE"]: s.setdefault("sr_at", {})[k] = s["sr"]
+                if P["TRACE"] and s.get("trace"):
+                    s["trace"][-1]["grav"] += g; s["trace"][-1]["grav_own" if raced else "grav_skip"] += g
+                if P["TRACE"]: s.setdefault("glog", []).append((k, g, raced))
+            if P["TRACE"]:
+                s.setdefault("sr_at", {})[k] = s["sr"]; s.setdefault("snap", {})[k] = list(s["nets"])
     return {n: dict(sr=half(s["sr"]), races=len(rows[n]), dirty=s["dirty"], streak_now=s["level"], streak_max=s["best"],
                     gravity=round(s["grav"], 1), bonus=round(s["bonus"], 1), pts_raw=round(s["raw"], 1), pts_adj=round(s["adj"], 1),
                     worst=round(s["worst"], 1), worst_pen=round(s.get("worst_pen", 0.0), 1), hidden=round(s["hidden"], 1),
                     **({"trace": s.get("trace", []), "sr_at": s.get("sr_at", {}), "sr_raw": s["sr"], "league": league,
-                        "step_len": P["STEP_LEN"], "steps": W} if P["TRACE"] else {}))
+                        "step_len": P["STEP_LEN"], "steps": W, "glog": s.get("glog", []), "snap": s.get("snap", {})} if P["TRACE"] else {}))
             for n, s in st.items() if rows[n]}
 
 # draft 4 fix (no multipliers or caps): gravity only on races you skip (the window already fades old
