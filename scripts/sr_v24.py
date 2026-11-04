@@ -49,14 +49,16 @@ def cls_of(item, p):
     return "small" if p <= 0.5 else "medium" if p <= 1.5 else "big"
 
 
-def race_rows(driver):
+def race_rows(driver, skip_bonus=()):
     """Per race of a driver: (file, bonus, [(order, kind, cls, pts)]) with qualifying joined to the next race."""
     out = []; pend_b = 0.0; pend = []
     for s in driver["sessions"]:
         b = 0.0; its = []
         for it in s["items"]:
             v = it["pts"]
-            if v > 0: b += v; continue
+            if v > 0:
+                if it["cat"] not in skip_bonus: b += v
+                continue
             if v == 0: continue
             q = 0 if not s["race"] else 1
             lap = it.get("lap"); t = (it.get("inc") or {}).get("t") or 0
@@ -247,14 +249,14 @@ def table_linear(data, variants, sim=None):
 #   on your latest race, so it ages out of the window with it.
 WINDOW4 = dict(DEFAULT, BONUS_DIM=0.10, GRAV_PCT=0.04, GRAV_PCT_SKIP=0.02, STEPS=[1.0, 0.8, 0.6, 0.4, 0.2],
                BONUS_SCALE=1.0, OTHER_SCALE=1.0, CLEAN_ONLY_BONUS=False, STREAK_RESET_SKIPS=None,
-               GRAV_ON_SKIP_ONLY=False)
+               GRAV_ON_SKIP_ONLY=False, BONUS_SKIP_CATS=(), NO_BONUS_DIRTY=False)
 
 
 def simulate_window(data, **kw):
     P = dict(WINDOW4, **kw)
     league = [f for st in data["streams"] for f in st["files"] if f.startswith("Race_")]
     pos_of = {f: k for k, f in enumerate(league)}
-    rows = {d["name"]: {pos_of[f]: (b, its) for f, b, its in race_rows(d) if f in pos_of} for d in data["drivers"]}
+    rows = {d["name"]: {pos_of[f]: (b, its) for f, b, its in race_rows(d, P["BONUS_SKIP_CATS"]) if f in pos_of} for d in data["drivers"]}
     st = {n: dict(nets=[], sr=50.0, level=0, skips=0, dirty=0, best=0, grav=0.0, bonus=0.0, raw=0.0, adj=0.0, worst=0.0,
                   hidden=0.0) for n in rows}
     W = P["STEPS"]
@@ -295,7 +297,8 @@ def simulate_window(data, **kw):
             bm = 1.0 - max(0.0, (s["sr"] - 50.0) / 10.0) * P["BONUS_DIM"]
             bb = b * bm * P["BONUS_SCALE"]
             if P["CLEAN_ONLY_BONUS"] and ninc: bb = 0.0
-            s["bonus"] += bb; s["adj"] += pen; s["worst"] = max(s["worst"], pen - bb)
+            if P["NO_BONUS_DIRTY"] and dirty: bb = 0.0
+            s["bonus"] += bb; s["adj"] += pen; s["worst"] = max(s["worst"], pen - bb); s["worst_pen"] = max(s.get("worst_pen", 0.0), pen)
             s["nets"].append(bb - pen); rescore(s)
         for n, s in st.items():
             if not s["nets"]: continue
@@ -306,9 +309,27 @@ def simulate_window(data, **kw):
                 s["nets"][-1] -= g; s["grav"] += g; rescore(s)
     return {n: dict(sr=half(s["sr"]), races=len(rows[n]), dirty=s["dirty"], streak_now=s["level"], streak_max=s["best"],
                     gravity=round(s["grav"], 1), bonus=round(s["bonus"], 1), pts_raw=round(s["raw"], 1), pts_adj=round(s["adj"], 1),
-                    worst=round(s["worst"], 1), hidden=round(s["hidden"], 1))
+                    worst=round(s["worst"], 1), worst_pen=round(s.get("worst_pen", 0.0), 1), hidden=round(s["hidden"], 1))
             for n, s in st.items() if rows[n]}
 
 # draft 4 fix (no multipliers or caps): gravity only on races you skip (the window already fades old
 # races), contact points 1 / 2 / 4 / 6, R9 12 (track limits / pit exit / DNF stay 1)
 WINDOW4_FIX = dict(GRAV_ON_SKIP_ONLY=True, GRAV_PCT_SKIP=0.02, TABLE={0.5: 1.0, 1.5: 2.0, 3.0: 4.0, 5.0: 6.0, 10.0: 12.0})
+
+# draft 5 (GreMi, 4 Nov 2026): draft 4 with gravity -2% of (SR - 50) after every league race, raced or
+# skipped; points unchanged. The window counts the races the driver joined (skipping never ages a penalty).
+WINDOW5 = dict(GRAV_PCT=0.02, GRAV_PCT_SKIP=0.02)
+
+
+def table_window(data, variants):
+    live = {d["name"]: d["sr"] for d in data["drivers"]}
+    res = [(lbl, simulate_window(data, **kw)) for lbl, kw in variants]
+    r0 = res[0][1]; names = sorted(r0, key=lambda n: (-r0[n]["sr"], n.lower()))
+    lines = ["| # | Driver | Races | Bonus | Penalty (raw -> scaled) | Dirty | Max streak | Gravity | Biggest race penalty | Worst race net | v2.2 live | "
+             + " | ".join(l for l, _ in res) + " |", "|" + "---|" * (11 + len(res))]
+    for k, n in enumerate(names, 1):
+        x = r0[n]
+        lines.append(f"| {k} | {n} | {x['races']} | +{x['bonus']:g} | {x['pts_raw']:g} -> {x['pts_adj']:g} | {x['dirty']} | {x['streak_max']} | "
+                     f"-{x['gravity']:g} | -{x['worst_pen']:g} | {-x['worst']:+g} | {live.get(n, 50.0):.1f} | "
+                     + " | ".join(f"{r[n]['sr']:.1f}" for _, r in res) + " |")
+    return "\n".join(lines).replace("| -0 |", "| 0 |").replace("| +0 |", "| 0 |")
