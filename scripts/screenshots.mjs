@@ -61,6 +61,12 @@ await page.locator("#safety-highlights").screenshot({ path: `${outDir}/safety-hi
 await page.click('th:has-text("Races")');
 await page.waitForTimeout(500);
 await page.screenshot({ path: `${outDir}/safety-sorted.jpg`, type: "jpeg", quality: 75 });
+// SR page of one driver, newest race opened (race card with bonus, penalties, gravity)
+await page.goto(`${base}${scope}/safety?tab=personal&driver=ddrk`);
+await page.waitForTimeout(2500);
+const raceRow = page.locator("section", { hasText: "How it adds up" }).locator("button:has(span:text-is('R'))").first();
+if (await raceRow.count()) { await raceRow.click(); await page.waitForTimeout(800); }
+await page.screenshot({ path: `${outDir}/safety-personal.jpg`, type: "jpeg", quality: 75, fullPage: true });
 // sorted by a column, with the highlights below
 await shoot("leaderboard-full", "drivers", true);
 await page.locator("#league-highlights").screenshot({ path: `${outDir}/leaderboard-highlights.jpg`, type: "jpeg", quality: 80 });
