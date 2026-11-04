@@ -249,7 +249,7 @@ def table_linear(data, variants, sim=None):
 #   on your latest race, so it ages out of the window with it.
 WINDOW4 = dict(DEFAULT, BONUS_DIM=0.10, GRAV_PCT=0.04, GRAV_PCT_SKIP=0.02, STEPS=[1.0, 0.8, 0.6, 0.4, 0.2],
                BONUS_SCALE=1.0, OTHER_SCALE=1.0, CLEAN_ONLY_BONUS=False, STREAK_RESET_SKIPS=None,
-               GRAV_ON_SKIP_ONLY=False, BONUS_SKIP_CATS=(), NO_BONUS_DIRTY=False)
+               GRAV_ON_SKIP_ONLY=False, BONUS_SKIP_CATS=(), NO_BONUS_DIRTY=False, STEP_LEN=10)
 
 
 def simulate_window(data, **kw):
@@ -263,7 +263,8 @@ def simulate_window(data, **kw):
 
     def total(s):
         nets = s["nets"]; L = len(nets)
-        return sum(W[(L - 1 - k) // 10] * v for k, v in enumerate(nets) if (L - 1 - k) // 10 < len(W))
+        SL = P["STEP_LEN"]
+        return sum(W[(L - 1 - k) // SL] * v for k, v in enumerate(nets) if (L - 1 - k) // SL < len(W))
 
     def rescore(s):
         raw = 50 + total(s); s["hidden"] = max(0.0, raw - 100)
@@ -333,3 +334,6 @@ def table_window(data, variants):
                      f"-{x['gravity']:g} | -{x['worst_pen']:g} | {-x['worst']:+g} | {live.get(n, 50.0):.1f} | "
                      + " | ".join(f"{r[n]['sr']:.1f}" for _, r in res) + " |")
     return "\n".join(lines).replace("| -0 |", "| 0 |").replace("| +0 |", "| 0 |")
+# draft 6 candidates (GreMi, 4 Nov 2026): no bonus in dirty races; window in steps of 6 races (30 races)
+WINDOW6 = dict(WINDOW5, NO_BONUS_DIRTY=True)
+WINDOW6_SHORT = dict(WINDOW6, STEP_LEN=6)
