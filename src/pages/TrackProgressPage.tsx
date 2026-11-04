@@ -45,8 +45,6 @@ import { Button, buttonVariants } from "../components/ui/Button";
 import { InsightDetail, InsightValue } from "../components/ui/InsightText";
 import { InsightTile } from "../components/ui/InsightTile";
 import { SectionHeader } from "../components/ui/SectionHeader";
-import { PageFrame } from "../components/ui/PageFrame";
-import { PageHeader } from "../components/ui/PageHeader";
 import { SegmentedControl } from "../components/ui/SegmentedControl";
 import { HStack, VStack } from "../components/ui/Stack";
 import { useTelemetry } from "../context/TelemetryContext";
@@ -383,18 +381,19 @@ export function TrackProgressPage() {
           : "";
 
       return (
-        <PageFrame className="space-y-6">
-          <PageHeader
-            eyebrow="Track analysis"
-            title={
-              <span className="inline-flex items-center gap-2">
-                <TrackFlag track={trackSourceName} />
-                {displayTrackName}
-              </span>
-            }
-            description="Review the saved sessions from this circuit."
-            meta={`${activeFormula?.showLabel ? `${activeFormula.label} · ` : ""}${spectatorTrackSessions.length} spectator session${spectatorTrackSessions.length !== 1 ? "s" : ""}${spectatorDateRange ? ` · ${spectatorDateRange}` : ""}`}
-          />
+        <div className="p-6 max-w-5xl mx-auto space-y-6">
+          <div>
+            <h2 className="text-xl font-bold mb-1">
+              <TrackFlag track={trackSourceName} className="mr-2" />
+              {displayTrackName}
+            </h2>
+            <p className="text-sm text-zinc-500">
+              {activeFormula?.showLabel ? `${activeFormula.label} · ` : ""}
+              {spectatorTrackSessions.length} spectator session
+              {spectatorTrackSessions.length !== 1 ? "s" : ""}
+              {spectatorDateRange ? ` · ${spectatorDateRange}` : ""}
+            </p>
+          </div>
 
           <section className={cardClass}>
             <Badge tone="zinc">Spectator</Badge>
@@ -413,7 +412,7 @@ export function TrackProgressPage() {
             activeKind={activeTab}
             spectatorSessions={spectatorHistory}
           />
-        </PageFrame>
+        </div>
       );
     }
 
@@ -541,52 +540,62 @@ export function TrackProgressPage() {
   };
 
   return (
-    <PageFrame className="space-y-8">
-      <PageHeader
-        eyebrow="Track analysis"
-        title={
-          <span className="inline-flex items-center gap-2">
-            <TrackFlag track={trackSourceName} size="medium" />
+    <div className="p-6 max-w-5xl mx-auto space-y-8">
+      {/* Header */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <h2 className="text-xl font-bold mb-1">
+            <TrackFlag
+              track={trackSourceName}
+              size="medium"
+              className="mr-2 -translate-y-px"
+            />
             {displayTrackName}
-          </span>
-        }
-        meta={`${activeFormula?.showLabel ? `${activeFormula.label} · ` : ""}${data.length} session${data.length !== 1 ? "s" : ""}`}
-        description={
-          bestTimeTrialSession && bestTimeTrialMs > 0 ? (
-            <Link
-              to={sessionSummaryPath(bestTimeTrialSession.summary, scopeKey)}
-              className="inline-flex items-center gap-1 whitespace-nowrap text-cyan-200/90 transition-colors hover:text-cyan-100"
-            >
-              <Gauge className="size-3" />
-              <span>Best TT</span>
-              <span className="font-mono tabular-nums">
-                {msToLapTime(bestTimeTrialMs)}
-              </span>
-            </Link>
-          ) : undefined
-        }
-        action={
-          <VStack align="start" className="gap-2 sm:shrink-0 sm:items-end">
-            {/* Tab switcher: interactive when multiple analysis buckets exist, static otherwise. */}
-            {tabOptions.length > 1 && (
-              <SegmentedControl<TrackSessionKind>
-                ariaLabel="Session type"
-                options={tabOptions}
-                value={selectedTab}
-                onChange={handleTabChange}
-              />
+          </h2>
+          <p className="text-sm text-zinc-500">
+            {activeFormula?.showLabel ? `${activeFormula.label} · ` : ""}
+            {data.length} session{data.length !== 1 ? "s" : ""}
+            {bestTimeTrialSession && bestTimeTrialMs > 0 && (
+              <>
+                {" · "}
+                <Link
+                  to={sessionSummaryPath(
+                    bestTimeTrialSession.summary,
+                    scopeKey,
+                  )}
+                  className="inline-flex items-center gap-1 whitespace-nowrap text-zinc-400 transition-colors hover:text-cyan-200"
+                >
+                  <Gauge className="size-3 text-cyan-300" />
+                  <span className="text-cyan-300/80">Best TT</span>
+                  <span className="whitespace-nowrap font-mono text-zinc-300">
+                    {msToLapTime(bestTimeTrialMs)}
+                  </span>
+                </Link>
+              </>
             )}
-            {tabOptions.length === 1 && (
-              <SegmentedControl<TrackSessionKind>
-                ariaLabel="Session type"
-                options={tabOptions}
-                value={tabOptions[0].value}
-                onChange={() => {}}
-              />
-            )}
-          </VStack>
-        }
-      />
+          </p>
+        </div>
+
+        <VStack align="start" className="gap-2 sm:shrink-0 sm:items-end">
+          {/* Tab switcher: interactive when multiple analysis buckets exist, static otherwise. */}
+          {tabOptions.length > 1 && (
+            <SegmentedControl<TrackSessionKind>
+              ariaLabel="Session type"
+              options={tabOptions}
+              value={selectedTab}
+              onChange={handleTabChange}
+            />
+          )}
+          {tabOptions.length === 1 && (
+            <SegmentedControl<TrackSessionKind>
+              ariaLabel="Session type"
+              options={tabOptions}
+              value={tabOptions[0].value}
+              onChange={() => {}}
+            />
+          )}
+        </VStack>
+      </div>
 
       {/* ── Qualifying Section ── */}
       {qualiData.length > 0 && selectedTab === "qualifying" && (
@@ -1448,7 +1457,7 @@ export function TrackProgressPage() {
         sessions={trackAnalysis.sessionHistory}
         spectatorSessions={spectatorHistory}
       />
-    </PageFrame>
+    </div>
   );
 }
 

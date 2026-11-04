@@ -1,15 +1,4 @@
-import {
-  Clapperboard,
-  Flame,
-  Gauge,
-  Play,
-  Search,
-  Swords,
-  Timer,
-  Trophy,
-  Users,
-  X,
-} from "lucide-react";
+import { Flame, Gauge, Play, Search, Swords, Timer, Trophy, Users, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { cardClass, cardHighlight } from "../components/Card";
@@ -23,8 +12,6 @@ import { getTrackDisplayName } from "../utils/tracks";
 import { loadRaceIndex, type RaceIndexEntry } from "../viewer/format";
 import { useLiveSessions } from "../viewer/live";
 import { PickerTabs } from "../viewer/LiveTab";
-import { PageFrame } from "../components/ui/PageFrame";
-import { PageHeader } from "../components/ui/PageHeader";
 
 type Race = RaceIndexEntry & { base: string };
 type Sort = "newest" | "chaos" | "incidents" | "cars" | "closest";
@@ -37,20 +24,7 @@ interface Night {
 }
 
 const NIGHT_GAP_MS = 3 * 3600 * 1000;
-const MONTHS = [
-  "Jan",
-  "Feb",
-  "Mar",
-  "Apr",
-  "May",
-  "Jun",
-  "Jul",
-  "Aug",
-  "Sep",
-  "Oct",
-  "Nov",
-  "Dec",
-];
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 const SORTS = [
   { value: "newest", label: "Newest first" },
@@ -70,8 +44,7 @@ function nightsOf(races: Race[]): Night[] {
   let prev: number | null = null;
   for (const r of races) {
     const t = Date.parse(r.started);
-    if (prev === null || prev - t > NIGHT_GAP_MS)
-      out.push({ key: r.uid, label: "", races: [] });
+    if (prev === null || prev - t > NIGHT_GAP_MS) out.push({ key: r.uid, label: "", races: [] });
     out[out.length - 1].races.push(r);
     prev = t;
   }
@@ -115,22 +88,10 @@ export function RaceListPage() {
   }, []);
 
   const nights = useMemo(() => nightsOf(races ?? []), [races]);
-  const nightOf = useMemo(
-    () =>
-      new Map(nights.flatMap((n) => n.races.map((r) => [r.uid, n] as const))),
-    [nights],
-  );
-  const tracks = useMemo(
-    () => [...new Set((races ?? []).map((r) => r.track))].sort(),
-    [races],
-  );
+  const nightOf = useMemo(() => new Map(nights.flatMap((n) => n.races.map((r) => [r.uid, n] as const))), [nights]);
+  const tracks = useMemo(() => [...new Set((races ?? []).map((r) => r.track))].sort(), [races]);
   const drivers = useMemo(
-    () =>
-      [
-        ...new Set(
-          (races ?? []).flatMap((r) => r.drivers ?? []).filter(shownDriver),
-        ),
-      ].sort((a, b) => a.localeCompare(b)),
+    () => [...new Set((races ?? []).flatMap((r) => r.drivers ?? []).filter(shownDriver))].sort((a, b) => a.localeCompare(b)),
     [races],
   );
 
@@ -144,9 +105,7 @@ export function RaceListPage() {
         (!needle ||
           getTrackDisplayName(r.track).toLowerCase().includes(needle) ||
           r.track.toLowerCase().includes(needle) ||
-          r.drivers?.some(
-            (d) => shownDriver(d) && d.toLowerCase().includes(needle),
-          )),
+          r.drivers?.some((d) => shownDriver(d) && d.toLowerCase().includes(needle))),
     );
   }, [races, q, track, driver, night, nightOf]);
 
@@ -164,18 +123,11 @@ export function RaceListPage() {
   // badges: the most chaotic race and the closest finish of each stream night
   const badges = useMemo(() => {
     const out = new Map<string, ("chaos" | "close")[]>();
-    const add = (uid: string, b: "chaos" | "close") =>
-      out.set(uid, [...(out.get(uid) ?? []), b]);
+    const add = (uid: string, b: "chaos" | "close") => out.set(uid, [...(out.get(uid) ?? []), b]);
     for (const n of nights) {
-      const wild = n.races.reduce<Race | null>(
-        (m, r) => ((r.chaos ?? 0) > (m?.chaos ?? 0) ? r : m),
-        null,
-      );
+      const wild = n.races.reduce<Race | null>((m, r) => ((r.chaos ?? 0) > (m?.chaos ?? 0) ? r : m), null);
       if (wild && (wild.chaos ?? 0) >= 3) add(wild.uid, "chaos");
-      const close = n.races.reduce<Race | null>(
-        (m, r) => (r.gap !== undefined && r.gap < (m?.gap ?? 2) ? r : m),
-        null,
-      );
+      const close = n.races.reduce<Race | null>((m, r) => (r.gap !== undefined && r.gap < (m?.gap ?? 2) ? r : m), null);
       if (close) add(close.uid, "close");
     }
     return out;
@@ -191,152 +143,116 @@ export function RaceListPage() {
   );
 
   const card = (r: Race) => (
-    <RaceCard
-      key={r.uid}
-      race={r}
-      to={`/${formulaKey}/race/${encodeURIComponent(r.uid)}`}
-      badges={badges.get(r.uid) ?? []}
-    />
+    <RaceCard key={r.uid} race={r} to={`/${formulaKey}/race/${encodeURIComponent(r.uid)}`} badges={badges.get(r.uid) ?? []} />
   );
 
   return (
-    <PageFrame className="space-y-6">
+    <div className="mx-auto max-w-5xl space-y-6">
       <PickerTabs tab={tab} onTab={setTabPick} formulaKey={formulaKey} />
       {tab === "races" && (
         <>
-          <PageHeader
-            icon={Clapperboard}
-            eyebrow="Races"
-            title="Race viewer"
-            description="Pick a race and watch every car, lap, and incident from above."
-            action={
-              races && races.length > 0 ? (
-                <div className="grid grid-cols-3 gap-4 text-right">
-                  <Stat value={races.length} label="races" />
-                  <Stat value={nights.length} label="stream nights" />
-                  <Stat value={totals.incidents} label="incidents" />
-                </div>
-              ) : undefined
-            }
-          />
-          <section className={cn(cardClass, "relative overflow-visible")}>
-            <div className="flex flex-wrap items-center gap-2">
-              <label className="relative min-w-48 flex-1">
-                <Search className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-zinc-500" />
-                <input
-                  value={q}
-                  onChange={(e) => set("q", e.target.value)}
-                  placeholder="Search track or driver"
-                  aria-label="Search track or driver"
-                  className="h-9 w-full rounded-full bg-white/5 pl-8 pr-3 text-sm text-zinc-100 placeholder:text-zinc-500 outline-none ring-1 ring-white/10 focus:ring-red-500/60"
-                />
-              </label>
-              <PillSelect
-                ariaLabel="Track"
-                value={track}
-                onChange={(v) => set("track", v)}
-                options={[
-                  { value: "", label: "All tracks" },
-                  ...tracks.map((t) => ({
-                    value: t,
-                    label: getTrackDisplayName(t),
-                  })),
-                ]}
-              />
-              <PillSelect
-                ariaLabel="Driver"
-                leadingIcon={Users}
-                value={driver}
-                onChange={(v) => set("driver", v)}
-                options={[
-                  { value: "", label: "All drivers" },
-                  ...drivers.map((d) => ({ value: d, label: d })),
-                ]}
-              />
-              <PillSelect
-                ariaLabel="Stream night"
-                value={night}
-                onChange={(v) => set("night", v)}
-                options={[
-                  { value: "", label: "All stream nights" },
-                  ...nights.map((n) => ({
-                    value: n.key,
-                    label: `${n.label} · ${n.races.length} ${n.races.length === 1 ? "race" : "races"}`,
-                  })),
-                ]}
-              />
-              <PillSelect
-                ariaLabel="Sort"
-                leadingIcon={Gauge}
-                value={sort}
-                onChange={(v) => set("sort", v === "newest" ? "" : v)}
-                options={SORTS}
-              />
-              {filtered && (
-                <button
-                  onClick={() =>
-                    setParams(sort === "newest" ? {} : { sort }, {
-                      replace: true,
-                    })
-                  }
-                  className="flex h-9 items-center gap-1 rounded-full px-3 text-xs text-zinc-400 hover:bg-white/5 hover:text-zinc-100"
-                >
-                  <X className="size-3.5" /> Clear
-                </button>
-              )}
-            </div>
-          </section>
-
-          {races === null ? (
-            <div className="mx-auto h-6 w-6 animate-spin rounded-full border-2 border-zinc-700 border-t-red-500" />
-          ) : sorted.length === 0 ? (
-            <p className="text-center text-sm text-zinc-500">
-              {races.length ? "No races match these filters." : "No races yet."}
+      <section className={cn(cardClass, "relative overflow-hidden")}>
+        <div className="pointer-events-none absolute -right-10 -top-16 h-56 w-56 rounded-full bg-red-500/10 blur-3xl" />
+        <div className="relative flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <h1 className="text-xl font-semibold text-zinc-50">Race viewer</h1>
+            <p className="mt-1 max-w-xl text-sm text-zinc-400">
+              Pick a race and watch it from above: every car, every lap and every incident.
             </p>
-          ) : sort === "newest" ? (
-            nights
-              .map((n) => ({
-                n,
-                list: sorted.filter((r) => nightOf.get(r.uid) === n),
-              }))
-              .filter(({ list }) => list.length)
-              .map(({ n, list }) => (
-                <section key={n.key} className="space-y-3">
-                  <h2 className="flex items-baseline gap-2 px-1">
-                    <span className="text-base font-semibold text-zinc-100">
-                      {n.label}
-                    </span>
-                    <span className="text-xs text-zinc-500">
-                      {n.races.length} {n.races.length === 1 ? "race" : "races"}{" "}
-                      · {n.races.reduce((s, r) => s + (r.incidents ?? 0), 0)}{" "}
-                      incidents
-                    </span>
-                  </h2>
-                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                    {list.map(card)}
-                  </div>
-                </section>
-              ))
-          ) : (
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {sorted.map(card)}
+          </div>
+          {races && races.length > 0 && (
+            <div className="flex gap-6 text-right">
+              <Stat value={races.length} label="races" />
+              <Stat value={nights.length} label="stream nights" />
+              <Stat value={totals.incidents} label="incidents" />
             </div>
           )}
+        </div>
+
+        <div className="relative mt-5 flex flex-wrap items-center gap-2">
+          <label className="relative min-w-48 flex-1">
+            <Search className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-zinc-500" />
+            <input
+              value={q}
+              onChange={(e) => set("q", e.target.value)}
+              placeholder="Search track or driver"
+              aria-label="Search track or driver"
+              className="h-9 w-full rounded-full bg-white/5 pl-8 pr-3 text-sm text-zinc-100 placeholder:text-zinc-500 outline-none ring-1 ring-white/10 focus:ring-red-500/60"
+            />
+          </label>
+          <PillSelect
+            ariaLabel="Track"
+            value={track}
+            onChange={(v) => set("track", v)}
+            options={[{ value: "", label: "All tracks" }, ...tracks.map((t) => ({ value: t, label: getTrackDisplayName(t) }))]}
+          />
+          <PillSelect
+            ariaLabel="Driver"
+            leadingIcon={Users}
+            value={driver}
+            onChange={(v) => set("driver", v)}
+            options={[{ value: "", label: "All drivers" }, ...drivers.map((d) => ({ value: d, label: d }))]}
+          />
+          <PillSelect
+            ariaLabel="Stream night"
+            value={night}
+            onChange={(v) => set("night", v)}
+            options={[
+              { value: "", label: "All stream nights" },
+              ...nights.map((n) => ({ value: n.key, label: `${n.label} · ${n.races.length} ${n.races.length === 1 ? "race" : "races"}` })),
+            ]}
+          />
+          <PillSelect
+            ariaLabel="Sort"
+            leadingIcon={Gauge}
+            value={sort}
+            onChange={(v) => set("sort", v === "newest" ? "" : v)}
+            options={SORTS}
+          />
+          {filtered && (
+            <button
+              onClick={() => setParams(sort === "newest" ? {} : { sort }, { replace: true })}
+              className="flex h-9 items-center gap-1 rounded-full px-3 text-xs text-zinc-400 hover:bg-white/5 hover:text-zinc-100"
+            >
+              <X className="size-3.5" /> Clear
+            </button>
+          )}
+        </div>
+      </section>
+
+      {races === null ? (
+        <div className="mx-auto h-6 w-6 animate-spin rounded-full border-2 border-zinc-700 border-t-red-500" />
+      ) : sorted.length === 0 ? (
+        <p className="text-center text-sm text-zinc-500">{races.length ? "No races match these filters." : "No races yet."}</p>
+      ) : sort === "newest" ? (
+        nights
+          .map((n) => ({ n, list: sorted.filter((r) => nightOf.get(r.uid) === n) }))
+          .filter(({ list }) => list.length)
+          .map(({ n, list }) => (
+            <section key={n.key} className="space-y-3">
+              <h2 className="flex items-baseline gap-2 px-1">
+                <span className="text-base font-semibold text-zinc-100">{n.label}</span>
+                <span className="text-xs text-zinc-500">
+                  {n.races.length} {n.races.length === 1 ? "race" : "races"} · {n.races.reduce((s, r) => s + (r.incidents ?? 0), 0)} incidents
+                </span>
+              </h2>
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{list.map(card)}</div>
+            </section>
+          ))
+      ) : (
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{sorted.map(card)}</div>
+      )}
         </>
       )}
-    </PageFrame>
+    </div>
   );
 }
 
 function Stat({ value, label }: { value: number; label: string }) {
   return (
     <div>
-      <div className="text-2xl font-semibold tabular-nums text-zinc-50">
-        {value.toLocaleString("en")}
-      </div>
-      <div className="text-[11px] uppercase tracking-wide text-zinc-500">
-        {label}
-      </div>
+      <div className="text-2xl font-semibold tabular-nums text-zinc-50">{value.toLocaleString("en")}</div>
+      <div className="text-[11px] uppercase tracking-wide text-zinc-500">{label}</div>
     </div>
   );
 }
@@ -345,34 +261,13 @@ function Stat({ value, label }: { value: number; label: string }) {
 function ChaosMeter({ value }: { value: number }) {
   const lit = Math.round(value / 2);
   return (
-    <span
-      className="flex items-center gap-1.5"
-      title={`Chaos rating ${value.toFixed(1)} / 10`}
-    >
-      <Flame
-        className={cn(
-          "size-3.5",
-          value >= 6
-            ? "text-red-400"
-            : value >= 3
-              ? "text-amber-400"
-              : "text-zinc-500",
-        )}
-      />
+    <span className="flex items-center gap-1.5" title={`Chaos rating ${value.toFixed(1)} / 10`}>
+      <Flame className={cn("size-3.5", value >= 6 ? "text-red-400" : value >= 3 ? "text-amber-400" : "text-zinc-500")} />
       <span className="flex gap-0.5">
         {[0, 1, 2, 3, 4].map((i) => (
           <span
             key={i}
-            className={cn(
-              "h-1.5 w-3 rounded-full",
-              i < lit
-                ? i >= 3
-                  ? "bg-red-500"
-                  : i >= 1
-                    ? "bg-amber-400"
-                    : "bg-yellow-300"
-                : "bg-white/10",
-            )}
+            className={cn("h-1.5 w-3 rounded-full", i < lit ? (i >= 3 ? "bg-red-500" : i >= 1 ? "bg-amber-400" : "bg-yellow-300") : "bg-white/10")}
           />
         ))}
       </span>
@@ -380,15 +275,7 @@ function ChaosMeter({ value }: { value: number }) {
   );
 }
 
-function RaceCard({
-  race: r,
-  to,
-  badges,
-}: {
-  race: Race;
-  to: string;
-  badges: ("chaos" | "close")[];
-}) {
+function RaceCard({ race: r, to, badges }: { race: Race; to: string; badges: ("chaos" | "close")[] }) {
   return (
     <Link
       to={to}
@@ -406,9 +293,7 @@ function RaceCard({
         <div className="min-w-0">
           <div className="flex items-center gap-2">
             <TrackFlag track={r.track} size="small" className="rounded-[2px]" />
-            <span className="truncate font-semibold text-zinc-50">
-              {getTrackDisplayName(r.track)}
-            </span>
+            <span className="truncate font-semibold text-zinc-50">{getTrackDisplayName(r.track)}</span>
           </div>
           <div className="mt-0.5 text-xs text-zinc-500">
             {dayLabel(r.started)} · {r.started.slice(11, 16)} · {r.session}
@@ -440,9 +325,7 @@ function RaceCard({
           <div className="flex items-center gap-1.5 text-zinc-200">
             <Trophy className="size-3.5 text-yellow-400" />
             <span className="truncate">{r.winner}</span>
-            {r.gap !== undefined && (
-              <span className="text-zinc-500">by {r.gap.toFixed(1)}s</span>
-            )}
+            {r.gap !== undefined && <span className="text-zinc-500">by {r.gap.toFixed(1)}s</span>}
           </div>
         )}
         {r.fastest && (
@@ -455,8 +338,7 @@ function RaceCard({
         <div className="flex items-center justify-between gap-2 pt-1 text-zinc-500">
           <span>
             {r.laps} laps · {r.cars} cars
-            {r.incidents !== undefined &&
-              ` · ${r.incidents} ${r.incidents === 1 ? "incident" : "incidents"}`}
+            {r.incidents !== undefined && ` · ${r.incidents} ${r.incidents === 1 ? "incident" : "incidents"}`}
           </span>
           {r.chaos !== undefined && <ChaosMeter value={r.chaos} />}
         </div>

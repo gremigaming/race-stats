@@ -1,308 +1,330 @@
-import {
-  ArrowRight,
-  BarChart3,
-  CalendarDays,
-  Clapperboard,
-  Flag,
-  ShieldCheck,
-  Trophy,
-  UsersRound,
-  Wrench,
-} from "lucide-react";
-import { Link } from "react-router-dom";
-import { buildDashboardActivity } from "../analysis/dashboardActivity";
-import { getDashboardResultStats } from "../analysis/dashboardResultStats";
+import { ChevronDown, ChevronUp, Timer } from "lucide-react";
+import { useState } from "react";
+import { cardHighlight } from "../components/Card";
 import { ActivityRow } from "../components/dashboard/ActivityRow";
+import { InsightCard } from "../components/dashboard/InsightCard";
+import { QualifyingPaceCard } from "../components/dashboard/QualifyingPaceCard";
+import { RaceResultsHero } from "../components/dashboard/RaceResultsHero";
+import { RivalCard } from "../components/dashboard/RivalCard";
+import { TrackOverviewCard } from "../components/dashboard/TrackOverviewCard";
+import { Button } from "../components/ui/Button";
+import { Eyebrow } from "../components/ui/Eyebrow";
+import {
+  type SessionStats,
+  buildQualifyingPaceData,
+  buildTrackGroups,
+  buildTrackRecords,
+} from "../components/dashboard/helpers";
+import { SectionHeader } from "../components/ui/SectionHeader";
 import { SafetySummary } from "../components/safety/SafetySummary";
-import { PageFrame } from "../components/ui/PageFrame";
 import { useTelemetry } from "../context/TelemetryContext";
-import { SETUP_MANAGER_ON } from "../league/setupManager";
+import { buildDashboardActivity } from "../analysis/dashboardActivity";
+import { buildTrackInsights } from "../analysis/dashboardInsights";
+import { getDashboardResultStats } from "../analysis/dashboardResultStats";
+import { buildRivalStats } from "../analysis/rivalStats";
 import {
   areSessionFiltersDefault,
+  DEFAULT_FILTERS,
   matchesSessionFilters,
   useSessionFilters,
 } from "../hooks/useSessionFilters";
 import { useSessionList } from "../hooks/useSessionList";
+import type { SessionSummary } from "../types/telemetry";
 import { cn } from "../utils/cn";
-import { dashboardPath } from "../utils/routes";
+import { getSessionFormulaScopeKey } from "../utils/formulaScope";
+import { formatRelativeDate } from "../utils/format";
+import { getTrackId, sortTracksByCalendar } from "../utils/tracks";
+import { isRaceSessionType } from "../utils/sessionTypes";
 
-const SHORTCUTS = [
-  {
-    key: "drivers",
-    label: "Drivers",
-    detail: "Leaderboard and team standings",
-    icon: Trophy,
-    path: "drivers",
-    tone: "from-rose-500/15 to-fuchsia-500/5 text-rose-200",
-  },
-  {
-    key: "sessions",
-    label: "Race history",
-    detail: "Browse every saved session",
-    icon: CalendarDays,
-    path: "sessions",
-    tone: "from-violet-500/15 to-indigo-500/5 text-violet-200",
-  },
-  {
-    key: "tracks",
-    label: "Tracks",
-    detail: "Records, pace, and progress",
-    icon: Flag,
-    path: "tracks",
-    tone: "from-fuchsia-500/15 to-rose-500/5 text-fuchsia-200",
-  },
-  {
-    key: "race",
-    label: "Race viewer",
-    detail: "Watch a replay or live race",
-    icon: Clapperboard,
-    path: "race",
-    tone: "from-red-500/15 to-orange-500/5 text-red-200",
-  },
-  {
-    key: "insights",
-    label: "Performance insights",
-    detail: "Pace trends and rival comparisons",
-    icon: BarChart3,
-    path: "insights",
-    tone: "from-sky-500/15 to-violet-500/5 text-sky-200",
-  },
-] as const;
+const RECENT_ACTIVITY_COLLAPSED = 3;
 
 export function DashboardPage() {
   const { sessions, loading } = useSessionList();
   const { mode, scopeKey, activeFormulaKey, activeFormula, league } =
     useTelemetry();
-  const [filters] = useSessionFilters();
-  const driverName = league?.drivers.find(
-    (driver) => driver.key === league.selectedDriver,
+  const leagueDriverName = league?.drivers.find(
+    (d) => d.key === league.selectedDriver,
   )?.name;
-  const rootPath = dashboardPath(scopeKey ?? "all");
+  const [filters, setFilters] = useSessionFilters();
+  const [showAllActivity, setShowAllActivity] = useState(false);
+  const isDemoMode = mode === "demo";
 
   if (loading) {
     return (
-      <div className="flex min-h-80 items-center justify-center text-sm text-zinc-500">
+      <div className="flex items-center justify-center h-full text-zinc-500">
         Loading sessions...
       </div>
     );
   }
 
+  // Dashboard result stats should count classified race outcomes even when the
+  // player retired before logging a timed lap. Lap/pace sections below still
+  // self-filter to sessions with actual lap data before charting.
   const dashboardSessions = sessions.filter(
     (session) => session.validLapCount > 0 || session.playerRaceResult != null,
   );
+  const isFiltered = !areSessionFiltersDefault(filters);
   const visibleSessions = dashboardSessions.filter((session) =>
     matchesSessionFilters(session, filters),
   );
-  const stats = getDashboardResultStats(visibleSessions, activeFormulaKey);
-  const recentActivity = buildDashboardActivity(stats.scopedSessions, 4);
-  const hasData = stats.scopedSessions.length > 0;
-  const filtered = !areSessionFiltersDefault(filters);
-  const formulaLabel = activeFormula?.label ?? "All games";
-
-  return (
-    <PageFrame className="space-y-5 sm:space-y-6">
-      <section className="brand-stripe-wash relative isolate overflow-hidden rounded-3xl border border-white/[0.08] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.07)] sm:p-7">
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 bg-gradient-to-r from-black/20 via-transparent to-black/15"
-        />
-        <div className="relative flex flex-wrap items-start justify-between gap-4">
-          <div className="min-w-0">
-            <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-rose-200/75">
-              Driver home
-            </p>
-            <h1 className="mt-1 text-2xl font-bold tracking-tight text-white sm:text-3xl">
-              {mode === "demo"
-                ? "Explore the stats"
-                : `Welcome, ${driverName ?? "driver"}`}
-            </h1>
-            <p className="mt-1.5 text-sm text-zinc-200/75">
-              {formulaLabel} ·{" "}
-              {league?.filterLabel ?? "Your saved race sessions"}
-              {filtered ? " · Filtered" : ""}
-            </p>
-          </div>
-          <SafetySummary />
-        </div>
-
-        {hasData ? (
-          <div className="relative mt-6 grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
-            <SummaryStat
-              label="Average finish"
-              value={
-                stats.averageFinish == null
-                  ? "—"
-                  : `P${stats.averageFinish.toFixed(1)}`
-              }
-            />
-            <SummaryStat label="Wins" value={stats.wins} />
-            <SummaryStat
-              label="Podiums"
-              value={stats.p2 + stats.p3 + stats.wins}
-            />
-            <SummaryStat label="Race starts" value={stats.starts} />
-          </div>
-        ) : (
-          <div className="relative mt-6 rounded-2xl border border-white/[0.08] bg-black/20 px-4 py-5">
-            <p className="text-sm font-semibold text-zinc-100">
-              No sessions in this view yet
-            </p>
-            <p className="mt-1 text-sm text-zinc-300/70">
-              {filtered
-                ? "Adjust the time or session filters to see more of your racing history."
-                : "Load telemetry or choose another game scope to get started."}
-            </p>
-          </div>
-        )}
-      </section>
-
-      <section aria-labelledby="quick-links-heading">
-        <div className="mb-3 flex items-end justify-between gap-3 px-1">
-          <div>
-            <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-rose-200/60">
-              Go to
-            </p>
-            <h2
-              id="quick-links-heading"
-              className="mt-0.5 text-lg font-semibold text-white"
-            >
-              Your racing tools
-            </h2>
-          </div>
-          <span className="hidden text-xs text-zinc-500 sm:block">
-            Pick up where you want to race
-          </span>
-        </div>
-
-        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 xl:grid-cols-4">
-          {SHORTCUTS.map(({ key, label, detail, icon: Icon, path, tone }) => (
-            <Link
-              key={key}
-              to={`${rootPath}/${path}`}
-              className="group relative flex min-h-24 items-center gap-3 overflow-hidden rounded-2xl border border-white/[0.07] bg-zinc-900/65 p-4 transition duration-200 hover:-translate-y-0.5 hover:border-rose-300/20 hover:bg-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-red/70"
-            >
-              <span
-                className={cn(
-                  "flex size-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ring-1 ring-inset ring-white/[0.06]",
-                  tone,
-                )}
-              >
-                <Icon className="size-5" />
-              </span>
-              <span className="min-w-0 flex-1">
-                <span className="block text-sm font-semibold text-zinc-100 group-hover:text-white">
-                  {label}
-                </span>
-                <span className="mt-0.5 block text-xs text-zinc-500">
-                  {detail}
-                </span>
-              </span>
-              <ArrowRight className="size-4 shrink-0 text-zinc-600 transition group-hover:translate-x-0.5 group-hover:text-rose-200" />
-            </Link>
-          ))}
-          {SETUP_MANAGER_ON && (
-            <Link
-              to={`${rootPath}/setups`}
-              className="group relative flex min-h-24 items-center gap-3 overflow-hidden rounded-2xl border border-white/[0.07] bg-zinc-900/65 p-4 transition duration-200 hover:-translate-y-0.5 hover:border-violet-300/20 hover:bg-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-red/70"
-            >
-              <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500/15 to-sky-500/5 text-violet-200 ring-1 ring-inset ring-white/[0.06]">
-                <Wrench className="size-5" />
-              </span>
-              <span className="min-w-0 flex-1">
-                <span className="block text-sm font-semibold text-zinc-100 group-hover:text-white">
-                  Setups
-                </span>
-                <span className="mt-0.5 block text-xs text-zinc-500">
-                  Recommendations by track
-                </span>
-              </span>
-              <ArrowRight className="size-4 shrink-0 text-zinc-600 transition group-hover:translate-x-0.5 group-hover:text-violet-200" />
-            </Link>
-          )}
-          <Link
-            to={`${rootPath}/head-to-head`}
-            className="group relative flex min-h-24 items-center gap-3 overflow-hidden rounded-2xl border border-white/[0.07] bg-zinc-900/65 p-4 transition duration-200 hover:-translate-y-0.5 hover:border-fuchsia-300/20 hover:bg-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-red/70"
-          >
-            <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-fuchsia-500/15 to-violet-500/5 text-fuchsia-200 ring-1 ring-inset ring-white/[0.06]">
-              <UsersRound className="size-5" />
-            </span>
-            <span className="min-w-0 flex-1">
-              <span className="block text-sm font-semibold text-zinc-100 group-hover:text-white">
-                Head to head
-              </span>
-              <span className="mt-0.5 block text-xs text-zinc-500">
-                Compare your races with a rival
-              </span>
-            </span>
-            <ArrowRight className="size-4 shrink-0 text-zinc-600 transition group-hover:translate-x-0.5 group-hover:text-fuchsia-200" />
-          </Link>
-          <Link
-            to={`${rootPath}/safety`}
-            className="group relative flex min-h-24 items-center gap-3 overflow-hidden rounded-2xl border border-white/[0.07] bg-zinc-900/65 p-4 transition duration-200 hover:-translate-y-0.5 hover:border-emerald-300/20 hover:bg-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-red/70"
-          >
-            <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500/15 to-teal-500/5 text-emerald-200 ring-1 ring-inset ring-white/[0.06]">
-              <ShieldCheck className="size-5" />
-            </span>
-            <span className="min-w-0 flex-1">
-              <span className="block text-sm font-semibold text-zinc-100 group-hover:text-white">
-                Safety rating
-              </span>
-              <span className="mt-0.5 block text-xs text-zinc-500">
-                Review your rating and race calls
-              </span>
-            </span>
-            <ArrowRight className="size-4 shrink-0 text-zinc-600 transition group-hover:translate-x-0.5 group-hover:text-emerald-200" />
-          </Link>
-        </div>
-      </section>
-
-      {recentActivity.length > 0 && (
-        <section aria-labelledby="recent-activity-heading">
-          <div className="mb-3 flex flex-wrap items-end justify-between gap-3 px-1">
-            <div>
-              <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-rose-200/60">
-                Latest laps
-              </p>
-              <h2
-                id="recent-activity-heading"
-                className="mt-0.5 text-lg font-semibold text-white"
-              >
-                Recent activity
-              </h2>
-            </div>
-            <Link
-              to={`${rootPath}/sessions`}
-              className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-xs font-medium text-zinc-400 transition hover:bg-white/[0.05] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-red/70"
-            >
-              All sessions <ArrowRight className="size-3.5" />
-            </Link>
-          </div>
-          <div className="space-y-1.5">
-            {recentActivity.slice(0, 3).map((activity) => (
-              <ActivityRow key={activity.key} activity={activity} />
-            ))}
-          </div>
-        </section>
-      )}
-    </PageFrame>
+  // Synthetic entries are demo-only summary stubs with no backing detail JSON.
+  // They flow into every dashboard section (hero, recent results, insights,
+  // rivals, tracks) so the prod no-data preview looks like a real dashboard.
+  // List/card surfaces either render them as static demo rows or rely on the
+  // SessionPage's friendly "demo preview" placeholder when a chart links to one.
+  const dashboardStats = getDashboardResultStats(
+    visibleSessions,
+    activeFormulaKey,
   );
-}
+  const scopedSessions = dashboardStats.scopedSessions;
+  const scopedSessionStats: SessionStats[] = scopedSessions.map((session) => ({
+    summary: session,
+    isRace: isRaceSessionType(session.sessionType),
+    bestLapMs: session.bestLapTimeMs ?? 0,
+    validLapCount: session.validLapCount,
+  }));
 
-function SummaryStat({
-  label,
-  value,
-}: {
-  label: string;
-  value: string | number;
-}) {
+  const trackGroups = buildTrackGroups(scopedSessionStats);
+  const recentActivity = buildDashboardActivity(scopedSessions);
+  const sparklineGroups = Object.values(buildQualifyingPaceData(trackGroups))
+    .sort((a, b) => {
+      const [trackA] = sortTracksByCalendar(
+        [a.track, b.track],
+        activeFormulaKey,
+      );
+      if (a.track !== b.track) return trackA === a.track ? -1 : 1;
+      return a.formulaLabel.localeCompare(b.formulaLabel);
+    })
+    .slice(0, 6);
+
+  const insights = buildTrackInsights(dashboardStats);
+  const rivalStats = buildRivalStats(
+    visibleSessions,
+    activeFormulaKey,
+    getSessionFormulaScopeKey,
+  );
+  const resultPositions = dashboardStats.resultSessions
+    .map((session) => session.playerRaceResult?.position)
+    .filter((position): position is number => position != null);
+  const bestResultPosition =
+    resultPositions.length > 0 ? Math.min(...resultPositions) : undefined;
+  const tracksWithResults = new Set(
+    dashboardStats.resultSessions.map((session) => getTrackId(session.track)),
+  ).size;
+  const scopedSessionsByTrack = new Map<string, SessionSummary[]>();
+  for (const session of scopedSessions) {
+    const trackId = getTrackId(session.track);
+    const trackSessions = scopedSessionsByTrack.get(trackId) ?? [];
+    trackSessions.push(session);
+    scopedSessionsByTrack.set(trackId, trackSessions);
+  }
+  const uniqueTracks = sortTracksByCalendar(
+    [...scopedSessionsByTrack.keys()],
+    activeFormulaKey,
+  );
+  const hasScopedData = scopedSessions.length > 0;
+  const unfilteredScopedSessionCount = activeFormulaKey
+    ? dashboardSessions.filter(
+        (session) => getSessionFormulaScopeKey(session) === activeFormulaKey,
+      ).length
+    : dashboardSessions.length;
+  const hasUnfilteredScopedData = unfilteredScopedSessionCount > 0;
+  // Aggregate stats (avg finish, DNF rate, podium counts) are noisy or misleading
+  // with one or two races, and downright depressing when every race is a DNF
+  // (P21 best, 0/0/0 podium, 100% DNF). Hide until there's a meaningful sample
+  // AND at least one clean finish; Recent Activity still surfaces the raw work.
+  const showHero =
+    dashboardStats.starts >= 3 &&
+    dashboardStats.cleanFinishSessions.length >= 1;
+  const hasRecentActivity = recentActivity.length > 0;
+  const formulaLabelText =
+    activeFormula?.label ?? (scopeKey ? "All games" : "Telemetry");
+  const subtitle = hasScopedData
+    ? `${formulaLabelText} · ${scopedSessions.length} ${isFiltered ? "filtered " : ""}${scopedSessions.length === 1 ? "session" : "sessions"} across ${uniqueTracks.length} ${uniqueTracks.length === 1 ? "track" : "tracks"}`
+    : `${formulaLabelText} form across your saved sessions`;
+  const leagueSubtitle = league
+    ? `${formulaLabelText} · ${league.filterLabel} · ${scopedSessions.length} ${scopedSessions.length === 1 ? "session" : "sessions"} across ${uniqueTracks.length} ${uniqueTracks.length === 1 ? "track" : "tracks"}`
+    : null;
+  const emptyTitle = league
+    ? `No sessions for ${leagueDriverName ?? "this driver"} in this period`
+    : isFiltered && hasUnfilteredScopedData
+      ? "No sessions match these filters"
+      : "No sessions in this scope";
+  const emptyHint = league
+    ? `${league.filterLabel}. Pick a longer time range in the filter at the top left.`
+    : isFiltered && hasUnfilteredScopedData
+      ? "Reset filters or choose a different game scope."
+      : "Try a different formula or load more telemetry files.";
+
   return (
-    <div className="rounded-xl border border-white/[0.07] bg-black/20 px-3 py-2.5 sm:px-4 sm:py-3">
-      <p className="font-mono text-[10px] uppercase tracking-[0.13em] text-zinc-400/80">
-        {label}
-      </p>
-      <p className="mt-1 font-mono text-xl font-bold tabular-nums text-white sm:text-2xl">
-        {value}
-      </p>
+    <div className="mx-auto max-w-5xl space-y-8 p-6">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0">
+          <h2 className="mb-1 text-xl font-bold">
+            {isDemoMode ? "Demo" : (leagueDriverName ?? "Dashboard")}
+          </h2>
+          <p className="text-sm text-zinc-500">{leagueSubtitle ?? subtitle}</p>
+        </div>
+        <SafetySummary />
+      </div>
+
+      {!hasScopedData ? (
+        <section
+          className={cn(
+            "rounded-2xl bg-zinc-900/40 px-5 py-8 text-center",
+            cardHighlight,
+          )}
+        >
+          <h3 className="text-sm font-semibold text-zinc-300">{emptyTitle}</h3>
+          <p className="mt-1 text-sm text-zinc-500">{emptyHint}</p>
+          {league && league.filter.kind !== "all" && (
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() => league.setFilter({ kind: "all" })}
+              className="mt-4"
+            >
+              Show all time
+            </Button>
+          )}
+          {isFiltered && (
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() => setFilters(DEFAULT_FILTERS)}
+              className="mt-4"
+            >
+              Reset filters
+            </Button>
+          )}
+        </section>
+      ) : (
+        <>
+          {showHero && (
+            <RaceResultsHero
+              stats={dashboardStats}
+              bestPosition={bestResultPosition}
+              trackCount={tracksWithResults}
+            />
+          )}
+
+          {hasRecentActivity && (
+            <section>
+              <SectionHeader title="Recent Activity" />
+              <div className="space-y-4">
+                {Object.entries(
+                  (showAllActivity
+                    ? recentActivity
+                    : recentActivity.slice(0, RECENT_ACTIVITY_COLLAPSED)
+                  ).reduce<Record<string, typeof recentActivity>>(
+                    (acc, activity) => {
+                      (acc[activity.dayKey] ??= []).push(activity);
+                      return acc;
+                    },
+                    {},
+                  ),
+                ).map(([dayKey, activities]) => (
+                  <div key={dayKey}>
+                    <h3 className="mb-1.5 px-1">
+                      <Eyebrow>
+                        {formatRelativeDate(dayKey + "T00:00:00")}
+                      </Eyebrow>
+                    </h3>
+                    <div className="space-y-1.5">
+                      {activities.map((activity) => (
+                        <ActivityRow key={activity.key} activity={activity} />
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {recentActivity.length > RECENT_ACTIVITY_COLLAPSED && (
+                <Button
+                  size="xs"
+                  variant="ghost"
+                  onClick={() => setShowAllActivity((value) => !value)}
+                  className="mt-2"
+                >
+                  {showAllActivity ? (
+                    <>
+                      Show less <ChevronUp className="size-3" />
+                    </>
+                  ) : (
+                    <>
+                      Show {recentActivity.length - RECENT_ACTIVITY_COLLAPSED}{" "}
+                      more <ChevronDown className="size-3" />
+                    </>
+                  )}
+                </Button>
+              )}
+            </section>
+          )}
+
+          {insights.length > 0 && (
+            <section>
+              <SectionHeader title="Insights" />
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                {insights.map((insight) => (
+                  <InsightCard
+                    key={`${insight.kind}-${insight.track}`}
+                    insight={insight}
+                  />
+                ))}
+              </div>
+            </section>
+          )}
+
+          {rivalStats.cards.length > 0 && (
+            <section>
+              <SectionHeader title="Rivals & Teammates" />
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                {rivalStats.cards.map((card) => (
+                  <RivalCard
+                    key={`${card.kind}-${card.driverName}`}
+                    card={card}
+                  />
+                ))}
+              </div>
+            </section>
+          )}
+
+          {sparklineGroups.length > 0 && (
+            <section>
+              <SectionHeader
+                title="Qualifying Pace"
+                action={<Timer className="size-4 text-zinc-600" />}
+              />
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {sparklineGroups.map((group) => (
+                  <QualifyingPaceCard key={group.key} data={group} />
+                ))}
+              </div>
+            </section>
+          )}
+
+          {uniqueTracks.length > 0 && (
+            <section>
+              <SectionHeader title="Tracks" />
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {uniqueTracks.map((trackId) => {
+                  const trackSessions =
+                    scopedSessionsByTrack.get(trackId) ?? [];
+                  const track = trackSessions[0]?.track ?? trackId;
+                  return (
+                    <TrackOverviewCard
+                      key={trackId}
+                      track={track}
+                      sessions={trackSessions}
+                      scopeKey={scopeKey}
+                      records={buildTrackRecords(trackSessions)}
+                    />
+                  );
+                })}
+              </div>
+            </section>
+          )}
+        </>
+      )}
     </div>
   );
 }

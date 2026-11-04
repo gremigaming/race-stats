@@ -19,15 +19,10 @@ interface Props {
   onChange: (next: SessionListFilters) => void;
   game: GameScope;
   onReset: () => void;
-  showGame?: boolean;
 }
 
-function countActive(
-  value: SessionListFilters,
-  game: GameScope,
-  showGame: boolean,
-): number {
-  let n = showGame && game.isFiltered ? 1 : 0;
+function countActive(value: SessionListFilters, game: GameScope): number {
+  let n = game.isFiltered ? 1 : 0;
   if (value.type !== DEFAULT_FILTERS.type) n += 1;
   if (value.mode !== DEFAULT_FILTERS.mode) n += 1;
   return n;
@@ -36,7 +31,6 @@ function countActive(
 function getButtonIcon(
   value: SessionListFilters,
   game: GameScope,
-  showGame: boolean,
 ): {
   icon: LucideIcon;
   label: string;
@@ -49,7 +43,7 @@ function getButtonIcon(
     const meta = SESSION_MODE_META[value.mode];
     return { icon: meta.icon, label: meta.buttonLabel };
   }
-  if (showGame && game.isFiltered) {
+  if (game.isFiltered) {
     return { icon: Gamepad2, label: `${game.label ?? "Game"} only` };
   }
   return { icon: SlidersHorizontal, label: "Filters" };
@@ -63,17 +57,16 @@ export function SessionListFilterMenu({
   onChange,
   game,
   onReset,
-  showGame = true,
 }: Props) {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
 
-  const activeCount = countActive(value, game, showGame);
-  const buttonIcon = getButtonIcon(value, game, showGame);
+  const activeCount = countActive(value, game);
+  const buttonIcon = getButtonIcon(value, game);
   const ButtonIcon = buttonIcon.icon;
   const activeLabels = [
-    showGame && game.isFiltered ? (game.label ?? null) : null,
+    game.isFiltered ? (game.label ?? null) : null,
     value.type === "all" ? null : SESSION_TYPE_FILTER_META[value.type].label,
     value.mode === "all" ? null : SESSION_MODE_META[value.mode].label,
   ].filter((label): label is string => label !== null);
@@ -133,10 +126,10 @@ export function SessionListFilterMenu({
           aria-label="Session filters"
           className={cn(
             "absolute right-0 top-full z-20 mt-1.5 max-w-[calc(100vw-2rem)] rounded-xl bg-zinc-950 ring-1 ring-white/[0.06] shadow-xl divide-y divide-white/[0.05]",
-            game.enabled && showGame ? "w-64" : "w-56",
+            game.enabled ? "w-64" : "w-56",
           )}
         >
-          {game.enabled && showGame && (
+          {game.enabled && (
             <Section label="Game" icon={Gamepad2}>
               <SegmentedControl<string>
                 size="sm"

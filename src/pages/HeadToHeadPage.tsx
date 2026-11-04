@@ -4,8 +4,6 @@ import { cardClass, cardClassFeature } from "../components/Card";
 import { TrackFlag } from "../components/TrackFlag";
 import { DriverSearchSelect } from "../components/DriverSearchSelect";
 import { SectionHeader } from "../components/ui/SectionHeader";
-import { PageFrame } from "../components/ui/PageFrame";
-import { PageHeader } from "../components/ui/PageHeader";
 import {
   tableCellClass,
   tableClassLoose,
@@ -61,14 +59,16 @@ export function HeadToHeadPage() {
   const total = h2h.races.length;
 
   return (
-    <PageFrame>
-      <PageHeader
-        icon={Swords}
-        eyebrow="Drivers"
-        title="Head to head"
-        description="Compare qualifying, race pace, results, and battles between two drivers."
-        meta={`${league.filterLabel} · ${total} ${total === 1 ? "race" : "races"} together`}
-      />
+    <div className="mx-auto max-w-5xl space-y-8 p-6">
+      <div>
+        <h2 className="mb-1 flex items-center gap-2 text-xl font-bold">
+          <Swords className="h-5 w-5 text-red-400" />
+          Head to head
+        </h2>
+        <p className="text-sm text-zinc-500">
+          {league.filterLabel} · {total} {total === 1 ? "race" : "races"} together
+        </p>
+      </div>
 
       <div className="flex flex-wrap items-center gap-3">
         <DriverSearchSelect
@@ -98,11 +98,7 @@ export function HeadToHeadPage() {
         <>
           <section className={cardClassFeature}>
             <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4">
-              <Side
-                name={nameOf(a)}
-                score={h2h.aAhead}
-                lead={h2h.aAhead > h2h.bAhead}
-              />
+              <Side name={nameOf(a)} score={h2h.aAhead} lead={h2h.aAhead > h2h.bAhead} />
               <div className="text-center font-mono text-xs uppercase tracking-wider text-zinc-500">
                 Finished ahead
               </div>
@@ -121,17 +117,8 @@ export function HeadToHeadPage() {
               hint="Only the races they were both in"
             />
             <div className="divide-y divide-white/[0.04]">
-              <StatRow
-                label="Qualified ahead"
-                a={h2h.a.qualiAhead}
-                b={h2h.b.qualiAhead}
-              />
-              <StatRow
-                label="Faster best lap"
-                a={h2h.a.fasterLap}
-                b={h2h.b.fasterLap}
-                purple
-              />
+              <StatRow label="Qualified ahead" a={h2h.a.qualiAhead} b={h2h.b.qualiAhead} />
+              <StatRow label="Faster best lap" a={h2h.a.fasterLap} b={h2h.b.fasterLap} purple />
               <StatRow
                 label="Better race pace"
                 hint="Median clean lap"
@@ -161,11 +148,7 @@ export function HeadToHeadPage() {
                 b={h2h.b.gained}
                 format={(v) => `${v > 0 ? "+" : ""}${v}`}
               />
-              <StatRow
-                label="Overtakes made"
-                a={h2h.a.overtakes}
-                b={h2h.b.overtakes}
-              />
+              <StatRow label="Overtakes made" a={h2h.a.overtakes} b={h2h.b.overtakes} />
               <StatRow
                 label="Passed each other"
                 a={h2h.a.passedRival}
@@ -193,27 +176,16 @@ export function HeadToHeadPage() {
           </section>
 
           <section className={cardClass}>
-            <SectionHeader
-              title="Races together"
-              hint="Newest first · click a race to open it"
-            />
+            <SectionHeader title="Races together" hint="Newest first · click a race to open it" />
             <div className="overflow-x-auto">
               <table className={tableClassLoose}>
                 <thead className={tableHeadClass}>
                   <tr>
                     <th className={tableCellClass()}>Race</th>
-                    <th className={tableCellClass({ align: "right" })}>
-                      {nameOf(a)}
-                    </th>
-                    <th className={tableCellClass({ align: "right" })}>
-                      {nameOf(b)}
-                    </th>
-                    <th className={tableCellClass({ align: "right" })}>
-                      Best lap
-                    </th>
-                    <th className={tableCellClass({ align: "right" })}>
-                      Best lap
-                    </th>
+                    <th className={tableCellClass({ align: "right" })}>{nameOf(a)}</th>
+                    <th className={tableCellClass({ align: "right" })}>{nameOf(b)}</th>
+                    <th className={tableCellClass({ align: "right" })}>Best lap</th>
+                    <th className={tableCellClass({ align: "right" })}>Best lap</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -253,22 +225,10 @@ export function HeadToHeadPage() {
                             </span>
                           </span>
                         </td>
-                        <Result
-                          text={formatStatus(r.a)}
-                          win={rank(r.a) < rank(r.b)}
-                        />
-                        <Result
-                          text={formatStatus(r.b)}
-                          win={rank(r.b) < rank(r.a)}
-                        />
-                        <Result
-                          text={formatLap(r.a.bestLapMs)}
-                          purple={aFaster}
-                        />
-                        <Result
-                          text={formatLap(r.b.bestLapMs)}
-                          purple={bFaster}
-                        />
+                        <Result text={formatStatus(r.a)} win={rank(r.a) < rank(r.b)} />
+                        <Result text={formatStatus(r.b)} win={rank(r.b) < rank(r.a)} />
+                        <Result text={formatLap(r.a.bestLapMs)} purple={aFaster} />
+                        <Result text={formatLap(r.b.bestLapMs)} purple={bFaster} />
                       </tr>
                     );
                   })}
@@ -278,13 +238,12 @@ export function HeadToHeadPage() {
           </section>
         </>
       )}
-    </PageFrame>
+    </div>
   );
 }
 
 function rank(r: { position: number | null; status: string }): number {
-  const ok =
-    r.status === "FINISHED" || r.status === "ACTIVE" || r.status === "";
+  const ok = r.status === "FINISHED" || r.status === "ACTIVE" || r.status === "";
   return ok && r.position != null ? r.position : 1000;
 }
 
@@ -383,17 +342,11 @@ function StatRow({
         {hint && <div className="text-[10px] text-zinc-600">{hint}</div>}
         <div className="mt-1.5 flex h-1 overflow-hidden rounded-full bg-zinc-800">
           <div
-            className={cn(
-              "h-full",
-              aWins ? "bg-emerald-400/70" : "bg-zinc-600",
-            )}
+            className={cn("h-full", aWins ? "bg-emerald-400/70" : "bg-zinc-600")}
             style={{ width: `${share * 100}%` }}
           />
           <div
-            className={cn(
-              "h-full flex-1",
-              bWins ? "bg-emerald-400/70" : "bg-zinc-700",
-            )}
+            className={cn("h-full flex-1", bWins ? "bg-emerald-400/70" : "bg-zinc-700")}
           />
         </div>
       </div>

@@ -3,26 +3,12 @@ export interface ChangelogEntry {
   date: string;
   type: "feat" | "fix" | "docs";
   message: string;
-  destination:
-    | "home"
-    | "tracks"
-    | "drivers"
-    | "safety"
-    | "personal-safety"
-    | "race";
+  destination: "tracks" | "drivers" | "safety" | "personal-safety" | "race";
 }
 
 // Curated site updates. Keep these focused on changes visitors can notice;
 // raw commit history also contains routine uploads and staff-only corrections.
 const changelog: ChangelogEntry[] = [
-  {
-    id: "driver-first-home-navigation",
-    date: "2026-11-04",
-    type: "feat",
-    message:
-      "Start from a driver-first home hub, with Drivers, Races, and Setups grouped in a clearer navigation bar.",
-    destination: "home",
-  },
   {
     id: "track-sorting-options",
     date: "2026-11-04",
@@ -110,8 +96,7 @@ const changelog: ChangelogEntry[] = [
     id: "race-replays",
     date: "2026-10-29",
     type: "feat",
-    message:
-      "Replay recorded races and jump to contacts from the incident list.",
+    message: "Replay recorded races and jump to contacts from the incident list.",
     destination: "race",
   },
 ];
