@@ -186,7 +186,7 @@ jobs:
           cd "$GITHUB_WORKSPACE"
           git config user.name "github-actions"
           git config user.email "github-actions@users.noreply.github.com"
-          if [ -f dist/discord/leaderboard.png ]; then cp dist/discord/leaderboard.png previews/discord-leaderboard.png; fi
+          cp dist/discord/leaderboard.png previews/discord-leaderboard.png
           rm -rf previews/setups && cp -r dist/discord/setups previews/setups
           rm -rf previews/setup-test && if [ -d dist/discord/setup-test ]; then cp -r dist/discord/setup-test previews/setup-test; fi
           git add previews
