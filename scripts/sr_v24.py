@@ -49,15 +49,16 @@ def cls_of(item, p):
     return "small" if p <= 0.5 else "medium" if p <= 1.5 else "big"
 
 
-def race_rows(driver, skip_bonus=()):
-    """Per race of a driver: (file, bonus, [(order, kind, cls, pts)]) with qualifying joined to the next race."""
+def race_rows(driver, skip_bonus=(), bonus_cat=None, other_cat=None):
+    """Per race of a driver: (file, bonus, [(order, kind, cls, pts)]) with qualifying joined to the next race.
+    bonus_cat / other_cat (SR settings): x per bonus type / per other penalty type ("*": any other type)."""
     out = []; pend_b = 0.0; pend = []
     for s in driver["sessions"]:
         b = 0.0; its = []
         for it in s["items"]:
             v = it["pts"]
             if v > 0:
-                if it["cat"] not in skip_bonus: b += v
+                if it["cat"] not in skip_bonus: b += v * (bonus_cat or {}).get(it["cat"], 1.0)
                 continue
             if v == 0: continue
             q = 0 if not s["race"] else 1
@@ -67,7 +68,8 @@ def race_rows(driver, skip_bonus=()):
                 p = -v / 2                      # v2.2 table is double v2.4's
                 its.append((order, "inc", cls_of(it, p), p))
             else:
-                its.append((order, "other", None, -v))   # track limits, pit exit, DNF: 1 in both
+                oc = other_cat or {}
+                its.append((order, "other", None, -v * oc.get(it["cat"], oc.get("*", 1.0))))   # track limits, pit exit, DNF: 1 in both
         if not s["race"]:
             pend_b += b; pend += its; continue
         out.append((s["file"], b + pend_b, sorted(pend + its)))
@@ -249,14 +251,15 @@ def table_linear(data, variants, sim=None):
 #   on your latest race, so it ages out of the window with it.
 WINDOW4 = dict(DEFAULT, BONUS_DIM=0.10, GRAV_PCT=0.04, GRAV_PCT_SKIP=0.02, STEPS=[1.0, 0.8, 0.6, 0.4, 0.2],
                BONUS_SCALE=1.0, OTHER_SCALE=1.0, CLEAN_ONLY_BONUS=False, STREAK_RESET_SKIPS=None,
-               GRAV_ON_SKIP_ONLY=False, BONUS_SKIP_CATS=(), NO_BONUS_DIRTY=False, STEP_LEN=10, TRACE=False)
+               GRAV_ON_SKIP_ONLY=False, BONUS_SKIP_CATS=(), NO_BONUS_DIRTY=False, STEP_LEN=10, TRACE=False,
+               BONUS_CAT=None, OTHER_CAT=None)   # SR settings: x per bonus type / other penalty type
 
 
 def simulate_window(data, **kw):
     P = dict(WINDOW4, **kw)
     league = [f for st in data["streams"] for f in st["files"] if f.startswith("Race_")]
     pos_of = {f: k for k, f in enumerate(league)}
-    rows = {d["name"]: {pos_of[f]: (b, its) for f, b, its in race_rows(d, P["BONUS_SKIP_CATS"]) if f in pos_of} for d in data["drivers"]}
+    rows = {d["name"]: {pos_of[f]: (b, its) for f, b, its in race_rows(d, P["BONUS_SKIP_CATS"], P["BONUS_CAT"], P["OTHER_CAT"]) if f in pos_of} for d in data["drivers"]}
     st = {n: dict(nets=[], sr=50.0, level=0, skips=0, dirty=0, best=0, grav=0.0, bonus=0.0, raw=0.0, adj=0.0, worst=0.0,
                   hidden=0.0) for n in rows}
     W = P["STEPS"]
@@ -281,7 +284,9 @@ def simulate_window(data, **kw):
             pos = tier(P["POS"], s["sr"], 1.0)
             cnt = dict(big=0, medium=0, small=0); dirty = False; pen = 0.0; lvl = s["level"]; ninc = 0; sm_max = 1.0
             for _, kind, c, p in its:
-                sm = 1.0 if lvl == 0 else P["STREAK_FIRST"] + P["STREAK_STEP"] * (lvl - 1); sm_max = max(sm_max, sm)
+                sm = 1.0 if lvl == 0 else P["STREAK_FIRST"] + P["STREAK_STEP"] * (lvl - 1)
+                if P["STREAK_MAX"]: sm = min(sm, P["STREAK_MAX"])
+                sm_max = max(sm_max, sm)
                 t_ = P["TABLE"] or {}
                 if kind == "inc":
                     p = t_[p] if p in t_ else t_[p * 2] / 2 if p * 2 in t_ else p * P["INC_SCALE"]
@@ -369,15 +374,19 @@ V25 = dict(WINDOW4, **WINDOW7_PICK)
 
 def v25_pts(pts, cat, P=V25):
     """One item's points on the v2.5 scale (before the SR multipliers and the bonus cut)."""
-    if pts > 0: return pts * P["BONUS_SCALE"]
+    if pts > 0: return pts * P["BONUS_SCALE"] * (P.get("BONUS_CAT") or {}).get(cat, 1.0)
     if pts == 0: return 0.0
     if cat in ("contact", "staff"):
         t_ = P["TABLE"] or {}; p = -pts / 2
         return -(t_[p] if p in t_ else t_[p * 2] / 2 if p * 2 in t_ else p * P["INC_SCALE"])
-    return pts * P["OTHER_SCALE"]
+    oc = P.get("OTHER_CAT") or {}
+    return pts * P["OTHER_SCALE"] * oc.get(cat, oc.get("*", 1.0))
 
 
 def v25_scale(P=V25):
     """What the site needs to show item points on the v2.5 scale (keys: v2.2 contact points)."""
-    return {"bonus": P["BONUS_SCALE"], "other": P["OTHER_SCALE"],
-            "contact": {f"{k * 2:g}": v for k, v in (P["TABLE"] or {}).items()}, "contactElse": P["INC_SCALE"] / 2}
+    oc = P.get("OTHER_CAT") or {}
+    return {"bonus": P["BONUS_SCALE"], "other": P["OTHER_SCALE"] * oc.get("*", 1.0),
+            "contact": {f"{k * 2:g}": v for k, v in (P["TABLE"] or {}).items()}, "contactElse": P["INC_SCALE"] / 2,
+            "bonusCat": dict(P.get("BONUS_CAT") or {}),
+            "otherCat": {c: P["OTHER_SCALE"] * x for c, x in oc.items() if c != "*"}}

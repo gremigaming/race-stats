@@ -46,6 +46,10 @@ V1 = RULESET in ("v1", "v2.1", "v2.2", "v2.3", "v2.4", "v2.5")
 if V25:
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
     import sr_v24   # v2.1/v2.2 take contact blame from the fault engine too
+    import sr_settings   # every v2.5 number, editable on the staff page (races/sr-settings.json)
+    SR_SET, _problems = sr_settings.load()
+    for _p in _problems: print(f"  SR settings: {_p}")
+    P25 = dict(sr_v24.V25, **sr_settings.params(SR_SET))
 VERDICTS = os.environ.get("SR_VERDICTS", "/tmp/telemetry-cache/verdicts")
 OUT = os.environ.get("SR_OUT", os.path.join("public", "league"))
 TRACK_LIMITS = re.compile(r"Corner Cutting|Crossed Pit Exit", re.I)   # the only game rulings v1 keeps
@@ -733,7 +737,7 @@ def stream_avg(n, si):
     ks = [k for k, e in enumerate(es) if e["stream"] == si]; nr = sum(es[k]["race"] for k in ks)
     return round(sum(session_net(es[k], k in recent)[0] for k in ks) / nr, 2) if nr else None
 
-KICK_RACE, KICK_STREAM = (30, 60) if V25 else (40, 80) if V22 else (20, 40)   # v2.2 contact points are doubled, so the kick lines are too
+KICK_RACE, KICK_STREAM = (SR_SET["kick_race"], SR_SET["kick_stream"]) if V25 else (40, 80) if V22 else (20, 40)   # v2.2 contact points are doubled, so the kick lines are too
 all_incs = []
 for si, stream in enumerate(streams):
     seen_stream = set(); stream_loss = collections.defaultdict(float)
@@ -803,7 +807,7 @@ for si, stream in enumerate(streams):
                 car.update(kicked); present += list(kicked)
         apply_staff(name, items, car, is_race, would)
         for n in set(present) | set(items):
-            loss = -sum((sr_v24.v25_pts(i["pts"], i["cat"]) if V25 else i["pts"]) for i in items[n] if i["pts"] < 0)
+            loss = -sum((sr_v24.v25_pts(i["pts"], i["cat"], P25) if V25 else i["pts"]) for i in items[n] if i["pts"] < 0)
             stream_loss[n] += loss
             if is_race and loss >= KICK_RACE: flags[n].append(f"{short(f)}: lost {loss:g} in one race (kick line {KICK_RACE})")
             entries[n].append({"file": name, "race": is_race, "items": items[n], "stream": si})
@@ -835,7 +839,7 @@ out = {"generated": __import__("datetime").datetime.now(__import__("datetime").t
        "drivers": drivers}
 SR_START_V25 = 50.0
 if V25:   # SR v2.5: score the v2.2 data with the draft 7 rules (scripts/sr_v24.py, V25)
-    res = sr_v24.simulate_window(out, **dict(sr_v24.WINDOW7_PICK, TRACE=True))
+    res = sr_v24.simulate_window(out, **dict(P25, TRACE=True))
     league_files = [f for st in out["streams"] for f in st["files"] if f.startswith("Race_")]
     last_k = []   # per stream: index of the last league race up to it
     k = -1
@@ -866,8 +870,8 @@ if V25:   # SR v2.5: score the v2.2 data with the draft 7 rules (scripts/sr_v24.
         pend = []
         for s_ in d["sessions"]:
             for key in ("sting", "net", "bonus", "bonusCounted", "incident", "other", "withQuali"): s_.pop(key, None)
-            b = sum(sr_v24.v25_pts(i["pts"], i["cat"]) for i in s_["items"] if i["pts"] > 0)
-            p = -sum(sr_v24.v25_pts(i["pts"], i["cat"]) for i in s_["items"] if i["pts"] < 0)
+            b = sum(sr_v24.v25_pts(i["pts"], i["cat"], P25) for i in s_["items"] if i["pts"] > 0)
+            p = -sum(sr_v24.v25_pts(i["pts"], i["cat"], P25) for i in s_["items"] if i["pts"] < 0)
             t = tr.get(s_["file"]) if s_["race"] else None
             if not s_["race"]:
                 s_.update(carry=True, bonus=round(b, 1), penalty=round(p, 1), net=round(b - p, 1)); pend.append(s_); continue
@@ -881,7 +885,8 @@ if V25:   # SR v2.5: score the v2.2 data with the draft 7 rules (scripts/sr_v24.
             pend = []
         for q in pend: q["weight"] = 1.0   # qualifying waiting for its race
     drivers.sort(key=lambda x: (-x["sr"], x["name"].lower()))
-    out["scale"] = sr_v24.v25_scale()
+    out["scale"] = sr_v24.v25_scale(P25)
+    out["settings"] = SR_SET   # the numbers this build used (staff page: SR settings)
     for x in drivers: print(f"  SR v2.5 {x['sr']:5.1f}  {x['name']}  ({x['races']} races)")
 os.makedirs(OUT, exist_ok=True)
 if V1: out["rules"] = RULESET; out["unjudged"] = no_verdicts

@@ -22,6 +22,9 @@ import {
   SR_RANKS,
   SR_START,
   signedHalf,
+  srPct,
+  srSettings,
+  srWindowRaces,
   type SafetyCategory,
   type SafetyData,
   type SafetyDriver,
@@ -324,6 +327,7 @@ function Breakdown({ driver }: { driver: SafetyDriver }) {
 }
 
 function Sessions({ driver, data }: { driver: SafetyDriver; data: SafetyData }) {
+  const sr = srSettings(data);
   const [filter, setFilter] = useState<ItemFilter>("all");
   const [query, setQuery] = useState("");
   const groups = useMemo(() => {
@@ -350,11 +354,15 @@ function Sessions({ driver, data }: { driver: SafetyDriver; data: SafetyData }) 
       <SectionHeader title="Races" hint={`${driver.sessions.length} sessions, newest first`} />
       {data.rules === "v2.5" && (
         <p className="mb-3 rounded-lg bg-zinc-950/50 px-3 py-2 text-[11px] leading-relaxed text-zinc-400">
-          <span className="text-zinc-200">How it adds up:</span> SR = 50 + the net scores of your last 30 races,
-          between 0 and 100. Your newest 6 races count in full, the 6 before that 80%, then 60%, 40% and 20%. A race's
-          net score (right of each race) is its bonus minus its penalties. The higher your SR, the less bonus you get
-          and the more a penalty costs, and a dirty race gets no bonus at all. Gravity pulls you back towards 50 after
-          every league race: 4% of the distance after a race you join, 2% after one you skip.
+          <span className="text-zinc-200">How it adds up:</span> SR = 50 + the net scores of your last{" "}
+          {srWindowRaces(sr)} races, between 0 and 100. Your newest {sr.window_step} races count{" "}
+          {sr.window_weights[0] === 1 ? "in full" : srPct(sr.window_weights[0])}
+          {sr.window_weights.length > 1 &&
+            `, the ${sr.window_step} before that ${sr.window_weights.slice(1).map(srPct).join(", then ")}`}
+          . A race's net score (right of each race) is its bonus minus its penalties. The higher your SR, the less
+          bonus you get and the more a penalty costs{sr.no_bonus_dirty && ", and a dirty race gets no bonus at all"}.
+          Gravity pulls you back towards 50 after every league race: {srPct(sr.gravity_joined)} of the distance after
+          a race you join, {srPct(sr.gravity_skipped)} after one you skip.
         </p>
       )}
       {driver.history.some((h) => h.base != null) && (

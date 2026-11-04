@@ -112,7 +112,71 @@ export interface SafetyScale {
   /** v2.2 contact points -> v2.5 points */
   contact: Record<string, number>;
   contactElse: number;
+  /** SR settings: x per bonus type (finish, clean, close, overtakes, quali, stream) */
+  bonusCat?: Record<string, number>;
+  /** SR settings: other penalty types with their own factor (retirement); the rest use `other` */
+  otherCat?: Record<string, number>;
 }
+
+/** The SR v2.5 numbers a build used (races/sr-settings.json, edited on the staff page). */
+export interface SrSettings {
+  contact_small: number;
+  contact_medium: number;
+  contact_big: number;
+  contact_huge: number;
+  contact_r9: number;
+  contact_other: number;
+  penalty_track: number;
+  penalty_dnf: number;
+  bonus_scale: number;
+  bonus_finish: number;
+  bonus_clean: number;
+  bonus_close: number;
+  bonus_overtakes: number;
+  bonus_quali: number;
+  bonus_stream: number;
+  bonus_cut: number;
+  no_bonus_dirty: boolean;
+  dirty_big: number;
+  dirty_medium: number;
+  dirty_small: number;
+  streak_first: number;
+  streak_step: number;
+  streak_max: number;
+  tier_60: number;
+  tier_70: number;
+  tier_80: number;
+  tier_90: number;
+  tier_100: number;
+  gravity_joined: number;
+  gravity_skipped: number;
+  window_step: number;
+  window_weights: number[];
+  kick_race: number;
+  kick_stream: number;
+}
+
+/** SR v2.5 as GreMi picked it (same as scripts/sr_settings.py DEFAULTS), for data from before the settings. */
+export const SR_SETTINGS_DEFAULT: SrSettings = {
+  contact_small: 0.75, contact_medium: 2.25, contact_big: 4.5, contact_huge: 7.5, contact_r9: 15, contact_other: 0.5,
+  penalty_track: 1.5, penalty_dnf: 1.5,
+  bonus_scale: 2, bonus_finish: 1, bonus_clean: 1, bonus_close: 1, bonus_overtakes: 1, bonus_quali: 1, bonus_stream: 1,
+  bonus_cut: 0.1, no_bonus_dirty: true,
+  dirty_big: 1, dirty_medium: 2, dirty_small: 3, streak_first: 1.5, streak_step: 0.5, streak_max: 0,
+  tier_60: 1.2, tier_70: 1.4, tier_80: 1.6, tier_90: 1.8, tier_100: 2,
+  gravity_joined: 0.04, gravity_skipped: 0.02,
+  window_step: 6, window_weights: [1, 0.8, 0.6, 0.4, 0.2],
+  kick_race: 30, kick_stream: 60,
+};
+
+export const srSettings = (data?: SafetyData | null): SrSettings => ({ ...SR_SETTINGS_DEFAULT, ...(data?.settings ?? {}) });
+
+/** How many of your own races the SR window covers. */
+export const srWindowRaces = (s: SrSettings) => s.window_step * s.window_weights.length;
+
+/** Round for rule texts: 0.75, 1.5, 4 */
+export const srNum = (v: number) => String(+v.toFixed(2));
+export const srPct = (v: number) => `${+(v * 100).toFixed(1)}%`;
 
 export interface SafetyData {
   generated: string;
@@ -120,11 +184,12 @@ export interface SafetyData {
   drivers: SafetyDriver[];
   rules?: string;
   scale?: SafetyScale;
+  settings?: Partial<SrSettings>;
 }
 
 /** One item's points on the v2.5 scale (same as scripts/sr_v24.py v25_pts). */
 export function scaledPts(pts: number, cat: string, sc: SafetyScale): number {
-  if (pts > 0) return pts * sc.bonus;
+  if (pts > 0) return pts * sc.bonus * (sc.bonusCat?.[cat] ?? 1);
   if (pts === 0) return 0;
   if (cat === "contact" || cat === "staff") {
     const one = sc.contact[String(-pts)];
@@ -133,7 +198,7 @@ export function scaledPts(pts: number, cat: string, sc: SafetyScale): number {
     if (two != null) return -two / 2;
     return pts * sc.contactElse;
   }
-  return pts * sc.other;
+  return pts * (sc.otherCat?.[cat] ?? sc.other);
 }
 
 /** Shows every item on the v2.5 scale when the data carries one (SR v2.5 live). */
@@ -147,8 +212,9 @@ export function applySafetyScale(data: SafetyData): SafetyData {
         it.pts = scaledPts(it.pts, it.cat, sc);
         if (it.pts > 0)   // the bonus texts name their v2.2 values
           it.text = it.text
-            .replace("(+0.3 each)", `(+${+(0.3 * sc.bonus).toFixed(2)} each)`)
-            .replace(", perfect race +1", `, perfect race +${sc.bonus}`);
+            .replace("(+0.3 each)", `(+${+(0.3 * sc.bonus * (sc.bonusCat?.clean ?? 1)).toFixed(2)} each)`)
+            .replace(", perfect race +1", `, perfect race +${+(sc.bonus * (sc.bonusCat?.clean ?? 1)).toFixed(2)}`)
+            .replace("(+0.5 per 3)", `(+${+(0.5 * sc.bonus * (sc.bonusCat?.overtakes ?? 1)).toFixed(2)} per 3)`);
       }
       s.total = s.items.reduce((n, it) => n + it.pts, 0);
     }
