@@ -856,7 +856,11 @@ if V24:   # SR v2.4 simulation: live v2.2 next to v2.4 (and the tuned variants) 
                      **({"staff": 1} if i.get("staff") else {}),
                      "text": (sr_v24.SEV_RE.search(i.get("text", "")) or [""])[0]} for i in s["items"] if i["pts"]]}
                 for s in d["sessions"]]} for d in out["drivers"]]}
-    blob = base64.b64encode(gzip.compress(json.dumps(slim, separators=(",", ":")).encode())).decode()
+    raw = gzip.compress(json.dumps(slim, separators=(",", ":"), sort_keys=True).encode(), mtime=0)
+    if os.environ.get("SR24_DATA"):   # committed by the build so tuning can run offline (names are public already)
+        with open(os.environ["SR24_DATA"], "wb") as fh: fh.write(raw)
+    print(sr_v24.table_window(slim, sr_v24.WINDOW7_VARIANTS))
+    blob = base64.b64encode(raw).decode()
     print("SR24DUMP-BEGIN")
     for k in range(0, len(blob), 900): print("SR24DUMP " + blob[k:k + 900])
     print("SR24DUMP-END")

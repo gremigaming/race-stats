@@ -112,7 +112,17 @@ jobs:
         env:
           SR_RULES: v2.4
           SR_OUT: /tmp/sr-v24
-        run: python3 scripts/safety_rating.py || echo "v2.4 simulation failed"
+          SR24_DATA: sr-sim/v24-input.json.gz
+        run: |
+          mkdir -p sr-sim
+          python3 scripts/safety_rating.py || echo "v2.4 simulation failed"
+          if [ -n "$(git status --porcelain sr-sim)" ]; then
+            git config user.name "github-actions"
+            git config user.email "github-actions@users.noreply.github.com"
+            git add sr-sim/v24-input.json.gz
+            git commit -m "SR v2.4 simulation input [skip ci]"
+            git pull --rebase --autostash origin main && git push origin HEAD:main || echo "sim input not saved"
+          fi
       - name: Rank the Discord award roles
         run: python3 scripts/awards.py
       # GreMi's Setup manager: advice from his telemetry, published only

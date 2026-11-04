@@ -337,3 +337,13 @@ def table_window(data, variants):
 # draft 6 candidates (GreMi, 4 Nov 2026): no bonus in dirty races; window in steps of 6 races (30 races)
 WINDOW6 = dict(WINDOW5, NO_BONUS_DIRTY=True)
 WINDOW6_SHORT = dict(WINDOW6, STEP_LEN=6)
+
+# draft 7 candidates (GreMi, 4 Nov 2026): 30-race window, 2% gravity, no bonus in dirty races, points scaled
+# x1.25: contacts 0.75 / 2 / 4 / 6, R9 12, track limits / pit exit / DNF 1.25, bonuses x1.25
+WINDOW7_125 = dict(WINDOW6_SHORT, TABLE={0.5: 0.75, 1.5: 2.0, 3.0: 4.0, 5.0: 6.0, 10.0: 12.0}, OTHER_SCALE=1.25, BONUS_SCALE=1.25)
+# penalties x1.5 (contacts 0.75 / 2.25 / 4.5 / 7.5, R9 15, others 1.5), bonuses x2
+WINDOW7_P15_B2 = dict(WINDOW6_SHORT, TABLE={0.5: 0.75, 1.5: 2.25, 3.0: 4.5, 5.0: 7.5, 10.0: 15.0}, OTHER_SCALE=1.5, BONUS_SCALE=2.0)
+# middle ground: penalties x1.25, bonuses x1.5
+WINDOW7_P125_B15 = dict(WINDOW7_125, BONUS_SCALE=1.5)
+WINDOW7_VARIANTS = [("Draft 6 (points as now)", WINDOW6_SHORT), ("x1.25 all", WINDOW7_125),
+                    ("penalties x1.25, bonus x1.5", WINDOW7_P125_B15), ("penalties x1.5, bonus x2", WINDOW7_P15_B2)]
