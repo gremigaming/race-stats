@@ -1,45 +1,44 @@
-error: Access to fetch at 'https://replays.gremigaming.com/league/index.json?t=1793786353370' from origin 'http://localhost:4173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
+error: Access to fetch at 'https://replays.gremigaming.com/league/index.json?t=1793827186743' from origin 'http://localhost:4173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
 error: Failed to load resource: net::ERR_FAILED
-error: Access to fetch at 'https://replays.gremigaming.com/league/index.json?t=1793786353568' from origin 'http://localhost:4173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
+error: Access to fetch at 'https://replays.gremigaming.com/league/index.json?t=1793827186923' from origin 'http://localhost:4173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
 error: Failed to load resource: net::ERR_FAILED
 error: Access to fetch at 'https://replays.gremigaming.com/index.json' from origin 'http://localhost:4173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
 error: Failed to load resource: net::ERR_FAILED
-error: Access to fetch at 'https://replays.gremigaming.com/league/index.json?t=1793786357531' from origin 'http://localhost:4173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
+error: Access to fetch at 'https://replays.gremigaming.com/league/index.json?t=1793827191251' from origin 'http://localhost:4173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
 error: Failed to load resource: net::ERR_FAILED
-error: Access to fetch at 'https://replays.gremigaming.com/league/index.json?t=1793786357689' from origin 'http://localhost:4173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
+error: Access to fetch at 'https://replays.gremigaming.com/league/index.json?t=1793827191533' from origin 'http://localhost:4173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
 error: Failed to load resource: net::ERR_FAILED
-error: Access to fetch at 'https://replays.gremigaming.com/2026-11-02_20-47-28_Melbourne_Race/manifest.json' from origin 'http://localhost:4173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
+error: Access to fetch at 'https://replays.gremigaming.com/2026-11-04_20-49-01_Austria_Race/manifest.json' from origin 'http://localhost:4173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
 error: Failed to load resource: net::ERR_FAILED
-warning:     at h9.init (http://localhost:4173/race-stats/assets/index-BeGagic4.js:847:45025)
-warning: [.WebGL-0xdc12708a00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels
+warning:     at h9.init (http://localhost:4173/race-stats/assets/index-BNYa00E7.js:839:45025)
 error: Failed to load resource: net::ERR_CERT_COMMON_NAME_INVALID
 error: Failed to load resource: net::ERR_CERT_COMMON_NAME_INVALID
-warning: [.WebGL-0xdc12708a00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels
-warning: [.WebGL-0xdc12708a00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels
-warning: [.WebGL-0xdc12708a00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)
+warning: [.WebGL-0x142c0c808800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels
+warning: [.WebGL-0x142c0c808800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels
+warning: [.WebGL-0x142c0c808800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels
+warning: [.WebGL-0x142c0c808800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)
 error: Access to fetch at 'https://replays.gremigaming.com/maps/index.json' from origin 'http://localhost:4173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
 error: Failed to load resource: net::ERR_FAILED
-error: Access to fetch at 'https://replays.gremigaming.com/league/index.json?t=1793786368897' from origin 'http://localhost:4173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
+error: Access to fetch at 'https://replays.gremigaming.com/league/index.json?t=1793827203625' from origin 'http://localhost:4173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
 error: Failed to load resource: net::ERR_FAILED
-error: Access to fetch at 'https://replays.gremigaming.com/league/index.json?t=1793786379471' from origin 'http://localhost:4173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
+error: Access to fetch at 'https://replays.gremigaming.com/league/index.json?t=1793827218776' from origin 'http://localhost:4173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
 error: Failed to load resource: net::ERR_FAILED
-error: Access to fetch at 'https://replays.gremigaming.com/league/index.json?t=1793786390853' from origin 'http://localhost:4173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
+error: Access to fetch at 'https://replays.gremigaming.com/league/index.json?t=1793827230047' from origin 'http://localhost:4173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
 error: Failed to load resource: net::ERR_FAILED
-error: Access to fetch at 'https://replays.gremigaming.com/league/index.json?t=1793786402497' from origin 'http://localhost:4173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
+error: Access to fetch at 'https://replays.gremigaming.com/league/index.json?t=1793827249433' from origin 'http://localhost:4173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
 error: Failed to load resource: net::ERR_FAILED
-error: Access to fetch at 'https://replays.gremigaming.com/league/index.json?t=1793786413261' from origin 'http://localhost:4173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
+error: Access to fetch at 'https://replays.gremigaming.com/league/index.json?t=1793827260311' from origin 'http://localhost:4173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
+error: Failed to load resource: net::ERR_FAILED
+error: Access to fetch at 'https://replays.gremigaming.com/league/index.json?t=1793827273096' from origin 'http://localhost:4173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
+error: Failed to load resource: net::ERR_FAILED
+error: Access to fetch at 'https://replays.gremigaming.com/league/index.json?t=1793827286609' from origin 'http://localhost:4173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
 error: Failed to load resource: net::ERR_FAILED
 warning: PixiJS Warning:  [BindGroup] a 'textureSource' was destroyed while still bound to a shader. Remove it from the shader before destroying it.
 warning: PixiJS Warning:  [BindGroup] a 'textureSampler' was destroyed while still bound to a shader. Remove it from the shader before destroying it.
 pageerror: Cannot read properties of null (reading 'clear')
-error: Access to fetch at 'https://replays.gremigaming.com/league/index.json?t=1793786429681' from origin 'http://localhost:4173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
-error: Failed to load resource: net::ERR_FAILED
-warning: PixiJS Warning:  [BindGroup] a 'textureSource' was destroyed while still bound to a shader. Remove it from the shader before destroying it.
-warning: PixiJS Warning:  [BindGroup] a 'textureSampler' was destroyed while still bound to a shader. Remove it from the shader before destroying it.
+pageerror: Cannot read properties of null (reading 'clear')
 error: Failed to load resource: net::ERR_CERT_COMMON_NAME_INVALID
-warning: PixiJS Warning:  [BindGroup] a 'textureSource' was destroyed while still bound to a shader. Remove it from the shader before destroying it.
-warning: PixiJS Warning:  [BindGroup] a 'textureSampler' was destroyed while still bound to a shader. Remove it from the shader before destroying it.
 error: Access to fetch at 'https://replays.gremigaming.com/maps/index.json' from origin 'http://localhost:4173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
 error: Failed to load resource: net::ERR_FAILED
-error: Access to fetch at 'https://replays.gremigaming.com/league/index.json?t=1793786439899' from origin 'http://localhost:4173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
+error: Access to fetch at 'https://replays.gremigaming.com/league/index.json?t=1793827297289' from origin 'http://localhost:4173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
 error: Failed to load resource: net::ERR_FAILED
