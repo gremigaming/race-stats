@@ -479,6 +479,20 @@
       "was": -6.0,
       "learn": true,
       "owner": true
+    },
+    {
+      "id": "Race_Brazil_2026_11_02_19_22_19.json|2|contact|1|0",
+      "type": "incident",
+      "reason": "Small unnecessary wheelbang, not a medium incident",
+      "by": "319544045435224067",
+      "at": "2026-11-04T13:19:34Z",
+      "file": "Race_Brazil_2026_11_02_19_22_19.json",
+      "driver": "[LCR] Turbodruif",
+      "car": 2,
+      "pts": -0.5,
+      "was": -3.0,
+      "learn": true,
+      "owner": true
     }
   ]
 }
