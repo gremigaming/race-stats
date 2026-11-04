@@ -891,7 +891,7 @@ with open(os.path.join(OUT, "incidents.json"), "w") as fh:
     json.dump({"incidents": all_incs, **({"scale": out["scale"]} if V25 else {})}, fh, separators=(",", ":"))
 for x in drivers:   # stream by stream for a few drivers, in the build log
     if x["name"] in ("TTV/GreMi_Gaming", "Lucas_ostepoppen", "FPR_SAMUEL", "Stepino81", "NEX", "DDRK"):
-        print(f"  PATH {x['name']}: " + " | ".join(f"{h['date'][5:]} avg {h['avg']:+.2f} base {h.get('base', 0):.1f} sting {h.get('sting', 0):.1f} SR {h['sr']:.1f}" for h in x["history"] if h["raced"]))
+        print(f"  PATH {x['name']}: " + " | ".join(f"{h['date'][5:]} avg {h.get('avg', 0):+.2f} base {h.get('base', 0):.1f} sting {h.get('sting', 0):.1f} SR {h['sr']:.1f}" for h in x["history"] if h["raced"]))
 for x in drivers:   # key scores in the build log
     print(f"  SR {x['sr']:5.1f}  {x['name']}  ({x['races']} races)")
 print(f"safety rating{f' ({RULESET}, fault engine)' if V1 else ''}: {len(drivers)} drivers over {len(streams)} streams, {len(all_incs)} {'incidents' if V1 else 'collisions'}"
