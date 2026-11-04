@@ -437,6 +437,20 @@
       "was": -3.0,
       "learn": true,
       "owner": true
+    },
+    {
+      "id": "Race_Miami_2026_10_30_16_01_59.json|4|contact|3|0",
+      "type": "incident",
+      "reason": "This is more like equal, Jakub went wide but Sethonhere went in too quick",
+      "by": "319544045435224067",
+      "at": "2026-11-04T13:07:41Z",
+      "file": "Race_Miami_2026_10_30_16_01_59.json",
+      "driver": "Jakubm18_F1",
+      "car": 4,
+      "pts": -0.5,
+      "was": -3.0,
+      "learn": true,
+      "owner": true
     }
   ]
 }
