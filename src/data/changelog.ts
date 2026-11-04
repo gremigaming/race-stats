@@ -10,6 +10,14 @@ export interface ChangelogEntry {
 // raw commit history also contains routine uploads and staff-only corrections.
 const changelog: ChangelogEntry[] = [
   {
+    id: "safety-rating-v25",
+    date: "2026-11-04",
+    type: "feat",
+    message:
+      "Safety Rating 2.5: your last 30 races add up, dirty races earn no bonus, penalties grow with your SR, and gravity pulls you back towards 50.",
+    destination: "safety",
+  },
+  {
     id: "corner-analysis",
     date: "2026-11-03",
     type: "feat",

@@ -249,7 +249,7 @@ def table_linear(data, variants, sim=None):
 #   on your latest race, so it ages out of the window with it.
 WINDOW4 = dict(DEFAULT, BONUS_DIM=0.10, GRAV_PCT=0.04, GRAV_PCT_SKIP=0.02, STEPS=[1.0, 0.8, 0.6, 0.4, 0.2],
                BONUS_SCALE=1.0, OTHER_SCALE=1.0, CLEAN_ONLY_BONUS=False, STREAK_RESET_SKIPS=None,
-               GRAV_ON_SKIP_ONLY=False, BONUS_SKIP_CATS=(), NO_BONUS_DIRTY=False, STEP_LEN=10)
+               GRAV_ON_SKIP_ONLY=False, BONUS_SKIP_CATS=(), NO_BONUS_DIRTY=False, STEP_LEN=10, TRACE=False)
 
 
 def simulate_window(data, **kw):
@@ -279,9 +279,9 @@ def simulate_window(data, **kw):
                 continue
             b, its = r[k]; s["skips"] = 0
             pos = tier(P["POS"], s["sr"], 1.0)
-            cnt = dict(big=0, medium=0, small=0); dirty = False; pen = 0.0; lvl = s["level"]; ninc = 0
+            cnt = dict(big=0, medium=0, small=0); dirty = False; pen = 0.0; lvl = s["level"]; ninc = 0; sm_max = 1.0
             for _, kind, c, p in its:
-                sm = 1.0 if lvl == 0 else P["STREAK_FIRST"] + P["STREAK_STEP"] * (lvl - 1)
+                sm = 1.0 if lvl == 0 else P["STREAK_FIRST"] + P["STREAK_STEP"] * (lvl - 1); sm_max = max(sm_max, sm)
                 t_ = P["TABLE"] or {}
                 if kind == "inc":
                     p = t_[p] if p in t_ else t_[p * 2] / 2 if p * 2 in t_ else p * P["INC_SCALE"]
@@ -301,6 +301,9 @@ def simulate_window(data, **kw):
             if P["NO_BONUS_DIRTY"] and dirty: bb = 0.0
             s["bonus"] += bb; s["adj"] += pen; s["worst"] = max(s["worst"], pen - bb); s["worst_pen"] = max(s.get("worst_pen", 0.0), pen)
             s["nets"].append(bb - pen); rescore(s)
+            if P["TRACE"]:   # per race, for the live SR's race cards (v2.5)
+                s.setdefault("trace", []).append(dict(k=k, bonus_raw=b * P["BONUS_SCALE"], bonus=bb, cut=1.0 - bm, pen=pen,
+                                                      dirty=dirty, pos=pos, streak=sm_max, grav=0.0))
         for n, s in st.items():
             if not s["nets"]: continue
             raced = k in rows[n]
@@ -308,9 +311,13 @@ def simulate_window(data, **kw):
             if s["sr"] > 50:
                 g = min((P["GRAV_PCT"] if raced else P["GRAV_PCT_SKIP"]) * (s["sr"] - 50), s["sr"] - 50)
                 s["nets"][-1] -= g; s["grav"] += g; rescore(s)
+                if P["TRACE"] and s.get("trace"): s["trace"][-1]["grav"] += g
+            if P["TRACE"]: s.setdefault("sr_at", {})[k] = s["sr"]
     return {n: dict(sr=half(s["sr"]), races=len(rows[n]), dirty=s["dirty"], streak_now=s["level"], streak_max=s["best"],
                     gravity=round(s["grav"], 1), bonus=round(s["bonus"], 1), pts_raw=round(s["raw"], 1), pts_adj=round(s["adj"], 1),
-                    worst=round(s["worst"], 1), worst_pen=round(s.get("worst_pen", 0.0), 1), hidden=round(s["hidden"], 1))
+                    worst=round(s["worst"], 1), worst_pen=round(s.get("worst_pen", 0.0), 1), hidden=round(s["hidden"], 1),
+                    **({"trace": s.get("trace", []), "sr_at": s.get("sr_at", {}), "sr_raw": s["sr"], "league": league,
+                        "step_len": P["STEP_LEN"], "steps": W} if P["TRACE"] else {}))
             for n, s in st.items() if rows[n]}
 
 # draft 4 fix (no multipliers or caps): gravity only on races you skip (the window already fades old
@@ -353,3 +360,24 @@ WINDOW7_P15_B2_G4 = WINDOW7_PICK
 WINDOW7_VARIANTS = [("Pick: gravity 4% joined / 2% skipped", WINDOW7_PICK), ("4% joined / 0 skipped", WINDOW7_PICK_NOSKIP),
                     ("4% every race", WINDOW7_PICK_ALL4), ("2% every race", WINDOW7_P15_B2), ("x1.25 all, 2%", WINDOW7_125),
                     ("Draft 6", WINDOW6_SHORT)]
+
+
+# ---- SR v2.5 = draft 7 pick, LIVE from 4 Nov 2026 (GreMi). Items keep their v2.2 points in safety.json
+# (the staff page edits on that scale); the site shows them on the v2.5 scale with this conversion.
+V25 = dict(WINDOW4, **WINDOW7_PICK)
+
+
+def v25_pts(pts, cat, P=V25):
+    """One item's points on the v2.5 scale (before the SR multipliers and the bonus cut)."""
+    if pts > 0: return pts * P["BONUS_SCALE"]
+    if pts == 0: return 0.0
+    if cat in ("contact", "staff"):
+        t_ = P["TABLE"] or {}; p = -pts / 2
+        return -(t_[p] if p in t_ else t_[p * 2] / 2 if p * 2 in t_ else p * P["INC_SCALE"])
+    return pts * P["OTHER_SCALE"]
+
+
+def v25_scale(P=V25):
+    """What the site needs to show item points on the v2.5 scale (keys: v2.2 contact points)."""
+    return {"bonus": P["BONUS_SCALE"], "other": P["OTHER_SCALE"],
+            "contact": {f"{k * 2:g}": v for k, v in (P["TABLE"] or {}).items()}, "contactElse": P["INC_SCALE"] / 2}

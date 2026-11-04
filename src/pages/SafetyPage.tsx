@@ -100,6 +100,46 @@ const HOW_IT_WORKS: { title: string; body: ReactNode }[] = [
   },
 ];
 
+// SR v2.5 (GreMi, 4 Nov 2026): these replace the matching v2.2 topics when safety.json says rules "v2.5"
+const HOW_IT_WORKS_V25: Record<string, ReactNode> = {
+  "How you lose points": li([
+    "Every contact is judged from our own telemetry: who moved across, who ran into the back, who rejoined unsafely. The game's own collision penalties are not used.",
+    "Contact you caused, by severity (1-10): 1-3 costs 0.75, 4-5 costs 2.25, 6-7 costs 4.5, 8-10 costs 7.5. Hitting the same car again on purpose costs 15. Shared blame costs half. Not to blame costs nothing.",
+    "Track-limit time penalties and crossing the pit exit line: 1.5.",
+    "Quitting a race: 1.5. Retiring because someone else wrecked you, or after you already finished, doesn't count.",
+    "The higher your SR, the more a penalty costs: x1.2 from SR 60, x1.4 from 70, x1.6 from 80, x1.8 from 90, x2 at 100.",
+    "Dirty race: 1 big incident (severity 6+), 2 medium (4-5) or 3 small (1-3). Penalties after that point count x1.5. If your previous race was dirty too, every penalty already counts x1.5 and after the trigger x2, and so on. A clean race resets the streak.",
+    "Contacts with AI cars don't count. Staff can change or add a penalty.",
+  ]),
+  "How you gain points": li([
+    "Finishing a race: +1, or +2 when there was no qualifying for that race.",
+    "Every clean lap: +0.6. A perfect race, every lap clean and no warnings at all: +2 extra.",
+    "A clean qualifying lap within 107% of pole: +1.",
+    "Clean overtakes and close racing without contact.",
+    "Your first race of a stream: +2, and +2 more if you share your full telemetry.",
+    "The higher your SR, the less bonus you get: 10% less for every 10 SR above 50.",
+    "A dirty race gets no bonus at all.",
+  ]),
+  "From points to SR": (
+    <>
+      <p>
+        Every race gets a net score: its bonus minus its penalties (qualifying joins the next race). Your SR is{" "}
+        {SR_START} + the net scores of your last 30 races, between 0 and 100.
+      </p>
+      {li([
+        "Your newest 6 races count in full, the 6 before that 80%, then 60%, 40% and 20%. After 30 of your own races a race is gone. Only races you drive age your history, so sitting out doesn't wash anything away.",
+        "Gravity: after every league race, above 50, you lose 4% of the distance to 50 if you raced and 2% if you skipped. It's booked on your latest race, so it leaves your history with that race.",
+        "Your rating shows from your first race and is marked provisional until you've done 3 races.",
+      ])}
+    </>
+  ),
+  "Kicks and bans": li([
+    "Lose 30 points in one race or 60 in one stream and you sit out the rest of that stream.",
+    "Drop to 0 and you're no longer welcome in the lobby.",
+    "Staff check flagged incidents. If you think a penalty was wrong, let us know.",
+  ]),
+};
+
 type Tab = "ranking" | "personal";
 type SortKey = "pos" | "rank" | "name" | "sr" | "change" | "races";
 
@@ -288,7 +328,9 @@ export function SafetyPage() {
       <section className={cardClass}>
         <SectionHeader title="How it works" />
         <div className="space-y-1.5">
-          {HOW_IT_WORKS.map((topic) => (
+          {HOW_IT_WORKS.map((t) =>
+            league.safetyData?.rules === "v2.5" && HOW_IT_WORKS_V25[t.title] ? { ...t, body: HOW_IT_WORKS_V25[t.title] } : t,
+          ).map((topic) => (
             <details
               key={topic.title}
               className="group rounded-md border border-zinc-800/80 bg-zinc-950/60"

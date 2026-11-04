@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTelemetry } from "../../context/TelemetryContext";
 import { driverKey } from "../../league/league";
-import { signedHalf, STAFF_URL, type SafetyData, type SafetyItem } from "../../league/safety";
+import { scaledPts, signedHalf, STAFF_URL, type SafetyData, type SafetyItem, type SafetyScale } from "../../league/safety";
 import { loadLeagueJson } from "../../league/liveData";
 import { cn } from "../../utils/cn";
 import { IncidentReplay, replayStats, type CarStats, type ReplayData } from "./IncidentReplay";
@@ -43,13 +43,22 @@ interface AllIncidents {
     lines: Record<string, [number, string]>;
     replay?: string;
   }[];
+  /** SR v2.5: line points are on the v2.2 scale, shown converted. */
+  scale?: SafetyScale;
 }
 
 /** league/incidents.json, refreshed as the live analysis publishes. */
 function useAllIncidents(): AllIncidents | null {
   const { data } = useQuery({
     queryKey: ["league-incidents"],
-    queryFn: () => loadLeagueJson<AllIncidents>("incidents.json"),
+    queryFn: () =>
+      loadLeagueJson<AllIncidents>("incidents.json").then((all) => {
+        const sc = all.scale;
+        if (sc)
+          for (const inc of all.incidents)
+            for (const line of Object.values(inc.lines)) line[0] = scaledPts(line[0], "contact", sc);
+        return all;
+      }),
     staleTime: 0,
     refetchInterval: 10_000,
   });

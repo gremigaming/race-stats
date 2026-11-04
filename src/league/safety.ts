@@ -54,6 +54,20 @@ export interface SafetySession {
   incident?: number;
   /** Track limits, pit exit, retirements: count in full in the race. */
   other?: number;
+  /** SR v2.5: penalty points this race counts for (with the SR-level and dirty-streak multipliers). */
+  penalty?: number;
+  /** SR v2.5: penalty points before the multipliers (race and its qualifying). */
+  penaltyBase?: number;
+  /** SR v2.5: penalty multiplier from your SR before the race (1.0 below 60 ... 2.0 at 100). */
+  posMult?: number;
+  /** SR v2.5: highest dirty-streak multiplier used in this race (1 = none). */
+  streakMult?: number;
+  /** SR v2.5: dirty race (1 big, 2 medium or 3 small incidents): no bonus. */
+  dirty?: boolean;
+  /** SR v2.5: share of the bonus cut at your SR (10% per 10 SR above 50). */
+  bonusCut?: number;
+  /** SR v2.5: gravity booked on this race (it ages out with it). */
+  gravity?: number;
   /** Qualifying: its points join the next race. */
   carry?: boolean;
   withQuali?: boolean;
@@ -82,15 +96,59 @@ export interface SafetyDriver {
     sting?: number;
     /** SR v2.2: taken off for streams skipped (above 50 only). */
     drift?: number;
+    /** SR v2.5: net score of this stream's races (bonus minus penalties). */
+    net?: number;
+    /** SR v2.5: gravity taken during this stream (joined and skipped races). */
+    gravity?: number;
   }[];
   sessions: SafetySession[];
   flags: string[];
+}
+
+/** SR v2.5: how item points (stored on the v2.2 scale, which staff edit) are shown. */
+export interface SafetyScale {
+  bonus: number;
+  other: number;
+  /** v2.2 contact points -> v2.5 points */
+  contact: Record<string, number>;
+  contactElse: number;
 }
 
 export interface SafetyData {
   generated: string;
   streams: { date: string; files: string[] }[];
   drivers: SafetyDriver[];
+  rules?: string;
+  scale?: SafetyScale;
+}
+
+/** One item's points on the v2.5 scale (same as scripts/sr_v24.py v25_pts). */
+export function scaledPts(pts: number, cat: string, sc: SafetyScale): number {
+  if (pts > 0) return pts * sc.bonus;
+  if (pts === 0) return 0;
+  if (cat === "contact" || cat === "staff") {
+    const one = sc.contact[String(-pts)];
+    if (one != null) return -one;
+    const two = sc.contact[String(-pts * 2)];
+    if (two != null) return -two / 2;
+    return pts * sc.contactElse;
+  }
+  return pts * sc.other;
+}
+
+/** Shows every item on the v2.5 scale when the data carries one (SR v2.5 live). */
+export function applySafetyScale(data: SafetyData): SafetyData {
+  const sc = data.scale;
+  if (!sc) return data;
+  for (const d of data.drivers)
+    for (const s of d.sessions) {
+      for (const it of s.items) {
+        if (it.orig != null) it.orig = scaledPts(it.orig, it.cat, sc);
+        it.pts = scaledPts(it.pts, it.cat, sc);
+      }
+      s.total = s.items.reduce((n, it) => n + it.pts, 0);
+    }
+  return data;
 }
 
 export const SR_START = 50;

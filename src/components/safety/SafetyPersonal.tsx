@@ -348,6 +348,15 @@ function Sessions({ driver, data }: { driver: SafetyDriver; data: SafetyData }) 
   return (
     <section className={cardClass}>
       <SectionHeader title="Races" hint={`${driver.sessions.length} sessions, newest first`} />
+      {data.rules === "v2.5" && (
+        <p className="mb-3 rounded-lg bg-zinc-950/50 px-3 py-2 text-[11px] leading-relaxed text-zinc-400">
+          <span className="text-zinc-200">How it adds up:</span> SR = 50 + the net scores of your last 30 races,
+          between 0 and 100. Your newest 6 races count in full, the 6 before that 80%, then 60%, 40% and 20%. A race's
+          net score (right of each race) is its bonus minus its penalties. The higher your SR, the less bonus you get
+          and the more a penalty costs, and a dirty race gets no bonus at all. Gravity pulls you back towards 50 after
+          every league race: 4% of the distance after a race you join, 2% after one you skip.
+        </p>
+      )}
       {driver.history.some((h) => h.base != null) && (
         <p className="mb-3 rounded-lg bg-zinc-950/50 px-3 py-2 text-[11px] leading-relaxed text-zinc-400">
           <span className="text-zinc-200">How it adds up:</span> SR = 50 + 25 × your average net score (at most 100),
@@ -400,6 +409,8 @@ function Sessions({ driver, data }: { driver: SafetyDriver; data: SafetyData }) 
               sting={h?.sting}
               stingBefore={prev?.sting ?? 0}
               drift={h?.drift}
+              net={h?.net}
+              gravity={h?.gravity}
               sessions={g.sessions}
               driver={driver.name}
               defaultOpen={gi === 0 || query.trim() !== ""}
@@ -422,6 +433,8 @@ function StreamGroup({
   sting,
   stingBefore,
   drift,
+  net,
+  gravity,
   sessions,
   driver,
   defaultOpen,
@@ -436,6 +449,8 @@ function StreamGroup({
   sting?: number;
   stingBefore: number;
   drift?: number;
+  net?: number;
+  gravity?: number;
   sessions: SafetySession[];
   driver: string;
   defaultOpen: boolean;
@@ -464,6 +479,14 @@ function StreamGroup({
             <div className="text-[11px] text-zinc-500">
               <span className={changeClass(perRace - avgBefore)}>{signedHalf(perRace).replace(/\.0$/, "")} per race</span>
               {` vs your average of ${signedHalf(avgBefore)} before it`}
+            </div>
+          )}
+          {sr != null && (net != null || (gravity ?? 0) > 0) && (
+            <div className="text-[11px] text-zinc-500">
+              {net != null && (
+                <span className={changeClass(net)}>{`${signedHalf(net).replace(/\.0$/, "")} net from races`}</span>
+              )}
+              {(gravity ?? 0) > 0 && <span>{`${net != null ? " · " : ""}gravity −${(gravity ?? 0).toFixed(1)}`}</span>}
             </div>
           )}
           {sr != null && base != null && sting != null && (
@@ -610,7 +633,47 @@ function SessionRow({ session, driver }: { session: SafetySession; driver: strin
             </p>
             </div>
           ))}
-          {session.net != null && (
+          {session.net != null && (session.penalty != null) && (
+            <div className="mt-1 space-y-0.5 rounded-md bg-zinc-950/50 px-2.5 py-2 text-zinc-400">
+              <div className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
+                How this {session.race ? "race" : "qualifying"} counts{session.withQuali ? " (with its qualifying)" : ""}
+              </div>
+              <p className="flex justify-between gap-3">
+                <span>
+                  Bonus
+                  {session.race && session.dirty
+                    ? ` ${fmt(session.bonus ?? 0)}: none in a dirty race`
+                    : session.race && (session.bonusCut ?? 0) > 0
+                      ? ` ${fmt(session.bonus ?? 0)}, ${Math.round((session.bonusCut ?? 0) * 100)}% less at your SR`
+                      : ""}
+                </span>
+                <span className="font-mono text-emerald-300">+{fmt(session.bonusCounted ?? session.bonus ?? 0)}</span>
+              </p>
+              {(session.penalty ?? 0) > 0 && (
+                <p className="flex justify-between gap-3">
+                  <span>
+                    Penalties
+                    {session.race && (session.posMult ?? 1) * (session.streakMult ?? 1) > 1
+                      ? ` ${fmt(session.penaltyBase ?? 0)}, x${fmt(session.posMult ?? 1)} at your SR` +
+                        ((session.streakMult ?? 1) > 1 ? `, up to x${fmt(session.streakMult ?? 1)} dirty streak` : "")
+                      : ""}
+                  </span>
+                  <span className="font-mono text-red-300">−{fmt(session.penalty ?? 0)}</span>
+                </p>
+              )}
+              <p className="flex justify-between gap-3 border-t border-white/[0.06] pt-0.5 text-zinc-200">
+                <span>{session.race ? (session.dirty ? "Net score (dirty race)" : "Net score") : "Joins your next race"}</span>
+                <span className={cn("font-mono", changeClass(session.net))}>{signedHalf(session.net)}</span>
+              </p>
+              {(session.gravity ?? 0) > 0 && (
+                <p className="flex justify-between gap-3">
+                  <span>Gravity booked on this race (leaves with it)</span>
+                  <span className="font-mono text-zinc-300">−{fmt(session.gravity ?? 0)}</span>
+                </p>
+              )}
+            </div>
+          )}
+          {session.net != null && session.penalty == null && (
             <div className="mt-1 space-y-0.5 rounded-md bg-zinc-950/50 px-2.5 py-2 text-zinc-400">
               <div className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
                 How this {session.race ? "race" : "qualifying"} counts{session.withQuali ? " (with its qualifying)" : ""}

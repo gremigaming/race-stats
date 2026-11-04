@@ -39,9 +39,13 @@ CAP = 25
 RULESET = os.environ.get("SR_RULES", "game")
 V23 = RULESET == "v2.3"   # simulation (GreMi, 3 Nov 2026): running SR, x10, bonus max 7.5
 V24 = RULESET == "v2.4"   # simulation (GreMi, 4 Nov 2026): builds the v2.2 data, then scripts/sr_v24.py scores it again
-V22 = RULESET in ("v2.2", "v2.3", "v2.4")
-V21 = RULESET in ("v2.1", "v2.2", "v2.3", "v2.4")   # v2.2 keeps the v2.1 contact points (0.5/1.5/3/5, R9 10)
-V1 = RULESET in ("v1", "v2.1", "v2.2", "v2.3", "v2.4")   # v2.1/v2.2 take contact blame from the fault engine too
+V25 = RULESET == "v2.5"   # LIVE (GreMi, 4 Nov 2026): builds the v2.2 data, then scores it with sr_v24.V25 (draft 7)
+V22 = RULESET in ("v2.2", "v2.3", "v2.4", "v2.5")
+V21 = RULESET in ("v2.1", "v2.2", "v2.3", "v2.4", "v2.5")   # v2.2 keeps the v2.1 contact points (0.5/1.5/3/5, R9 10)
+V1 = RULESET in ("v1", "v2.1", "v2.2", "v2.3", "v2.4", "v2.5")
+if V25:
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import sr_v24   # v2.1/v2.2 take contact blame from the fault engine too
 VERDICTS = os.environ.get("SR_VERDICTS", "/tmp/telemetry-cache/verdicts")
 OUT = os.environ.get("SR_OUT", os.path.join("public", "league"))
 TRACK_LIMITS = re.compile(r"Corner Cutting|Crossed Pit Exit", re.I)   # the only game rulings v1 keeps
@@ -729,7 +733,7 @@ def stream_avg(n, si):
     ks = [k for k, e in enumerate(es) if e["stream"] == si]; nr = sum(es[k]["race"] for k in ks)
     return round(sum(session_net(es[k], k in recent)[0] for k in ks) / nr, 2) if nr else None
 
-KICK_RACE, KICK_STREAM = (40, 80) if V22 else (20, 40)   # v2.2 contact points are doubled, so the kick lines are too
+KICK_RACE, KICK_STREAM = (30, 60) if V25 else (40, 80) if V22 else (20, 40)   # v2.2 contact points are doubled, so the kick lines are too
 all_incs = []
 for si, stream in enumerate(streams):
     seen_stream = set(); stream_loss = collections.defaultdict(float)
@@ -799,7 +803,7 @@ for si, stream in enumerate(streams):
                 car.update(kicked); present += list(kicked)
         apply_staff(name, items, car, is_race, would)
         for n in set(present) | set(items):
-            loss = -sum(i["pts"] for i in items[n] if i["pts"] < 0)
+            loss = -sum((sr_v24.v25_pts(i["pts"], i["cat"]) if V25 else i["pts"]) for i in items[n] if i["pts"] < 0)
             stream_loss[n] += loss
             if is_race and loss >= KICK_RACE: flags[n].append(f"{short(f)}: lost {loss:g} in one race (kick line {KICK_RACE})")
             entries[n].append({"file": name, "race": is_race, "items": items[n], "stream": si})
@@ -829,12 +833,62 @@ drivers.sort(key=lambda x: (-x["sr"], x["name"].lower()))
 out = {"generated": __import__("datetime").datetime.now(__import__("datetime").timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
        "streams": [{"date": when(s[0]).strftime("%Y-%m-%d"), "files": [os.path.basename(f) for f in s]} for s in streams],
        "drivers": drivers}
+SR_START_V25 = 50.0
+if V25:   # SR v2.5: score the v2.2 data with the draft 7 rules (scripts/sr_v24.py, V25)
+    res = sr_v24.simulate_window(out, **dict(sr_v24.WINDOW7_PICK, TRACE=True))
+    league_files = [f for st in out["streams"] for f in st["files"] if f.startswith("Race_")]
+    last_k = []   # per stream: index of the last league race up to it
+    k = -1
+    for st in out["streams"]:
+        k += sum(f.startswith("Race_") for f in st["files"]); last_k.append(k)
+    for d in drivers:
+        r = res.get(d["name"])
+        tr = {league_files[t["k"]]: t for t in (r or {}).get("trace", [])}
+        sr_at = (r or {}).get("sr_at", {})
+        def at(si):
+            ks = [x for x in sr_at if x <= last_k[si]]
+            return half(sr_at[max(ks)]) if ks else SR_START_V25
+        nets = [f for f in tr]   # races in order, for the window weights
+        L = len(nets); SL = r["step_len"] if r else 6; W = r["steps"] if r else [1.0]
+        wt = {f: (W[(L - 1 - j) // SL] if (L - 1 - j) // SL < len(W) else 0.0) for j, f in enumerate(nets)}
+        for h in d["history"]:
+            for key in ("base", "sting", "drift", "avg"): h.pop(key, None)
+            h["sr"] = at(h["stream"]); h["streamAvg"] = None
+            ts = [tr[f] for f in out["streams"][h["stream"]]["files"] if f in tr]
+            if ts:
+                h["net"] = round(sum(t["bonus"] - t["pen"] for t in ts), 1)
+            g = sum(t["grav"] for f, t in tr.items() if league_files.index(f) <= last_k[h["stream"]]) - sum(
+                t["grav"] for f, t in tr.items() if h["stream"] > 0 and league_files.index(f) <= last_k[h["stream"] - 1])
+            h["gravity"] = round(g, 1)
+        d["sr"] = half(r["sr_raw"]) if r else SR_START_V25
+        d["change"] = half(d["sr"] - (d["history"][-2]["sr"] if len(d["history"]) > 1 else SR_START_V25))
+        d["banned"] = d["sr"] <= 0
+        pend = []
+        for s_ in d["sessions"]:
+            for key in ("sting", "net", "bonus", "bonusCounted", "incident", "other", "withQuali"): s_.pop(key, None)
+            b = sum(sr_v24.v25_pts(i["pts"], i["cat"]) for i in s_["items"] if i["pts"] > 0)
+            p = -sum(sr_v24.v25_pts(i["pts"], i["cat"]) for i in s_["items"] if i["pts"] < 0)
+            t = tr.get(s_["file"]) if s_["race"] else None
+            if not s_["race"]:
+                s_.update(carry=True, bonus=round(b, 1), penalty=round(p, 1), net=round(b - p, 1)); pend.append(s_); continue
+            if t is None: continue
+            s_.update(bonus=round(t["bonus_raw"], 1), bonusCounted=round(t["bonus"], 1), bonusCut=round(t["cut"], 2),
+                      penalty=round(t["pen"], 1), penaltyBase=round(p + sum(q["penalty"] for q in pend), 1),
+                      posMult=t["pos"], streakMult=t["streak"], dirty=t["dirty"], gravity=round(t["grav"], 1),
+                      net=round(t["bonus"] - t["pen"], 1), weight=wt.get(s_["file"], 0.0),
+                      **({"withQuali": True} if pend else {}))
+            for q in pend: q["weight"] = s_["weight"]
+            pend = []
+        for q in pend: q["weight"] = 1.0   # qualifying waiting for its race
+    drivers.sort(key=lambda x: (-x["sr"], x["name"].lower()))
+    out["scale"] = sr_v24.v25_scale()
+    for x in drivers: print(f"  SR v2.5 {x['sr']:5.1f}  {x['name']}  ({x['races']} races)")
 os.makedirs(OUT, exist_ok=True)
 if V1: out["rules"] = RULESET; out["unjudged"] = no_verdicts
 with open(os.path.join(OUT, "safety.json"), "w") as fh:
     json.dump(out, fh, separators=(",", ":"))
 with open(os.path.join(OUT, "incidents.json"), "w") as fh:
-    json.dump({"incidents": all_incs}, fh, separators=(",", ":"))
+    json.dump({"incidents": all_incs, **({"scale": out["scale"]} if V25 else {})}, fh, separators=(",", ":"))
 for x in drivers:   # stream by stream for a few drivers, in the build log
     if x["name"] in ("TTV/GreMi_Gaming", "Lucas_ostepoppen", "FPR_SAMUEL", "Stepino81", "NEX", "DDRK"):
         print(f"  PATH {x['name']}: " + " | ".join(f"{h['date'][5:]} avg {h['avg']:+.2f} base {h.get('base', 0):.1f} sting {h.get('sting', 0):.1f} SR {h['sr']:.1f}" for h in x["history"] if h["raced"]))

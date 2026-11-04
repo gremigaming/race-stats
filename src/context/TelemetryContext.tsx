@@ -40,7 +40,7 @@ import {
   type LeagueIndex,
   type LeagueRace,
 } from "../league/league";
-import { safetyByKey, type SafetyData, type SafetyDriver } from "../league/safety";
+import { applySafetyScale, safetyByKey, type SafetyData, type SafetyDriver } from "../league/safety";
 import { leagueRevision, loadLeagueJson, loadLeagueSource } from "../league/liveData";
 import {
   allowedFiles,
@@ -109,7 +109,9 @@ async function fetchLeague(): Promise<{
     }),
   );
   // The rating is built alongside the race files; a missing file just hides it
-  const safety = await loadLeagueJson<SafetyData>("safety.json", source).catch(() => null);
+  const safety = await loadLeagueJson<SafetyData>("safety.json", source)
+    .then(applySafetyScale)
+    .catch(() => null);
   lastLeague = { index, races, safety };
   return lastLeague;
 }
