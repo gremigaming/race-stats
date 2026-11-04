@@ -106,6 +106,13 @@ jobs:
           SR_RULES: v2.3
           SR_OUT: /tmp/sr-v23
         run: python3 scripts/safety_rating.py || echo "v2.3 simulation failed"
+      # SR v2.4 simulation (GreMi, 4 Nov 2026: position multipliers, dirty race streaks, gravity):
+      # build log only, the site keeps v2.2. Prints live v2.2 next to v2.4 per driver.
+      - name: SR v2.4 simulation (log only)
+        env:
+          SR_RULES: v2.4
+          SR_OUT: /tmp/sr-v24
+        run: python3 scripts/safety_rating.py || echo "v2.4 simulation failed"
       - name: Rank the Discord award roles
         run: python3 scripts/awards.py
       # GreMi's Setup manager: advice from his telemetry, published only

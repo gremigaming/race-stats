@@ -38,9 +38,10 @@ NAME = {"LOW": "light", "MEDIUM": "medium", "HIGH": "heavy"}
 CAP = 25
 RULESET = os.environ.get("SR_RULES", "game")
 V23 = RULESET == "v2.3"   # simulation (GreMi, 3 Nov 2026): running SR, x10, bonus max 7.5
-V22 = RULESET in ("v2.2", "v2.3")
-V21 = RULESET in ("v2.1", "v2.2", "v2.3")   # v2.2 keeps the v2.1 contact points (0.5/1.5/3/5, R9 10)
-V1 = RULESET in ("v1", "v2.1", "v2.2", "v2.3")   # v2.1/v2.2 take contact blame from the fault engine too
+V24 = RULESET == "v2.4"   # simulation (GreMi, 4 Nov 2026): builds the v2.2 data, then scripts/sr_v24.py scores it again
+V22 = RULESET in ("v2.2", "v2.3", "v2.4")
+V21 = RULESET in ("v2.1", "v2.2", "v2.3", "v2.4")   # v2.2 keeps the v2.1 contact points (0.5/1.5/3/5, R9 10)
+V1 = RULESET in ("v1", "v2.1", "v2.2", "v2.3", "v2.4")   # v2.1/v2.2 take contact blame from the fault engine too
 VERDICTS = os.environ.get("SR_VERDICTS", "/tmp/telemetry-cache/verdicts")
 OUT = os.environ.get("SR_OUT", os.path.join("public", "league"))
 TRACK_LIMITS = re.compile(r"Corner Cutting|Crossed Pit Exit", re.I)   # the only game rulings v1 keeps
@@ -841,3 +842,21 @@ for x in drivers:   # key scores in the build log
     print(f"  SR {x['sr']:5.1f}  {x['name']}  ({x['races']} races)")
 print(f"safety rating{f' ({RULESET}, fault engine)' if V1 else ''}: {len(drivers)} drivers over {len(streams)} streams, {len(all_incs)} {'incidents' if V1 else 'collisions'}"
       + (f", not judged (no recording): {', '.join(no_verdicts)}" if V1 and no_verdicts else ""))
+
+if V24:   # SR v2.4 simulation: live v2.2 next to v2.4 (and the tuned variants) in the build log
+    import base64, gzip
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import sr_v24
+    print(sr_v24.table(out, sr_v24.VARIANTS))
+    # compact copy of the v2.2 data for offline tuning (names are public on the site already)
+    slim = {"streams": [{"files": s["files"]} for s in out["streams"]],
+            "drivers": [{"name": d["name"], "sr": d["sr"], "sessions": [
+                {"file": s["file"], "race": s["race"], "items": [
+                    {"pts": i["pts"], "cat": i["cat"], "lap": i.get("lap"), **({"inc": {"t": i["inc"]["t"]}} if i.get("inc") else {}),
+                     **({"staff": 1} if i.get("staff") else {}),
+                     "text": (sr_v24.SEV_RE.search(i.get("text", "")) or [""])[0]} for i in s["items"] if i["pts"]]}
+                for s in d["sessions"]]} for d in out["drivers"]]}
+    blob = base64.b64encode(gzip.compress(json.dumps(slim, separators=(",", ":")).encode())).decode()
+    print("SR24DUMP-BEGIN")
+    for k in range(0, len(blob), 900): print("SR24DUMP " + blob[k:k + 900])
+    print("SR24DUMP-END")
