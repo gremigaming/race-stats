@@ -37,16 +37,29 @@ import {
   type SetupSetting,
 } from "../league/setupManager";
 import { cn } from "../utils/cn";
+import { PageFrame } from "../components/ui/PageFrame";
+import { PageHeader } from "../components/ui/PageHeader";
 import { getTrackDisplayName, sortTracksByCalendar } from "../utils/tracks";
 
-const KIND_LABEL: Record<SetupKind, string> = { quali: "Qualifying", race: "Race", wet: "Wet" };
+const KIND_LABEL: Record<SetupKind, string> = {
+  quali: "Qualifying",
+  race: "Race",
+  wet: "Wet",
+};
 const KIND_TEXT: Record<SetupKind, string> = {
   quali: "text-violet-300",
   race: "text-red-300",
   wet: "text-sky-300",
 };
 const KINDS: SetupKind[] = ["quali", "race", "wet"];
-const WEATHER = ["Clear", "Light cloud", "Overcast", "Light rain", "Heavy rain", "Storm"];
+const WEATHER = [
+  "Clear",
+  "Light cloud",
+  "Overcast",
+  "Light rain",
+  "Heavy rain",
+  "Storm",
+];
 
 const LABEL: Record<string, string> = {
   front_wing: "Front Wing",
@@ -104,11 +117,24 @@ const RANGE: Record<string, [number, number]> = {
 const COLUMNS: [string, string[]][][] = [
   [
     ["Aerodynamics", ["front_wing", "rear_wing"]],
-    ["Transmission", ["diff_on_throttle", "diff_off_throttle", "engine_braking"]],
+    [
+      "Transmission",
+      ["diff_on_throttle", "diff_off_throttle", "engine_braking"],
+    ],
     ["Brakes", ["brake_pressure", "brake_bias"]],
   ],
   [
-    ["Suspension", ["front_suspension", "rear_suspension", "front_arb", "rear_arb", "front_ride_height", "rear_ride_height"]],
+    [
+      "Suspension",
+      [
+        "front_suspension",
+        "rear_suspension",
+        "front_arb",
+        "rear_arb",
+        "front_ride_height",
+        "rear_ride_height",
+      ],
+    ],
     ["Geometry", ["front_camber", "rear_camber", "front_toe", "rear_toe"]],
   ],
   [
@@ -117,7 +143,13 @@ const COLUMNS: [string, string[]][][] = [
   ],
 ];
 
-const PERCENT = new Set(["diff_on_throttle", "diff_off_throttle", "engine_braking", "brake_pressure", "brake_bias"]);
+const PERCENT = new Set([
+  "diff_on_throttle",
+  "diff_off_throttle",
+  "engine_braking",
+  "brake_pressure",
+  "brake_bias",
+]);
 
 function formatValue(key: string, v: number): string {
   if (key.includes("psi")) return v.toFixed(1);
@@ -144,10 +176,16 @@ function formatDay(date: string): string {
   const d = new Date(`${date}T12:00:00`);
   return Number.isNaN(d.getTime())
     ? date
-    : d.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric" });
+    : d.toLocaleDateString("en-GB", {
+        weekday: "short",
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      });
 }
 
-const changeCount = (a?: SetupAdvice) => (a ? a.settings.filter((s) => s.changed).length : 0);
+const changeCount = (a?: SetupAdvice) =>
+  a ? a.settings.filter((s) => s.changed).length : 0;
 
 type State =
   | { status: "locked"; denied?: boolean }
@@ -170,7 +208,11 @@ export function SetupManagerPage() {
     }
     loadSetupData(key)
       .then((data) => setState({ status: "ready", data }))
-      .catch((e) => setState({ status: e instanceof SetupDataMissing ? "missing" : "badkey" }));
+      .catch((e) =>
+        setState({
+          status: e instanceof SetupDataMissing ? "missing" : "badkey",
+        }),
+      );
   }, []);
 
   const logOut = () => {
@@ -179,28 +221,25 @@ export function SetupManagerPage() {
   };
 
   return (
-    <div className="mx-auto max-w-6xl space-y-8 p-6">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h2 className="mb-1 flex items-center gap-2 text-xl font-bold">
-            <Wrench className="h-5 w-5 text-red-400" />
-            Setup manager
-          </h2>
-          <p className="text-sm text-zinc-500">
-            Your setup per track, with a recommended value and the reason for every setting · from your own race telemetry
-          </p>
-        </div>
-        {state.status === "ready" && (
-          <button
-            type="button"
-            onClick={logOut}
-            className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-zinc-400 transition-colors hover:bg-zinc-900/70 hover:text-zinc-200"
-          >
-            <LogOut className="h-3.5 w-3.5" />
-            Log out
-          </button>
-        )}
-      </div>
+    <PageFrame>
+      <PageHeader
+        icon={Wrench}
+        eyebrow="Setups"
+        title="Setup manager"
+        description="Track recommendations for each circuit, with a reason behind every setting."
+        action={
+          state.status === "ready" && (
+            <button
+              type="button"
+              onClick={logOut}
+              className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-zinc-400 transition-colors hover:bg-zinc-900/70 hover:text-zinc-200"
+            >
+              <LogOut className="h-3.5 w-3.5" />
+              Log out
+            </button>
+          )
+        }
+      />
       {state.status === "loading" && (
         <div className="flex justify-center py-16">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-zinc-700 border-t-red-500" />
@@ -210,22 +249,36 @@ export function SetupManagerPage() {
       {state.status === "badkey" && <LockedCard expired />}
       {state.status === "missing" && (
         <section className={cn(cardClass, "text-sm text-zinc-400")}>
-          The setup advice isn't built yet. It appears here after the next site update.
+          The setup advice isn't built yet. It appears here after the next site
+          update.
         </section>
       )}
       {state.status === "ready" && <SetupManager data={state.data} />}
-    </div>
+    </PageFrame>
   );
 }
 
-function LockedCard({ denied, expired }: { denied?: boolean; expired?: boolean }) {
+function LockedCard({
+  denied,
+  expired,
+}: {
+  denied?: boolean;
+  expired?: boolean;
+}) {
   return (
-    <section className={cn(cardClass, "flex flex-col items-center gap-4 py-12 text-center")}>
+    <section
+      className={cn(
+        cardClass,
+        "flex flex-col items-center gap-4 py-12 text-center",
+      )}
+    >
       <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-zinc-800 text-zinc-400">
         <Lock className="h-5 w-5" />
       </span>
       <div className="space-y-1">
-        <h3 className="text-lg font-semibold text-zinc-100">Only GreMi can open the Setup manager</h3>
+        <h3 className="text-lg font-semibold text-zinc-100">
+          Only GreMi can open the Setup manager
+        </h3>
         <p className="text-sm text-zinc-500">
           {denied
             ? "That Discord account doesn't have access."
@@ -251,7 +304,10 @@ function SetupManager({ data }: { data: SetupData }) {
     if (reg) {
       return [...reg.tracks]
         .sort((a, b) => a.row - b.row)
-        .map((m) => ({ track: m.track, kinds: data.tracks.find((t) => t.track === m.track)?.kinds ?? {} }));
+        .map((m) => ({
+          track: m.track,
+          kinds: data.tracks.find((t) => t.track === m.track)?.kinds ?? {},
+        }));
     }
     const order = sortTracksByCalendar(data.tracks.map((t) => t.track));
     return order.map((name) => data.tracks.find((t) => t.track === name)!);
@@ -268,7 +324,11 @@ function SetupManager({ data }: { data: SetupData }) {
   });
   const track = tracks.find((t) => t.track === view.track) ?? tracks[0];
   const kinds = KINDS.filter((k) => reg || track?.kinds[k]);
-  const kind = kinds.includes(view.kind) ? view.kind : (kinds.includes("race") ? "race" : kinds[0]);
+  const kind = kinds.includes(view.kind)
+    ? view.kind
+    : kinds.includes("race")
+      ? "race"
+      : kinds[0];
 
   useEffect(() => {
     try {
@@ -279,86 +339,118 @@ function SetupManager({ data }: { data: SetupData }) {
   }, [view]);
 
   if (!track || !kind) {
-    return <section className={cn(cardClass, "text-sm text-zinc-400")}>No setups recorded yet.</section>;
+    return (
+      <section className={cn(cardClass, "text-sm text-zinc-400")}>
+        No setups recorded yet.
+      </section>
+    );
   }
   const advice = track.kinds[kind];
   const m = managed(track.track);
 
   return (
     <div className="space-y-6">
-    {reg && <ApplyBar reg={reg} />}
-    <div className="grid grid-cols-1 gap-6 lg:grid-cols-[240px_minmax(0,1fr)]">
-      <nav aria-label="Tracks" className={cn(cardClass, "h-fit min-w-0 p-2")}>
-        <div className="px-2.5 pb-2 pt-1.5">
-          <Eyebrow>Tracks</Eyebrow>
-        </div>
-        <div className="flex gap-0.5 overflow-x-auto lg:flex-col">
-          {tracks.map((t) => {
-            const active = t.track === track.track;
-            return (
-              <button
-                key={t.track}
-                type="button"
-                onClick={() => setView({ track: t.track, kind })}
-                aria-current={active}
-                className={cn(
-                  "flex shrink-0 flex-col gap-1 rounded-lg px-2.5 py-2 text-left transition-colors",
-                  active ? "bg-red-500/10" : "hover:bg-zinc-900/70",
-                )}
-              >
-                <span
+      {reg && <ApplyBar reg={reg} />}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[240px_minmax(0,1fr)]">
+        <nav aria-label="Tracks" className={cn(cardClass, "h-fit min-w-0 p-2")}>
+          <div className="px-2.5 pb-2 pt-1.5">
+            <Eyebrow>Tracks</Eyebrow>
+          </div>
+          <div className="flex gap-0.5 overflow-x-auto lg:flex-col">
+            {tracks.map((t) => {
+              const active = t.track === track.track;
+              return (
+                <button
+                  key={t.track}
+                  type="button"
+                  onClick={() => setView({ track: t.track, kind })}
+                  aria-current={active}
                   className={cn(
-                    "flex items-center gap-2 text-sm font-medium",
-                    active ? "text-red-300" : "text-zinc-200",
+                    "flex shrink-0 flex-col gap-1 rounded-lg px-2.5 py-2 text-left transition-colors",
+                    active ? "bg-red-500/10" : "hover:bg-zinc-900/70",
                   )}
                 >
-                  <TrackFlag track={t.track} size="smaller" />
-                  {getTrackDisplayName(t.track)}
-                  {managed(t.track)?.finished && <CircleCheck className="h-3.5 w-3.5 text-emerald-400" aria-label="Finished" />}
-                </span>
-                <span className="flex gap-2.5 font-mono text-3xs font-semibold uppercase tracking-wider">
-                  {KINDS.filter((k) => reg || t.kinds[k]).map((k) => {
-                    const vs = managed(t.track)?.kinds[k].versions;
-                    const last = vs?.[vs.length - 1];
-                    return (
-                      <span key={k} className={KIND_TEXT[k]}>
-                        {k === "quali" ? "Quali" : KIND_LABEL[k]}
-                        {last ? (
-                          <span className={cn("ml-1", last.saved ? "text-zinc-400" : "text-amber-300")}>V{last.v}</span>
-                        ) : (
-                          changeCount(t.kinds[k]) > 0 && <span className="ml-1 text-zinc-400">{changeCount(t.kinds[k])}</span>
-                        )}
-                      </span>
-                    );
-                  })}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      </nav>
+                  <span
+                    className={cn(
+                      "flex items-center gap-2 text-sm font-medium",
+                      active ? "text-red-300" : "text-zinc-200",
+                    )}
+                  >
+                    <TrackFlag track={t.track} size="smaller" />
+                    {getTrackDisplayName(t.track)}
+                    {managed(t.track)?.finished && (
+                      <CircleCheck
+                        className="h-3.5 w-3.5 text-emerald-400"
+                        aria-label="Finished"
+                      />
+                    )}
+                  </span>
+                  <span className="flex gap-2.5 font-mono text-3xs font-semibold uppercase tracking-wider">
+                    {KINDS.filter((k) => reg || t.kinds[k]).map((k) => {
+                      const vs = managed(t.track)?.kinds[k].versions;
+                      const last = vs?.[vs.length - 1];
+                      return (
+                        <span key={k} className={KIND_TEXT[k]}>
+                          {k === "quali" ? "Quali" : KIND_LABEL[k]}
+                          {last ? (
+                            <span
+                              className={cn(
+                                "ml-1",
+                                last.saved ? "text-zinc-400" : "text-amber-300",
+                              )}
+                            >
+                              V{last.v}
+                            </span>
+                          ) : (
+                            changeCount(t.kinds[k]) > 0 && (
+                              <span className="ml-1 text-zinc-400">
+                                {changeCount(t.kinds[k])}
+                              </span>
+                            )
+                          )}
+                        </span>
+                      );
+                    })}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </nav>
 
-      <div className="min-w-0 space-y-6">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h3 className="flex items-center gap-2 text-2xl font-bold text-zinc-100">
-            <TrackFlag track={track.track} size="medium" />
-            {getTrackDisplayName(track.track)}
-          </h3>
-          <SegmentedControl
-            ariaLabel="Setup"
-            options={kinds.map((k) => ({ value: k, label: KIND_LABEL[k], meta: changeCount(track.kinds[k]) || undefined }))}
-            value={kind}
-            onChange={(k) => setView({ track: track.track, kind: k })}
-          />
+        <div className="min-w-0 space-y-6">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h3 className="flex items-center gap-2 text-2xl font-bold text-zinc-100">
+              <TrackFlag track={track.track} size="medium" />
+              {getTrackDisplayName(track.track)}
+            </h3>
+            <SegmentedControl
+              ariaLabel="Setup"
+              options={kinds.map((k) => ({
+                value: k,
+                label: KIND_LABEL[k],
+                meta: changeCount(track.kinds[k]) || undefined,
+              }))}
+              value={kind}
+              onChange={(k) => setView({ track: track.track, kind: k })}
+            />
+          </div>
+          {m && <VersionsView track={m} kind={kind} />}
+          {advice ? (
+            <AdviceView
+              advice={advice}
+              kind={kind}
+              trackName={getTrackDisplayName(track.track)}
+            />
+          ) : (
+            !m && (
+              <section className={cn(cardClass, "text-sm text-zinc-400")}>
+                No advice for this setup yet.
+              </section>
+            )
+          )}
         </div>
-        {m && <VersionsView track={m} kind={kind} />}
-        {advice ? (
-          <AdviceView advice={advice} kind={kind} trackName={getTrackDisplayName(track.track)} />
-        ) : (
-          !m && <section className={cn(cardClass, "text-sm text-zinc-400")}>No advice for this setup yet.</section>
-        )}
       </div>
-    </div>
     </div>
   );
 }
@@ -370,7 +462,12 @@ const actionClass =
 function ApplyBar({ reg }: { reg: SetupRegistry }) {
   const waiting = reg.pending;
   return (
-    <section className={cn(cardClass, "flex flex-wrap items-center justify-between gap-3 py-4")}>
+    <section
+      className={cn(
+        cardClass,
+        "flex flex-wrap items-center justify-between gap-3 py-4",
+      )}
+    >
       <div className="space-y-0.5">
         <p className="text-sm font-medium text-zinc-100">
           {waiting > 0
@@ -386,7 +483,10 @@ function ApplyBar({ reg }: { reg: SetupRegistry }) {
       {waiting > 0 && (
         <a
           href={setupActionUrl("apply")}
-          className={cn(actionClass, "bg-red-700/95 text-white shadow-lg shadow-red-950/40 hover:bg-red-600")}
+          className={cn(
+            actionClass,
+            "bg-red-700/95 text-white shadow-lg shadow-red-950/40 hover:bg-red-600",
+          )}
         >
           <Play className="h-4 w-4" />
           Apply in the game
@@ -413,14 +513,35 @@ const VERDICT_LABEL: Record<SetupVersion["verdict"]["result"], string> = {
 
 // Registry short keys, in the order of the in-game tabs
 const SHORT: [string, string][] = [
-  ["fw", "front_wing"], ["rw", "rear_wing"], ["don", "diff_on_throttle"], ["doff", "diff_off_throttle"],
-  ["fc", "front_camber"], ["rc", "rear_camber"], ["ft", "front_toe"], ["rt", "rear_toe"],
-  ["fs", "front_suspension"], ["rs", "rear_suspension"], ["farb", "front_arb"], ["rarb", "rear_arb"],
-  ["frh", "front_ride_height"], ["rrh", "rear_ride_height"], ["bb", "brake_bias"], ["bp", "brake_pressure"],
-  ["fl", "fl_psi"], ["fr", "fr_psi"], ["rl", "rl_psi"], ["rr", "rr_psi"],
+  ["fw", "front_wing"],
+  ["rw", "rear_wing"],
+  ["don", "diff_on_throttle"],
+  ["doff", "diff_off_throttle"],
+  ["fc", "front_camber"],
+  ["rc", "rear_camber"],
+  ["ft", "front_toe"],
+  ["rt", "rear_toe"],
+  ["fs", "front_suspension"],
+  ["rs", "rear_suspension"],
+  ["farb", "front_arb"],
+  ["rarb", "rear_arb"],
+  ["frh", "front_ride_height"],
+  ["rrh", "rear_ride_height"],
+  ["bb", "brake_bias"],
+  ["bp", "brake_pressure"],
+  ["fl", "fl_psi"],
+  ["fr", "fr_psi"],
+  ["rl", "rl_psi"],
+  ["rr", "rr_psi"],
 ];
 
-function VersionsView({ track, kind }: { track: ManagedTrack; kind: SetupKind }) {
+function VersionsView({
+  track,
+  kind,
+}: {
+  track: ManagedTrack;
+  kind: SetupKind;
+}) {
   const versions = track.kinds[kind].versions;
   const newest = versions[versions.length - 1];
   const inGame = [...versions].reverse().find((v) => v.saved);
@@ -430,11 +551,18 @@ function VersionsView({ track, kind }: { track: ManagedTrack; kind: SetupKind })
       <SectionHeader
         size="sm"
         title="Setup versions"
-        hint={inGame ? `In the game: ${track.name} - ${kind.toUpperCase()} - V${inGame.v}` : "Not in the game yet"}
+        hint={
+          inGame
+            ? `In the game: ${track.name} - ${kind.toUpperCase()} - V${inGame.v}`
+            : "Not in the game yet"
+        }
         className="mb-4"
         action={
           <a
-            href={setupActionUrl(track.finished ? "reopen" : "finish", track.name)}
+            href={setupActionUrl(
+              track.finished ? "reopen" : "finish",
+              track.name,
+            )}
             className={cn(
               actionClass,
               "-my-1.5 py-1.5 text-xs",
@@ -443,28 +571,42 @@ function VersionsView({ track, kind }: { track: ManagedTrack; kind: SetupKind })
                 : "bg-emerald-600/90 text-white hover:bg-emerald-500",
             )}
           >
-            {track.finished ? <RotateCcw className="h-3.5 w-3.5" /> : <Flag className="h-3.5 w-3.5" />}
+            {track.finished ? (
+              <RotateCcw className="h-3.5 w-3.5" />
+            ) : (
+              <Flag className="h-3.5 w-3.5" />
+            )}
             {track.finished ? "Reopen setup" : "Finish setup"}
           </a>
         }
       />
       {track.finished && (
         <p className="mb-4 rounded-xl bg-emerald-500/[0.08] px-3 py-2.5 text-xs text-emerald-200">
-          Finished {formatDay(track.finished)}: no new versions for {getTrackDisplayName(track.track)}.
+          Finished {formatDay(track.finished)}: no new versions for{" "}
+          {getTrackDisplayName(track.track)}.
         </p>
       )}
       <ol className="space-y-3">
         {[...versions].reverse().map((v) => (
-          <li key={v.v} className="rounded-xl border border-zinc-800/80 bg-zinc-950/40 p-3.5">
+          <li
+            key={v.v}
+            className="rounded-xl border border-zinc-800/80 bg-zinc-950/40 p-3.5"
+          >
             <div className="flex flex-wrap items-center gap-2">
-              <span className="font-mono text-sm font-semibold text-zinc-100">V{v.v}</span>
+              <span className="font-mono text-sm font-semibold text-zinc-100">
+                V{v.v}
+              </span>
               <span className="text-sm text-zinc-200">{v.text}</span>
-              {v.base != null && v.change && <span className="text-xs text-zinc-500">on V{v.base}</span>}
+              {v.base != null && v.change && (
+                <span className="text-xs text-zinc-500">on V{v.base}</span>
+              )}
               <span className="flex-1" />
               <span
                 className={cn(
                   "rounded-full px-2.5 py-0.5 font-mono text-3xs font-semibold uppercase tracking-wider",
-                  v.saved ? "bg-zinc-800 text-zinc-400" : "bg-amber-500/15 text-amber-300",
+                  v.saved
+                    ? "bg-zinc-800 text-zinc-400"
+                    : "bg-amber-500/15 text-amber-300",
                 )}
               >
                 {v.saved ? `Saved ${v.saved}` : "Waits for Apply"}
@@ -499,8 +641,17 @@ function VersionsView({ track, kind }: { track: ManagedTrack; kind: SetupKind })
         <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-xs sm:grid-cols-4">
           {SHORT.map(([k, key]) => (
             <span key={k} className="flex justify-between gap-2">
-              <span className={changed.has(k) ? "text-orange-300" : "text-zinc-500"}>{LABEL[key] ?? key}</span>
-              <span className={cn("font-mono tabular-nums", changed.has(k) ? "text-orange-300" : "text-zinc-300")}>
+              <span
+                className={changed.has(k) ? "text-orange-300" : "text-zinc-500"}
+              >
+                {LABEL[key] ?? key}
+              </span>
+              <span
+                className={cn(
+                  "font-mono tabular-nums",
+                  changed.has(k) ? "text-orange-300" : "text-zinc-300",
+                )}
+              >
                 {formatValue(key, newest.values[k])}
               </span>
             </span>
@@ -511,7 +662,15 @@ function VersionsView({ track, kind }: { track: ManagedTrack; kind: SetupKind })
   );
 }
 
-function AdviceView({ advice, kind, trackName }: { advice: SetupAdvice; kind: SetupKind; trackName: string }) {
+function AdviceView({
+  advice,
+  kind,
+  trackName,
+}: {
+  advice: SetupAdvice;
+  kind: SetupKind;
+  trackName: string;
+}) {
   const changes = advice.settings.filter((s) => s.changed);
   const byKey = new Map(advice.settings.map((s) => [s.key, s]));
   const quali = advice.source === "quali";
@@ -529,32 +688,57 @@ function AdviceView({ advice, kind, trackName }: { advice: SetupAdvice; kind: Se
         <SectionHeader title="Key Insights" hint={hint} />
         {!advice.derived && (
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-            <InsightTile title={quali ? "Quali lap" : "Average lap"} icon={Timer} accent="purple">
+            <InsightTile
+              title={quali ? "Quali lap" : "Average lap"}
+              icon={Timer}
+              accent="purple"
+            >
               <p className="font-mono text-xl font-medium text-purple-300">
                 {formatLap(quali ? advice.best : advice.mean)}
               </p>
               <p className="mt-1 font-mono text-xs text-zinc-400">
                 {quali
-                  ? advice.laps[0]?.[2] ? "valid lap" : "invalid lap"
+                  ? advice.laps[0]?.[2]
+                    ? "valid lap"
+                    : "invalid lap"
                   : `best ${formatLap(advice.best)}`}
               </p>
             </InsightTile>
             <InsightTile title="Consistency" icon={Gauge} accent="cyan">
               <p className="font-mono text-xl font-medium text-cyan-300">
-                {advice.spread != null && advice.clean.length > 1 ? `${(advice.spread / 1000).toFixed(2)} s` : "—"}
+                {advice.spread != null && advice.clean.length > 1
+                  ? `${(advice.spread / 1000).toFixed(2)} s`
+                  : "—"}
               </p>
               <p className="mt-1 font-mono text-xs text-zinc-400">
-                spread over {advice.clean.length} {advice.clean.length === 1 ? "lap" : "laps"}
+                spread over {advice.clean.length}{" "}
+                {advice.clean.length === 1 ? "lap" : "laps"}
               </p>
             </InsightTile>
-            <InsightTile title="Changes" icon={SlidersHorizontal} accent="orange">
-              <p className="font-mono text-xl font-medium text-orange-300">{changes.length}</p>
-              <p className="mt-1 font-mono text-xs text-zinc-400">of {advice.settings.length} settings</p>
-            </InsightTile>
-            <InsightTile title="Status" icon={advice.tested ? FlaskConical : CircleCheck} accent="emerald">
-              <p className="font-mono text-xl font-medium text-emerald-300">{advice.tested ? "Tested" : "Advice"}</p>
+            <InsightTile
+              title="Changes"
+              icon={SlidersHorizontal}
+              accent="orange"
+            >
+              <p className="font-mono text-xl font-medium text-orange-300">
+                {changes.length}
+              </p>
               <p className="mt-1 font-mono text-xs text-zinc-400">
-                {advice.tested ? "confirmed in practice" : `from your ${quali ? "qualifying" : "race"} data`}
+                of {advice.settings.length} settings
+              </p>
+            </InsightTile>
+            <InsightTile
+              title="Status"
+              icon={advice.tested ? FlaskConical : CircleCheck}
+              accent="emerald"
+            >
+              <p className="font-mono text-xl font-medium text-emerald-300">
+                {advice.tested ? "Tested" : "Advice"}
+              </p>
+              <p className="mt-1 font-mono text-xs text-zinc-400">
+                {advice.tested
+                  ? "confirmed in practice"
+                  : `from your ${quali ? "qualifying" : "race"} data`}
               </p>
             </InsightTile>
           </div>
@@ -576,7 +760,9 @@ function AdviceView({ advice, kind, trackName }: { advice: SetupAdvice; kind: Se
               </ul>
             ) : (
               <p className="text-sm text-zinc-500">
-                {advice.derived ? "Based on what your race showed." : "Nothing stood out."}
+                {advice.derived
+                  ? "Based on what your race showed."
+                  : "Nothing stood out."}
               </p>
             )}
             {advice.laps.length > 0 && (
@@ -584,7 +770,13 @@ function AdviceView({ advice, kind, trackName }: { advice: SetupAdvice; kind: Se
                 {advice.laps.map(([lap, ms, valid]) => (
                   <span
                     key={lap}
-                    className={advice.clean.includes(lap) ? "text-zinc-300" : valid ? "text-zinc-600" : "text-behind"}
+                    className={
+                      advice.clean.includes(lap)
+                        ? "text-zinc-300"
+                        : valid
+                          ? "text-zinc-600"
+                          : "text-behind"
+                    }
                   >
                     L{lap} {formatLap(ms)}
                   </span>
@@ -594,10 +786,15 @@ function AdviceView({ advice, kind, trackName }: { advice: SetupAdvice; kind: Se
           </div>
           <div className="space-y-2">
             {advice.tested && (
-              <p className="rounded-xl bg-emerald-500/[0.08] px-3 py-2.5 text-xs text-emerald-200">{advice.tested}</p>
+              <p className="rounded-xl bg-emerald-500/[0.08] px-3 py-2.5 text-xs text-emerald-200">
+                {advice.tested}
+              </p>
             )}
             {advice.notes.map((n) => (
-              <p key={n} className="rounded-xl bg-zinc-800/40 px-3 py-2.5 text-xs text-zinc-400">
+              <p
+                key={n}
+                className="rounded-xl bg-zinc-800/40 px-3 py-2.5 text-xs text-zinc-400"
+              >
                 {n}
               </p>
             ))}
@@ -619,7 +816,10 @@ function AdviceView({ advice, kind, trackName }: { advice: SetupAdvice; kind: Se
                 getText={() =>
                   `${trackName} ${KIND_LABEL[kind]}: ` +
                   changes
-                    .map((s) => `${LABEL[s.key] ?? s.key} ${formatValue(s.key, s.now)} → ${formatValue(s.key, s.rec)}`)
+                    .map(
+                      (s) =>
+                        `${LABEL[s.key] ?? s.key} ${formatValue(s.key, s.now)} → ${formatValue(s.key, s.rec)}`,
+                    )
                     .join(", ")
                 }
               />
@@ -666,11 +866,19 @@ function AdviceRow({ setting: s }: { setting: SetupSetting }) {
   return (
     <div className="space-y-1">
       <div className="flex items-center gap-2 text-xs">
-        <span className={cn("w-20 shrink-0 truncate", s.changed ? "text-zinc-200" : "text-zinc-500")}>
+        <span
+          className={cn(
+            "w-20 shrink-0 truncate",
+            s.changed ? "text-zinc-200" : "text-zinc-500",
+          )}
+        >
           {LABEL[s.key] ?? s.key}
         </span>
         <div className="relative h-1.5 min-w-[48px] flex-1 rounded-full bg-zinc-800">
-          <div className="h-full rounded-full bg-blue-500/50" style={{ width: `${pct(s.key, s.now)}%` }} />
+          <div
+            className="h-full rounded-full bg-blue-500/50"
+            style={{ width: `${pct(s.key, s.now)}%` }}
+          />
           {s.changed && (
             <span
               className="absolute -top-1 h-3.5 w-[3px] -translate-x-1/2 rounded-full bg-orange-400"
@@ -681,14 +889,24 @@ function AdviceRow({ setting: s }: { setting: SetupSetting }) {
         <span className="w-24 shrink-0 whitespace-nowrap text-right font-mono tabular-nums text-zinc-300">
           {s.changed ? (
             <>
-              {formatValue(s.key, s.now)} → <span className="font-semibold text-orange-300">{formatValue(s.key, s.rec)}</span>
+              {formatValue(s.key, s.now)} →{" "}
+              <span className="font-semibold text-orange-300">
+                {formatValue(s.key, s.rec)}
+              </span>
             </>
           ) : (
             formatValue(s.key, s.now)
           )}
         </span>
       </div>
-      <p className={cn("text-2xs leading-snug", s.changed ? "text-zinc-400" : "text-zinc-600")}>{s.why}</p>
+      <p
+        className={cn(
+          "text-2xs leading-snug",
+          s.changed ? "text-zinc-400" : "text-zinc-600",
+        )}
+      >
+        {s.why}
+      </p>
     </div>
   );
 }

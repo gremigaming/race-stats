@@ -1,11 +1,21 @@
-import { ChevronRight, ListOrdered, ShieldCheck, TimerOff, UserRound } from "lucide-react";
+import {
+  ChevronRight,
+  ListOrdered,
+  ShieldCheck,
+  UserRound,
+} from "lucide-react";
 import { useEffect, useRef, type ReactNode } from "react";
 import { useSearchParams } from "react-router-dom";
 import { cardClass } from "../components/Card";
 import { RankLegend, RankTile } from "../components/safety/RankTile";
-import { changeClass, SafetyPersonal } from "../components/safety/SafetyPersonal";
+import {
+  changeClass,
+  SafetyPersonal,
+} from "../components/safety/SafetyPersonal";
 import { SafetyHighlights } from "../components/league/SafetyHighlights";
 import { SectionHeader } from "../components/ui/SectionHeader";
+import { PageFrame } from "../components/ui/PageFrame";
+import { PageHeader } from "../components/ui/PageHeader";
 import { SortHeader, sortRows, useSort } from "../components/ui/SortHeader";
 import { SegmentedControl } from "../components/ui/SegmentedControl";
 import {
@@ -16,7 +26,15 @@ import {
 } from "../components/ui/table";
 import { useTelemetry } from "../context/TelemetryContext";
 import { driverKey } from "../league/league";
-import { SR_START, signedHalf, srNum, srPct, srSettings, srWindowRaces, type SrSettings } from "../league/safety";
+import {
+  SR_START,
+  signedHalf,
+  srNum,
+  srPct,
+  srSettings,
+  srWindowRaces,
+  type SrSettings,
+} from "../league/safety";
 import { cn } from "../utils/cn";
 
 const li = (items: string[]) => (
@@ -33,12 +51,14 @@ const HOW_IT_WORKS: { title: string; body: ReactNode }[] = [
     body: (
       <>
         <p>
-          Every driver gets a safety rating (SR) from 0 to 100, and everyone starts at {SR_START}.
-          It's worked out automatically from the race data after every stream, from races since
-          19 October. Drivers who hide their name don't get a rating.
+          Every driver gets a safety rating (SR) from 0 to 100, and everyone
+          starts at {SR_START}. It's worked out automatically from the race data
+          after every stream, from races since 19 October. Drivers who hide
+          their name don't get a rating.
         </p>
         <p>
-          Your rating shows from your first race. It's marked provisional until you've done 3 races.
+          Your rating shows from your first race. It's marked provisional until
+          you've done 3 races.
         </p>
       </>
     ),
@@ -69,8 +89,10 @@ const HOW_IT_WORKS: { title: string; body: ReactNode }[] = [
     body: (
       <>
         <p>
-          Every race gets a net score: your bonus (max 4) minus half your incident points, minus your track-limit, pit exit and retirement points in full. Your SR is{" "}
-          {SR_START} + 25 × your average net score, at most 100, minus your sting, never below 0.
+          Every race gets a net score: your bonus (max 4) minus half your
+          incident points, minus your track-limit, pit exit and retirement
+          points in full. Your SR is {SR_START} + 25 × your average net score,
+          at most 100, minus your sting, never below 0.
         </p>
         {li([
           "Instant sting: the other half of your incident points comes straight off your SR, shown in red on that race's card. So a 6-point contact costs 3 in that race's net score and 3 SR directly. Track limits, pit exit and retirements have no sting.",
@@ -105,11 +127,22 @@ const HOW_IT_WORKS: { title: string; body: ReactNode }[] = [
 function howItWorksV25(s: SrSettings): Record<string, ReactNode> {
   const n = srNum;
   const b = (base: number, cat: number) => n(base * s.bonus_scale * cat);
-  const tiers = ([[60, s.tier_60], [70, s.tier_70], [80, s.tier_80], [90, s.tier_90], [100, s.tier_100]] as const)
+  const tiers = (
+    [
+      [60, s.tier_60],
+      [70, s.tier_70],
+      [80, s.tier_80],
+      [90, s.tier_90],
+      [100, s.tier_100],
+    ] as const
+  )
     .filter(([, x]) => x !== 1)
     .map(([at, x]) => `x${n(x)} ${at === 100 ? "at 100" : `from ${at}`}`);
   const step2 = s.streak_first + s.streak_step;
-  const cap = s.streak_max > 0 ? ` The streak multiplier stops at x${n(s.streak_max)}.` : "";
+  const cap =
+    s.streak_max > 0
+      ? ` The streak multiplier stops at x${n(s.streak_max)}.`
+      : "";
   const w = s.window_weights;
   const steps = w.slice(1).map((x) => srPct(x));
   const total = srWindowRaces(s);
@@ -119,7 +152,9 @@ function howItWorksV25(s: SrSettings): Record<string, ReactNode> {
       `Contact you caused, by severity (1-10): 1-3 costs ${n(s.contact_small)}, 4-5 costs ${n(s.contact_medium)}, 6-7 costs ${n(s.contact_big)}, 8-10 costs ${n(s.contact_huge)}. Hitting the same car again on purpose costs ${n(s.contact_r9)}. Shared blame costs half. Not to blame costs nothing.`,
       `Track-limit time penalties and crossing the pit exit line: ${n(s.penalty_track)}.`,
       `Quitting a race: ${n(s.penalty_dnf)}. Retiring because someone else wrecked you, or after you already finished, doesn't count.`,
-      tiers.length ? `The higher your SR, the more a penalty costs: ${tiers.join(", ")}.` : "Your SR doesn't change what a penalty costs.",
+      tiers.length
+        ? `The higher your SR, the more a penalty costs: ${tiers.join(", ")}.`
+        : "Your SR doesn't change what a penalty costs.",
       `Dirty race: ${s.dirty_big} big incident${s.dirty_big > 1 ? "s" : ""} (severity 6+), ${s.dirty_medium} medium (4-5) or ${s.dirty_small} small (1-3). Penalties after that point count x${n(s.streak_first)}. If your previous race was dirty too, every penalty already counts x${n(s.streak_first)} and after the trigger x${n(s.streak_max > 0 ? Math.min(step2, s.streak_max) : step2)}, and so on. A clean race resets the streak.${cap}`,
       "Contacts with AI cars don't count. Staff can change or add a penalty.",
     ]),
@@ -129,18 +164,25 @@ function howItWorksV25(s: SrSettings): Record<string, ReactNode> {
       `A clean qualifying lap within 107% of pole: +${b(0.5, s.bonus_quali)}.`,
       `Clean overtakes (+${b(0.5, s.bonus_overtakes)} per 3 in a row on different cars) and close racing without contact.`,
       `Your first race of a stream: +${b(1, s.bonus_stream)}, and +${b(1, s.bonus_stream)} more if you share your full telemetry.`,
-      ...(s.bonus_cut > 0 ? [`The higher your SR, the less bonus you get: ${srPct(s.bonus_cut)} less for every 10 SR above 50.`] : []),
+      ...(s.bonus_cut > 0
+        ? [
+            `The higher your SR, the less bonus you get: ${srPct(s.bonus_cut)} less for every 10 SR above 50.`,
+          ]
+        : []),
       ...(s.no_bonus_dirty ? ["A dirty race gets no bonus at all."] : []),
     ]),
     "From points to SR": (
       <>
         <p>
-          Every race gets a net score: its bonus minus its penalties (qualifying joins the next race). Your SR is{" "}
-          {SR_START} + the net scores of your last {total} races, between 0 and 100.
+          Every race gets a net score: its bonus minus its penalties (qualifying
+          joins the next race). Your SR is {SR_START} + the net scores of your
+          last {total} races, between 0 and 100.
         </p>
         {li([
           `Your newest ${s.window_step} races count ${w[0] === 1 ? "in full" : srPct(w[0])}` +
-            (steps.length ? `, the ${s.window_step} before that ${steps[0]}${steps.length > 1 ? `, then ${steps.slice(1).join(", ")}` : ""}` : "") +
+            (steps.length
+              ? `, the ${s.window_step} before that ${steps[0]}${steps.length > 1 ? `, then ${steps.slice(1).join(", ")}` : ""}`
+              : "") +
             `. After ${total} of your own races a race is gone. Only races you drive age your history, so sitting out doesn't wash anything away.`,
           `Gravity: after every league race, above 50, you lose ${srPct(s.gravity_joined)} of the distance to 50 if you raced and ${srPct(s.gravity_skipped)} if you skipped. It's booked on your latest race, so it leaves your history with that race.`,
           "Your rating shows from your first race and is marked provisional until you've done 3 races.",
@@ -165,10 +207,15 @@ export function SafetyPage() {
   // ?embed: the Discord picture, the full ranking with the site address
   const embed = params.has("embed");
   const { sort, toggle } = useSort<SortKey>();
-  const tab: Tab = !embed && params.get("tab") === "personal" ? "personal" : "ranking";
+  const tab: Tab =
+    !embed && params.get("tab") === "personal" ? "personal" : "ranking";
 
   useEffect(() => {
-    if (tab === "ranking" && !embed) highlightRef.current?.scrollIntoView({ block: "center", behavior: "smooth" });
+    if (tab === "ranking" && !embed)
+      highlightRef.current?.scrollIntoView({
+        block: "center",
+        behavior: "smooth",
+      });
   }, [tab, embed]);
 
   if (!league?.safetyData) {
@@ -192,40 +239,52 @@ export function SafetyPage() {
   };
 
   return (
-    <div
+    <PageFrame
       id="safety-card"
-      className={cn("mx-auto max-w-5xl space-y-6 p-6", embed && "p-8")}
+      className={cn("space-y-6", embed && "max-w-5xl p-8 sm:p-8 lg:px-8")}
     >
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h2 className="mb-1 flex items-center gap-2 text-xl font-bold">
-            <ShieldCheck className="h-5 w-5 text-emerald-400" />
-            {embed ? "GreMi Gang Safety Rating" : "Safety rating"}
-          </h2>
-          <p className="flex flex-wrap items-center gap-2 text-sm text-zinc-500">
-            {!embed && (
-            <span className="inline-flex items-center gap-1 rounded-full border border-zinc-700 px-2 py-0.5 text-[11px] text-zinc-400">
-              <TimerOff className="h-3 w-3" />
-              not filtered by date
-            </span>
-            )}
-            Live rating over each driver's last {league.safetyData.rules === "v2.5" ? srWindowRaces(srSettings(league.safetyData)) : 50} races · {rows.length} drivers
-          </p>
+      {embed ? (
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h2 className="mb-1 flex items-center gap-2 text-xl font-bold">
+              <ShieldCheck className="h-5 w-5 text-emerald-400" />
+              GreMi Gang Safety Rating
+            </h2>
+            <p className="flex flex-wrap items-center gap-2 text-sm text-zinc-500">
+              Live rating over each driver&apos;s last{" "}
+              {league.safetyData.rules === "v2.5"
+                ? srWindowRaces(srSettings(league.safetyData))
+                : 50}{" "}
+              races · {rows.length} drivers
+            </p>
+          </div>
         </div>
-        {!embed && (
-        <SegmentedControl
-          value={tab}
-          onChange={(t) =>
-            setParams(t === "ranking" ? {} : { tab: "personal", driver: personalKey })
+      ) : (
+        <PageHeader
+          icon={ShieldCheck}
+          eyebrow="Drivers"
+          title="Safety rating"
+          description="Review your rating, recent changes, and the calls behind the standings."
+          meta={`Not filtered by date · Last ${league.safetyData.rules === "v2.5" ? srWindowRaces(srSettings(league.safetyData)) : 50} races · ${rows.length} drivers`}
+          action={
+            <SegmentedControl
+              value={tab}
+              onChange={(t) =>
+                setParams(
+                  t === "ranking"
+                    ? {}
+                    : { tab: "personal", driver: personalKey },
+                )
+              }
+              ariaLabel="Safety rating view"
+              options={[
+                { value: "ranking", label: "Ranking", icon: ListOrdered },
+                { value: "personal", label: "Personal", icon: UserRound },
+              ]}
+            />
           }
-          ariaLabel="Safety rating view"
-          options={[
-            { value: "ranking", label: "Ranking", icon: ListOrdered },
-            { value: "personal", label: "Personal", icon: UserRound },
-          ]}
         />
-        )}
-      </div>
+      )}
 
       {tab === "personal" ? (
         <>
@@ -255,7 +314,8 @@ export function SafetyPage() {
             />
           ) : (
             <p className={cn(cardClass, "text-sm text-zinc-500")}>
-              This driver has no safety rating yet. Pick a driver above, or open the ranking.
+              This driver has no safety rating yet. Pick a driver above, or open
+              the ranking.
             </p>
           )}
         </>
@@ -273,12 +333,29 @@ export function SafetyPage() {
             <table className={tableClassLoose}>
               <thead className={tableHeadClass}>
                 <tr>
-                  <SortHeader column="pos" firstDir="asc" {...sortProps}>#</SortHeader>
-                  <SortHeader column="rank" align="left" {...sortProps}>Rank</SortHeader>
-                  <SortHeader column="name" firstDir="asc" align="left" {...sortProps}>Driver</SortHeader>
-                  <SortHeader column="sr" {...sortProps}>SR</SortHeader>
-                  <SortHeader column="change" {...sortProps}>Last stream</SortHeader>
-                  <SortHeader column="races" {...sortProps}>Races</SortHeader>
+                  <SortHeader column="pos" firstDir="asc" {...sortProps}>
+                    #
+                  </SortHeader>
+                  <SortHeader column="rank" align="left" {...sortProps}>
+                    Rank
+                  </SortHeader>
+                  <SortHeader
+                    column="name"
+                    firstDir="asc"
+                    align="left"
+                    {...sortProps}
+                  >
+                    Driver
+                  </SortHeader>
+                  <SortHeader column="sr" {...sortProps}>
+                    SR
+                  </SortHeader>
+                  <SortHeader column="change" {...sortProps}>
+                    Last stream
+                  </SortHeader>
+                  <SortHeader column="races" {...sortProps}>
+                    Races
+                  </SortHeader>
                 </tr>
               </thead>
               <tbody>
@@ -294,10 +371,17 @@ export function SafetyPage() {
                       className={cn(
                         tableRowClass,
                         "cursor-pointer transition-colors hover:bg-white/[0.03]",
-                        isMe && "bg-red-500/[0.09] shadow-[inset_3px_0_0_#f87171]",
+                        isMe &&
+                          "bg-red-500/[0.09] shadow-[inset_3px_0_0_#f87171]",
                       )}
                     >
-                      <td className={tableCellClass({ align: "right", mono: true, className: "text-zinc-500" })}>
+                      <td
+                        className={tableCellClass({
+                          align: "right",
+                          mono: true,
+                          className: "text-zinc-500",
+                        })}
+                      >
                         {i + 1}
                       </td>
                       <td className={tableCellClass()}>
@@ -305,7 +389,10 @@ export function SafetyPage() {
                       </td>
                       <td
                         className={tableCellClass({
-                          className: cn("font-medium", isMe ? "text-red-300" : "text-zinc-100"),
+                          className: cn(
+                            "font-medium",
+                            isMe ? "text-red-300" : "text-zinc-100",
+                          ),
                         })}
                       >
                         {d.name}
@@ -315,16 +402,36 @@ export function SafetyPage() {
                           </span>
                         )}
                         {d.provisional && (
-                          <span className="ml-2 text-[11px] font-normal text-zinc-500">provisional</span>
+                          <span className="ml-2 text-[11px] font-normal text-zinc-500">
+                            provisional
+                          </span>
                         )}
                       </td>
-                      <td className={tableCellClass({ align: "right", mono: true, className: "font-semibold text-zinc-200" })}>
+                      <td
+                        className={tableCellClass({
+                          align: "right",
+                          mono: true,
+                          className: "font-semibold text-zinc-200",
+                        })}
+                      >
                         {d.sr.toFixed(1)}
                       </td>
-                      <td className={tableCellClass({ align: "right", mono: true, className: changeClass(d.change) })}>
+                      <td
+                        className={tableCellClass({
+                          align: "right",
+                          mono: true,
+                          className: changeClass(d.change),
+                        })}
+                      >
                         {signedHalf(d.change)}
                       </td>
-                      <td className={tableCellClass({ align: "right", mono: true, className: "text-zinc-300" })}>
+                      <td
+                        className={tableCellClass({
+                          align: "right",
+                          mono: true,
+                          className: "text-zinc-300",
+                        })}
+                      >
                         {d.races}
                       </td>
                     </tr>
@@ -340,29 +447,32 @@ export function SafetyPage() {
       {tab === "ranking" && !embed && <SafetyHighlights drivers={rows} />}
 
       {!embed && (
-      <section className={cardClass}>
-        <SectionHeader title="How it works" />
-        <div className="space-y-1.5">
-          {HOW_IT_WORKS.map((t) => {
-            const v25 = league.safetyData?.rules === "v2.5" ? howItWorksV25(srSettings(league.safetyData)) : null;
-            return v25?.[t.title] ? { ...t, body: v25[t.title] } : t;
-          }).map((topic) => (
-            <details
-              key={topic.title}
-              className="group rounded-md border border-zinc-800/80 bg-zinc-950/60"
-            >
-              <summary className="flex cursor-pointer list-none items-center gap-2 px-3 py-2 text-sm text-zinc-200 [&::-webkit-details-marker]:hidden">
-                <ChevronRight className="h-4 w-4 text-zinc-500 transition-transform group-open:rotate-90" />
-                {topic.title}
-              </summary>
-              <div className="space-y-1.5 border-t border-zinc-800/80 px-3 py-2.5 text-sm text-zinc-400">
-                {topic.body}
-              </div>
-            </details>
-          ))}
-        </div>
-      </section>
+        <section className={cardClass}>
+          <SectionHeader title="How it works" />
+          <div className="space-y-1.5">
+            {HOW_IT_WORKS.map((t) => {
+              const v25 =
+                league.safetyData?.rules === "v2.5"
+                  ? howItWorksV25(srSettings(league.safetyData))
+                  : null;
+              return v25?.[t.title] ? { ...t, body: v25[t.title] } : t;
+            }).map((topic) => (
+              <details
+                key={topic.title}
+                className="group rounded-md border border-zinc-800/80 bg-zinc-950/60"
+              >
+                <summary className="flex cursor-pointer list-none items-center gap-2 px-3 py-2 text-sm text-zinc-200 [&::-webkit-details-marker]:hidden">
+                  <ChevronRight className="h-4 w-4 text-zinc-500 transition-transform group-open:rotate-90" />
+                  {topic.title}
+                </summary>
+                <div className="space-y-1.5 border-t border-zinc-800/80 px-3 py-2.5 text-sm text-zinc-400">
+                  {topic.body}
+                </div>
+              </details>
+            ))}
+          </div>
+        </section>
       )}
-    </div>
+    </PageFrame>
   );
 }

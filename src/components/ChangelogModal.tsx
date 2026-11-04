@@ -22,6 +22,7 @@ const DESTINATION_PATHS: Record<
   (typeof changelog)[number]["destination"],
   string
 > = {
+  home: "",
   tracks: "/tracks",
   drivers: "/drivers",
   safety: "/safety",

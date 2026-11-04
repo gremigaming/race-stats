@@ -1,6 +1,5 @@
-import { ArrowUpDown } from "lucide-react";
+import { ArrowUpDown, Route } from "lucide-react";
 import { useMemo, useState } from "react";
-import { SectionHeader } from "../components/ui/SectionHeader";
 import { SessionListActiveFilters } from "../components/SessionListActiveFilters";
 import { SessionListFilterMenu } from "../components/SessionListFilterMenu";
 import { TrackOverviewCard } from "../components/dashboard/TrackOverviewCard";
@@ -19,6 +18,8 @@ import {
 } from "../hooks/useSessionFilters";
 import { useSessionList } from "../hooks/useSessionList";
 import { useGameScope } from "../hooks/useGameScope";
+import { PageFrame } from "../components/ui/PageFrame";
+import { PageHeader } from "../components/ui/PageHeader";
 import type { SessionSummary } from "../types/telemetry";
 import { getSessionFormulaScopeKey } from "../utils/formulaScope";
 import { getTrackId, sortTracksByCalendar } from "../utils/tracks";
@@ -110,8 +111,7 @@ export function TracksPage() {
         }
       } else if (trackSort === "race-pace") {
         if (a.paceGapMs == null || b.paceGapMs == null) {
-          comparison =
-            a.paceGapMs == null ? (b.paceGapMs == null ? 0 : 1) : -1;
+          comparison = a.paceGapMs == null ? (b.paceGapMs == null ? 0 : 1) : -1;
         } else {
           comparison = a.paceGapMs - b.paceGapMs;
         }
@@ -143,7 +143,7 @@ export function TracksPage() {
 
   if (error) {
     return (
-      <div className="mx-auto max-w-5xl p-6 text-sm text-red-300">
+      <div className="mx-auto max-w-6xl px-4 py-6 text-sm text-red-300 sm:px-6 lg:px-8">
         Tracks could not be loaded: {error}
       </div>
     );
@@ -153,12 +153,15 @@ export function TracksPage() {
     game.isFiltered || filters.type !== "all" || filters.mode !== "all";
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6 p-6">
-      <SectionHeader
-        title="All tracks"
-        hint={`${activeFormula?.label ?? "All games"} · ${league?.filterLabel ?? "All available dates"} · ${trackCards.length} ${trackCards.length === 1 ? "track" : "tracks"} · ${filteredSessions.length} ${filteredSessions.length === 1 ? "session" : "sessions"}`}
+    <PageFrame>
+      <PageHeader
+        icon={Route}
+        eyebrow="Race archive"
+        title="Tracks"
+        description="Compare your results, pace, and progress at every circuit."
+        meta={`${activeFormula?.label ?? "All games"} · ${league?.filterLabel ?? "All available dates"} · ${trackCards.length} ${trackCards.length === 1 ? "track" : "tracks"} · ${filteredSessions.length} ${filteredSessions.length === 1 ? "session" : "sessions"}`}
         action={
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <PillSelect
               ariaLabel="Sort tracks"
               leadingIcon={ArrowUpDown}
@@ -172,6 +175,7 @@ export function TracksPage() {
               onChange={setFilters}
               game={game}
               onReset={resetFilters}
+              showGame={false}
             />
           </div>
         }
@@ -189,17 +193,15 @@ export function TracksPage() {
 
       {trackCards.length ? (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          {trackCards.map(
-            ({ id, track, sessions: trackSessions, records }) => (
-              <TrackOverviewCard
-                key={id}
-                track={track}
-                sessions={trackSessions}
-                scopeKey={scopeKey ?? undefined}
-                records={records}
-              />
-            ),
-          )}
+          {trackCards.map(({ id, track, sessions: trackSessions, records }) => (
+            <TrackOverviewCard
+              key={id}
+              track={track}
+              sessions={trackSessions}
+              scopeKey={scopeKey ?? undefined}
+              records={records}
+            />
+          ))}
         </div>
       ) : (
         <div className="rounded-2xl bg-zinc-900/50 px-5 py-8 text-center">
@@ -213,6 +215,6 @@ export function TracksPage() {
           </p>
         </div>
       )}
-    </div>
+    </PageFrame>
   );
 }

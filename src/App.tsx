@@ -10,6 +10,7 @@ import {
 import { Analytics } from "@vercel/analytics/react";
 import { Layout } from "./components/Layout";
 import { DashboardPage } from "./pages/DashboardPage";
+import { DriverInsightsPage } from "./pages/DriverInsightsPage";
 import { SessionPage } from "./pages/SessionPage";
 import { SessionsPage } from "./pages/SessionsPage";
 import { TrackProgressPage } from "./pages/TrackProgressPage";
@@ -86,6 +87,14 @@ function AppRoutes() {
             element={
               <ScopedFormulaRoute>
                 <DriversPage />
+              </ScopedFormulaRoute>
+            }
+          />
+          <Route
+            path=":formulaKey/insights"
+            element={
+              <ScopedFormulaRoute>
+                <DriverInsightsPage />
               </ScopedFormulaRoute>
             }
           />
