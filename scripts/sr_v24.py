@@ -161,3 +161,71 @@ VARIANTS = [
     ("v2.4, gravity only when skipped", dict(GRAV_SKIPPED_ONLY=True)),
     ("v2.4 tuned", TUNED),
 ]
+
+
+# ---- SR v2.4 linear (GreMi, 4 Nov 2026, second draft): no averages, no stings.
+#   Every race: SR += min(bonus, BONUS_CAP) - penalties x Rule 1 x Rule 2, within 0..100,
+#   then gravity after every league race (raced or skipped). Qualifying joins the next race.
+LINEAR = dict(DEFAULT, BONUS_CAP=4.0, START=50.0, STREAK_MAX=None,
+              GAIN=1.0,       # x bonus and penalties
+              GRAV_PCT=None)  # proportional gravity: -pct x (SR - 50) per league race instead of the flat tiers
+
+
+def simulate_linear(data, **kw):
+    P = dict(LINEAR, **kw)
+    league = [f for st in data["streams"] for f in st["files"] if f.startswith("Race_")]
+    pos_of = {f: k for k, f in enumerate(league)}
+    rows = {d["name"]: {pos_of[f]: (b, its) for f, b, its in race_rows(d) if f in pos_of} for d in data["drivers"]}
+    st = {n: dict(sr=P["START"], level=0, started=False, skips=0, dirty=0, best=0, grav=0.0, bonus=0.0, raw=0.0, adj=0.0,
+                  hit100=0, hit0=0) for n in rows}
+    for k in range(len(league)):
+        for n, r in rows.items():
+            s = st[n]
+            if k not in r:
+                if s["started"]: s["skips"] += 1
+                if P["STREAK_RESET_SKIPS"] is not None and s["skips"] >= P["STREAK_RESET_SKIPS"]: s["level"] = 0
+                continue
+            b, its = r[k]; s["started"] = True; s["skips"] = 0
+            pos = tier(P["POS"], s["sr"], 1.0)
+            cnt = dict(big=0, medium=0, small=0); dirty = False; pen = 0.0; lvl = s["level"]
+            for _, kind, c, p in its:
+                sm = 1.0 if lvl == 0 else P["STREAK_FIRST"] + P["STREAK_STEP"] * (lvl - 1)
+                if P["STREAK_MAX"]: sm = min(sm, P["STREAK_MAX"])
+                if kind == "inc":
+                    t_ = P["TABLE"] or {}
+                    p = t_[p] if p in t_ else t_[p * 2] / 2 if p * 2 in t_ else p * P["INC_SCALE"]
+                pen += p * pos * sm; s["raw"] += p
+                if kind == "inc":
+                    cnt[c] += 1
+                    if not dirty and any(cnt[x] >= P["DIRTY"][x] for x in cnt):
+                        dirty = True; lvl = s["level"] + 1
+            if dirty: s["level"] += 1; s["dirty"] += 1; s["best"] = max(s["best"], s["level"])
+            else: s["level"] = 0
+            bb = min(b, P["BONUS_CAP"]) * P["GAIN"]; pen *= P["GAIN"]; s["bonus"] += bb; s["adj"] += pen
+            s["sr"] = max(0.0, min(100.0, s["sr"] + bb - pen))
+            s["hit100"] += s["sr"] >= 100; s["hit0"] += s["sr"] <= 0
+        for n, s in st.items():
+            if not s["started"]: continue
+            if P["GRAV_SKIPPED_ONLY"] and k in rows[n]: continue
+            if s["sr"] > 50:
+                g = P["GRAV_PCT"] * (s["sr"] - 50) if P["GRAV_PCT"] else min(tier(P["GRAV"], s["sr"], 0.0), s["sr"] - 50)
+                s["sr"] -= g; s["grav"] += g
+    return {n: dict(sr=half(s["sr"]), races=len(rows[n]), dirty=s["dirty"], streak_now=s["level"], streak_max=s["best"],
+                    gravity=round(s["grav"], 1), bonus=round(s["bonus"], 1), pts_raw=round(s["raw"], 1), pts_adj=round(s["adj"], 1),
+                    hit100=s["hit100"], hit0=s["hit0"])
+            for n, s in st.items() if rows[n]}
+
+LINEAR_TUNED = dict(GAIN=3.0, GRAV_PCT=0.04)
+
+
+def table_linear(data, variants):
+    live = {d["name"]: d["sr"] for d in data["drivers"]}
+    res = [(lbl, simulate_linear(data, **kw)) for lbl, kw in variants]
+    r0 = res[0][1]; names = sorted(r0, key=lambda n: (-r0[n]["sr"], n.lower()))
+    lines = ["| # | Driver | Races | Bonus | Penalty (raw -> scaled) | Dirty | Max streak | Gravity | v2.2 live | " + " | ".join(l for l, _ in res) + " |",
+             "|" + "---|" * (9 + len(res))]
+    for k, n in enumerate(names, 1):
+        x = r0[n]
+        lines.append(f"| {k} | {n} | {x['races']} | +{x['bonus']:g} | {x['pts_raw']:g} -> {x['pts_adj']:g} | {x['dirty']} | {x['streak_max']} | "
+                     f"-{x['gravity']:g} | {live.get(n, 50.0):.1f} | " + " | ".join(f"{r[n]['sr']:.1f}" for _, r in res) + " |")
+    return "\n".join(lines)
