@@ -451,6 +451,20 @@
       "was": -3.0,
       "learn": true,
       "owner": true
+    },
+    {
+      "id": "Race_Miami_2026_10_30_16_01_59.json|4|contact|4|1",
+      "type": "incident",
+      "reason": "Small incident, is on Jakub who could have left some space but was just okay",
+      "by": "319544045435224067",
+      "at": "2026-11-04T13:10:59Z",
+      "file": "Race_Miami_2026_10_30_16_01_59.json",
+      "driver": "Jakubm18_F1",
+      "car": 4,
+      "pts": -0.5,
+      "was": -6.0,
+      "learn": true,
+      "owner": true
     }
   ]
 }
