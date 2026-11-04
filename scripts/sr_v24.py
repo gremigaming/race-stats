@@ -32,6 +32,8 @@ DEFAULT = dict(
     STREAK_RESET_SKIPS=None,     # a streak ends after this many skipped league races
     STREAK_SCALES_OTHER=True,    # rule 2 also scales track limits / DNF
     POS_SCALES_OTHER=True,
+    INC_SCALE=1.0,
+    TABLE=None,                  # {v2.4 points: new points} for contact calls, e.g. {0.5: 0.75, 1.5: 2, 3: 4, 5: 6, 10: 12}               # x the incident points (2.0 = the v2.2 table)
 )
 
 half = lambda x: math.floor(x * 2 + 0.5) / 2
@@ -112,7 +114,9 @@ def simulate(data, **kw):
                     m = (pos if P["POS_SCALES_OTHER"] else 1.0) * (sm if P["STREAK_SCALES_OTHER"] else 1.0)
                     O += p * m
                 else:
-                    I += p * pos * sm
+                    t_ = P["TABLE"] or {}
+                    q = t_[p] if p in t_ else t_[p * 2] / 2 if p * 2 in t_ else p * P["INC_SCALE"]   # p*2: shared blame
+                    I += q * pos * sm
                     cnt[c] += 1
                     if not dirty and any(cnt[x] >= P["DIRTY"][x] for x in cnt):
                         dirty = True; lvl = s["level"] + 1     # penalties after the trigger use the next step
@@ -140,16 +144,20 @@ def table(data, variants):
     live = {d["name"]: d["sr"] for d in data["drivers"]}
     res = [(lbl, simulate(data, **kw)) for lbl, kw in variants]
     names = sorted(res[0][1], key=lambda n: (-res[0][1][n]["sr"], n.lower()))
-    head = "| # | Driver | Races | Dirty | Max streak | v2.2 live | " + " | ".join(l for l, _ in res) + " |"
-    lines = [head, "|" + "---|" * (6 + len(res))]
+    head = "| # | Driver | Races | Dirty races | Max streak | Gravity lost | v2.2 live | " + " | ".join(l for l, _ in res) + " |"
+    lines = [head, "|" + "---|" * (7 + len(res))]
     for k, n in enumerate(names, 1):
         r0 = res[0][1][n]
-        lines.append(f"| {k} | {n} | {r0['races']} | {r0['dirty']} | {r0['streak_max']} | {live.get(n, 50.0):.1f} | "
+        lines.append(f"| {k} | {n} | {r0['races']} | {r0['dirty']} | {r0['streak_max']} | {r0['gravity']:.1f} | {live.get(n, 50.0):.1f} | "
                      + " | ".join(f"{r[n]['sr']:.1f}" for _, r in res) + " |")
     return "\n".join(lines)
 
 
 # columns in the build log: v2.4 as GreMi wrote it, then tuned variants
+TUNED = dict(TABLE={0.5: 0.75, 1.5: 2.0, 3.0: 4.0, 5.0: 6.0, 10.0: 12.0}, INC_SCALE=1.25, STREAK_MAX=2.0,
+             GRAV=[(90, 0.5), (60, 0.25), (50, 0.1)], GRAV_SKIPPED_ONLY=True)
 VARIANTS = [
     ("v2.4", {}),
+    ("v2.4, gravity only when skipped", dict(GRAV_SKIPPED_ONLY=True)),
+    ("v2.4 tuned", TUNED),
 ]
