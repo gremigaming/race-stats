@@ -109,7 +109,12 @@ await phoneSite.screenshot({
   fullPage: true,
 });
 await phoneSite.goto(`${base}${scope}/race`);
-await phoneSite.waitForTimeout(2500);
+await phoneSite
+  .locator('a[href*="/race/"]')
+  .first()
+  .waitFor({ state: "visible", timeout: 10000 })
+  .catch(() => {});
+await phoneSite.waitForTimeout(300);
 await phoneSite.screenshot({
   path: `${outDir}/mobile-race-picker.jpg`,
   type: "jpeg",
