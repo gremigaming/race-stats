@@ -199,6 +199,147 @@
         "gray_score": 1.27
       }
     },
+    "1104b-4": {
+      "verdict": "1) #19 toni2608 at fault | 2) Not an incident",
+      "by": "GreMi",
+      "real": true,
+      "at_fault": [
+        "#19 toni2608"
+      ],
+      "severity": 3,
+      "note": "",
+      "at": 1793866237,
+      "parts": [
+        {
+          "t0": 8.3,
+          "t1": 10.0,
+          "real": true,
+          "verdict": "#19 toni2608 at fault",
+          "tags": [],
+          "kind": "Moved across alongside",
+          "note": "",
+          "drivers": [
+            {
+              "car": 6,
+              "name": "#21 EthanMoonski",
+              "call": "clear"
+            },
+            {
+              "car": 8,
+              "name": "#19 toni2608",
+              "call": "fault",
+              "severity": 3,
+              "note": "No need for that defence there"
+            },
+            {
+              "car": 10,
+              "name": "#69 trex-Leclerc",
+              "call": "out"
+            },
+            {
+              "car": 11,
+              "name": "#13 Jakubm18_F1",
+              "call": "out"
+            },
+            {
+              "car": 5,
+              "name": "#15 vanderdeured",
+              "call": "out"
+            },
+            {
+              "car": 9,
+              "name": "#21 Darkcore_Archie",
+              "call": "out"
+            }
+          ]
+        },
+        {
+          "t0": 22.0,
+          "t1": 27.0,
+          "real": false,
+          "verdict": "Not an incident",
+          "tags": [],
+          "kind": "Chain reaction",
+          "note": "Just lap 1 chaos, no one really at fault, jakub could have braked a bit earlier but this was just fine",
+          "drivers": [
+            {
+              "car": 6,
+              "name": "#21 EthanMoonski",
+              "call": "clear"
+            },
+            {
+              "car": 8,
+              "name": "#19 toni2608",
+              "call": "clear"
+            },
+            {
+              "car": 10,
+              "name": "#69 trex-Leclerc",
+              "call": "clear"
+            },
+            {
+              "car": 11,
+              "name": "#13 Jakubm18_F1",
+              "call": "clear"
+            },
+            {
+              "car": 5,
+              "name": "#15 vanderdeured",
+              "call": "clear"
+            },
+            {
+              "car": 9,
+              "name": "#21 Darkcore_Archie",
+              "call": "clear"
+            }
+          ]
+        }
+      ],
+      "kind": "Moved across alongside",
+      "drivers": [
+        {
+          "car": 6,
+          "name": "#21 EthanMoonski"
+        },
+        {
+          "car": 8,
+          "name": "#19 toni2608"
+        },
+        {
+          "car": 10,
+          "name": "#69 trex-Leclerc"
+        },
+        {
+          "car": 11,
+          "name": "#13 Jakubm18_F1"
+        },
+        {
+          "car": 5,
+          "name": "#15 vanderdeured"
+        },
+        {
+          "car": 9,
+          "name": "#21 Darkcore_Archie"
+        }
+      ],
+      "track": "Monza",
+      "date": "2026-11-04",
+      "race_file": "Race_Monza_2026_11_04_19_49_57.json",
+      "recording": "2026-11-04_19-41-26_Monza_Race.gmtel.gz",
+      "replay": "https://gremigaming.github.io/race-stats/f1/race/2026-11-04_19-41-26_Monza_Race?inc=8.3&car=6,8,10,11,5,9",
+      "engine": {
+        "rules": "v1.2",
+        "verdict": "RB #69 at fault",
+        "rule": "R3",
+        "severity": 3,
+        "why": "RB #69 ran into the back of toni2608, closing at 27 km/h",
+        "at_fault": [
+          "#69 trex-Leclerc"
+        ],
+        "contacts": 3,
+        "gray_score": 1.13
+      }
+    },
     "1102b-1": {
       "verdict": "Not an incident",
       "by": "GreMi",
