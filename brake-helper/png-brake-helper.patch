@@ -1156,10 +1156,11 @@ index 0000000..7e7a3a0
 +        self.invoke_qml_method("updateView", view)
 diff --git a/apps/hud/ui/overlays/brake_helper/brake_helper.qml b/apps/hud/ui/overlays/brake_helper/brake_helper.qml
 new file mode 100644
-index 0000000..474a8bd
+index 0000000..ae50439
 --- /dev/null
 +++ b/apps/hud/ui/overlays/brake_helper/brake_helper.qml
-@@ -0,0 +1,201 @@
+@@ -0,0 +1,203 @@
++pragma ComponentBehavior: Bound
 +import QtQuick
 +import QtQuick.Window
 +
@@ -1336,6 +1337,7 @@ index 0000000..474a8bd
 +                    Repeater {
 +                        model: root.dots.length
 +                        Rectangle {
++                            required property int index
 +                            width: index === root.current ? dotsRow.dw * 2 + 2 : dotsRow.dw
 +                            height: dotsRow.dw
 +                            radius: dotsRow.dw / 2
