@@ -531,6 +531,25 @@
       },
       "learn": true,
       "owner": true
+    },
+    {
+      "id": "Race_Singapore_2026_11_04_20_09_05.json|5|contact|3|0",
+      "type": "incident",
+      "reason": "Ethan brakes at his normal braking point, hitting gremi trying to battle devildriver, he didnt brake too late but he should have braked a bit earlier because of a battle in front.",
+      "by": "319544045435224067",
+      "at": "2026-11-05T11:18:21Z",
+      "call": {
+        "kind": "Moved across alongside",
+        "fault": "fault",
+        "severity": 4
+      },
+      "file": "Race_Singapore_2026_11_04_20_09_05.json",
+      "driver": "EthanMoonski",
+      "car": 5,
+      "pts": -3.0,
+      "was": -6.0,
+      "learn": true,
+      "owner": true
     }
   ]
 }
