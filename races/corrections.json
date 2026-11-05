@@ -588,6 +588,25 @@
       "was": -3.0,
       "learn": true,
       "owner": true
+    },
+    {
+      "id": "Race_Singapore_2026_11_04_20_09_05.json|10|contact|2|0",
+      "type": "incident",
+      "reason": "Keeps full trottle long after the corner, that was on purpose.",
+      "by": "319544045435224067",
+      "at": "2026-11-05T11:26:13Z",
+      "call": {
+        "kind": "Rear-end",
+        "fault": "fault",
+        "severity": 10
+      },
+      "file": "Race_Singapore_2026_11_04_20_09_05.json",
+      "driver": "daris_2190",
+      "car": 10,
+      "pts": -10.0,
+      "was": -3.0,
+      "learn": true,
+      "owner": true
     }
   ]
 }
