@@ -21,7 +21,9 @@ export const cardHighlight = "shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]";
 
 export const cardClass = `rounded-2xl bg-zinc-900/70 p-5 ${cardHighlight}`;
 export const cardClassCompact = `rounded-2xl bg-zinc-900/70 p-4 ${cardHighlight}`;
-export const cardClassFeature = `rounded-2xl bg-gradient-to-br from-zinc-800/90 via-zinc-900/80 to-zinc-900/50 p-5 ${cardHighlight}`;
+export const cardClassFeature = `rounded-2xl bg-gradient-to-br from-brand-wine/35 via-zinc-900/80 to-brand-violet/10 p-5 ${cardHighlight}`;
+export const interactiveFocusClass =
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-red/70";
 
 /**
  * Accent card recipe — the single source of truth for any nested card surface

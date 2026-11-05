@@ -3,43 +3,27 @@ export interface ChangelogEntry {
   date: string;
   type: "feat" | "fix" | "docs";
   message: string;
-  destination: "tracks" | "drivers" | "safety" | "personal-safety" | "race" | "incidents";
+  destination: "home" | "tracks" | "drivers" | "safety" | "personal-safety" | "race" | "incidents";
 }
 
 // Curated site updates. Keep these focused on changes visitors can notice;
 // raw commit history also contains routine uploads and staff-only corrections.
 const changelog: ChangelogEntry[] = [
   {
-    id: "hidden-names-viewers",
-    date: "2026-11-05",
-    type: "fix",
-    message:
-      "Drivers with hidden names read from the classification screen now show by name in the race viewer and Incidents viewer too (no more \"Car #69\"), and in the qualifying before that race. A name read slightly differently in two races counts as one driver. Drivers with private telemetry but a visible name are no longer shown as \"Car #N\" in the viewers.",
-    destination: "race",
-  },
-  {
     id: "incident-viewer",
     date: "2026-11-05",
     type: "feat",
     message:
-      "New full-screen Incidents viewer: every incident on the track map with coloured markers by type, filters for drivers (or two drivers against each other), the stream's top 10 and awards in a folding side panel, and each incident replayed with the cars' lines and the two main drivers' live throttle, brake and steering. The menu fades while an incident plays.",
+      "Browse race incidents on a track map, filter by driver and incident type, and replay each moment.",
     destination: "incidents",
   },
   {
-    id: "race-highlights",
+    id: "site-ui-refresh",
     date: "2026-11-05",
     type: "feat",
     message:
-      "The race viewer's timeline now shows highlights instead of every contact: big incidents, battles, overtakes, lead changes, fastest lap, photo finishes and more, with a Watch highlights button that plays them back to back.",
-    destination: "race",
-  },
-  {
-    id: "wet-weather-incidents",
-    date: "2026-11-05",
-    type: "feat",
-    message:
-      "Incidents in the wet are judged more leniently: the car behind gets more time to react and a slow slide into another car counts as a racing incident.",
-    destination: "safety",
+      "The GreMi Gang Race Stats site has a refreshed look, with clearer navigation, a more focused home page, calmer race cards, and cleaner layouts across its tools.",
+    destination: "home",
   },
   {
     id: "track-sorting-options",

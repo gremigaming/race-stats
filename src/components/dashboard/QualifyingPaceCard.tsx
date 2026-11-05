@@ -13,7 +13,7 @@ import { CHART_THEME } from "../../constants/colors";
 import { msToLapTime } from "../../utils/format";
 import { linkScopeKey } from "../../utils/routes";
 import { getTrackDisplayName } from "../../utils/tracks";
-import { cardClassCompact } from "../Card";
+import { cardClassCompact, interactiveFocusClass } from "../Card";
 import { TrackFlag } from "../TrackFlag";
 import { HStack } from "../ui/Stack";
 import { trackFormulaPath } from "./helpers";
@@ -33,7 +33,11 @@ export function QualifyingPaceCard({ data }: { data: QualifyingPaceData }) {
   return (
     <Link
       to={trackFormulaPath(track, linkScopeKey(scopeKey, formulaKey))}
-      className={cn(cardClassCompact, "transition-colors hover:bg-zinc-800/50")}
+      className={cn(
+        cardClassCompact,
+        "transition-colors hover:bg-zinc-800/50",
+        interactiveFocusClass,
+      )}
     >
       <HStack justify="between" className="mb-2 gap-3">
         <HStack className="gap-1.5">

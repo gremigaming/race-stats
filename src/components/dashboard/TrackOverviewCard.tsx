@@ -4,7 +4,7 @@ import type { SessionSummary } from "../../types/telemetry";
 import { buildTrackLapPaceBenchmark } from "../../analysis/trackLapPace";
 import { cn } from "../../utils/cn";
 import { formatShortDate, msToSectorTime } from "../../utils/format";
-import { cardClass } from "../Card";
+import { cardClass, interactiveFocusClass } from "../Card";
 import { TrackFlag } from "../TrackFlag";
 import { getTrackDisplayName } from "../../utils/tracks";
 import { TrackLayout } from "../TrackLayout";
@@ -236,7 +236,8 @@ export function TrackOverviewCard({
       to={trackFormulaPath(track, scopeKey)}
       className={cn(
         cardClass,
-        "group relative min-h-40 overflow-hidden transition-colors hover:bg-zinc-800/50",
+        "group relative min-h-40 overflow-hidden transition-all duration-200 hover:-translate-y-0.5 hover:bg-zinc-800/50 hover:shadow-xl hover:shadow-black/20",
+        interactiveFocusClass,
       )}
     >
       {inner}

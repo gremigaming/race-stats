@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useTelemetry } from "../../context/TelemetryContext";
 import { signedHalf, SR_START } from "../../league/safety";
 import { cn } from "../../utils/cn";
+import { interactiveFocusClass } from "../Card";
 import { RankTile } from "./RankTile";
 
 /** The selected driver's SR, plus how it moved inside the date filter. */
@@ -23,7 +24,10 @@ export function SafetySummary() {
   return (
     <Link
       to={`/${scopeKey ?? "all"}/safety?tab=personal`}
-      className="flex items-center gap-3 rounded-xl bg-zinc-900/70 px-3 py-2 transition-colors hover:bg-zinc-900"
+      className={cn(
+        "flex items-center gap-3 rounded-xl bg-zinc-900/70 px-3 py-2 transition-colors hover:bg-zinc-900",
+        interactiveFocusClass,
+      )}
       title="Safety rating (not filtered by date)"
     >
       <RankTile sr={driver.sr} size={36} />
@@ -38,7 +42,11 @@ export function SafetySummary() {
               {" · "}
               <span
                 className={cn(
-                  change > 0 ? "text-emerald-300" : change < 0 ? "text-red-300" : "text-zinc-500",
+                  change > 0
+                    ? "text-emerald-300"
+                    : change < 0
+                      ? "text-red-300"
+                      : "text-zinc-500",
                 )}
               >
                 {signedHalf(change)}

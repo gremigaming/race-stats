@@ -9,19 +9,8 @@ import {
 } from "react-router-dom";
 import { Analytics } from "@vercel/analytics/react";
 import { Layout } from "./components/Layout";
-import { DashboardPage } from "./pages/DashboardPage";
-import { SessionPage } from "./pages/SessionPage";
-import { SessionsPage } from "./pages/SessionsPage";
-import { TrackProgressPage } from "./pages/TrackProgressPage";
-import { TracksPage } from "./pages/TracksPage";
-import { DriversPage } from "./pages/DriversPage";
-import { HeadToHeadPage } from "./pages/HeadToHeadPage";
-import { SafetyPage } from "./pages/SafetyPage";
-import { RaceListPage } from "./pages/RaceListPage";
-import { RaceViewerPage } from "./pages/RaceViewerPage";
-import { IncidentsPage } from "./pages/IncidentsPage";
+import { LoadingSpinner } from "./components/ui/LoadingSpinner";
 import { SetupCardsPage } from "./pages/SetupCardsPage";
-import { SetupManagerPage } from "./pages/SetupManagerPage";
 import { SETUP_MANAGER_ON } from "./league/setupManager";
 import { TelemetryProvider, useTelemetry } from "./context/TelemetryContext";
 import { ZipUploadScreen } from "./components/ZipUploadScreen";
@@ -29,6 +18,72 @@ import { GlobalDropZone } from "./components/GlobalDropZone";
 import { PNG_VERSION_TITLE_PREFIX } from "./config/branding";
 import { ALL_FORMULA_SCOPE_KEY } from "./utils/formulaScope";
 import { dashboardPath, replaceFormulaScopeInPath } from "./utils/routes";
+
+const DashboardPage = lazy(() =>
+  import("./pages/DashboardPage").then((module) => ({
+    default: module.DashboardPage,
+  })),
+);
+const DriversPage = lazy(() =>
+  import("./pages/DriversPage").then((module) => ({
+    default: module.DriversPage,
+  })),
+);
+const DriverInsightsPage = lazy(() =>
+  import("./pages/DriverInsightsPage").then((module) => ({
+    default: module.DriverInsightsPage,
+  })),
+);
+const IncidentsPage = lazy(() =>
+  import("./pages/IncidentsPage").then((module) => ({
+    default: module.IncidentsPage,
+  })),
+);
+const SafetyPage = lazy(() =>
+  import("./pages/SafetyPage").then((module) => ({
+    default: module.SafetyPage,
+  })),
+);
+const RaceListPage = lazy(() =>
+  import("./pages/RaceListPage").then((module) => ({
+    default: module.RaceListPage,
+  })),
+);
+const HeadToHeadPage = lazy(() =>
+  import("./pages/HeadToHeadPage").then((module) => ({
+    default: module.HeadToHeadPage,
+  })),
+);
+const SetupManagerPage = lazy(() =>
+  import("./pages/SetupManagerPage").then((module) => ({
+    default: module.SetupManagerPage,
+  })),
+);
+const SessionsPage = lazy(() =>
+  import("./pages/SessionsPage").then((module) => ({
+    default: module.SessionsPage,
+  })),
+);
+const SessionPage = lazy(() =>
+  import("./pages/SessionPage").then((module) => ({
+    default: module.SessionPage,
+  })),
+);
+const TracksPage = lazy(() =>
+  import("./pages/TracksPage").then((module) => ({
+    default: module.TracksPage,
+  })),
+);
+const TrackProgressPage = lazy(() =>
+  import("./pages/TrackProgressPage").then((module) => ({
+    default: module.TrackProgressPage,
+  })),
+);
+const RaceViewerPage = lazy(() =>
+  import("./pages/RaceViewerPage").then((module) => ({
+    default: module.RaceViewerPage,
+  })),
+);
 
 const UiDebugPage = import.meta.env.DEV
   ? lazy(() =>
@@ -47,7 +102,7 @@ function AppRoutes() {
   if (!isUiDebugRoute && (mode === "detecting" || sessionsLoading)) {
     return (
       <div className="flex h-screen items-center justify-center bg-black">
-        <div className="h-10 w-10 animate-spin rounded-full border-4 border-zinc-600 border-t-red-500" />
+        <LoadingSpinner className="h-10 w-10 border-4" label="Loading site" />
       </div>
     );
   }
@@ -59,14 +114,12 @@ function AppRoutes() {
     <>
       <Routes>
         {/* The Live Race Viewer is one full screen, outside the site layout */}
-        <Route path=":formulaKey/race/:id" element={<RaceViewerPage />} />
-        {/* The incident viewer (5 Nov 2026): full screen like the race viewer, every incident on a track map */}
         <Route
-          path=":formulaKey/incidents"
+          path=":formulaKey/race/:id"
           element={
-            <ScopedFormulaRoute>
-              <IncidentsPage />
-            </ScopedFormulaRoute>
+            <Suspense fallback={<RaceViewerLoading />}>
+              <RaceViewerPage />
+            </Suspense>
           }
         />
         <Route element={<Layout />}>
@@ -96,6 +149,22 @@ function AppRoutes() {
             element={
               <ScopedFormulaRoute>
                 <DriversPage />
+              </ScopedFormulaRoute>
+            }
+          />
+          <Route
+            path=":formulaKey/insights"
+            element={
+              <ScopedFormulaRoute>
+                <DriverInsightsPage />
+              </ScopedFormulaRoute>
+            }
+          />
+          <Route
+            path=":formulaKey/incidents"
+            element={
+              <ScopedFormulaRoute>
+                <IncidentsPage />
               </ScopedFormulaRoute>
             }
           />
@@ -180,10 +249,32 @@ function UiDebugLoading() {
   return (
     <div className="flex min-h-screen items-center justify-center px-6 text-center">
       <div>
-        <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-zinc-700 border-t-cyan-400" />
+        <LoadingSpinner className="mx-auto h-8 w-8 border-4" />
         <p className="mt-3 font-mono text-xs uppercase tracking-[0.18em] text-zinc-500">
           loading ui debug
         </p>
+      </div>
+    </div>
+  );
+}
+
+function RouteLoadingFallback() {
+  return (
+    <div
+      className="flex min-h-[48vh] items-center justify-center px-6"
+    >
+      <LoadingSpinner className="size-8 border-2" label="Loading view" />
+    </div>
+  );
+}
+
+function RaceViewerLoading() {
+  return (
+    <div className="fixed inset-0 flex items-center justify-center bg-[#0d0b10] text-zinc-100">
+      <div className="brand-stripe-wash pointer-events-none absolute inset-x-0 top-0 h-px" />
+      <div className="flex items-center gap-3 rounded-2xl border border-white/[0.08] bg-zinc-900/80 px-5 py-4 shadow-2xl shadow-black/30">
+        <LoadingSpinner className="size-5 border-2" />
+        <span className="text-sm text-zinc-300">Loading race viewer</span>
       </div>
     </div>
   );
@@ -231,7 +322,7 @@ function ScopedFormulaRoute({ children }: { children: ReactNode }) {
     );
   }
 
-  return children;
+  return <Suspense fallback={<RouteLoadingFallback />}>{children}</Suspense>;
 }
 
 function RouteNotFound() {

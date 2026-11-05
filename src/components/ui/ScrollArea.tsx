@@ -12,10 +12,8 @@ export const scrollAxisClass: Record<ScrollAxis, string> = {
 };
 
 export const scrollbarClass: Record<ScrollTone, string> = {
-  default:
-    "scrollbar-thin scrollbar-thumb-zinc-800 scrollbar-track-transparent hover:scrollbar-thumb-zinc-700",
-  subtle:
-    "scrollbar-thin scrollbar-thumb-white/[0.06] scrollbar-track-transparent hover:scrollbar-thumb-white/[0.12]",
+  default: "scrollbar-thin scrollbar-themed",
+  subtle: "scrollbar-thin scrollbar-themed scrollbar-themed-subtle",
 };
 
 export const scrollbarGutterClass: Record<ScrollGutter, string> = {

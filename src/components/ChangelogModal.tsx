@@ -22,6 +22,7 @@ const DESTINATION_PATHS: Record<
   (typeof changelog)[number]["destination"],
   string
 > = {
+  home: "",
   tracks: "/tracks",
   drivers: "/drivers",
   safety: "/safety",
@@ -55,10 +56,16 @@ export function ChangelogModal({ onClose }: { onClose: () => void }) {
   const scopePath = dashboardPath(scopeKey ?? ALL_FORMULA_SCOPE_KEY);
 
   return (
-    <Modal onClose={onClose} className="max-w-[680px] max-h-[70vh]">
+    <Modal
+      onClose={onClose}
+      className="max-w-[680px] max-h-[70vh]"
+      ariaLabelledBy="changelog-modal-title"
+    >
       {/* Header */}
       <div className="flex items-center px-6 pt-5 pb-4 border-b border-white/[0.05] pr-14">
-        <h2 className="text-base font-semibold text-zinc-100">What's new</h2>
+        <h2 id="changelog-modal-title" className="text-base font-semibold text-zinc-100">
+          What's new
+        </h2>
       </div>
 
       {/* Content */}

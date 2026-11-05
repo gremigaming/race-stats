@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { ACCENT_TOKENS, type AccentColor } from "../../constants/accents";
 import { cn } from "../../utils/cn";
-import { accentCardClass, cardHighlight } from "../Card";
+import { accentCardClass, cardHighlight, interactiveFocusClass } from "../Card";
 import { Eyebrow } from "./Eyebrow";
 import { HStack } from "./Stack";
 
@@ -53,6 +53,7 @@ export function InsightTile({
     "relative flex flex-col flex-nowrap gap-1 overflow-hidden rounded-2xl p-3.5",
     surface,
     hoverClass,
+    to && interactiveFocusClass,
     className,
   );
 

@@ -9,7 +9,7 @@ import {
   TriangleAlert,
   Trophy,
 } from "lucide-react";
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { cardClass, cardHighlight } from "../Card";
 import { SectionHeader } from "../ui/SectionHeader";
@@ -356,19 +356,28 @@ function Sessions({ driver, data }: { driver: SafetyDriver; data: SafetyData }) 
   }, [driver, filter, query]);
 
   const histIdx = new Map(driver.history.map((h, i) => [h.stream, i]));
+  const hasLegacyBase = driver.history.some((h) => h.base != null);
   return (
     <section className={cardClass}>
       <SectionHeader title="Races" hint={`${driver.sessions.length} sessions, newest first`} />
-      {data.rules === "v2.5" && <HowItAddsUp params={sr} />}
-      {driver.history.some((h) => h.base != null) && (
-        <p className="mb-3 rounded-lg bg-zinc-950/50 px-3 py-2 text-[11px] leading-relaxed text-zinc-400">
-          <span className="text-zinc-200">How it adds up:</span> SR = 50 + 25 × your average net score (at most 100),
-          minus your stings. A race's net score (right of each race) is its bonus (max 4), minus half its incident
-          points, minus track limits, pit exit and retirements. The other half of the incident points is the sting
-          (red badge): it comes straight off your SR, the same for everyone however many races you've done, and fades
-          as you race on. With an average above +2.0 you're at the 100 max, so then only new stings and old ones
-          fading move your SR.
-        </p>
+      {(data.rules === "v2.5" || hasLegacyBase) && (
+        <details className="group mb-3 overflow-hidden rounded-xl border border-white/[0.07] bg-zinc-950/45">
+          <summary className="flex min-h-10 cursor-pointer list-none items-center gap-2.5 px-3 py-2 text-xs text-zinc-200 transition-colors hover:bg-white/[0.03] [&::-webkit-details-marker]:hidden">
+            <ChevronRight className="size-4 shrink-0 text-zinc-500 transition-transform group-open:rotate-90" />
+            <span className="font-medium">How a stream changes your rating</span>
+            <span className="ml-auto hidden text-[11px] text-zinc-500 sm:inline">
+              Formula and weighting
+            </span>
+          </summary>
+          <div className="space-y-2 border-t border-white/[0.06] px-3 py-3">
+            {data.rules === "v2.5" && <HowItAddsUp params={sr} />}
+            {hasLegacyBase && (
+              <p className="text-[11px] leading-relaxed text-zinc-400">
+                SR = 50 + 25 × your average net score (at most 100), minus your stings. A race's net score (right of each race) is its bonus (max 4), minus half its incident points, minus track limits, pit exit and retirements. The other half of the incident points is the sting (red badge): it comes straight off your SR, the same for everyone however many races you've done, and fades as you race on. With an average above +2.0 you're at the 100 max, so then only new stings and old ones fading move your SR.
+              </p>
+            )}
+          </div>
+        </details>
       )}
       <div className="mb-4 flex flex-wrap items-center gap-2">
         <SegmentedControl
@@ -418,7 +427,8 @@ function Sessions({ driver, data }: { driver: SafetyDriver; data: SafetyData }) 
               params={sr}
               sessions={g.sessions}
               driver={driver.name}
-              defaultOpen={gi === 0 || query.trim() !== ""}
+              defaultOpen={query.trim() !== "" || (filter !== "all" && gi === 0)}
+              resetKey={`${filter}:${query.trim() ? "search" : "browse"}`}
             />
           );
         })}
@@ -445,6 +455,7 @@ function StreamGroup({
   sessions,
   driver,
   defaultOpen,
+  resetKey,
 }: {
   date: string;
   sr?: number;
@@ -463,8 +474,10 @@ function StreamGroup({
   sessions: SafetySession[];
   driver: string;
   defaultOpen: boolean;
+  resetKey: string;
 }) {
   const [open, setOpen] = useState(defaultOpen);
+  useEffect(() => setOpen(defaultOpen), [defaultOpen, resetKey]);
   const weight = sessions[0]?.weight ?? 1;
   const skipped = sessions.length === 0;
   // SR v2.5: the change from the exact split, so the header matches the sum in the box
@@ -474,6 +487,7 @@ function StreamGroup({
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
         className="flex w-full items-center gap-3 px-3 py-2.5 text-left hover:bg-white/[0.02]"
       >
         <ChevronRight
@@ -574,6 +588,7 @@ function SessionRow({
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
         className="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm"
       >
         <span
@@ -775,7 +790,27 @@ function SessionIncidents({ file, driver }: { file: string; driver: string }) {
 const pct = (x: number) => `${Math.round(x * 100)}%`;
 const f1 = (x: number) => (Math.round(x * 10) / 10).toFixed(1);
 const f2 = (x: number) => String(+x.toFixed(2));
-const signed1 = (x: number) => signedHalf(Math.round(x * 10) / 10);
+const round1 = (x: number) => Math.round(x * 10) / 10;
+const signed1 = (x: number) => signedHalf(round1(x));
+
+function partsValues(parts: StreamParts): number[] {
+  return [
+    ...(parts.joined > 0 ? [parts.races - parts.gravJoined] : []),
+    ...(parts.gravSkipped > 0.04 ? [-parts.gravSkipped] : []),
+    ...(Math.abs(parts.window) >= 0.05 ? [parts.window] : []),
+    ...(Math.abs(parts.limit) >= 0.05 ? [parts.limit] : []),
+  ];
+}
+
+function partsHaveRoundingGap(parts: StreamParts): boolean {
+  const shownParts = partsValues(parts).reduce((sum, value) => sum + round1(value), 0);
+  return Math.abs(round1(shownParts) - round1(parts.after - parts.before)) >= 0.05;
+}
+
+function joinedRaceHasRoundingGap(parts: StreamParts): boolean {
+  const shownBreakdown = round1(parts.bonus) - round1(parts.penalty) - round1(parts.gravJoined);
+  return Math.abs(round1(shownBreakdown) - round1(parts.races - parts.gravJoined)) >= 0.05;
+}
 
 /** The rules, with the values this build used (safety.json settings, so staff changes show up here). */
 function HowItAddsUp({ params }: { params?: SrSettings }) {
@@ -783,9 +818,9 @@ function HowItAddsUp({ params }: { params?: SrSettings }) {
   const window = srWindowRaces(p);
   const tiers = ([60, 70, 80, 90, 100] as const).map((from) => `x${f2(p[`tier_${from}`])} from ${from}`).join(", ");
   return (
-    <div className="mb-3 space-y-1.5 rounded-lg bg-zinc-950/50 px-3 py-2 text-[11px] leading-relaxed text-zinc-400">
+    <div className="space-y-1.5 text-[11px] leading-relaxed text-zinc-400">
       <p>
-        <span className="text-zinc-200">How it adds up:</span> SR = 50 + the net scores of your last {window} races,
+        SR = 50 + the net scores of your last {window} races,
         between 0 and 100. Your newest {p.window_step} races count{" "}
         {p.window_weights.map((w, i) => (i === 0 ? `${pct(w)}` : `the ${p.window_step} before that ${pct(w)}`)).join(", ")}. So
         every race you join pushes your older races back a place, and every {p.window_step} places they count less: that's
@@ -807,10 +842,10 @@ function HowItAddsUp({ params }: { params?: SrSettings }) {
 
 /** One line under the stream title: the parts of its SR change. */
 function PartsLine({ parts }: { parts: StreamParts }) {
-  const grav = parts.gravJoined + parts.gravSkipped;
   const bits: { t: string; n: number }[] = [];
-  if (parts.joined > 0) bits.push({ t: "races", n: parts.races });
-  if (grav > 0.04) bits.push({ t: "gravity", n: -grav });
+  if (parts.joined > 0) bits.push({ t: "races joined (gravity in)", n: parts.races - parts.gravJoined });
+  if (parts.gravSkipped > 0.04)
+    bits.push({ t: `${parts.skipped === 1 ? "skipped race" : "skipped races"} gravity`, n: -parts.gravSkipped });
   if (Math.abs(parts.window) >= 0.05) bits.push({ t: "older races count less", n: parts.window });
   if (Math.abs(parts.limit) >= 0.05) bits.push({ t: "over the limit", n: parts.limit });
   return (
@@ -818,11 +853,11 @@ function PartsLine({ parts }: { parts: StreamParts }) {
       {bits.map((b, i) => (
         <span key={b.t}>
           {i > 0 && " "}
-          <span className={changeClass(b.n)}>{`${i > 0 ? (b.n < 0 ? "− " : "+ ") : b.n < 0 ? "−" : "+"}${f1(Math.abs(b.n))}`}</span>
+          <span className={changeClass(b.n)}>{signed1(b.n)}</span>
           {` ${b.t}`}
         </span>
       ))}
-      {` = ${signed1(parts.after - parts.before)}`}
+      {`${partsHaveRoundingGap(parts) ? " ≈ " : " = "}${signed1(parts.after - parts.before)}`}
     </div>
   );
 }
@@ -879,7 +914,8 @@ function PartsBox({
             <>
               bonus +{f1(parts.bonus)} − penalties {f1(parts.penalty)} − gravity {f1(parts.gravJoined)} (
               {pct(p.gravity_joined)} of your SR above 50, after each race)
-              {Math.abs(sumRows - (parts.races - parts.gravJoined)) >= 0.15 && " · race numbers are rounded"}
+              {(joinedRaceHasRoundingGap(parts) || Math.abs(sumRows - (parts.races - parts.gravJoined)) >= 0.15) &&
+                " · component values are rounded individually"}
             </>
           }
         />
@@ -915,6 +951,11 @@ function PartsBox({
         strong
         hint={`Change ${signed1(parts.after - parts.before)}. Your SR is shown rounded to the nearest 0.5.`}
       />
+      {(partsHaveRoundingGap(parts) || joinedRaceHasRoundingGap(parts)) && (
+        <p className="pt-0.5 text-[10.5px] text-zinc-500">
+          Values are rounded to 0.1 separately, so the displayed parts may not add up exactly.
+        </p>
+      )}
     </div>
   );
 }

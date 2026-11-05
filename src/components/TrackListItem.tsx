@@ -2,6 +2,7 @@ import { NavLink } from "react-router-dom";
 import { cn } from "../utils/cn";
 import { trackPath } from "../utils/routes";
 import { getTrackCountryName, getTrackDisplayName } from "../utils/tracks";
+import { interactiveFocusClass } from "./Card";
 import { TrackFlag } from "./TrackFlag";
 import { HStack } from "./ui/Stack";
 
@@ -83,8 +84,9 @@ export function TrackListItem({
         cn(
           "flex items-center gap-3 rounded-xl px-2 py-2.5 text-sm transition-colors",
           isActive
-            ? "bg-zinc-800/70 text-white"
-            : "text-zinc-400 hover:bg-zinc-900/60 hover:text-zinc-200",
+            ? "bg-gradient-to-r from-brand-red/[0.12] to-brand-violet/[0.08] text-white"
+            : "text-zinc-300 hover:bg-white/[0.04] hover:text-white",
+          interactiveFocusClass,
         )
       }
     >

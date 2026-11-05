@@ -25,6 +25,7 @@ import {
 import { linkScopeKey, sessionsPath, tracksPath } from "../utils/routes";
 import { readStoredString, writeStoredString } from "../utils/storage";
 import { getTrackId, sortTracksByCalendar } from "../utils/tracks";
+import { LoadingState } from "./ui/LoadingState";
 import { SessionListActiveFilters } from "./SessionListActiveFilters";
 import { SessionDatePicker } from "./SessionDatePicker";
 import { SessionListFilterMenu } from "./SessionListFilterMenu";
@@ -184,7 +185,7 @@ export function SessionList({
   };
 
   if (loading) {
-    return <div className="p-4 text-sm text-zinc-500">Loading sessions...</div>;
+    return <LoadingState variant="inline" label="Loading sessions" />;
   }
 
   if (error) {
@@ -451,12 +452,24 @@ export function SessionList({
             const modeLabel = groupModeLabel(dateSessions);
             return (
               <div key={dateKey}>
-                <h3 className="mb-1 px-2 font-mono text-xs font-semibold uppercase tracking-wider text-zinc-500">
-                  {formatRelativeDate(dateKey + "T00:00:00")}
+                <div className="mb-1.5 flex min-w-0 items-center gap-2.5 px-2 pt-1">
+                  <h3 className="shrink-0 font-mono text-[11px] font-semibold uppercase tracking-wider text-zinc-300">
+                    {formatRelativeDate(dateKey + "T00:00:00")}
+                  </h3>
                   {modeLabel && (
-                    <span className="ml-1.5 text-zinc-600">· {modeLabel}</span>
+                    <span className="shrink-0 rounded-md border border-white/[0.06] bg-black/20 px-1.5 py-0.5 text-[9px] font-medium tracking-wide text-zinc-400">
+                      {modeLabel}
+                    </span>
                   )}
-                </h3>
+                  <span className="shrink-0 text-[10px] text-zinc-500">
+                    {dateSessions.length}{" "}
+                    {dateSessions.length === 1 ? "session" : "sessions"}
+                  </span>
+                  <span
+                    aria-hidden="true"
+                    className="h-px min-w-3 flex-1 bg-gradient-to-r from-white/[0.09] to-transparent"
+                  />
+                </div>
                 <div className="space-y-0.5">
                   {dateSessions.map((session) => (
                     <SessionListItem

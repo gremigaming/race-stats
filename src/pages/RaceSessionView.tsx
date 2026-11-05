@@ -125,10 +125,16 @@ function SpectatorDriverPicker({
 
 function StickySessionContextBar({ children }: { children: ReactNode }) {
   return (
-    <div className="sticky top-0 z-30 -mx-4 border-b border-zinc-900/80 bg-canvas/90 px-4 py-3 shadow-lg shadow-black/20 backdrop-blur-md sm:-mx-6 sm:px-6">
-      <HStack align="center" wrap={false} className="gap-2">
-        {children}
-      </HStack>
+    <div className="sticky top-0 z-30 py-2">
+      <div className="brand-stripe-wash relative isolate overflow-hidden rounded-2xl border border-white/[0.08] p-2.5 shadow-[0_10px_28px_rgba(0,0,0,0.28)] backdrop-blur-xl sm:p-3">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 bg-black/45"
+        />
+        <HStack align="center" wrap={false} className="relative gap-2">
+          {children}
+        </HStack>
+      </div>
     </div>
   );
 }

@@ -1,7 +1,34 @@
-import { ArrowLeft, ChevronLeft, Compass, Eye, EyeOff, Hand, Maximize, Minus, Navigation, PanelRight, Plus, RotateCcw, RotateCw, SkipForward, Tv, Video, X } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { Link, useParams } from "react-router-dom";
+import {
+  ArrowLeft,
+  ChevronLeft,
+  Compass,
+  Eye,
+  EyeOff,
+  Hand,
+  Maximize,
+  Minus,
+  Navigation,
+  PanelRight,
+  Plus,
+  RotateCcw,
+  RotateCw,
+  SkipForward,
+  Tv,
+  Video,
+  X,
+} from "lucide-react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
+import { useParams } from "react-router-dom";
 import { useTelemetry } from "../context/TelemetryContext";
+import { useBackNavigation } from "../hooks/useBackNavigation";
+import { LoadingSpinner } from "../components/ui/LoadingSpinner";
 import { driverKey, RACE_POINTS } from "../league/league";
 import { liveryOf, loadLiveries, type Livery } from "../viewer/cars";
 import { IncidentPip, StartLights, TvStrip } from "../viewer/broadcast";
@@ -63,7 +90,12 @@ function leagueFileOf(files: string[], track: string, started: string) {
 /** The Live Race Viewer: one screen, the whole race on a WebGL map (spec v1, phase 2). */
 export function RaceViewerPage() {
   const { formulaKey, id } = useParams<{ formulaKey: string; id: string }>();
-  const [race, setRace] = useState<{ manifest: RaceManifest; base: string } | null>(null);
+  const back = `/${formulaKey ?? ""}/race`;
+  const goBack = useBackNavigation(back);
+  const [race, setRace] = useState<{
+    manifest: RaceManifest;
+    base: string;
+  } | null>(null);
   const [failed, setFailed] = useState(false);
 
   useEffect(() => {
@@ -81,29 +113,50 @@ export function RaceViewerPage() {
     };
   }, [id]);
 
-  const back = `/${formulaKey ?? ""}/race`;
   if (failed)
     return (
-      <Shell back={back}>
+      <Shell onBack={goBack}>
         <p className="text-zinc-400">This race isn't available (yet).</p>
       </Shell>
     );
   if (!race)
     return (
-      <Shell back={back}>
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-zinc-700 border-t-red-500" />
+      <Shell onBack={goBack}>
+        <LoadingSpinner
+          className="h-8 w-8 border-4"
+          label="Loading race"
+        />
       </Shell>
     );
-  return <Viewer key={race.manifest.uid} manifest={race.manifest} base={race.base} back={back} />;
+  return (
+    <Viewer
+      key={race.manifest.uid}
+      manifest={race.manifest}
+      base={race.base}
+      back={back}
+      onBack={goBack}
+    />
+  );
 }
 
-function Shell({ back, children }: { back: string; children: ReactNode }) {
+function Shell({
+  onBack,
+  children,
+}: {
+  onBack: () => void;
+  children: ReactNode;
+}) {
   return (
     <div className="fixed inset-0 flex flex-col items-center justify-center gap-4 bg-[#0c0e11] text-zinc-100">
       {children}
-      <Link to={back} className="text-sm text-zinc-400 underline">
-        All races
-      </Link>
+      <button
+        type="button"
+        onClick={onBack}
+        className="inline-flex items-center gap-2 rounded-lg border border-white/10 px-3 py-2 text-sm text-zinc-300 transition-colors hover:bg-white/[0.06] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-red/70"
+      >
+        <ArrowLeft className="size-4" />
+        Back
+      </button>
     </div>
   );
 }
@@ -124,7 +177,17 @@ interface Restore {
   inc: number;
 }
 
-function Viewer({ manifest: initial, base, back }: { manifest: RaceManifest; base: string; back: string }) {
+function Viewer({
+  manifest: initial,
+  base,
+  back,
+  onBack,
+}: {
+  manifest: RaceManifest;
+  base: string;
+  back: string;
+  onBack: () => void;
+}) {
   const [manifest, setManifest] = useState(initial);
   const host = useRef<HTMLDivElement>(null);
   const scene = useRef<RaceScene | null>(null);
@@ -848,13 +911,16 @@ function Viewer({ manifest: initial, base, back }: { manifest: RaceManifest; bas
           </div>
         )}
         <div className="pointer-events-none absolute inset-x-0 top-0 flex items-start gap-2 p-2 md:p-3">
-          <Link
-            to={back}
-            aria-label="All races"
-            className="pointer-events-auto flex h-9 shrink-0 items-center gap-1 rounded-lg border border-white/10 bg-[#0c0e11]/85 px-2 text-sm text-zinc-300 backdrop-blur hover:text-white"
+          <button
+            type="button"
+            onClick={onBack}
+            title="Go back"
+            aria-label="Go back"
+            className="pointer-events-auto flex h-9 shrink-0 items-center gap-1 rounded-lg border border-white/10 bg-[#0c0e11]/85 px-2 text-sm text-zinc-300 backdrop-blur transition-colors hover:bg-white/[0.08] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-red/70"
           >
-            <ArrowLeft className="h-4 w-4" /> <span className="hidden sm:inline">Races</span>
-          </Link>
+            <ArrowLeft className="h-4 w-4" />{" "}
+            <span className="hidden sm:inline">Back</span>
+          </button>
           <div className="min-w-0 rounded-lg border border-white/10 bg-[#0c0e11]/85 px-2.5 py-1 backdrop-blur md:px-3 md:py-1.5">
             <div className="truncate text-xs font-semibold md:text-sm">
               {manifest.track}

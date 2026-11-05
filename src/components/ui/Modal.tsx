@@ -7,12 +7,20 @@ const TRANSITION_MS = 180;
 interface ModalProps {
   // Omit to make the modal non-dismissable (no Escape, no backdrop click, no X).
   onClose?: () => void;
-  children: ReactNode;
+  children: ReactNode | ((requestClose: () => void) => ReactNode);
   // Sizing/extra classes applied to the inner panel.
   className?: string;
+  ariaLabelledBy?: string;
+  ariaDescribedBy?: string;
 }
 
-export function Modal({ onClose, children, className }: ModalProps) {
+export function Modal({
+  onClose,
+  children,
+  className,
+  ariaLabelledBy,
+  ariaDescribedBy,
+}: ModalProps) {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -36,6 +44,9 @@ export function Modal({ onClose, children, className }: ModalProps) {
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose, handleClose]);
 
+  const content =
+    typeof children === "function" ? children(handleClose) : children;
+
   return (
     <div
       className={cn(
@@ -45,6 +56,10 @@ export function Modal({ onClose, children, className }: ModalProps) {
       onClick={handleClose}
     >
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={ariaLabelledBy}
+        aria-describedby={ariaDescribedBy}
         onClick={(e) => e.stopPropagation()}
         className={cn(
           "relative flex w-full flex-col rounded-3xl bg-gradient-to-br from-zinc-800 via-zinc-900 to-zinc-950 shadow-2xl ring-1 ring-white/[0.06] transition-all duration-[180ms] ease-out",
@@ -61,7 +76,7 @@ export function Modal({ onClose, children, className }: ModalProps) {
             <X className="h-4 w-4" />
           </button>
         )}
-        {children}
+        {content}
       </div>
     </div>
   );

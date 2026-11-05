@@ -1,9 +1,10 @@
-import { ArrowUpDown } from "lucide-react";
+import { AlertTriangle, ArrowUpDown, RotateCcw, Route } from "lucide-react";
 import { useMemo, useState } from "react";
-import { SectionHeader } from "../components/ui/SectionHeader";
+import { ActionEmptyState } from "../components/ActionEmptyState";
 import { SessionListActiveFilters } from "../components/SessionListActiveFilters";
 import { SessionListFilterMenu } from "../components/SessionListFilterMenu";
 import { TrackOverviewCard } from "../components/dashboard/TrackOverviewCard";
+import { Button } from "../components/ui/Button";
 import {
   buildTrackRecords,
   isProblemStatus,
@@ -19,6 +20,9 @@ import {
 } from "../hooks/useSessionFilters";
 import { useSessionList } from "../hooks/useSessionList";
 import { useGameScope } from "../hooks/useGameScope";
+import { PageFrame } from "../components/ui/PageFrame";
+import { PageHeader } from "../components/ui/PageHeader";
+import { LoadingSpinner } from "../components/ui/LoadingSpinner";
 import type { SessionSummary } from "../types/telemetry";
 import { getSessionFormulaScopeKey } from "../utils/formulaScope";
 import { getTrackId, sortTracksByCalendar } from "../utils/tracks";
@@ -110,8 +114,7 @@ export function TracksPage() {
         }
       } else if (trackSort === "race-pace") {
         if (a.paceGapMs == null || b.paceGapMs == null) {
-          comparison =
-            a.paceGapMs == null ? (b.paceGapMs == null ? 0 : 1) : -1;
+          comparison = a.paceGapMs == null ? (b.paceGapMs == null ? 0 : 1) : -1;
         } else {
           comparison = a.paceGapMs - b.paceGapMs;
         }
@@ -133,18 +136,20 @@ export function TracksPage() {
         aria-label="Loading tracks"
         className="flex h-full items-center justify-center"
       >
-        <div
-          aria-hidden="true"
-          className="size-7 animate-spin rounded-full border-2 border-zinc-700 border-t-red-500"
-        />
+        <LoadingSpinner className="size-7 border-2" />
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="mx-auto max-w-5xl p-6 text-sm text-red-300">
-        Tracks could not be loaded: {error}
+      <div className="mx-auto flex min-h-80 max-w-6xl items-center justify-center px-4 py-6 sm:px-6 lg:px-8">
+        <ActionEmptyState
+          icon={AlertTriangle}
+          title="Track data could not load"
+          message={error}
+          className="max-w-lg"
+        />
       </div>
     );
   }
@@ -153,12 +158,15 @@ export function TracksPage() {
     game.isFiltered || filters.type !== "all" || filters.mode !== "all";
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6 p-6">
-      <SectionHeader
-        title="All tracks"
-        hint={`${activeFormula?.label ?? "All games"} · ${league?.filterLabel ?? "All available dates"} · ${trackCards.length} ${trackCards.length === 1 ? "track" : "tracks"} · ${filteredSessions.length} ${filteredSessions.length === 1 ? "session" : "sessions"}`}
+    <PageFrame>
+      <PageHeader
+        icon={Route}
+        eyebrow="Race archive"
+        title="Tracks"
+        description="Compare your results, pace, and progress at every circuit."
+        meta={`${activeFormula?.label ?? "All games"} · ${league?.filterLabel ?? "All available dates"} · ${trackCards.length} ${trackCards.length === 1 ? "track" : "tracks"} · ${filteredSessions.length} ${filteredSessions.length === 1 ? "session" : "sessions"}`}
         action={
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <PillSelect
               ariaLabel="Sort tracks"
               leadingIcon={ArrowUpDown}
@@ -172,6 +180,7 @@ export function TracksPage() {
               onChange={setFilters}
               game={game}
               onReset={resetFilters}
+              showGame={false}
             />
           </div>
         }
@@ -189,30 +198,36 @@ export function TracksPage() {
 
       {trackCards.length ? (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          {trackCards.map(
-            ({ id, track, sessions: trackSessions, records }) => (
-              <TrackOverviewCard
-                key={id}
-                track={track}
-                sessions={trackSessions}
-                scopeKey={scopeKey ?? undefined}
-                records={records}
-              />
-            ),
-          )}
+          {trackCards.map(({ id, track, sessions: trackSessions, records }) => (
+            <TrackOverviewCard
+              key={id}
+              track={track}
+              sessions={trackSessions}
+              scopeKey={scopeKey ?? undefined}
+              records={records}
+            />
+          ))}
         </div>
       ) : (
-        <div className="rounded-2xl bg-zinc-900/50 px-5 py-8 text-center">
-          <h2 className="text-sm font-semibold text-zinc-300">
-            {isFiltered ? "No tracks match these filters" : "No tracks yet"}
-          </h2>
-          <p className="mt-1 text-sm text-zinc-500">
-            {isFiltered
+        <ActionEmptyState
+          icon={Route}
+          title={isFiltered ? "No tracks match these filters" : "No tracks yet"}
+          message={
+            isFiltered
               ? "Reset the filters to see every track with saved sessions."
-              : "Tracks will appear here when you have saved sessions for them."}
-          </p>
-        </div>
+              : "Tracks will appear here when you have saved sessions for them."
+          }
+          className="max-w-none"
+          actions={
+            isFiltered && (
+              <Button variant="secondary" onClick={resetFilters}>
+                <RotateCcw className="size-3.5" />
+                Reset filters
+              </Button>
+            )
+          }
+        />
       )}
-    </div>
+    </PageFrame>
   );
 }

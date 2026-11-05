@@ -33,6 +33,7 @@ import {
 } from "../utils/formulaScope";
 import { getFormulaScopeCandidateFromPath, isRootPath } from "../utils/routes";
 import { buildSessionSummary } from "../utils/sessionSummary";
+import { LEAGUE_DRIVER_STORAGE_KEY } from "../constants/storage";
 import {
   asSeenBy,
   listDrivers,
@@ -70,8 +71,6 @@ export interface LeagueState {
   /** Race results are visible while telemetry analysis is still finishing. */
   analysisPending: boolean;
 }
-
-const LEAGUE_DRIVER_STORAGE_KEY = "league-driver";
 
 // Session content is cached by its published hash; corrections and late
 // classification reads replace only the affected sessions.

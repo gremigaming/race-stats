@@ -20,6 +20,7 @@ import { Eyebrow } from "../components/ui/Eyebrow";
 import { InsightTile } from "../components/ui/InsightTile";
 import { SectionHeader } from "../components/ui/SectionHeader";
 import { SegmentedControl } from "../components/ui/SegmentedControl";
+import { LoadingSpinner } from "../components/ui/LoadingSpinner";
 import {
   forgetKey,
   loadSetupData,
@@ -203,7 +204,10 @@ export function SetupManagerPage() {
       </div>
       {state.status === "loading" && (
         <div className="flex justify-center py-16">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-zinc-700 border-t-red-500" />
+          <LoadingSpinner
+            className="h-8 w-8 border-4"
+            label="Loading setup recommendations"
+          />
         </div>
       )}
       {state.status === "locked" && <LockedCard denied={state.denied} />}

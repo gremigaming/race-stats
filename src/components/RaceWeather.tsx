@@ -1,4 +1,11 @@
-import { Cloud, CloudLightning, CloudRain, CloudSun, Sun, type LucideIcon } from "lucide-react";
+import {
+  Cloud,
+  CloudLightning,
+  CloudRain,
+  CloudSun,
+  Sun,
+  type LucideIcon,
+} from "lucide-react";
 import type { CSSProperties } from "react";
 import { cn } from "../utils/cn";
 
@@ -7,88 +14,138 @@ interface Kind {
   key: "sun" | "cloud" | "overcast" | "rain" | "storm";
   label: string;
   icon: LucideIcon;
-  /** Card wash colour (rgba) and chip text colour. */
-  tint: string;
+  glow: string;
+  frame: string;
+  chip: string;
   text: string;
-  wet: boolean;
 }
 
 const KINDS: Record<Kind["key"], Kind> = {
-  sun: { key: "sun", label: "Sunny", icon: Sun, tint: "rgba(251,191,36,0.20)", text: "text-amber-300", wet: false },
-  cloud: { key: "cloud", label: "Light cloud", icon: CloudSun, tint: "rgba(253,230,138,0.12)", text: "text-amber-100", wet: false },
-  overcast: { key: "overcast", label: "Overcast", icon: Cloud, tint: "rgba(161,161,170,0.18)", text: "text-zinc-300", wet: false },
-  rain: { key: "rain", label: "Rain", icon: CloudRain, tint: "rgba(56,189,248,0.20)", text: "text-sky-300", wet: true },
-  storm: { key: "storm", label: "Storm", icon: CloudLightning, tint: "rgba(129,140,248,0.26)", text: "text-indigo-300", wet: true },
+  sun: {
+    key: "sun",
+    label: "Sunny",
+    icon: Sun,
+    glow: "rgba(251,191,36,0.22)",
+    frame: "ring-amber-300/12",
+    chip: "bg-amber-300/10 ring-amber-200/25",
+    text: "text-amber-300",
+  },
+  cloud: {
+    key: "cloud",
+    label: "Light cloud",
+    icon: CloudSun,
+    glow: "rgba(253,230,138,0.16)",
+    frame: "ring-amber-100/10",
+    chip: "bg-amber-100/[0.06] ring-amber-100/20",
+    text: "text-amber-100",
+  },
+  overcast: {
+    key: "overcast",
+    label: "Overcast",
+    icon: Cloud,
+    glow: "rgba(161,161,170,0.15)",
+    frame: "ring-zinc-300/10",
+    chip: "bg-zinc-300/[0.07] ring-zinc-300/20",
+    text: "text-zinc-300",
+  },
+  rain: {
+    key: "rain",
+    label: "Rain",
+    icon: CloudRain,
+    glow: "rgba(56,189,248,0.2)",
+    frame: "ring-sky-300/12",
+    chip: "bg-sky-400/10 ring-sky-300/25",
+    text: "text-sky-300",
+  },
+  storm: {
+    key: "storm",
+    label: "Storm",
+    icon: CloudLightning,
+    glow: "rgba(129,140,248,0.23)",
+    frame: "ring-indigo-300/14",
+    chip: "bg-indigo-400/15 ring-indigo-300/30",
+    text: "text-indigo-300",
+  },
 };
 
 /** Game weather code (0 clear, 1 light cloud, 2 overcast, 3 light rain, 4 heavy rain, 5 storm) to its kind. */
 function kindOf(code: number): Kind {
-  return code <= 0 ? KINDS.sun : code === 1 ? KINDS.cloud : code === 2 ? KINDS.overcast : code <= 4 ? KINDS.rain : KINDS.storm;
+  return code <= 0
+    ? KINDS.sun
+    : code === 1
+      ? KINDS.cloud
+      : code === 2
+        ? KINDS.overcast
+        : code <= 4
+          ? KINDS.rain
+          : KINDS.storm;
 }
 
 /** The kinds a race went through, repeats merged ("rain, heavy rain" is one Rain), at most 3 shown. */
 export function weatherSteps(codes: number[] | undefined): Kind[] {
   const out: Kind[] = [];
-  for (const c of codes ?? []) {
-    const k = kindOf(c);
-    if (out[out.length - 1]?.key !== k.key) out.push(k);
+  for (const code of codes ?? []) {
+    const kind = kindOf(code);
+    if (out[out.length - 1]?.key !== kind.key) out.push(kind);
   }
-  return out.length > 3 ? [out[0], out[Math.floor(out.length / 2)], out[out.length - 1]] : out;
+  return out.length > 3
+    ? [out[0], out[Math.floor(out.length / 2)], out[out.length - 1]]
+    : out;
 }
 
-const RAIN_STREAKS = "repeating-linear-gradient(105deg, rgba(186,230,253,0.10) 0 1px, transparent 1px 7px)";
-
-/**
- * Card background for the race weather: a wash in the start weather from the top-left, and when the
- * weather changed, the end weather from the bottom-right. Rain adds faint streaks on the wet side.
- * Pure CSS gradients, no images or animation, so a full picker stays cheap to paint.
- */
+/** A restrained corner glow reinforces the weather chip without tinting the whole card. */
 export function WeatherBackdrop({ codes }: { codes?: number[] }) {
   const steps = weatherSteps(codes);
   if (!steps.length) return null;
-  const first = steps[0];
+
   const last = steps[steps.length - 1];
   const wash: CSSProperties = {
-    background:
-      steps.length > 1
-        ? `linear-gradient(135deg, ${first.tint} 0%, transparent 50%), linear-gradient(315deg, ${last.tint} 0%, transparent 55%)`
-        : `linear-gradient(135deg, ${first.tint} 0%, transparent 65%)`,
+    backgroundImage: `radial-gradient(ellipse at 100% 0%, ${last.glow} 0%, transparent 74%)`,
   };
-  const anyWet = steps.some((s) => s.wet);
-  // where the rain falls: everywhere if it rained all race, otherwise fade in on the wet side
-  const mask =
-    steps.every((s) => s.wet) ? undefined : first.wet && !last.wet ? "linear-gradient(to left, transparent 20%, black)" : "linear-gradient(to right, transparent 20%, black)";
+
   return (
-    <div aria-hidden className="pointer-events-none absolute inset-0">
-      <div className="absolute inset-0" style={wash} />
-      {first.key === "sun" && <div className="absolute -left-8 -top-8 size-28 rounded-full bg-amber-300/15 blur-2xl" />}
-      {anyWet && (
-        <div className="absolute inset-0" style={{ backgroundImage: RAIN_STREAKS, maskImage: mask, WebkitMaskImage: mask }} />
-      )}
+    <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+      <div className="absolute right-0 top-0 h-28 w-44" style={wash} />
+      <div
+        className={cn(
+          "absolute inset-0 rounded-2xl ring-1 ring-inset",
+          last.frame,
+        )}
+      />
     </div>
   );
 }
 
-/** Small chip: the weather icon and name, or "start -> end" icons when it changed mid-race. */
-export function WeatherChip({ codes, className }: { codes?: number[]; className?: string }) {
+/** Small condition label, or a start-to-end summary when weather changed mid-race. */
+export function WeatherChip({
+  codes,
+  className,
+}: {
+  codes?: number[];
+  className?: string;
+}) {
   const steps = weatherSteps(codes);
   if (!steps.length) return null;
   const changed = steps.length > 1;
-  const title = changed ? `Weather changed: ${steps.map((s) => s.label).join(" → ")}` : steps[0].label;
+  const last = steps[steps.length - 1];
+  const title = changed
+    ? `Weather changed: ${steps.map((step) => step.label).join(" → ")}`
+    : last.label;
+
   return (
     <span
       title={title}
       className={cn(
-        "flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium",
-        changed ? "bg-white/10 ring-1 ring-sky-400/40" : "bg-black/20",
+        "flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium ring-1 ring-inset",
+        last.chip,
         className,
       )}
     >
-      {steps.map((s, i) => (
-        <span key={i} className="flex items-center gap-1">
-          {i > 0 && <span className="text-zinc-500">→</span>}
-          <s.icon className={cn("size-3", s.text)} />
-          {!changed && <span className={s.text}>{s.label}</span>}
+      {steps.map((step, index) => (
+        <span key={index} className="flex items-center gap-1">
+          {index > 0 && <span className="text-zinc-400/70">→</span>}
+          <step.icon className={cn("size-3", step.text)} />
+          {!changed && <span className={step.text}>{step.label}</span>}
         </span>
       ))}
       {changed && <span className="ml-0.5 text-zinc-200">Changed</span>}
