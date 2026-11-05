@@ -149,7 +149,7 @@ export function IncidentsPage() {
     x: r.inc.x,
     z: r.inc.z,
     color: KIND_META[r.kind].color,
-    r: 10 + Math.round(r.sev * 0.6),
+    r: 11 + Math.round(r.sev * 1.3),
     label: String(rank.get(r.id) ?? ""),
     sev: r.sev,
     title: `#${rank.get(r.id)} ${r.names.slice(0, 3).join(" & ")} · ${KIND_META[r.kind].label} · ${r.sev}/10${r.inc.lap ? ` · lap ${r.inc.lap}` : ""}`,

@@ -843,10 +843,19 @@ export class RaceScene {
       this.pinActive = act;
       this.pinActiveAt = this.clockMs;
     }
+    this.placePins();
     for (const pin of this.pins) {
       if (!Number.isFinite(pin.x) || !Number.isFinite(pin.z)) continue;
-      const p = this.toScreen(pin.x, pin.z);
+      const pos = this.pinPos.get(pin.id);
+      if (!pos) continue;
+      const p = { x: pos.x, y: pos.y };
       const a = pin.dim ? 0.45 : 1;
+      if (Math.hypot(pos.x - pos.ax, pos.y - pos.ay) > 3) {
+        // moved aside so it doesn't cover another one: a thin line back to where it happened
+        g.moveTo(pos.ax, pos.ay).lineTo(pos.x, pos.y).stroke({ width: 1.5, color: 0x0c0e11, alpha: 0.7 * a });
+        g.moveTo(pos.ax, pos.ay).lineTo(pos.x, pos.y).stroke({ width: 1, color: pin.color, alpha: 0.8 * a });
+        g.circle(pos.ax, pos.ay, 3).fill({ color: pin.color, alpha: a }).stroke({ width: 1, color: 0x0c0e11, alpha: 0.8 * a });
+      }
       const hot = pin.active || pin.id === this.hoveredPin;
       const col = pin.color;
       // pressed: it grows a little (with a small overshoot) and bursts, like the collision marker
@@ -873,7 +882,7 @@ export class RaceScene {
       }
       // the severity gauge (GreMi's pick, 5 Nov 2026): a dark disc with the number and a ring in the
       // type colour that fills to the severity out of 10
-      const ringW = Math.max(3, r * 0.28);
+      const ringW = Math.max(5, r * 0.38);
       const rr = r - ringW / 2;
       const sev = Math.max(0, Math.min(10, pin.sev ?? 10));
       g.circle(p.x, p.y, r + 5).fill({ color: col, alpha: (hot ? 0.22 : 0.1) * a });
@@ -896,7 +905,7 @@ export class RaceScene {
         this.overlay.addChildAt(t, this.overlay.getChildIndex(this.pinG) + 1);
       }
       if (t.text !== pin.label) t.text = pin.label;
-      const size = pin.r >= 13 ? 12 : 11;
+      const size = Math.round(Math.max(11, Math.min(17, pin.r * 0.72)));
       const key = `${size}`;
       if (this.pinKey[n] !== key) {
         // a style change re-renders the text: only when it really changes
@@ -913,12 +922,53 @@ export class RaceScene {
     for (let k = n; k < this.pinText.length; k++) this.pinText[k].visible = false;
   }
 
+  /** Where each marker goes on screen: on its spot, nudged apart where two would overlap. */
+  private pinPos = new Map<string, { x: number; y: number; ax: number; ay: number }>();
+  private placePins() {
+    const list = this.pins
+      .filter((pin) => Number.isFinite(pin.x) && Number.isFinite(pin.z))
+      .map((pin) => {
+        const p = this.toScreen(pin.x, pin.z);
+        return { id: pin.id, r: pin.r * (pin.active ? 1.35 : 1), ax: p.x, ay: p.y, x: p.x, y: p.y };
+      });
+    for (let it = 0; it < 12; it++) {
+      let moved = false;
+      for (let i = 0; i < list.length; i++)
+        for (let j = i + 1; j < list.length; j++) {
+          const a = list[i];
+          const b = list[j];
+          let dx = b.x - a.x;
+          let dy = b.y - a.y;
+          let d = Math.hypot(dx, dy);
+          const need = a.r + b.r + 6;
+          if (d >= need) continue;
+          if (d < 0.01) {
+            // on the very same spot: split them sideways
+            dx = j % 2 ? 1 : -1;
+            dy = 0.3;
+            d = Math.hypot(dx, dy);
+          }
+          const push = (need - d) / 2 + 0.5;
+          const ux = dx / d;
+          const uy = dy / d;
+          a.x -= ux * push;
+          a.y -= uy * push;
+          b.x += ux * push;
+          b.y += uy * push;
+          moved = true;
+        }
+      if (!moved) break;
+    }
+    this.pinPos.clear();
+    for (const q of list) this.pinPos.set(q.id, q);
+  }
+
   private pinAt(px: number, py: number) {
     let best: string | null = null;
     let bestD = Infinity;
     for (const pin of this.pins) {
       if (!Number.isFinite(pin.x)) continue;
-      const p = this.toScreen(pin.x, pin.z);
+      const p = this.pinPos.get(pin.id) ?? this.toScreen(pin.x, pin.z);
       const d = Math.hypot(p.x - px, p.y - py);
       if (d <= pin.r * (pin.active ? 1.35 : 1) + 8 && d < bestD) {
         bestD = d;
