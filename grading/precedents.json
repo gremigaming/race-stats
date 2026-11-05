@@ -728,6 +728,122 @@
    ],
    "contacts": []
   },
+  "1104b-5a": {
+   "key": "3da52f82c582",
+   "parent": "1104b-5",
+   "part": 1,
+   "of": 2,
+   "by": "GreMi",
+   "track": "Spa",
+   "date": "2026-11-04",
+   "verdict": "#19 toni2608 at fault",
+   "severity": 7,
+   "note": "",
+   "tags": [],
+   "kind": "Late lunge / divebomb",
+   "source": "grade",
+   "calls": {
+    "7": {
+     "name": "#21 EthanMoonski",
+     "call": "clear"
+    },
+    "6": {
+     "name": "#19 toni2608",
+     "call": "fault",
+     "severity": 7,
+     "note": "Crazy send, took away 1 sev for wanting to hand back the position otherwise this would be an 8"
+    }
+   },
+   "recording": "2026-11-04_19-21-49_Spa_Race.gmtel.gz",
+   "t": 337.0,
+   "t1": 344.0,
+   "cars": [
+    6,
+    7
+   ],
+   "contacts": [
+    {
+     "a": 7,
+     "b": 6,
+     "t": 341.0,
+     "x": {
+      "gap": 8.1,
+      "closing": 50,
+      "moved_front": 4.1,
+      "moved_back": -6.0,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 74,
+      "lost": 0,
+      "off": 0,
+      "cars": 2,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "back",
+     "rulebook": "back",
+     "rule": "R3"
+    }
+   ]
+  },
+  "1104b-5b": {
+   "key": "3da52f82c582",
+   "parent": "1104b-5",
+   "part": 2,
+   "of": 2,
+   "by": "GreMi",
+   "track": "Spa",
+   "date": "2026-11-04",
+   "verdict": "#21 EthanMoonski at fault",
+   "severity": 9,
+   "note": "",
+   "tags": [],
+   "kind": "Retaliation",
+   "source": "grade",
+   "calls": {
+    "7": {
+     "name": "#21 EthanMoonski",
+     "call": "fault",
+     "severity": 9,
+     "note": "Unacceptible driving, toni did cause a big incident before, so i take it from 10 to 9 sev. but that is just not okay."
+    },
+    "6": {
+     "name": "#19 toni2608",
+     "call": "clear"
+    }
+   },
+   "recording": "2026-11-04_19-21-49_Spa_Race.gmtel.gz",
+   "t": 344.0,
+   "t1": 353.0,
+   "cars": [
+    6,
+    7
+   ],
+   "contacts": [
+    {
+     "a": 7,
+     "b": 6,
+     "t": 345.4,
+     "x": {
+      "gap": 4.0,
+      "closing": 40,
+      "moved_front": -5.7,
+      "moved_back": 6.0,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 74,
+      "lost": 0,
+      "off": 0,
+      "cars": 2,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "back",
+     "rulebook": "back",
+     "rule": "R3"
+    }
+   ]
+  },
   "b1-01": {
    "key": "7faf5fe73bd3",
    "by": "GreMi",
@@ -4024,6 +4140,17 @@
    "contacts": 100,
    "rulebook": 50,
    "with_precedents": 50,
+   "overrides": 6,
+   "date": "2026-11-05",
+   "rules": "v1.3"
+  },
+  {
+   "incidents": 66,
+   "inc_rulebook": 26,
+   "inc_with_precedents": 26,
+   "contacts": 102,
+   "rulebook": 52,
+   "with_precedents": 51,
    "overrides": 6,
    "date": "2026-11-05",
    "rules": "v1.3"
