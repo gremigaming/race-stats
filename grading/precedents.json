@@ -427,6 +427,113 @@
     }
    ]
   },
+  "1104b-3a": {
+   "key": "34796a867583",
+   "parent": "1104b-3",
+   "part": 1,
+   "of": 1,
+   "by": "GreMi",
+   "track": "Monza",
+   "date": "2026-11-04",
+   "verdict": "#13 Jakubm18_F1 + #19 toni2608 shared",
+   "severity": 5,
+   "note": "",
+   "tags": [],
+   "kind": "Reckless driving",
+   "source": "grade",
+   "calls": {
+    "11": {
+     "name": "#13 Jakubm18_F1",
+     "call": "shared",
+     "severity": 5
+    },
+    "8": {
+     "name": "#19 toni2608",
+     "call": "shared",
+     "severity": 5
+    },
+    "6": {
+     "name": "#21 EthanMoonski",
+     "call": "clear"
+    }
+   },
+   "recording": "2026-11-04_19-41-26_Monza_Race.gmtel.gz",
+   "t": 181.4,
+   "t1": 185.9,
+   "cars": [
+    6,
+    8,
+    11
+   ],
+   "contacts": [
+    {
+     "a": 11,
+     "b": 8,
+     "t": 181.4,
+     "x": {
+      "gap": 3.8,
+      "closing": 17,
+      "moved_front": 3.63,
+      "moved_back": -2.76,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 16,
+      "lost": 1,
+      "off": 0,
+      "cars": 3,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "both",
+     "rulebook": "front",
+     "rule": "R2"
+    },
+    {
+     "a": 11,
+     "b": 6,
+     "t": 182.5,
+     "x": {
+      "gap": 8.0,
+      "closing": 17,
+      "moved_front": 2.18,
+      "moved_back": -0.85,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 16,
+      "lost": 1,
+      "off": 0,
+      "cars": 3,
+      "reaction": 0.0,
+      "aftermath": 1.0
+     },
+     "label": "back",
+     "rulebook": "none",
+     "rule": "R7"
+    },
+    {
+     "a": 11,
+     "b": 8,
+     "t": 185.4,
+     "x": {
+      "gap": 2.5,
+      "closing": 4,
+      "moved_front": 2.12,
+      "moved_back": -2.09,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 16,
+      "lost": 1,
+      "off": 0,
+      "cars": 3,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "both",
+     "rulebook": "front",
+     "rule": "R2"
+    }
+   ]
+  },
   "b1-01": {
    "key": "7faf5fe73bd3",
    "by": "GreMi",
@@ -3699,6 +3806,17 @@
    "inc_rulebook": 24,
    "inc_with_precedents": 25,
    "contacts": 94,
+   "rulebook": 49,
+   "with_precedents": 49,
+   "overrides": 5,
+   "date": "2026-11-05",
+   "rules": "v1.3"
+  },
+  {
+   "incidents": 62,
+   "inc_rulebook": 24,
+   "inc_with_precedents": 25,
+   "contacts": 97,
    "rulebook": 49,
    "with_precedents": 49,
    "overrides": 5,
