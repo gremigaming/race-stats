@@ -307,7 +307,7 @@ new file mode 100644
 index 0000000..5d6a5ba
 --- /dev/null
 +++ b/apps/hud/ui/overlays/brake_helper/brake_engine.py
-@@ -0,0 +1,768 @@
+@@ -0,0 +1,783 @@
 +# MIT License
 +#
 +# Copyright (c) [2025] [Ashwin Natarajan]
@@ -367,6 +367,7 @@ index 0000000..5d6a5ba
 +BRAKE_ON = 0.20
 +BRAKE_OFF = 0.05
 +LOCK_SLIP = 0.12            # |slip ratio| above this while braking = locking
++LOCK_HOLD_S = 0.25          # live lock-up line stays lit at least this long
 +BB_MAX_CHANGES = 3
 +BB_MIN_GAP_S = 5.0
 +CAR_MASS_KG = 800.0
@@ -500,6 +501,7 @@ index 0000000..5d6a5ba
 +        self.armed_glow: Optional[int] = None
 +        self.bb_plan: Dict[int, int] = {}       # corner idx -> bias to set before it
 +        self.bb_done: set = set()
++        self.lock_until = [0.0, 0.0]            # live lock-up lines lit until (front, rear)
 +        self.dirty = False
 +
 +    def _store_path(self) -> Optional[str]:
@@ -715,7 +717,9 @@ index 0000000..5d6a5ba
 +
 +        self._track_zone(s, d, v, t)
 +        self._check_gates(s)
-+        return self._view(s, d, v, t)
++        view = self._view(s, d, v, t)
++        self._live_lock(s, t, view)
++        return view
 +
 +    # ---------------------------------------------------------------- zones
 +
@@ -1004,7 +1008,18 @@ index 0000000..5d6a5ba
 +        return {"fill": 0.0, "color": "#f2f5f8", "glow": False, "label": label, "labelColor": "#8d99a6",
 +                "dots": [], "current": -1, "bias": getattr(s, "front_brake_bias", None) or 0,
 +                "biasKnown": getattr(s, "front_brake_bias", None) is not None, "biasDelta": 0,
-+                "mode": "idle"}
++                "mode": "idle", "lockFront": False, "lockRear": False}
++
++    def _live_lock(self, s, t: float, view: Dict[str, Any]) -> None:
++        """Live lock-up flags for the lines above (front axle) and below (rear axle) the BB."""
++        slip = s.wheel_slip
++        if (s.brake or 0.0) >= BRAKE_ON and slip and len(slip) == 4:
++            if min(slip[2], slip[3]) < -LOCK_SLIP:
++                self.lock_until[0] = t + LOCK_HOLD_S
++            if min(slip[0], slip[1]) < -LOCK_SLIP:
++                self.lock_until[1] = t + LOCK_HOLD_S
++        view["lockFront"] = t < self.lock_until[0]
++        view["lockRear"] = t < self.lock_until[1]
 +
 +    def _view(self, s, d: float, v: float, t: float) -> Dict[str, Any]:
 +        view = self._view_idle(s, "")
@@ -1081,7 +1096,7 @@ new file mode 100644
 index 0000000..f315588
 --- /dev/null
 +++ b/apps/hud/ui/overlays/brake_helper/brake_helper.py
-@@ -0,0 +1,72 @@
+@@ -0,0 +1,73 @@
 +# MIT License
 +#
 +# Copyright (c) [2025] [Ashwin Natarajan]
@@ -1120,8 +1135,9 @@ index 0000000..f315588
 +
 +class BrakeHelperOverlay(BaseOverlay):
 +    """
-+    Brake helper: a capsule with the brake bias block and a bar that fills towards the
-+    live brake point for the next corner, drains while braking and flashes the result.
++    Brake helper (Pincer): two half-bars close in on the brake bias block in the centre
++    towards the live brake point, drain while braking and flash the result. Lines above
++    and below the BB light up on a front / rear lock-up.
 +
 +    All logic lives in BrakeEngine (no Qt). References are stored per track in
 +    <app data>/brake_helper/track_<id>.json.
@@ -1159,20 +1175,28 @@ new file mode 100644
 index 0000000..ae50439
 --- /dev/null
 +++ b/apps/hud/ui/overlays/brake_helper/brake_helper.qml
-@@ -0,0 +1,203 @@
+@@ -0,0 +1,264 @@
 +pragma ComponentBehavior: Bound
 +import QtQuick
 +import QtQuick.Window
 +
-+// Brake helper capsule: [ BB | bar + corner dots + status label ]
++// Brake helper, layout A "Pincer" (mirror-symmetric, eyes stay in the centre):
++//
++//        [ left half-bar >   BB 56 ▼1   < right half-bar ]
++//                          ● ● ━ ● ● ●
++//                           GET READY
++//
++// Both halves fill from the outer edges in towards the BB block and touch it at the brake
++// point, then drain back out while braking. A pink line above the BB block lights for a
++// front lock-up, one below it for a rear lock-up (both lines = both axles).
 +// All state comes from BrakeEngine via updateView(view).
 +Window {
 +    id: root
 +    visible: true
 +
 +    property real scaleFactor: 1.0
-+    readonly property int baseWidth: 380
-+    readonly property int baseHeight: 76
++    readonly property int baseWidth: 400
++    readonly property int baseHeight: 104
 +
 +    width: baseWidth * scaleFactor
 +    height: baseHeight * scaleFactor
@@ -1190,11 +1214,14 @@ index 0000000..ae50439
 +    property int bias: 0
 +    property bool biasKnown: false
 +    property int biasDelta: 0
++    property bool lockFront: false
++    property bool lockRear: false
 +
 +    readonly property color fg: "#e9eef3"
 +    readonly property color muted: "#8d99a6"
 +    readonly property color up: "#34d27b"
 +    readonly property color down: "#ff3b30"
++    readonly property color lock: "#ff5fb0"
 +
 +    function updateView(v) {
 +        fill = Math.max(0, Math.min(1, v.fill))
@@ -1207,6 +1234,8 @@ index 0000000..ae50439
 +        bias = v.bias
 +        biasKnown = v.biasKnown
 +        biasDelta = v.biasDelta
++        lockFront = !!v.lockFront
++        lockRear = !!v.lockRear
 +    }
 +
 +    Item {
@@ -1245,17 +1274,42 @@ index 0000000..ae50439
 +                GradientStop { position: 1.0; color: Qt.rgba(8/255, 10/255, 14/255, 0.72) }
 +            }
 +
-+            // ---------------- BB block ----------------
++            readonly property int edge: 14      // outer padding of the half-bars
++            readonly property int gap: 10       // space between a half-bar and the BB block
++            readonly property real barY: core.y + bbCol.y + bbNum.y + bbNum.height / 2 - 4
++
++            // ---------------- front lock-up line (above the BB) ----------------
++            Rectangle {
++                anchors.horizontalCenter: parent.horizontalCenter
++                y: core.y - 6
++                width: 52
++                height: 9
++                radius: 4.5
++                color: root.lock
++                opacity: root.lockFront ? 0.30 : 0.0
++            }
++            Rectangle {
++                id: frontLine
++                anchors.horizontalCenter: parent.horizontalCenter
++                y: core.y - 3
++                width: 40
++                height: 3
++                radius: 1.5
++                color: root.lockFront ? root.lock : Qt.rgba(1, 1, 1, 0.06)
++            }
++
++            // ---------------- BB block (centre) ----------------
 +            Item {
-+                id: bbBlock
-+                anchors.left: parent.left
-+                anchors.top: parent.top
-+                anchors.bottom: parent.bottom
++                id: core
++                anchors.horizontalCenter: parent.horizontalCenter
++                y: 9
 +                width: 62
++                height: 44
 +
 +                Column {
++                    id: bbCol
 +                    anchors.centerIn: parent
-+                    spacing: 1
++                    spacing: 0
 +                    Text {
 +                        anchors.horizontalCenter: parent.horizontalCenter
 +                        text: "BB"
@@ -1265,10 +1319,11 @@ index 0000000..ae50439
 +                        font.bold: true
 +                    }
 +                    Text {
++                        id: bbNum
 +                        anchors.horizontalCenter: parent.horizontalCenter
 +                        text: root.biasKnown ? root.bias : "--"
 +                        color: root.fg
-+                        font.pixelSize: 20
++                        font.pixelSize: 21
 +                        font.bold: true
 +                    }
 +                    Text {
@@ -1277,88 +1332,110 @@ index 0000000..ae50439
 +                        text: root.biasDelta > 0 ? "▲" + root.biasDelta
 +                            : root.biasDelta < 0 ? "▼" + (-root.biasDelta) : ""
 +                        color: root.biasDelta > 0 ? root.up : root.down
-+                        font.pixelSize: 13
++                        font.pixelSize: 12
 +                        font.bold: true
 +                    }
 +                }
++            }
++
++            // ---------------- rear lock-up line (below the BB) ----------------
++            Rectangle {
++                anchors.horizontalCenter: parent.horizontalCenter
++                y: core.y + core.height - 3
++                width: 52
++                height: 9
++                radius: 4.5
++                color: root.lock
++                opacity: root.lockRear ? 0.30 : 0.0
++            }
++            Rectangle {
++                anchors.horizontalCenter: parent.horizontalCenter
++                y: core.y + core.height
++                width: 40
++                height: 3
++                radius: 1.5
++                color: root.lockRear ? root.lock : Qt.rgba(1, 1, 1, 0.06)
++            }
++
++            // ---------------- left half: fills from the left edge towards the BB ----------------
++            Rectangle {
++                x: capsule.edge
++                y: capsule.barY
++                width: core.x - capsule.gap - x
++                height: 8
++                radius: 4
++                color: Qt.rgba(1, 1, 1, 0.07)
++
++                Rectangle {
++                    anchors.left: parent.left
++                    anchors.top: parent.top
++                    anchors.bottom: parent.bottom
++                    width: parent.width * root.fill
++                    radius: 4
++                    visible: root.fill > 0.001
++                    gradient: Gradient {
++                        orientation: Gradient.Horizontal
++                        GradientStop { position: 0.0; color: Qt.darker(root.barColor, 1.45) }
++                        GradientStop { position: 1.0; color: root.barColor }
++                    }
++                }
++            }
++
++            // ---------------- right half: mirror image ----------------
++            Rectangle {
++                x: core.x + core.width + capsule.gap
++                y: capsule.barY
++                width: capsule.width - capsule.edge - x
++                height: 8
++                radius: 4
++                color: Qt.rgba(1, 1, 1, 0.07)
 +
 +                Rectangle {
 +                    anchors.right: parent.right
 +                    anchors.top: parent.top
 +                    anchors.bottom: parent.bottom
-+                    anchors.topMargin: 8
-+                    anchors.bottomMargin: 8
-+                    width: 1
-+                    color: Qt.rgba(1, 1, 1, 0.08)
++                    width: parent.width * root.fill
++                    radius: 4
++                    visible: root.fill > 0.001
++                    gradient: Gradient {
++                        orientation: Gradient.Horizontal
++                        GradientStop { position: 0.0; color: root.barColor }
++                        GradientStop { position: 1.0; color: Qt.darker(root.barColor, 1.45) }
++                    }
 +                }
 +            }
 +
-+            // ---------------- bar + dots ----------------
-+            Item {
-+                id: mainArea
-+                anchors.left: bbBlock.right
-+                anchors.right: parent.right
-+                anchors.top: parent.top
-+                anchors.bottom: parent.bottom
-+                anchors.leftMargin: 14
-+                anchors.rightMargin: 14
-+
-+                Rectangle {
-+                    id: bar
-+                    anchors.left: parent.left
-+                    anchors.right: parent.right
-+                    y: 16
-+                    height: 8
-+                    radius: 4
-+                    color: Qt.rgba(1, 1, 1, 0.07)
-+
++            // ---------------- corner dots + status label, centred ----------------
++            Row {
++                id: dotsRow
++                anchors.horizontalCenter: parent.horizontalCenter
++                y: core.y + core.height + 10
++                spacing: root.dots.length > 14 ? 3 : 5
++                readonly property int dw: root.dots.length > 14 ? 4 : 6
++                Repeater {
++                    model: root.dots.length
 +                    Rectangle {
-+                        anchors.left: parent.left
-+                        anchors.top: parent.top
-+                        anchors.bottom: parent.bottom
-+                        width: parent.width * root.fill
-+                        radius: 4
-+                        visible: root.fill > 0.001
-+                        gradient: Gradient {
-+                            orientation: Gradient.Horizontal
-+                            GradientStop { position: 0.0; color: Qt.darker(root.barColor, 1.45) }
-+                            GradientStop { position: 1.0; color: root.barColor }
-+                        }
++                        required property int index
++                        width: index === root.current ? dotsRow.dw * 2 + 2 : dotsRow.dw
++                        height: dotsRow.dw
++                        radius: dotsRow.dw / 2
++                        color: root.dots[index] !== ""
++                               ? root.dots[index]
++                               : (index === root.current ? Qt.rgba(1, 1, 1, 0.55) : Qt.rgba(1, 1, 1, 0.16))
++                        Behavior on width { NumberAnimation { duration: 200 } }
 +                    }
 +                }
++            }
 +
-+                Row {
-+                    id: dotsRow
-+                    anchors.left: parent.left
-+                    anchors.top: bar.bottom
-+                    anchors.topMargin: 9
-+                    spacing: root.dots.length > 14 ? 3 : 5
-+                    readonly property int dw: root.dots.length > 14 ? 4 : 6
-+                    Repeater {
-+                        model: root.dots.length
-+                        Rectangle {
-+                            required property int index
-+                            width: index === root.current ? dotsRow.dw * 2 + 2 : dotsRow.dw
-+                            height: dotsRow.dw
-+                            radius: dotsRow.dw / 2
-+                            color: root.dots[index] !== ""
-+                                   ? root.dots[index]
-+                                   : (index === root.current ? Qt.rgba(1, 1, 1, 0.55) : Qt.rgba(1, 1, 1, 0.16))
-+                            Behavior on width { NumberAnimation { duration: 200 } }
-+                        }
-+                    }
-+                }
-+
-+                Text {
-+                    anchors.right: parent.right
-+                    anchors.verticalCenter: dotsRow.verticalCenter
-+                    text: root.label.toUpperCase()
-+                    color: root.labelColor
-+                    opacity: 0.85
-+                    font.pixelSize: 10
-+                    font.bold: true
-+                    font.letterSpacing: 1.6
-+                }
++            Text {
++                anchors.horizontalCenter: parent.horizontalCenter
++                y: dotsRow.y + 10
++                text: root.label.toUpperCase()
++                color: root.labelColor
++                opacity: 0.85
++                font.pixelSize: 10
++                font.bold: true
++                font.letterSpacing: 1.6
 +            }
 +        }
 +    }
@@ -1630,7 +1707,7 @@ new file mode 100644
 index 0000000..b4cd544
 --- /dev/null
 +++ b/tests/tests_brake_helper.py
-@@ -0,0 +1,181 @@
+@@ -0,0 +1,198 @@
 +# MIT License
 +#
 +# Copyright (c) [2025] [Ashwin Natarajan]
@@ -1812,3 +1889,20 @@ index 0000000..b4cd544
 +    s = lap_samples(1)[0][1]
 +    s.player = False
 +    assert eng.update(s, 0.0)["mode"] == "idle"
++
++
++def test_live_lockup_flags(tmp_path):
++    eng = be.BrakeEngine(store_dir=str(tmp_path))
++    views = run(eng, lap_samples(2, front_lock_at=950.0))
++    assert any(v["lockFront"] for _, v in views)
++    assert not any(v["lockRear"] for _, v in views)
++    assert not views[0][1]["lockFront"]
++
++    eng2 = be.BrakeEngine()
++    s = lap_samples(1)[0][1]
++    s.brake, s.wheel_slip = 1.0, [-0.3, -0.3, -0.02, -0.02]
++    v = eng2.update(s, 0.0)
++    assert v["lockRear"] and not v["lockFront"]
++    s.wheel_slip = [-0.02] * 4
++    assert eng2.update(s, 0.1)["lockRear"]       # held briefly so it is visible
++    assert not eng2.update(s, 1.0)["lockRear"]

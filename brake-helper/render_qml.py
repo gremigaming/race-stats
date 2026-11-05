@@ -27,6 +27,10 @@ STATES = {
                             labelColor="#e9eef3", current=3, biasDelta=0),
     "7-result-later": dict(fill=1.0, color="#3d8bff", glow=False, label="Brake later", labelColor="#3d8bff",
                            current=3, biasDelta=1),
+    "8-lockup-front": dict(fill=0.6, color="#ff3b30", glow=False, label="Braking", labelColor="#ff3b30",
+                           current=3, biasDelta=0, lockFront=True),
+    "9-lockup-both": dict(fill=0.5, color="#ff3b30", glow=False, label="Braking", labelColor="#ff3b30",
+                          current=3, biasDelta=0, lockFront=True, lockRear=True),
 }
 
 
