@@ -1,6 +1,66 @@
 {
   "about": "Final calls on graded incidents (GreMi's grade, else the staff majority). Written by the staff page; the fault engine uses them as precedents.",
   "decisions": {
+    "1104b-1": {
+      "verdict": "Not an incident",
+      "by": "GreMi",
+      "real": false,
+      "at_fault": [],
+      "severity": 0,
+      "note": "Small wheel bang, not an issue.",
+      "at": 1793865598,
+      "parts": [
+        {
+          "t0": 22.4,
+          "t1": 24.2,
+          "real": false,
+          "verdict": "Not an incident",
+          "tags": [],
+          "kind": "Not an incident",
+          "note": "",
+          "drivers": [
+            {
+              "car": 1,
+              "name": "#2 Alexowitsh77",
+              "call": "clear"
+            },
+            {
+              "car": 6,
+              "name": "#69 trex-Leclerc",
+              "call": "clear"
+            }
+          ]
+        }
+      ],
+      "kind": "Not an incident",
+      "drivers": [
+        {
+          "car": 1,
+          "name": "#2 Alexowitsh77"
+        },
+        {
+          "car": 6,
+          "name": "#69 trex-Leclerc"
+        }
+      ],
+      "track": "Singapore",
+      "date": "2026-11-04",
+      "race_file": "Race_Singapore_2026_11_04_20_09_05.json",
+      "recording": "2026-11-04_19-59-27_Singapore_Race.gmtel.gz",
+      "replay": "https://gremigaming.github.io/race-stats/f1/race/2026-11-04_19-59-27_Singapore_Race?inc=22.4&car=1,6",
+      "engine": {
+        "rules": "v1.2",
+        "verdict": "Alexowitsh77 at fault",
+        "rule": "R2",
+        "severity": 2,
+        "why": "side by side; Alexowitsh77 moved 5.3 m across into the other car",
+        "at_fault": [
+          "#2 Alexowitsh77"
+        ],
+        "contacts": 1,
+        "gray_score": 0.0
+      }
+    },
     "1102b-1": {
       "verdict": "Not an incident",
       "by": "GreMi",
