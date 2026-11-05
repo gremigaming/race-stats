@@ -120,6 +120,8 @@ export class RaceScene {
   private trailG = new Graphics();
   private trailsDrawn = false;
   private pinsDrawn = false;
+  private pinActive: string | null = null;
+  private pinActiveAt = 0;
   private sprites = new Map<number, Sprite>();
   /** The frame each car was last drawn in. */
   private seen = new Map<number, number>();
@@ -834,15 +836,36 @@ export class RaceScene {
     g.clear();
     this.pinsDrawn = this.pins.length > 0;
     let n = 0;
+    const act = this.pins.find((x) => x.active)?.id ?? null;
+    if (act !== this.pinActive) {
+      this.pinActive = act;
+      this.pinActiveAt = this.clockMs;
+    }
     for (const pin of this.pins) {
       if (!Number.isFinite(pin.x) || !Number.isFinite(pin.z)) continue;
       const p = this.toScreen(pin.x, pin.z);
       const a = pin.dim ? 0.45 : 1;
       const hot = pin.active || pin.id === this.hoveredPin;
       const col = pin.color;
-      const r = pin.r;
-      // the marker: a soft halo, a dark rim, the type colour with a little gloss, the number in the middle
-      if (pin.active) {
+      // pressed: it grows a little (with a small overshoot) and bursts, like the collision marker
+      const age = pin.active ? this.clockMs - this.pinActiveAt : Infinity;
+      const grow = pin.active ? 1 + 0.35 * easeOutBack(Math.min(1, age / 380)) : 1;
+      const r = pin.r * grow;
+      if (pin.active && age < 900) {
+        const k = age / 900;
+        const e = 1 - (1 - k) * (1 - k);
+        g.circle(p.x, p.y, r + 4 + e * 46).stroke({ width: 3, color: col, alpha: 0.95 * (1 - k) });
+        g.circle(p.x, p.y, r + 2 + e * 26).stroke({ width: 2, color: 0xffffff, alpha: 0.6 * (1 - k) });
+        g.circle(p.x, p.y, r + 2 + e * 14).fill({ color: col, alpha: 0.25 * (1 - k) });
+        for (let s = 0; s < 8; s++) {
+          const ang = (s / 8) * Math.PI * 2 + 0.2;
+          const r0 = r + 6 + e * 16;
+          const r1 = r + 12 + e * 34;
+          g.moveTo(p.x + Math.cos(ang) * r0, p.y + Math.sin(ang) * r0)
+            .lineTo(p.x + Math.cos(ang) * r1, p.y + Math.sin(ang) * r1)
+            .stroke({ width: 2.5, color: col, alpha: 0.9 * (1 - k) });
+        }
+      } else if (pin.active) {
         const pulse = (this.clockMs / 1100) % 1;
         g.circle(p.x, p.y, r + 3 + pulse * 20).stroke({ width: 2, color: col, alpha: 0.9 * (1 - pulse) });
       }
@@ -870,6 +893,7 @@ export class RaceScene {
       }
       t.alpha = a;
       t.visible = true;
+      t.scale.set(grow);
       t.position.set(p.x, p.y + 0.5);
       n++;
     }
@@ -883,7 +907,7 @@ export class RaceScene {
       if (!Number.isFinite(pin.x)) continue;
       const p = this.toScreen(pin.x, pin.z);
       const d = Math.hypot(p.x - px, p.y - py);
-      if (d <= pin.r + 8 && d < bestD) {
+      if (d <= pin.r * (pin.active ? 1.35 : 1) + 8 && d < bestD) {
         bestD = d;
         best = pin.id;
       }
@@ -1213,4 +1237,10 @@ export class RaceScene {
     this.cam.x += before.x - after.x;
     this.cam.z += before.z - after.z;
   };
+}
+
+/** 0..1 with a small overshoot at the end (a marker popping bigger). */
+function easeOutBack(k: number) {
+  const c = 1.7;
+  return 1 + (c + 1) * Math.pow(k - 1, 3) + c * Math.pow(k - 1, 2);
 }

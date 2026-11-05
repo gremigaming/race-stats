@@ -14,7 +14,7 @@ const changelog: ChangelogEntry[] = [
     date: "2026-11-05",
     type: "feat",
     message:
-      "New Incidents tab: every incident on the track map with coloured markers by type, filters for drivers (or two drivers against each other), biggest-first or race order, stream awards, and each incident replayed with the cars' lines and inputs.",
+      "New full-screen Incidents viewer: every incident on the track map with coloured markers by type, filters for drivers (or two drivers against each other), the stream's top 10 and awards in a folding side panel, and each incident replayed with the cars' lines and the two main drivers' live throttle, brake and steering. The menu fades while an incident plays.",
     destination: "incidents",
   },
   {

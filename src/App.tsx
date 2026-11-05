@@ -60,6 +60,15 @@ function AppRoutes() {
       <Routes>
         {/* The Live Race Viewer is one full screen, outside the site layout */}
         <Route path=":formulaKey/race/:id" element={<RaceViewerPage />} />
+        {/* The incident viewer (5 Nov 2026): full screen like the race viewer, every incident on a track map */}
+        <Route
+          path=":formulaKey/incidents"
+          element={
+            <ScopedFormulaRoute>
+              <IncidentsPage />
+            </ScopedFormulaRoute>
+          }
+        />
         <Route element={<Layout />}>
           {UiDebugPage && (
             <Route
@@ -95,15 +104,6 @@ function AppRoutes() {
             element={
               <ScopedFormulaRoute>
                 <SafetyPage />
-              </ScopedFormulaRoute>
-            }
-          />
-          {/* The incident viewer (5 Nov 2026): every incident on a track map, with filters */}
-          <Route
-            path=":formulaKey/incidents"
-            element={
-              <ScopedFormulaRoute>
-                <IncidentsPage />
               </ScopedFormulaRoute>
             }
           />

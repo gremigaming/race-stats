@@ -38,6 +38,7 @@ export interface IncidentSeries {
   throttle: number[][];
   brake: number[][];
   steer: number[][];
+  gear: number[][];
   /** Metres between the first two cars. */
   gap: number[];
 }
@@ -52,6 +53,8 @@ export function IncidentMap(props: {
   onPin: (id: string) => void;
   onTick: (t: number, playing: boolean, phase: Phase) => void;
   onSeries: (s: IncidentSeries | null) => void;
+  /** Screen space the panels cover (px): the camera frames the cars in what's left. */
+  inset?: { top: number; right: number; bottom: number; left: number };
 }) {
   const { manifest, base } = props;
   const host = useRef<HTMLDivElement>(null);
@@ -59,8 +62,8 @@ export function IncidentMap(props: {
   const store = useMemo(() => new ChunkStore(manifest, base), [manifest, base]);
   const [mapPct, setMapPct] = useState(0);
   const [tip, setTip] = useState<{ id: string; x: number; y: number } | null>(null);
-  const live = useRef({ open: props.open, cars: props.cars, pins: props.pins, onTick: props.onTick, onSeries: props.onSeries, onPin: props.onPin });
-  live.current = { open: props.open, cars: props.cars, pins: props.pins, onTick: props.onTick, onSeries: props.onSeries, onPin: props.onPin };
+  const live = useRef({ open: props.open, cars: props.cars, pins: props.pins, onTick: props.onTick, onSeries: props.onSeries, onPin: props.onPin, inset: props.inset });
+  live.current = { open: props.open, cars: props.cars, pins: props.pins, onTick: props.onTick, onSeries: props.onSeries, onPin: props.onPin, inset: props.inset };
 
   useEffect(() => {
     const el = host.current;
@@ -85,7 +88,7 @@ export function IncidentMap(props: {
       const to = inc.t1 + POST;
       if (!store.loaded(from) || !store.loaded(to)) return false;
       const n = Math.round((to - from) / STEP) + 1;
-      const series: IncidentSeries = { from, to, cars, speed: [], throttle: [], brake: [], steer: [], gap: [] };
+      const series: IncidentSeries = { from, to, cars, speed: [], throttle: [], brake: [], steer: [], gear: [], gap: [] };
       const pos: number[][] = [];
       trails = cars.map((car, k) => {
         const pts: number[] = [];
@@ -93,6 +96,7 @@ export function IncidentMap(props: {
         const th: number[] = [];
         const br: number[] = [];
         const st: number[] = [];
+        const gr: number[] = [];
         for (let i = 0; i < n; i++) {
           const x = store.sampleCar(from + i * STEP, car, one);
           pts.push(x ? x.x : NaN, x ? x.z : NaN);
@@ -100,11 +104,13 @@ export function IncidentMap(props: {
           th.push(x ? x.throttle : NaN);
           br.push(x ? x.brake : NaN);
           st.push(x ? x.steer : NaN);
+          gr.push(x ? x.gear : NaN);
         }
         series.speed.push(sp);
         series.throttle.push(th);
         series.brake.push(br);
         series.steer.push(st);
+        series.gear.push(gr);
         pos.push(pts);
         return { color: CAR_COLORS[k % CAR_COLORS.length], pts, done: 0 };
       });
@@ -119,6 +125,8 @@ export function IncidentMap(props: {
       if (!mapOk) mapOk = s.mapProgress() >= 1 || performance.now() > giveUp;
       const c = props.clock.current;
       const { open: inc, cars } = live.current;
+      const ins = live.current.inset;
+      s.inset = ins ? { top: ins.top + 8, right: ins.right + 8, bottom: ins.bottom + 8, left: ins.left + 8 } : { top: 8, right: 8, bottom: 8, left: 8 };
       const now = performance.now();
       const key = keyOf(inc);
       if (key !== seenInc || c.run !== seenRun) {
@@ -245,7 +253,7 @@ export function IncidentMap(props: {
 
   const tipPin = tip ? props.pins.find((p) => p.id === tip.id) : undefined;
   return (
-    <div className="relative h-full w-full overflow-hidden rounded-xl border border-white/10 bg-[#15181c]">
+    <div className="relative h-full w-full overflow-hidden bg-[#15181c]">
       <div ref={host} className="absolute inset-0" />
       {mapPct < 1 && (
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
