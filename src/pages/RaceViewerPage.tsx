@@ -7,7 +7,7 @@ import { liveryOf, loadLiveries, type Livery } from "../viewer/cars";
 import { IncidentPip, StartLights, TvStrip } from "../viewer/broadcast";
 import { DriverCard } from "../viewer/DriverCard";
 import { Director } from "../viewer/director";
-import { incidentsOf, isMajor, loadManifest, type RaceIncident, type RaceManifest } from "../viewer/format";
+import { incidentsOf, isMajor, loadManifest, startedMs, type RaceIncident, type RaceManifest } from "../viewer/format";
 import { HIGHLIGHT_META, raceHighlights, type Highlight } from "../viewer/highlights";
 import { HighlightsPanel } from "../viewer/HighlightsPanel";
 import type { SurfacePick, TimePick } from "../viewer/look";
@@ -46,7 +46,7 @@ function readSide(): { open: boolean; tab: SideTab } {
 /** The league race file (from the safety rating) for this recording: same track, saved within a few hours of its start. */
 function leagueFileOf(files: string[], track: string, started: string) {
   const norm = (x: string) => x.toLowerCase().replace(/[^a-z0-9]/g, "");
-  const t0 = Date.parse(`${started}Z`);
+  const t0 = startedMs(started);
   let best: string | null = null;
   let bestD = Infinity;
   for (const f of files) {

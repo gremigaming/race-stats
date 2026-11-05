@@ -1,7 +1,7 @@
 import { useQueries, useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { driverKey } from "../../league/league";
-import { incidentsOf, loadManifest, loadRaceIndex, type RaceIncident, type RaceIndexEntry, type RaceManifest } from "../../viewer/format";
+import { incidentsOf, loadManifest, startedMs, loadRaceIndex, type RaceIncident, type RaceIndexEntry, type RaceManifest } from "../../viewer/format";
 import { atFaultOf, carsOf, kindOf, severityOf, type IncidentKind } from "../../viewer/incidentKinds";
 
 export type RaceRef = RaceIndexEntry & { base: string };
@@ -27,7 +27,7 @@ export interface Row {
   at: number;
 }
 
-export const raceTime = (r: RaceIndexEntry) => Date.parse(`${r.started}Z`);
+export const raceTime = (r: RaceIndexEntry) => startedMs(r.started);
 
 /** Every race the viewer knows (newest first). */
 export function useRaceIndex() {

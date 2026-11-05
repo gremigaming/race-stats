@@ -124,6 +124,15 @@ export interface CarTiming {
   pits?: number[];
 }
 
+/**
+ * When a race started (ms since epoch). Recordings write UTC without a zone ("2026-11-04T20:10:33"),
+ * the live server with one ("...Z"): never add a second Z (that made live races "Invalid Date").
+ */
+export function startedMs(started: string): number {
+  const s = started.trim().replace(" ", "T");
+  return Date.parse(/(Z|[+-]\d\d:?\d\d)$/i.test(s) ? s : `${s}Z`);
+}
+
 /** One decoded chunk: frame-major columns (frame 0 car 0, frame 0 car 1, ...). */
 export interface Chunk {
   t0: number;
