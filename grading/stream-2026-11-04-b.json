@@ -1,0 +1,268 @@
+{
+ "title": "Stream 4 Nov · 5 picks",
+ "stream": "1104b",
+ "made": "2026-11-05",
+ "rules": "v1.2",
+ "incidents": [
+  {
+   "id": "1104b-1",
+   "pick": "low",
+   "track": "Singapore",
+   "date": "2026-11-04",
+   "lap": 1,
+   "race_time": "0:22",
+   "replay": "https://gremigaming.github.io/race-stats/f1/race/2026-11-04_19-59-27_Singapore_Race?inc=22.4&car=1,6",
+   "race_file": "Race_Singapore_2026_11_04_20_09_05.json",
+   "recording": "2026-11-04_19-59-27_Singapore_Race.gmtel.gz",
+   "t0": 22.4,
+   "t1": 24.2,
+   "contacts": [
+    {
+     "t": 22.4,
+     "a": 1,
+     "b": 6
+    }
+   ],
+   "drivers": [
+    {
+     "car": 1,
+     "name": "#2 Alexowitsh77"
+    },
+    {
+     "car": 6,
+     "name": "#69 trex-Leclerc"
+    }
+   ],
+   "engine": {
+    "rules": "v1.2",
+    "verdict": "Alexowitsh77 at fault",
+    "rule": "R2",
+    "severity": 2,
+    "why": "side by side; Alexowitsh77 moved 5.3 m across into the other car",
+    "at_fault": [
+     "#2 Alexowitsh77"
+    ],
+    "contacts": 1,
+    "gray_score": 0.0
+   },
+   "claude": "Picked as the low-severity case. My call: Alexowitsh77 at fault (rule R2: side by side, one car moved over), severity 2, blame on #2 Alexowitsh77. What I saw: side by side; Alexowitsh77 moved 5.3 m across into the other car. I'm fairly confident: the numbers are clear of every limit; this one is here for its severity."
+  },
+  {
+   "id": "1104b-2",
+   "pick": "high",
+   "track": "Monza",
+   "date": "2026-11-04",
+   "lap": 4,
+   "race_time": "4:30",
+   "replay": "https://gremigaming.github.io/race-stats/f1/race/2026-11-04_19-41-26_Monza_Race?inc=271.0&car=2,11",
+   "race_file": "Race_Monza_2026_11_04_19_49_57.json",
+   "recording": "2026-11-04_19-41-26_Monza_Race.gmtel.gz",
+   "t0": 271.0,
+   "t1": 286.1,
+   "contacts": [
+    {
+     "t": 271.0,
+     "a": 2,
+     "b": 11
+    }
+   ],
+   "drivers": [
+    {
+     "car": 2,
+     "name": "#8 Stepino81"
+    },
+    {
+     "car": 11,
+     "name": "#13 Jakubm18_F1"
+    }
+   ],
+   "engine": {
+    "rules": "v1.2",
+    "verdict": "Stepino81 at fault",
+    "rule": "R5",
+    "severity": 7,
+    "why": "Stepino81 came back onto the track and moved 5.4 m across into Jakubm18_F1",
+    "at_fault": [
+     "#8 Stepino81"
+    ],
+    "contacts": 1,
+    "gray_score": 0.0
+   },
+   "claude": "Picked as the high-severity case. My call: Stepino81 at fault (rule R5: unsafe rejoin), severity 7, blame on #8 Stepino81. What I saw: Stepino81 came back onto the track and moved 5.4 m across into Jakubm18_F1. I'm fairly confident: the numbers are clear of every limit; this one is here for its severity."
+  },
+  {
+   "id": "1104b-3",
+   "pick": "gray",
+   "track": "Monza",
+   "date": "2026-11-04",
+   "lap": 3,
+   "race_time": "3:01",
+   "replay": "https://gremigaming.github.io/race-stats/f1/race/2026-11-04_19-41-26_Monza_Race?inc=181.4&car=11,8,6",
+   "race_file": "Race_Monza_2026_11_04_19_49_57.json",
+   "recording": "2026-11-04_19-41-26_Monza_Race.gmtel.gz",
+   "t0": 181.4,
+   "t1": 185.9,
+   "contacts": [
+    {
+     "t": 181.4,
+     "a": 11,
+     "b": 8
+    },
+    {
+     "t": 182.5,
+     "a": 11,
+     "b": 6
+    },
+    {
+     "t": 185.4,
+     "a": 11,
+     "b": 8
+    }
+   ],
+   "drivers": [
+    {
+     "car": 11,
+     "name": "#13 Jakubm18_F1"
+    },
+    {
+     "car": 8,
+     "name": "#19 toni2608"
+    },
+    {
+     "car": 6,
+     "name": "#21 EthanMoonski"
+    }
+   ],
+   "engine": {
+    "rules": "v1.2",
+    "verdict": "Jakubm18_F1 at fault",
+    "rule": "R2",
+    "severity": 2,
+    "why": "side by side; Jakubm18_F1 moved 3.6 m across into the other car",
+    "at_fault": [
+     "#13 Jakubm18_F1"
+    ],
+    "contacts": 3,
+    "gray_score": 1.27
+   },
+   "claude": "Picked because it's a gray area for me. My call: Jakubm18_F1 at fault (rule R2: side by side, one car moved over), severity 2, blame on #13 Jakubm18_F1. What I saw: side by side; Jakubm18_F1 moved 3.6 m across into the other car. Why I'm not sure: the cars were 3.8 m apart along the track, right at the 4 m line between 'side by side' (the car moving over is to blame) and 'one behind the other' (the car behind is to blame); the worst slide was 16°, near the 20° where I count it as harm done; its 3 contacts don't point the same way (Jakubm18_F1 at fault; Racing incident; Jakubm18_F1 at fault)."
+  },
+  {
+   "id": "1104b-4",
+   "pick": "gray",
+   "track": "Monza",
+   "date": "2026-11-04",
+   "lap": 1,
+   "race_time": "0:08",
+   "replay": "https://gremigaming.github.io/race-stats/f1/race/2026-11-04_19-41-26_Monza_Race?inc=8.3&car=6,8,10,11,5,9",
+   "race_file": "Race_Monza_2026_11_04_19_49_57.json",
+   "recording": "2026-11-04_19-41-26_Monza_Race.gmtel.gz",
+   "t0": 8.3,
+   "t1": 22.0,
+   "contacts": [
+    {
+     "t": 8.3,
+     "a": 6,
+     "b": 8
+    },
+    {
+     "t": 11.6,
+     "a": 8,
+     "b": 10
+    },
+    {
+     "t": 12.3,
+     "a": 10,
+     "b": 11
+    }
+   ],
+   "drivers": [
+    {
+     "car": 6,
+     "name": "#21 EthanMoonski"
+    },
+    {
+     "car": 8,
+     "name": "#19 toni2608"
+    },
+    {
+     "car": 10,
+     "name": "#69 trex-Leclerc"
+    },
+    {
+     "car": 11,
+     "name": "#13 Jakubm18_F1"
+    },
+    {
+     "car": 5,
+     "name": "#15 vanderdeured"
+    },
+    {
+     "car": 9,
+     "name": "#21 Darkcore_Archie"
+    }
+   ],
+   "engine": {
+    "rules": "v1.2",
+    "verdict": "RB #69 at fault",
+    "rule": "R3",
+    "severity": 3,
+    "why": "RB #69 ran into the back of toni2608, closing at 27 km/h",
+    "at_fault": [
+     "#69 trex-Leclerc"
+    ],
+    "contacts": 3,
+    "gray_score": 1.13
+   },
+   "claude": "Picked because it's a gray area for me. My call: RB #69 at fault (rule R3: the car behind ran into the one ahead), severity 3, blame on #69 trex-Leclerc. What I saw: RB #69 ran into the back of toni2608, closing at 27 km/h. Why I'm not sure: the cars were 4.4 m apart along the track, right at the 4 m line between 'side by side' (the car moving over is to blame) and 'one behind the other' (the car behind is to blame); the worst slide was 18°, near the 20° where I count it as harm done; its 3 contacts don't point the same way (Racing incident; RB #69 at fault; Racing incident)."
+  },
+  {
+   "id": "1104b-5",
+   "pick": "gray",
+   "track": "Spa",
+   "date": "2026-11-04",
+   "lap": 4,
+   "race_time": "5:41",
+   "replay": "https://gremigaming.github.io/race-stats/f1/race/2026-11-04_19-21-49_Spa_Race?inc=341.0&car=7,6",
+   "race_file": "Race_Spa_2026_11_04_19_32_23.json",
+   "recording": "2026-11-04_19-21-49_Spa_Race.gmtel.gz",
+   "t0": 341.0,
+   "t1": 355.1,
+   "contacts": [
+    {
+     "t": 341.0,
+     "a": 7,
+     "b": 6
+    },
+    {
+     "t": 345.4,
+     "a": 7,
+     "b": 6
+    }
+   ],
+   "drivers": [
+    {
+     "car": 7,
+     "name": "#21 EthanMoonski"
+    },
+    {
+     "car": 6,
+     "name": "#19 toni2608"
+    }
+   ],
+   "engine": {
+    "rules": "v1.2",
+    "verdict": "EthanMoonski at fault",
+    "rule": "P",
+    "severity": 4,
+    "why": "toni2608 ran into the back of EthanMoonski, closing at 50 km/h; but GreMi called a similar one (B4-02, Abu Dhabi 2026-10-20) the car ahead at fault; EthanMoonski ran into the back of toni2608, closing at 40 km/h",
+    "at_fault": [
+     "#21 EthanMoonski"
+    ],
+    "contacts": 2,
+    "gray_score": 1.0
+   },
+   "claude": "Picked because it's a gray area for me. My call: EthanMoonski at fault (rule P: follows a similar graded incident), severity 4, blame on #21 EthanMoonski. What I saw: toni2608 ran into the back of EthanMoonski, closing at 50 km/h; but GreMi called a similar one (B4-02, Abu Dhabi 2026-10-20) the car ahead at fault; EthanMoonski ran into the back of toni2608, closing at 40 km/h. Why I'm not sure: the cars were 4.0 m apart along the track, right at the 4 m line between 'side by side' (the car moving over is to blame) and 'one behind the other' (the car behind is to blame)."
+  }
+ ]
+}
