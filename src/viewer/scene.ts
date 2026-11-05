@@ -73,6 +73,8 @@ export interface MapPin {
   /** Radius in px. */
   r: number;
   label: string;
+  /** Severity out of 10: how far the ring is filled. */
+  sev?: number;
   /** Tooltip on hover. */
   title?: string;
   active?: boolean;
@@ -869,11 +871,22 @@ export class RaceScene {
         const pulse = (this.clockMs / 1100) % 1;
         g.circle(p.x, p.y, r + 3 + pulse * 20).stroke({ width: 2, color: col, alpha: 0.9 * (1 - pulse) });
       }
-      g.circle(p.x, p.y, r + 6).fill({ color: col, alpha: (hot ? 0.28 : 0.16) * a });
-      g.circle(p.x, p.y, r + 1.75).fill({ color: 0x0c0e11, alpha: 0.9 * a });
-      g.circle(p.x, p.y, r).fill({ color: col, alpha: a });
-      g.ellipse(p.x, p.y - r * 0.38, r * 0.62, r * 0.38).fill({ color: 0xffffff, alpha: 0.2 * a });
-      if (hot) g.circle(p.x, p.y, r + 1.75).stroke({ width: 2, color: 0xffffff, alpha: 0.95 });
+      // the severity gauge (GreMi's pick, 5 Nov 2026): a dark disc with the number and a ring in the
+      // type colour that fills to the severity out of 10
+      const ringW = Math.max(3, r * 0.28);
+      const rr = r - ringW / 2;
+      const sev = Math.max(0, Math.min(10, pin.sev ?? 10));
+      g.circle(p.x, p.y, r + 5).fill({ color: col, alpha: (hot ? 0.22 : 0.1) * a });
+      g.circle(p.x, p.y, r).fill({ color: 0x0c0e11, alpha: 0.94 * a });
+      g.circle(p.x, p.y, rr).stroke({ width: ringW, color: 0xffffff, alpha: 0.12 * a });
+      if (sev > 0) {
+        const a0 = -Math.PI / 2;
+        const a1 = a0 + (Math.PI * 2 * sev) / 10;
+        g.moveTo(p.x + Math.cos(a0) * rr, p.y + Math.sin(a0) * rr)
+          .arc(p.x, p.y, rr, a0, a1)
+          .stroke({ width: ringW, color: col, alpha: a, cap: "round" });
+      }
+      if (hot) g.circle(p.x, p.y, r + 1.5).stroke({ width: 1.5, color: 0xffffff, alpha: 0.95 });
       if (!pin.label) continue;
       let t = this.pinText[n];
       if (!t) {
@@ -884,11 +897,11 @@ export class RaceScene {
       }
       if (t.text !== pin.label) t.text = pin.label;
       const size = pin.r >= 13 ? 12 : 11;
-      const key = `${inkOn(pin.color)}|${size}`;
+      const key = `${size}`;
       if (this.pinKey[n] !== key) {
         // a style change re-renders the text: only when it really changes
         this.pinKey[n] = key;
-        t.style.fill = inkOn(pin.color);
+        t.style.fill = 0xffffff;
         t.style.fontSize = size;
       }
       t.alpha = a;
