@@ -313,6 +313,120 @@
     }
    ]
   },
+  "1104b-1a": {
+   "key": "db8f64505010",
+   "parent": "1104b-1",
+   "part": 1,
+   "of": 1,
+   "by": "GreMi",
+   "track": "Singapore",
+   "date": "2026-11-04",
+   "verdict": "Not an incident",
+   "severity": 0,
+   "note": "",
+   "tags": [],
+   "kind": "Not an incident",
+   "source": "grade",
+   "calls": {
+    "1": {
+     "name": "#2 Alexowitsh77",
+     "call": "clear"
+    },
+    "6": {
+     "name": "#69 trex-Leclerc",
+     "call": "clear"
+    }
+   },
+   "recording": "2026-11-04_19-59-27_Singapore_Race.gmtel.gz",
+   "t": 22.4,
+   "t1": 24.2,
+   "cars": [
+    1,
+    6
+   ],
+   "contacts": [
+    {
+     "a": 1,
+     "b": 6,
+     "t": 22.4,
+     "x": {
+      "gap": 2.0,
+      "closing": -7,
+      "moved_front": 5.28,
+      "moved_back": -2.42,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 4,
+      "lost": 0,
+      "off": 0,
+      "cars": 2,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "no",
+     "rulebook": "front",
+     "rule": "R2"
+    }
+   ]
+  },
+  "1104b-2a": {
+   "key": "0ad8cc96a035",
+   "parent": "1104b-2",
+   "part": 1,
+   "of": 1,
+   "by": "GreMi",
+   "track": "Monza",
+   "date": "2026-11-04",
+   "verdict": "#8 Stepino81 at fault",
+   "severity": 7,
+   "note": "",
+   "tags": [],
+   "kind": "Unsafe rejoin",
+   "source": "grade",
+   "calls": {
+    "2": {
+     "name": "#8 Stepino81",
+     "call": "fault",
+     "severity": 7,
+     "note": "Crazy rejoin, dangerous."
+    },
+    "11": {
+     "name": "#13 Jakubm18_F1",
+     "call": "clear"
+    }
+   },
+   "recording": "2026-11-04_19-41-26_Monza_Race.gmtel.gz",
+   "t": 271.0,
+   "t1": 286.1,
+   "cars": [
+    2,
+    11
+   ],
+   "contacts": [
+    {
+     "a": 2,
+     "b": 11,
+     "t": 271.0,
+     "x": {
+      "gap": 6.6,
+      "closing": 60.0,
+      "moved_front": 5.39,
+      "moved_back": 0.58,
+      "rejoin_front": 1.0,
+      "rejoin_back": 0.0,
+      "slide": 108,
+      "lost": 3,
+      "off": 2,
+      "cars": 2,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "front",
+     "rulebook": "front",
+     "rule": "R5"
+    }
+   ]
+  },
   "b1-01": {
    "key": "7faf5fe73bd3",
    "by": "GreMi",
@@ -3577,6 +3691,17 @@
    "rulebook": 48,
    "with_precedents": 49,
    "overrides": 6,
+   "date": "2026-11-05",
+   "rules": "v1.3"
+  },
+  {
+   "incidents": 61,
+   "inc_rulebook": 24,
+   "inc_with_precedents": 25,
+   "contacts": 94,
+   "rulebook": 49,
+   "with_precedents": 49,
+   "overrides": 5,
    "date": "2026-11-05",
    "rules": "v1.3"
   }
