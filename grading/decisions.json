@@ -61,6 +61,70 @@
         "gray_score": 0.0
       }
     },
+    "1104b-2": {
+      "verdict": "#8 Stepino81 at fault",
+      "by": "GreMi",
+      "real": true,
+      "at_fault": [
+        "#8 Stepino81"
+      ],
+      "severity": 7,
+      "note": "",
+      "at": 1793865739,
+      "parts": [
+        {
+          "t0": 271.0,
+          "t1": 286.1,
+          "real": true,
+          "verdict": "#8 Stepino81 at fault",
+          "tags": [],
+          "kind": "Unsafe rejoin",
+          "note": "",
+          "drivers": [
+            {
+              "car": 2,
+              "name": "#8 Stepino81",
+              "call": "fault",
+              "severity": 7,
+              "note": "Crazy rejoin, dangerous."
+            },
+            {
+              "car": 11,
+              "name": "#13 Jakubm18_F1",
+              "call": "clear"
+            }
+          ]
+        }
+      ],
+      "kind": "Unsafe rejoin",
+      "drivers": [
+        {
+          "car": 2,
+          "name": "#8 Stepino81"
+        },
+        {
+          "car": 11,
+          "name": "#13 Jakubm18_F1"
+        }
+      ],
+      "track": "Monza",
+      "date": "2026-11-04",
+      "race_file": "Race_Monza_2026_11_04_19_49_57.json",
+      "recording": "2026-11-04_19-41-26_Monza_Race.gmtel.gz",
+      "replay": "https://gremigaming.github.io/race-stats/f1/race/2026-11-04_19-41-26_Monza_Race?inc=271.0&car=2,11",
+      "engine": {
+        "rules": "v1.2",
+        "verdict": "Stepino81 at fault",
+        "rule": "R5",
+        "severity": 7,
+        "why": "Stepino81 came back onto the track and moved 5.4 m across into Jakubm18_F1",
+        "at_fault": [
+          "#8 Stepino81"
+        ],
+        "contacts": 1,
+        "gray_score": 0.0
+      }
+    },
     "1102b-1": {
       "verdict": "Not an incident",
       "by": "GreMi",
