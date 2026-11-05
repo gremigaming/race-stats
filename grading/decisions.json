@@ -78,6 +78,7 @@
           ]
         }
       ],
+      "kind": null,
       "drivers": [
         {
           "car": 7,
@@ -579,6 +580,7 @@
           ]
         }
       ],
+      "kind": null,
       "drivers": [
         {
           "car": 21,
@@ -811,6 +813,7 @@
           ]
         }
       ],
+      "kind": null,
       "drivers": [
         {
           "car": 2,
