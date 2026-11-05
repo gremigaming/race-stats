@@ -569,6 +569,25 @@
       "was": -3.0,
       "learn": true,
       "owner": true
+    },
+    {
+      "id": "Race_Brazil_2026_11_04_20_24_42.json|4|contact|2|0",
+      "type": "incident",
+      "reason": "Close to a crash, both should have left a bit more room",
+      "by": "319544045435224067",
+      "at": "2026-11-05T11:22:47Z",
+      "call": {
+        "kind": "Racing incident",
+        "fault": "clear",
+        "severity": 3
+      },
+      "file": "Race_Brazil_2026_11_04_20_24_42.json",
+      "driver": "DevilDriver2396",
+      "car": 4,
+      "pts": 0.0,
+      "was": -3.0,
+      "learn": true,
+      "owner": true
     }
   ]
 }
