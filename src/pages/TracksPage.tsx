@@ -1,8 +1,10 @@
-import { ArrowUpDown, Route } from "lucide-react";
+import { AlertTriangle, ArrowUpDown, RotateCcw, Route } from "lucide-react";
 import { useMemo, useState } from "react";
+import { ActionEmptyState } from "../components/ActionEmptyState";
 import { SessionListActiveFilters } from "../components/SessionListActiveFilters";
 import { SessionListFilterMenu } from "../components/SessionListFilterMenu";
 import { TrackOverviewCard } from "../components/dashboard/TrackOverviewCard";
+import { Button } from "../components/ui/Button";
 import {
   buildTrackRecords,
   isProblemStatus,
@@ -20,6 +22,7 @@ import { useSessionList } from "../hooks/useSessionList";
 import { useGameScope } from "../hooks/useGameScope";
 import { PageFrame } from "../components/ui/PageFrame";
 import { PageHeader } from "../components/ui/PageHeader";
+import { LoadingSpinner } from "../components/ui/LoadingSpinner";
 import type { SessionSummary } from "../types/telemetry";
 import { getSessionFormulaScopeKey } from "../utils/formulaScope";
 import { getTrackId, sortTracksByCalendar } from "../utils/tracks";
@@ -133,18 +136,20 @@ export function TracksPage() {
         aria-label="Loading tracks"
         className="flex h-full items-center justify-center"
       >
-        <div
-          aria-hidden="true"
-          className="size-7 animate-spin rounded-full border-2 border-zinc-700 border-t-red-500"
-        />
+        <LoadingSpinner className="size-7 border-2" />
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="mx-auto max-w-6xl px-4 py-6 text-sm text-red-300 sm:px-6 lg:px-8">
-        Tracks could not be loaded: {error}
+      <div className="mx-auto flex min-h-80 max-w-6xl items-center justify-center px-4 py-6 sm:px-6 lg:px-8">
+        <ActionEmptyState
+          icon={AlertTriangle}
+          title="Track data could not load"
+          message={error}
+          className="max-w-lg"
+        />
       </div>
     );
   }
@@ -204,16 +209,24 @@ export function TracksPage() {
           ))}
         </div>
       ) : (
-        <div className="rounded-2xl bg-zinc-900/50 px-5 py-8 text-center">
-          <h2 className="text-sm font-semibold text-zinc-300">
-            {isFiltered ? "No tracks match these filters" : "No tracks yet"}
-          </h2>
-          <p className="mt-1 text-sm text-zinc-500">
-            {isFiltered
+        <ActionEmptyState
+          icon={Route}
+          title={isFiltered ? "No tracks match these filters" : "No tracks yet"}
+          message={
+            isFiltered
               ? "Reset the filters to see every track with saved sessions."
-              : "Tracks will appear here when you have saved sessions for them."}
-          </p>
-        </div>
+              : "Tracks will appear here when you have saved sessions for them."
+          }
+          className="max-w-none"
+          actions={
+            isFiltered && (
+              <Button variant="secondary" onClick={resetFilters}>
+                <RotateCcw className="size-3.5" />
+                Reset filters
+              </Button>
+            )
+          }
+        />
       )}
     </PageFrame>
   );

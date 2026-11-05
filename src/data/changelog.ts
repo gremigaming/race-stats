@@ -16,18 +16,11 @@ export interface ChangelogEntry {
 // raw commit history also contains routine uploads and staff-only corrections.
 const changelog: ChangelogEntry[] = [
   {
-    id: "gremi-gaming-brand-mark",
-    date: "2026-11-04",
-    type: "feat",
-    message: "See the GreMi Gaming logo in the site navigation and browser icon.",
-    destination: "home",
-  },
-  {
-    id: "driver-first-home-navigation",
-    date: "2026-11-04",
+    id: "site-ui-refresh",
+    date: "2026-11-05",
     type: "feat",
     message:
-      "Start from a driver-first home hub, with Drivers, Races, and Setups grouped in a clearer navigation bar.",
+      "The GreMi Gang Race Stats site has a refreshed look, with clearer navigation, a more focused home page, calmer race cards, and cleaner layouts across its tools.",
     destination: "home",
   },
   {

@@ -134,7 +134,7 @@ await page.screenshot({
 });
 await page.keyboard.press("Escape");
 // the last 3 streams
-await page.selectOption('select[aria-label="Time range"]', "streams");
+await page.selectOption('select[aria-label="Time range"]', "streams:3");
 await page.waitForTimeout(1500);
 await page.screenshot({
   path: `${outDir}/filter-streams.jpg`,

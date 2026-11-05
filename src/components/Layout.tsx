@@ -1,4 +1,5 @@
 import {
+  ArrowLeft,
   BarChart3,
   Bell,
   CalendarDays,
@@ -9,6 +10,7 @@ import {
   LayoutDashboard,
   Menu,
   Route,
+  Settings2,
   ShieldCheck,
   Swords,
   Trophy,
@@ -28,18 +30,27 @@ import changelog from "../data/changelog";
 import { useTelemetry } from "../context/TelemetryContext";
 import { SETUP_MANAGER_ON } from "../league/setupManager";
 import { useGameScope } from "../hooks/useGameScope";
+import { useBackNavigation } from "../hooks/useBackNavigation";
 import { cn } from "../utils/cn";
 import { LiveDot, useIsLive } from "../viewer/LiveTab";
+import { ALL_FORMULA_SCOPE_KEY } from "../utils/formulaScope";
 import { dashboardPath } from "../utils/routes";
 import { readStoredString, writeStoredString } from "../utils/storage";
 import { CHANGELOG_SEEN_STORAGE_KEY } from "../constants/storage";
 import { AppBrand } from "./AppBrand";
 import { ChangelogModal } from "./ChangelogModal";
-import { RankTile } from "./safety/RankTile";
+import { DriverWelcomeModal } from "./DriverWelcomeModal";
 import { DriverSearchSelect } from "./DriverSearchSelect";
 import { LeagueFilterPanel } from "./LeagueFilterPanel";
 import { SessionList } from "./SessionList";
+import { Modal } from "./ui/Modal";
 import { PillSelect } from "./ui/PillSelect";
+import {
+  DROPDOWN_LINK_STYLES,
+  DROPDOWN_OPTION_IDLE_STYLES,
+  DROPDOWN_OPTION_SELECTED_STYLES,
+  DROPDOWN_PANEL_STYLES,
+} from "./ui/formControl";
 
 type NavGroupKey = "drivers" | "races";
 
@@ -60,16 +71,23 @@ const routeItemClass = ({ isActive }: { isActive: boolean }) =>
   );
 
 export function Layout() {
-  const { mode, setShowUploadModal, scopeKey, league } = useTelemetry();
+  const { mode, setShowUploadModal, scopeKey, league, formulaOptions } =
+    useTelemetry();
   const game = useGameScope();
   const isLive = useIsLive();
-  const mySafety = league?.safety.get(league.selectedDriver);
   const location = useLocation();
   const routeParts = location.pathname.split("/").filter(Boolean);
   const section = routeParts[1];
   const pageScope = scopeKey ?? routeParts[0];
   const homePath = dashboardPath(pageScope);
+  const isDashboardPage =
+    routeParts.length === 1 &&
+    (routeParts[0] === ALL_FORMULA_SCOPE_KEY ||
+      routeParts[0] === scopeKey ||
+      formulaOptions.some((option) => option.key === routeParts[0]));
+  const goBack = useBackNavigation(homePath);
   const [showChangelog, setShowChangelog] = useState(false);
+  const [showFilterSettings, setShowFilterSettings] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [sessionBrowserOpen, setSessionBrowserOpen] = useState(false);
   const [openGroup, setOpenGroup] = useState<NavGroupKey | null>(null);
@@ -93,6 +111,7 @@ export function Layout() {
     setMobileNavOpen(false);
     setSessionBrowserOpen(false);
     setOpenGroup(null);
+    setShowFilterSettings(false);
   }, [location.pathname]);
 
   useEffect(() => {
@@ -150,7 +169,10 @@ export function Layout() {
             aria-label={mobileNavOpen ? "Close navigation" : "Open navigation"}
             aria-expanded={mobileNavOpen}
             aria-controls="mobile-navigation"
-            className="inline-flex size-10 shrink-0 items-center justify-center rounded-xl text-zinc-300 transition-colors hover:bg-white/[0.06] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-red/70 lg:hidden"
+            className={cn(
+              "inline-flex size-10 shrink-0 items-center justify-center rounded-xl text-zinc-300 transition-colors hover:bg-white/[0.06] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-red/70",
+              hasLeagueNavigation ? "xl:hidden" : "lg:hidden",
+            )}
           >
             {mobileNavOpen ? (
               <X className="size-5" />
@@ -183,7 +205,7 @@ export function Layout() {
             <nav
               ref={desktopNavRef}
               aria-label="Primary navigation"
-              className="ml-2 hidden items-center gap-1 lg:flex"
+              className="ml-2 hidden items-center gap-1 xl:flex"
             >
               <NavLink to={homePath} end className={routeItemClass}>
                 <LayoutDashboard className="size-4" />
@@ -253,7 +275,7 @@ export function Layout() {
               onClick={() => setSessionBrowserOpen((value) => !value)}
               aria-expanded={sessionBrowserOpen}
               className={cn(
-                "hidden min-h-10 items-center gap-2 rounded-xl px-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-red/70 lg:inline-flex",
+                "hidden min-h-10 items-center gap-2 rounded-xl px-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-red/70 xl:inline-flex",
                 sessionBrowserOpen
                   ? "bg-brand-wine/55 text-white"
                   : "text-zinc-400 hover:bg-white/[0.045] hover:text-zinc-100",
@@ -271,13 +293,37 @@ export function Layout() {
           )}
 
           <div className="ml-auto flex shrink-0 items-center gap-1">
+            {((hasLeagueNavigation && league) || game.enabled) && (
+              <button
+                type="button"
+                onClick={() => setShowFilterSettings(true)}
+                title="View options"
+                aria-label="Open view options"
+                aria-expanded={showFilterSettings}
+                className={cn(
+                  "relative inline-flex min-h-10 items-center gap-2 rounded-xl px-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-red/70",
+                  showFilterSettings
+                    ? "bg-brand-wine/55 text-white ring-1 ring-inset ring-brand-red/20"
+                    : "text-zinc-400 hover:bg-white/[0.06] hover:text-zinc-100",
+                )}
+              >
+                <Settings2 className="size-4" />
+                <span className="hidden sm:inline">View options</span>
+                {league?.analysisPending && (
+                  <span
+                    title="Race analysis updating"
+                    className="absolute right-2 top-2 size-1.5 animate-pulse rounded-full bg-amber-300"
+                  />
+                )}
+              </button>
+            )}
             {!hasLeagueNavigation && (
               <button
                 type="button"
                 onClick={() => setSessionBrowserOpen((value) => !value)}
                 aria-label="Browse sessions"
                 aria-expanded={sessionBrowserOpen}
-                className="inline-flex size-10 items-center justify-center rounded-xl text-zinc-400 transition-colors hover:bg-white/[0.06] hover:text-zinc-100 lg:hidden"
+                className="inline-flex size-10 items-center justify-center rounded-xl text-zinc-400 transition-colors hover:bg-white/[0.06] hover:text-zinc-100 xl:hidden"
               >
                 <CalendarDays className="size-4" />
               </button>
@@ -308,71 +354,11 @@ export function Layout() {
           </div>
         </div>
 
-        {((hasLeagueNavigation && league) || game.enabled) && (
-          <div className="border-t border-white/[0.045] bg-white/[0.012]">
-            <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-2 px-4 py-2.5 sm:px-6 lg:px-8">
-              {league && league.drivers.length > 0 && (
-                <div className="w-full sm:w-56">
-                  <DriverSearchSelect
-                    drivers={league.drivers}
-                    value={league.selectedDriver}
-                    onChange={league.setSelectedDriver}
-                  />
-                </div>
-              )}
-              {league?.safetyData && pageScope && (
-                <Link
-                  to={`/${pageScope}/safety`}
-                  title={
-                    mySafety
-                      ? `Safety rating ${mySafety.sr.toFixed(1)} (not filtered by date)`
-                      : "Safety rating (not filtered by date)"
-                  }
-                  aria-label="Open your safety rating"
-                  className="hidden shrink-0 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-red/70 sm:block"
-                >
-                  {mySafety ? (
-                    <RankTile sr={mySafety.sr} size={34} />
-                  ) : (
-                    <span className="inline-flex size-[34px] items-center justify-center rounded-[9px] bg-zinc-800 text-zinc-400">
-                      <ShieldCheck className="size-4" />
-                    </span>
-                  )}
-                </Link>
-              )}
-              {league && (
-                <div className="min-w-[9.5rem] flex-1 sm:w-48 sm:flex-none">
-                  <LeagueFilterPanel />
-                </div>
-              )}
-              {game.enabled && (
-                <div className="min-w-[9.5rem] flex-1 sm:flex-none">
-                  <PillSelect
-                    value={game.value}
-                    onChange={game.setGame}
-                    options={game.options}
-                    ariaLabel="Game scope"
-                    leadingIcon={Gamepad2}
-                    width="full"
-                    size="sm"
-                  />
-                </div>
-              )}
-              {league?.analysisPending && (
-                <span className="ml-auto inline-flex items-center gap-1.5 rounded-full bg-amber-400/10 px-2.5 py-1 text-[11px] font-medium text-amber-200/90">
-                  <span className="size-1.5 animate-pulse rounded-full bg-amber-300" />
-                  Race analysis updating
-                </span>
-              )}
-            </div>
-          </div>
-        )}
-
         {mobileNavOpen && hasLeagueNavigation && pageScope && (
           <nav
             id="mobile-navigation"
             aria-label="Mobile navigation"
-            className="border-t border-white/[0.06] bg-[#100b0f] px-4 py-4 shadow-xl lg:hidden"
+            className="border-t border-white/[0.06] bg-[#100b0f] px-4 py-4 shadow-xl xl:hidden"
           >
             <div className="mx-auto grid max-w-7xl gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <div className="space-y-1">
@@ -433,7 +419,7 @@ export function Layout() {
         {mobileNavOpen && !hasLeagueNavigation && (
           <div
             id="mobile-navigation"
-            className="border-t border-white/[0.06] px-4 py-3 lg:hidden"
+            className="border-t border-white/[0.06] px-4 py-3 xl:hidden"
           >
             <p className="mx-auto max-w-7xl px-1 text-sm text-zinc-400">
               Choose a session below, or load a telemetry archive.
@@ -449,6 +435,20 @@ export function Layout() {
       </header>
 
       <main className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto bg-canvas">
+        {!isDashboardPage && (
+          <div className="mx-auto w-full max-w-6xl px-4 pt-3 sm:px-6 lg:px-8">
+            <button
+              type="button"
+              onClick={goBack}
+              title="Go back to the previous page"
+              aria-label="Go back to the previous page"
+              className="inline-flex min-h-9 items-center gap-2 rounded-xl border border-white/[0.08] bg-zinc-900/60 px-3 text-xs font-medium text-zinc-300 transition-colors hover:bg-zinc-800/80 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-red/70"
+            >
+              <ArrowLeft className="size-4" />
+              Back
+            </button>
+          </div>
+        )}
         {mode === "demo" && (
           <div className="mx-auto max-w-7xl px-4 pt-4 sm:px-6 lg:px-8">
             <div className="brand-stripe-wash relative flex flex-wrap items-center justify-between gap-4 overflow-hidden rounded-2xl border border-white/[0.08] px-5 py-4 sm:px-6">
@@ -485,6 +485,93 @@ export function Layout() {
       {showChangelog && (
         <ChangelogModal onClose={() => setShowChangelog(false)} />
       )}
+      {showFilterSettings && (
+        <Modal
+          onClose={() => setShowFilterSettings(false)}
+          ariaLabelledBy="global-filter-settings-title"
+          ariaDescribedBy="global-filter-settings-description"
+          className="mx-4 max-w-md border border-white/[0.08]"
+        >
+          {(requestClose) => (
+            <>
+              <div className="border-b border-white/[0.07] px-5 pb-4 pt-5 sm:px-6">
+                <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-rose-200/70">
+                  View options
+                </p>
+                <h2
+                  id="global-filter-settings-title"
+                  className="mt-1 text-xl font-bold tracking-tight text-white"
+                >
+                  Settings
+                </h2>
+                <p
+                  id="global-filter-settings-description"
+                  className="mt-1 text-sm text-zinc-400"
+                >
+                  Choose the data shown across the site.
+                </p>
+              </div>
+              <div
+                id="global-filter-settings"
+                className="space-y-4 px-5 py-5 sm:px-6"
+              >
+                {league && (
+                  <FilterField label="Time range">
+                    <LeagueFilterPanel />
+                  </FilterField>
+                )}
+                {game.enabled && (
+                  <FilterField label="Game">
+                    <PillSelect
+                      value={game.value}
+                      onChange={game.setGame}
+                      options={game.options}
+                      ariaLabel="Game scope"
+                      leadingIcon={Gamepad2}
+                      width="full"
+                      size="md"
+                    />
+                  </FilterField>
+                )}
+                {league && league.drivers.length > 0 && (
+                  <FilterField label="Player">
+                    <DriverSearchSelect
+                      drivers={league.drivers}
+                      value={league.selectedDriver}
+                      onChange={league.setSelectedDriver}
+                    />
+                  </FilterField>
+                )}
+              </div>
+              <div className="flex justify-end border-t border-white/[0.07] px-5 py-4 sm:px-6">
+                <button
+                  type="button"
+                  onClick={requestClose}
+                  className="inline-flex min-h-10 items-center justify-center rounded-xl bg-gradient-to-r from-brand-red to-brand-violet px-4 text-sm font-semibold text-white shadow-lg shadow-rose-950/20 transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                >
+                  Done
+                </button>
+              </div>
+            </>
+          )}
+        </Modal>
+      )}
+      <DriverWelcomeModal />
+    </div>
+  );
+}
+
+function FilterField({
+  label,
+  children,
+}: {
+  label: string;
+  children: ReactNode;
+}) {
+  return (
+    <div className="space-y-1.5">
+      <p className="text-xs font-semibold text-zinc-300">{label}</p>
+      {children}
     </div>
   );
 }
@@ -523,7 +610,12 @@ function NavGroup({
         />
       </button>
       {open && (
-        <div className="absolute left-0 top-full z-50 mt-2 w-56 rounded-2xl bg-zinc-950/98 p-2 shadow-2xl shadow-black/60 ring-1 ring-white/[0.08] backdrop-blur-xl">
+        <div
+          className={cn(
+            "absolute left-0 top-full z-50 mt-1.5 w-56 p-1.5",
+            DROPDOWN_PANEL_STYLES,
+          )}
+        >
           {children}
         </div>
       )}
@@ -543,7 +635,17 @@ function DropdownLink({
   children: ReactNode;
 }) {
   return (
-    <NavLink to={to} className={routeItemClass}>
+    <NavLink
+      to={to}
+      className={({ isActive }) =>
+        cn(
+          DROPDOWN_LINK_STYLES,
+          isActive
+            ? DROPDOWN_OPTION_SELECTED_STYLES
+            : DROPDOWN_OPTION_IDLE_STYLES,
+        )
+      }
+    >
       <Icon className="size-4 shrink-0 text-zinc-500" />
       <span className="min-w-0 flex-1">{children}</span>
       {badge}
@@ -563,7 +665,17 @@ function MobileNavLink({
   children: ReactNode;
 }) {
   return (
-    <NavLink to={to} className={routeItemClass}>
+    <NavLink
+      to={to}
+      className={({ isActive }) =>
+        cn(
+          DROPDOWN_LINK_STYLES,
+          isActive
+            ? DROPDOWN_OPTION_SELECTED_STYLES
+            : DROPDOWN_OPTION_IDLE_STYLES,
+        )
+      }
+    >
       <Icon className="size-4 shrink-0" />
       <span className="min-w-0 flex-1">{children}</span>
       {badge}

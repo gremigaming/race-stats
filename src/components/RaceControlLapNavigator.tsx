@@ -1,10 +1,6 @@
-import {
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-  FlagTriangleRight,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, FlagTriangleRight } from "lucide-react";
 import { Button } from "./ui/Button";
+import { PillMenuSelect } from "./ui/PillMenuSelect";
 import type { PillSelectOption, PillSelectValue } from "./ui/PillSelect";
 
 interface RaceControlLapNavigatorProps {
@@ -44,32 +40,16 @@ export function RaceControlLapNavigator({
       >
         <ChevronLeft aria-hidden="true" className="size-3.5" />
       </Button>
-      <span className="relative flex min-w-0 items-center">
-        <FlagTriangleRight
-          aria-hidden="true"
-          className="pointer-events-none absolute left-2.5 size-3 text-zinc-500"
-        />
-        <select
-          value={String(value)}
-          onChange={(event) => onChange(event.target.value)}
-          aria-label="Jump to race-control lap"
-          className="h-full w-full min-w-0 appearance-none bg-transparent pl-7 pr-7 text-xs font-medium text-zinc-200 outline-none transition-colors hover:bg-zinc-800/30 focus:bg-zinc-800/40"
-        >
-          {options.map((option) => (
-            <option
-              key={String(option.value)}
-              value={String(option.value)}
-              disabled={option.disabled}
-            >
-              {option.label}
-            </option>
-          ))}
-        </select>
-        <ChevronDown
-          aria-hidden="true"
-          className="pointer-events-none absolute right-2.5 size-3 text-zinc-500"
-        />
-      </span>
+      <PillMenuSelect
+        value={value}
+        onChange={onChange}
+        options={options.map((option) => ({ ...option, group: "" }))}
+        ariaLabel="Jump to race-control lap"
+        leadingIcon={FlagTriangleRight}
+        width="full"
+        size="sm"
+        triggerClassName="h-full rounded-none border-0 bg-transparent pl-7 pr-7 hover:bg-zinc-800/30 focus:bg-zinc-800/40 focus:ring-0"
+      />
       <Button
         size="icon"
         variant="ghost"

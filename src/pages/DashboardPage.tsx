@@ -4,7 +4,6 @@ import {
   CalendarDays,
   Clapperboard,
   Flag,
-  ShieldCheck,
   Trophy,
   UsersRound,
   Wrench,
@@ -13,7 +12,7 @@ import { Link } from "react-router-dom";
 import { buildDashboardActivity } from "../analysis/dashboardActivity";
 import { getDashboardResultStats } from "../analysis/dashboardResultStats";
 import { ActivityRow } from "../components/dashboard/ActivityRow";
-import { SafetySummary } from "../components/safety/SafetySummary";
+import { LoadingState } from "../components/ui/LoadingState";
 import { PageFrame } from "../components/ui/PageFrame";
 import { useTelemetry } from "../context/TelemetryContext";
 import { SETUP_MANAGER_ON } from "../league/setupManager";
@@ -80,11 +79,7 @@ export function DashboardPage() {
   const rootPath = dashboardPath(scopeKey ?? "all");
 
   if (loading) {
-    return (
-      <div className="flex min-h-80 items-center justify-center text-sm text-zinc-500">
-        Loading sessions...
-      </div>
-    );
+    return <LoadingState label="Loading sessions" />;
   }
 
   const dashboardSessions = sessions.filter(
@@ -122,7 +117,6 @@ export function DashboardPage() {
               {filtered ? " · Filtered" : ""}
             </p>
           </div>
-          <SafetySummary />
         </div>
 
         {hasData ? (
@@ -182,14 +176,22 @@ export function DashboardPage() {
               className="group relative flex min-h-24 items-center gap-3 overflow-hidden rounded-2xl border border-white/[0.07] bg-zinc-900/65 p-4 transition duration-200 hover:-translate-y-0.5 hover:border-rose-300/20 hover:bg-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-red/70"
             >
               <span
+                aria-hidden="true"
+                className="brand-stripe-wash pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-20"
+              />
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-y-3 left-0 z-10 w-0.5 rounded-full bg-gradient-to-b from-brand-red/35 via-brand-red/80 to-brand-violet/45 opacity-70 transition-opacity group-hover:opacity-100"
+              />
+              <span
                 className={cn(
-                  "flex size-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ring-1 ring-inset ring-white/[0.06]",
+                  "relative z-10 flex size-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ring-1 ring-inset ring-white/[0.06]",
                   tone,
                 )}
               >
                 <Icon className="size-5" />
               </span>
-              <span className="min-w-0 flex-1">
+              <span className="relative z-10 min-w-0 flex-1">
                 <span className="block text-sm font-semibold text-zinc-100 group-hover:text-white">
                   {label}
                 </span>
@@ -197,7 +199,7 @@ export function DashboardPage() {
                   {detail}
                 </span>
               </span>
-              <ArrowRight className="size-4 shrink-0 text-zinc-600 transition group-hover:translate-x-0.5 group-hover:text-rose-200" />
+              <ArrowRight className="relative z-10 size-4 shrink-0 text-zinc-600 transition group-hover:translate-x-0.5 group-hover:text-rose-200" />
             </Link>
           ))}
           {SETUP_MANAGER_ON && (
@@ -235,23 +237,6 @@ export function DashboardPage() {
               </span>
             </span>
             <ArrowRight className="size-4 shrink-0 text-zinc-600 transition group-hover:translate-x-0.5 group-hover:text-fuchsia-200" />
-          </Link>
-          <Link
-            to={`${rootPath}/safety`}
-            className="group relative flex min-h-24 items-center gap-3 overflow-hidden rounded-2xl border border-white/[0.07] bg-zinc-900/65 p-4 transition duration-200 hover:-translate-y-0.5 hover:border-emerald-300/20 hover:bg-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-red/70"
-          >
-            <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500/15 to-teal-500/5 text-emerald-200 ring-1 ring-inset ring-white/[0.06]">
-              <ShieldCheck className="size-5" />
-            </span>
-            <span className="min-w-0 flex-1">
-              <span className="block text-sm font-semibold text-zinc-100 group-hover:text-white">
-                Safety rating
-              </span>
-              <span className="mt-0.5 block text-xs text-zinc-500">
-                Review your rating and race calls
-              </span>
-            </span>
-            <ArrowRight className="size-4 shrink-0 text-zinc-600 transition group-hover:translate-x-0.5 group-hover:text-emerald-200" />
           </Link>
         </div>
       </section>

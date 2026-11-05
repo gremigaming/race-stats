@@ -25,6 +25,7 @@ import { useLiveSessions } from "../viewer/live";
 import { PickerTabs } from "../viewer/LiveTab";
 import { PageFrame } from "../components/ui/PageFrame";
 import { PageHeader } from "../components/ui/PageHeader";
+import { LoadingSpinner } from "../components/ui/LoadingSpinner";
 
 type Race = RaceIndexEntry & { base: string };
 type Sort = "newest" | "chaos" | "incidents" | "cars" | "closest";
@@ -288,7 +289,10 @@ export function RaceListPage() {
           </section>
 
           {races === null ? (
-            <div className="mx-auto h-6 w-6 animate-spin rounded-full border-2 border-zinc-700 border-t-red-500" />
+            <LoadingSpinner
+              className="mx-auto h-6 w-6 border-2"
+              label="Loading races"
+            />
           ) : sorted.length === 0 ? (
             <p className="text-center text-sm text-zinc-500">
               {races.length ? "No races match these filters." : "No races yet."}
@@ -393,19 +397,33 @@ function RaceCard({
     <Link
       to={to}
       className={cn(
-        "group relative flex min-h-40 flex-col overflow-hidden rounded-2xl bg-white/[0.03] p-4 transition hover:-translate-y-0.5 hover:bg-white/[0.06]",
+        "group relative flex min-h-40 flex-col overflow-hidden rounded-2xl bg-zinc-900/70 p-4 ring-1 ring-inset ring-white/[0.06] transition hover:-translate-y-0.5 hover:bg-zinc-900",
         cardHighlight,
       )}
     >
       <WeatherBackdrop codes={r.weather} />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute right-1.5 top-1.5 z-[1] h-24 w-36 overflow-hidden rounded-xl opacity-[0.2] transition-opacity group-hover:opacity-[0.22]"
+        style={{
+          maskImage: "radial-gradient(ellipse at 100% 0%, black 0%, transparent 82%)",
+          WebkitMaskImage:
+            "radial-gradient(ellipse at 100% 0%, black 0%, transparent 82%)",
+        }}
+      >
+        <TrackFlag
+          track={r.track}
+          size="large"
+          className="absolute right-2 top-2 h-auto max-h-16 w-24 max-w-none rounded-sm object-contain"
+        />
+      </div>
       <TrackLayout
         track={r.track}
-        className="pointer-events-none absolute bottom-2 right-2 size-24 text-white/[0.08] transition group-hover:text-red-500/25 [&>svg]:size-full"
+        className="pointer-events-none absolute bottom-2 right-2 z-[2] size-20 text-white/[0.05] transition group-hover:text-brand-red/15 [&>svg]:size-full"
       />
-      <div className="relative flex items-start justify-between gap-2">
+      <div className="relative z-10 flex items-start justify-between gap-2">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <TrackFlag track={r.track} size="small" className="rounded-[2px]" />
             <span className="truncate font-semibold text-zinc-50">
               {getTrackDisplayName(r.track)}
             </span>
@@ -421,7 +439,7 @@ function RaceCard({
       </div>
 
       {badges.length > 0 && (
-        <div className="relative mt-2 flex flex-wrap gap-1.5">
+        <div className="relative z-10 mt-2 flex flex-wrap gap-1.5">
           {badges.includes("chaos") && (
             <span className="flex items-center gap-1 rounded-full bg-red-500/15 px-2 py-0.5 text-[11px] font-medium text-red-300">
               <Flame className="size-3" /> Most chaotic
@@ -435,7 +453,7 @@ function RaceCard({
         </div>
       )}
 
-      <div className="relative mt-auto space-y-1.5 pt-3 text-xs">
+      <div className="relative z-10 mt-auto space-y-1.5 pt-3 text-xs">
         {r.winner && (
           <div className="flex items-center gap-1.5 text-zinc-200">
             <Trophy className="size-3.5 text-yellow-400" />

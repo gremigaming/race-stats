@@ -205,7 +205,7 @@ function ProgressionColumn({ session }: { session: SessionSummary }) {
     <Link
       to={to}
       title={title}
-      className="group flex min-w-0 flex-col items-center gap-2.5"
+      className="group flex min-w-0 flex-col items-center gap-2.5 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-red/70"
     >
       <div
         className="flex items-end gap-[4px]"

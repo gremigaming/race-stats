@@ -20,6 +20,7 @@ import {
 } from "../constants/links";
 import { AppBrand } from "./AppBrand";
 import { Modal } from "./ui/Modal";
+import { LoadingSpinner } from "./ui/LoadingSpinner";
 import { HStack, VStack } from "./ui/Stack";
 
 export function ZipUploadScreen({
@@ -66,10 +67,14 @@ export function ZipUploadScreen({
   );
 
   return (
-    <Modal onClose={dismissable ? close : undefined} className="max-w-xl">
+    <Modal
+      onClose={dismissable ? close : undefined}
+      className="max-w-xl"
+      ariaLabelledBy="upload-modal-title"
+    >
       {/* Header */}
       <div className="w-full px-10 pt-10 pb-6 text-center">
-        <h2 className="text-2xl font-bold tracking-tight">
+        <h2 id="upload-modal-title" className="text-2xl font-bold tracking-tight">
           <AppBrand />
         </h2>
         <p className="mt-4 text-base text-zinc-300">
@@ -121,7 +126,7 @@ export function ZipUploadScreen({
         >
           {filesLoading ? (
             <>
-              <div className="h-8 w-8 animate-spin rounded-full border-[3px] border-zinc-600 border-t-red-500" />
+              <LoadingSpinner className="h-8 w-8 border-[3px]" />
               <div>
                 <p className="text-sm font-medium text-zinc-200">
                   Loading telemetry data...

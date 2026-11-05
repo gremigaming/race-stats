@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { NavLink } from "react-router-dom";
 import { cn } from "../utils/cn";
-import { cardHighlight } from "./Card";
+import { cardHighlight, interactiveFocusClass } from "./Card";
 import { HStack } from "./ui/Stack";
 
 /**
@@ -44,13 +44,13 @@ export function SessionRow({ to, leading, meta, trailing }: SessionRowProps) {
     );
   }
   return (
-    <NavLink to={to} className="block rounded-xl">
+    <NavLink to={to} className={cn("block rounded-xl", interactiveFocusClass)}>
       {({ isActive }) => (
         <HStack
           className={cn(
             "gap-3 rounded-xl px-3 py-2 transition-colors",
             isActive
-              ? "bg-zinc-800/70 text-white"
+              ? "bg-gradient-to-r from-brand-red/[0.1] to-brand-violet/[0.06] text-white"
               : "bg-zinc-900/60 hover:bg-zinc-800/60",
             cardHighlight,
           )}

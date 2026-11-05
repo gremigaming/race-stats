@@ -12,6 +12,8 @@ import {
 import { cardClass } from "../Card";
 import { Badge } from "../ui/Badge";
 import { SectionHeader } from "../ui/SectionHeader";
+import { HorizontalScrollRegion } from "../ui/HorizontalScrollRegion";
+import { LoadingSpinner } from "../ui/LoadingSpinner";
 import { SegmentedControl } from "../ui/SegmentedControl";
 import { useTelemetry } from "../../context/TelemetryContext";
 import { CHART_THEME, TOOLTIP_STYLE } from "../../constants/colors";
@@ -873,44 +875,49 @@ function TrackSectionDetail({
               <summary className="cursor-pointer px-3 py-2.5 text-xs font-medium text-zinc-300">
                 Races in this comparison ({comparableSessions.length})
               </summary>
-              <div className="overflow-x-auto px-3 pb-3">
-                <table className="w-full min-w-[460px] text-left text-xs">
-                  <thead className="text-zinc-500">
-                    <tr>
-                      <th className="py-2 pr-3 font-medium">Race</th>
-                      <th className="py-2 pr-3 font-medium">Conditions</th>
-                      <th className="py-2 pr-3 text-right font-medium">
-                        Median gap
-                      </th>
-                      <th className="py-2 text-right font-medium">Match</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-white/[0.05] text-zinc-300">
-                    {comparableSessions.map(({ conditions, point }) => (
-                      <tr key={point.raceUid}>
-                        <td className="py-2 pr-3">{point.label}</td>
-                        <td className="py-2 pr-3">
-                          {sessionConditionsLabel(conditions)}
-                        </td>
-                        <td
-                          className="py-2 pr-3 text-right font-mono tabular-nums"
-                          style={{
-                            color: markerColor(
-                              relativeGap(point.deltaMs, point.groupMs),
-                              majorGapThreshold,
-                            ),
-                          }}
-                        >
-                          {signedSeconds(point.deltaMs)}
-                        </td>
-                        <td className="py-2 text-right">
-                          {point.confidence === "high" ? "Strong" : "Limited"}
-                        </td>
+              <HorizontalScrollRegion
+                label="Races in the corner comparison"
+                hint="Swipe to compare race conditions and pace"
+              >
+                <div className="px-3 pb-3">
+                  <table className="w-full min-w-[460px] text-left text-xs">
+                    <thead className="text-zinc-500">
+                      <tr>
+                        <th className="py-2 pr-3 font-medium">Race</th>
+                        <th className="py-2 pr-3 font-medium">Conditions</th>
+                        <th className="py-2 pr-3 text-right font-medium">
+                          Median gap
+                        </th>
+                        <th className="py-2 text-right font-medium">Match</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody className="divide-y divide-white/[0.05] text-zinc-300">
+                      {comparableSessions.map(({ conditions, point }) => (
+                        <tr key={point.raceUid}>
+                          <td className="py-2 pr-3">{point.label}</td>
+                          <td className="py-2 pr-3">
+                            {sessionConditionsLabel(conditions)}
+                          </td>
+                          <td
+                            className="py-2 pr-3 text-right font-mono tabular-nums"
+                            style={{
+                              color: markerColor(
+                                relativeGap(point.deltaMs, point.groupMs),
+                                majorGapThreshold,
+                              ),
+                            }}
+                          >
+                            {signedSeconds(point.deltaMs)}
+                          </td>
+                          <td className="py-2 text-right">
+                            {point.confidence === "high" ? "Strong" : "Limited"}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </HorizontalScrollRegion>
             </details>
           </>
         )}
@@ -920,45 +927,50 @@ function TrackSectionDetail({
         <summary className="cursor-pointer px-4 py-3 text-sm font-medium text-zinc-300">
           Peer drivers in this comparison ({trend.peerComparisons.length})
         </summary>
-        <div className="overflow-x-auto px-4 pb-4">
-          <table className="w-full min-w-[480px] text-left text-xs">
-            <thead className="text-zinc-500">
-              <tr>
-                <th className="py-2 pr-4 font-medium">Driver</th>
-                <th className="py-2 pr-4 text-right font-medium">Median</th>
-                <th className="py-2 pr-4 text-right font-medium">Fastest</th>
-                <th className="py-2 pr-4 text-right font-medium">
-                  Matched laps
-                </th>
-                <th className="py-2 text-right font-medium">
-                  Your passes matched
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/[0.05] text-zinc-300">
-              {trend.peerComparisons.map((peer) => (
-                <tr key={peer.driverKey}>
-                  <td className="py-2 pr-4 font-medium">{peer.driverName}</td>
-                  <td className="py-2 pr-4 text-right font-mono tabular-nums">
-                    {durationSeconds(peer.medianMs)}
-                  </td>
-                  <td className="py-2 pr-4 text-right font-mono tabular-nums">
-                    {durationSeconds(peer.fastestMs)}
-                  </td>
-                  <td className="py-2 pr-4 text-right tabular-nums">
-                    {peer.matchedLaps}
-                  </td>
-                  <td className="py-2 text-right tabular-nums">
-                    {peer.playerPasses}
-                  </td>
+        <HorizontalScrollRegion
+          label="Peer drivers in the corner comparison"
+          hint="Swipe to compare peer drivers"
+        >
+          <div className="px-4 pb-4">
+            <table className="w-full min-w-[480px] text-left text-xs">
+              <thead className="text-zinc-500">
+                <tr>
+                  <th className="py-2 pr-4 font-medium">Driver</th>
+                  <th className="py-2 pr-4 text-right font-medium">Median</th>
+                  <th className="py-2 pr-4 text-right font-medium">Fastest</th>
+                  <th className="py-2 pr-4 text-right font-medium">
+                    Matched laps
+                  </th>
+                  <th className="py-2 text-right font-medium">
+                    Your passes matched
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-          <p className="mt-3 text-xs text-zinc-500">
-            Only tyre-compatible clean passes are included for each driver.
-          </p>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-white/[0.05] text-zinc-300">
+                {trend.peerComparisons.map((peer) => (
+                  <tr key={peer.driverKey}>
+                    <td className="py-2 pr-4 font-medium">{peer.driverName}</td>
+                    <td className="py-2 pr-4 text-right font-mono tabular-nums">
+                      {durationSeconds(peer.medianMs)}
+                    </td>
+                    <td className="py-2 pr-4 text-right font-mono tabular-nums">
+                      {durationSeconds(peer.fastestMs)}
+                    </td>
+                    <td className="py-2 pr-4 text-right tabular-nums">
+                      {peer.matchedLaps}
+                    </td>
+                    <td className="py-2 text-right tabular-nums">
+                      {peer.playerPasses}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <p className="mt-3 text-xs text-zinc-500">
+              Only tyre-compatible clean passes are included for each driver.
+            </p>
+          </div>
+        </HorizontalScrollRegion>
       </details>
 
       <div className="divide-y divide-white/[0.05]">
@@ -1128,10 +1140,7 @@ export function CornerAnalysisPanel({
           }
           className="flex flex-col items-center justify-center gap-3 py-10"
         >
-          <div
-            aria-hidden="true"
-            className="h-6 w-6 animate-spin rounded-full border-2 border-zinc-700 border-t-red-500"
-          />
+          <LoadingSpinner className="h-6 w-6 border-2" />
           {totalRaces > 0 && (
             <span className="text-sm text-zinc-500">
               {`Analyzing replay data · ${completedRaces} of ${totalRaces} races`}

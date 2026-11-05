@@ -47,6 +47,7 @@ import { InsightTile } from "../components/ui/InsightTile";
 import { SectionHeader } from "../components/ui/SectionHeader";
 import { PageFrame } from "../components/ui/PageFrame";
 import { PageHeader } from "../components/ui/PageHeader";
+import { LoadingState } from "../components/ui/LoadingState";
 import { SegmentedControl } from "../components/ui/SegmentedControl";
 import { HStack, VStack } from "../components/ui/Stack";
 import { useTelemetry } from "../context/TelemetryContext";
@@ -344,11 +345,7 @@ export function TrackProgressPage() {
   );
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-full text-zinc-500">
-        Loading track data...
-      </div>
-    );
+    return <LoadingState label="Loading track data" />;
   }
 
   if (!data.length) {
@@ -418,7 +415,7 @@ export function TrackProgressPage() {
     }
 
     return (
-      <div className="flex items-center justify-center h-full">
+      <div className="flex min-h-[55vh] items-center justify-center px-4 py-8">
         <ActionEmptyState
           icon={isUploadWithNoData ? Upload : ArrowLeft}
           className="max-w-md"

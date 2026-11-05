@@ -11,6 +11,7 @@ import type { GameScope } from "../hooks/useGameScope";
 import { cn } from "../utils/cn";
 import { SESSION_MODE_META } from "./sessionModeMeta";
 import { SESSION_TYPE_FILTER_META } from "./sessionTypeMeta";
+import { DROPDOWN_PANEL_STYLES } from "./ui/formControl";
 import { SegmentedControl } from "./ui/SegmentedControl";
 import { HStack } from "./ui/Stack";
 
@@ -116,15 +117,24 @@ export function SessionListFilterMenu({
         }
         aria-expanded={open}
         className={cn(
-          "relative flex items-center justify-center rounded-md p-1.5 transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-zinc-600",
+          "relative inline-flex min-h-8 items-center gap-2 rounded-lg border px-2.5 text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-red/50",
           !isDefault
-            ? "bg-sky-500/15 text-sky-300 ring-1 ring-inset ring-sky-400/25 hover:bg-sky-500/20"
+            ? "border-brand-red/25 bg-brand-wine/40 text-rose-100 hover:bg-brand-wine/55"
             : open
-              ? "bg-zinc-900 text-zinc-200"
-              : "text-zinc-500 hover:bg-zinc-900/60 hover:text-zinc-300",
+              ? "border-white/10 bg-zinc-900 text-zinc-200"
+              : "border-white/[0.07] text-zinc-400 hover:bg-white/[0.045] hover:text-zinc-200",
         )}
       >
-        <ButtonIcon className="h-3.5 w-3.5" />
+        <ButtonIcon className="size-3.5 shrink-0" />
+        <span>Filters</span>
+        {activeCount > 0 && (
+          <span
+            aria-hidden="true"
+            className="inline-flex min-w-4 items-center justify-center rounded-full bg-white/10 px-1 text-[10px] tabular-nums text-rose-100"
+          >
+            {activeCount}
+          </span>
+        )}
       </button>
 
       {open && (
@@ -132,7 +142,8 @@ export function SessionListFilterMenu({
           role="dialog"
           aria-label="Session filters"
           className={cn(
-            "absolute right-0 top-full z-20 mt-1.5 max-w-[calc(100vw-2rem)] rounded-xl bg-zinc-950 ring-1 ring-white/[0.06] shadow-xl divide-y divide-white/[0.05]",
+            "absolute right-0 top-full z-20 mt-1.5 max-w-[calc(100vw-2rem)] divide-y divide-white/[0.07]",
+            DROPDOWN_PANEL_STYLES,
             game.enabled && showGame ? "w-64" : "w-56",
           )}
         >

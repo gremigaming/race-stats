@@ -4,6 +4,7 @@ import { useTelemetry } from "../context/TelemetryContext";
 import { cn } from "../utils/cn";
 import { formatSessionType, formatTime } from "../utils/format";
 import { sessionSummaryPath } from "../utils/routes";
+import { interactiveFocusClass } from "./Card";
 import { SessionCard } from "./SessionCard";
 
 interface SessionListItemProps {
@@ -38,7 +39,7 @@ export function SessionListItem({
     return (
       <div
         title="Demo data — upload your telemetry to explore detail"
-        className="block rounded-xl px-2 py-2 text-zinc-400"
+        className="block rounded-xl border border-dashed border-white/[0.045] bg-zinc-900/20 px-3 py-2.5 text-zinc-500"
       >
         {card}
       </div>
@@ -50,10 +51,11 @@ export function SessionListItem({
       to={sessionSummaryPath(session, scopeKey)}
       className={({ isActive }) =>
         cn(
-          "block rounded-xl px-2 py-2 transition-colors",
+          "block rounded-xl border px-3 py-2.5 transition-colors",
           isActive
-            ? "bg-zinc-800/70 text-white"
-            : "text-zinc-400 hover:bg-zinc-900/60 hover:text-zinc-200",
+            ? "border-rose-300/20 bg-gradient-to-r from-brand-red/[0.13] to-brand-violet/[0.09] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.035)]"
+            : "border-white/[0.045] bg-zinc-900/35 text-zinc-300 hover:border-rose-300/15 hover:bg-zinc-900/70 hover:text-white",
+          interactiveFocusClass,
         )
       }
     >

@@ -4,9 +4,9 @@ import {
   ShieldCheck,
   UserRound,
 } from "lucide-react";
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useSearchParams } from "react-router-dom";
-import { cardClass } from "../components/Card";
+import { cardClass, interactiveFocusClass } from "../components/Card";
 import { RankLegend, RankTile } from "../components/safety/RankTile";
 import {
   changeClass,
@@ -14,6 +14,7 @@ import {
 } from "../components/safety/SafetyPersonal";
 import { SafetyHighlights } from "../components/league/SafetyHighlights";
 import { SectionHeader } from "../components/ui/SectionHeader";
+import { HorizontalScrollRegion } from "../components/ui/HorizontalScrollRegion";
 import { PageFrame } from "../components/ui/PageFrame";
 import { PageHeader } from "../components/ui/PageHeader";
 import { SortHeader, sortRows, useSort } from "../components/ui/SortHeader";
@@ -22,10 +23,12 @@ import {
   tableCellClass,
   tableClassLoose,
   tableHeadClass,
+  tableStickyHeadClass,
   tableRowClass,
 } from "../components/ui/table";
 import { useTelemetry } from "../context/TelemetryContext";
 import { driverKey } from "../league/league";
+import { isoDay } from "../league/filter";
 import {
   SR_START,
   signedHalf,
@@ -199,16 +202,28 @@ function howItWorksV25(s: SrSettings): Record<string, ReactNode> {
 
 type Tab = "ranking" | "personal";
 type SortKey = "pos" | "rank" | "name" | "sr" | "change" | "races";
+type RankingScope = "all" | "current-stream";
 
 export function SafetyPage() {
   const { league } = useTelemetry();
   const [params, setParams] = useSearchParams();
   const highlightRef = useRef<HTMLTableRowElement>(null);
+  const [rankingScope, setRankingScope] = useState<RankingScope>("all");
   // ?embed: the Discord picture, the full ranking with the site address
   const embed = params.has("embed");
   const { sort, toggle } = useSort<SortKey>();
   const tab: Tab =
     !embed && params.get("tab") === "personal" ? "personal" : "ranking";
+  const today = isoDay(new Date());
+  const todayStreamIndex =
+    league?.safetyData?.streams.reduce(
+      (found, stream, index) => (stream.date === today ? index : found),
+      -1,
+    ) ?? -1;
+
+  useEffect(() => {
+    if (todayStreamIndex < 0) setRankingScope("all");
+  }, [todayStreamIndex]);
 
   useEffect(() => {
     if (tab === "ranking" && !embed)
@@ -226,7 +241,14 @@ export function SafetyPage() {
     );
   }
   const rows = league.safetyData.drivers.filter((d) => !d.banned);
-  const sortedRows = sortRows(rows, sort, (d, k) =>
+  const currentStreamRows =
+    todayStreamIndex < 0
+      ? []
+      : rows.filter((d) => d.sessions.some((session) => session.stream === todayStreamIndex));
+  const currentStreamAvailable = !embed && todayStreamIndex >= 0;
+  const showingCurrentStream = rankingScope === "current-stream" && currentStreamAvailable;
+  const visibleRows = showingCurrentStream ? currentStreamRows : rows;
+  const sortedRows = sortRows(visibleRows, sort, (d, k) =>
     k === "pos" ? rows.indexOf(d) : k === "rank" ? d.sr : d[k],
   );
   const sortProps = { sort, toggle };
@@ -264,7 +286,13 @@ export function SafetyPage() {
           icon={ShieldCheck}
           eyebrow="Drivers"
           title="Safety rating"
-          description="Review your rating, recent changes, and the calls behind the standings."
+          description={
+            tab === "personal"
+              ? personal
+                ? "Review one driver's rating and race-by-race changes. Choose a different name in the ranking to switch."
+                : "Choose a driver from the ranking to view their safety rating."
+              : "Review your rating, recent changes, and the calls behind the standings."
+          }
           meta={`Not filtered by date · Last ${league.safetyData.rules === "v2.5" ? srWindowRaces(srSettings(league.safetyData)) : 50} races · ${rows.length} drivers`}
           action={
             <SegmentedControl
@@ -288,23 +316,6 @@ export function SafetyPage() {
 
       {tab === "personal" ? (
         <>
-          <label className="flex items-center gap-2 text-xs text-zinc-500">
-            Driver
-            <select
-              value={personal ? personalKey : ""}
-              onChange={(e) => openPersonal(e.target.value)}
-              className="h-8 rounded-lg bg-zinc-900/70 px-2 text-sm text-zinc-200 focus:outline-none focus:ring-1 focus:ring-zinc-600"
-            >
-              {!personal && <option value="">Pick a driver</option>}
-              {[...rows]
-                .sort((a, b) => a.name.localeCompare(b.name))
-                .map((d) => (
-                  <option key={d.name} value={driverKey(d.name)}>
-                    {d.name}
-                  </option>
-                ))}
-            </select>
-          </label>
           {personal ? (
             <SafetyPersonal
               driver={personal}
@@ -313,10 +324,20 @@ export function SafetyPage() {
               of={rows.length}
             />
           ) : (
-            <p className={cn(cardClass, "text-sm text-zinc-500")}>
-              This driver has no safety rating yet. Pick a driver above, or open
-              the ranking.
-            </p>
+            <div className={cn(cardClass, "flex flex-wrap items-center justify-between gap-4")}>
+              <p className="text-sm text-zinc-400">
+                This driver has no safety rating yet. Choose another driver from
+                the ranking.
+              </p>
+              <button
+                type="button"
+                onClick={() => setParams({})}
+                className="inline-flex items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.04] px-3 py-2 text-sm font-medium text-zinc-200 transition-colors hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-red/70"
+              >
+                View ranking
+                <ChevronRight className="size-4" />
+              </button>
+            </div>
           )}
         </>
       ) : (
@@ -325,13 +346,39 @@ export function SafetyPage() {
             title="Ranking"
             hint={
               embed
-                ? "Your own rating and every incident at gremigaming.github.io/race-stats"
-                : "Click a driver to open their personal page"
+                ? "Live safety rating across the league"
+                : showingCurrentStream
+                  ? `${visibleRows.length} ${visibleRows.length === 1 ? "driver" : "drivers"} in today's stream · Select a driver name to open their personal page`
+                  : "Select a driver name to open their personal page"
+            }
+            action={
+              currentStreamAvailable ? (
+                <SegmentedControl
+                  size="sm"
+                  value={rankingScope}
+                  onChange={setRankingScope}
+                  ariaLabel="Drivers in ranking"
+                  options={[
+                    { value: "all", label: "All drivers", meta: rows.length },
+                    {
+                      value: "current-stream",
+                      label: "Current stream",
+                      meta: currentStreamRows.length,
+                    },
+                  ]}
+                />
+              ) : undefined
             }
           />
-          <div className="overflow-x-auto">
+          <HorizontalScrollRegion
+            label="Safety rating rankings"
+            hint="Swipe to compare safety ratings"
+            stickyHeader={!embed}
+          >
             <table className={tableClassLoose}>
-              <thead className={tableHeadClass}>
+              <thead
+                className={cn(tableHeadClass, !embed && tableStickyHeadClass)}
+              >
                 <tr>
                   <SortHeader column="pos" firstDir="asc" {...sortProps}>
                     #
@@ -359,18 +406,26 @@ export function SafetyPage() {
                 </tr>
               </thead>
               <tbody>
-                {sortedRows.map((d) => {
+                {sortedRows.length === 0 && showingCurrentStream ? (
+                  <tr>
+                    <td colSpan={6} className="px-3 py-8 text-center text-sm text-zinc-500">
+                      No ranked drivers in today's stream yet.
+                    </td>
+                  </tr>
+                ) : sortedRows.map((d) => {
                   const i = rows.indexOf(d);
                   const key = driverKey(d.name);
                   const isMe = !embed && key === league.selectedDriver;
+                  const openDriver = () => openPersonal(key);
                   return (
                     <tr
                       key={key}
                       ref={isMe ? highlightRef : undefined}
-                      onClick={() => openPersonal(key)}
+                      onClick={embed ? undefined : openDriver}
                       className={cn(
                         tableRowClass,
-                        "cursor-pointer transition-colors hover:bg-white/[0.03]",
+                        !embed &&
+                          "cursor-pointer transition-colors hover:bg-white/[0.03]",
                         isMe &&
                           "bg-red-500/[0.09] shadow-[inset_3px_0_0_#f87171]",
                       )}
@@ -395,16 +450,40 @@ export function SafetyPage() {
                           ),
                         })}
                       >
-                        {d.name}
-                        {isMe && (
-                          <span className="ml-2 rounded-full bg-red-500/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-red-300">
-                            you
-                          </span>
-                        )}
-                        {d.provisional && (
-                          <span className="ml-2 text-[11px] font-normal text-zinc-500">
-                            provisional
-                          </span>
+                        {embed ? (
+                          <>
+                            {d.name}
+                            {d.provisional && (
+                              <span className="ml-2 text-[11px] font-normal text-zinc-500">
+                                provisional
+                              </span>
+                            )}
+                          </>
+                        ) : (
+                          <button
+                            type="button"
+                            aria-label={`Open personal safety rating for ${d.name}`}
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              openDriver();
+                            }}
+                            className={cn(
+                              "rounded-sm text-left text-inherit hover:underline",
+                              interactiveFocusClass,
+                            )}
+                          >
+                            {d.name}
+                            {isMe && (
+                              <span className="ml-2 rounded-full bg-red-500/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-red-300">
+                                you
+                              </span>
+                            )}
+                            {d.provisional && (
+                              <span className="ml-2 text-[11px] font-normal text-zinc-500">
+                                provisional
+                              </span>
+                            )}
+                          </button>
                         )}
                       </td>
                       <td
@@ -439,7 +518,7 @@ export function SafetyPage() {
                 })}
               </tbody>
             </table>
-          </div>
+          </HorizontalScrollRegion>
           <RankLegend className="mt-4" />
         </section>
       )}

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { buildTrackInsights } from "../analysis/dashboardInsights";
 import { getDashboardResultStats } from "../analysis/dashboardResultStats";
 import { buildRivalStats } from "../analysis/rivalStats";
+import { ActionEmptyState } from "../components/ActionEmptyState";
 import { InsightCard } from "../components/dashboard/InsightCard";
 import { QualifyingPaceCard } from "../components/dashboard/QualifyingPaceCard";
 import { RaceResultsHero } from "../components/dashboard/RaceResultsHero";
@@ -13,6 +14,7 @@ import {
   buildTrackGroups,
 } from "../components/dashboard/helpers";
 import { SectionHeader } from "../components/ui/SectionHeader";
+import { LoadingState } from "../components/ui/LoadingState";
 import { PageFrame } from "../components/ui/PageFrame";
 import { PageHeader } from "../components/ui/PageHeader";
 import { useTelemetry } from "../context/TelemetryContext";
@@ -32,11 +34,7 @@ export function DriverInsightsPage() {
   const [filters] = useSessionFilters();
 
   if (loading) {
-    return (
-      <div className="flex min-h-80 items-center justify-center text-sm text-zinc-500">
-        Loading driver insights...
-      </div>
-    );
+    return <LoadingState label="Loading driver insights" />;
   }
 
   const dashboardSessions = sessions.filter(
@@ -113,15 +111,12 @@ export function DriverInsightsPage() {
       )}
 
       {!hasAnalysis && (
-        <section className="rounded-2xl border border-white/[0.07] bg-zinc-900/45 px-5 py-8 text-center">
-          <h2 className="text-sm font-semibold text-zinc-200">
-            Not enough data for insights yet
-          </h2>
-          <p className="mx-auto mt-1 max-w-lg text-sm text-zinc-500">
-            Keep racing and your pace trends, rival comparisons, and result
-            patterns will appear here.
-          </p>
-        </section>
+        <ActionEmptyState
+          icon={BarChart3}
+          title="Not enough data for insights yet"
+          message="Keep racing and your pace trends, rival comparisons, and result patterns will appear here."
+          className="max-w-none"
+        />
       )}
 
       {insights.length > 0 && (

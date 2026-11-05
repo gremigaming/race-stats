@@ -1,9 +1,14 @@
 import { Swords } from "lucide-react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { cardClass, cardClassFeature } from "../components/Card";
+import {
+  cardClass,
+  cardClassFeature,
+  interactiveFocusClass,
+} from "../components/Card";
 import { TrackFlag } from "../components/TrackFlag";
 import { DriverSearchSelect } from "../components/DriverSearchSelect";
 import { SectionHeader } from "../components/ui/SectionHeader";
+import { HorizontalScrollRegion } from "../components/ui/HorizontalScrollRegion";
 import { PageFrame } from "../components/ui/PageFrame";
 import { PageHeader } from "../components/ui/PageHeader";
 import {
@@ -195,9 +200,12 @@ export function HeadToHeadPage() {
           <section className={cardClass}>
             <SectionHeader
               title="Races together"
-              hint="Newest first · click a race to open it"
+              hint="Newest first · select a track to open the comparison"
             />
-            <div className="overflow-x-auto">
+            <HorizontalScrollRegion
+              label="Races shared by the selected drivers"
+              hint="Swipe to compare race results and lap times"
+            >
               <table className={tableClassLoose}>
                 <thead className={tableHeadClass}>
                   <tr>
@@ -226,28 +234,47 @@ export function HeadToHeadPage() {
                       r.a.bestLapMs != null &&
                       r.b.bestLapMs != null &&
                       r.b.bestLapMs < r.a.bestLapMs;
+                    const openRace = () => {
+                      // Open the race as driver a, already compared with b
+                      league.setSelectedDriver(a);
+                      if (scopeKey)
+                        navigate(
+                          `${sessionPath(scopeKey, toSlug(r.file))}?vs=${encodeURIComponent(b)}`,
+                        );
+                    };
                     return (
                       <tr
                         key={r.file}
-                        onClick={() => {
-                          // Open the race as driver a, already compared with b
-                          league.setSelectedDriver(a);
-                          if (scopeKey)
-                            navigate(
-                              `${sessionPath(scopeKey, toSlug(r.file))}?vs=${encodeURIComponent(b)}`,
-                            );
-                        }}
+                        onClick={scopeKey ? openRace : undefined}
                         className={cn(
                           tableRowClass,
-                          "cursor-pointer transition-colors hover:bg-white/[0.03]",
+                          scopeKey &&
+                            "cursor-pointer transition-colors hover:bg-white/[0.03]",
                         )}
                       >
                         <td className={tableCellClass()}>
                           <span className="flex items-center gap-2">
                             <TrackFlag track={r.track} size="small" />
-                            <span className="text-zinc-100">
-                              {getTrackDisplayName(r.track)}
-                            </span>
+                            {scopeKey ? (
+                              <button
+                                type="button"
+                                aria-label={`Open head-to-head comparison at ${getTrackDisplayName(r.track)} on ${r.date.slice(0, 10)}`}
+                                onClick={(event) => {
+                                  event.stopPropagation();
+                                  openRace();
+                                }}
+                                className={cn(
+                                  "rounded-sm text-left text-zinc-100 hover:underline",
+                                  interactiveFocusClass,
+                                )}
+                              >
+                                {getTrackDisplayName(r.track)}
+                              </button>
+                            ) : (
+                              <span className="text-zinc-100">
+                                {getTrackDisplayName(r.track)}
+                              </span>
+                            )}
                             <span className="font-mono text-xs text-zinc-500">
                               {r.date.slice(0, 10)}
                             </span>
@@ -274,7 +301,7 @@ export function HeadToHeadPage() {
                   })}
                 </tbody>
               </table>
-            </div>
+            </HorizontalScrollRegion>
           </section>
         </>
       )}

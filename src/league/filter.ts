@@ -23,7 +23,7 @@ export const FILTER_KINDS: { value: LeagueFilter["kind"]; label: string }[] = [
   { value: "custom", label: "Custom range" },
 ];
 
-export const STREAM_COUNTS = [1, 2, 3, 5, 10, 20];
+export const STREAM_COUNTS = [1, 3];
 
 /** Sessions more than this far apart belong to different streams. */
 const STREAM_GAP_MS = 3 * 60 * 60 * 1000;
@@ -165,6 +165,11 @@ export function readStoredFilter(): LeagueFilter {
   try {
     const raw = window.sessionStorage.getItem(STORAGE_KEY);
     const parsed = raw ? (JSON.parse(raw) as LeagueFilter) : null;
+    if (parsed?.kind === "streams") {
+      return STREAM_COUNTS.includes(parsed.count)
+        ? parsed
+        : { kind: "streams", count: 3 };
+    }
     if (parsed && FILTER_KINDS.some((k) => k.value === parsed.kind)) return parsed;
   } catch {
     // storage unavailable or old value — fall back to the default

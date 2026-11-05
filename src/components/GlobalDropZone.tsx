@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Upload } from "lucide-react";
 import { useTelemetry } from "../context/TelemetryContext";
+import { LoadingSpinner } from "./ui/LoadingSpinner";
 import { HStack, VStack } from "./ui/Stack";
 
 export function GlobalDropZone() {
@@ -94,7 +95,7 @@ export function GlobalDropZone() {
           <VStack align="center">
             {filesLoading ? (
               <>
-                <div className="h-12 w-12 animate-spin rounded-full border-4 border-zinc-600 border-t-red-500" />
+                <LoadingSpinner className="h-12 w-12 border-4" />
                 <p className="text-lg font-medium text-zinc-200">
                   Loading telemetry...
                 </p>

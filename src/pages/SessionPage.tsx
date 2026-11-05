@@ -9,6 +9,7 @@ import { ActionEmptyState } from "../components/ActionEmptyState";
 import { RaceSessionView } from "./RaceSessionView";
 import { QualifyingSessionView } from "./QualifyingSessionView";
 import { Button, buttonVariants } from "../components/ui/Button";
+import { LoadingState } from "../components/ui/LoadingState";
 import { HStack } from "../components/ui/Stack";
 
 /**
@@ -25,11 +26,7 @@ export function SessionPage() {
   const backToDashboardPath = dashboardPath(scopeKey);
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-full text-zinc-500">
-        Loading session...
-      </div>
-    );
+    return <LoadingState label="Loading session" />;
   }
 
   if (error || !session) {
@@ -43,14 +40,14 @@ export function SessionPage() {
 
     if (isDemoPreview) {
       return (
-        <div className="flex items-center justify-center h-full px-6">
+        <div className="flex min-h-[55vh] items-center justify-center px-6">
           <ActionEmptyState
             icon={Upload}
             className="max-w-md"
             title="Demo session — detail not available"
             message="You're previewing the dashboard with sample data. Upload your own Pits n' Giggles telemetry to explore real per-lap charts, stints, sector breakdowns, and race-by-race comparisons."
             actions={
-              <HStack className="gap-2">
+              <HStack wrap justify="center" className="gap-2">
                 <Button
                   variant="primary"
                   onClick={() => setShowUploadModal(true)}
@@ -71,7 +68,7 @@ export function SessionPage() {
     }
 
     return (
-      <div className="flex items-center justify-center h-full">
+      <div className="flex min-h-[55vh] items-center justify-center px-4 py-8">
         <ActionEmptyState
           icon={isUploadWithNoData ? Upload : ArrowLeft}
           title={

@@ -1,9 +1,10 @@
 import { Trophy } from "lucide-react";
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { cardClass } from "../components/Card";
+import { cardClass, interactiveFocusClass } from "../components/Card";
 import { LeagueHighlights } from "../components/league/LeagueHighlights";
 import { SectionHeader } from "../components/ui/SectionHeader";
+import { HorizontalScrollRegion } from "../components/ui/HorizontalScrollRegion";
 import { PageFrame } from "../components/ui/PageFrame";
 import { PageHeader } from "../components/ui/PageHeader";
 import { SegmentedControl } from "../components/ui/SegmentedControl";
@@ -12,6 +13,7 @@ import {
   tableCellClass,
   tableClassLoose,
   tableHeadClass,
+  tableStickyHeadClass,
   tableRowClass,
 } from "../components/ui/table";
 import { useTelemetry } from "../context/TelemetryContext";
@@ -200,12 +202,20 @@ export function DriversPage() {
                   ? allRows.length > rows.length
                     ? `Top ${rows.length} · full standings at gremigaming.github.io/race-stats`
                     : "Full stats at gremigaming.github.io/race-stats"
-                  : "Points as awarded in the lobby · click a driver to see their stats"
+                  : "Points as awarded in the lobby · select a driver name to see their stats"
             }
           />
-          <div className="overflow-x-auto">
+          <HorizontalScrollRegion
+            label={
+              activeMode === "drivers" ? "Driver standings" : "Team standings"
+            }
+            hint={`Swipe to see all ${activeMode === "drivers" ? "driver" : "team"} standings`}
+            stickyHeader={!embed}
+          >
             <table className={tableClassLoose}>
-              <thead className={tableHeadClass}>
+              <thead
+                className={cn(tableHeadClass, !embed && tableStickyHeadClass)}
+              >
                 <tr>
                   <SortHeader column="pos" firstDir="asc" {...sortProps}>
                     #
@@ -253,25 +263,21 @@ export function DriversPage() {
               <tbody>
                 {sortedRows.map((row) => {
                   const i = position.get(row.key) ?? 0;
+                  const canOpenDriver = activeMode === "drivers" && !embed;
+                  const openDriver = () => {
+                    league.setSelectedDriver(row.key);
+                    navigate(dashboardPath(scopeKey));
+                  };
                   const isSelected =
-                    activeMode === "drivers" &&
-                    !embed &&
-                    row.key === league.selectedDriver;
+                    canOpenDriver && row.key === league.selectedDriver;
                   return (
                     <tr
                       key={row.key}
-                      onClick={
-                        activeMode === "drivers"
-                          ? () => {
-                              league.setSelectedDriver(row.key);
-                              navigate(dashboardPath(scopeKey));
-                            }
-                          : undefined
-                      }
+                      onClick={canOpenDriver ? openDriver : undefined}
                       className={cn(
                         tableRowClass,
-                        "transition-colors hover:bg-white/[0.03]",
-                        activeMode === "drivers" && "cursor-pointer",
+                        canOpenDriver &&
+                          "cursor-pointer transition-colors hover:bg-white/[0.03]",
                         isSelected && "bg-red-500/[0.07]",
                       )}
                     >
@@ -292,7 +298,24 @@ export function DriversPage() {
                           ),
                         })}
                       >
-                        {row.name}
+                        {canOpenDriver ? (
+                          <button
+                            type="button"
+                            aria-label={`Open driver stats for ${row.name}`}
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              openDriver();
+                            }}
+                            className={cn(
+                              "rounded-sm text-left text-inherit hover:underline",
+                              interactiveFocusClass,
+                            )}
+                          >
+                            {row.name}
+                          </button>
+                        ) : (
+                          row.name
+                        )}
                       </td>
                       <Num v={row.races} />
                       <Num v={row.points} strong />
@@ -317,7 +340,7 @@ export function DriversPage() {
                 })}
               </tbody>
             </table>
-          </div>
+          </HorizontalScrollRegion>
           {hidden > 0 && !embed && activeMode === "drivers" && (
             <p className="mt-4 text-xs text-zinc-500">
               {hidden} {hidden === 1 ? "entry is" : "entries are"} left out

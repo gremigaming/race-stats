@@ -1,64 +1,89 @@
 import { CalendarRange } from "lucide-react";
 import { useTelemetry } from "../context/TelemetryContext";
 import {
-  DEFAULT_FILTER,
   FILTER_KINDS,
   isoDay,
   STREAM_COUNTS,
   streamLabel,
-  type LeagueFilter,
 } from "../league/filter";
+import { PillMenuSelect, type PillMenuOption } from "./ui/PillMenuSelect";
 import { PillSelect } from "./ui/PillSelect";
 
 const dateInputClass =
   "w-full min-w-0 rounded-lg bg-zinc-900/70 px-2 py-1 text-xs text-zinc-200 ring-1 ring-inset ring-white/[0.08] [color-scheme:dark] focus:outline-none focus:ring-red-400/40";
 
-/** The site-wide time filter, under the driver picker. */
+const TIME_RANGE_OPTIONS: PillMenuOption[] = [
+  ...FILTER_KINDS.filter(
+    (option) => option.value !== "streams" && option.value !== "stream",
+  ).map((option) => ({ ...option, group: "Date ranges" })),
+  ...STREAM_COUNTS.map((count) => ({
+    value: `streams:${count}`,
+    label: count === 1 ? "Last stream" : `Last ${count} streams`,
+    group: "Recent streams",
+  })),
+  { value: "stream", label: "One stream", group: "Recent streams" },
+];
+
+/** The site-wide time filter, shown beside the driver picker. */
 export function LeagueFilterPanel() {
   const { league } = useTelemetry();
   if (!league) return null;
   const { filter, setFilter, streams } = league;
 
-  const changeKind = (kind: LeagueFilter["kind"]) => {
-    if (kind === "streams") setFilter({ kind, count: 3 });
-    else if (kind === "stream") setFilter({ kind, id: streams[0]?.id ?? "" });
-    else if (kind === "custom") {
-      const today = new Date();
-      const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
-      setFilter({ kind, from: isoDay(monthStart), to: isoDay(today) });
-    } else setFilter({ kind });
+  const changeKind = (value: string) => {
+    if (value.startsWith("streams:")) {
+      const count = Number(value.slice("streams:".length));
+      if (STREAM_COUNTS.includes(count)) setFilter({ kind: "streams", count });
+      return;
+    }
+
+    switch (value) {
+      case "today":
+      case "week":
+      case "month":
+      case "year":
+      case "all":
+        setFilter({ kind: value });
+        break;
+      case "stream":
+        setFilter({ kind: "stream", id: streams[0]?.id ?? "" });
+        break;
+      case "custom": {
+        const today = new Date();
+        const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+        setFilter({
+          kind: "custom",
+          from: isoDay(monthStart),
+          to: isoDay(today),
+        });
+        break;
+      }
+    }
   };
+
+  const value =
+    filter.kind === "streams" ? `streams:${filter.count}` : filter.kind;
 
   return (
     <div className="space-y-1.5">
-      <PillSelect
-        value={filter.kind}
-        onChange={(v) => changeKind(v as LeagueFilter["kind"])}
-        options={FILTER_KINDS}
+      <PillMenuSelect
+        value={value}
+        onChange={changeKind}
+        options={TIME_RANGE_OPTIONS}
         ariaLabel="Time range"
         leadingIcon={CalendarRange}
         width="full"
         size="sm"
       />
-      {filter.kind === "streams" && (
-        <PillSelect
-          value={filter.count}
-          onChange={(v) => setFilter({ kind: "streams", count: Number(v) })}
-          options={STREAM_COUNTS.map((n) => ({
-            value: n,
-            label: n === 1 ? "Last stream" : `Last ${n} streams`,
-          }))}
-          ariaLabel="Number of streams"
-          width="full"
-          size="sm"
-        />
-      )}
       {filter.kind === "stream" &&
         (streams.length ? (
           <PillSelect
             value={filter.id}
             onChange={(v) => setFilter({ kind: "stream", id: String(v) })}
-            options={streams.map((s) => ({ value: s.id, label: streamLabel(s) }))}
+            options={streams.map((s) => ({
+              value: s.id,
+              label: streamLabel(s),
+            }))}
             ariaLabel="Stream"
             width="full"
             size="sm"
@@ -85,15 +110,6 @@ export function LeagueFilterPanel() {
             className={dateInputClass}
           />
         </div>
-      )}
-      {filter.kind !== DEFAULT_FILTER.kind && (
-        <button
-          type="button"
-          onClick={() => setFilter(DEFAULT_FILTER)}
-          className="px-1 text-[11px] text-zinc-500 hover:text-zinc-300"
-        >
-          Back to this month
-        </button>
       )}
     </div>
   );

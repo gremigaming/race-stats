@@ -10,6 +10,8 @@ export const tableRowClass = "border-t border-white/[0.04]";
  * inheriting via thead alone isn't enough — apply the rule on the th itself).
  */
 export const tableHeadClass = "text-zinc-500 [&_th]:font-normal";
+export const tableStickyHeadClass =
+  "xl:sticky xl:top-0 xl:z-20 xl:bg-zinc-950/95 xl:backdrop-blur xl:shadow-[0_1px_0_rgba(255,255,255,0.08)]";
 
 export const tableClass = "w-full text-xs";
 export const tableClassLoose = "w-full text-sm";

@@ -1,7 +1,12 @@
 import { Check, ChevronDown } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { cn } from "../../utils/cn";
 import {
+  DROPDOWN_OPTION_STYLES,
+  DROPDOWN_OPTION_IDLE_STYLES,
+  DROPDOWN_OPTION_SELECTED_STYLES,
+  DROPDOWN_DIVIDER_STYLES,
+  DROPDOWN_PANEL_STYLES,
   FORM_CONTROL_CHROME_STYLES,
   FORM_CONTROL_CONTAINER_STYLES,
   FORM_CONTROL_SIZE_STYLES,
@@ -29,6 +34,7 @@ export function MultiPillSelect({
 }) {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const menuId = useId();
 
   useEffect(() => {
     if (!open) return;
@@ -77,7 +83,9 @@ export function MultiPillSelect({
       <button
         type="button"
         aria-label={ariaLabel}
+        aria-haspopup="listbox"
         aria-expanded={open}
+        aria-controls={menuId}
         onClick={() => setOpen((o) => !o)}
         className={cn(
           FORM_CONTROL_CHROME_STYLES,
@@ -90,29 +98,38 @@ export function MultiPillSelect({
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full z-50 mt-1 w-full min-w-[12rem] overflow-hidden rounded-md border border-zinc-800 bg-zinc-900 py-1 shadow-lg shadow-black/20">
+        <div
+          id={menuId}
+          role="listbox"
+          aria-label={ariaLabel}
+          aria-multiselectable="true"
+          className={cn(
+            "absolute right-0 top-full z-50 mt-1.5 w-full min-w-[14rem] overflow-hidden p-1.5",
+            DROPDOWN_PANEL_STYLES,
+          )}
+        >
           <button
             type="button"
+            role="option"
+            aria-selected={value.length === 0}
             onClick={() => onChange([])}
             className={cn(
-              "flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs transition-colors hover:bg-zinc-800/60",
-              value.length === 0 ? "text-zinc-100" : "text-zinc-400",
+              DROPDOWN_OPTION_STYLES,
+              value.length === 0
+                ? DROPDOWN_OPTION_SELECTED_STYLES
+                : DROPDOWN_OPTION_IDLE_STYLES,
             )}
           >
-            <span
-              className={cn(
-                "flex size-3.5 shrink-0 items-center justify-center rounded-sm border",
-                value.length === 0
-                  ? "border-zinc-500 bg-zinc-600"
-                  : "border-zinc-700",
-              )}
-            >
-              {value.length === 0 && <Check className="size-2 text-zinc-200" />}
-            </span>
-            {allOption?.label}
+            <span className="min-w-0 flex-1 truncate">{allOption?.label}</span>
+            {value.length === 0 && (
+              <Check
+                aria-hidden="true"
+                className="size-3.5 shrink-0 text-rose-200"
+              />
+            )}
           </button>
 
-          <div className="my-1 h-px bg-zinc-800" />
+          <div aria-hidden="true" className={DROPDOWN_DIVIDER_STYLES} />
 
           {typeOptions.map((option) => {
             const isSelected = value.includes(String(option.value));
@@ -120,25 +137,25 @@ export function MultiPillSelect({
               <button
                 key={String(option.value)}
                 type="button"
+                role="option"
+                aria-selected={isSelected}
                 disabled={option.disabled}
                 onClick={() => toggle(String(option.value))}
                 className={cn(
-                  "flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs transition-colors hover:bg-zinc-800/60",
-                  isSelected ? "text-zinc-100" : "text-zinc-400",
+                  DROPDOWN_OPTION_STYLES,
+                  isSelected
+                    ? DROPDOWN_OPTION_SELECTED_STYLES
+                    : DROPDOWN_OPTION_IDLE_STYLES,
                   option.disabled && "cursor-not-allowed opacity-40",
                 )}
               >
-                <span
-                  className={cn(
-                    "flex size-3.5 shrink-0 items-center justify-center rounded-sm border",
-                    isSelected
-                      ? "border-zinc-500 bg-zinc-600"
-                      : "border-zinc-700",
-                  )}
-                >
-                  {isSelected && <Check className="size-2 text-zinc-200" />}
-                </span>
                 <span className="truncate">{option.label}</span>
+                {isSelected && (
+                  <Check
+                    aria-hidden="true"
+                    className="ml-auto size-3.5 shrink-0 text-rose-200"
+                  />
+                )}
               </button>
             );
           })}

@@ -7,6 +7,9 @@ export const SESSION_LIST_TAB_STORAGE_KEY = "session-list-tab";
 
 export const SIDEBAR_WIDTH_STORAGE_KEY = "sidebar-width";
 export const CHANGELOG_SEEN_STORAGE_KEY = "changelog-last-seen";
+export const LEAGUE_DRIVER_STORAGE_KEY = "league-driver";
+export const LEAGUE_DRIVER_ONBOARDING_STORAGE_KEY =
+  "league-driver-onboarding-dismissed";
 
 export const LAP_CHART_BATTERY_VISIBILITY_STORAGE_KEY =
   "f1.lapTimeChart.showBattery";

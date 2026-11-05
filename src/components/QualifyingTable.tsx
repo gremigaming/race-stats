@@ -6,7 +6,7 @@ import { getTeamColor, getTeamName } from "../utils/colors";
 import { cn } from "../utils/cn";
 import { formatQualifyingTableTitle } from "../analysis/sessionInsightSummary";
 import { FocusToggle } from "./ui/FocusToggle";
-import { ScrollArea } from "./ui/ScrollArea";
+import { HorizontalScrollRegion } from "./ui/HorizontalScrollRegion";
 import { SectionHeader } from "./ui/SectionHeader";
 import {
   tableCellClass,
@@ -44,7 +44,10 @@ export function QualifyingTable({
           <FocusToggle value={focusedOnly} onChange={toggleFocusedOnly} />
         }
       />
-      <ScrollArea axis="x">
+      <HorizontalScrollRegion
+        label={`${formatQualifyingTableTitle(session)} results`}
+        hint="Swipe to see sector times and gaps"
+      >
         <table className={tableClassLoose}>
           <thead className={tableHeadClass}>
             <tr>
@@ -155,7 +158,7 @@ export function QualifyingTable({
             })}
           </tbody>
         </table>
-      </ScrollArea>
+      </HorizontalScrollRegion>
     </div>
   );
 }
