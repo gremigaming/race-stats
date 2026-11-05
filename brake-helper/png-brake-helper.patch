@@ -1,0 +1,1812 @@
+diff --git a/apps/backend/state_mgmt_layer/intf/readers/stream_overlay.py b/apps/backend/state_mgmt_layer/intf/readers/stream_overlay.py
+index 66eb92e..eb7bc3d 100644
+--- a/apps/backend/state_mgmt_layer/intf/readers/stream_overlay.py
++++ b/apps/backend/state_mgmt_layer/intf/readers/stream_overlay.py
+@@ -93,6 +93,7 @@ class StreamOverlayData(BaseAPI):
+         self.__initPaceComparison(prev_data, next_data)
+         self.__initMotion(session_state.m_driver_data)
+         self.__init2026Fields()
++        self.__initBrakeHelper(session_state)
+ 
+     def __initCarTelemetry(self) -> None:
+         """Prepares the car telemetry data.
+@@ -267,6 +268,70 @@ class StreamOverlayData(BaseAPI):
+                 "harv-limit-j": 0.0,
+             }
+ 
++    def __initBrakeHelper(self, session_state: SessionState) -> None:
++        """Brake helper overlay feed: the player's own car plus where the other cars are on track.
++
++        Kept flat and small (sent at the realtime overlay rate). Missing packets give None.
++        """
++        def _int(v):
++            try:
++                return int(v)
++            except (TypeError, ValueError):
++                return None
++
++        ref = self.m_ref_obj
++        pc = ref.m_packet_copies if ref else None
++        lap = pc.m_packet_lap_data if pc else None
++        tel = pc.m_packet_car_telemetry if pc else None
++        status = pc.m_packet_car_status if pc else None
++        damage = pc.m_packet_car_damage if pc else None
++        motion = pc.m_packet_motion if pc else None
++        session_pkt = session_state.m_session_info.m_packet_session
++        # Extended motion only exists for the player's own car, not for a spectated car
++        motion_ex = session_state.m_player_motion_ex \
++            if (ref is not None and self.m_ref_index == session_state.m_player_index) else None
++
++        others = []
++        for driver in session_state.m_driver_data:
++            if not driver or not driver.is_valid or driver.m_index == self.m_ref_index:
++                continue
++            d_lap = driver.m_packet_copies.m_packet_lap_data
++            d_tel = driver.m_packet_copies.m_packet_car_telemetry
++            if not d_lap or _int(d_lap.m_pitStatus):
++                continue
++            others.append([round(d_lap.m_lapDistance, 1), d_tel.m_speed if d_tel else None])
++
++        self.m_brake_helper_json = {
++            "player": bool(ref is not None and self.m_ref_index == session_state.m_player_index),
++            "track-id": self.m_circuit.value if self.m_circuit else None,
++            "track-length": self.m_circuit_len,
++            "session-type": str(self.m_session_type),
++            "session-uid": session_state.m_session_info.m_session_uid,
++            "lap-num": lap.m_currentLapNum if lap else None,
++            "lap-distance": lap.m_lapDistance if lap else None,
++            "lap-invalid": bool(lap.m_currentLapInvalid) if lap else None,
++            "pit-status": _int(lap.m_pitStatus) if lap else None,
++            "driver-status": _int(lap.m_driverStatus) if lap else None,
++            "speed-kmph": tel.m_speed if tel else None,
++            "throttle": tel.m_throttle if tel else None,
++            "brake": tel.m_brake if tel else None,
++            "steer": tel.m_steer if tel else None,
++            "tyre-surface-temp": list(tel.m_tyresSurfaceTemperature) if tel else None,
++            "tyre-inner-temp": list(tel.m_tyresInnerTemperature) if tel else None,
++            "front-brake-bias": status.m_frontBrakeBias if status else None,
++            "fuel-kg": status.m_fuelInTank if status else None,
++            "visual-compound": _int(status.m_visualTyreCompound) if status else None,
++            "tyre-wear": list(damage.m_tyresWear) if damage else None,
++            "wheel-slip": list(motion_ex.m_wheelSlipRatio) if motion_ex else None,
++            "pos-x": motion.m_worldPositionX if motion else None,
++            "pos-z": motion.m_worldPositionZ if motion else None,
++            "weather": _int(session_pkt.m_weather) if session_pkt else None,
++            "rain-pct": (self.m_weather_forecast_samples[0].m_rainPercentage
++                         if self.m_weather_forecast_samples else None),
++            "track-temp": self.m_track_temp,
++            "others": others,
++        }
++
+     def __populatePaceCompDataForDriver(self,
+                                         json_dict: Dict[str, any],
+                                         driver_obj: Optional[DataPerDriver]) -> None:
+@@ -452,6 +517,7 @@ class StreamOverlayData(BaseAPI):
+             "pace-comparison" : self.m_pace_comp_json,
+             "motion" : self.m_motion_json,
+             "2026-regs-info" : self.m_2026_regs_json,
++            "brake-helper" : self.m_brake_helper_json,
+         }
+ 
+         if self.m_export_hud_data:
+diff --git a/apps/backend/state_mgmt_layer/session_state.py b/apps/backend/state_mgmt_layer/session_state.py
+index e2639d5..98af333 100644
+--- a/apps/backend/state_mgmt_layer/session_state.py
++++ b/apps/backend/state_mgmt_layer/session_state.py
+@@ -109,6 +109,7 @@ class SessionState:
+         'm_flashback_occurred',
+         'm_in_menu',
+         'm_track_segments_db',
++        'm_player_motion_ex',
+     )
+ 
+     def __init__(self,
+@@ -138,6 +139,7 @@ class SessionState:
+         self.m_fastest_s2_ms: Optional[int] = None
+         self.m_fastest_s3_ms: Optional[int] = None
+         self.m_time_trial_packet : Optional[PacketTimeTrialData] = None
++        self.m_player_motion_ex = None # brake helper: latest PacketMotionExData (player car only)
+         self.m_overtakes_history = OvertakesHistory()
+         self.m_session_info: SessionInfo = SessionInfo(settings, logger)
+         self.m_first_session_update_received: bool = False
+@@ -818,6 +820,14 @@ class SessionState:
+             obj_to_be_updated = self._getObjectByIndex(index, reason='Motion update')
+             obj_to_be_updated.m_packet_copies.m_packet_motion = motion_data
+ 
++    def processMotionExUpdate(self, packet) -> None:
++        """Brake helper: keep the latest extended motion packet (player car only, wheel slip etc.)
++
++        Args:
++            packet (PacketMotionExData): The extended motion packet
++        """
++        self.m_player_motion_ex = packet
++
+     def processCarSetupsUpdate(self, packet: PacketCarSetupData) -> None:
+         """Process the car setup update packet and update the necessary fields
+ 
+diff --git a/apps/backend/telemetry_layer/telemetry_handler.py b/apps/backend/telemetry_layer/telemetry_handler.py
+index be40334..f238d97 100644
+--- a/apps/backend/telemetry_layer/telemetry_handler.py
++++ b/apps/backend/telemetry_layer/telemetry_handler.py
+@@ -587,6 +587,11 @@ class F1TelemetryHandler:
+             self._kick_periodic_packet_timer()
+             self.m_session_state_ref.processMotionUpdate(packet)
+ 
++        @self.m_manager.on_packet(F1PacketType.MOTION_EX)
++        async def processMotionExUpdate(packet) -> None:
++            """Brake helper: store the player's extended motion data (wheel slip)"""
++            self.m_session_state_ref.processMotionExUpdate(packet)
++
+         # Register the car setup handler if and only if user has allowed this
+         if self.m_session_state_ref.m_process_car_setups:
+             self.m_logger.debug("Processing car setups")
+diff --git a/apps/hud/ui/hf_types/__init__.py b/apps/hud/ui/hf_types/__init__.py
+index 70e3b3d..b54f904 100644
+--- a/apps/hud/ui/hf_types/__init__.py
++++ b/apps/hud/ui/hf_types/__init__.py
+@@ -23,6 +23,7 @@
+ # -------------------------------------- IMPORTS -----------------------------------------------------------------------
+ 
+ from .base import HighFreqBase
++from .brake_helper import BrakeHelperData
+ from .car_motion import LiveSessionMotionInfo, DriverMotionInfo
+ from .input_telemetry import InputTelemetryData
+ from .hud_overlay_data import HudOverlayData
+@@ -33,6 +34,7 @@ from .template import DummyHFType
+ __all__ = [
+     "HighFreqBase",
+     "InputTelemetryData",
++    "BrakeHelperData",
+     "LiveSessionMotionInfo",
+     "DriverMotionInfo",
+     "HudOverlayData",
+diff --git a/apps/hud/ui/hf_types/brake_helper.py b/apps/hud/ui/hf_types/brake_helper.py
+new file mode 100644
+index 0000000..5974150
+--- /dev/null
++++ b/apps/hud/ui/hf_types/brake_helper.py
+@@ -0,0 +1,83 @@
++# MIT License
++#
++# Copyright (c) [2025] [Ashwin Natarajan]
++#
++# Permission is hereby granted, free of charge, to any person obtaining a copy
++# of this software and associated documentation files (the "Software"), to deal
++# in the Software without restriction, including without limitation the rights
++# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
++# copies of the Software, and to permit persons to whom the Software is
++# furnished to do so, subject to the following conditions:
++#
++# The above copyright notice and this permission notice shall be included in all
++# copies or substantial portions of the Software.
++#
++# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
++# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
++# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
++# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
++# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
++# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
++# SOFTWARE.
++# -------------------------------------- IMPORTS -----------------------------------------------------------------------
++
++from dataclasses import dataclass, field
++from typing import List, Optional
++
++from .base import HighFreqBase
++
++# -------------------------------------- CLASSES -----------------------------------------------------------------------
++
++@dataclass(slots=True, frozen=True)
++class BrakeHelperData(HighFreqBase):
++    """Player car feed for the brake helper overlay (see stream_overlay.py "brake-helper")."""
++    player: bool = False
++    track_id: Optional[int] = None
++    track_length: Optional[int] = None
++    session_uid: Optional[int] = None
++    lap_num: Optional[int] = None
++    lap_distance: Optional[float] = None
++    lap_invalid: bool = False
++    pit_status: Optional[int] = None
++    speed_kmph: Optional[float] = None
++    throttle: float = 0.0
++    brake: float = 0.0
++    tyre_surface_temp: Optional[List[float]] = None   # RL, RR, FL, FR
++    front_brake_bias: Optional[int] = None
++    fuel_kg: Optional[float] = None
++    visual_compound: Optional[int] = None
++    tyre_wear: Optional[List[float]] = None           # RL, RR, FL, FR (percent)
++    wheel_slip: Optional[List[float]] = None          # RL, RR, FL, FR
++    pos_x: Optional[float] = None
++    pos_z: Optional[float] = None
++    weather: Optional[int] = None
++    rain_pct: Optional[int] = None
++    others: List[List[Optional[float]]] = field(default_factory=list)  # [lap distance, speed kmph]
++
++    @classmethod
++    def from_json(cls, json_data: dict) -> "BrakeHelperData":
++        d = json_data.get("brake-helper") or {}
++        return cls(
++            player=bool(d.get("player")),
++            track_id=d.get("track-id"),
++            track_length=d.get("track-length"),
++            session_uid=d.get("session-uid"),
++            lap_num=d.get("lap-num"),
++            lap_distance=d.get("lap-distance"),
++            lap_invalid=bool(d.get("lap-invalid")),
++            pit_status=d.get("pit-status"),
++            speed_kmph=d.get("speed-kmph"),
++            throttle=d.get("throttle") or 0.0,
++            brake=d.get("brake") or 0.0,
++            tyre_surface_temp=d.get("tyre-surface-temp"),
++            front_brake_bias=d.get("front-brake-bias"),
++            fuel_kg=d.get("fuel-kg"),
++            visual_compound=d.get("visual-compound"),
++            tyre_wear=d.get("tyre-wear"),
++            wheel_slip=d.get("wheel-slip"),
++            pos_x=d.get("pos-x"),
++            pos_z=d.get("pos-z"),
++            weather=d.get("weather"),
++            rain_pct=d.get("rain-pct"),
++            others=d.get("others") or [],
++        )
+diff --git a/apps/hud/ui/infra/overlays_mgr.py b/apps/hud/ui/infra/overlays_mgr.py
+index 0bcb3c6..9c7f165 100644
+--- a/apps/hud/ui/infra/overlays_mgr.py
++++ b/apps/hud/ui/infra/overlays_mgr.py
+@@ -32,8 +32,9 @@ from lib.rate_limiter import RateLimiter
+ from lib.wdt import WatchDogTimerSync
+ 
+ from ...common import get_ref_row, get_ref_row_index, is_tt_session
+-from ..hf_types import HudOverlayData, InputTelemetryData, LiveSessionMotionInfo
+-from ..overlays import (BaseOverlay, CircuitInfoOverlay, HudOverlay,
++from ..hf_types import (BrakeHelperData, HudOverlayData, InputTelemetryData,
++                        LiveSessionMotionInfo)
++from ..overlays import (BaseOverlay, BrakeHelperOverlay, CircuitInfoOverlay, HudOverlay,
+                         InputTelemetryOverlay, LapTimerOverlay, MfdOverlay,
+                         PuOverlay, TimingTowerOverlay, TrackRadarOverlay)
+ from ..overlays.mfd.pages import (FuelInfoPage, LapTimesPage, MfdPageBase,
+@@ -49,7 +50,7 @@ class OverlaysMgr:
+ 
+     OVERLAY_CLASSES: List[Type[BaseOverlay]] = [
+         LapTimerOverlay, TimingTowerOverlay, InputTelemetryOverlay, TrackRadarOverlay,
+-        HudOverlay, CircuitInfoOverlay, PuOverlay, MfdOverlay,
++        HudOverlay, CircuitInfoOverlay, PuOverlay, MfdOverlay, BrakeHelperOverlay,
+     ]
+     STANDALONE_PAGE_CLASSES: List[Type[MfdPageBase]] = [
+         FuelInfoPage, TyreInfoPage, LapTimesPage, WeatherForecastPage,
+@@ -161,6 +162,7 @@ class OverlaysMgr:
+         self._input_telemetry_update(data)
+         self._motion_update(data)
+         self._hud_overlay_update(data)
++        self.window_manager.send_high_freq_data(BrakeHelperData, data)
+         if self.rate_limiter.allows("stream-overlay-update"):
+             self.window_manager.emit_event('stream_overlay_update', data)
+ 
+diff --git a/apps/hud/ui/overlays/__init__.py b/apps/hud/ui/overlays/__init__.py
+index efd4dbc..159f6c1 100644
+--- a/apps/hud/ui/overlays/__init__.py
++++ b/apps/hud/ui/overlays/__init__.py
+@@ -23,6 +23,7 @@
+ # -------------------------------------- IMPORTS -----------------------------------------------------------------------
+ 
+ from .base.base_overlay import BaseOverlay
++from .brake_helper.brake_helper import BrakeHelperOverlay
+ from .circuit_info.circuit_info import CircuitInfoOverlay
+ from .hud_overlay.hud_overlay import HudOverlay
+ from .input_telemetry.input_telemetry import InputTelemetryOverlay
+@@ -35,6 +36,7 @@ from .track_radar.track_radar import TrackRadarOverlay
+ 
+ __all__ = [
+     "BaseOverlay",
++    "BrakeHelperOverlay",
+     "InputTelemetryOverlay",
+     "LapTimerOverlay",
+     "MfdOverlay",
+diff --git a/apps/hud/ui/overlays/brake_helper/brake_engine.py b/apps/hud/ui/overlays/brake_helper/brake_engine.py
+new file mode 100644
+index 0000000..5d6a5ba
+--- /dev/null
++++ b/apps/hud/ui/overlays/brake_helper/brake_engine.py
+@@ -0,0 +1,768 @@
++# MIT License
++#
++# Copyright (c) [2025] [Ashwin Natarajan]
++#
++# Permission is hereby granted, free of charge, to any person obtaining a copy
++# of this software and associated documentation files (the "Software"), to deal
++# in the Software without restriction, including without limitation the rights
++# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
++# copies of the Software, and to permit persons to whom the Software is
++# furnished to do so, subject to the following conditions:
++#
++# The above copyright notice and this permission notice shall be included in all
++# copies or substantial portions of the Software.
++#
++# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
++# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
++# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
++# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
++# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
++# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
++# SOFTWARE.
++
++"""Brake helper engine (no Qt): learns the player's own braking per corner and
++computes a live brake point every frame.
++
++Brake point:  point = apex - (v_now^2 - v_target^2) / (2 * a_now)
++  v_now     live speed
++  v_target  own best minimum speed for the corner, scaled by current grip
++  a_now     own best average deceleration for the corner, scaled by current grip
++            (tyre wear + temps, fuel, wetness), a learned correction from recent
++            zones (achieved decel without lock-ups), and battle offsets
++            (off the normal line, close behind a car).
++
++At reference conditions this gives exactly the reference brake point.
++
++Wheel arrays are RL, RR, FL, FR (game order).
++"""
++
++# -------------------------------------- IMPORTS -----------------------------------------------------------------------
++
++import itertools
++import json
++import math
++import os
++from dataclasses import dataclass, field
++from typing import Any, Callable, Dict, List, Optional
++
++# -------------------------------------- CONSTANTS ---------------------------------------------------------------------
++
++WHITE_LEAD_S = 2.0          # white line starts filling this long before the point
++FLASH_S = 1.3               # result flash after the corner
++LINE_BIN_M = 10.0           # racing line resolution
++GATE_IN_M = 150.0           # segment timing gate before the brake point
++GATE_OUT_M = 100.0          # segment timing gate after the apex
++MATCH_M = 60.0              # a zone belongs to a corner if its apex is this close
++MIN_DROP_KMPH = 25.0        # smaller slow-downs are lifts, not braking zones
++BRAKE_ON = 0.20
++BRAKE_OFF = 0.05
++LOCK_SLIP = 0.12            # |slip ratio| above this while braking = locking
++BB_MAX_CHANGES = 3
++BB_MIN_GAP_S = 5.0
++CAR_MASS_KG = 800.0
++
++# Result colours / names (spec)
++RESULTS = {
++    "good":    ("#34d27b", "Good"),
++    "later":   ("#3d8bff", "Brake later"),
++    "earlier": ("#ff8a1f", "Brake earlier"),
++    "harder":  ("#b26bff", "Brake harder"),
++    "less":    ("#22d3c5", "Brake less"),
++}
++
++# Grip vs conditions for each tyre class. Weather enum: 0 clear, 1 light cloud,
++# 2 overcast, 3 light rain, 4 heavy rain, 5 storm (6 = thunderstorm).
++_WET_GRIP = {
++    "dry":   [1.00, 1.00, 1.00, 0.75, 0.60, 0.55, 0.55],
++    "inter": [0.88, 0.88, 0.88, 0.84, 0.72, 0.64, 0.64],
++    "wet":   [0.80, 0.80, 0.80, 0.78, 0.74, 0.70, 0.70],
++}
++# Surface temp window (C) per tyre class
++_TEMP_WINDOW = {"dry": (85.0, 105.0), "inter": (60.0, 90.0), "wet": (45.0, 80.0)}
++
++# -------------------------------------- HELPERS -----------------------------------------------------------------------
++
++def tyre_class(visual_compound: Optional[int]) -> str:
++    """7 = intermediate, 8 = wet (F1 modern + classic), everything else is a slick."""
++    if visual_compound == 7:
++        return "inter"
++    if visual_compound == 8:
++        return "wet"
++    return "dry"
++
++def _clamp(v: float, lo: float, hi: float) -> float:
++    return lo if v < lo else hi if v > hi else v
++
++def _wrap(delta: float, length: float) -> float:
++    """Wrap a distance difference into (-L/2, L/2]."""
++    if not length:
++        return delta
++    delta = (delta + length / 2) % length - length / 2
++    return delta
++
++def _avg(values: Optional[List[float]], idx=(0, 1, 2, 3)) -> Optional[float]:
++    if not values:
++        return None
++    vals = [values[i] for i in idx if i < len(values) and values[i] is not None]
++    return sum(vals) / len(vals) if vals else None
++
++# -------------------------------------- DATA --------------------------------------------------------------------------
++
++@dataclass
++class Zone:
++    """One braking zone as it happens."""
++    start_d: float
++    start_t: float
++    v_entry: float                  # m/s
++    bias: Optional[int]
++    corner: Optional[int] = None    # index into corners when known at start
++    point_d: Optional[float] = None # live brake point when braking started
++    v_target: Optional[float] = None
++    min_v: float = 1e9
++    min_d: float = 0.0
++    end_d: Optional[float] = None   # brake released
++    peak: float = 0.0
++    frames: int = 0
++    front_lock: int = 0
++    rear_lock: int = 0
++    grip: float = 1.0
++    lap_invalid: bool = False
++    traffic: bool = False           # a car was close ahead: outcome not judged
++
++@dataclass
++class Corner:
++    apex: float
++    refs: Dict[str, Dict[str, float]] = field(default_factory=dict)
++    bias_target: Optional[float] = None
++    bias_n: int = 0
++    bias_weight: float = 1.0
++    gap_prev_s: Optional[float] = None
++    confirmed: bool = True          # False until the lap it was found on is completed (not pitted)
++    misses: int = 0                 # completed laps in a row without braking here
++
++    def to_json(self) -> Dict[str, Any]:
++        return {"apex": round(self.apex, 1), "refs": self.refs,
++                "bias_target": self.bias_target, "bias_n": self.bias_n,
++                "bias_weight": round(self.bias_weight, 3), "gap_prev_s": self.gap_prev_s,
++                "misses": self.misses}
++
++    @classmethod
++    def from_json(cls, d: Dict[str, Any]) -> "Corner":
++        return cls(apex=d["apex"], refs=d.get("refs", {}), bias_target=d.get("bias_target"),
++                   bias_n=d.get("bias_n", 0), bias_weight=d.get("bias_weight", 1.0),
++                   gap_prev_s=d.get("gap_prev_s"), misses=d.get("misses", 0))
++
++# -------------------------------------- ENGINE ------------------------------------------------------------------------
++
++class BrakeEngine:
++    """Feed it one sample per telemetry frame with update(sample, t). It returns the view."""
++
++    def __init__(self, store_dir: Optional[str] = None, warn_s: float = 0.5,
++                 log: Optional[Callable[[str], None]] = None) -> None:
++        self.store_dir = store_dir
++        self.warn_s = warn_s
++        self.log = log or (lambda _m: None)
++        self.track_id: Optional[int] = None
++        self.track_len: float = 0.0
++        self.corners: List[Corner] = []
++        self.line: List[Optional[List[float]]] = []
++        self._reset_session(None)
++
++    # ---------------------------------------------------------------- state
++
++    def _reset_session(self, uid) -> None:
++        self.session_uid = uid
++        self.k: Dict[str, float] = {}           # learned decel correction per tyre class
++        self.zone: Optional[Zone] = None
++        self.last_d: Optional[float] = None
++        self.last_t: Optional[float] = None
++        self.lap: Optional[int] = None
++        self.lap_results: Dict[int, str] = {}
++        self.lap_line: Dict[int, List[float]] = {}
++        self.lap_clean = True
++        self.lap_pitted = False
++        self.lap_hit: set = set()               # id() of corners braked for this lap
++        self.trace: List[tuple] = []            # (t, d) for gate timing, ~40 s
++        self.pending_gates: List[tuple] = []    # (corner idx, zone, gate_in_d, gate_out_d)
++        self.flash: Optional[tuple] = None      # (until_t, result key, corner idx)
++        self.last_exit_t: Optional[float] = None
++        self.last_exit_corner: Optional[int] = None
++        self.armed_glow: Optional[int] = None
++        self.bb_plan: Dict[int, int] = {}       # corner idx -> bias to set before it
++        self.bb_done: set = set()
++        self.dirty = False
++
++    def _store_path(self) -> Optional[str]:
++        if not self.store_dir or self.track_id is None:
++            return None
++        return os.path.join(self.store_dir, f"track_{self.track_id}.json")
++
++    def _load_track(self, track_id: int, track_len: float) -> None:
++        self.save()   # unconfirmed corners are never written
++        self.track_id, self.track_len = track_id, float(track_len or 0)
++        self.corners, self.line = [], []
++        path = self._store_path()
++        if path and os.path.exists(path):
++            try:
++                with open(path, "r", encoding="utf-8") as f:
++                    data = json.load(f)
++                if abs(data.get("track_length", 0) - self.track_len) < 5:
++                    self.corners = [Corner.from_json(c) for c in data.get("corners", [])]
++                    self.line = data.get("line", [])
++                    self.log(f"brake helper: loaded {len(self.corners)} corners for track {track_id}")
++            except (OSError, ValueError, KeyError) as e:
++                self.log(f"brake helper: could not load {path}: {e}")
++        nbins = int(math.ceil(self.track_len / LINE_BIN_M)) if self.track_len else 0
++        if len(self.line) != nbins:
++            self.line = [None] * nbins
++
++    def save(self) -> None:
++        path = self._store_path()
++        if not path or not self.dirty:
++            return
++        try:
++            os.makedirs(os.path.dirname(path), exist_ok=True)
++            tmp = path + ".tmp"
++            with open(tmp, "w", encoding="utf-8") as f:
++                json.dump({"version": 1, "track_length": self.track_len,
++                           "corners": [c.to_json() for c in self.corners if c.confirmed],
++                           "line": self.line}, f)
++            os.replace(tmp, path)
++            self.dirty = False
++        except OSError as e:
++            self.log(f"brake helper: could not save {path}: {e}")
++
++    # ---------------------------------------------------------------- grip model
++
++    def conditions_grip(self, s) -> float:
++        """Grip from conditions only (1.0 = new slicks in the window, dry, light car)."""
++        cls = tyre_class(s.visual_compound)
++        w = s.weather if isinstance(s.weather, int) and 0 <= s.weather <= 6 else 0
++        g = _WET_GRIP[cls][w]
++        wear = _avg(s.tyre_wear)
++        if wear is not None:
++            g *= _clamp(1.0 - 0.0022 * wear, 0.8, 1.0)
++        temp = _avg(s.tyre_surface_temp)
++        if temp is not None and temp > 0:
++            lo, hi = _TEMP_WINDOW[cls]
++            off = lo - temp if temp < lo else temp - hi if temp > hi else 0.0
++            g *= 1.0 - min(0.12, 0.004 * off)
++        return g
++
++    @staticmethod
++    def mass_factor(s) -> float:
++        fuel = s.fuel_kg if s.fuel_kg is not None else 0.0
++        return (CAR_MASS_KG / (CAR_MASS_KG + max(0.0, fuel))) ** 0.6
++
++    def line_offset(self, s) -> Optional[float]:
++        if s.pos_x is None or not self.line or s.lap_distance is None:
++            return None
++        n = len(self.line)
++        b = int((s.lap_distance % self.track_len) // LINE_BIN_M) if self.track_len else 0
++        best = None
++        # lateral distance = distance to the line segments around this bin (not to a bin centre)
++        for i in (b - 1, b):
++            p0, p1 = self.line[i % n], self.line[(i + 1) % n]
++            if not p0 or not p1:
++                continue
++            sx, sz = p1[0] - p0[0], p1[1] - p0[1]
++            l2 = sx * sx + sz * sz
++            u = _clamp(((s.pos_x - p0[0]) * sx + (s.pos_z - p0[1]) * sz) / l2, 0.0, 1.0) if l2 > 1e-6 else 0.0
++            dist = math.hypot(s.pos_x - (p0[0] + u * sx), s.pos_z - (p0[1] + u * sz))
++            best = dist if best is None else min(best, dist)
++        return best
++
++    def car_ahead(self, s) -> Optional[tuple]:
++        """(gap m, closing m/s) to the nearest car ahead on track within 80 m."""
++        if s.lap_distance is None or not self.track_len:
++            return None
++        best = None
++        for d, v in s.others:
++            if d is None:
++                continue
++            gap = (d - s.lap_distance) % self.track_len
++            if 0.5 < gap < 80 and (best is None or gap < best[0]):
++                closing = ((s.speed_kmph or 0) - (v if v is not None else (s.speed_kmph or 0))) / 3.6
++                best = (gap, closing)
++        return best
++
++    def battle(self, s) -> tuple:
++        """(decel factor, extra margin m) from line offset and a car ahead."""
++        f, margin = 1.0, 0.0
++        off = self.line_offset(s)
++        if off is not None and 1.5 < off < 25.0:   # >25 m = bad data (pit lane, other layout)
++            f *= 1.0 - min(0.20, 0.04 * (off - 1.5))
++        ahead = self.car_ahead(s)
++        if ahead:
++            gap, closing = ahead
++            f *= 1.0 - 0.10 * _clamp((45.0 - gap) / 35.0, 0.0, 1.0)
++            if gap < 60:
++                margin += max(0.0, closing) * 0.25
++        return f, margin
++
++    # ---------------------------------------------------------------- brake point
++
++    def ref_for(self, corner: Corner, cls: str) -> Optional[Dict[str, float]]:
++        return corner.refs.get(cls) or corner.refs.get("dry") or next(iter(corner.refs.values()), None)
++
++    def brake_point(self, corner: Corner, s, v: float) -> Optional[tuple]:
++        """(point distance, target min speed m/s, a_now) or None if no braking needed."""
++        cls = tyre_class(s.visual_compound)
++        ref = self.ref_for(corner, cls)
++        if not ref:
++            return None
++        g = self.conditions_grip(s)
++        bf, margin = self.battle(s)
++        a = ref["a_norm"] * g * self.mass_factor(s) * self.k.get(cls, 1.0) * bf
++        vt = ref["vmin_norm"] * math.sqrt(g)
++        if v <= vt + 1.0 or a <= 0:
++            return None
++        dist = (v * v - vt * vt) / (2 * a)
++        return ref["apex"] - dist - margin, vt, a
++
++    # ---------------------------------------------------------------- corners
++
++    def _find_corner(self, apex_d: float) -> Optional[int]:
++        best, best_i = MATCH_M, None
++        for i, c in enumerate(self.corners):
++            d = abs(_wrap(c.apex - apex_d, self.track_len))
++            if d < best:
++                best, best_i = d, i
++        return best_i
++
++    def _next_corner(self, d: float) -> Optional[int]:
++        """Next corner whose apex is still ahead (with the 'just finished' one skipped)."""
++        if not self.corners:
++            return None
++        best, best_i = None, None
++        for i, c in enumerate(self.corners):
++            ahead = (c.apex - d) % self.track_len if self.track_len else c.apex - d
++            if i == self.last_exit_corner and ahead > self.track_len - 300:
++                continue
++            if best is None or ahead < best:
++                best, best_i = ahead, i
++        return best_i
++
++    def _add_corner(self, apex: float) -> int:
++        self.corners.append(Corner(apex=apex, confirmed=False))
++        self.corners.sort(key=lambda c: c.apex)
++        self.dirty = True
++        # indices shifted: drop per-lap state keyed by index
++        self.lap_results.clear()
++        self.bb_plan.clear()
++        return self._find_corner(apex)
++
++    # ---------------------------------------------------------------- main update
++
++    def update(self, s, t: float) -> Dict[str, Any]:
++        """Process one sample. t = seconds (monotonic). Returns the view dict."""
++        if not s.player or s.lap_distance is None or s.speed_kmph is None or not s.track_length:
++            return self._view_idle(s, "")
++        if s.track_id != self.track_id or abs((s.track_length or 0) - self.track_len) > 5:
++            self._load_track(s.track_id, s.track_length)
++            self._reset_session(s.session_uid)
++        elif s.session_uid != self.session_uid:
++            self.corners = [c for c in self.corners if c.confirmed]
++            self.save()
++            self._reset_session(s.session_uid)
++
++        d = s.lap_distance % self.track_len
++        v = s.speed_kmph / 3.6
++
++        # flashback / teleport: distance jumped back or far forward
++        if self.last_d is not None:
++            step = _wrap(d - self.last_d, self.track_len)
++            if step < -20 or step > 200:
++                self.zone = None
++                self.pending_gates.clear()
++                self.trace.clear()
++                self.flash = None
++        self.last_d, self.last_t = d, t
++
++        if s.pit_status:
++            self.zone = None
++            self.lap_clean = False
++            self.lap_pitted = True
++
++        # lap change: reset dots, learn line, plan bias changes
++        if s.lap_num != self.lap:
++            self._on_new_lap(s)
++        if s.lap_invalid:
++            self.lap_clean = False
++
++        # timing trace for segment gates
++        self.trace.append((t, s.lap_distance))
++        if len(self.trace) > 2400:
++            del self.trace[:600]
++
++        # racing line accumulation (this lap)
++        if s.pos_x is not None and not s.pit_status:
++            b = int(d // LINE_BIN_M)
++            acc = self.lap_line.setdefault(b, [0.0, 0.0, 0])
++            acc[0] += s.pos_x
++            acc[1] += s.pos_z
++            acc[2] += 1
++
++        self._track_zone(s, d, v, t)
++        self._check_gates(s)
++        return self._view(s, d, v, t)
++
++    # ---------------------------------------------------------------- zones
++
++    def _track_zone(self, s, d: float, v: float, t: float) -> None:
++        z = self.zone
++        brake = s.brake or 0.0
++        if z is None:
++            if brake >= BRAKE_ON and v > 60 / 3.6 and not s.pit_status:
++                ci = self._next_corner(d)
++                point = vt = None
++                if ci is not None:
++                    c = self.corners[ci]
++                    # only attach if the corner apex is reasonably close ahead
++                    if (c.apex - d) % self.track_len > 600:
++                        ci = None
++                    else:
++                        bp = self.brake_point(c, s, v)
++                        if bp:
++                            point, vt, _a = bp
++                self.zone = Zone(start_d=d, start_t=t, v_entry=v, bias=s.front_brake_bias, corner=ci,
++                                 point_d=point, v_target=vt, grip=self.conditions_grip(s),
++                                 lap_invalid=bool(s.lap_invalid))
++                self.armed_glow = None
++            return
++
++        z.frames += 1
++        z.peak = max(z.peak, brake)
++        if not z.traffic and z.end_d is None:
++            ahead = self.car_ahead(s)
++            z.traffic = bool(ahead and ahead[0] < 25)
++        z.lap_invalid = z.lap_invalid or bool(s.lap_invalid)
++        if v < z.min_v:
++            z.min_v, z.min_d = v, d
++        if brake >= 0.3 and s.wheel_slip:
++            slip = s.wheel_slip
++            if min(slip[2], slip[3]) < -LOCK_SLIP:
++                z.front_lock += 1
++            if min(slip[0], slip[1]) < -LOCK_SLIP:
++                z.rear_lock += 1
++        if brake < BRAKE_OFF and z.end_d is None:
++            z.end_d = d
++        elif brake >= BRAKE_ON and z.end_d is not None:
++            z.end_d = None   # trail-braking pulses: still the same zone
++        # zone over: off the brake and speed picking up again (or on the throttle)
++        if z.end_d is not None and (v > z.min_v + 3 / 3.6 or (s.throttle or 0) > 0.4):
++            self._close_zone(s, z, t)
++            self.zone = None
++        elif _wrap(d - z.start_d, self.track_len) > 1200:
++            self.zone = None   # something odd (spin, pit), drop it
++
++    def _close_zone(self, s, z: Zone, t: float) -> None:
++        drop_kmph = (z.v_entry - z.min_v) * 3.6
++        if drop_kmph < MIN_DROP_KMPH:
++            return
++        ci = self._find_corner(z.min_d)
++        if ci is None:
++            ci = self._add_corner(z.min_d)
++        c = self.corners[ci]
++        self.lap_hit.add(id(c))
++        cls = tyre_class(s.visual_compound)
++        zone_len = _wrap(z.min_d - z.start_d, self.track_len)
++        a_ach = (z.v_entry ** 2 - z.min_v ** 2) / (2 * zone_len) if zone_len > 5 else None
++        locked = z.frames and (z.front_lock + z.rear_lock) / z.frames > 0.10
++
++        # learned decel correction: achieved vs predicted for this corner's reference
++        ref = self.ref_for(c, cls)
++        if ref and a_ach and z.peak >= 0.9:
++            pred = ref["a_norm"] * z.grip * self.mass_factor(s) * self.k.get(cls, 1.0)
++            r = a_ach / pred if pred > 0 else 1.0
++            if locked:
++                r = min(r, 1.0) * 0.97
++            old = self.k.get(cls, 1.0)
++            self.k[cls] = _clamp(0.7 * old + 0.3 * (old * r), 0.85, 1.08)
++
++        # result vs the adjusted point at the moment braking started
++        result = None
++        if ref and z.point_d is not None and z.v_target is not None:
++            start_err = _wrap(z.start_d - z.point_d, self.track_len)   # + = braked later
++            apex_err = _wrap(z.min_d - ref["apex"], self.track_len)
++            slow = (z.v_target - z.min_v) * 3.6                          # km/h below target
++            slow_tol = max(8.0, 0.05 * z.v_target * 3.6)
++            overshoot = apex_err > 12 or slow > 5
++            if overshoot and start_err > 8:
++                result = "earlier"
++            elif slow > slow_tol:
++                result = "less"
++            elif start_err < -15 and not overshoot:
++                result = "later"
++            elif z.peak < 0.85 and apex_err > 10:
++                result = "harder"
++            else:
++                result = "good"
++            if z.traffic and result in ("less", "later", "harder"):
++                result = "good"   # held up by the car ahead: only overshoots are on the driver
++            self.last_eval = {"corner": ci, "start_err": round(start_err, 1), "apex_err": round(apex_err, 1),
++                              "slow_kmph": round(slow, 1), "peak": round(z.peak, 2), "result": result}
++            self.lap_results[ci] = result
++            self.flash = (t + FLASH_S, result, ci)
++
++        # brake bias learning from lock-ups and tyre wear
++        if z.bias is not None and z.frames >= 10:
++            fr = z.front_lock / z.frames
++            rr = z.rear_lock / z.frames
++            delta = 0.0
++            if fr > 0.08 and fr > 1.5 * rr:
++                delta = -2.0 if fr > 0.2 else -1.0
++            elif rr > 0.05 and rr > 1.5 * fr:
++                delta = 2.0 if rr > 0.15 else 1.0
++            wear = s.tyre_wear
++            if wear and len(wear) == 4:
++                if (wear[2] + wear[3]) / 2 - (wear[0] + wear[1]) / 2 > 8:
++                    delta -= 0.5
++            obs = _clamp(z.bias + delta, 50.0, 70.0)
++            c.bias_target = obs if c.bias_target is None else 0.6 * c.bias_target + 0.4 * obs
++            c.bias_n += 1
++            c.bias_weight = 0.7 * c.bias_weight + 0.3 * (1.0 + 10 * (fr + rr))
++            self.dirty = True
++
++        if self.last_exit_t is not None and self.last_exit_corner is not None:
++            gap = z.start_t - self.last_exit_t
++            if 0 < gap < 60:
++                c.gap_prev_s = gap if c.gap_prev_s is None else 0.7 * c.gap_prev_s + 0.3 * gap
++        self.last_exit_t, self.last_exit_corner = t, ci
++        if ci == len(self.corners) - 1:
++            # out of the last corner: plan next lap's bias changes now, so the first
++            # corner's tip shows on the run to the line
++            self.bb_done = set()
++            self.bb_plan = self.plan_bias(s.front_brake_bias)
++
++        # reference candidate: timed between gates once the car passes gate_out
++        if a_ach and not z.lap_invalid and not locked:
++            own = c.refs.get(cls)
++            gate_in = own["gate_in"] if own else z.start_d - GATE_IN_M
++            gate_out = own["gate_out"] if own else z.min_d + GATE_OUT_M
++            self.pending_gates.append((ci, z, cls, gate_in, gate_out, a_ach))
++
++    def _time_at(self, lap_dist_target: float) -> Optional[float]:
++        """Interpolated time when the car passed a lap distance (raw lap distance, may be unwrapped)."""
++        tr = self.trace
++        for i in range(len(tr) - 1, 0, -1):
++            (t1, d1), (t0, d0) = tr[i], tr[i - 1]
++            dd = _wrap(d1 - d0, self.track_len)
++            if dd <= 0:
++                continue
++            x = _wrap(lap_dist_target - d0, self.track_len)
++            if 0 <= x <= dd:
++                return t0 + (t1 - t0) * x / dd
++        return None
++
++    def _check_gates(self, s) -> None:
++        if not self.pending_gates:
++            return
++        d = s.lap_distance % self.track_len
++        keep = []
++        for item in self.pending_gates:
++            ci, z, cls, gin, gout, a_ach = item
++            if _wrap(d - gout, self.track_len) < 0:
++                keep.append(item)
++                continue
++            if ci >= len(self.corners):
++                continue
++            t_in, t_out = self._time_at(gin), self._time_at(gout)
++            if t_in is None or t_out is None or t_out <= t_in or s.lap_invalid:
++                continue
++            seg = t_out - t_in
++            c = self.corners[ci]
++            ref = c.refs.get(cls)
++            faster = ref is not None and seg < ref["seg_t"] - 0.005
++            if z.traffic:
++                # held up by a car: only a provisional reference until a clean one exists
++                better = ref is None or (ref.get("prov") and faster)
++            else:
++                better = ref is None or ref.get("prov") or faster
++            if better:
++                g = z.grip
++                c.refs[cls] = {
++                    "start": round(z.start_d, 1), "apex": round(z.min_d, 1),
++                    "v_entry": round(z.v_entry, 2), "vmin": round(z.min_v, 2),
++                    "a_norm": round(a_ach / (g * self.mass_factor(s)), 3),
++                    "vmin_norm": round(z.min_v / math.sqrt(g), 2),
++                    "seg_t": round(seg, 3), "gate_in": round(gin, 1), "gate_out": round(gout, 1),
++                }
++                if z.traffic:
++                    c.refs[cls]["prov"] = True
++                c.apex = 0.8 * c.apex + 0.2 * z.min_d if ref else z.min_d
++                self.dirty = True
++        self.pending_gates = keep
++
++    # ---------------------------------------------------------------- laps / bias plan
++
++    def _on_new_lap(self, s) -> None:
++        if self.lap is not None and self.lap_clean and self.lap_line:
++            for b, (sx, sz, n) in self.lap_line.items():
++                if 0 <= b < len(self.line) and n:
++                    p = [sx / n, sz / n]
++                    old = self.line[b]
++                    self.line[b] = [round(p[0], 2), round(p[1], 2)] if not old else \
++                        [round(0.7 * old[0] + 0.3 * p[0], 2), round(0.7 * old[1] + 0.3 * p[1], 2)]
++            self.dirty = True
++        if self.lap is not None and s.lap_num == self.lap + 1:
++            self._end_of_lap()
++        elif self.lap is not None:
++            # jumped laps (flashback, session restart): forget corners found on the unfinished lap
++            self._drop_corners([c for c in self.corners if not c.confirmed])
++        if self.lap is not None:
++            self.save()
++        self.lap = s.lap_num
++        self.lap_results = {}
++        self.lap_line = {}
++        self.lap_clean = not s.pit_status
++        self.lap_pitted = bool(s.pit_status)
++        self.lap_hit = set()
++        if not self.bb_plan:
++            self.bb_done = set()
++            self.bb_plan = self.plan_bias(s.front_brake_bias)
++
++    def _end_of_lap(self) -> None:
++        """A lap was completed: confirm corners found on it, retire corners never braked for."""
++        if self.lap_pitted:
++            self._drop_corners([c for c in self.corners if not c.confirmed])
++            return
++        drop = []
++        for c in self.corners:
++            if not c.confirmed:
++                c.confirmed = True
++                self.dirty = True
++            elif id(c) in self.lap_hit:
++                c.misses = 0
++            else:
++                c.misses += 1
++                if c.misses >= 3:
++                    drop.append(c)
++        self._drop_corners(drop)
++
++    def _drop_corners(self, drop: List["Corner"]) -> None:
++        if not drop:
++            return
++        self.corners = [c for c in self.corners if all(c is not d for d in drop)]
++        self.lap_results.clear()
++        self.bb_plan.clear()
++        self.pending_gates.clear()
++        self.zone = None
++        self.dirty = True
++
++    def plan_bias(self, current: Optional[int]) -> Dict[int, int]:
++        """Pick at most 3 cyclic bias changes per lap with the most benefit.
++        Returns {corner index: bias to have set before that corner}."""
++        if current is None:
++            return {}
++        known = [i for i, c in enumerate(self.corners) if c.bias_n >= 2 and c.bias_target is not None]
++        if not known:
++            return {}
++        target = {i: round(self.corners[i].bias_target) for i in known}
++        weight = {i: self.corners[i].bias_weight for i in known}
++        eligible = [i for i in known
++                    if self.corners[i].gap_prev_s is not None and self.corners[i].gap_prev_s >= BB_MIN_GAP_S]
++
++        def cost(applied: Dict[int, int]) -> float:
++            return sum(weight[i] * abs(target[i] - applied[i]) for i in known)
++
++        base = cost({i: current for i in known})
++        best_cost, best_plan = base, {}
++        for k in (1, 2, 3):
++            for combo in itertools.combinations(eligible, k):
++                vals = {ci: target[ci] for ci in combo}
++                order = sorted(combo)
++                # value in effect at each corner (cyclic: before the first change, the last one holds)
++                applied = {}
++                for i in known:
++                    prev = [c for c in order if c <= i]
++                    applied[i] = vals[prev[-1]] if prev else vals[order[-1]]
++                seq = [vals[c] for c in order]
++                changes = sum(1 for j in range(len(seq)) if seq[j] != seq[j - 1]) if len(seq) > 1 else 0
++                if changes > BB_MAX_CHANGES:
++                    continue
++                if k > 1 and changes < k - 1:
++                    continue   # redundant change points
++                c_ = cost(applied) + 0.3 * changes
++                if c_ < best_cost - 0.5:
++                    best_cost, best_plan = c_, vals
++        return best_plan
++
++    # ---------------------------------------------------------------- view
++
++    def _view_idle(self, s, label: str) -> Dict[str, Any]:
++        return {"fill": 0.0, "color": "#f2f5f8", "glow": False, "label": label, "labelColor": "#8d99a6",
++                "dots": [], "current": -1, "bias": getattr(s, "front_brake_bias", None) or 0,
++                "biasKnown": getattr(s, "front_brake_bias", None) is not None, "biasDelta": 0,
++                "mode": "idle"}
++
++    def _view(self, s, d: float, v: float, t: float) -> Dict[str, Any]:
++        view = self._view_idle(s, "")
++        view["dots"] = [RESULTS[self.lap_results[i]][0] if i in self.lap_results else ""
++                        for i in range(len(self.corners))]
++        if not self.corners or not any(c.refs for c in self.corners):
++            view["label"] = "Learning"
++            return view
++
++        ci = self.zone.corner if self.zone and self.zone.corner is not None else self._next_corner(d)
++        view["current"] = ci if ci is not None else -1
++
++        # brake bias tip for the next corner: from the previous corner's exit until braking
++        if ci is not None and ci in self.bb_plan and s.front_brake_bias is not None and not self.zone:
++            delta = self.bb_plan[ci] - s.front_brake_bias
++            if ci not in self.bb_done:
++                view["biasDelta"] = delta
++                if delta == 0:
++                    self.bb_done.add(ci)
++        elif self.zone and ci is not None:
++            self.bb_done.add(ci)
++
++        # result flash wins
++        if self.flash and t < self.flash[0]:
++            color, name = RESULTS[self.flash[1]]
++            view.update({"fill": 1.0, "color": color, "label": name, "labelColor": color, "mode": "result"})
++            return view
++        self.flash = None
++
++        z = self.zone
++        if z is not None:
++            vt = z.v_target
++            if vt is None:
++                view.update({"label": "Braking", "labelColor": "#ff3b30", "mode": "brake",
++                             "fill": 1.0, "color": "#ff3b30"})
++                return view
++            span = max(1e-3, z.v_entry ** 2 - vt ** 2)
++            drain = _clamp((v * v - vt * vt) / span, 0.0, 1.0)
++            if drain <= 0.02 or z.end_d is not None:
++                view.update({"label": "Off the brake", "labelColor": "#e9eef3", "mode": "release",
++                             "fill": 0.0})
++            else:
++                view.update({"label": "Braking", "labelColor": "#ff3b30", "mode": "brake",
++                             "fill": drain, "color": "#ff3b30"})
++            return view
++
++        if ci is None:
++            return view
++        bp = self.brake_point(self.corners[ci], s, v)
++        if not bp:
++            return view
++        point = bp[0]
++        to_go = _wrap(point - d, self.track_len)
++        t_to = to_go / max(v, 1.0)
++        if t_to > WHITE_LEAD_S:
++            self.armed_glow = None
++            return view
++        if t_to > self.warn_s:
++            view.update({"fill": (WHITE_LEAD_S - t_to) / WHITE_LEAD_S, "color": "#f2f5f8", "mode": "approach"})
++            return view
++        if t_to > 0:
++            x = 1.0 - t_to / self.warn_s               # 0 = yellow, 1 = red
++            g, b = int(0xc5 * (1 - x) + 0x3b * x), int(0x3d * (1 - x) + 0x30 * x)
++            col = f"#ff{g:02x}{b:02x}"
++            view.update({"fill": (WHITE_LEAD_S - t_to) / WHITE_LEAD_S, "color": col,
++                         "label": "Get ready", "labelColor": "#ffc53d", "mode": "warn"})
++            return view
++        if to_go > -60:   # at / just past the point and not braking yet
++            view.update({"fill": 1.0, "color": "#ff3b30", "glow": True, "label": "Brake",
++                         "labelColor": "#ff3b30", "mode": "point"})
++        return view
+diff --git a/apps/hud/ui/overlays/brake_helper/brake_helper.py b/apps/hud/ui/overlays/brake_helper/brake_helper.py
+new file mode 100644
+index 0000000..7e7a3a0
+--- /dev/null
++++ b/apps/hud/ui/overlays/brake_helper/brake_helper.py
+@@ -0,0 +1,72 @@
++# MIT License
++#
++# Copyright (c) [2025] [Ashwin Natarajan]
++#
++# Permission is hereby granted, free of charge, to any person obtaining a copy
++# of this software and associated documentation files (the "Software"), to deal
++# in the Software without restriction, including without limitation the rights
++# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
++# copies of the Software, and to permit persons to whom the Software is
++# furnished to do so, subject to the following conditions:
++#
++# The above copyright notice and this permission notice shall be included in all
++# copies or substantial portions of the Software.
++#
++# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
++# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
++# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
++# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
++# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
++# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
++# SOFTWARE.
++# -------------------------------------- IMPORTS -----------------------------------------------------------------------
++
++from pathlib import Path
++from typing import final
++
++from lib.config import OverlayId, PngSettings
++from lib.file_path import get_app_fixed_dir
++from lib.logger import PngLogger
++
++from ...hf_types import BrakeHelperData
++from ..base.base_overlay import BaseOverlay
++from .brake_engine import BrakeEngine
++
++# -------------------------------------- CLASSES -----------------------------------------------------------------------
++
++class BrakeHelperOverlay(BaseOverlay):
++    """
++    Brake helper: a capsule with the brake bias block and a bar that fills towards the
++    live brake point for the next corner, drains while braking and flashes the result.
++
++    All logic lives in BrakeEngine (no Qt). References are stored per track in
++    <app data>/brake_helper/track_<id>.json.
++    """
++
++    QML_FILE = Path(__file__).parent / "brake_helper.qml"
++    OVERLAY_ID = OverlayId.BRAKE_HELPER
++    ANIMATION_DRIVEN = True
++
++    def __init__(self, settings: PngSettings, logger: PngLogger) -> None:
++        super().__init__(settings, logger)
++        self._engine = BrakeEngine(
++            store_dir=str(get_app_fixed_dir() / "brake_helper"),
++            warn_s=settings.HUD.brake_helper_warn_sec,
++            log=logger.debug,
++        )
++        self._last_seq = -1
++        self.subscribe_hf(BrakeHelperData)
++
++    @final
++    def render_frame(self):
++        """Feed each new sample to the engine once and push the view to QML."""
++        data = self.get_latest_hf_data(BrakeHelperData)
++        if not data or data.__seq__ == self._last_seq:
++            return
++        self._last_seq = data.__seq__
++        try:
++            view = self._engine.update(data, data.__timestamp__ / 1e9)
++        except Exception:  # pylint: disable=broad-exception-caught
++            self.logger.exception("Brake helper engine failed")
++            return
++        self.invoke_qml_method("updateView", view)
+diff --git a/apps/hud/ui/overlays/brake_helper/brake_helper.qml b/apps/hud/ui/overlays/brake_helper/brake_helper.qml
+new file mode 100644
+index 0000000..474a8bd
+--- /dev/null
++++ b/apps/hud/ui/overlays/brake_helper/brake_helper.qml
+@@ -0,0 +1,201 @@
++import QtQuick
++import QtQuick.Window
++
++// Brake helper capsule: [ BB | bar + corner dots + status label ]
++// All state comes from BrakeEngine via updateView(view).
++Window {
++    id: root
++    visible: true
++
++    property real scaleFactor: 1.0
++    readonly property int baseWidth: 380
++    readonly property int baseHeight: 76
++
++    width: baseWidth * scaleFactor
++    height: baseHeight * scaleFactor
++    color: "transparent"
++    flags: Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint
++
++    // ---------------- state (from engine) ----------------
++    property real fill: 0.0
++    property color barColor: "#f2f5f8"
++    property bool glow: false
++    property string label: ""
++    property color labelColor: "#8d99a6"
++    property var dots: []
++    property int current: -1
++    property int bias: 0
++    property bool biasKnown: false
++    property int biasDelta: 0
++
++    readonly property color fg: "#e9eef3"
++    readonly property color muted: "#8d99a6"
++    readonly property color up: "#34d27b"
++    readonly property color down: "#ff3b30"
++
++    function updateView(v) {
++        fill = Math.max(0, Math.min(1, v.fill))
++        barColor = v.color
++        glow = v.glow
++        label = v.label
++        labelColor = v.labelColor
++        dots = v.dots
++        current = v.current
++        bias = v.bias
++        biasKnown = v.biasKnown
++        biasDelta = v.biasDelta
++    }
++
++    Item {
++        id: scaledRoot
++        anchors.centerIn: parent
++        width: root.baseWidth
++        height: root.baseHeight
++        transform: Scale {
++            xScale: root.scaleFactor
++            yScale: root.scaleFactor
++            origin.x: root.baseWidth / 2
++            origin.y: root.baseHeight / 2
++        }
++
++        // glow halo at the brake point
++        Rectangle {
++            anchors.fill: capsule
++            anchors.margins: -5
++            radius: capsule.radius + 5
++            color: "transparent"
++            border.width: 5
++            border.color: root.barColor
++            opacity: root.glow ? 0.35 : 0.0
++            Behavior on opacity { NumberAnimation { duration: 120 } }
++        }
++
++        Rectangle {
++            id: capsule
++            anchors.fill: parent
++            anchors.margins: 8
++            radius: 14
++            border.width: 1
++            border.color: Qt.rgba(1, 1, 1, 0.08)
++            gradient: Gradient {
++                GradientStop { position: 0.0; color: Qt.rgba(14/255, 18/255, 24/255, 0.80) }
++                GradientStop { position: 1.0; color: Qt.rgba(8/255, 10/255, 14/255, 0.72) }
++            }
++
++            // ---------------- BB block ----------------
++            Item {
++                id: bbBlock
++                anchors.left: parent.left
++                anchors.top: parent.top
++                anchors.bottom: parent.bottom
++                width: 62
++
++                Column {
++                    anchors.centerIn: parent
++                    spacing: 1
++                    Text {
++                        anchors.horizontalCenter: parent.horizontalCenter
++                        text: "BB"
++                        color: root.muted
++                        font.pixelSize: 9
++                        font.letterSpacing: 1.5
++                        font.bold: true
++                    }
++                    Text {
++                        anchors.horizontalCenter: parent.horizontalCenter
++                        text: root.biasKnown ? root.bias : "--"
++                        color: root.fg
++                        font.pixelSize: 20
++                        font.bold: true
++                    }
++                    Text {
++                        anchors.horizontalCenter: parent.horizontalCenter
++                        height: 13
++                        text: root.biasDelta > 0 ? "▲" + root.biasDelta
++                            : root.biasDelta < 0 ? "▼" + (-root.biasDelta) : ""
++                        color: root.biasDelta > 0 ? root.up : root.down
++                        font.pixelSize: 13
++                        font.bold: true
++                    }
++                }
++
++                Rectangle {
++                    anchors.right: parent.right
++                    anchors.top: parent.top
++                    anchors.bottom: parent.bottom
++                    anchors.topMargin: 8
++                    anchors.bottomMargin: 8
++                    width: 1
++                    color: Qt.rgba(1, 1, 1, 0.08)
++                }
++            }
++
++            // ---------------- bar + dots ----------------
++            Item {
++                id: mainArea
++                anchors.left: bbBlock.right
++                anchors.right: parent.right
++                anchors.top: parent.top
++                anchors.bottom: parent.bottom
++                anchors.leftMargin: 14
++                anchors.rightMargin: 14
++
++                Rectangle {
++                    id: bar
++                    anchors.left: parent.left
++                    anchors.right: parent.right
++                    y: 16
++                    height: 8
++                    radius: 4
++                    color: Qt.rgba(1, 1, 1, 0.07)
++
++                    Rectangle {
++                        anchors.left: parent.left
++                        anchors.top: parent.top
++                        anchors.bottom: parent.bottom
++                        width: parent.width * root.fill
++                        radius: 4
++                        visible: root.fill > 0.001
++                        gradient: Gradient {
++                            orientation: Gradient.Horizontal
++                            GradientStop { position: 0.0; color: Qt.darker(root.barColor, 1.45) }
++                            GradientStop { position: 1.0; color: root.barColor }
++                        }
++                    }
++                }
++
++                Row {
++                    id: dotsRow
++                    anchors.left: parent.left
++                    anchors.top: bar.bottom
++                    anchors.topMargin: 9
++                    spacing: root.dots.length > 14 ? 3 : 5
++                    readonly property int dw: root.dots.length > 14 ? 4 : 6
++                    Repeater {
++                        model: root.dots.length
++                        Rectangle {
++                            width: index === root.current ? dotsRow.dw * 2 + 2 : dotsRow.dw
++                            height: dotsRow.dw
++                            radius: dotsRow.dw / 2
++                            color: root.dots[index] !== ""
++                                   ? root.dots[index]
++                                   : (index === root.current ? Qt.rgba(1, 1, 1, 0.55) : Qt.rgba(1, 1, 1, 0.16))
++                            Behavior on width { NumberAnimation { duration: 200 } }
++                        }
++                    }
++                }
++
++                Text {
++                    anchors.right: parent.right
++                    anchors.verticalCenter: dotsRow.verticalCenter
++                    text: root.label.toUpperCase()
++                    color: root.labelColor
++                    opacity: 0.85
++                    font.pixelSize: 10
++                    font.bold: true
++                    font.letterSpacing: 1.6
++                }
++            }
++        }
++    }
++}
+diff --git a/apps/launcher/subsystems/hud_mgr/hud_mgr.py b/apps/launcher/subsystems/hud_mgr/hud_mgr.py
+index 19101c8..b24d4a3 100644
+--- a/apps/launcher/subsystems/hud_mgr/hud_mgr.py
++++ b/apps/launcher/subsystems/hud_mgr/hud_mgr.py
+@@ -556,6 +556,8 @@ class HudAppMgr(PngAppMgrBase):
+                 "use_windowed_overlays",
+                 "input_overlay_buffer_duration_sec",
+                 "show_input_overlay",
++                "show_brake_helper",
++                "brake_helper_warn_sec",
+                 "show_hud_overlay",
+                 "overlays_fuel_estimation_mode",
+                 "show_circuit_info",
+diff --git a/assets/overlay-previews/brake-helper.png b/assets/overlay-previews/brake-helper.png
+new file mode 100644
+index 0000000000000000000000000000000000000000..cd8f1e3df288efea1a470f67b996854a7e4cc2cc
+GIT binary patch
+literal 7953
+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
+Bn+pH{
+
+literal 0
+HcmV?d00001
+
+diff --git a/lib/config/schema/hud/hud.py b/lib/config/schema/hud/hud.py
+index 0e1ebbf..4e1b8f7 100644
+--- a/lib/config/schema/hud/hud.py
++++ b/lib/config/schema/hud/hud.py
+@@ -325,6 +325,33 @@ class HudSettings(ConfigDiffMixin, BaseModel):
+         }
+     )
+ 
++    # ============== BRAKE HELPER OVERLAY ==============
++    show_brake_helper: bool = overlay_enable_field(
++        description="Enable brake helper overlay",
++        default=False,
++        group="Brake Helper",
++        preview_image="assets/overlay-previews/brake-helper.png",
++        ext_info=[
++            "Shows when to brake for each corner, learned from your own best braking per corner. "
++            "Drive one clean lap on a new track first. Also gives brake bias tips (max 3 per lap)."
++        ])
++    brake_helper_warn_sec: float = Field(
++        default=0.5,
++        ge=0.2,
++        le=1.5,
++        description="Brake helper yellow-to-red warning time (sec)",
++        json_schema_extra={
++            "ui": {
++                "type" : "text_box",
++                "visible": True,
++                "group": "Brake Helper",
++                "ext_info": [
++                    "How long before the brake point the bar turns from white to yellow and then red."
++                ]
++            }
++        }
++    )
++
+     # ============== TRACK RADAR OVERLAY ==============
+     show_track_radar_overlay: bool = overlay_enable_field(description="Enable track radar overlay", group="Track Radar",
+                                                           preview_image="assets/overlay-previews/track-radar.png")
+@@ -670,6 +697,7 @@ class HudSettings(ConfigDiffMixin, BaseModel):
+             OverlayId.TYRE_SETS:       self.show_tyre_sets,
+             OverlayId.PACE_COMP:       self.show_pace_comp,
+             OverlayId.TRAFFIC_MONITOR: self.show_traffic_monitor,
++            OverlayId.BRAKE_HELPER:    self.show_brake_helper,
+         }
+         return [oid for oid, is_on in enabled.items() if is_on]
+ 
+diff --git a/lib/config/schema/hud/layout.py b/lib/config/schema/hud/layout.py
+index ef72cb7..a8cbfa4 100644
+--- a/lib/config/schema/hud/layout.py
++++ b/lib/config/schema/hud/layout.py
+@@ -49,6 +49,7 @@ class OverlayId(str, Enum):
+     TYRE_SETS        = "tyre_sets_standalone"
+     PACE_COMP        = "pace_comp_standalone"
+     TRAFFIC_MONITOR  = "traffic_monitor_standalone"
++    BRAKE_HELPER     = "brake_helper"
+ 
+     @property
+     def display_name(self) -> str:
+@@ -70,6 +71,7 @@ class OverlayId(str, Enum):
+             OverlayId.TYRE_SETS:       "Tyre Sets",
+             OverlayId.PACE_COMP:       "Pace Comparison",
+             OverlayId.TRAFFIC_MONITOR: "Traffic Monitor",
++            OverlayId.BRAKE_HELPER:    "Brake Helper",
+         }[self]
+ 
+ # -------------------------------------- MODELS ------------------------------------------------------------------------
+@@ -147,6 +149,7 @@ DEFAULT_OVERLAY_LAYOUT: Dict[str, OverlayPosition] = {
+     OverlayId.TYRE_SETS:       OverlayPosition(x=420,  y=840),
+     OverlayId.PACE_COMP:       OverlayPosition(x=830,  y=840),
+     OverlayId.TRAFFIC_MONITOR: OverlayPosition(x=1240, y=840),
++    OverlayId.BRAKE_HELPER:    OverlayPosition(x=760,  y=880),
+ }
+ 
+ # -------------------------------------- HELPERS -----------------------------------------------------------------------
+diff --git a/scripts/png.spec b/scripts/png.spec
+index b005232..5a03486 100644
+--- a/scripts/png.spec
++++ b/scripts/png.spec
+@@ -188,6 +188,7 @@ datas.extend([
+     qml_file("apps/hud/ui/overlays/base", "DiffedTableModel.qml"),
+     qml_file("apps/hud/ui/overlays/track_radar", "track_radar.qml"),
+     qml_file("apps/hud/ui/overlays/input_telemetry", "input_telemetry.qml"),
++    qml_file("apps/hud/ui/overlays/brake_helper", "brake_helper.qml"),
+     qml_file("apps/hud/ui/overlays/timing_tower", "timing_tower.qml"),
+     qml_file("apps/hud/ui/overlays/lap_timer", "lap_timer_overlay.qml"),
+     qml_file("apps/hud/ui/overlays/circuit_info", "circuit_info.qml"),
+diff --git a/tests/tests_brake_helper.py b/tests/tests_brake_helper.py
+new file mode 100644
+index 0000000..b4cd544
+--- /dev/null
++++ b/tests/tests_brake_helper.py
+@@ -0,0 +1,181 @@
++# MIT License
++#
++# Copyright (c) [2025] [Ashwin Natarajan]
++#
++# Permission is hereby granted, free of charge, to any person obtaining a copy
++# of this software and associated documentation files (the "Software"), to deal
++# in the Software without restriction, including without limitation the rights
++# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
++# copies of the Software, and to permit persons to whom the Software is
++# furnished to do so, subject to the following conditions:
++#
++# The above copyright notice and this permission notice shall be included in all
++# copies or substantial portions of the Software.
++#
++# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
++# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
++# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
++# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
++# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
++# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
++# SOFTWARE.
++# pylint: skip-file
++"""Brake helper engine tests (synthetic laps, no Qt)."""
++
++import importlib.util
++import math
++import types
++from pathlib import Path
++
++import pytest
++
++_spec = importlib.util.spec_from_file_location(
++    "brake_engine",
++    Path(__file__).resolve().parents[1] / "apps/hud/ui/overlays/brake_helper/brake_engine.py")
++be = importlib.util.module_from_spec(_spec)
++_spec.loader.exec_module(be)
++
++TRACK = 3000.0
++CORNERS = [(1000.0, 25.0), (2200.0, 40.0)]   # apex distance, min speed m/s
++DECEL = 30.0
++ACCEL = 9.0
++VMAX = 85.0
++
++
++def speed_at(d: float) -> float:
++    v = VMAX
++    for apex, vmin in CORNERS:
++        for a in (apex, apex - TRACK, apex + TRACK):
++            if d <= a:   # braking towards it
++                v = min(v, math.sqrt(vmin ** 2 + 2 * DECEL * (a - d)))
++            else:        # accelerating away
++                v = min(v, math.sqrt(vmin ** 2 + 2 * ACCEL * (d - a)))
++    return v
++
++
++def lap_samples(n_laps=3, t0=0.0, bias=56, front_lock_at=None, others_fn=None, **extra):
++    """60 Hz samples; brake = 1 where the profile is decelerating."""
++    out, t, d, lap = [], t0, 0.0, 1
++    dt = 1 / 60
++    while lap <= n_laps:
++        v = speed_at(d)
++        braking = speed_at(d + 0.5) < v - 0.05
++        slip = [-0.02] * 4
++        if braking and front_lock_at is not None and abs(d - front_lock_at) < 80:
++            slip = [-0.02, -0.02, -0.3, -0.3]
++        s = dict(player=True, track_id=7, track_length=TRACK, session_uid=1, lap_num=lap, lap_distance=d,
++                 lap_invalid=False, pit_status=0, speed_kmph=v * 3.6, throttle=0.0 if braking else 1.0,
++                 brake=1.0 if braking else 0.0, tyre_surface_temp=[95] * 4, front_brake_bias=bias,
++                 fuel_kg=10.0, visual_compound=16, tyre_wear=[5.0] * 4, wheel_slip=slip,
++                 pos_x=d, pos_z=0.0, weather=0, rain_pct=0,
++                 others=others_fn(d, lap) if others_fn else [])
++        s.update(extra)
++        out.append((t, types.SimpleNamespace(**s)))
++        t += dt
++        d += v * dt
++        if d >= TRACK:
++            d -= TRACK
++            lap += 1
++    return out
++
++
++def run(engine, samples):
++    views = []
++    for t, s in samples:
++        views.append((s, engine.update(s, t)))
++    return views
++
++
++def test_learns_corners_and_reference(tmp_path):
++    eng = be.BrakeEngine(store_dir=str(tmp_path))
++    run(eng, lap_samples(2))
++    assert len(eng.corners) == 2
++    for c, (apex, vmin) in zip(eng.corners, CORNERS):
++        ref = c.refs["dry"]
++        assert abs(ref["apex"] - apex) < 5
++        assert abs(ref["vmin"] - vmin) < 1.5
++    eng.save()
++    assert (tmp_path / "track_7.json").exists()
++
++
++def test_brake_point_matches_reference_and_moves_with_conditions(tmp_path):
++    eng = be.BrakeEngine(store_dir=str(tmp_path))
++    run(eng, lap_samples(2))
++    c = eng.corners[0]
++    ref = c.refs["dry"]
++    base = types.SimpleNamespace(**vars(lap_samples(1)[0][1]))
++    base.lap_distance = 300.0
++    base.pos_x = 300.0
++    p0, _, _ = eng.brake_point(c, base, ref["v_entry"])
++    assert abs(p0 - ref["start"]) < 8
++
++    worn = types.SimpleNamespace(**{**vars(base), "tyre_wear": [60.0] * 4})
++    wet = types.SimpleNamespace(**{**vars(base), "weather": 3})
++    fast = ref["v_entry"] + 5
++    assert eng.brake_point(c, worn, ref["v_entry"])[0] < p0 - 3
++    assert eng.brake_point(c, wet, ref["v_entry"])[0] < p0 - 15
++    assert eng.brake_point(c, base, fast)[0] < p0 - 5
++    # close behind a slower car: earlier
++    behind = types.SimpleNamespace(**{**vars(base), "others": [[base.lap_distance + 15, 250.0]]})
++    assert eng.brake_point(c, behind, ref["v_entry"])[0] < p0 - 5
++    # 5 m off the normal line: earlier
++    offline = types.SimpleNamespace(**{**vars(base), "pos_z": 5.0})
++    assert eng.brake_point(c, offline, ref["v_entry"])[0] < p0 - 5
++
++
++def test_bar_phases_and_results(tmp_path):
++    eng = be.BrakeEngine(store_dir=str(tmp_path))
++    views = run(eng, lap_samples(3))
++    modes = {v["mode"] for s, v in views if s.lap_num == 3}
++    assert {"approach", "warn", "brake", "result"} <= modes
++    results = [v["label"] for s, v in views if s.lap_num == 3 and v["mode"] == "result"]
++    assert results and set(results) == {"Good"}
++    last = [v for s, v in views if s.lap_num == 3][-1]
++    assert len(last["dots"]) == 2
++
++
++def test_braking_too_late_says_brake_earlier(tmp_path):
++    eng = be.BrakeEngine(store_dir=str(tmp_path))
++    run(eng, lap_samples(2))
++    global CORNERS
++    saved = CORNERS
++    try:
++        # same entry, braking 40 m later and overshooting the apex
++        CORNERS = [(1040.0, 32.0), (2200.0, 40.0)]
++        views = run(eng, lap_samples(3, t0=1000.0)[-int(60 * 40):])
++    finally:
++        CORNERS = saved
++    labels = {v["label"] for s, v in views if v["mode"] == "result"}
++    assert "Brake earlier" in labels
++
++
++def test_bias_tips_follow_front_lockups(tmp_path):
++    eng = be.BrakeEngine(store_dir=str(tmp_path))
++    views = run(eng, lap_samples(5, front_lock_at=950.0))
++    c0 = eng.corners[0]
++    assert c0.bias_target < 55
++    tips = [(s.lap_num, v["current"], v["biasDelta"]) for s, v in views if v["biasDelta"]]
++    assert tips and all(d < 0 for _, ci, d in tips if ci == 0)
++
++
++def test_bias_plan_limits():
++    eng = be.BrakeEngine()
++    eng.track_len = TRACK
++    eng.corners = [be.Corner(apex=100.0 * i + 50) for i in range(8)]
++    for i, c in enumerate(eng.corners):
++        c.bias_n = 3
++        c.bias_target = 50 + 3 * i
++        c.gap_prev_s = 3.0 if i % 2 else 8.0   # odd corners come too soon after the previous one
++    plan = eng.plan_bias(56)
++    assert plan
++    assert all(ci % 2 == 0 for ci in plan)
++    vals = [plan[k] for k in sorted(plan)]
++    changes = sum(1 for j in range(len(vals)) if vals[j] != vals[j - 1]) if len(vals) > 1 else 0
++    assert changes <= 3
++
++
++def test_not_player_is_idle():
++    eng = be.BrakeEngine()
++    s = lap_samples(1)[0][1]
++    s.player = False
++    assert eng.update(s, 0.0)["mode"] == "idle"
