@@ -340,6 +340,94 @@
         "gray_score": 1.13
       }
     },
+    "1104b-5": {
+      "verdict": "1) #19 toni2608 at fault | 2) #21 EthanMoonski at fault",
+      "by": "GreMi",
+      "real": true,
+      "at_fault": [
+        "#19 toni2608",
+        "#21 EthanMoonski"
+      ],
+      "severity": 9,
+      "note": "He turns into toni after him wanting to give back the position, after that he also does a bracke check.",
+      "at": 1793866650,
+      "parts": [
+        {
+          "t0": 337.0,
+          "t1": 344.0,
+          "real": true,
+          "verdict": "#19 toni2608 at fault",
+          "tags": [],
+          "kind": "Late lunge / divebomb",
+          "note": "",
+          "drivers": [
+            {
+              "car": 7,
+              "name": "#21 EthanMoonski",
+              "call": "clear"
+            },
+            {
+              "car": 6,
+              "name": "#19 toni2608",
+              "call": "fault",
+              "severity": 7,
+              "note": "Crazy send, took away 1 sev for wanting to hand back the position otherwise this would be an 8"
+            }
+          ]
+        },
+        {
+          "t0": 344.0,
+          "t1": 353.0,
+          "real": true,
+          "verdict": "#21 EthanMoonski at fault",
+          "tags": [],
+          "kind": "Retaliation",
+          "note": "",
+          "drivers": [
+            {
+              "car": 7,
+              "name": "#21 EthanMoonski",
+              "call": "fault",
+              "severity": 9,
+              "note": "Unacceptible driving, toni did cause a big incident before, so i take it from 10 to 9 sev. but that is just not okay."
+            },
+            {
+              "car": 6,
+              "name": "#19 toni2608",
+              "call": "clear"
+            }
+          ]
+        }
+      ],
+      "kind": "Late lunge / divebomb",
+      "drivers": [
+        {
+          "car": 7,
+          "name": "#21 EthanMoonski"
+        },
+        {
+          "car": 6,
+          "name": "#19 toni2608"
+        }
+      ],
+      "track": "Spa",
+      "date": "2026-11-04",
+      "race_file": "Race_Spa_2026_11_04_19_32_23.json",
+      "recording": "2026-11-04_19-21-49_Spa_Race.gmtel.gz",
+      "replay": "https://gremigaming.github.io/race-stats/f1/race/2026-11-04_19-21-49_Spa_Race?inc=341.0&car=7,6",
+      "engine": {
+        "rules": "v1.2",
+        "verdict": "EthanMoonski at fault",
+        "rule": "P",
+        "severity": 4,
+        "why": "toni2608 ran into the back of EthanMoonski, closing at 50 km/h; but GreMi called a similar one (B4-02, Abu Dhabi 2026-10-20) the car ahead at fault; EthanMoonski ran into the back of toni2608, closing at 40 km/h",
+        "at_fault": [
+          "#21 EthanMoonski"
+        ],
+        "contacts": 2,
+        "gray_score": 1.0
+      }
+    },
     "1102b-1": {
       "verdict": "Not an incident",
       "by": "GreMi",
