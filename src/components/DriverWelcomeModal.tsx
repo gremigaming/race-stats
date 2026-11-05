@@ -1,6 +1,6 @@
 import { ArrowRight, UserRound } from "lucide-react";
 import { useCallback, useMemo, useRef, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { useTelemetry } from "../context/TelemetryContext";
 import {
   LEAGUE_DRIVER_ONBOARDING_STORAGE_KEY,
@@ -12,7 +12,7 @@ import { Modal } from "./ui/Modal";
 
 export function DriverWelcomeModal() {
   const { mode, league } = useTelemetry();
-  const location = useLocation();
+  const [, setSearchParams] = useSearchParams();
   const [dismissed, setDismissed] = useState(() =>
     readStoredBoolean(LEAGUE_DRIVER_ONBOARDING_STORAGE_KEY),
   );
@@ -23,27 +23,31 @@ export function DriverWelcomeModal() {
     [league?.drivers],
   );
 
-  const routeDriver = new URLSearchParams(location.search)
-    .get("driver")
-    ?.toLowerCase();
   const savedDriver = readStoredString(LEAGUE_DRIVER_STORAGE_KEY);
   const hasSavedDriver = drivers.some((driver) => driver.key === savedDriver);
-  const hasRouteDriver = drivers.some((driver) => driver.key === routeDriver);
   const visible =
     mode === "league" &&
     drivers.length > 0 &&
     !dismissed &&
-    !hasSavedDriver &&
-    !hasRouteDriver;
+    !hasSavedDriver;
 
   const finish = useCallback(() => {
     if (pendingChoice.current) {
       league?.setSelectedDriver(pendingChoice.current);
       pendingChoice.current = null;
+      // A shared driver URL must not override the visitor's own choice later.
+      setSearchParams(
+        (current) => {
+          const next = new URLSearchParams(current);
+          next.delete("driver");
+          return next;
+        },
+        { replace: true },
+      );
     }
     writeStoredBoolean(LEAGUE_DRIVER_ONBOARDING_STORAGE_KEY, true);
     setDismissed(true);
-  }, [league?.setSelectedDriver]);
+  }, [league?.setSelectedDriver, setSearchParams]);
 
   if (!visible || !league) return null;
 

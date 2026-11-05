@@ -12,6 +12,7 @@ import { Link } from "react-router-dom";
 import { buildDashboardActivity } from "../analysis/dashboardActivity";
 import { getDashboardResultStats } from "../analysis/dashboardResultStats";
 import { ActivityRow } from "../components/dashboard/ActivityRow";
+import { SafetySummary } from "../components/safety/SafetySummary";
 import { LoadingState } from "../components/ui/LoadingState";
 import { PageFrame } from "../components/ui/PageFrame";
 import { useTelemetry } from "../context/TelemetryContext";
@@ -117,6 +118,7 @@ export function DashboardPage() {
               {filtered ? " · Filtered" : ""}
             </p>
           </div>
+          <SafetySummary />
         </div>
 
         {hasData ? (

@@ -36,11 +36,11 @@ import { cn } from "../utils/cn";
 import { LiveDot, useIsLive } from "../viewer/LiveTab";
 import { ALL_FORMULA_SCOPE_KEY } from "../utils/formulaScope";
 import { dashboardPath } from "../utils/routes";
+import { APP_BRAND_LINE, APP_NAME, APP_SUBTITLE } from "../config/branding";
 import { readStoredString, writeStoredString } from "../utils/storage";
 import { CHANGELOG_SEEN_STORAGE_KEY } from "../constants/storage";
 import { AppBrand } from "./AppBrand";
 import { ChangelogModal } from "./ChangelogModal";
-import { DriverWelcomeModal } from "./DriverWelcomeModal";
 import { DriverSearchSelect } from "./DriverSearchSelect";
 import { LeagueFilterPanel } from "./LeagueFilterPanel";
 import { SessionList } from "./SessionList";
@@ -187,7 +187,7 @@ export function Layout() {
 
           <Link
             to={homePath}
-            aria-label="GreMi Gang Race Stats home"
+            aria-label={`${APP_NAME} home`}
             className="group flex min-w-0 shrink-0 items-center gap-2.5 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-red/70"
           >
             <img
@@ -197,11 +197,13 @@ export function Layout() {
             />
             <span className="hidden min-w-0 sm:block">
               <span className="block truncate text-sm font-bold tracking-tight text-zinc-100 group-hover:text-white">
-                <AppBrand />
+                {APP_BRAND_LINE}
               </span>
-              <span className="block font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-500">
-                Race stats
-              </span>
+              {APP_SUBTITLE && (
+                <span className="block font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-500">
+                  {APP_SUBTITLE}
+                </span>
+              )}
             </span>
           </Link>
 
@@ -572,7 +574,6 @@ export function Layout() {
           )}
         </Modal>
       )}
-      <DriverWelcomeModal />
     </div>
   );
 }

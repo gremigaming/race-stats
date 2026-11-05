@@ -9,6 +9,7 @@ import {
 } from "react-router-dom";
 import { Analytics } from "@vercel/analytics/react";
 import { Layout } from "./components/Layout";
+import { DriverWelcomeModal } from "./components/DriverWelcomeModal";
 import { LoadingSpinner } from "./components/ui/LoadingSpinner";
 import { SetupCardsPage } from "./pages/SetupCardsPage";
 import { SETUP_MANAGER_ON } from "./league/setupManager";
@@ -237,6 +238,7 @@ function AppRoutes() {
           <Route path="*" element={<RouteNotFound />} />
         </Route>
       </Routes>
+      <DriverWelcomeModal />
       {(needsData || showUploadModal) && (
         <ZipUploadScreen dismissable={!needsData} />
       )}

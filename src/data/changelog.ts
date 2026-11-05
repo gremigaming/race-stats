@@ -22,7 +22,7 @@ const changelog: ChangelogEntry[] = [
     date: "2026-11-05",
     type: "feat",
     message:
-      "The GreMi Gang Race Stats site has a refreshed look, with clearer navigation, a more focused home page, calmer race cards, and cleaner layouts across its tools.",
+      "GreMi Gaming F1 Lobby Manager has a refreshed look, with clearer navigation, a more focused home page, calmer race cards, and cleaner layouts across its tools.",
     destination: "home",
   },
   {
