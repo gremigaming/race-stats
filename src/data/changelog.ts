@@ -3,12 +3,28 @@ export interface ChangelogEntry {
   date: string;
   type: "feat" | "fix" | "docs";
   message: string;
-  destination: "tracks" | "drivers" | "safety" | "personal-safety" | "race";
+  destination: "tracks" | "drivers" | "safety" | "personal-safety" | "race" | "incidents";
 }
 
 // Curated site updates. Keep these focused on changes visitors can notice;
 // raw commit history also contains routine uploads and staff-only corrections.
 const changelog: ChangelogEntry[] = [
+  {
+    id: "incident-viewer",
+    date: "2026-11-05",
+    type: "feat",
+    message:
+      "New Incidents tab: every incident on the track map with coloured markers by type, filters for drivers (or two drivers against each other), biggest-first or race order, stream awards, and each incident replayed with the cars' lines and inputs.",
+    destination: "incidents",
+  },
+  {
+    id: "race-highlights",
+    date: "2026-11-05",
+    type: "feat",
+    message:
+      "The race viewer's timeline now shows highlights instead of every contact: big incidents, battles, overtakes, lead changes, fastest lap, photo finishes and more, with a Watch highlights button that plays them back to back.",
+    destination: "race",
+  },
   {
     id: "wet-weather-incidents",
     date: "2026-11-05",

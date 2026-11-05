@@ -1,16 +1,17 @@
-import { ChevronDown, Flag, Play } from "lucide-react";
+import { ChevronDown, Flag, TriangleAlert } from "lucide-react";
 import { useMemo, useState } from "react";
+import { Link, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useTelemetry } from "../../context/TelemetryContext";
 import { driverKey } from "../../league/league";
 import { scaledPts, signedHalf, STAFF_URL, type SafetyData, type SafetyItem, type SafetyScale } from "../../league/safety";
 import { loadLeagueJson } from "../../league/liveData";
 import { cn } from "../../utils/cn";
-import { IncidentReplay, replayStats, type CarStats, type ReplayData } from "./IncidentReplay";
 
 /**
  * The incidents of one driver in one race: every collision they were part of (also the ones
- * that cost nobody points), both sides with the verdict, the points and the overhead replay.
+ * that cost nobody points), both sides with the verdict and the points, and a link that opens it
+ * in the incident viewer (the small overhead replays were dropped 5 Nov 2026).
  * Shown on the driver's safety rating page (per race) and in their race history on the
  * dashboard. Replaces the old standalone Incidents tab (removed 2 Nov 2026).
  */
@@ -67,14 +68,6 @@ function useAllIncidents(): AllIncidents | null {
 
 const base = (file: string) => file.split("/").pop() ?? file;
 
-/** Track name from a race file name (as SafetyPersonal.parseSessionFile), for the replay's map. */
-const trackOf = (file: string) =>
-  base(file)
-    .replace(/_Just_in_case/, "")
-    .replace(/_\d{4}_\d{2}_\d{2}_.*$/, "")
-    .replace(/^(One_Shot_)?Qualifying_|^Race_/, "")
-    .replace(/_/g, " ");
-
 const SEV: Record<string, { label: string; cls: string }> = {
   LOW: { label: "Light", cls: "bg-zinc-500/15 text-zinc-300" },
   MEDIUM: { label: "Medium", cls: "bg-amber-500/15 text-amber-300" },
@@ -94,8 +87,6 @@ function verdict(item?: SafetyItem): { label: string; cls: string } {
   if (t.includes("to blame")) return { label: "To blame", cls: "bg-red-500/15 text-red-300" };
   return { label: "Points lost", cls: "bg-zinc-500/15 text-zinc-300" };
 }
-
-const COLORS = ["#ff8a1f", "#4fb6ff"];
 
 const cap = (t: string) => t.charAt(0).toUpperCase() + t.slice(1);
 
@@ -209,14 +200,8 @@ export function RaceIncidentList({
 
 function IncidentCard({ inc, driver }: { inc: RaceIncident; driver: string }) {
   const [open, setOpen] = useState(false);
-  const [stats, setStats] = useState<{ d: ReplayData; s: CarStats[] } | null>(null);
-  // the replay's own order decides the colours: first car orange, second blue
-  const colorOf = (name: string) => {
-    if (!stats) return undefined;
-    const i = stats.s.findIndex((c) => stats.d.names[String(c.car)] === name);
-    return i >= 0 ? COLORS[i] : undefined;
-  };
-  const statOf = (name: string) => stats?.s.find((c) => stats.d.names[String(c.car)] === name);
+  const { formulaKey } = useParams<{ formulaKey: string }>();
+  const viewer = `/${formulaKey ?? ""}/incidents?file=${encodeURIComponent(base(inc.file))}${inc.lap != null ? `&lap=${inc.lap}` : ""}&with=${encodeURIComponent(inc.sides.map((s) => s.name).join("|"))}`;
   const mine = inc.sides.find((s) => driverKey(s.name) === driver)?.item?.pts ?? 0;
   const others = inc.sides.filter((s) => driverKey(s.name) !== driver).map((s) => s.name);
 
@@ -237,7 +222,6 @@ function IncidentCard({ inc, driver }: { inc: RaceIncident; driver: string }) {
             {SEV[inc.sev].label}
           </span>
         )}
-        {inc.replay && <Play className="h-3.5 w-3.5 shrink-0 text-zinc-500" aria-label="Has a replay" />}
         <span className={cn("w-10 text-right font-mono", mine < 0 ? "text-red-300" : "text-zinc-500")}>{signedHalf(mine)}</span>
         <ChevronDown className={cn("h-3.5 w-3.5 shrink-0 text-zinc-600 transition-transform", open && "rotate-180")} />
       </button>
@@ -246,13 +230,10 @@ function IncidentCard({ inc, driver }: { inc: RaceIncident; driver: string }) {
           <div className="grid gap-2 sm:grid-cols-2">
             {inc.sides.map((s) => {
               const v = verdict(s.item);
-              const st = statOf(s.name);
               const why = s.item ? splitText(s.item.text).why : "No points lost";
-              const col = colorOf(s.name);
               return (
                 <div key={s.name} className="rounded-lg bg-black/25 p-2.5">
                   <div className="mb-1.5 flex items-center gap-2">
-                    {col && <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: col }} />}
                     <span className="min-w-0 truncate font-semibold text-zinc-100">{s.name}</span>
                     <span className={cn("ml-auto shrink-0 rounded px-1.5 py-0.5 text-[10px] font-semibold", v.cls)}>
                       {v.label}
@@ -268,7 +249,6 @@ function IncidentCard({ inc, driver }: { inc: RaceIncident; driver: string }) {
                       {s.item.staff ? `: ${s.item.staff}` : ""}
                     </p>
                   )}
-                  {st && <StatLine st={st} />}
                   {s.item && s.item.pts < 0 && s.item.id && s.item.staff == null && (
                     <a
                       href={`${STAFF_URL}/protest?item=${encodeURIComponent(s.item.id)}`}
@@ -283,30 +263,11 @@ function IncidentCard({ inc, driver }: { inc: RaceIncident; driver: string }) {
               );
             })}
           </div>
-          {inc.replay ? (
-            <IncidentReplay id={inc.replay} track={trackOf(inc.file)} onData={(d) => setStats({ d, s: replayStats(d) })} />
-          ) : (
-            <p className="text-zinc-500">No replay for this contact (the race was recorded before every car's position was kept).</p>
-          )}
+          <Link to={viewer} className="inline-flex items-center gap-1.5 rounded-md bg-white/10 px-2.5 py-1.5 font-medium text-zinc-100 hover:bg-white/15">
+            <TriangleAlert className="h-3.5 w-3.5 text-amber-300" /> Watch it in the incident viewer
+          </Link>
         </div>
       )}
     </div>
   );
-}
-
-function StatLine({ st }: { st: CarStats }) {
-  const parts: string[] = [];
-  if (st.speed != null) {
-    let p = `${Math.round(st.speed)} km/h at contact`;
-    if (st.speedBefore != null) {
-      const dv = st.speed - st.speedBefore;
-      p += Math.abs(dv) < 3 ? " (steady)" : dv < 0 ? ` (braked ${Math.round(-dv)} km/h in the last second)` : ` (+${Math.round(dv)} km/h in the last second)`;
-    }
-    parts.push(p);
-  }
-  if (st.ahead != null)
-    parts.push(Math.abs(st.ahead) < 1 ? "side by side" : st.ahead > 0 ? `${st.ahead.toFixed(1)} m ahead` : `${(-st.ahead).toFixed(1)} m behind`);
-  if (st.moved != null && Math.abs(st.moved) >= 0.5)
-    parts.push(`moved ${Math.abs(st.moved).toFixed(1)} m to the ${st.moved > 0 ? "left" : "right"} in the last second`);
-  return parts.length ? <p className="mt-1.5 font-mono text-[11px] text-zinc-300">{parts.join(" · ")}</p> : null;
 }

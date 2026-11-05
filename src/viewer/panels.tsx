@@ -1,6 +1,7 @@
-import { Pause, Play, RotateCcw, RotateCw, X } from "lucide-react";
+import { Pause, Play, RotateCcw, RotateCw, Sparkles, Square, X } from "lucide-react";
 import { useRef, type ReactNode } from "react";
 import type { RaceCar, RaceIncident } from "./format";
+import { HIGHLIGHT_META, type Highlight } from "./highlights";
 import type { SurfacePick, TimePick } from "./look";
 import type { CarState } from "./store";
 
@@ -14,7 +15,7 @@ export function clock(t: number) {
     .padStart(2, "0")}`;
 }
 
-/** The video-style bar: play, skip, speed, and a scrub bar with lap ticks and incident markers. */
+/** The video-style bar: play, skip, speed, and a scrub bar with lap ticks and the race's highlights. */
 export function PlayerBar(props: {
   t: number;
   start: number;
@@ -22,21 +23,23 @@ export function PlayerBar(props: {
   playing: boolean;
   rate: number;
   lapStarts: number[];
-  incidents: RaceIncident[];
+  highlights: Highlight[];
   buffering: boolean;
   onPlay: () => void;
   onSeek: (t: number) => void;
   onRate: (r: number) => void;
-  onIncident: (i: number) => void;
-  /** The selected driver's colour for incidents they were in, else null. */
-  highlight?: (i: number) => string | null;
+  onHighlight: (h: Highlight) => void;
+  /** The selected driver's colour for highlights they are in, else null. */
+  mine?: (h: Highlight) => string | null;
+  /** The highlights reel: start it (or stop it while it runs). */
+  reel?: { on: boolean; onToggle: () => void };
   /** Track conditions: the race's own (auto) or the viewer's pick. */
   surface?: SurfacePick;
   time?: TimePick;
   onSurface?: (v: SurfacePick) => void;
   onTime?: (v: TimePick) => void;
 }) {
-  const { t, start, end, playing, rate, lapStarts, incidents } = props;
+  const { t, start, end, playing, rate, lapStarts, highlights } = props;
   const bar = useRef<HTMLDivElement>(null);
   const len = Math.max(end - start, 1);
   const pct = (v: number) => `${Math.min(100, Math.max(0, ((v - start) / len) * 100))}%`;
@@ -64,17 +67,28 @@ export function PlayerBar(props: {
         {lapStarts.slice(1).map((s, i) => (
           <div key={`lap${i}`} className="absolute top-1 h-3 w-px bg-white/35" style={{ left: pct(s) }} title={`Lap ${i + 2}`} />
         ))}
-        {incidents.map((inc, i) => {
-          const mine = props.highlight?.(i) ?? null;
+        {highlights
+          .filter((h) => h.span)
+          .map((h) => (
+            <div
+              key={`span${h.id}`}
+              className="pointer-events-none absolute top-[15px] h-[3px] rounded-full opacity-70"
+              style={{ left: pct(h.span![0]), width: `calc(${pct(h.span![1])} - ${pct(h.span![0])})`, background: HIGHLIGHT_META[h.kind].color }}
+            />
+          ))}
+        {highlights.map((h) => {
+          const mine = props.mine?.(h) ?? null;
+          const meta = HIGHLIGHT_META[h.kind];
           return (
             <button
-              key={`inc${i}`}
+              key={h.id}
               type="button"
-              title={`Incident, lap ${inc.lap || "?"}`}
-              className={`absolute -translate-x-1/2 rotate-45 rounded-[2px] hover:scale-125 ${mine ? "-top-1.5 z-10 h-3.5 w-3.5 ring-2 ring-white" : "-top-1 h-2.5 w-2.5 bg-amber-400"}`}
-              style={{ left: pct(inc.t0), background: mine ?? undefined }}
+              title={`${meta.label}: ${h.title} (${h.sub})`}
+              aria-label={`${meta.label}: ${h.title}`}
+              className={`absolute -translate-x-1/2 rounded-full border border-black/60 hover:scale-150 ${mine ? "-top-1.5 z-10 h-3.5 w-3.5 ring-2 ring-white" : "-top-1 h-3 w-3"}`}
+              style={{ left: pct(h.t), background: meta.color }}
               onPointerDown={(e) => e.stopPropagation()}
-              onClick={() => props.onIncident(i)}
+              onClick={() => props.onHighlight(h)}
             />
           );
         })}
@@ -90,6 +104,17 @@ export function PlayerBar(props: {
         <IconButton label="Forward 5 s" onClick={() => props.onSeek(t + 5)}>
           <RotateCw className="h-4 w-4" />
         </IconButton>
+        {props.reel && highlights.length > 0 && (
+          <button
+            type="button"
+            onClick={props.reel.onToggle}
+            title={props.reel.on ? "Stop the highlights" : "Watch every highlight back to back"}
+            className={`ml-1 flex h-7 items-center gap-1 rounded-md px-2 text-xs font-semibold ${props.reel.on ? "bg-amber-400 text-black" : "bg-white/10 text-zinc-100 hover:bg-white/15"}`}
+          >
+            {props.reel.on ? <Square className="h-3 w-3" /> : <Sparkles className="h-3.5 w-3.5 text-amber-300" />}
+            <span className="hidden sm:inline">{props.reel.on ? "Stop" : "Highlights"}</span>
+          </button>
+        )}
         <span className="ml-1 whitespace-nowrap font-mono tabular-nums text-zinc-300 sm:ml-2">
           {clock(t - start)}
           <span className="hidden sm:inline"> / {clock(end - start)}</span>

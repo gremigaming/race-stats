@@ -1,13 +1,15 @@
-import { ArrowLeft, ChevronLeft, Compass, Eye, EyeOff, Hand, Maximize, Minus, Navigation, PanelRight, Plus, RotateCcw, RotateCw, Tv, Video } from "lucide-react";
+import { ArrowLeft, ChevronLeft, Compass, Eye, EyeOff, Hand, Maximize, Minus, Navigation, PanelRight, Plus, RotateCcw, RotateCw, SkipForward, Tv, Video, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useTelemetry } from "../context/TelemetryContext";
 import { driverKey, RACE_POINTS } from "../league/league";
 import { liveryOf, loadLiveries, type Livery } from "../viewer/cars";
-import { IncidentFeed, IncidentPip, StartLights, TvStrip } from "../viewer/broadcast";
+import { IncidentPip, StartLights, TvStrip } from "../viewer/broadcast";
 import { DriverCard } from "../viewer/DriverCard";
 import { Director } from "../viewer/director";
 import { incidentsOf, isMajor, loadManifest, type RaceIncident, type RaceManifest } from "../viewer/format";
+import { HIGHLIGHT_META, raceHighlights, type Highlight } from "../viewer/highlights";
+import { HighlightsPanel } from "../viewer/HighlightsPanel";
 import type { SurfacePick, TimePick } from "../viewer/look";
 import { IconButton, IncidentDetail, PlayerBar, type IncidentDriverStats, type Trace } from "../viewer/panels";
 import { bits, RaceScene, type CameraMode } from "../viewer/scene";
@@ -128,6 +130,7 @@ function Viewer({ manifest: initial, base, back }: { manifest: RaceManifest; bas
   const scene = useRef<RaceScene | null>(null);
   const store = useMemo(() => new ChunkStore(initial, base), [initial, base]);
   const incidents = useMemo(() => incidentsOf(manifest), [manifest]);
+  const highlights = useMemo(() => raceHighlights(manifest, incidents), [manifest, incidents]);
   const [start, spanEnd] = store.span();
   const end = manifest.duration ?? spanEnd;
   const lapStarts = manifest.lap_starts ?? [];
@@ -176,6 +179,11 @@ function Viewer({ manifest: initial, base, back }: { manifest: RaceManifest; bas
   const manifestRef = useRef(manifest);
   manifestRef.current = manifest;
   const restore = useRef<Restore | null>(null);
+  /** The highlights reel while it plays: the list, which one, and the speed to go back to. */
+  const reel = useRef<{ list: Highlight[]; i: number; busy: boolean; rate: number } | null>(null);
+  const [reelAt, setReelAt] = useState<number | null>(null);
+  const [activeHl, setActiveHl] = useState<string | null>(null);
+  const nextReelRef = useRef<() => void>(() => {});
   const endIncidentRef = useRef<() => void>(() => {});
   const pickRef = useRef<(car: number, add: boolean) => void>(() => {});
   const focusCar = focusPick !== null && selected.includes(focusPick) ? focusPick : (selected[selected.length - 1] ?? null);
@@ -321,7 +329,8 @@ function Viewer({ manifest: initial, base, back }: { manifest: RaceManifest; bas
       // the incident marker: on the track only from the moment of contact
       const incs = incidentsRef.current;
       let k = -1;
-      for (let n = 0; n < incs.length && k < 0; n++) if (p.t >= incs[n].t0 && p.t <= incs[n].t1 + 1) k = n;
+      // (only the big ones, or the one that was opened: small contacts stay out of the way)
+      for (let n = 0; n < incs.length && k < 0; n++) if (p.t >= incs[n].t0 && p.t <= incs[n].t1 + 1 && (isMajor(incs[n]) || restore.current?.inc === n)) k = n;
       if (k >= 0) {
         const i = incs[k];
         const m = pool.marker;
@@ -330,6 +339,15 @@ function Viewer({ manifest: initial, base, back }: { manifest: RaceManifest; bas
         m.strength = p.t > i.t1 + 0.3 ? 1 - (p.t - i.t1 - 0.3) / 0.7 : 1;
         s.incident = m;
       } else s.incident = null;
+      // the highlights reel: on to the next one when this one has played
+      const RL = reel.current;
+      if (RL && !RL.busy) {
+        const h = RL.list[RL.i];
+        if (!h || p.t >= h.to) {
+          RL.busy = true;
+          window.setTimeout(() => nextReelRef.current(), 0);
+        }
+      }
       // an opened incident has played (or the user went elsewhere): back to what the camera did before
       const R = restore.current;
       if (R) {
@@ -464,9 +482,68 @@ function Viewer({ manifest: initial, base, back }: { manifest: RaceManifest; bas
   };
   endIncidentRef.current = endIncident;
 
+  /** Jump to one highlight: its window, its cars in frame (the start: the broadcast camera). */
+  const showHighlight = (h: Highlight) => {
+    const s = scene.current;
+    if (!s) return;
+    if (restore.current) {
+      restore.current = null;
+      setActiveInc(null);
+    }
+    setActiveHl(h.id);
+    seek(h.from);
+    changeRate(h.rate);
+    if (h.cars.length) s.follow(h.cars, 60);
+    else s.tv();
+    play.current.playing = true;
+    setPlaying(true);
+  };
+  const stopReel = (resume = true) => {
+    const R = reel.current;
+    if (!R) return;
+    reel.current = null;
+    setReelAt(null);
+    if (resume) {
+      changeRate(R.rate);
+      scene.current?.tv();
+    }
+  };
+  const startReel = () => {
+    if (!highlights.length) return;
+    reel.current = { list: highlights, i: 0, busy: false, rate: play.current.rate };
+    setReelAt(0);
+    setSelected([]);
+    showHighlight(highlights[0]);
+  };
+  const nextReel = () => {
+    const R = reel.current;
+    if (!R) return;
+    R.i += 1;
+    R.busy = false;
+    if (R.i >= R.list.length) {
+      stopReel();
+      play.current.playing = false;
+      setPlaying(false);
+      setActiveHl(null);
+      return;
+    }
+    setReelAt(R.i);
+    showHighlight(R.list[R.i]);
+  };
+  nextReelRef.current = nextReel;
+  /** A highlight clicked on the bar or in the list: an incident opens like before, the rest jump there. */
+  const pickHighlight = (h: Highlight) => {
+    stopReel(false);
+    if (h.kind === "incident" && h.inc !== undefined) {
+      setActiveHl(h.id);
+      pickIncident(h.inc);
+    } else showHighlight(h);
+  };
+
   /** Pick a driver (tower or map): the camera follows them; Shift adds more; picking the only one again goes back to the broadcast camera. */
   const pickDriver = (car: number, add: boolean) => {
     const s = scene.current;
+    stopReel(false);
     if (restore.current) {
       changeRate(restore.current.rate);
       restore.current = null;
@@ -739,7 +816,19 @@ function Viewer({ manifest: initial, base, back }: { manifest: RaceManifest; bas
             />
           </div>
         )}
-        <IncidentFeed incidents={incidents} cars={manifest.cars} color={color} start={start} t={t} focus={focusCar} active={activeInc} onPick={pickIncident} />
+        <HighlightsPanel
+          highlights={highlights}
+          cars={manifest.cars}
+          color={color}
+          start={start}
+          t={t}
+          active={activeHl}
+          reelOn={reelAt !== null}
+          onReel={() => (reel.current ? stopReel() : startReel())}
+          onPick={pickHighlight}
+          incidents={incidents.length}
+          incidentsLink={`${back.replace(/\/race$/, "/incidents")}?race=${encodeURIComponent(manifest.uid)}`}
+        />
       </>
     );
   })();
@@ -862,6 +951,26 @@ function Viewer({ manifest: initial, base, back }: { manifest: RaceManifest; bas
             <ChevronLeft className={`h-4 w-4 transition-transform ${side.open ? "rotate-180" : ""}`} />
           </button>
         )}
+        {reelAt !== null && highlights[reelAt] && (
+          <div className="pointer-events-none absolute inset-x-0 top-[52px] flex justify-center px-2 md:top-[60px]">
+            <div className="pointer-events-auto flex max-w-[34rem] items-center gap-3 rounded-xl border border-white/10 bg-[#0c0e11]/90 px-3 py-2 shadow-2xl backdrop-blur">
+              <span className="h-8 w-1 shrink-0 rounded-full" style={{ background: HIGHLIGHT_META[highlights[reelAt].kind].color }} />
+              <div className="min-w-0">
+                <div className="text-[10px] font-bold uppercase tracking-wide" style={{ color: HIGHLIGHT_META[highlights[reelAt].kind].color }}>
+                  {HIGHLIGHT_META[highlights[reelAt].kind].label} · {reelAt + 1}/{highlights.length}
+                </div>
+                <div className="truncate text-sm font-semibold">{highlights[reelAt].title}</div>
+                <div className="truncate text-[11px] text-zinc-400">{highlights[reelAt].sub}</div>
+              </div>
+              <IconButton label="Next highlight" onClick={() => reel.current && ((reel.current.busy = true), nextReel())}>
+                <SkipForward className="h-4 w-4" />
+              </IconButton>
+              <IconButton label="Stop the highlights" onClick={() => stopReel()}>
+                <X className="h-4 w-4" />
+              </IconButton>
+            </div>
+          </div>
+        )}
         {view.lights && (
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
             <StartLights lit={view.lights.lit} fade={view.lights.fade} />
@@ -915,22 +1024,26 @@ function Viewer({ manifest: initial, base, back }: { manifest: RaceManifest; bas
             playing={playing}
             rate={rate}
             lapStarts={lapStarts}
-            incidents={incidents}
+            highlights={highlights}
             buffering={!view.states.length}
             onPlay={toggle}
-            onSeek={seek}
+            onSeek={(v) => {
+              stopReel(false);
+              seek(v);
+            }}
             onRate={changeRate}
-            onIncident={pickIncident}
+            onHighlight={pickHighlight}
+            reel={{ on: reelAt !== null, onToggle: () => (reel.current ? stopReel() : startReel()) }}
             surface={surface}
             time={timePick}
             onSurface={setSurface}
             onTime={setTimePick}
-            highlight={(i) => (focusCar !== null && incidents[i]?.drivers.some((d) => d.car === focusCar) ? color(focusCar) : null)}
+            mine={(h) => (focusCar !== null && h.cars.includes(focusCar) ? color(focusCar) : null)}
           />
         </div>
       </div>
       {sideShown && (
-        <Sidebar tab={side.tab} onTab={(tab) => setSide({ tab })} onCollapse={() => setSide({ open: false })} badge={{ incidents: passed.length || undefined }}>
+        <Sidebar tab={side.tab} onTab={(tab) => setSide({ tab })} onCollapse={() => setSide({ open: false })}>
           {panel}
         </Sidebar>
       )}

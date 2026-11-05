@@ -19,6 +19,7 @@ import { HeadToHeadPage } from "./pages/HeadToHeadPage";
 import { SafetyPage } from "./pages/SafetyPage";
 import { RaceListPage } from "./pages/RaceListPage";
 import { RaceViewerPage } from "./pages/RaceViewerPage";
+import { IncidentsPage } from "./pages/IncidentsPage";
 import { SetupCardsPage } from "./pages/SetupCardsPage";
 import { SetupManagerPage } from "./pages/SetupManagerPage";
 import { SETUP_MANAGER_ON } from "./league/setupManager";
@@ -97,11 +98,13 @@ function AppRoutes() {
               </ScopedFormulaRoute>
             }
           />
-          {/* The old Incidents tab: incidents now live per race on the safety rating page */}
+          {/* The incident viewer (5 Nov 2026): every incident on a track map, with filters */}
           <Route
             path=":formulaKey/incidents"
             element={
-              <Navigate to="../safety?tab=personal" relative="path" replace />
+              <ScopedFormulaRoute>
+                <IncidentsPage />
+              </ScopedFormulaRoute>
             }
           />
           <Route

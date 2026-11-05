@@ -64,6 +64,28 @@ interface Frame {
   states: CarState[];
 }
 
+/** A marker on the map (the incident viewer): screen-space circle with a short label. */
+export interface MapPin {
+  id: string;
+  x: number;
+  z: number;
+  color: string;
+  /** Radius in px. */
+  r: number;
+  label: string;
+  /** Tooltip on hover. */
+  title?: string;
+  active?: boolean;
+  dim?: boolean;
+}
+
+/** The line a car drove (the incident viewer): world x, z pairs; the first `done` points are driven so far. */
+export interface Trail {
+  color: string;
+  pts: number[];
+  done: number;
+}
+
 export class RaceScene {
   readonly app = new Application();
   private world = new Container();
@@ -80,6 +102,12 @@ export class RaceScene {
   private dotLayer = new Container();
   private chipLayer = new Container();
   private marks = new Graphics();
+  private pinG = new Graphics();
+  private pinText: Text[] = [];
+  private pinKey: string[] = [];
+  private trailG = new Graphics();
+  private trailsDrawn = false;
+  private pinsDrawn = false;
   private sprites = new Map<number, Sprite>();
   /** The frame each car was last drawn in. */
   private seen = new Map<number, number>();
@@ -149,6 +177,12 @@ export class RaceScene {
   onHover: (car: number | null) => void = () => {};
   onPick: (car: number, add: boolean) => void = () => {};
   onModeChange: (mode: CameraMode, cars: number[]) => void = () => {};
+  /** Map markers and car lines (the incident viewer), and what happens when a marker is clicked or hovered. */
+  pins: MapPin[] = [];
+  trails: Trail[] = [];
+  onPin: (id: string) => void = () => {};
+  onPinHover: (id: string | null, at: { x: number; y: number } | null) => void = () => {};
+  private hoveredPin: string | null = null;
 
   constructor(host: HTMLElement, carInfo: Record<string, RaceCar>, track: string, frame: (dtMs: number) => Frame) {
     this.host = host;
@@ -186,11 +220,11 @@ export class RaceScene {
     this.carLayer.sortableChildren = true;
     this.carsBelow.sortableChildren = true;
     this.dotLayer.sortableChildren = true;
-    this.world.addChild(this.map.view, this.carsBelow, this.map.over, this.carLayer);
+    this.world.addChild(this.map.view, this.carsBelow, this.map.over, this.trailG, this.carLayer);
     this.lookRoot.addChild(this.world);
     this.lookRoot.filterArea = this.app.screen;
     this.chipLayer.addChild(this.leaders);
-    this.overlay.addChild(this.marks, this.dotLayer, this.chipLayer);
+    this.overlay.addChild(this.pinG, this.marks, this.dotLayer, this.chipLayer);
     this.app.stage.addChild(this.lookRoot, this.overlay);
     this.app.ticker.add((t) => this.tick(t.deltaMS));
     const c = this.app.canvas;
@@ -585,6 +619,8 @@ export class RaceScene {
     this.drawCars(carAlpha);
     this.drawRoofs(dtMs);
     this.drawDots(1 - carAlpha);
+    this.drawTrails();
+    this.drawPins();
     this.drawMarks(outside);
     this.drawChips(carAlpha, dtMs);
   }
@@ -703,6 +739,102 @@ export class RaceScene {
       if (d.c.zIndex !== zi) d.c.zIndex = zi;
     }
     for (const d of this.dots.values()) if (d.seen !== n) d.c.visible = false;
+  }
+
+  /** Each car's line through an incident: the whole path faint, the part driven so far solid with a dark edge. */
+  private drawTrails() {
+    const g = this.trailG;
+    if (!this.trails.length) {
+      if (this.trailsDrawn) g.clear();
+      this.trailsDrawn = false;
+      return;
+    }
+    g.clear();
+    this.trailsDrawn = true;
+    const px = 1 / this.cam.scale;
+    const line = (p: number[], to: number) => {
+      let pen = false;
+      for (let i = 0; i < to; i++) {
+        const x = p[i * 2];
+        const z = p[i * 2 + 1];
+        if (!Number.isFinite(x) || !Number.isFinite(z)) {
+          pen = false;
+          continue;
+        }
+        if (pen) g.lineTo(x, z);
+        else g.moveTo(x, z);
+        pen = true;
+      }
+    };
+    const style = { cap: "round" as const, join: "round" as const };
+    for (const tr of this.trails) {
+      const n = tr.pts.length / 2;
+      if (n < 2) continue;
+      line(tr.pts, n);
+      g.stroke({ width: 2.5 * px, color: tr.color, alpha: 0.35, ...style });
+    }
+    for (const tr of this.trails) {
+      const d = Math.min(tr.done, tr.pts.length / 2);
+      if (d < 2) continue;
+      line(tr.pts, d);
+      g.stroke({ width: 7 * px, color: 0x000000, alpha: 0.5, ...style });
+      line(tr.pts, d);
+      g.stroke({ width: 3.5 * px, color: tr.color, alpha: 1, ...style });
+    }
+  }
+
+  /** The incident viewer's markers: coloured circles with a number, the open one ringed. */
+  private drawPins() {
+    const g = this.pinG;
+    if (!this.pins.length && !this.pinsDrawn) return;
+    g.clear();
+    this.pinsDrawn = this.pins.length > 0;
+    let n = 0;
+    for (const pin of this.pins) {
+      if (!Number.isFinite(pin.x) || !Number.isFinite(pin.z)) continue;
+      const p = this.toScreen(pin.x, pin.z);
+      const a = pin.dim ? 0.4 : 1;
+      const hot = pin.active || pin.id === this.hoveredPin;
+      if (hot) g.circle(p.x, p.y, pin.r + 5).stroke({ width: 2.5, color: 0xffffff, alpha: 0.95 });
+      g.circle(p.x, p.y, pin.r + 1.5).fill({ color: 0x0c0e11, alpha: 0.75 * a });
+      g.circle(p.x, p.y, pin.r).fill({ color: pin.color, alpha: a });
+      if (!pin.label) continue;
+      let t = this.pinText[n];
+      if (!t) {
+        t = new Text({ text: "", style: { fontFamily: FONT, fontSize: 11, fontWeight: "800", fill: 0xffffff }, resolution: Math.min(window.devicePixelRatio || 1, 2) * 1.5 });
+        t.anchor.set(0.5);
+        this.pinText[n] = t;
+        this.overlay.addChildAt(t, this.overlay.getChildIndex(this.pinG) + 1);
+      }
+      if (t.text !== pin.label) t.text = pin.label;
+      const key = `${inkOn(pin.color)}|${pin.r >= 10 ? 11 : 9}`;
+      if (this.pinKey[n] !== key) {
+        // a style change re-renders the text: only when it really changes
+        this.pinKey[n] = key;
+        t.style.fill = inkOn(pin.color);
+        t.style.fontSize = pin.r >= 10 ? 11 : 9;
+      }
+      t.alpha = a;
+      t.visible = true;
+      t.position.set(p.x, p.y + 0.5);
+      n++;
+    }
+    for (let k = n; k < this.pinText.length; k++) this.pinText[k].visible = false;
+  }
+
+  private pinAt(px: number, py: number) {
+    let best: string | null = null;
+    let bestD = Infinity;
+    for (const pin of this.pins) {
+      if (!Number.isFinite(pin.x)) continue;
+      const p = this.toScreen(pin.x, pin.z);
+      const d = Math.hypot(p.x - px, p.y - py);
+      if (d <= pin.r + 6 && d < bestD) {
+        bestD = d;
+        best = pin.id;
+      }
+    }
+    return best;
   }
 
   /** The incident marker (pulsing ring) and arrows at the screen edge for what's off screen. */
@@ -962,10 +1094,16 @@ export class RaceScene {
       this.drag.y = p.y;
       return;
     }
+    const pin = this.pins.length ? this.pinAt(p.x, p.y) : null;
+    if (pin !== this.hoveredPin) {
+      this.hoveredPin = pin;
+      this.onPinHover(pin, pin ? p : null);
+    }
     const car = this.carAt(p.x, p.y);
+    if (pin) this.app.canvas.style.cursor = "pointer";
     if (car !== this.hovered) {
       this.hovered = car;
-      this.app.canvas.style.cursor = car === null ? "grab" : "pointer";
+      this.app.canvas.style.cursor = car === null && !pin ? "grab" : "pointer";
       this.onHover(car);
     }
   };
@@ -980,12 +1118,18 @@ export class RaceScene {
     const d = this.drag;
     this.drag = null;
     if (d && !d.moved) {
+      const pin = this.pins.length ? this.pinAt(d.x, d.y) : null;
+      if (pin) return this.onPin(pin);
       const car = this.carAt(d.x, d.y);
       if (car !== null) this.onPick(car, e.shiftKey || e.ctrlKey || e.metaKey);
     }
   };
 
   private leave = () => {
+    if (this.hoveredPin !== null) {
+      this.hoveredPin = null;
+      this.onPinHover(null, null);
+    }
     if (this.hovered !== null) {
       this.hovered = null;
       this.onHover(null);

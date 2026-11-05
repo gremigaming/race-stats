@@ -1,19 +1,20 @@
 /**
- * The viewer's right-hand column: vertical tabs (Incidents, Driver, Safety, Race stats, Points)
+ * The viewer's right-hand column: vertical tabs (Highlights, Driver, Safety, Race stats, Points)
  * that fold away completely for a clean spectator view. On phones the same column sits under
  * the map, with the tabs in a row along its top.
  */
-import { BarChart3, ChevronRight, ShieldCheck, Trophy, TriangleAlert, User } from "lucide-react";
+import { BarChart3, ChevronRight, ShieldCheck, Sparkles, Trophy, User } from "lucide-react";
 import type { ReactNode } from "react";
 import { rankOf } from "../league/safety";
 import type { Livery } from "./cars";
 import { lapTime } from "./DriverCard";
 import { TeamBadge } from "./tower";
 
+/** "incidents" is the Highlights tab (the key stays: it is remembered per browser). */
 export type SideTab = "incidents" | "driver" | "safety" | "stats" | "points";
 
 const TABS: { key: SideTab; label: string; icon: typeof User }[] = [
-  { key: "incidents", label: "Incidents", icon: TriangleAlert },
+  { key: "incidents", label: "Highlights", icon: Sparkles },
   { key: "driver", label: "Driver", icon: User },
   { key: "safety", label: "Safety", icon: ShieldCheck },
   { key: "stats", label: "Race stats", icon: BarChart3 },

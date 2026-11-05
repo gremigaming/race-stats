@@ -11,6 +11,7 @@ import {
   ShieldCheck,
   Swords,
   Trophy,
+  TriangleAlert,
   Wrench,
   X,
   type LucideIcon,
@@ -278,6 +279,12 @@ export function Layout() {
               icon={Clapperboard}
               label="Race viewer"
               badge={isLive ? <LiveDot className="ml-auto" /> : null}
+            />
+            <MenuLink
+              to={`/${scopeKey}/incidents`}
+              active={section === "incidents"}
+              icon={TriangleAlert}
+              label="Incidents"
             />
             {SETUP_MANAGER_ON && (
               <MenuLink
