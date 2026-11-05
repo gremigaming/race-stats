@@ -512,6 +512,25 @@
       },
       "learn": true,
       "owner": true
+    },
+    {
+      "id": "Race_Austria_2026_11_04_20_56_44.json|3|contact|2|0",
+      "type": "incident",
+      "file": "Race_Austria_2026_11_04_20_56_44.json",
+      "driver": "DDRK",
+      "car": 3,
+      "pts": 0.0,
+      "was": -1.0,
+      "reason": "Protest accepted: DDRk did hit car 86, but it was such a small tap and no consequents for either",
+      "by": "319544045435224067",
+      "at": "2026-11-05T07:54:07Z",
+      "call": {
+        "kind": "Rear-end",
+        "fault": "clear",
+        "severity": 1
+      },
+      "learn": true,
+      "owner": true
     }
   ]
 }
