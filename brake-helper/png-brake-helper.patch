@@ -1078,7 +1078,7 @@ index 0000000..5d6a5ba
 +        return view
 diff --git a/apps/hud/ui/overlays/brake_helper/brake_helper.py b/apps/hud/ui/overlays/brake_helper/brake_helper.py
 new file mode 100644
-index 0000000..7e7a3a0
+index 0000000..f315588
 --- /dev/null
 +++ b/apps/hud/ui/overlays/brake_helper/brake_helper.py
 @@ -0,0 +1,72 @@
@@ -1133,7 +1133,7 @@ index 0000000..7e7a3a0
 +
 +    def __init__(self, settings: PngSettings, logger: PngLogger) -> None:
 +        super().__init__(settings, logger)
-+        self._engine = BrakeEngine(
++        self._brake = BrakeEngine(
 +            store_dir=str(get_app_fixed_dir() / "brake_helper"),
 +            warn_s=settings.HUD.brake_helper_warn_sec,
 +            log=logger.debug,
@@ -1149,7 +1149,7 @@ index 0000000..7e7a3a0
 +            return
 +        self._last_seq = data.__seq__
 +        try:
-+            view = self._engine.update(data, data.__timestamp__ / 1e9)
++            view = self._brake.update(data, data.__timestamp__ / 1e9)
 +        except Exception:  # pylint: disable=broad-exception-caught
 +            self.logger.exception("Brake helper engine failed")
 +            return
