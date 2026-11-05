@@ -8,16 +8,16 @@ import { MAJOR_SEVERITY, type RaceIncident } from "./format";
 export type IncidentKind = "rear" | "lunge" | "side" | "block" | "rejoin" | "control" | "retaliation" | "racing" | "tap" | "contact";
 
 export const KIND_META: Record<IncidentKind, { label: string; color: string; hint: string }> = {
-  lunge: { label: "Divebomb", color: "#ef4444", hint: "Late lunge from behind, closing fast" },
-  rear: { label: "Rear-end", color: "#f97316", hint: "Ran into the back of the car ahead" },
-  side: { label: "Side contact", color: "#eab308", hint: "Side by side and moved across into the other car" },
-  block: { label: "Blocking", color: "#ec4899", hint: "The car ahead swept across into the car behind" },
-  rejoin: { label: "Unsafe rejoin", color: "#3b82f6", hint: "Came back onto the track into someone" },
-  control: { label: "Lost control", color: "#a855f7", hint: "Spin, slide or chain reaction" },
-  retaliation: { label: "Retaliation", color: "#14b8a6", hint: "Hit the same car again on purpose" },
-  racing: { label: "Racing incident", color: "#94a3b8", hint: "Nobody to blame" },
-  tap: { label: "Tap", color: "#71717a", hint: "Light contact without consequences" },
-  contact: { label: "Contact", color: "#a1a1aa", hint: "Not judged yet" },
+  lunge: { label: "Divebomb", color: "#ff4d6d", hint: "Late lunge from behind, closing fast" },
+  rear: { label: "Rear-end", color: "#ff9f43", hint: "Ran into the back of the car ahead" },
+  side: { label: "Side contact", color: "#ffd166", hint: "Side by side and moved across into the other car" },
+  block: { label: "Blocking", color: "#f472d0", hint: "The car ahead swept across into the car behind" },
+  rejoin: { label: "Unsafe rejoin", color: "#4cc9f0", hint: "Came back onto the track into someone" },
+  control: { label: "Lost control", color: "#9d8cff", hint: "Spin, slide or chain reaction" },
+  retaliation: { label: "Retaliation", color: "#2ee6a6", hint: "Hit the same car again on purpose" },
+  racing: { label: "Racing incident", color: "#cbd5e1", hint: "Nobody to blame" },
+  tap: { label: "Tap", color: "#8a94a6", hint: "Light contact without consequences" },
+  contact: { label: "Contact", color: "#a8b0bd", hint: "Not judged yet" },
 };
 
 export const KIND_ORDER: IncidentKind[] = ["lunge", "rear", "side", "block", "rejoin", "control", "retaliation", "racing", "tap", "contact"];

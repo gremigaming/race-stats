@@ -167,8 +167,13 @@ export function IncidentMap(props: {
           s.showTrack();
         }
         if (phase !== "done") states = store.sample(c.t, pool);
-        const k = Math.max(0, Math.min(Math.round((c.t - from) / STEP) + 1, Math.round((to - from) / STEP) + 1));
-        for (const tr of trails) tr.done = phase === "done" ? tr.pts.length / 2 : k;
+        // the driven line: every sample up to now, then on to exactly where the car is this frame
+        const k = Math.max(0, Math.min(Math.floor((c.t - from) / STEP + 1e-6) + 1, Math.round((to - from) / STEP) + 1));
+        trails.forEach((tr, i) => {
+          tr.done = phase === "done" ? tr.pts.length / 2 : k;
+          const st = phase === "done" ? undefined : states.find((x) => x.car === cars[i]);
+          tr.head = st ? { x: st.x, z: st.z } : null;
+        });
         s.trails = trails;
         if (c.t >= inc.t0 && c.t <= inc.t1 + 1 && phase !== "done") {
           marker.x = inc.x;

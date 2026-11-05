@@ -84,6 +84,8 @@ export interface Trail {
   color: string;
   pts: number[];
   done: number;
+  /** Where the car is right now: the driven line ends exactly under it. */
+  head?: { x: number; z: number } | null;
 }
 
 export class RaceScene {
@@ -220,7 +222,7 @@ export class RaceScene {
     this.carLayer.sortableChildren = true;
     this.carsBelow.sortableChildren = true;
     this.dotLayer.sortableChildren = true;
-    this.world.addChild(this.map.view, this.carsBelow, this.map.over, this.trailG, this.carLayer);
+    this.world.addChild(this.map.view, this.trailG, this.carsBelow, this.map.over, this.carLayer);
     this.lookRoot.addChild(this.world);
     this.lookRoot.filterArea = this.app.screen;
     this.chipLayer.addChild(this.leaders);
@@ -773,12 +775,19 @@ export class RaceScene {
       line(tr.pts, n);
       g.stroke({ width: 2.5 * px, color: tr.color, alpha: 0.35, ...style });
     }
+    const driven = (tr: Trail, d: number) => {
+      line(tr.pts, d);
+      const h = tr.head;
+      const lx = tr.pts[(d - 1) * 2];
+      const lz = tr.pts[(d - 1) * 2 + 1];
+      if (h && Number.isFinite(lx) && Number.isFinite(lz)) g.lineTo(h.x, h.z);
+    };
     for (const tr of this.trails) {
       const d = Math.min(tr.done, tr.pts.length / 2);
-      if (d < 2) continue;
-      line(tr.pts, d);
+      if (d < 1) continue;
+      driven(tr, d);
       g.stroke({ width: 7 * px, color: 0x000000, alpha: 0.5, ...style });
-      line(tr.pts, d);
+      driven(tr, d);
       g.stroke({ width: 3.5 * px, color: tr.color, alpha: 1, ...style });
     }
   }
@@ -793,11 +802,23 @@ export class RaceScene {
     for (const pin of this.pins) {
       if (!Number.isFinite(pin.x) || !Number.isFinite(pin.z)) continue;
       const p = this.toScreen(pin.x, pin.z);
-      const a = pin.dim ? 0.4 : 1;
+      const a = pin.dim ? 0.45 : 1;
       const hot = pin.active || pin.id === this.hoveredPin;
-      if (hot) g.circle(p.x, p.y, pin.r + 5).stroke({ width: 2.5, color: 0xffffff, alpha: 0.95 });
-      g.circle(p.x, p.y, pin.r + 1.5).fill({ color: 0x0c0e11, alpha: 0.75 * a });
-      g.circle(p.x, p.y, pin.r).fill({ color: pin.color, alpha: a });
+      const col = pin.color;
+      const r = pin.r;
+      if (pin.active) {
+        const pulse = (this.clockMs / 900) % 1;
+        g.circle(p.x, p.y, r + pulse * 22).stroke({ width: 2.5, color: col, alpha: 1 - pulse });
+      }
+      g.circle(p.x, p.y, r + 2).stroke({ width: 5, color: 0x0c0e11, alpha: 0.45 * a });
+      g.circle(p.x, p.y, r).fill({ color: col, alpha: (hot ? 0.3 : 0.18) * a });
+      g.circle(p.x, p.y, r).stroke({ width: hot ? 3.5 : 3, color: col, alpha: a });
+      const c = r * 0.42;
+      g.moveTo(p.x - c, p.y).lineTo(p.x + c, p.y).moveTo(p.x, p.y - c).lineTo(p.x, p.y + c).stroke({ width: 2, color: col, alpha: a });
+      // the number in a small badge on the ring's upper right
+      const bx = p.x + r * 0.78;
+      const by = p.y - r * 0.78;
+      if (pin.label) g.circle(bx, by, 7.5).fill({ color: col, alpha: a }).circle(bx, by, 7.5).stroke({ width: 1.5, color: 0x0c0e11, alpha: 0.8 * a });
       if (!pin.label) continue;
       let t = this.pinText[n];
       if (!t) {
@@ -807,16 +828,16 @@ export class RaceScene {
         this.overlay.addChildAt(t, this.overlay.getChildIndex(this.pinG) + 1);
       }
       if (t.text !== pin.label) t.text = pin.label;
-      const key = `${inkOn(pin.color)}|${pin.r >= 10 ? 11 : 9}`;
+      const key = `${inkOn(pin.color)}|9`;
       if (this.pinKey[n] !== key) {
         // a style change re-renders the text: only when it really changes
         this.pinKey[n] = key;
         t.style.fill = inkOn(pin.color);
-        t.style.fontSize = pin.r >= 10 ? 11 : 9;
+        t.style.fontSize = 9;
       }
       t.alpha = a;
       t.visible = true;
-      t.position.set(p.x, p.y + 0.5);
+      t.position.set(p.x + pin.r * 0.78, p.y - pin.r * 0.78 + 0.5);
       n++;
     }
     for (let k = n; k < this.pinText.length; k++) this.pinText[k].visible = false;
@@ -829,7 +850,7 @@ export class RaceScene {
       if (!Number.isFinite(pin.x)) continue;
       const p = this.toScreen(pin.x, pin.z);
       const d = Math.hypot(p.x - px, p.y - py);
-      if (d <= pin.r + 6 && d < bestD) {
+      if (d <= pin.r + 8 && d < bestD) {
         bestD = d;
         best = pin.id;
       }

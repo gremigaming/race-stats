@@ -90,17 +90,22 @@ export function IncidentsPage() {
     if (track) list = list.filter((r) => r.track === track);
     return list;
   }, [races, race, range, track]);
-  const uids = useMemo(() => [...new Set([raceUid, ...inRange.map((r) => r.uid)].filter(Boolean))], [raceUid, inRange]);
+  /** Every race of the selected race's stream (one evening, all tracks). */
+  const streamRaces = useMemo(() => (race ? streamOf(races, race.uid) : []), [races, race]);
+  const uids = useMemo(
+    () => [...new Set([raceUid, ...inRange.map((r) => r.uid), ...streamRaces.map((r) => r.uid)].filter(Boolean))],
+    [raceUid, inRange, streamRaces],
+  );
   const { map: manifests, loading } = useManifests(uids);
 
   const rowsByRace = useMemo(() => {
     const out = new Map<string, Row[]>();
-    for (const r of [...inRange, ...(race ? [race] : [])]) {
+    for (const r of [...inRange, ...streamRaces, ...(race ? [race] : [])]) {
       const m = manifests.get(r.uid);
       if (m && !out.has(r.uid)) out.set(r.uid, rowsOf(r, m.manifest));
     }
     return out;
-  }, [inRange, race, manifests]);
+  }, [inRange, streamRaces, race, manifests]);
   const rangeRows = useMemo(() => inRange.flatMap((r) => rowsByRace.get(r.uid) ?? []), [inRange, rowsByRace]);
   const raceRows = rowsByRace.get(raceUid) ?? [];
 
@@ -140,7 +145,7 @@ export function IncidentsPage() {
     x: r.inc.x,
     z: r.inc.z,
     color: KIND_META[r.kind].color,
-    r: 7 + Math.round(r.sev * 0.7),
+    r: 10 + Math.round(r.sev * 0.6),
     label: String(rank.get(r.id) ?? ""),
     title: `#${rank.get(r.id)} ${r.names.slice(0, 3).join(" & ")} · ${KIND_META[r.kind].label} · ${r.sev}/10${r.inc.lap ? ` · lap ${r.inc.lap}` : ""}`,
     active: r.id === openId,
@@ -163,11 +168,14 @@ export function IncidentsPage() {
   const carOrder = openHere ? openHere.cars.slice(0, CAR_COLORS.length) : [];
 
   // ---- the fun bit: awards over the time range
-  const stream = useMemo(() => (race ? streamOf(races, race.uid).map((r) => r.uid) : []), [races, race]);
   const filteredRange = rangeRows.filter(match);
-  const streamRows = [...rowsByRace.entries()].filter(([uid]) => stream.includes(uid)).flatMap(([, rows]) => rows).filter(match);
+  // the stream's biggest, over every track raced that evening
+  const streamTop = streamRaces
+    .flatMap((r) => rowsByRace.get(r.uid) ?? [])
+    .filter((r) => match(r) && !r.tap)
+    .sort(biggestFirst)
+    .slice(0, 10);
   const top = (rows: Row[]) => rows.filter((r) => !r.tap).sort(biggestFirst)[0] ?? null;
-  const crash = top(streamRows);
   const biggest = top(filteredRange);
   const wanted = useMemo(() => {
     const m = new Map<string, { n: number; sev: number }>();
@@ -347,18 +355,48 @@ export function IncidentsPage() {
         </div>
       </div>
 
-      {/* ---- awards */}
-      <div className="grid grid-cols-2 gap-2 lg:grid-cols-5">
-        <Award icon={<Flame className="h-4 w-4 text-red-400" />} title="Crash of the stream" empty={!crash} onClick={crash ? () => openRow(crash) : undefined}>
-          {crash && (
-            <>
-              <b>{crash.names.slice(0, 2).join(" & ")}</b>
-              <span>
-                {KIND_META[crash.kind].label} · {crash.sev}/10 · {crash.race.track}
-              </span>
-            </>
+      {/* ---- the stream's biggest incidents, every track of that evening */}
+      <div className="rounded-xl border border-white/10 bg-zinc-900/40 p-3">
+        <div className="mb-2 flex flex-wrap items-baseline gap-x-2">
+          <span className="flex items-center gap-1.5 text-sm font-semibold">
+            <Flame className="h-4 w-4 text-red-400" /> Biggest incidents of the stream
+          </span>
+          {streamRaces.length > 0 && (
+            <span className="text-xs text-zinc-500">
+              {new Date(raceTime(streamRaces[0])).toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" })} ·{" "}
+              {[...new Set(streamRaces.map((r) => r.track))].join(", ")}
+            </span>
           )}
-        </Award>
+        </div>
+        {streamTop.length ? (
+          <ol className="flex snap-x gap-2 overflow-x-auto pb-1">
+            {streamTop.map((r, i) => (
+              <li key={r.id} className="snap-start">
+                <button
+                  type="button"
+                  onClick={() => openRow(r)}
+                  className={`flex w-56 items-start gap-2 rounded-lg border p-2 text-left hover:bg-white/5 ${r.id === openId ? "border-white/40 bg-white/10" : "border-white/10"}`}
+                >
+                  <span className="mt-0.5 w-5 shrink-0 text-center font-mono text-xs text-zinc-500">{i + 1}</span>
+                  <SevBadge sev={r.sev} />
+                  <span className="min-w-0">
+                    <span className="block truncate text-sm font-semibold">{r.names.slice(0, 2).join(" & ")}</span>
+                    <span className="block truncate text-[11px] text-zinc-500">
+                      <span style={{ color: KIND_META[r.kind].color }}>{KIND_META[r.kind].label}</span> · {r.race.track}
+                      {r.inc.lap ? ` · lap ${r.inc.lap}` : ""}
+                    </span>
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ol>
+        ) : (
+          <p className="text-xs text-zinc-500">{loading ? "Loading the stream's races…" : "No incidents in this stream match the filters."}</p>
+        )}
+      </div>
+
+      {/* ---- awards */}
+      <div className="grid grid-cols-2 gap-2 lg:grid-cols-4">
         <Award icon={<Trophy className="h-4 w-4 text-amber-300" />} title={`Biggest · ${rangeLabel}`} empty={!biggest} onClick={biggest ? () => openRow(biggest) : undefined}>
           {biggest && (
             <>
