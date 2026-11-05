@@ -495,25 +495,6 @@
       "owner": true
     },
     {
-      "id": "Race_Austria_2026_11_04_20_56_44.json|3|contact|2|1",
-      "type": "incident",
-      "file": "Race_Austria_2026_11_04_20_56_44.json",
-      "driver": "DDRK",
-      "car": 3,
-      "pts": -1.0,
-      "was": -1.0,
-      "reason": "Protest accepted: Car 32 went to the normal race line when ddrk was fully next to him",
-      "by": "319544045435224067",
-      "at": "2026-11-05T07:52:20Z",
-      "call": {
-        "kind": "Moved across alongside",
-        "fault": "fault",
-        "severity": 2
-      },
-      "learn": true,
-      "owner": true
-    },
-    {
       "id": "Race_Austria_2026_11_04_20_56_44.json|3|contact|2|0",
       "type": "incident",
       "file": "Race_Austria_2026_11_04_20_56_44.json",
