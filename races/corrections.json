@@ -550,6 +550,25 @@
       "was": -6.0,
       "learn": true,
       "owner": true
+    },
+    {
+      "id": "Race_Brazil_2026_11_04_20_24_42.json|4|contact|3|0",
+      "type": "incident",
+      "reason": "Just a little wheelbang in a fast corner",
+      "by": "319544045435224067",
+      "at": "2026-11-05T11:21:11Z",
+      "call": {
+        "kind": "Wheelbanging",
+        "fault": "clear",
+        "severity": 2
+      },
+      "file": "Race_Brazil_2026_11_04_20_24_42.json",
+      "driver": "DevilDriver2396",
+      "car": 4,
+      "pts": 0.0,
+      "was": -3.0,
+      "learn": true,
+      "owner": true
     }
   ]
 }
