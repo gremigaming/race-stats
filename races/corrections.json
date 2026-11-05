@@ -531,6 +531,25 @@
       },
       "learn": true,
       "owner": true
+    },
+    {
+      "id": "Race_Monza_2026_11_04_19_49_57.json|3|contact|2|0",
+      "type": "incident",
+      "file": "Race_Monza_2026_11_04_19_49_57.json",
+      "driver": "DDRK",
+      "car": 3,
+      "pts": 0.0,
+      "was": -3.0,
+      "reason": "Protest accepted: Lico is a part of this game, but being off trottle halfway on the straight is just too early. But he did give back the position and it was just a small mistake by stepino",
+      "by": "319544045435224067",
+      "at": "2026-11-05T07:58:28Z",
+      "call": {
+        "kind": "Reckless driving",
+        "fault": "clear",
+        "severity": 4
+      },
+      "learn": true,
+      "owner": true
     }
   ]
 }
