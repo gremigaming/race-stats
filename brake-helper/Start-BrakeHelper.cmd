@@ -8,7 +8,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -Command ^
   "$ErrorActionPreference='Stop';" ^
   "$base='https://github.com/gremigaming/race-stats/releases/download/brake-helper';" ^
   "try {" ^
-  "  $remote=(Invoke-WebRequest -UseBasicParsing \"$base/version.txt\").Content.Trim();" ^
+  "  Invoke-WebRequest -UseBasicParsing \"$base/version.txt\" -OutFile 'brake-helper-version.new';" ^
+  "  $remote=(Get-Content 'brake-helper-version.new' -Raw).Trim(); Remove-Item 'brake-helper-version.new';" ^
   "  $local=''; if (Test-Path 'brake-helper-version.txt') { $local=(Get-Content 'brake-helper-version.txt' -Raw).Trim() };" ^
   "  if ($remote -ne $local -or -not (Test-Path 'PitsNGiggles-BrakeHelper.exe')) {" ^
   "    Write-Host 'Downloading the latest brake helper build...';" ^
