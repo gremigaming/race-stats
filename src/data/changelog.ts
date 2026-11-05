@@ -10,6 +10,14 @@ export interface ChangelogEntry {
 // raw commit history also contains routine uploads and staff-only corrections.
 const changelog: ChangelogEntry[] = [
   {
+    id: "hidden-names-viewers",
+    date: "2026-11-05",
+    type: "fix",
+    message:
+      "Drivers with hidden names read from the classification screen now show by name in the race viewer and Incidents viewer too (no more \"Car #69\"), and in the qualifying before that race. A name read slightly differently in two races counts as one driver.",
+    destination: "race",
+  },
+  {
     id: "incident-viewer",
     date: "2026-11-05",
     type: "feat",

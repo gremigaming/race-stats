@@ -91,6 +91,8 @@ export interface RaceManifest {
   tod?: [number, number] | null;
   /** Where the cars drove, [minX, minZ, maxX, maxZ] (recordings, bundle v9+): the full-track frame before any chunk loads. */
   bounds?: [number, number, number, number] | null;
+  /** The game's session uid (16 hex digits) on site bundles; the live server's uid is that uid itself. */
+  session_uid?: string;
 }
 
 export interface RaceIndexEntry {
@@ -301,6 +303,50 @@ export async function loadRaceIndex(): Promise<
 /** The live race server (gremigaming/race-control-stats live/server.py): sessions still running. */
 export const LIVE_SERVER = "https://live.gremigaming.com";
 
+type ViewerNames = Record<string, Record<string, string>>;
+let viewerNames: Promise<ViewerNames> | null = null;
+
+/**
+ * Names of hidden-name cars, read from the classification screen after the race
+ * (scripts/build-league-data.mjs writes league/viewer-names.json, per game session uid). The
+ * recordings only know "Car #69"; this site build and the live server's build are both read, so
+ * a name found by either shows.
+ */
+function loadViewerNames(): Promise<ViewerNames> {
+  viewerNames ??= Promise.all([
+    getJson<{ sessions?: ViewerNames }>(`${import.meta.env.BASE_URL}league/viewer-names.json`),
+    import("../league/liveData")
+      .then((m) => m.loadLeagueJson<{ sessions?: ViewerNames }>("viewer-names.json"))
+      .catch(() => null),
+  ]).then(([pages, live]) => {
+    const out: ViewerNames = { ...(pages?.sessions ?? {}) };
+    for (const [uid, cars] of Object.entries(live?.sessions ?? {}))
+      out[uid] = { ...(out[uid] ?? {}), ...cars };
+    return out;
+  });
+  return viewerNames;
+}
+
+/** Give hidden cars their classification-screen name everywhere in the manifest (cars, verdict texts). */
+export function applyViewerNames(m: RaceManifest, names: ViewerNames): RaceManifest {
+  const cars = names[m.session_uid ?? m.uid] ?? names[m.uid];
+  if (!cars) return m;
+  const swaps: [RegExp, string][] = [];
+  for (const [car, name] of Object.entries(cars)) {
+    const c = m.cars[car];
+    if (!c || c.name === name) continue;
+    const old = c.name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    swaps.push([new RegExp(`${old}(?!\\d)`, "g"), name]);
+    m.cars[car] = { ...c, name };
+  }
+  const swap = (s: string) => swaps.reduce((v, [re, to]) => v.replace(re, () => to), s);
+  for (const inc of m.incidents ?? []) {
+    if (inc.verdict?.verdict) inc.verdict.verdict = swap(inc.verdict.verdict);
+    if (inc.verdict?.why) inc.verdict.why = swap(inc.verdict.why);
+  }
+  return m;
+}
+
 /** The manifest of one race and the base URL its chunks come from (a running race: the live server). */
 export async function loadManifest(
   uid: string,
@@ -309,8 +355,10 @@ export async function loadManifest(
     const manifest = await getJson<RaceManifest>(
       `${base}${encodeURIComponent(uid)}/manifest.json`,
     );
-    if (manifest)
+    if (manifest) {
+      if (manifest.finished) applyViewerNames(manifest, await loadViewerNames().catch(() => ({})));
       return { manifest, base: `${base}${encodeURIComponent(uid)}/` };
+    }
   }
   return null;
 }
