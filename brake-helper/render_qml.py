@@ -6,7 +6,7 @@
 import os
 import sys
 
-from PySide6.QtCore import QTimer, QUrl
+from PySide6.QtCore import Q_ARG, QMetaObject, Qt, QTimer, QUrl
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtQml import QQmlApplicationEngine
 
@@ -51,10 +51,19 @@ def main():
             app.quit()
             return
         view = dict(STATES[names[i]], dots=DOTS, bias=56, biasKnown=True)
-        win.updateView(view)
-        QTimer.singleShot(400, lambda: step(i + 1))
+        QMetaObject.invokeMethod(win, "updateView", Qt.ConnectionType.DirectConnection,
+                                 Q_ARG("QVariant", view))
+        QTimer.singleShot(400, lambda: safe_step(i + 1))
 
-    QTimer.singleShot(300, step)
+    def safe_step(i=0):
+        try:
+            step(i)
+        except Exception as e:  # never hang CI
+            print("render failed:", e)
+            app.exit(1)
+
+    QTimer.singleShot(300, safe_step)
+    QTimer.singleShot(60000, lambda: (print("render timed out"), app.exit(1)))
     sys.exit(app.exec())
 
 

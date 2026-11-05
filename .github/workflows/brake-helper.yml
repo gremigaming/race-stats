@@ -36,6 +36,7 @@ env:
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v5
         with:
@@ -82,12 +83,14 @@ jobs:
 
       - name: Render overlay states
         working-directory: png
+        timeout-minutes: 5
         env:
           QT_QPA_PLATFORM: offscreen
           QT_QUICK_BACKEND: software
         run: poetry run python ../rs/brake-helper/render_qml.py "$PWD" ../rs/brake-helper/previews
 
       - name: Replay recorded races
+        timeout-minutes: 15
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -109,6 +112,7 @@ jobs:
     needs: test
     if: ${{ github.event_name == 'push' || inputs.build_exe }}
     runs-on: windows-latest
+    timeout-minutes: 60
     steps:
       - name: Keep line endings as-is
         run: git config --global core.autocrlf false
