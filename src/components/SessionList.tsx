@@ -375,7 +375,6 @@ export function SessionList({
               onChange={updateFilters}
               game={game}
               onReset={resetFilters}
-              showGame={false}
             />
           </div>
         </HStack>

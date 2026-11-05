@@ -153,14 +153,17 @@ def _sev_of(pts):
 def load_lessons(cache):
     """Staff changes of contact points (and accepted protests) as graded incidents: the engine's
     call on that contact with the changed driver cleared (points to 0), blamed (points from 0) or
-    kept (points changed). Needs CACHE/verdicts (the race's incidents and recording)."""
+    kept (points changed). A rejected protest ("confirm", GreMi 5 Nov 2026) is a lesson too: the
+    engine's call was right. Changes made with the staff page's picker carry their call (incident
+    type, at fault / shared / not at fault, severity), which wins over guessing from the points.
+    Needs CACHE/verdicts (the race's incidents and recording)."""
     try:
         changes = json.load(open(CORRECTIONS, encoding="utf-8")).get("changes", [])
     except (OSError, ValueError):
         return {}
     groups = {}
     for c in changes:
-        if c.get("type") != "incident" or not c.get("inc") or "|contact|" not in c.get("id", ""):
+        if c.get("type") not in ("incident", "confirm") or not c.get("inc") or "|contact|" not in c.get("id", ""):
             continue
         if c.get("learn") is False or (c.get("at") or "")[:10] in NO_LESSON_DAYS:
             continue
@@ -179,8 +182,15 @@ def load_lessons(cache):
         name = lambda i: names.get(i, f"car {i}")  # noqa: E731
         fault = set(inc.get("at_fault") or [])
         sev = inc.get("severity") or 1
+        kinds = []
         for c in cs:
-            if float(c["pts"]) >= 0:
+            call = c.get("call") or {}
+            if call.get("kind"):
+                kinds.append(call["kind"])
+            if call.get("fault") in ("fault", "shared"):
+                fault.add(c["car"])
+                sev = int(call.get("severity") or sev)
+            elif call.get("fault") == "clear" or float(c["pts"]) >= 0:
                 fault.discard(c["car"])
             else:
                 fault.add(c["car"])
@@ -188,7 +198,9 @@ def load_lessons(cache):
         lid = "s-" + hashlib.sha1(f"{file}|{t}".encode()).hexdigest()[:8]
         out[lid] = {"id": lid, "by": "GreMi" if all(c.get("owner") for c in cs) else "staff", "lesson": True,
                     "real": True, "at_fault": [name(x) for x in sorted(fault)], "severity": sev if fault else 0,
-                    "verdict": blame_text(sorted(fault), name), "note": "; ".join(c.get("reason", "") for c in cs)[:300],
+                    "verdict": blame_text(sorted(fault), name), "kind": kinds[0] if kinds else None,
+                    "source": "protest rejected" if any(c["type"] == "confirm" for c in cs) else
+                              "protest accepted" if any((c.get("reason") or "").startswith("Protest accepted") for c in cs) else "staff change", "note": "; ".join(c.get("reason", "") for c in cs)[:300],
                     "drivers": [{"car": x, "name": name(x)} for x in inc["cars"]], "recording": data["recording"],
                     "t": round(inc["t0"] - (data.get("offset") or 0), 1), "track": re.sub(r"^Race_|_\d{4}_.*$", "", file).replace("_", " "),
                     "date": "-".join(re.search(r"(\d{4})_(\d\d)_(\d\d)", file).groups())}
@@ -228,7 +240,7 @@ def part_id(d, n):
 def key_of(d):
     """Changes when the call on a graded incident changes: its numbers are then made again."""
     import verdicts  # noqa: E402  (the rulebook's call is stored too: made again when it changes)
-    k = [d["recording"], d["t"], d["verdict"], sorted(d.get("at_fault") or []), verdicts.RULES]
+    k = [d["recording"], d["t"], d["verdict"], sorted(d.get("at_fault") or []), verdicts.RULES, d.get("kind")]
     if parts_of(d):   # unsplit grades keep their old key (no rebuild)
         k.append(parts_of(d))
     return hashlib.sha1(json.dumps(k, sort_keys=True).encode()).hexdigest()[:12]
@@ -297,7 +309,7 @@ def _build_one(job):
                              "label": role(front, back, fault, d["real"]), "rulebook": rule_role(c, front, back), "rule": p["rule"]})
         out.append((d["id"], {
             "key": key_of(d), "by": d.get("by", "GreMi"), "track": d.get("track"), "date": d.get("date"),
-            "verdict": d["verdict"], "severity": d.get("severity") or 0, "note": (d.get("note") or "")[:300],
+            "kind": d.get("kind"), "source": d.get("source") or "grade", "verdict": d["verdict"], "severity": d.get("severity") or 0, "note": (d.get("note") or "")[:300],
             "recording": rec, "t": d["t"], "cars": sorted({x["car"] for x in inc["drivers"]}),
             "rulebook": {"verdict": v["verdict"], "rule": v["rule"]}, "contacts": contacts},
             f"{d['id']} {rec} t={d['t']} -> {d['verdict']} ({len(contacts)} contacts)"))
@@ -327,6 +339,7 @@ def _build_parts(d, rec, incs, vs):
             "key": key_of(d), "parent": d["id"], "part": n + 1, "of": len(parts), "by": d.get("by", "GreMi"),
             "track": d.get("track"), "date": d.get("date"), "verdict": part.get("verdict") or d["verdict"],
             "severity": sev, "note": (part.get("note") or "")[:300], "tags": part.get("tags") or [],
+            "kind": part.get("kind"), "source": d.get("source") or "grade",
             "calls": {str(x["car"]): {k: x[k] for k in ("name", "call", "severity", "note") if x.get(k) not in (None, "")}
                       for x in part["drivers"]},
             "recording": rec, "t": part["t0"], "t1": part["t1"], "cars": sorted(part_cars(part)),
@@ -378,6 +391,19 @@ def build(cache):
                             del store["precedents"][old]
                     store["precedents"][pid] = entry
     store["about"] = "Numbers of every graded incident's contacts and the final call (scripts/telemetry/precedents.py)."
+    # how often the engine gets the graded incidents right without having seen them, over time
+    # (the staff page's "What I learned" page shows it)
+    try:
+        import datetime
+        import verdicts  # noqa: E402
+        r = evaluate(store)
+        now = {k: r[k] for k in ("incidents", "inc_rulebook", "inc_with_precedents", "contacts", "rulebook", "with_precedents", "overrides")}
+        hist = store.get("eval_history") or []
+        if not hist or {k: hist[-1].get(k) for k in now} != now or hist[-1].get("rules") != verdicts.RULES:
+            hist.append(dict(now, date=datetime.date.today().isoformat(), rules=verdicts.RULES))
+        store["eval_history"] = hist[-60:]
+    except Exception as ex:
+        print("leave-one-out check failed:", ex)
     store["precedents"] = dict(sorted(store["precedents"].items()))
     json.dump(store, open(STORE + ".tmp", "w", encoding="utf-8"), indent=1, ensure_ascii=False)
     os.replace(STORE + ".tmp", STORE)

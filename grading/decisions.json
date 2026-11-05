@@ -1,6 +1,433 @@
 {
   "about": "Final calls on graded incidents (GreMi's grade, else the staff majority). Written by the staff page; the fault engine uses them as precedents.",
   "decisions": {
+    "1104b-1": {
+      "verdict": "Not an incident",
+      "by": "GreMi",
+      "real": false,
+      "at_fault": [],
+      "severity": 0,
+      "note": "Small wheel bang, not an issue.",
+      "at": 1793865598,
+      "parts": [
+        {
+          "t0": 22.4,
+          "t1": 24.2,
+          "real": false,
+          "verdict": "Not an incident",
+          "tags": [],
+          "kind": "Not an incident",
+          "note": "",
+          "drivers": [
+            {
+              "car": 1,
+              "name": "#2 Alexowitsh77",
+              "call": "clear"
+            },
+            {
+              "car": 6,
+              "name": "#69 trex-Leclerc",
+              "call": "clear"
+            }
+          ]
+        }
+      ],
+      "kind": "Not an incident",
+      "drivers": [
+        {
+          "car": 1,
+          "name": "#2 Alexowitsh77"
+        },
+        {
+          "car": 6,
+          "name": "#69 trex-Leclerc"
+        }
+      ],
+      "track": "Singapore",
+      "date": "2026-11-04",
+      "race_file": "Race_Singapore_2026_11_04_20_09_05.json",
+      "recording": "2026-11-04_19-59-27_Singapore_Race.gmtel.gz",
+      "replay": "https://gremigaming.github.io/race-stats/f1/race/2026-11-04_19-59-27_Singapore_Race?inc=22.4&car=1,6",
+      "engine": {
+        "rules": "v1.2",
+        "verdict": "Alexowitsh77 at fault",
+        "rule": "R2",
+        "severity": 2,
+        "why": "side by side; Alexowitsh77 moved 5.3 m across into the other car",
+        "at_fault": [
+          "#2 Alexowitsh77"
+        ],
+        "contacts": 1,
+        "gray_score": 0.0
+      }
+    },
+    "1104b-2": {
+      "verdict": "#8 Stepino81 at fault",
+      "by": "GreMi",
+      "real": true,
+      "at_fault": [
+        "#8 Stepino81"
+      ],
+      "severity": 7,
+      "note": "",
+      "at": 1793865739,
+      "parts": [
+        {
+          "t0": 271.0,
+          "t1": 286.1,
+          "real": true,
+          "verdict": "#8 Stepino81 at fault",
+          "tags": [],
+          "kind": "Unsafe rejoin",
+          "note": "",
+          "drivers": [
+            {
+              "car": 2,
+              "name": "#8 Stepino81",
+              "call": "fault",
+              "severity": 7,
+              "note": "Crazy rejoin, dangerous."
+            },
+            {
+              "car": 11,
+              "name": "#13 Jakubm18_F1",
+              "call": "clear"
+            }
+          ]
+        }
+      ],
+      "kind": "Unsafe rejoin",
+      "drivers": [
+        {
+          "car": 2,
+          "name": "#8 Stepino81"
+        },
+        {
+          "car": 11,
+          "name": "#13 Jakubm18_F1"
+        }
+      ],
+      "track": "Monza",
+      "date": "2026-11-04",
+      "race_file": "Race_Monza_2026_11_04_19_49_57.json",
+      "recording": "2026-11-04_19-41-26_Monza_Race.gmtel.gz",
+      "replay": "https://gremigaming.github.io/race-stats/f1/race/2026-11-04_19-41-26_Monza_Race?inc=271.0&car=2,11",
+      "engine": {
+        "rules": "v1.2",
+        "verdict": "Stepino81 at fault",
+        "rule": "R5",
+        "severity": 7,
+        "why": "Stepino81 came back onto the track and moved 5.4 m across into Jakubm18_F1",
+        "at_fault": [
+          "#8 Stepino81"
+        ],
+        "contacts": 1,
+        "gray_score": 0.0
+      }
+    },
+    "1104b-3": {
+      "verdict": "#13 Jakubm18_F1 + #19 toni2608 shared",
+      "by": "GreMi",
+      "real": true,
+      "at_fault": [
+        "#13 Jakubm18_F1",
+        "#19 toni2608"
+      ],
+      "severity": 5,
+      "note": "For both toni and jakub, leave some space on the exit, no real incident happend but this could have been a big crash, leave some space on the exit and let each other live.",
+      "at": 1793865946,
+      "parts": [
+        {
+          "t0": 181.4,
+          "t1": 185.9,
+          "real": true,
+          "verdict": "#13 Jakubm18_F1 + #19 toni2608 shared",
+          "tags": [],
+          "kind": "Reckless driving",
+          "note": "",
+          "drivers": [
+            {
+              "car": 11,
+              "name": "#13 Jakubm18_F1",
+              "call": "shared",
+              "severity": 5
+            },
+            {
+              "car": 8,
+              "name": "#19 toni2608",
+              "call": "shared",
+              "severity": 5
+            },
+            {
+              "car": 6,
+              "name": "#21 EthanMoonski",
+              "call": "clear"
+            }
+          ]
+        }
+      ],
+      "kind": "Reckless driving",
+      "drivers": [
+        {
+          "car": 11,
+          "name": "#13 Jakubm18_F1"
+        },
+        {
+          "car": 8,
+          "name": "#19 toni2608"
+        },
+        {
+          "car": 6,
+          "name": "#21 EthanMoonski"
+        }
+      ],
+      "track": "Monza",
+      "date": "2026-11-04",
+      "race_file": "Race_Monza_2026_11_04_19_49_57.json",
+      "recording": "2026-11-04_19-41-26_Monza_Race.gmtel.gz",
+      "replay": "https://gremigaming.github.io/race-stats/f1/race/2026-11-04_19-41-26_Monza_Race?inc=181.4&car=11,8,6",
+      "engine": {
+        "rules": "v1.2",
+        "verdict": "Jakubm18_F1 at fault",
+        "rule": "R2",
+        "severity": 2,
+        "why": "side by side; Jakubm18_F1 moved 3.6 m across into the other car",
+        "at_fault": [
+          "#13 Jakubm18_F1"
+        ],
+        "contacts": 3,
+        "gray_score": 1.27
+      }
+    },
+    "1104b-4": {
+      "verdict": "1) #19 toni2608 at fault | 2) Not an incident",
+      "by": "GreMi",
+      "real": true,
+      "at_fault": [
+        "#19 toni2608"
+      ],
+      "severity": 3,
+      "note": "",
+      "at": 1793866237,
+      "parts": [
+        {
+          "t0": 8.3,
+          "t1": 10.0,
+          "real": true,
+          "verdict": "#19 toni2608 at fault",
+          "tags": [],
+          "kind": "Moved across alongside",
+          "note": "",
+          "drivers": [
+            {
+              "car": 6,
+              "name": "#21 EthanMoonski",
+              "call": "clear"
+            },
+            {
+              "car": 8,
+              "name": "#19 toni2608",
+              "call": "fault",
+              "severity": 3,
+              "note": "No need for that defence there"
+            },
+            {
+              "car": 10,
+              "name": "#69 trex-Leclerc",
+              "call": "out"
+            },
+            {
+              "car": 11,
+              "name": "#13 Jakubm18_F1",
+              "call": "out"
+            },
+            {
+              "car": 5,
+              "name": "#15 vanderdeured",
+              "call": "out"
+            },
+            {
+              "car": 9,
+              "name": "#21 Darkcore_Archie",
+              "call": "out"
+            }
+          ]
+        },
+        {
+          "t0": 22.0,
+          "t1": 27.0,
+          "real": false,
+          "verdict": "Not an incident",
+          "tags": [],
+          "kind": "Chain reaction",
+          "note": "Just lap 1 chaos, no one really at fault, jakub could have braked a bit earlier but this was just fine",
+          "drivers": [
+            {
+              "car": 6,
+              "name": "#21 EthanMoonski",
+              "call": "clear"
+            },
+            {
+              "car": 8,
+              "name": "#19 toni2608",
+              "call": "clear"
+            },
+            {
+              "car": 10,
+              "name": "#69 trex-Leclerc",
+              "call": "clear"
+            },
+            {
+              "car": 11,
+              "name": "#13 Jakubm18_F1",
+              "call": "clear"
+            },
+            {
+              "car": 5,
+              "name": "#15 vanderdeured",
+              "call": "clear"
+            },
+            {
+              "car": 9,
+              "name": "#21 Darkcore_Archie",
+              "call": "clear"
+            }
+          ]
+        }
+      ],
+      "kind": "Moved across alongside",
+      "drivers": [
+        {
+          "car": 6,
+          "name": "#21 EthanMoonski"
+        },
+        {
+          "car": 8,
+          "name": "#19 toni2608"
+        },
+        {
+          "car": 10,
+          "name": "#69 trex-Leclerc"
+        },
+        {
+          "car": 11,
+          "name": "#13 Jakubm18_F1"
+        },
+        {
+          "car": 5,
+          "name": "#15 vanderdeured"
+        },
+        {
+          "car": 9,
+          "name": "#21 Darkcore_Archie"
+        }
+      ],
+      "track": "Monza",
+      "date": "2026-11-04",
+      "race_file": "Race_Monza_2026_11_04_19_49_57.json",
+      "recording": "2026-11-04_19-41-26_Monza_Race.gmtel.gz",
+      "replay": "https://gremigaming.github.io/race-stats/f1/race/2026-11-04_19-41-26_Monza_Race?inc=8.3&car=6,8,10,11,5,9",
+      "engine": {
+        "rules": "v1.2",
+        "verdict": "RB #69 at fault",
+        "rule": "R3",
+        "severity": 3,
+        "why": "RB #69 ran into the back of toni2608, closing at 27 km/h",
+        "at_fault": [
+          "#69 trex-Leclerc"
+        ],
+        "contacts": 3,
+        "gray_score": 1.13
+      }
+    },
+    "1104b-5": {
+      "verdict": "1) #19 toni2608 at fault | 2) #21 EthanMoonski at fault",
+      "by": "GreMi",
+      "real": true,
+      "at_fault": [
+        "#19 toni2608",
+        "#21 EthanMoonski"
+      ],
+      "severity": 9,
+      "note": "He turns into toni after him wanting to give back the position, after that he also does a bracke check.",
+      "at": 1793866650,
+      "parts": [
+        {
+          "t0": 337.0,
+          "t1": 344.0,
+          "real": true,
+          "verdict": "#19 toni2608 at fault",
+          "tags": [],
+          "kind": "Late lunge / divebomb",
+          "note": "",
+          "drivers": [
+            {
+              "car": 7,
+              "name": "#21 EthanMoonski",
+              "call": "clear"
+            },
+            {
+              "car": 6,
+              "name": "#19 toni2608",
+              "call": "fault",
+              "severity": 7,
+              "note": "Crazy send, took away 1 sev for wanting to hand back the position otherwise this would be an 8"
+            }
+          ]
+        },
+        {
+          "t0": 344.0,
+          "t1": 353.0,
+          "real": true,
+          "verdict": "#21 EthanMoonski at fault",
+          "tags": [],
+          "kind": "Retaliation",
+          "note": "",
+          "drivers": [
+            {
+              "car": 7,
+              "name": "#21 EthanMoonski",
+              "call": "fault",
+              "severity": 9,
+              "note": "Unacceptible driving, toni did cause a big incident before, so i take it from 10 to 9 sev. but that is just not okay."
+            },
+            {
+              "car": 6,
+              "name": "#19 toni2608",
+              "call": "clear"
+            }
+          ]
+        }
+      ],
+      "kind": "Late lunge / divebomb",
+      "drivers": [
+        {
+          "car": 7,
+          "name": "#21 EthanMoonski"
+        },
+        {
+          "car": 6,
+          "name": "#19 toni2608"
+        }
+      ],
+      "track": "Spa",
+      "date": "2026-11-04",
+      "race_file": "Race_Spa_2026_11_04_19_32_23.json",
+      "recording": "2026-11-04_19-21-49_Spa_Race.gmtel.gz",
+      "replay": "https://gremigaming.github.io/race-stats/f1/race/2026-11-04_19-21-49_Spa_Race?inc=341.0&car=7,6",
+      "engine": {
+        "rules": "v1.2",
+        "verdict": "EthanMoonski at fault",
+        "rule": "P",
+        "severity": 4,
+        "why": "toni2608 ran into the back of EthanMoonski, closing at 50 km/h; but GreMi called a similar one (B4-02, Abu Dhabi 2026-10-20) the car ahead at fault; EthanMoonski ran into the back of toni2608, closing at 40 km/h",
+        "at_fault": [
+          "#21 EthanMoonski"
+        ],
+        "contacts": 2,
+        "gray_score": 1.0
+      }
+    },
     "1102b-1": {
       "verdict": "Not an incident",
       "by": "GreMi",
@@ -78,6 +505,7 @@
           ]
         }
       ],
+      "kind": null,
       "drivers": [
         {
           "car": 7,
@@ -579,6 +1007,7 @@
           ]
         }
       ],
+      "kind": null,
       "drivers": [
         {
           "car": 21,
@@ -811,6 +1240,7 @@
           ]
         }
       ],
+      "kind": null,
       "drivers": [
         {
           "car": 2,

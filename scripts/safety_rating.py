@@ -12,6 +12,8 @@ game's own penalties only track limits / corner cutting still count. Without it
 the old game-based rules run, as the site does today. SR_OUT: output folder.
 """
 import json, glob, re, sys, os, collections, statistics, math
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "telemetry"))
+from incident_kinds import kind_of, weather_name  # incident type guess + weather name for the staff page
 AI_RE = re.compile(r" #\d+$")  # AI and hidden names look like "Ferrari '26 #28", "RB #46"
 REAL = set()   # names the game showed as a human's own name somewhere ("ERC | Samy #13" is a real name)
 
@@ -89,6 +91,7 @@ def pace_ratio(x, y, skip):
     r = [b[x] / b[y] for f, b in best.items() if f != skip and x in b and y in b]
     return statistics.median(r) if len(r) >= 2 else None
 
+VIEWER = "https://gremigaming.github.io/race-stats/f1/race/"   # same as grading_batch.SITE
 RULE_LABEL = {"G": "graded", "P": "like a graded one"}   # precedents.py: GreMi's own call / a similar graded call
 
 def v1_rows(path, names, cols, game_incs):
@@ -133,6 +136,10 @@ def v1_rows(path, names, cols, game_incs):
             else:
                 lines[x] = (0, [f"severity {sev}/10, not to blame ({RULE_LABEL.get(inc['rule'], inc['rule'])}) 0", inc["why"]])
         rows.append({"file": path.split("/")[-1].rsplit("_2026", 1)[0], "pair": pair, "t": inc["t0"], "t_end": inc["t1"], "sev": word,
+                     "weather": weather_name(inc.get("weather")), "type": kind_of(inc),
+                     # the race viewer at this incident, for the staff page (protests, penalty changes)
+                     "watch": f"{VIEWER}{data['recording'].replace('.gmtel.gz', '')}?inc={inc['t0'] - (data.get('offset') or 0):.1f}&car="
+                              + ",".join(map(str, cars)) if data.get("recording") else None,
                      "severity": sev, "rule": inc["rule"], "lap": inc["lap"], "dist": None, "sector": None, "corner": None, "where": where,
                      "pn": [names[pair[0]], names[pair[1]]] if pair[0] in names and pair[1] in names else [names[c] for c in cars[:2]],
                      "lines": {names[k]: v for k, v in lines.items()},
@@ -770,6 +777,7 @@ for si, stream in enumerate(streams):
         for r in rows:
             # every collision, also the ones that cost nobody points, for the Incidents tab
             all_incs.append({"file": name, "lap": r["lap"], "where": r["where"], "sev": r["sev"], "names": r["pn"],
+                             **{k: r[k] for k in ("weather", "type", "watch") if r.get(k)},
                              "lines": {n: [-half(pts) or 0, "; ".join(parts)] for n, (pts, parts) in r["lines"].items()},
                              "inc": incref(r)})
             for n, (pts, parts) in r["lines"].items():
@@ -777,6 +785,7 @@ for si, stream in enumerate(streams):
                 pts = half(pts)
                 if not pts: continue
                 items[n].append({"pts": -pts, "text": f"{r['where']}, with {r['vs'][n]}: " + "; ".join(parts), "lap": r["lap"], "cat": "contact",
+                                 **{k: r[k] for k in ("weather", "type", "watch") if r.get(k)},
                                  "inc": incref(r)})
         for n, v, what, lap, _fl in other:
             if not n or AI.search(n) or not v: continue

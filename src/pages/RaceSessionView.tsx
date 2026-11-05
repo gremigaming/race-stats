@@ -19,7 +19,6 @@ import {
 } from "../analysis/speedAnalysis";
 import { CarSetupCard } from "../components/CarSetupCard";
 import { Card } from "../components/Card";
-import { PageFrame } from "../components/ui/PageFrame";
 import { CompoundLapComparison } from "../components/CompoundLapComparison";
 import { DamageTimeline } from "../components/DamageTimeline";
 import { DriverComparisonPicker } from "../components/DriverComparisonPicker";
@@ -165,9 +164,8 @@ export function RaceSessionView({
     if (!vs) return null;
     const key = vs.toLowerCase();
     return (
-      drivers.find(
-        (d) => isNamedDriver(d) && driverKey(d["driver-name"]) === key,
-      )?.index ?? null
+      drivers.find((d) => isNamedDriver(d) && driverKey(d["driver-name"]) === key)
+        ?.index ?? null
     );
   }, [drivers, vs]);
   const [selectedRivalIndex, setSelectedRivalIndex] = useState<number | null>(
@@ -383,7 +381,7 @@ export function RaceSessionView({
   );
 
   return (
-    <PageFrame className="space-y-0 p-4 sm:p-6">
+    <div className="p-4 sm:p-6 max-w-5xl mx-auto">
       <SessionHeader
         session={session}
         focusedDriverIndex={focusedDriverIndex}
@@ -584,6 +582,6 @@ export function RaceSessionView({
           isAutoSave={sessionMeta?.isAutoSave}
         />
       </VStack>
-    </PageFrame>
+    </div>
   );
 }

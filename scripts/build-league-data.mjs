@@ -239,6 +239,13 @@ function carsOf(data) {
 }
 const bestLaps = (data) =>
   Object.fromEntries(data["classification-data"].map((d) => [d.index, d["final-classification"]?.["best-lap-time-ms"] ?? 0]));
+// every car slot, AI too: a player who left mid-race shows his real name on the AI that took over
+const slotsOf = (data) =>
+  Object.fromEntries(data["classification-data"].map((d) => {
+    const p = d["participant-data"] ?? {};
+    return [d.index, { number: p["race-number"] ?? null, team: d.team ?? null, ai: !!p["ai-controlled"],
+      hidden: p["show-online-names"] === false, name: renameDrivers(d["driver-name"] ?? "") }];
+  }));
 const raceNumbers = (data) =>
   Object.fromEntries(data["classification-data"].map((d) => [d.index, d["participant-data"]?.["race-number"] ?? null]));
 // "2026-11-03_00-25-04_Brazil_Race.gmcls" -> ms, on the same clock as fileTime()
@@ -258,6 +265,7 @@ const captureTime = (asset) => {
 // also goes to that car's other sessions (same race number + nationality +
 // platform, not the shared default). Listed in league/merges.json like every
 // merge; staff "unmerge" undoes it.
+const captureOf = new Map(); // race file -> game session uid of its classification capture
 const OCR_FILE = process.env.CLASSIFICATION_FILE || join(process.env.LEAGUE_CACHE_DIR || ".cache", "classification.json");
 const ocrCaptures = existsSync(OCR_FILE) ? (JSON.parse(readFileSync(OCR_FILE, "utf8")).captures ?? []) : [];
 const ocrKey = (s) => s.toUpperCase().replace(/0/g, "O").replace(/[|1L]/g, "I").replace(/[^A-Z0-9]/g, ""); // same as norm() in classification_ocr.py
@@ -289,7 +297,6 @@ function screenNames(stream, known) {
   const found = []; // {i, file, index, name, read, votes}
   stream.forEach((s, i) => {
     const hidden = s.cars.filter((c) => c.hidden);
-    if (!hidden.length) return;
     const withLap = Object.entries(s.bests).filter(([, ms]) => ms > 0);
     const numbered = Object.entries(s.numbers).filter(([, n]) => n != null);
     const cap = ocrCaptures.find((c) => {
@@ -300,6 +307,8 @@ function screenNames(stream, known) {
       return !c.has_results && linkedFile(c) === s.name;
     });
     if (!cap) return;
+    if (cap.session_uid) captureOf.set(s.name, cap.session_uid);
+    if (!hidden.length) return;
     const present = new Set(s.cars.filter((c) => !c.hidden).map((c) => c.name.toLowerCase()));
     for (const c of hidden) {
       const e = cap.cars[c.index];
@@ -316,6 +325,17 @@ function screenNames(stream, known) {
       found.push({ i, file: s.name, index: c.index, name, read: e.ocr, votes: `${e.votes}/${e.seen}`, combo: c.shared ? null : c.combo });
     }
   });
+  // one driver, one spelling: a new name read a little differently in another race of the stream
+  // ("NWEER-BT" / "ONWEER-BT") takes the spelling most screenshots agreed on (then the longer one)
+  const isNew = (f) => !known.some((k) => k.toLowerCase() === f.name.toLowerCase());
+  const weight = new Map();
+  for (const f of found) if (isNew(f)) weight.set(f.name, (weight.get(f.name) ?? 0) + Number(f.votes.split("/")[0]));
+  const spellings = [...weight.keys()].sort((a, b) => weight.get(b) - weight.get(a) || b.length - a.length);
+  for (const f of found) {
+    if (!isNew(f)) continue;
+    const to = spellings.find((n) => likeness(ocrKey(n), ocrKey(f.name)) >= 0.85);
+    if (to && to !== f.name) f.name = to;
+  }
   // the same car (combo) in the stream's other sessions, when the screen gave it one name only
   const byCombo = new Map();
   for (const f of found) if (f.combo) byCombo.set(f.combo, [...(byCombo.get(f.combo) ?? []), f]);
@@ -360,6 +380,29 @@ function findMerges(sessions) {
         merges.get(f.file).set(f.index, to);
       }
     }
+    // A hidden car in the qualifying right before a race on the same track (same lobby: same car
+    // slot, race number and team) is the driver the race named: by the screen, or by the AI that
+    // took over when he left (the game then shows his name). Works for the shared #2 too.
+    stream.forEach((q, qi) => {
+      if (!/Qualifying/i.test(q.name)) return;
+      const race = stream.slice(qi + 1).find((s) => /^Race_/.test(s.name) && s.track === q.track);
+      if (!race || stream.slice(qi + 1, stream.indexOf(race)).some((s) => s.track !== q.track && /^Race_/.test(s.name))) return;
+      for (const [ix, slot] of Object.entries(q.slots)) {
+        if (!slot.hidden || slot.ai || merges.get(q.name)?.has(Number(ix))) continue;
+        const r = race.slots[ix];
+        if (!r || r.number !== slot.number || r.team !== slot.team) continue;
+        const to = merges.get(race.name)?.get(Number(ix)) ?? (r.ai && r.hidden && r.name && !/#\d+$/.test(r.name) ? r.name : null);
+        if (!to || q.cars.some((c) => !c.hidden && c.name.toLowerCase() === to.toLowerCase())) continue;
+        const id = `${day}|${to.toLowerCase()}|qualifying`;
+        let entry = list.find((e) => e.id === id);
+        if (!entry) list.push(entry = { id, day, name: to, car: "same car in the race", hidden: [], files: [], off: unmerged.has(id) });
+        if (!entry.hidden.includes(slot.name)) entry.hidden.push(slot.name);
+        entry.files.push(q.name);
+        if (entry.off) continue;
+        if (!merges.has(q.name)) merges.set(q.name, new Map());
+        merges.get(q.name).set(Number(ix), to);
+      }
+    });
     const combos = new Map();
     stream.forEach((s, i) =>
       s.cars.forEach((c) => {
@@ -454,7 +497,8 @@ for (const path of SOURCES.flatMap(walk)) {
   const name = data && realName(base, data);
   if (data && !firstPassSeen.has(name) && !isTest(name)) {
     firstPassSeen.add(name);
-    firstPass.push({ name, cars: carsOf(data), bests: bestLaps(data), numbers: raceNumbers(data) });
+    firstPass.push({ name, track: data["session-info"]["track-id"] ?? null, cars: carsOf(data), bests: bestLaps(data),
+      numbers: raceNumbers(data), slots: slotsOf(data) });
   }
 }
 const { merges: merged, list: mergeList } = findMerges(firstPass);
@@ -533,6 +577,20 @@ for (const backup of backups) {
 }
 files.sort((a, b) => dateKey(b).localeCompare(dateKey(a)));
 writeFileSync(join(OUT, "merges.json"), JSON.stringify({ merges: mergeList }, null, 2));
+// The race viewer and incident viewer draw names from the telemetry ("Car #69"): this file gives
+// them the merged names, per game session uid (src/viewer/format.ts loadManifest).
+const viewerNames = {};
+// Shown names too: the recordings only carry a name when the driver's telemetry is public (older
+// bundles and the live server's copies), the race file has it whenever the game shows it.
+const slotsByFile = new Map(firstPass.map((s) => [s.name, s.slots]));
+for (const [file, uid] of captureOf) {
+  const cars = {};
+  for (const [ix, slot] of Object.entries(slotsByFile.get(file) ?? {}))
+    if (!slot.ai && !slot.hidden && slot.name && slot.name !== "Player") cars[ix] = slot.name;
+  for (const [ix, name] of merged.get(file) ?? []) cars[ix] = name;
+  if (Object.keys(cars).length) viewerNames[uid] = cars;
+}
+writeFileSync(join(OUT, "viewer-names.json"), JSON.stringify({ sessions: viewerNames }));
 console.log(`hidden-name merges: ${mergeList.filter((m) => !m.off).length} (${mergeList.filter((m) => m.off).length} undone by staff)`);
 const revisions = Object.fromEntries(files.map((name) => [
   name,

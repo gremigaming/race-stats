@@ -1,0 +1,187 @@
+name: Brake helper build
+
+# Applies brake-helper/png-brake-helper.patch to Pits n' Giggles (ashwin-nat/pits-n-giggles),
+# tests it (unit tests, QML lint + render, replay of recorded races) and builds a Windows exe
+# into the 'brake-helper' release of this repo.
+# After a Pits n' Giggles update: run this by hand with the new tag as png_ref.
+
+on:
+  workflow_dispatch:
+    inputs:
+      png_ref:
+        description: "Pits n' Giggles tag or branch to build on (e.g. v4.4.2)"
+        default: "v4.4.2"
+        required: true
+      build_exe:
+        description: "Build and publish the Windows exe"
+        type: boolean
+        default: true
+  push:
+    branches: [main]
+    paths:
+      - "brake-helper/**"
+      - ".github/workflows/brake-helper.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: brake-helper
+  cancel-in-progress: false
+
+env:
+  PNG_REF: ${{ inputs.png_ref || 'v4.4.2' }}
+  POETRY_VERSION: 2.2.1
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          path: rs
+
+      - name: Checkout Pits n' Giggles ${{ env.PNG_REF }}
+        uses: actions/checkout@v5
+        with:
+          repository: ashwin-nat/pits-n-giggles
+          ref: ${{ env.PNG_REF }}
+          path: png
+          fetch-depth: 0
+
+      - name: Apply brake helper patch
+        working-directory: png
+        run: |
+          git config user.email "ci@example.com" && git config user.name "ci"
+          git apply --3way --whitespace=nowarn ../rs/brake-helper/png-brake-helper.patch
+          git status --short
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install Poetry + dependencies
+        working-directory: png
+        run: |
+          pip install "poetry==$POETRY_VERSION"
+          poetry install --no-root
+          sudo apt-get update -qq && sudo apt-get install -y -qq libegl1 libxkbcommon0 libgl1 >/dev/null
+
+      - name: Unit tests (brake helper + config + hud)
+        working-directory: png
+        run: poetry run pytest tests/tests_brake_helper.py tests/tests_config -q -n 0 -p no:cacheprovider
+
+      - name: Full unit test run (report only)
+        working-directory: png
+        continue-on-error: true
+        run: poetry run pytest tests/ -q -x -m "not serial" 2>&1 | tail -25
+
+      - name: QML lint
+        working-directory: png
+        run: poetry run python scripts/qmllint.py apps/hud/ui/overlays/brake_helper/brake_helper.qml
+
+      - name: Render overlay states
+        working-directory: png
+        timeout-minutes: 5
+        env:
+          QT_QPA_PLATFORM: offscreen
+          QT_QUICK_BACKEND: software
+        run: poetry run python ../rs/brake-helper/render_qml.py "$PWD" ../rs/brake-helper/previews
+
+      - name: Replay recorded races
+        timeout-minutes: 15
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p tel
+          gh release download telemetry -R "$GITHUB_REPOSITORY" -D tel \
+            -p "2026-11-04_19-21-49_Spa_Race.gmtel.gz" -p "2026-11-04_19-41-26_Monza_Race.gmtel.gz"
+          python3 rs/brake-helper/replay_check.py png tel/*.gmtel.gz | tee rs/brake-helper/previews/replay.txt
+
+      - name: Commit previews
+        working-directory: rs
+        run: |
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git add brake-helper/previews
+          git diff --cached --quiet || git commit -m "Brake helper previews ($PNG_REF)"
+          for i in 1 2 3; do git pull --rebase -q && git push -q && break; sleep 5; done
+
+  build-windows:
+    needs: test
+    if: ${{ github.event_name == 'push' || inputs.build_exe }}
+    runs-on: windows-latest
+    timeout-minutes: 60
+    steps:
+      - name: Keep line endings as-is
+        run: git config --global core.autocrlf false
+
+      - uses: actions/checkout@v5
+        with:
+          path: rs
+
+      - name: Checkout Pits n' Giggles ${{ env.PNG_REF }}
+        uses: actions/checkout@v5
+        with:
+          repository: ashwin-nat/pits-n-giggles
+          ref: ${{ env.PNG_REF }}
+          path: png
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: Apply brake helper patch
+        working-directory: png
+        shell: bash
+        run: |
+          git config user.email "ci@example.com" && git config user.name "ci"
+          git apply --3way --whitespace=nowarn ../rs/brake-helper/png-brake-helper.patch
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install Poetry + dependencies
+        working-directory: png
+        shell: bash
+        run: |
+          pip install "poetry==$POETRY_VERSION"
+          poetry install --no-root --without dev
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: "10"
+
+      - name: Build exe
+        working-directory: png
+        shell: bash
+        run: poetry run python scripts/build.py
+
+      - name: Publish to the brake-helper release
+        working-directory: png
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          EXE=$(find dist -name "*.exe" | head -n 1)
+          echo "built $EXE"
+          mkdir -p out
+          cp "$EXE" out/PitsNGiggles-BrakeHelper.exe
+          printf "%s\n%s\n%s\n" "$PNG_REF" "$(git -C ../rs rev-parse --short HEAD)" "$(date -u +%FT%TZ)" > out/version.txt
+          gh release view brake-helper -R "$GITHUB_REPOSITORY" >/dev/null 2>&1 || \
+            gh release create brake-helper -R "$GITHUB_REPOSITORY" --title "Brake helper (Pits n' Giggles build)" \
+              --notes "Pits n' Giggles with the brake helper overlay. Run brake-helper/Start-BrakeHelper.cmd on the racing PC."
+          gh release upload brake-helper out/PitsNGiggles-BrakeHelper.exe out/version.txt -R "$GITHUB_REPOSITORY" --clobber
+
+      - name: Check the start file downloads the build
+        shell: cmd
+        run: |
+          mkdir %RUNNER_TEMP%\starttest
+          copy rs\brake-helper\Start-BrakeHelper.cmd %RUNNER_TEMP%\starttest\
+          call %RUNNER_TEMP%\starttest\Start-BrakeHelper.cmd --no-start
+          if not exist %RUNNER_TEMP%\starttest\PitsNGiggles-BrakeHelper.exe exit /b 1
+          type %RUNNER_TEMP%\starttest\brake-helper-version.txt

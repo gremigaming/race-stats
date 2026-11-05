@@ -3,18 +3,20 @@ export interface ChangelogEntry {
   date: string;
   type: "feat" | "fix" | "docs";
   message: string;
-  destination:
-    | "home"
-    | "tracks"
-    | "drivers"
-    | "safety"
-    | "personal-safety"
-    | "race";
+  destination: "home" | "tracks" | "drivers" | "safety" | "personal-safety" | "race" | "incidents";
 }
 
 // Curated site updates. Keep these focused on changes visitors can notice;
 // raw commit history also contains routine uploads and staff-only corrections.
 const changelog: ChangelogEntry[] = [
+  {
+    id: "incident-viewer",
+    date: "2026-11-05",
+    type: "feat",
+    message:
+      "Browse race incidents on a track map, filter by driver and incident type, and replay each moment.",
+    destination: "incidents",
+  },
   {
     id: "site-ui-refresh",
     date: "2026-11-05",
@@ -110,8 +112,7 @@ const changelog: ChangelogEntry[] = [
     id: "race-replays",
     date: "2026-10-29",
     type: "feat",
-    message:
-      "Replay recorded races and jump to contacts from the incident list.",
+    message: "Replay recorded races and jump to contacts from the incident list.",
     destination: "race",
   },
 ];

@@ -179,7 +179,8 @@ def parse_field(pid, b):
 
 
 def parse_participants(b):
-    """{car index: {"name", "ai", "race_number", "team", "public"}} (packet format 2026)."""
+    """{car index: {"name", "ai", "race_number", "team", "public", "shown"}} (packet format 2026).
+    public = the driver's telemetry setting; shown = the game shows his name (showOnlineNames)."""
     n = b[0]
     per = (len(b) - 1) // 24 if (len(b) - 1) % 24 == 0 else (len(b) - 1) // 22
     name_at = 10 if per >= 60 else 7
@@ -189,7 +190,7 @@ def parse_participants(b):
         name = r[name_at:name_at + 32].split(b"\0", 1)[0].decode("utf-8", "replace")
         out[i] = {"name": name, "ai": r[0], "race_number": r[name_at - 2],
                   "team": struct.unpack_from("<H", r, 5)[0] if per >= 60 else r[3],
-                  "public": r[name_at + 32]}
+                  "public": r[name_at + 32], "shown": r[name_at + 33] if len(r) > name_at + 33 else None}
     return out
 
 

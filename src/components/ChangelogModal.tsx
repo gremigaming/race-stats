@@ -28,6 +28,7 @@ const DESTINATION_PATHS: Record<
   safety: "/safety",
   "personal-safety": "/safety?tab=personal",
   race: "/race",
+  incidents: "/incidents",
 };
 
 function groupByDate(

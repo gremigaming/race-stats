@@ -1,0 +1,17 @@
+## Spa (2026-11-04_19-21-49_Spa_Race.gmtel.gz), 37089 samples
+run 1: corners 6, judged zones 25, median |brake start - shown point| 10.6 m, results {'Good': 21, 'Brake earlier': 1, 'Brake later': 2, 'Brake less': 1}
+run 2: corners 6, judged zones 31, median |brake start - shown point| 6.4 m, results {'Good': 27, 'Brake earlier': 2, 'Brake later': 1, 'Brake less': 1}
+   corner at    406 m: brake    264 m, 284 ->  78 km/h
+   corner at   2458 m: brake   2306 m, 328 -> 171 km/h
+   corner at   3066 m: brake   2932 m, 260 -> 118 km/h
+   corner at   4540 m: brake   4425 m, 276 -> 172 km/h
+   corner at   4972 m: brake   4882 m, 240 -> 156 km/h
+   corner at   6770 m: brake   6642 m, 264 ->  90 km/h
+## Monza (2026-11-04_19-41-26_Monza_Race.gmtel.gz), 26349 samples
+run 1: corners 5, judged zones 19, median |brake start - shown point| 11.5 m, results {'Good': 17, 'Brake earlier': 1, 'Brake later': 1}
+run 2: corners 5, judged zones 25, median |brake start - shown point| 11.9 m, results {'Good': 21, 'Brake earlier': 4}
+   corner at    974 m: brake    781 m, 312 ->  75 km/h
+   corner at   2154 m: brake   2020 m, 293 -> 127 km/h
+   corner at   2879 m: brake   2803 m, 246 -> 187 km/h
+   corner at   3969 m: brake   3866 m, 306 -> 211 km/h
+   corner at   5191 m: brake   5075 m, 291 -> 199 km/h

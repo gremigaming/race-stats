@@ -34,6 +34,11 @@ const DriverInsightsPage = lazy(() =>
     default: module.DriverInsightsPage,
   })),
 );
+const IncidentsPage = lazy(() =>
+  import("./pages/IncidentsPage").then((module) => ({
+    default: module.IncidentsPage,
+  })),
+);
 const SafetyPage = lazy(() =>
   import("./pages/SafetyPage").then((module) => ({
     default: module.SafetyPage,
@@ -156,18 +161,19 @@ function AppRoutes() {
             }
           />
           <Route
+            path=":formulaKey/incidents"
+            element={
+              <ScopedFormulaRoute>
+                <IncidentsPage />
+              </ScopedFormulaRoute>
+            }
+          />
+          <Route
             path=":formulaKey/safety"
             element={
               <ScopedFormulaRoute>
                 <SafetyPage />
               </ScopedFormulaRoute>
-            }
-          />
-          {/* The old Incidents tab: incidents now live per race on the safety rating page */}
-          <Route
-            path=":formulaKey/incidents"
-            element={
-              <Navigate to="../safety?tab=personal" relative="path" replace />
             }
           />
           <Route

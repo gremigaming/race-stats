@@ -14,6 +14,7 @@ import {
   ShieldCheck,
   Swords,
   Trophy,
+  TriangleAlert,
   Wrench,
   X,
   type LucideIcon,
@@ -105,7 +106,10 @@ export function Layout() {
     section === "safety" ||
     section === "insights";
   const isRacesActive =
-    section === "sessions" || section === "tracks" || section === "race";
+    section === "sessions" ||
+    section === "tracks" ||
+    section === "race" ||
+    section === "incidents";
 
   useEffect(() => {
     setMobileNavOpen(false);
@@ -259,6 +263,12 @@ export function Layout() {
                 >
                   Race viewer
                 </DropdownLink>
+                <DropdownLink
+                  to={`/${pageScope}/incidents`}
+                  icon={TriangleAlert}
+                >
+                  Incidents
+                </DropdownLink>
               </NavGroup>
               {SETUP_MANAGER_ON && (
                 <NavLink to={`/${pageScope}/setups`} className={routeItemClass}>
@@ -400,6 +410,12 @@ export function Layout() {
                   badge={isLive ? <LiveDot className="ml-auto" /> : undefined}
                 >
                   Race viewer
+                </MobileNavLink>
+                <MobileNavLink
+                  to={`/${pageScope}/incidents`}
+                  icon={TriangleAlert}
+                >
+                  Incidents
                 </MobileNavLink>
               </div>
               {SETUP_MANAGER_ON && (

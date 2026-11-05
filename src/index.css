@@ -53,9 +53,6 @@
   /* Surfaces */
   --color-shell: #000000;
   --color-canvas: hsl(240deg, 14.3%, 3.75%);
-  --color-brand-wine: #4b1028;
-  --color-brand-red: #e11d48;
-  --color-brand-violet: #7c3aed;
   --color-card-surface: color-mix(
     in oklab,
     var(--color-canvas) 30%,
@@ -277,49 +274,23 @@ body {
 
 /* Safety rating S+ tile: a light sweep and a soft gold pulse */
 @keyframes sr-sweep {
-  0% {
-    transform: translateX(-140%) skewX(-20deg);
-  }
-  55%,
-  100% {
-    transform: translateX(240%) skewX(-20deg);
-  }
+  0% { transform: translateX(-140%) skewX(-20deg); }
+  55%, 100% { transform: translateX(240%) skewX(-20deg); }
 }
 @keyframes sr-pulse {
-  0%,
-  100% {
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.12),
-      inset 0 0 0 1px rgba(252, 211, 77, 0.35),
-      0 0 8px rgba(252, 211, 77, 0.25);
-  }
-  50% {
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.12),
-      inset 0 0 0 1px rgba(252, 211, 77, 0.55),
-      0 0 14px rgba(252, 211, 77, 0.45);
-  }
+  0%, 100% { box-shadow: inset 0 1px 0 rgba(255,255,255,.12), inset 0 0 0 1px rgba(252,211,77,.35), 0 0 8px rgba(252,211,77,.25); }
+  50% { box-shadow: inset 0 1px 0 rgba(255,255,255,.12), inset 0 0 0 1px rgba(252,211,77,.55), 0 0 14px rgba(252,211,77,.45); }
 }
-.sr-top {
-  animation: sr-pulse 2.6s ease-in-out infinite;
-}
+.sr-top { animation: sr-pulse 2.6s ease-in-out infinite; }
 .sr-top::after {
   content: "";
   position: absolute;
   top: 0;
   bottom: 0;
   width: 40%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 250, 220, 0.45),
-    transparent
-  );
+  background: linear-gradient(90deg, transparent, rgba(255, 250, 220, 0.45), transparent);
   animation: sr-sweep 3.2s ease-in-out infinite;
 }
 @media (prefers-reduced-motion: reduce) {
-  .sr-top,
-  .sr-top::after {
-    animation: none;
-  }
+  .sr-top, .sr-top::after { animation: none; }
 }

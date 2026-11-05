@@ -6,7 +6,6 @@ import {
 } from "../analysis/sessionInsightSummary";
 import { CarSetupCard } from "../components/CarSetupCard";
 import { Card } from "../components/Card";
-import { PageFrame } from "../components/ui/PageFrame";
 import { DuplicateNotice } from "../components/DuplicateNotice";
 import { QualifyingTable } from "../components/QualifyingTable";
 import { SectorComparison } from "../components/SectorComparison";
@@ -105,7 +104,7 @@ export function QualifyingSessionView({
     focusedDriver?.["is-player"] && focusedDriver["car-setup"]?.["is-valid"];
 
   return (
-    <PageFrame className="space-y-6 p-4 sm:space-y-8 sm:p-6">
+    <div className="p-4 sm:p-6 max-w-5xl mx-auto space-y-6 sm:space-y-8">
       <SessionHeader
         session={session}
         focusedDriverIndex={focusedDriverIndex}
@@ -162,6 +161,6 @@ export function QualifyingSessionView({
         count={sessionMeta?.duplicateCount ?? 0}
         isAutoSave={sessionMeta?.isAutoSave}
       />
-    </PageFrame>
+    </div>
   );
 }

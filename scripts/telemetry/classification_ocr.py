@@ -35,7 +35,7 @@ import struct
 import sys
 import urllib.request
 
-VERSION = 1
+VERSION = 2   # bump when the reading changes: every capture is read again
 MAGIC = b"GMCLS1\n"
 HEADER_LEN = 29
 RELEASE = "https://api.github.com/repos/gremigaming/race-stats/releases/tags/telemetry"
@@ -499,7 +499,16 @@ def read_capture(payload):
         for e in es[1:]:
             for k in ("ocr", "votes", "seen"):
                 e.pop(k, None)
+    # the game's session uid (header bytes 7-14): the race viewer finds its race by it
+    uid = None
+    for k in ("participants", "results", "finish_lap"):
+        if payload.get(k):
+            b = base64.b64decode(payload[k])
+            if len(b) >= 15:
+                uid = f"{struct.unpack_from('<Q', b, 7)[0]:016x}"
+                break
     return {"recording": payload.get("recording"), "captured": payload.get("captured"), "frames": frames,
+            "session_uid": uid,
             "finish_time": payload.get("finish_time"), "has_results": bool(results),
             "cars": cars, "check": {"named_cars": checked, "ocr_correct": ok}}
 
