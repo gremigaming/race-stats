@@ -9,6 +9,7 @@ import sys
 from PySide6.QtCore import Q_ARG, QMetaObject, Qt, QTimer, QUrl
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtQml import QQmlApplicationEngine
+from PySide6.QtQuick import QQuickWindow  # noqa: F401  (root wrapped as QQuickWindow -> grabWindow)
 
 DOTS = ["#34d27b", "#34d27b", "#3d8bff", "", "", "", "", ""]
 STATES = {
@@ -39,6 +40,9 @@ def main():
         print("QML failed to load")
         sys.exit(1)
     win = engine.rootObjects()[0]
+    if not isinstance(win, QQuickWindow):
+        import shiboken6
+        win = shiboken6.wrapInstance(shiboken6.getCppPointer(win)[0], QQuickWindow)
     win.setProperty("scaleFactor", 2.0)
     names = list(STATES)
 
