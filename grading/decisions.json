@@ -125,6 +125,80 @@
         "gray_score": 0.0
       }
     },
+    "1104b-3": {
+      "verdict": "#13 Jakubm18_F1 + #19 toni2608 shared",
+      "by": "GreMi",
+      "real": true,
+      "at_fault": [
+        "#13 Jakubm18_F1",
+        "#19 toni2608"
+      ],
+      "severity": 5,
+      "note": "For both toni and jakub, leave some space on the exit, no real incident happend but this could have been a big crash, leave some space on the exit and let each other live.",
+      "at": 1793865946,
+      "parts": [
+        {
+          "t0": 181.4,
+          "t1": 185.9,
+          "real": true,
+          "verdict": "#13 Jakubm18_F1 + #19 toni2608 shared",
+          "tags": [],
+          "kind": "Reckless driving",
+          "note": "",
+          "drivers": [
+            {
+              "car": 11,
+              "name": "#13 Jakubm18_F1",
+              "call": "shared",
+              "severity": 5
+            },
+            {
+              "car": 8,
+              "name": "#19 toni2608",
+              "call": "shared",
+              "severity": 5
+            },
+            {
+              "car": 6,
+              "name": "#21 EthanMoonski",
+              "call": "clear"
+            }
+          ]
+        }
+      ],
+      "kind": "Reckless driving",
+      "drivers": [
+        {
+          "car": 11,
+          "name": "#13 Jakubm18_F1"
+        },
+        {
+          "car": 8,
+          "name": "#19 toni2608"
+        },
+        {
+          "car": 6,
+          "name": "#21 EthanMoonski"
+        }
+      ],
+      "track": "Monza",
+      "date": "2026-11-04",
+      "race_file": "Race_Monza_2026_11_04_19_49_57.json",
+      "recording": "2026-11-04_19-41-26_Monza_Race.gmtel.gz",
+      "replay": "https://gremigaming.github.io/race-stats/f1/race/2026-11-04_19-41-26_Monza_Race?inc=181.4&car=11,8,6",
+      "engine": {
+        "rules": "v1.2",
+        "verdict": "Jakubm18_F1 at fault",
+        "rule": "R2",
+        "severity": 2,
+        "why": "side by side; Jakubm18_F1 moved 3.6 m across into the other car",
+        "at_fault": [
+          "#13 Jakubm18_F1"
+        ],
+        "contacts": 3,
+        "gray_score": 1.27
+      }
+    },
     "1102b-1": {
       "verdict": "Not an incident",
       "by": "GreMi",
