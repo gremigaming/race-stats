@@ -35,6 +35,11 @@ looks like graded ones follows them when they agree.
       having been REPEAT_GAP_M+ apart in between (it came back for it): deliberate, severity 10.
   R5 also covers a car rejoining in front of a car that runs into it: the rejoining car.
 
+  WET (v1.3, GreMi 5 Nov 2026): in rain (light rain, heavy rain or storm at the contact) it is a
+      racing incident a bit sooner: the car behind gets REACT_WET_S to react, must close in at
+      CLOSING_WET_KMH+ to be blamed for running into the back, and a car behind that slid or went
+      off itself just before the contact, closing under SMALL_KMH, is a racing incident.
+
 Severity 1-10: 1 for the contact, plus what it did (slides and spins, cars involved, places
 lost, cars off track) and +1 when one driver is clearly at fault. The incident takes the
 highest severity of its contacts that blame someone (or of the first contact when none does).
@@ -53,7 +58,7 @@ import gmtel  # noqa: E402
 import incident_replays  # noqa: E402
 import race_bundles as rb  # noqa: E402
 
-RULES = "v1.2"       # bump when a rule changes: fault_engine.py judges every race again
+RULES = "v1.3"       # bump when a rule changes: fault_engine.py judges every race again
 ALONGSIDE_M = 4.0    # less than this apart along the track = alongside (a car is ~5.6 m long)
 MOVE_M = 1.0         # moving across this much in the last 1.2 s counts as moving into the other car
 MOVE_MORE_M = 0.7    # ... and this much more than the other car did
@@ -70,6 +75,9 @@ SHARED_M = 2.0       # both moved across this much into each other = shared faul
 REPEAT_S = 10.0      # hitting the same car again this soon = deliberate ...
 REPEAT_GAP_M = 35.0  # ... after the two cars had been this far apart (not one long scrape)
 UPSET_DEG = 20
+WET = 3              # weather code 3+ (light rain, heavy rain, storm) = wet
+REACT_WET_S = 1.5    # wet: the car ahead got upset this soon before = no time to react
+CLOSING_WET_KMH = 10 # wet: the car behind must close in this fast to be blamed for a rear-end
 
 
 def ai_at_start(path):
@@ -87,6 +95,20 @@ class Judge:
         self.race = incident_replays.Race(sess)
         self.ai = ai_at_start(path)
         self.slip = rb.slip_angles(frames)
+        self.weather = list(getattr(sess, "weather", None) or [])
+
+    def weather_at(self, t):
+        """The weather code at session time t (0 clear .. 5 storm), or None when unknown."""
+        w = None
+        for t0, code in self.weather:
+            if t0 > t:
+                break
+            w = code
+        return w if w is not None else (self.weather[0][1] if self.weather else None)
+
+    def wet(self, t):
+        w = self.weather_at(t)
+        return w is not None and w >= WET
 
     def upset(self, car, t0, t1):
         """First time in [t0, t1] the car slid (UPSET_DEG+) or had 2+ wheels off, or None."""
@@ -136,6 +158,9 @@ class Judge:
             A0, B0 = self.at(t - dt).get(a), self.at(t - dt).get(b)
             if A0 and B0 and abs(A0[4] - B0[4]) > abs(f["closing_a_kmh"]):
                 f["closing_a_kmh"] = A0[4] - B0[4]
+        A1 = self.at(t - 0.2)   # pedals and steering just before the contact (how it happened)
+        f["brake"] = {i: round(float(A1[i][6]), 2) for i in (a, b) if i in A1}
+        f["steer"] = {i: round(float(A1[i][7]), 2) for i in (a, b) if i in A1}
         f["moved"], f["rejoin"] = {}, {}
         if track:
             oa, ob = self.offset(track, a, t - 0.3)[0], self.offset(track, b, t - 0.3)[0]
@@ -208,10 +233,12 @@ class Judge:
         ma, mb = f["moved"].get(a, 0), f["moved"].get(b, 0)
         fault, rule, why = None, None, ""
         alongside = abs(f["a_ahead_m"]) < ALONGSIDE_M
+        wet = self.wet(c["t"])
+        react_s, closing_kmh = (REACT_WET_S, CLOSING_WET_KMH) if wet else (REACT_S, CLOSING_KMH)
         front, back = (a, b) if f["a_ahead_m"] > 0 else (b, a)
         closing = f["closing_a_kmh"] if back == a else -f["closing_a_kmh"]
         rej = [i for i in (a, b) if f["rejoin"].get(i) and f["moved"].get(i, 0) >= MOVE_M]
-        if not rej and f.get("off_n", {}).get(front, 0) >= 2 and not alongside and closing >= CLOSING_KMH:
+        if not rej and f.get("off_n", {}).get(front, 0) >= 2 and not alongside and closing >= closing_kmh:
             rej = [front]
         if earlier:
             rule = "R7"
@@ -234,13 +261,16 @@ class Judge:
             rule = "R2"
             why = (f"side by side; {name(fault)} moved {max(ma, mb):.1f} m across into the other car" if fault is not None
                    else f"side by side, both or neither moved across ({ma:.1f} m / {mb:.1f} m)")
-        elif self.upset(front, c["t"] - REACT_S, c["t"] - 0.1) is not None:
+        elif self.upset(front, c["t"] - react_s, c["t"] - 0.1) is not None:
             rule = "R7"
-            why = f"{name(front)} slid or went off just before; {name(back)} had no time to react"
-        elif f["moved"].get(front, 0) >= SWEEP_M and f["moved"][front] > f["moved"].get(back, 0) + MOVE_MORE_M and closing < CLOSING_KMH:
+            why = f"{name(front)} slid or went off just before; {name(back)} had no time to react" + (" (wet track)" if wet else "")
+        elif wet and closing < SMALL_KMH and self.upset(back, c["t"] - REACT_WET_S, c["t"] - 0.1) is not None:
+            rule = "R7"
+            why = f"{name(back)} lost the car on a wet track just before, closing at only {closing:.0f} km/h: racing incident"
+        elif f["moved"].get(front, 0) >= SWEEP_M and f["moved"][front] > f["moved"].get(back, 0) + MOVE_MORE_M and closing < closing_kmh:
             fault, rule = front, "R2"
             why = f"{name(front)} was ahead but swept {f['moved'][front]:.1f} m across into {name(back)}"
-        elif closing >= CLOSING_KMH:
+        elif closing >= closing_kmh:
             fault, rule = back, "R3"
             why = f"{name(back)} ran into the back of {name(front)}, closing at {closing:.0f} km/h"
         elif inc.get("kind") == "tap" and not eff["places_lost"]:
@@ -248,7 +278,7 @@ class Judge:
                     "why": f"light touch from behind ({closing:.0f} km/h), nobody slowed, slid or went off", "features": f, "effects": eff}
         else:
             rule = "R3"
-            why = f"{name(back)} was behind but hardly closing ({closing:.0f} km/h)"
+            why = f"{name(back)} was behind but hardly closing ({closing:.0f} km/h)" + (" on a wet track" if wet else "")
         harmless = eff["max_slide_deg"] <= SLIP_HARM and not eff["places_lost"] and not eff["off_track"]
         if harmless and ((rule == "R3" and fault is not None and closing < TAP_KMH) or (rule == "R2" and max(ma, mb) < TAP_MOVE_M)):
             return {"verdict": "Not an incident", "at_fault": None, "rule": "R1", "severity": 1,
@@ -322,3 +352,7 @@ if __name__ == "__main__":
     sess, incs, vs = judge_race(sys.argv[1])
     for inc, v in zip(incs, vs):
         print(f"L{inc['lap']} {inc['t0']:7.1f}s {len(inc['drivers'])} cars  {v['rule']:3} sev {v['severity']:2}  {v['verdict']}: {v['why']}")
+
+
+# incident types for the staff page live in incident_kinds.py (no numpy: safety_rating.py uses them too)
+from incident_kinds import KINDS, WEATHER, kind_of, phase_of, weather_name  # noqa: E402,F401

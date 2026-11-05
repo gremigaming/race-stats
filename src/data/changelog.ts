@@ -10,6 +10,14 @@ export interface ChangelogEntry {
 // raw commit history also contains routine uploads and staff-only corrections.
 const changelog: ChangelogEntry[] = [
   {
+    id: "wet-weather-incidents",
+    date: "2026-11-05",
+    type: "feat",
+    message:
+      "Incidents in the wet are judged more leniently: the car behind gets more time to react and a slow slide into another car counts as a racing incident.",
+    destination: "safety",
+  },
+  {
     id: "track-sorting-options",
     date: "2026-11-04",
     type: "feat",

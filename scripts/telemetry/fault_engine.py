@@ -43,7 +43,62 @@ def feats(p):
     return {"ahead_m": f.get("a_ahead_m"), "closing_kmh": round(f.get("closing_a_kmh") or 0, 1),
             "moved": {str(k): v for k, v in (f.get("moved") or {}).items()},
             "rejoin": [int(k) for k, v in (f.get("rejoin") or {}).items() if v],
-            "slide_deg": eff.get("max_slide_deg"), "places_lost": eff.get("places_lost"), "off_track": eff.get("off_track")}
+            "slide_deg": eff.get("max_slide_deg"), "places_lost": eff.get("places_lost"), "off_track": eff.get("off_track"),
+            "brake": {str(k): v for k, v in (f.get("brake") or {}).items()},
+            "steer": {str(k): v for k, v in (f.get("steer") or {}).items()}}
+
+
+BATTLE_M = 5.0       # less than this apart along the track and ...
+BATTLE_SIDE_M = 8.0  # ... this close in a straight line = side by side (wheel to wheel)
+BATTLE_END_S = 2.0   # a battle ends when the two cars have not been side by side for this long
+
+
+def battles(j, incs):
+    """Wheel-to-wheel per car, for the staff page's driver summaries: seconds side by side, battles
+    (side-by-side spells with one car), battles without a contact, and battles that ended with
+    the car ahead of the other (on track, not in the pits). Sampled every 0.25 s."""
+    tl = j.track_len
+    lap_m = lambda x: x[11] * tl + x[10] if tl else x[10]  # noqa: E731
+    touched = {}
+    for inc in incs:
+        for c in inc["contacts"]:
+            touched.setdefault(frozenset((c["a"], c["b"])), []).append(c["t"])
+    open_, out = {}, {}
+    last_t, step = None, 0.25
+
+    def close(pair, b):
+        a_, b_ = sorted(pair)
+        clean = not any(b["t0"] - 0.5 <= t <= b["last"] + 0.5 for t in touched.get(pair, []))
+        end = j.at(b["last"] + BATTLE_END_S)
+        for me, other in ((a_, b_), (b_, a_)):
+            s = out.setdefault(me, {"side_s": 0.0, "battles": 0, "clean": 0, "passes": 0})
+            s["battles"] += 1
+            s["clean"] += clean
+            if me in end and other in end and end[me][12] and end[other][12] and end[me][12] < end[other][12] and b["start_pos"].get(me, 99) > end[me][12]:
+                s["passes"] += 1
+
+    for t, cars in j.frames:
+        if last_t is not None and t - last_t < step:
+            continue
+        last_t = t
+        live = [i for i in cars if i not in j.ai and cars[i][4] > 60]
+        for x in range(len(live)):
+            for y in range(x + 1, len(live)):
+                a, b = live[x], live[y]
+                A, B = cars[a], cars[b]
+                if abs(lap_m(A) - lap_m(B)) < BATTLE_M and ((A[0] - B[0]) ** 2 + (A[1] - B[1]) ** 2) < BATTLE_SIDE_M ** 2:
+                    pair = frozenset((a, b))
+                    bt = open_.get(pair)
+                    if bt is None or t - bt["last"] > BATTLE_END_S:
+                        if bt is not None:
+                            close(pair, bt)
+                        bt = open_[pair] = {"t0": t, "last": t, "start_pos": {a: A[12], b: B[12]}}
+                    bt["last"] = t
+                    for i in (a, b):
+                        out.setdefault(i, {"side_s": 0.0, "battles": 0, "clean": 0, "passes": 0})["side_s"] += step
+    for pair, bt in open_.items():
+        close(pair, bt)
+    return {str(k): dict(v, side_s=round(v["side_s"], 1)) for k, v in out.items()}
 
 
 def judge(args):
@@ -61,11 +116,19 @@ def judge(args):
     keep = lambda p: {"a": p["a"], "b": p["b"], "t": round(p["t"] + off, 2), "rule": p["rule"], "severity": p["severity"],  # noqa: E731
                       "verdict": p["verdict"], "why": p["why"], "at_fault": p.get("at_fault_all") or [],
                       **({"f": feats(p)} if p.get("features") else {})}
+    try:
+        wheel = battles(j, incs)
+    except Exception as ex:   # the summaries can do without it; the verdicts can't
+        print(file, ": battles not counted:", ex)
+        wheel = {}
     data = {"rules": verdicts.RULES, "recording": rec, "offset": round(off, 2), "matched": round(share, 2),
+            "weather": [[round(t + off, 1), w] for t, w in j.weather], "track_temp": sess.info.get("track_temp"),
+            "battles": wheel,
             "incidents": [{"t0": round(inc["t0"] + off, 2), "t1": round(inc["t1"] + off, 2), "lap": inc["lap"],
                            "kind": inc.get("kind"), "cars": [d["car"] for d in inc["drivers"]],
                            "roles": {str(d["car"]): d.get("role") for d in inc["drivers"]},
                            "rule": v["rule"], "severity": v["severity"], "verdict": v["verdict"], "why": v["why"],
+                           "weather": j.weather_at(inc["t0"]),
                            "at_fault": v.get("at_fault_all") or [], "contacts": [keep(p) for p in v["contacts"]]}
                           for inc, v in zip(incs, vs)]}
     os.makedirs(os.path.dirname(out), exist_ok=True)
