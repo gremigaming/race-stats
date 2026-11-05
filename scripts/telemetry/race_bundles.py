@@ -36,7 +36,7 @@ import gmtel  # noqa: E402
 RELEASE = "https://api.github.com/repos/gremigaming/race-stats/releases/tags/telemetry"
 DOWNLOAD = "https://github.com/gremigaming/race-stats/releases/download/telemetry/"
 
-VERSION = 10         # bump to rebuild every bundle (10: fault engine verdicts per incident)
+VERSION = 11         # bump to rebuild every bundle (10: fault engine verdicts per incident, 11: names by showOnlineNames)
 KEEP = 40            # newest races published on the site (R2 keeps everything later)
 CHUNK_SECONDS = 10
 CHUNK_HEAD = struct.Struct("<4sBBHd")
@@ -104,8 +104,10 @@ def team_name(tid):
 
 
 def shown_name(p):
-    """Same rule as live/race.py: hidden-name players (and the game's anonymous "Player") only by race number."""
-    if (p.get("ai") or p.get("public")) and p.get("name") not in (None, "", "Player"):
+    """Same rule as live/race.py: hidden-name players (and the game's anonymous "Player") only by race number.
+    Hidden = the game hides the name (showOnlineNames off), not a restricted telemetry setting."""
+    shown = p.get("shown") if p.get("shown") is not None else p.get("public")
+    if (p.get("ai") or shown) and p.get("name") not in (None, "", "Player"):
         return p["name"]
     return f"Car #{p.get('race_number', 0)}"
 

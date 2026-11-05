@@ -14,7 +14,7 @@ const changelog: ChangelogEntry[] = [
     date: "2026-11-05",
     type: "fix",
     message:
-      "Drivers with hidden names read from the classification screen now show by name in the race viewer and Incidents viewer too (no more \"Car #69\"), and in the qualifying before that race. A name read slightly differently in two races counts as one driver.",
+      "Drivers with hidden names read from the classification screen now show by name in the race viewer and Incidents viewer too (no more \"Car #69\"), and in the qualifying before that race. A name read slightly differently in two races counts as one driver. Drivers with private telemetry but a visible name are no longer shown as \"Car #N\" in the viewers.",
     destination: "race",
   },
   {

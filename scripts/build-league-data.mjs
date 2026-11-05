@@ -297,7 +297,6 @@ function screenNames(stream, known) {
   const found = []; // {i, file, index, name, read, votes}
   stream.forEach((s, i) => {
     const hidden = s.cars.filter((c) => c.hidden);
-    if (!hidden.length) return;
     const withLap = Object.entries(s.bests).filter(([, ms]) => ms > 0);
     const numbered = Object.entries(s.numbers).filter(([, n]) => n != null);
     const cap = ocrCaptures.find((c) => {
@@ -309,6 +308,7 @@ function screenNames(stream, known) {
     });
     if (!cap) return;
     if (cap.session_uid) captureOf.set(s.name, cap.session_uid);
+    if (!hidden.length) return;
     const present = new Set(s.cars.filter((c) => !c.hidden).map((c) => c.name.toLowerCase()));
     for (const c of hidden) {
       const e = cap.cars[c.index];
@@ -580,9 +580,15 @@ writeFileSync(join(OUT, "merges.json"), JSON.stringify({ merges: mergeList }, nu
 // The race viewer and incident viewer draw names from the telemetry ("Car #69"): this file gives
 // them the merged names, per game session uid (src/viewer/format.ts loadManifest).
 const viewerNames = {};
-for (const [file, cars] of merged) {
-  const uid = captureOf.get(file);
-  if (uid) viewerNames[uid] = Object.fromEntries(cars);
+// Shown names too: the recordings only carry a name when the driver's telemetry is public (older
+// bundles and the live server's copies), the race file has it whenever the game shows it.
+const slotsByFile = new Map(firstPass.map((s) => [s.name, s.slots]));
+for (const [file, uid] of captureOf) {
+  const cars = {};
+  for (const [ix, slot] of Object.entries(slotsByFile.get(file) ?? {}))
+    if (!slot.ai && !slot.hidden && slot.name && slot.name !== "Player") cars[ix] = slot.name;
+  for (const [ix, name] of merged.get(file) ?? []) cars[ix] = name;
+  if (Object.keys(cars).length) viewerNames[uid] = cars;
 }
 writeFileSync(join(OUT, "viewer-names.json"), JSON.stringify({ sessions: viewerNames }));
 console.log(`hidden-name merges: ${mergeList.filter((m) => !m.off).length} (${mergeList.filter((m) => m.off).length} undone by staff)`);
