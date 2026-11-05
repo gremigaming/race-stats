@@ -79,6 +79,14 @@ export interface MapPin {
   dim?: boolean;
 }
 
+/** A corner's usual braking point (the incident viewer): on the track at (x, z), track normal (nx, nz). */
+export interface BrakeMark {
+  x: number;
+  z: number;
+  nx: number;
+  nz: number;
+}
+
 /** The line a car drove (the incident viewer): world x, z pairs; the first `done` points are driven so far. */
 export interface Trail {
   color: string;
@@ -105,6 +113,8 @@ export class RaceScene {
   private chipLayer = new Container();
   private marks = new Graphics();
   private pinG = new Graphics();
+  private brakeG = new Graphics();
+  private brakesDrawn = false;
   private pinText: Text[] = [];
   private pinKey: string[] = [];
   private trailG = new Graphics();
@@ -160,6 +170,8 @@ export class RaceScene {
   private followAt = -Infinity;
   /** Smallest frame (metres) the multi-car camera zooms to. */
   minFrame = 60;
+  /** How far the user dragged the view away from the followed cars (world metres); it keeps following. */
+  private panOff = { x: 0, z: 0 };
   /** In follow mode, turn the map so the (first) followed car points up. */
   autoRotate = false;
   /** The incident marker: where, and how strongly to show it (0..1). */
@@ -182,6 +194,8 @@ export class RaceScene {
   /** Map markers and car lines (the incident viewer), and what happens when a marker is clicked or hovered. */
   pins: MapPin[] = [];
   trails: Trail[] = [];
+  /** Median braking point per corner, drawn as a little brake board beside the track once zoomed in. */
+  brakes: BrakeMark[] = [];
   onPin: (id: string) => void = () => {};
   onPinHover: (id: string | null, at: { x: number; y: number } | null) => void = () => {};
   private hoveredPin: string | null = null;
@@ -226,7 +240,7 @@ export class RaceScene {
     this.lookRoot.addChild(this.world);
     this.lookRoot.filterArea = this.app.screen;
     this.chipLayer.addChild(this.leaders);
-    this.overlay.addChild(this.pinG, this.marks, this.dotLayer, this.chipLayer);
+    this.overlay.addChild(this.brakeG, this.pinG, this.marks, this.dotLayer, this.chipLayer);
     this.app.stage.addChild(this.lookRoot, this.overlay);
     this.app.ticker.add((t) => this.tick(t.deltaMS));
     const c = this.app.canvas;
@@ -307,6 +321,7 @@ export class RaceScene {
     this.mode = "follow";
     this.followCars = [...new Set(cars)];
     this.minFrame = minFrame;
+    this.panOff = { x: 0, z: 0 };
     this.zoomBias = 1;
     if (this.followCars.length === 1) this.followScale = Math.max(this.cam.scale, 3.5);
     this.followAt = this.clockMs;
@@ -488,10 +503,11 @@ export class RaceScene {
     }
     if (this.mode === "follow") {
       if (!inFrame.length) return null;
+      const o = this.panOff;
       if (inFrame.length === 1 && this.followCars.length === 1)
-        return this.centreOn(inFrame[0].x, inFrame[0].z, this.followScale, rot);
-      const f = this.fit(inFrame, rot, 0.2, this.minFrame);
-      return this.centreOnScaled(f, this.zoomBias);
+        return this.centreOn(inFrame[0].x + o.x, inFrame[0].z + o.z, this.followScale, rot);
+      const f = this.centreOnScaled(this.fit(inFrame, rot, 0.2, this.minFrame), this.zoomBias);
+      return { ...f, x: f.x + o.x, z: f.z + o.z };
     }
     if (this.mode === "tv") {
       if (!inFrame.length) return null;
@@ -560,7 +576,7 @@ export class RaceScene {
       this.cam.rot = wrap(this.cam.rot + wrap(aim.rot - this.cam.rot) * k);
       if (lock && kp >= 1 && this.followCars.length === 1 && inFrame.length === 1) {
         // exact: centred for the scale and rotation actually shown this frame, not the ones being eased to
-        const c = this.centreOn(inFrame[0].x, inFrame[0].z, this.cam.scale, this.cam.rot);
+        const c = this.centreOn(inFrame[0].x + this.panOff.x, inFrame[0].z + this.panOff.z, this.cam.scale, this.cam.rot);
         this.cam.x = c.x;
         this.cam.z = c.z;
       }
@@ -622,6 +638,7 @@ export class RaceScene {
     this.drawRoofs(dtMs);
     this.drawDots(1 - carAlpha);
     this.drawTrails();
+    this.drawBrakes();
     this.drawPins();
     this.drawMarks(outside);
     this.drawChips(carAlpha, dtMs);
@@ -743,7 +760,7 @@ export class RaceScene {
     for (const d of this.dots.values()) if (d.seen !== n) d.c.visible = false;
   }
 
-  /** Each car's line through an incident: the whole path faint, the part driven so far solid with a dark edge. */
+  /** Each car's line through an incident: only the part driven so far, see-through, under the cars. */
   private drawTrails() {
     const g = this.trailG;
     if (!this.trails.length) {
@@ -769,12 +786,6 @@ export class RaceScene {
       }
     };
     const style = { cap: "round" as const, join: "round" as const };
-    for (const tr of this.trails) {
-      const n = tr.pts.length / 2;
-      if (n < 2) continue;
-      line(tr.pts, n);
-      g.stroke({ width: 2.5 * px, color: tr.color, alpha: 0.35, ...style });
-    }
     const driven = (tr: Trail, d: number) => {
       line(tr.pts, d);
       const h = tr.head;
@@ -786,9 +797,33 @@ export class RaceScene {
       const d = Math.min(tr.done, tr.pts.length / 2);
       if (d < 1) continue;
       driven(tr, d);
-      g.stroke({ width: 7 * px, color: 0x000000, alpha: 0.5, ...style });
+      g.stroke({ width: 5.5 * px, color: 0x000000, alpha: 0.22, ...style });
       driven(tr, d);
-      g.stroke({ width: 3.5 * px, color: tr.color, alpha: 1, ...style });
+      g.stroke({ width: 3 * px, color: tr.color, alpha: 0.6, ...style });
+    }
+  }
+
+  /** Brake boards: a bar across the track at the usual braking point and a small board on a post beside it. */
+  private drawBrakes() {
+    const g = this.brakeG;
+    const show = this.brakes.length > 0 && this.cam.scale >= 0.9;
+    if (!show) {
+      if (this.brakesDrawn) g.clear();
+      this.brakesDrawn = false;
+      return;
+    }
+    g.clear();
+    this.brakesDrawn = true;
+    const fade = clamp((this.cam.scale - 0.9) / 0.8, 0, 1);
+    for (const b of this.brakes) {
+      const a = this.toScreen(b.x - b.nx * 6, b.z - b.nz * 6);
+      const c = this.toScreen(b.x + b.nx * 6, b.z + b.nz * 6);
+      const post = this.toScreen(b.x + b.nx * 12, b.z + b.nz * 12);
+      g.moveTo(a.x, a.y).lineTo(c.x, c.y).stroke({ width: 2, color: 0xffffff, alpha: 0.55 * fade });
+      g.moveTo(c.x, c.y).lineTo(post.x, post.y).stroke({ width: 1, color: 0xffffff, alpha: 0.5 * fade });
+      // the board: white with three black stripes, like the 100/50 m boards
+      g.roundRect(post.x - 5, post.y - 7, 10, 14, 1.5).fill({ color: 0xffffff, alpha: 0.95 * fade }).stroke({ width: 1, color: 0x0c0e11, alpha: 0.8 * fade });
+      for (let k = 0; k < 3; k++) g.rect(post.x - 3.5, post.y - 5 + k * 4, 7, 1.6).fill({ color: 0x0c0e11, alpha: 0.9 * fade });
     }
   }
 
@@ -806,19 +841,16 @@ export class RaceScene {
       const hot = pin.active || pin.id === this.hoveredPin;
       const col = pin.color;
       const r = pin.r;
+      // the marker: a soft halo, a dark rim, the type colour with a little gloss, the number in the middle
       if (pin.active) {
-        const pulse = (this.clockMs / 900) % 1;
-        g.circle(p.x, p.y, r + pulse * 22).stroke({ width: 2.5, color: col, alpha: 1 - pulse });
+        const pulse = (this.clockMs / 1100) % 1;
+        g.circle(p.x, p.y, r + 3 + pulse * 20).stroke({ width: 2, color: col, alpha: 0.9 * (1 - pulse) });
       }
-      g.circle(p.x, p.y, r + 2).stroke({ width: 5, color: 0x0c0e11, alpha: 0.45 * a });
-      g.circle(p.x, p.y, r).fill({ color: col, alpha: (hot ? 0.3 : 0.18) * a });
-      g.circle(p.x, p.y, r).stroke({ width: hot ? 3.5 : 3, color: col, alpha: a });
-      const c = r * 0.42;
-      g.moveTo(p.x - c, p.y).lineTo(p.x + c, p.y).moveTo(p.x, p.y - c).lineTo(p.x, p.y + c).stroke({ width: 2, color: col, alpha: a });
-      // the number in a small badge on the ring's upper right
-      const bx = p.x + r * 0.78;
-      const by = p.y - r * 0.78;
-      if (pin.label) g.circle(bx, by, 7.5).fill({ color: col, alpha: a }).circle(bx, by, 7.5).stroke({ width: 1.5, color: 0x0c0e11, alpha: 0.8 * a });
+      g.circle(p.x, p.y, r + 6).fill({ color: col, alpha: (hot ? 0.28 : 0.16) * a });
+      g.circle(p.x, p.y, r + 1.75).fill({ color: 0x0c0e11, alpha: 0.9 * a });
+      g.circle(p.x, p.y, r).fill({ color: col, alpha: a });
+      g.ellipse(p.x, p.y - r * 0.38, r * 0.62, r * 0.38).fill({ color: 0xffffff, alpha: 0.2 * a });
+      if (hot) g.circle(p.x, p.y, r + 1.75).stroke({ width: 2, color: 0xffffff, alpha: 0.95 });
       if (!pin.label) continue;
       let t = this.pinText[n];
       if (!t) {
@@ -828,16 +860,17 @@ export class RaceScene {
         this.overlay.addChildAt(t, this.overlay.getChildIndex(this.pinG) + 1);
       }
       if (t.text !== pin.label) t.text = pin.label;
-      const key = `${inkOn(pin.color)}|9`;
+      const size = pin.r >= 13 ? 12 : 11;
+      const key = `${inkOn(pin.color)}|${size}`;
       if (this.pinKey[n] !== key) {
         // a style change re-renders the text: only when it really changes
         this.pinKey[n] = key;
         t.style.fill = inkOn(pin.color);
-        t.style.fontSize = 9;
+        t.style.fontSize = size;
       }
       t.alpha = a;
       t.visible = true;
-      t.position.set(p.x + pin.r * 0.78, p.y - pin.r * 0.78 + 0.5);
+      t.position.set(p.x, p.y + 0.5);
       n++;
     }
     for (let k = n; k < this.pinText.length; k++) this.pinText[k].visible = false;
@@ -1104,12 +1137,22 @@ export class RaceScene {
       if (this.drag.rotate) {
         this.rotateBy(dx * 0.006);
       } else {
-        if (this.mode !== "free") this.free();
         const { scale, rot } = this.cam;
         const c = Math.cos(rot);
         const s = Math.sin(rot);
-        this.cam.x -= (dx * c + dy * s) / scale;
-        this.cam.z -= (-dx * s + dy * c) / scale;
+        const wx = (dx * c + dy * s) / scale;
+        const wz = (-dx * s + dy * c) / scale;
+        if (this.mode === "follow") {
+          // following: dragging only shifts the view, the camera keeps following the cars (GreMi, 5 Nov 2026)
+          this.panOff.x -= wx;
+          this.panOff.z -= wz;
+          this.cam.x -= wx;
+          this.cam.z -= wz;
+        } else {
+          if (this.mode !== "free") this.free();
+          this.cam.x -= wx;
+          this.cam.z -= wz;
+        }
       }
       this.drag.x = p.x;
       this.drag.y = p.y;

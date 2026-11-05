@@ -34,8 +34,8 @@ export function useRaceIndex() {
   return useQuery({ queryKey: ["race-index"], queryFn: loadRaceIndex, staleTime: 60_000 });
 }
 
-/** Races one evening apart are one stream: a new stream starts after a 4 h gap. */
-export function streamOf(races: RaceRef[], uid: string): RaceRef[] {
+/** Every stream, newest first, each in race order: a new stream starts after a 4 h gap. */
+export function streamsOf(races: RaceRef[]): RaceRef[][] {
   const asc = [...races].sort((a, b) => raceTime(a) - raceTime(b));
   const groups: RaceRef[][] = [];
   for (const r of asc) {
@@ -43,7 +43,12 @@ export function streamOf(races: RaceRef[], uid: string): RaceRef[] {
     if (g && raceTime(r) - raceTime(g[g.length - 1]) < 4 * 3600_000) g.push(r);
     else groups.push([r]);
   }
-  return groups.find((g) => g.some((r) => r.uid === uid)) ?? [];
+  return groups.reverse();
+}
+
+/** The stream (one evening) a race belongs to. */
+export function streamOf(races: RaceRef[], uid: string): RaceRef[] {
+  return streamsOf(races).find((g) => g.some((r) => r.uid === uid)) ?? [];
 }
 
 /** The manifests of these races (cached: a finished race never changes). */

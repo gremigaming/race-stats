@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState, type MutableRefObject } from "rea
 import type { RaceIncident, RaceManifest } from "../../viewer/format";
 import { RaceScene, type MapPin, type Trail } from "../../viewer/scene";
 import { ChunkStore, type CarState } from "../../viewer/store";
+import { brakePoints } from "./brakes";
 
 /**
  * The incident viewer's map (GreMi, 5 Nov 2026): the full track of one race with a marker per
@@ -16,6 +17,9 @@ const HOLD = 1.2; // s to hold the last frame before zooming out
 
 /** Distinct colours for the cars in an incident (team colours can be the same for teammates). */
 export const CAR_COLORS = ["#ff8a1f", "#4fb6ff", "#a3e635", "#f472b6", "#facc15", "#c084fc"];
+
+/** preview: opened, the cars frozen at the first contact and the camera on that part of the track (click again to play). */
+export type Phase = "preview" | "loading" | "playing" | "done";
 
 export interface Clock {
   t: number;
@@ -46,7 +50,7 @@ export function IncidentMap(props: {
   cars: number[];
   clock: MutableRefObject<Clock>;
   onPin: (id: string) => void;
-  onTick: (t: number, playing: boolean, phase: "loading" | "playing" | "done") => void;
+  onTick: (t: number, playing: boolean, phase: Phase) => void;
   onSeries: (s: IncidentSeries | null) => void;
 }) {
   const { manifest, base } = props;
@@ -67,7 +71,7 @@ export function IncidentMap(props: {
     const giveUp = performance.now() + 15000;
     let lastUi = 0;
     let doneAt = 0; // performance.now() the incident finished
-    let phase: "loading" | "playing" | "done" = "done";
+    let phase: Phase = "done";
     let seenRun = -1;
     let seenInc: string | null = null;
     const keyOf = (i: RaceIncident | null) => (i ? `${i.t0}|${i.t1}` : null);
@@ -118,7 +122,7 @@ export function IncidentMap(props: {
       const now = performance.now();
       const key = keyOf(inc);
       if (key !== seenInc || c.run !== seenRun) {
-        // a new incident (or a replay): back to its start, fly in on its cars
+        const fresh = key !== seenInc;
         seenInc = key;
         seenRun = c.run;
         if (inc) {
@@ -127,11 +131,19 @@ export function IncidentMap(props: {
             trailsFor = null;
             live.current.onSeries(null);
           }
-          c.t = inc.t0 - PRE;
-          c.playing = true;
-          phase = "loading";
-          s.pins = [];
-          s.follow(cars, 45);
+          if (fresh) {
+            // first click: show where it happened, the cars at the first contact
+            c.t = inc.t0;
+            c.playing = false;
+            phase = "preview";
+            s.follow(cars, 110);
+          } else {
+            // play (a second click, Play or Replay): from the start, flown in on its cars
+            c.t = inc.t0 - PRE;
+            c.playing = true;
+            phase = "loading";
+            s.follow(cars, 45);
+          }
         } else {
           trails = [];
           trailsFor = null;
@@ -143,12 +155,13 @@ export function IncidentMap(props: {
       if (inc) {
         const from = inc.t0 - PRE;
         const to = inc.t1 + POST;
+        store.want(from, 1);
         store.want(Math.min(Math.max(c.t, from), to), 1);
         store.want(to, 1);
         if (trailsFor !== key) sampleTrails(inc, cars);
         const ready = mapOk && store.loaded(c.t) && trailsFor === key;
         if (phase === "loading" && ready) phase = "playing";
-        if (phase === "done" && c.t < to - 0.05) {
+        if ((phase === "done" || phase === "preview") && c.t < to - 0.05 && c.playing) {
           // moved back into the incident (the charts): fly in again
           phase = "playing";
           s.follow(cars, 45);
@@ -166,22 +179,23 @@ export function IncidentMap(props: {
           phase = "done";
           s.showTrack();
         }
-        if (phase !== "done") states = store.sample(c.t, pool);
+        if (phase !== "done" && store.loaded(c.t)) states = store.sample(c.t, pool);
         // the driven line: every sample up to now, then on to exactly where the car is this frame
         const k = Math.max(0, Math.min(Math.floor((c.t - from) / STEP + 1e-6) + 1, Math.round((to - from) / STEP) + 1));
+        const whole = phase === "done" || phase === "preview";
         trails.forEach((tr, i) => {
-          tr.done = phase === "done" ? tr.pts.length / 2 : k;
-          const st = phase === "done" ? undefined : states.find((x) => x.car === cars[i]);
+          tr.done = whole ? tr.pts.length / 2 : k;
+          const st = whole ? undefined : states.find((x) => x.car === cars[i]);
           tr.head = st ? { x: st.x, z: st.z } : null;
         });
         s.trails = trails;
-        if (c.t >= inc.t0 && c.t <= inc.t1 + 1 && phase !== "done") {
+        if (c.t >= inc.t0 && c.t <= inc.t1 + 1 && phase !== "done" && phase !== "preview") {
           marker.x = inc.x;
           marker.z = inc.z;
           marker.strength = c.t > inc.t1 + 0.3 ? 1 - (c.t - inc.t1 - 0.3) / 0.7 : 1;
           s.incident = marker;
         } else s.incident = null;
-        s.pins = phase === "done" ? live.current.pins : [];
+        s.pins = phase === "done" || phase === "preview" ? live.current.pins : [];
       } else {
         s.trails = [];
         s.incident = null;
@@ -201,12 +215,21 @@ export function IncidentMap(props: {
     s.onPinHover = (id, at) => setTip(id && at ? { id, x: at.x, y: at.y } : null);
     s.showTrack();
     scene.current = s;
+    // each corner's usual braking point (two laps of the whole field), once the map is up
+    let gone = false;
+    window.setTimeout(() => {
+      if (!gone)
+        void brakePoints(manifest, base).then((b) => {
+          if (!gone) s.brakes = b;
+        });
+    }, 1500);
     const timer = window.setInterval(() => {
       const v = performance.now() > giveUp ? 1 : s.mapProgress();
       setMapPct(v);
       if (v >= 1) window.clearInterval(timer);
     }, 150);
     return () => {
+      gone = true;
       window.clearInterval(timer);
       scene.current = null;
       try {

@@ -1,7 +1,7 @@
 import { Clapperboard, Flame, Pause, Play, RotateCcw, ShieldCheck, Swords, TriangleAlert, Trophy, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
-import { chronological, biggestFirst, chunkStart, raceTime, rowsOf, streamOf, useManifests, useRaceIndex, type RaceRef, type Row } from "../components/incidents/data";
+import { chronological, biggestFirst, chunkStart, raceTime, rowsOf, streamOf, streamsOf, useManifests, useRaceIndex, type RaceRef, type Row } from "../components/incidents/data";
 import { IncidentCharts } from "../components/incidents/IncidentCharts";
 import { CAR_COLORS, IncidentMap, type Clock, type IncidentSeries } from "../components/incidents/IncidentMap";
 import { KIND_META, KIND_ORDER, type IncidentKind } from "../viewer/incidentKinds";
@@ -91,7 +91,11 @@ export function IncidentsPage() {
     return list;
   }, [races, race, range, track]);
   /** Every race of the selected race's stream (one evening, all tracks). */
-  const streamRaces = useMemo(() => (race ? streamOf(races, race.uid) : []), [races, race]);
+  // (the newest stream by default, stepped with the arrows; never tied to the race or track picked below)
+  const streams = useMemo(() => streamsOf(races), [races]);
+  const streamParam = params.get("stream");
+  const streamIdx = Math.max(0, streams.findIndex((g) => g.some((r) => r.uid === streamParam)));
+  const streamRaces = useMemo(() => streams[streamIdx] ?? [], [streams, streamIdx]);
   const uids = useMemo(
     () => [...new Set([raceUid, ...inRange.map((r) => r.uid), ...streamRaces.map((r) => r.uid)].filter(Boolean))],
     [raceUid, inRange, streamRaces],
@@ -152,8 +156,12 @@ export function IncidentsPage() {
     dim: !!openId && r.id !== openId,
   }));
 
+  /** First click: show it (data + where on the track). Clicking the same one again plays it. */
   const openRow = (r: Row) => {
-    clockRef.current.run++;
+    if (r.id === openId) {
+      clockRef.current.run++;
+      return;
+    }
     set({ inc: r.id, race: r.uid !== raceUid ? r.uid : raceUid });
   };
 
@@ -172,7 +180,7 @@ export function IncidentsPage() {
   // the stream's biggest, over every track raced that evening
   const streamTop = streamRaces
     .flatMap((r) => rowsByRace.get(r.uid) ?? [])
-    .filter((r) => match(r) && !r.tap)
+    .filter((r) => !r.tap)
     .sort(biggestFirst)
     .slice(0, 10);
   const top = (rows: Row[]) => rows.filter((r) => !r.tap).sort(biggestFirst)[0] ?? null;
@@ -361,6 +369,26 @@ export function IncidentsPage() {
           <span className="flex items-center gap-1.5 text-sm font-semibold">
             <Flame className="h-4 w-4 text-red-400" /> Biggest incidents of the stream
           </span>
+          <span className="flex items-center gap-1">
+            <button
+              type="button"
+              disabled={streamIdx >= streams.length - 1}
+              onClick={() => set({ stream: streams[streamIdx + 1]?.[0]?.uid ?? null })}
+              className="rounded px-1.5 text-zinc-400 hover:bg-white/10 hover:text-white disabled:opacity-30"
+              aria-label="Previous stream"
+            >
+              ‹
+            </button>
+            <button
+              type="button"
+              disabled={streamIdx <= 0}
+              onClick={() => set({ stream: streamIdx - 1 <= 0 ? null : streams[streamIdx - 1][0].uid })}
+              className="rounded px-1.5 text-zinc-400 hover:bg-white/10 hover:text-white disabled:opacity-30"
+              aria-label="Next stream"
+            >
+              ›
+            </button>
+          </span>
           {streamRaces.length > 0 && (
             <span className="text-xs text-zinc-500">
               {new Date(raceTime(streamRaces[0])).toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" })} ·{" "}
@@ -541,6 +569,11 @@ export function IncidentsPage() {
                     <CtlButton
                       onClick={() => {
                         const c = clockRef.current;
+                        // shown but not played yet (or played out): play it from the start
+                        if (tick.phase === "preview" || tick.phase === "done") {
+                          c.run++;
+                          return;
+                        }
                         c.playing = !c.playing;
                         setTick((x) => ({ ...x, playing: c.playing }));
                       }}
@@ -567,7 +600,11 @@ export function IncidentsPage() {
                       ))}
                     </div>
                     <span className="font-mono text-xs tabular-nums text-zinc-400">
-                      {tick.phase === "loading" ? "Loading the cars…" : `${(tick.t - open.inc.t0).toFixed(1)} s`}
+                      {tick.phase === "loading"
+                        ? "Loading the cars…"
+                        : tick.phase === "preview"
+                          ? "Click the marker again (or Play) to watch it"
+                          : `${(tick.t - open.inc.t0).toFixed(1)} s`}
                     </span>
                     <Link to={viewerLink} className="ml-auto flex items-center gap-1.5 rounded-md px-2 py-1 text-xs text-zinc-300 hover:bg-white/10 hover:text-white">
                       <Clapperboard className="h-4 w-4" /> Open in the race viewer
