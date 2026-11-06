@@ -1,4 +1,13 @@
-import { ArrowRight, CalendarDays, Route } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  CalendarDays,
+  Flag,
+  Route,
+  Search,
+  Timer,
+  X,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import { SESSION_LIST_TAB_STORAGE_KEY } from "../constants/storage";
@@ -8,12 +17,17 @@ import {
   DEFAULT_FILTERS,
   matchesSessionFilters,
   useSessionFilters,
+  type SessionTypeFilter,
 } from "../hooks/useSessionFilters";
 import { useGameScope } from "../hooks/useGameScope";
 import { useSessionList } from "../hooks/useSessionList";
 import type { SessionSummary } from "../types/telemetry";
 import { cn } from "../utils/cn";
-import { formatRelativeDate, msToLapTime } from "../utils/format";
+import {
+  formatRelativeDate,
+  formatSessionType,
+  msToLapTime,
+} from "../utils/format";
 import {
   ALL_FORMULA_SCOPE_KEY,
   getSessionFormulaScopeKey,
@@ -24,7 +38,11 @@ import {
 } from "../utils/sessionTypes";
 import { linkScopeKey, sessionsPath, tracksPath } from "../utils/routes";
 import { readStoredString, writeStoredString } from "../utils/storage";
-import { getTrackId, sortTracksByCalendar } from "../utils/tracks";
+import {
+  getTrackDisplayName,
+  getTrackId,
+  sortTracksByCalendar,
+} from "../utils/tracks";
 import { LoadingState } from "./ui/LoadingState";
 import { SessionListActiveFilters } from "./SessionListActiveFilters";
 import { SessionDatePicker } from "./SessionDatePicker";
@@ -34,6 +52,7 @@ import { resolveSessionMode } from "./sessionModeMeta";
 import { TrackListItem, type TrackListBestLapKind } from "./TrackListItem";
 import { HStack } from "./ui/Stack";
 import { Tabs } from "./ui/Tabs";
+import { SegmentedControl } from "./ui/SegmentedControl";
 
 const SIDEBAR_TABS = [
   { value: "sessions", label: "Sessions", icon: CalendarDays },
@@ -168,6 +187,7 @@ export function SessionList({
   const [filters, setFilters] = useSessionFilters();
   const [page, setPage] = useState(0);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Keep the active tab scoped to this browser tab; filters are a longer-lived
   // preference shared with the dashboard via useSessionFilters().
@@ -177,7 +197,7 @@ export function SessionList({
 
   useEffect(() => {
     setPage(0);
-  }, [filters.type, filters.mode, selectedDate]);
+  }, [filters.type, filters.mode, selectedDate, searchQuery]);
 
   const updateFilters = (next: typeof filters) => {
     setFilters(next);
@@ -233,7 +253,22 @@ export function SessionList({
           (session) => session.date.split("T")[0] === selectedDate,
         )
       : filteredSessions;
-  const orderedSessions = [...dateFilteredSessions].sort((a, b) => {
+  const normalizedSearch = searchQuery.trim().toLocaleLowerCase();
+  const searchedSessions = normalizedSearch
+    ? dateFilteredSessions.filter((session) => {
+        const searchableText = [
+          getTrackDisplayName(session.track),
+          session.track,
+          formatSessionType(session.sessionType, session.formula),
+          session.formula,
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLocaleLowerCase();
+        return searchableText.includes(normalizedSearch);
+      })
+    : dateFilteredSessions;
+  const orderedSessions = [...searchedSessions].sort((a, b) => {
     const aDate = Date.parse(a.date);
     const bDate = Date.parse(b.date);
     return (
@@ -246,6 +281,48 @@ export function SessionList({
   const pagedSessions = orderedSessions.slice(
     safePage * PAGE_SIZE,
     (safePage + 1) * PAGE_SIZE,
+  );
+  const sessionsByType = {
+    all: scopedSessions.filter((session) =>
+      matchesSessionFilters(session, { ...filters, type: "all" }),
+    ).length,
+    race: scopedSessions.filter((session) =>
+      matchesSessionFilters(session, { ...filters, type: "race" }),
+    ).length,
+    quali: scopedSessions.filter((session) =>
+      matchesSessionFilters(session, { ...filters, type: "quali" }),
+    ).length,
+    tt: scopedSessions.filter((session) =>
+      matchesSessionFilters(session, { ...filters, type: "tt" }),
+    ).length,
+  };
+  const archiveTypeOptions = [
+    {
+      value: "all" as const,
+      label: "All sessions",
+      mobileLabel: "All",
+      icon: CalendarDays,
+      meta: sessionsByType.all,
+    },
+    {
+      value: "race" as const,
+      label: "Races",
+      mobileLabel: "Race",
+      icon: Flag,
+      meta: sessionsByType.race,
+    },
+    {
+      value: "quali" as const,
+      label: "Qualifying",
+      mobileLabel: "Quali",
+      icon: Timer,
+      meta: sessionsByType.quali,
+    },
+  ];
+  const pageRangeStart = orderedSessions.length ? safePage * PAGE_SIZE + 1 : 0;
+  const pageRangeEnd = Math.min(
+    (safePage + 1) * PAGE_SIZE,
+    orderedSessions.length,
   );
 
   const isRecentSessionsSidebar = section === "sessions" && !showAllSessions;
@@ -304,82 +381,192 @@ export function SessionList({
 
   return (
     <nav className="flex flex-col">
-      {/* Sticky header: tabs + filter */}
-      <div className="sticky top-0 z-10 bg-black/85 backdrop-blur">
-        <HStack
-          className="px-2 pt-2"
-          justify={
-            showAllSessions || section === "tracks" || isRecentSessionsSidebar
-              ? "between"
-              : section
-                ? "end"
-                : undefined
-          }
-        >
-          {showAllSessions && tab === "sessions" && (
-            <SessionDatePicker
-              availableDates={availableSessionDates}
-              selectedDate={selectedDate}
-              onSelect={(date) => {
-                setSelectedDate(date);
-                setPage(0);
-              }}
-            />
-          )}
-          {isRecentSessionsSidebar && scopeKey && (
-            <NavLink
-              to={sessionsPath(scopeKey)}
-              end
-              className={({ isActive }) =>
-                cn(
-                  "flex min-w-0 flex-1 items-center justify-between gap-2 rounded-md px-2 py-1.5 text-xs font-medium transition-colors",
-                  isActive
-                    ? "bg-white/[0.07] text-zinc-200"
-                    : "text-zinc-400 hover:bg-white/[0.045] hover:text-zinc-200",
-                )
-              }
-            >
-              <span className="truncate">View all sessions</span>
-              <ArrowRight className="size-3.5 shrink-0" />
-            </NavLink>
-          )}
-          {section === "tracks" && scopeKey && (
-            <NavLink
-              to={tracksPath(scopeKey)}
-              end
-              className={({ isActive }) =>
-                cn(
-                  "flex min-w-0 flex-1 items-center justify-between gap-2 rounded-md px-2 py-1.5 text-xs font-medium transition-colors",
-                  isActive
-                    ? "bg-white/[0.07] text-zinc-200"
-                    : "text-zinc-400 hover:bg-white/[0.045] hover:text-zinc-200",
-                )
-              }
-            >
-              <span className="truncate">View all tracks</span>
-              <ArrowRight className="size-3.5 shrink-0" />
-            </NavLink>
-          )}
-          {!section && (
-            <Tabs
-              className="flex-1"
-              options={SIDEBAR_TABS}
-              value={tab}
-              onChange={setTab}
-              ariaLabel="Sidebar section"
-            />
-          )}
-          <div className={cn("pl-2", section ? "pb-1" : "pb-[7px]")}>
-            <SessionListFilterMenu
-              value={filters}
-              onChange={updateFilters}
-              game={game}
-              onReset={resetFilters}
-            />
-          </div>
-        </HStack>
+      <div
+        className={cn(
+          "sticky top-0 z-10",
+          showAllSessions ? "px-3 pt-3 sm:px-4" : "bg-black/85 backdrop-blur",
+        )}
+      >
+        {showAllSessions ? (
+          <div className="relative rounded-2xl border border-white/[0.08] bg-zinc-950/85 shadow-xl shadow-black/20 backdrop-blur">
+            <div className="space-y-2 p-2.5 sm:space-y-2.5 sm:p-3">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                <label className="relative min-w-0 flex-1">
+                  <span className="sr-only">
+                    Search sessions by track or type
+                  </span>
+                  <Search
+                    aria-hidden="true"
+                    className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-500"
+                  />
+                  <input
+                    type="search"
+                    value={searchQuery}
+                    onChange={(event) => setSearchQuery(event.target.value)}
+                    placeholder="Search track or session type"
+                    className="h-9 w-full rounded-xl border border-white/[0.08] bg-black/25 pl-9 pr-10 text-sm text-zinc-100 outline-none transition placeholder:text-zinc-600 hover:border-white/[0.12] focus:border-rose-300/30 focus:ring-2 focus:ring-brand-red/15"
+                  />
+                  {searchQuery && (
+                    <button
+                      type="button"
+                      aria-label="Clear session search"
+                      onClick={() => setSearchQuery("")}
+                      className="absolute right-2 top-1/2 flex size-7 -translate-y-1/2 items-center justify-center rounded-lg text-zinc-500 transition hover:bg-white/[0.07] hover:text-zinc-200 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-brand-red/60"
+                    >
+                      <X className="size-3.5" aria-hidden="true" />
+                    </button>
+                  )}
+                </label>
 
-        {filtersActive && (
+                <div className="flex shrink-0 items-center gap-2">
+                  <SessionDatePicker
+                    availableDates={availableSessionDates}
+                    selectedDate={selectedDate}
+                    onSelect={(date) => {
+                      setSelectedDate(date);
+                      setPage(0);
+                    }}
+                  />
+                  <SessionListFilterMenu
+                    value={filters}
+                    onChange={updateFilters}
+                    game={game}
+                    onReset={resetFilters}
+                  />
+                </div>
+              </div>
+
+              <SegmentedControl<SessionTypeFilter>
+                ariaLabel="Filter sessions by type"
+                options={archiveTypeOptions}
+                value={filters.type}
+                onChange={(type) => updateFilters({ ...filters, type })}
+                size="sm"
+                fullWidth
+                scrollable
+                className="border border-white/[0.04] bg-black/20"
+              />
+
+              <div className="flex min-h-6 items-center justify-between gap-3">
+                <p
+                  aria-live="polite"
+                  className="min-w-0 truncate text-xs text-zinc-500"
+                >
+                  <span className="font-mono tabular-nums text-zinc-300">
+                    {pageRangeStart}–{pageRangeEnd}
+                  </span>{" "}
+                  of{" "}
+                  <span className="font-mono tabular-nums text-zinc-300">
+                    {orderedSessions.length}
+                  </span>{" "}
+                  {normalizedSearch ? "matches" : "sessions"}
+                </p>
+                {pageCount > 1 && (
+                  <div className="flex shrink-0 items-center gap-1 rounded-lg border border-white/[0.07] bg-black/20 p-0.5">
+                    <button
+                      type="button"
+                      aria-label="Previous page of sessions"
+                      onClick={() => setPage((p) => Math.max(0, p - 1))}
+                      disabled={safePage === 0}
+                      className="flex size-7 items-center justify-center rounded-md text-zinc-400 transition hover:bg-white/[0.07] hover:text-zinc-100 disabled:cursor-default disabled:text-zinc-700"
+                    >
+                      <ArrowLeft className="size-3.5" aria-hidden="true" />
+                    </button>
+                    <span className="px-1.5 font-mono text-2xs tabular-nums text-zinc-400">
+                      {safePage + 1} / {pageCount}
+                    </span>
+                    <button
+                      type="button"
+                      aria-label="Next page of sessions"
+                      onClick={() =>
+                        setPage((p) => Math.min(pageCount - 1, p + 1))
+                      }
+                      disabled={safePage === pageCount - 1}
+                      className="flex size-7 items-center justify-center rounded-md text-zinc-400 transition hover:bg-white/[0.07] hover:text-zinc-100 disabled:cursor-default disabled:text-zinc-700"
+                    >
+                      <ArrowRight className="size-3.5" aria-hidden="true" />
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+            {filtersActive && (
+              <SessionListActiveFilters
+                value={filters}
+                gameLabel={game.isFiltered ? game.label : undefined}
+                matchingCount={filteredSessions.length}
+                totalCount={sessions.length}
+                onReset={resetFilters}
+                compact
+              />
+            )}
+          </div>
+        ) : (
+          <HStack
+            className="px-2 pt-2"
+            justify={
+              section === "tracks" || isRecentSessionsSidebar
+                ? "between"
+                : section
+                  ? "end"
+                  : undefined
+            }
+          >
+            {isRecentSessionsSidebar && scopeKey && (
+              <NavLink
+                to={sessionsPath(scopeKey)}
+                end
+                className={({ isActive }) =>
+                  cn(
+                    "flex min-w-0 flex-1 items-center justify-between gap-2 rounded-md px-2 py-1.5 text-xs font-medium transition-colors",
+                    isActive
+                      ? "bg-white/[0.07] text-zinc-200"
+                      : "text-zinc-400 hover:bg-white/[0.045] hover:text-zinc-200",
+                  )
+                }
+              >
+                <span className="truncate">View all sessions</span>
+                <ArrowRight className="size-3.5 shrink-0" />
+              </NavLink>
+            )}
+            {section === "tracks" && scopeKey && (
+              <NavLink
+                to={tracksPath(scopeKey)}
+                end
+                className={({ isActive }) =>
+                  cn(
+                    "flex min-w-0 flex-1 items-center justify-between gap-2 rounded-md px-2 py-1.5 text-xs font-medium transition-colors",
+                    isActive
+                      ? "bg-white/[0.07] text-zinc-200"
+                      : "text-zinc-400 hover:bg-white/[0.045] hover:text-zinc-200",
+                  )
+                }
+              >
+                <span className="truncate">View all tracks</span>
+                <ArrowRight className="size-3.5 shrink-0" />
+              </NavLink>
+            )}
+            {!section && (
+              <Tabs
+                className="flex-1"
+                options={SIDEBAR_TABS}
+                value={tab}
+                onChange={setTab}
+                ariaLabel="Sidebar section"
+              />
+            )}
+            <div className={cn("pl-2", section ? "pb-1" : "pb-[7px]")}>
+              <SessionListFilterMenu
+                value={filters}
+                onChange={updateFilters}
+                game={game}
+                onReset={resetFilters}
+              />
+            </div>
+          </HStack>
+        )}
+
+        {!showAllSessions && filtersActive && (
           <SessionListActiveFilters
             value={filters}
             gameLabel={game.isFiltered ? game.label : undefined}
@@ -389,31 +576,38 @@ export function SessionList({
           />
         )}
 
-        {tab === "sessions" && !isRecentSessionsSidebar && pageCount > 1 && (
-          <HStack justify="between" className="mt-1 px-2 py-1">
-            <button
-              onClick={() => setPage((p) => Math.max(0, p - 1))}
-              disabled={safePage === 0}
-              className="px-2 py-0.5 text-xs text-zinc-400 hover:text-zinc-200 disabled:text-zinc-700 disabled:cursor-default transition-colors"
-            >
-              ←
-            </button>
-            <span className="text-xs text-zinc-500 tabular-nums">
-              {safePage + 1} / {pageCount}
-            </span>
-            <button
-              onClick={() => setPage((p) => Math.min(pageCount - 1, p + 1))}
-              disabled={safePage === pageCount - 1}
-              className="px-2 py-0.5 text-xs text-zinc-400 hover:text-zinc-200 disabled:text-zinc-700 disabled:cursor-default transition-colors"
-            >
-              →
-            </button>
-          </HStack>
-        )}
+        {!showAllSessions &&
+          tab === "sessions" &&
+          !isRecentSessionsSidebar &&
+          pageCount > 1 && (
+            <HStack justify="between" className="mt-1 px-2 py-1">
+              <button
+                onClick={() => setPage((p) => Math.max(0, p - 1))}
+                disabled={safePage === 0}
+                className="px-2 py-0.5 text-xs text-zinc-400 hover:text-zinc-200 disabled:text-zinc-700 disabled:cursor-default transition-colors"
+              >
+                ←
+              </button>
+              <span className="text-xs text-zinc-500 tabular-nums">
+                {safePage + 1} / {pageCount}
+              </span>
+              <button
+                onClick={() => setPage((p) => Math.min(pageCount - 1, p + 1))}
+                disabled={safePage === pageCount - 1}
+                className="px-2 py-0.5 text-xs text-zinc-400 hover:text-zinc-200 disabled:text-zinc-700 disabled:cursor-default transition-colors"
+              >
+                →
+              </button>
+            </HStack>
+          )}
       </div>
 
       <div
-        className={cn("p-2", tab === "sessions" ? "space-y-4" : "space-y-0.5")}
+        className={cn(
+          "p-2",
+          tab === "sessions" ? "space-y-4" : "space-y-0.5",
+          showAllSessions && "p-3 sm:p-4",
+        )}
       >
         {tab === "tracks" &&
           section === "tracks" &&
@@ -423,16 +617,50 @@ export function SessionList({
               {recentTracks.length === 1 ? "track" : "tracks"}
             </p>
           )}
-        {tab === "sessions" && filteredSessions.length === 0 && (
-          <div className="px-2 py-4 text-sm text-zinc-500">
-            No sessions match these filters.{" "}
-            <button
-              type="button"
-              onClick={() => updateFilters(DEFAULT_FILTERS)}
-              className="font-medium text-sky-400 hover:text-sky-300"
-            >
-              Reset
-            </button>
+        {tab === "sessions" && orderedSessions.length === 0 && (
+          <div className="mx-auto flex max-w-md flex-col items-center px-4 py-14 text-center">
+            <span className="mb-3 flex size-11 items-center justify-center rounded-2xl border border-white/[0.07] bg-white/[0.035] text-zinc-500">
+              <Search className="size-5" aria-hidden="true" />
+            </span>
+            <h3 className="text-sm font-semibold text-zinc-200">
+              {normalizedSearch
+                ? "No matching sessions"
+                : "No sessions to show"}
+            </h3>
+            <p className="mt-1.5 text-sm leading-relaxed text-zinc-500">
+              {normalizedSearch
+                ? `Nothing matched “${searchQuery.trim()}”. Try a different track or session type.`
+                : "No sessions match the selected date and filters."}
+            </p>
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+              {normalizedSearch && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery("")}
+                  className="rounded-lg border border-white/[0.08] px-3 py-1.5 text-xs font-medium text-zinc-300 transition hover:bg-white/[0.06] hover:text-white"
+                >
+                  Clear search
+                </button>
+              )}
+              {filtersActive && (
+                <button
+                  type="button"
+                  onClick={resetFilters}
+                  className="rounded-lg border border-rose-300/15 bg-rose-300/[0.06] px-3 py-1.5 text-xs font-medium text-rose-100/80 transition hover:bg-rose-300/[0.1]"
+                >
+                  Reset filters
+                </button>
+              )}
+              {selectedDate && (
+                <button
+                  type="button"
+                  onClick={() => setSelectedDate(null)}
+                  className="rounded-lg border border-white/[0.08] px-3 py-1.5 text-xs font-medium text-zinc-300 transition hover:bg-white/[0.06] hover:text-white"
+                >
+                  Clear date
+                </button>
+              )}
+            </div>
           </div>
         )}
         {tab === "tracks" && tracks.length === 0 && (
@@ -450,39 +678,71 @@ export function SessionList({
         {tab === "sessions" &&
           grouped.map(([dateKey, dateSessions]) => {
             const modeLabel = groupModeLabel(dateSessions);
-            return (
-              <div key={dateKey}>
-                <div className="mb-1.5 flex min-w-0 items-center gap-2.5 px-2 pt-1">
-                  <h3 className="shrink-0 font-mono text-[11px] font-semibold uppercase tracking-wider text-zinc-300">
-                    {formatRelativeDate(dateKey + "T00:00:00")}
-                  </h3>
-                  {modeLabel && (
-                    <span className="shrink-0 rounded-md border border-white/[0.06] bg-black/20 px-1.5 py-0.5 text-[9px] font-medium tracking-wide text-zinc-400">
-                      {modeLabel}
-                    </span>
+            const groupHeading = (
+              <div
+                className={cn(
+                  "mb-1.5 flex min-w-0 items-center gap-2.5 px-2 pt-1",
+                  showAllSessions &&
+                    "mb-0 border-b border-white/[0.07] bg-white/[0.025] px-4 py-3",
+                )}
+              >
+                <h3
+                  className={cn(
+                    "shrink-0 font-mono text-[11px] font-semibold uppercase tracking-wider text-zinc-300",
+                    showAllSessions && "text-xs text-zinc-100",
                   )}
-                  <span className="shrink-0 text-[10px] text-zinc-500">
-                    {dateSessions.length}{" "}
-                    {dateSessions.length === 1 ? "session" : "sessions"}
+                >
+                  {formatRelativeDate(dateKey + "T00:00:00")}
+                </h3>
+                {modeLabel && (
+                  <span className="shrink-0 rounded-md border border-white/[0.06] bg-black/20 px-1.5 py-0.5 text-[9px] font-medium tracking-wide text-zinc-400">
+                    {modeLabel}
                   </span>
+                )}
+                <span
+                  className={cn(
+                    "shrink-0 text-[10px] text-zinc-500",
+                    showAllSessions &&
+                      "rounded-full border border-white/[0.06] bg-black/20 px-2 py-0.5 font-mono tabular-nums",
+                  )}
+                >
+                  {dateSessions.length}{" "}
+                  {dateSessions.length === 1 ? "session" : "sessions"}
+                </span>
+                {!showAllSessions && (
                   <span
                     aria-hidden="true"
                     className="h-px min-w-3 flex-1 bg-gradient-to-r from-white/[0.09] to-transparent"
                   />
+                )}
+              </div>
+            );
+            const sessionItems = dateSessions.map((session) => (
+              <SessionListItem
+                key={session.relativePath}
+                session={session}
+                isTrackBest={isSessionTrackBest(session, bestTimeByTrack)}
+                hideMode={
+                  modeLabel != null && sessionModeLabel(session) === modeLabel
+                }
+                isArchive={showAllSessions}
+              />
+            ));
+            return showAllSessions ? (
+              <section
+                key={dateKey}
+                aria-label={`${formatRelativeDate(dateKey + "T00:00:00")}, ${dateSessions.length} sessions`}
+                className="overflow-hidden rounded-2xl border border-white/[0.08] bg-zinc-950/45 shadow-sm shadow-black/15"
+              >
+                {groupHeading}
+                <div className="divide-y divide-white/[0.055]">
+                  {sessionItems}
                 </div>
-                <div className="space-y-0.5">
-                  {dateSessions.map((session) => (
-                    <SessionListItem
-                      key={session.relativePath}
-                      session={session}
-                      isTrackBest={isSessionTrackBest(session, bestTimeByTrack)}
-                      hideMode={
-                        modeLabel != null &&
-                        sessionModeLabel(session) === modeLabel
-                      }
-                    />
-                  ))}
-                </div>
+              </section>
+            ) : (
+              <div key={dateKey}>
+                {groupHeading}
+                <div className="space-y-0.5">{sessionItems}</div>
               </div>
             );
           })}

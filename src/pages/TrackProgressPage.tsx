@@ -37,6 +37,7 @@ import { PaceEvolutionChart } from "../components/track/PaceEvolutionChart";
 import { TrackKeyInsights } from "../components/track/TrackKeyInsights";
 import { CornerAnalysisPanel } from "../components/track/CornerAnalysisPanel";
 import { TrackQualifyingInsights } from "../components/track/TrackQualifyingInsights";
+import { TrackRecordLineage } from "../components/track/TrackRecordLineage";
 import { TrackSessionHistory } from "../components/track/TrackSessionHistory";
 import { TrackStrategySection } from "../components/track/TrackStrategySection";
 import { TrackFlag } from "../components/TrackFlag";
@@ -48,10 +49,17 @@ import { SectionHeader } from "../components/ui/SectionHeader";
 import { PageFrame } from "../components/ui/PageFrame";
 import { PageHeader } from "../components/ui/PageHeader";
 import { LoadingState } from "../components/ui/LoadingState";
-import { SegmentedControl } from "../components/ui/SegmentedControl";
+import {
+  SegmentedControl,
+  type SegmentedOption,
+} from "../components/ui/SegmentedControl";
 import { HStack, VStack } from "../components/ui/Stack";
 import { useTelemetry } from "../context/TelemetryContext";
 import { useSessionList } from "../hooks/useSessionList";
+import {
+  buildTrackRecordCandidates,
+  type TrackRecordSource,
+} from "../analysis/trackRecordLineage";
 import {
   buildRaceAnalysisBuckets,
   buildRaceSetupCandidates,
@@ -85,11 +93,16 @@ import {
 } from "../utils/tracks";
 import {
   dashboardPath,
+  isTrackPageTab,
   isTrackSessionTab,
   sessionSummaryPath,
   trackPath,
 } from "../utils/routes";
-import { TRACK_TAB_QUERY_PARAM } from "../constants/routes";
+import {
+  TRACK_RECORDS_TAB,
+  TRACK_TAB_QUERY_PARAM,
+  type TrackPageTab,
+} from "../constants/routes";
 import { aggregateCompoundLife } from "../utils/stats/trackAggregates";
 import { buildPaceEvolution } from "../utils/stats/trackPaceEvolution";
 import { buildTrackRaceRecommendation } from "../analysis/trackRaceRecommendation";
@@ -127,6 +140,7 @@ export function TrackProgressPage() {
     mode,
     setShowUploadModal,
     scopeKey,
+    league,
     activeFormulaKey,
     activeFormula,
     formulaOptions,
@@ -134,8 +148,8 @@ export function TrackProgressPage() {
   const [data, setData] = useState<TrackSessionData[]>([]);
   const [loading, setLoading] = useState(true);
   const requestedTab = searchParams.get(TRACK_TAB_QUERY_PARAM);
-  const [activeTab, setActiveTab] = useState<TrackSessionKind>(() =>
-    isTrackSessionTab(requestedTab) ? requestedTab : "race",
+  const [activeTab, setActiveTab] = useState<TrackPageTab>(() =>
+    isTrackPageTab(requestedTab) ? requestedTab : "race",
   );
   const requestedRaceLaps = searchParams.get("raceLaps");
   const canonicalTrackId = trackId ? getTrackId(trackId) : "";
@@ -163,7 +177,7 @@ export function TrackProgressPage() {
   }, [scopeKey, canonicalTrackId, navigate, search, trackId]);
 
   useEffect(() => {
-    if (isTrackSessionTab(requestedTab)) {
+    if (isTrackPageTab(requestedTab)) {
       setActiveTab(requestedTab);
     }
   }, [requestedTab]);
@@ -236,6 +250,32 @@ export function TrackProgressPage() {
   const raceDataAll = useMemo(
     () => data.filter((d) => d.kind === "race"),
     [data],
+  );
+  const allLeagueRaces = league?.allRaces;
+  const recordSources = useMemo<TrackRecordSource[]>(() => {
+    if (allLeagueRaces) {
+      return allLeagueRaces.map(({ file, session }) => ({
+        file,
+        session,
+        isOnline: true,
+      }));
+    }
+    return data
+      .filter(
+        (session) =>
+          session.kind === "race" || session.kind === "qualifying",
+      )
+      .map((race) => ({
+        file: race.summary.relativePath,
+        slug: race.summary.slug,
+        date: race.summary.date,
+        session: race.session,
+        isOnline: race.summary.isOnline,
+      }));
+  }, [allLeagueRaces, data]);
+  const recordCandidates = useMemo(
+    () => buildTrackRecordCandidates(recordSources, canonicalTrackId),
+    [recordSources, canonicalTrackId],
   );
   const raceSessions = useMemo(
     () => raceDataAll.map((d) => d.session),
@@ -516,21 +556,40 @@ export function TrackProgressPage() {
   const tooltipStyle = TOOLTIP_STYLE;
 
   const availableTabs = trackAnalysis.availableTabs;
-  const selectedTab = availableTabs.includes(activeTab)
-    ? activeTab
-    : getPreferredTrackTab(availableTabs);
-  const tabOptions = availableTabs.map((value) => ({
-    value,
-    label: TRACK_TAB_LABELS[value],
-    mobileLabel: TRACK_TAB_MOBILE_LABELS[value],
-    icon: getSessionTypeMeta(TRACK_TAB_META_LABEL[value]).icon,
-  }));
+  const hasRecordHistory =
+    raceDataAll.length > 0 ||
+    availableTabs.includes("qualifying") ||
+    recordCandidates.length > 0;
+  const selectedPageTab: TrackPageTab =
+    activeTab === TRACK_RECORDS_TAB && hasRecordHistory
+      ? TRACK_RECORDS_TAB
+      : isTrackSessionTab(activeTab) && availableTabs.includes(activeTab)
+        ? activeTab
+        : getPreferredTrackTab(availableTabs);
+  const tabOptions: SegmentedOption<TrackPageTab>[] = [
+    ...availableTabs.map((value) => ({
+      value,
+      label: TRACK_TAB_LABELS[value],
+      mobileLabel: TRACK_TAB_MOBILE_LABELS[value],
+      icon: getSessionTypeMeta(TRACK_TAB_META_LABEL[value]).icon,
+    })),
+    ...(hasRecordHistory
+      ? [
+          {
+            value: TRACK_RECORDS_TAB,
+            label: "Record lineage",
+            mobileLabel: "Records",
+            icon: TimerReset,
+          },
+        ]
+      : []),
+  ];
   const handleRaceLengthChange = (raceLaps: string) => {
     const nextParams = new URLSearchParams(searchParams);
     nextParams.set("raceLaps", raceLaps);
     setSearchParams(nextParams);
   };
-  const handleTabChange = (tab: TrackSessionKind) => {
+  const handleTabChange = (tab: TrackPageTab) => {
     setActiveTab(tab);
     const nextParams = new URLSearchParams(searchParams);
     nextParams.set(TRACK_TAB_QUERY_PARAM, tab);
@@ -566,16 +625,17 @@ export function TrackProgressPage() {
           <VStack align="start" className="gap-2 sm:shrink-0 sm:items-end">
             {/* Tab switcher: interactive when multiple analysis buckets exist, static otherwise. */}
             {tabOptions.length > 1 && (
-              <SegmentedControl<TrackSessionKind>
-                ariaLabel="Session type"
+              <SegmentedControl<TrackPageTab>
+                ariaLabel="Track analysis view"
                 options={tabOptions}
-                value={selectedTab}
+                value={selectedPageTab}
                 onChange={handleTabChange}
+                scrollable
               />
             )}
             {tabOptions.length === 1 && (
-              <SegmentedControl<TrackSessionKind>
-                ariaLabel="Session type"
+              <SegmentedControl<TrackPageTab>
+                ariaLabel="Track analysis view"
                 options={tabOptions}
                 value={tabOptions[0].value}
                 onChange={() => {}}
@@ -585,8 +645,17 @@ export function TrackProgressPage() {
         }
       />
 
+      {selectedPageTab === TRACK_RECORDS_TAB && (
+        <TrackRecordLineage
+          candidates={recordCandidates}
+          activeFormulaKey={activeFormulaKey}
+          formulaOptions={formulaOptions}
+          scopeKey={scopeKey}
+        />
+      )}
+
       {/* ── Qualifying Section ── */}
-      {qualiData.length > 0 && selectedTab === "qualifying" && (
+      {qualiData.length > 0 && selectedPageTab === "qualifying" && (
         <>
           {qualifyingInsights && (
             <TrackQualifyingInsights insights={qualifyingInsights} />
@@ -911,7 +980,7 @@ export function TrackProgressPage() {
       )}
 
       {/* ── Time Trial Section ── */}
-      {timeTrialData.length > 0 && selectedTab === "time-trial" && (
+      {timeTrialData.length > 0 && selectedPageTab === "time-trial" && (
         <>
           <SectionHeader
             title="Key Insights"
@@ -1264,7 +1333,7 @@ export function TrackProgressPage() {
 
       {/* ── Race Section ── */}
       {raceData.length > 0 &&
-        selectedTab === "race" &&
+        selectedPageTab === "race" &&
         (() => {
           // Shared recommendation drives Key Insights AND the Strategy section
           // below Compound Tyre Life. Both reuse the same wear/pace synthesis so
@@ -1440,11 +1509,13 @@ export function TrackProgressPage() {
           );
         })()}
 
-      <TrackSessionHistory
-        activeKind={selectedTab}
-        sessions={trackAnalysis.sessionHistory}
-        spectatorSessions={spectatorHistory}
-      />
+      {selectedPageTab !== TRACK_RECORDS_TAB && (
+        <TrackSessionHistory
+          activeKind={selectedPageTab}
+          sessions={trackAnalysis.sessionHistory}
+          spectatorSessions={spectatorHistory}
+        />
+      )}
     </PageFrame>
   );
 }

@@ -1,5 +1,6 @@
 import { Medal, Trophy, type LucideIcon } from "lucide-react";
 import { ACCENT_TOKENS, type AccentColor } from "../../constants/accents";
+import type { TrackPageTab } from "../../constants/routes";
 import { accentCardClass } from "../Card";
 import type { SessionSummary } from "../../types/telemetry";
 import {
@@ -47,8 +48,12 @@ export interface TrackRecords {
   timeTrial?: TrackLapRecord;
 }
 
-export function trackFormulaPath(track: string, formulaKey: string): string {
-  return trackPath(formulaKey, track);
+export function trackFormulaPath(
+  track: string,
+  formulaKey: string,
+  tab?: TrackPageTab,
+): string {
+  return trackPath(formulaKey, track, tab);
 }
 
 export function positionLabel(position: number | undefined): string {

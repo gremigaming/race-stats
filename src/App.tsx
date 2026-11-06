@@ -30,6 +30,11 @@ const DriversPage = lazy(() =>
     default: module.DriversPage,
   })),
 );
+const DriverDnaPage = lazy(() =>
+  import("./pages/DriverDnaPage").then((module) => ({
+    default: module.DriverDnaPage,
+  })),
+);
 const DriverInsightsPage = lazy(() =>
   import("./pages/DriverInsightsPage").then((module) => ({
     default: module.DriverInsightsPage,
@@ -161,6 +166,14 @@ function AppRoutes() {
             element={
               <ScopedFormulaRoute>
                 <DriversPage />
+              </ScopedFormulaRoute>
+            }
+          />
+          <Route
+            path=":formulaKey/drivers/dna"
+            element={
+              <ScopedFormulaRoute>
+                <DriverDnaPage />
               </ScopedFormulaRoute>
             }
           />

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Check, Copy } from "lucide-react";
+import { Check, Copy, type LucideIcon } from "lucide-react";
 import { cn } from "../../utils/cn";
 import { Tooltip } from "../Tooltip";
 
@@ -12,11 +12,15 @@ const COPIED_RESET_MS = 1500;
  */
 export function CopyButton({
   getText,
+  onCopy,
   label,
+  icon = Copy,
   className,
 }: {
-  getText: () => string;
+  getText?: () => string;
+  onCopy?: () => Promise<boolean>;
   label: string;
+  icon?: LucideIcon;
   className?: string;
 }) {
   const [copied, setCopied] = useState(false);
@@ -25,14 +29,22 @@ export function CopyButton({
   useEffect(() => () => clearTimeout(resetTimer.current), []);
 
   async function handleClick() {
-    const ok = await copyToClipboard(getText());
+    let ok = false;
+    try {
+      ok = onCopy ? await onCopy() : false;
+    } catch {
+      // A custom clipboard format may be unavailable; fall back to plain text.
+    }
+    if (!ok && getText) {
+      ok = await copyToClipboard(getText());
+    }
     if (!ok) return;
     setCopied(true);
     clearTimeout(resetTimer.current);
     resetTimer.current = setTimeout(() => setCopied(false), COPIED_RESET_MS);
   }
 
-  const Icon = copied ? Check : Copy;
+  const Icon = copied ? Check : icon;
 
   return (
     <Tooltip text={label}>

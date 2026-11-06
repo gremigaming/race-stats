@@ -352,7 +352,7 @@ export function DriversPage() {
       )}
 
       {!embed && activeMode === "drivers" && rows.length > 0 && (
-        <LeagueHighlights rows={allRows} />
+        <LeagueHighlights rows={allRows} races={visibleRaces} />
       )}
     </PageFrame>
   );

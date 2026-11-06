@@ -5,6 +5,7 @@ import {
   CalendarDays,
   ChevronDown,
   Clapperboard,
+  Dna,
   FolderUp,
   Gamepad2,
   LayoutDashboard,
@@ -236,8 +237,11 @@ export function Layout() {
                   )
                 }
               >
-                <DropdownLink to={`/${pageScope}/drivers`} icon={Trophy}>
+                <DropdownLink to={`/${pageScope}/drivers`} icon={Trophy} end>
                   Leaderboard
+                </DropdownLink>
+                <DropdownLink to={`/${pageScope}/drivers/dna`} icon={Dna}>
+                  Driver DNA
                 </DropdownLink>
                 <DropdownLink to={`/${pageScope}/head-to-head`} icon={Swords}>
                   Head to head
@@ -388,8 +392,11 @@ export function Layout() {
                 <MobileNavLink to={homePath} icon={LayoutDashboard}>
                   Home
                 </MobileNavLink>
-                <MobileNavLink to={`/${pageScope}/drivers`} icon={Trophy}>
+                <MobileNavLink to={`/${pageScope}/drivers`} icon={Trophy} end>
                   Leaderboard
+                </MobileNavLink>
+                <MobileNavLink to={`/${pageScope}/drivers/dna`} icon={Dna}>
+                  Driver DNA
                 </MobileNavLink>
                 <MobileNavLink to={`/${pageScope}/head-to-head`} icon={Swords}>
                   Head to head
@@ -652,16 +659,19 @@ function DropdownLink({
   to,
   icon: Icon,
   badge,
+  end,
   children,
 }: {
   to: string;
   icon: LucideIcon;
   badge?: ReactNode;
+  end?: boolean;
   children: ReactNode;
 }) {
   return (
     <NavLink
       to={to}
+      end={end}
       className={({ isActive }) =>
         cn(
           DROPDOWN_LINK_STYLES,
@@ -682,16 +692,19 @@ function MobileNavLink({
   to,
   icon: Icon,
   badge,
+  end,
   children,
 }: {
   to: string;
   icon: LucideIcon;
   badge?: ReactNode;
+  end?: boolean;
   children: ReactNode;
 }) {
   return (
     <NavLink
       to={to}
+      end={end}
       className={({ isActive }) =>
         cn(
           DROPDOWN_LINK_STYLES,

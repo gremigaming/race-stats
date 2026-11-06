@@ -1,9 +1,11 @@
 import type { SessionSummary } from "../types/telemetry";
 import {
   SESSIONS_ROUTE_SEGMENT,
+  TRACK_RECORDS_TAB,
   TRACK_SESSION_TABS,
   TRACK_TAB_QUERY_PARAM,
   TRACKS_ROUTE_SEGMENT,
+  type TrackPageTab,
   type TrackSessionTab,
 } from "../constants/routes";
 import {
@@ -38,6 +40,12 @@ export function isTrackSessionTab(
   return TRACK_SESSION_TABS.includes(value as TrackSessionTab);
 }
 
+export function isTrackPageTab(
+  value: string | null | undefined,
+): value is TrackPageTab {
+  return isTrackSessionTab(value) || value === TRACK_RECORDS_TAB;
+}
+
 export function trackTabForSessionType(
   sessionType: string | undefined,
 ): TrackSessionTab {
@@ -50,7 +58,7 @@ export function trackTabForSessionType(
 export function trackPath(
   formulaKey: string,
   track: string,
-  tab?: TrackSessionTab,
+  tab?: TrackPageTab,
 ): string {
   const path = `/${encodeURIComponent(formulaKey)}/${TRACKS_ROUTE_SEGMENT}/${toTrackSlug(track)}`;
   return tab

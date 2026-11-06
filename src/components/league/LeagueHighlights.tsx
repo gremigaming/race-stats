@@ -1,8 +1,39 @@
-import { Award, Crown, Medal, Rocket, ShieldCheck, Swords, Timer, Trophy, Zap, Repeat } from "lucide-react";
-import type { LeaderboardRow } from "../../league/league";
+import { useMemo } from "react";
+import {
+  Award,
+  Crown,
+  HeartCrack,
+  Medal,
+  Repeat,
+  Rocket,
+  ShieldCheck,
+  Swords,
+  Timer,
+  Trophy,
+  Zap,
+} from "lucide-react";
+import { driverKey, type LeaderboardRow, type LeagueRace } from "../../league/league";
+import { useLeagueCalls, type LeagueCall } from "../incidents/data";
 import { best, HighlightGrid, isHost, useAwards, type AwardRow, type Highlight } from "./HighlightCard";
 
 const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
+const fileName = (file: string) => file.replace(/\\/g, "/").split("/").pop() ?? file;
+
+/** Contacts where another driver was blamed and this driver was cleared. */
+function takenOutCounts(races: LeagueRace[], calls: LeagueCall[] | undefined) {
+  const selectedFiles = new Set(races.map((race) => fileName(race.file)));
+  const counts = new Map<string, number>();
+  for (const call of calls ?? []) {
+    if (!selectedFiles.has(fileName(call.file))) continue;
+    const lines = Object.entries(call.lines).map(([name, [points]]) => ({ key: driverKey(name), points }));
+    const blamed = new Set(lines.filter((line) => line.points < 0).map((line) => line.key));
+    if (!blamed.size) continue;
+    for (const key of new Set(lines.filter((line) => line.points >= 0).map((line) => line.key))) {
+      if (!blamed.has(key)) counts.set(key, (counts.get(key) ?? 0) + 1);
+    }
+  }
+  return counts;
+}
 
 /** The five Discord award roles, as on the server: the best driver who isn't GreMi. */
 const AWARDS: { key: "wins" | "fastest" | "dotd" | "overtakes" | "clean"; title: string; icon: Highlight["icon"]; accent: Highlight["accent"]; value: (r: AwardRow) => string }[] = [
@@ -33,8 +64,10 @@ export function awardHighlights(awards: ReturnType<typeof useAwards>["data"], ke
   });
 }
 
-export function LeagueHighlights({ rows }: { rows: LeaderboardRow[] }) {
+export function LeagueHighlights({ rows, races }: { rows: LeaderboardRow[]; races: LeagueRace[] }) {
   const { data: awards } = useAwards();
+  const { data: calls } = useLeagueCalls();
+  const takenOut = useMemo(() => takenOutCounts(races, calls), [races, calls]);
   const items = awardHighlights(awards);
   const extra: Highlight[] = [];
   const poles = best(rows, (r) => r.poles);
@@ -52,6 +85,17 @@ export function LeagueHighlights({ rows }: { rows: LeaderboardRow[] }) {
   const iron = best(rows, (r) => r.races);
   if (iron)
     extra.push({ id: "iron", title: "Iron Man", icon: Repeat, accent: "sky", name: iron.name, value: String(iron.races), detail: `Most races driven · ${plural(iron.dnfs, "DNF")}` });
+  const unlucky = best(rows, (r) => takenOut.get(r.key) ?? 0);
+  if (unlucky)
+    extra.push({
+      id: "unlucky",
+      title: "Most Unlucky",
+      icon: HeartCrack,
+      accent: "orange",
+      name: unlucky.name,
+      value: String(takenOut.get(unlucky.key) ?? 0),
+      detail: `${plural(takenOut.get(unlucky.key) ?? 0, "collision")} where another driver was at fault · ${plural(unlucky.dnfs, "DNF")} in ${plural(unlucky.races, "race")}`,
+    });
   return (
     <div id="league-highlights" className="space-y-8">
       <HighlightGrid

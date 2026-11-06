@@ -1,3 +1,4 @@
+import { ArrowRight, History } from "lucide-react";
 import { Link } from "react-router-dom";
 import type { ReactNode } from "react";
 import type { SessionSummary } from "../../types/telemetry";
@@ -9,6 +10,7 @@ import { TrackFlag } from "../TrackFlag";
 import { getTrackDisplayName } from "../../utils/tracks";
 import { TrackLayout } from "../TrackLayout";
 import { resolveSessionMode } from "../sessionModeMeta";
+import { TRACK_RECORDS_TAB } from "../../constants/routes";
 import {
   isProblemStatus,
   podiumIcon,
@@ -21,6 +23,10 @@ import {
   type TrackRecords,
   trackFormulaPath,
 } from "./helpers";
+import {
+  isQualifyingSessionType,
+  isRaceSessionType,
+} from "../../utils/sessionTypes";
 
 function modeLabel(session: SessionSummary): string {
   return (
@@ -232,15 +238,32 @@ export function TrackOverviewCard({
   }
 
   return (
-    <Link
-      to={trackFormulaPath(track, scopeKey)}
+    <article
       className={cn(
         cardClass,
         "group relative min-h-40 overflow-hidden transition-all duration-200 hover:-translate-y-0.5 hover:bg-zinc-800/50 hover:shadow-xl hover:shadow-black/20",
-        interactiveFocusClass,
       )}
     >
-      {inner}
-    </Link>
+      <Link
+        to={trackFormulaPath(track, scopeKey)}
+        className={cn("relative block", interactiveFocusClass)}
+      >
+        {inner}
+      </Link>
+      {sessions.some(
+        (session) =>
+          session.isOnline === true &&
+          (isRaceSessionType(session.sessionType) ||
+            isQualifyingSessionType(session.sessionType)),
+      ) && (
+        <Link
+          to={trackFormulaPath(track, scopeKey, TRACK_RECORDS_TAB)}
+          className="relative mt-4 inline-flex min-h-8 items-center gap-1.5 border-t border-white/[0.06] pt-3 text-xs font-medium text-rose-200/80 transition-colors hover:text-rose-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-red/70"
+        >
+          <History className="size-3.5" /> Record lineage
+          <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
+        </Link>
+      )}
+    </article>
   );
 }

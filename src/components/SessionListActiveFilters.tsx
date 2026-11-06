@@ -3,6 +3,7 @@ import type { SessionListFilters } from "../hooks/useSessionFilters";
 import { SESSION_MODE_META } from "./sessionModeMeta";
 import { SESSION_TYPE_FILTER_META } from "./sessionTypeMeta";
 import { HStack } from "./ui/Stack";
+import { cn } from "../utils/cn";
 
 interface Props {
   value: SessionListFilters;
@@ -10,6 +11,7 @@ interface Props {
   matchingCount: number;
   totalCount: number;
   onReset: () => void;
+  compact?: boolean;
 }
 
 export function SessionListActiveFilters({
@@ -18,6 +20,7 @@ export function SessionListActiveFilters({
   matchingCount,
   totalCount,
   onReset,
+  compact = false,
 }: Props) {
   const labels = [
     gameLabel ?? null,
@@ -26,8 +29,20 @@ export function SessionListActiveFilters({
   ].filter((label): label is string => label !== null);
 
   return (
-    <div className="mt-1.5 px-2 pb-2">
-      <HStack className="gap-2 rounded-lg bg-zinc-900/45 px-2.5 py-2 ring-1 ring-inset ring-white/[0.06]">
+    <div
+      className={cn(
+        compact
+          ? "mt-3 border-t border-white/[0.07] px-4 pt-3 sm:px-5"
+          : "mt-1.5 px-2 pb-2",
+      )}
+    >
+      <HStack
+        className={cn(
+          "gap-2",
+          !compact &&
+            "rounded-lg bg-zinc-900/45 px-2.5 py-2 ring-1 ring-inset ring-white/[0.06]",
+        )}
+      >
         <SlidersHorizontal className="size-3.5 shrink-0 text-sky-400" />
         <div className="min-w-0 flex-1" aria-live="polite">
           <p className="font-mono text-3xs font-semibold uppercase tracking-wider text-sky-400/80">
