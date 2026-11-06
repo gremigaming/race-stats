@@ -5162,6 +5162,67 @@
      "front": 14
     }
    ]
+  },
+  "sev-11041959-1166a": {
+   "key": "85bba11a5949",
+   "race_file": "Race_Singapore_2026_11_04_20_09_05.json",
+   "parent": "sev-11041959-1166",
+   "part": 1,
+   "of": 1,
+   "by": "staff",
+   "track": "Singapore",
+   "date": "2026-11-04",
+   "verdict": "#21 daris_2190 at fault",
+   "severity": 10,
+   "note": "",
+   "tags": [
+    "Ran into the back"
+   ],
+   "kind": "Rear-end",
+   "source": "grade",
+   "calls": {
+    "10": {
+     "name": "#21 daris_2190",
+     "call": "fault",
+     "severity": 10
+    },
+    "3": {
+     "name": "#19 DDRK",
+     "call": "clear"
+    }
+   },
+   "recording": "2026-11-04_19-59-27_Singapore_Race.gmtel.gz",
+   "t": 116.7,
+   "t1": 126.1,
+   "cars": [
+    3,
+    10
+   ],
+   "contacts": [
+    {
+     "a": 10,
+     "b": 3,
+     "t": 116.7,
+     "x": {
+      "gap": 9.0,
+      "closing": 24,
+      "moved_front": 0.16,
+      "moved_back": -0.71,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 95,
+      "lost": 2,
+      "off": 0,
+      "cars": 2,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "back",
+     "rulebook": "back",
+     "rule": "R10",
+     "front": 3
+    }
+   ]
   }
  },
  "about": "Numbers of every graded incident's contacts and the final call (scripts/telemetry/precedents.py).",
@@ -5261,6 +5322,17 @@
    "contacts": 121,
    "rulebook": 61,
    "with_precedents": 67,
+   "overrides": 9,
+   "date": "2026-11-06",
+   "rules": "v1.4"
+  },
+  {
+   "incidents": 81,
+   "inc_rulebook": 33,
+   "inc_with_precedents": 37,
+   "contacts": 122,
+   "rulebook": 62,
+   "with_precedents": 68,
    "overrides": 9,
    "date": "2026-11-06",
    "rules": "v1.4"
