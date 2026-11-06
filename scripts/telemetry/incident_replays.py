@@ -452,10 +452,11 @@ def main():
         for s in d["sessions"]:
             for it in s["items"]:
                 if it.get("inc"):
-                    it["inc"] = {"t": it["inc"]["t"], "pair": it["inc"].get("pair")}
+                    it["inc"] = {k: it["inc"][k] for k in ("t", "pair") if k in it["inc"]}
     json.dump(data, open(path, "w"), separators=(",", ":"))
-    for it in incs["incidents"]:
-        it.pop("inc", None)
+    for it in incs["incidents"]:   # same for the staff page's incident editor (staff/races.py incident_rows)
+        if it.get("inc"):
+            it["inc"] = {k: it["inc"][k] for k in ("t", "te", "pair", "names") if k in it["inc"]}
     json.dump(incs, open(ipath, "w"), separators=(",", ":"))
     print("replays written:", made)
 
