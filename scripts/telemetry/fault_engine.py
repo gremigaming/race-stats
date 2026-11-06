@@ -45,7 +45,8 @@ def feats(p):
             "rejoin": [int(k) for k, v in (f.get("rejoin") or {}).items() if v],
             "slide_deg": eff.get("max_slide_deg"), "places_lost": eff.get("places_lost"), "off_track": eff.get("off_track"),
             "brake": {str(k): v for k, v in (f.get("brake") or {}).items()},
-            "steer": {str(k): v for k, v in (f.get("steer") or {}).items()}}
+            "steer": {str(k): v for k, v in (f.get("steer") or {}).items()},
+            "push": {str(k): v for k, v in (f.get("push") or {}).items() if v}}
 
 
 BATTLE_M = 5.0       # less than this apart along the track and ...

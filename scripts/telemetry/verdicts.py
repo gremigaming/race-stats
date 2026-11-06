@@ -34,6 +34,10 @@ looks like graded ones follows them when they agree.
   R9  Hitting the same car again within REPEAT_S after being at fault for a contact with it,
       having been REPEAT_GAP_M+ apart in between (it came back for it): deliberate, severity 10.
   R5 also covers a car rejoining in front of a car that runs into it: the rejoining car.
+  R10 Inputs (v1.4, GreMi 6 Nov 2026, from daris_2190 into DDRK, Singapore 4 Nov): the car behind
+      that keeps full throttle (PUSH_THROTTLE+, no brake) for PUSH_S+ after hitting a car that is
+      braking all that time, still touching it (less than PUSH_M apart), pushed it on purpose:
+      at fault, severity 10. Not when side by side (both on the power alongside is racing).
 
   WET (v1.3, GreMi 5 Nov 2026): in rain (light rain, heavy rain or storm at the contact) it is a
       racing incident a bit sooner: the car behind gets REACT_WET_S to react, must close in at
@@ -58,7 +62,7 @@ import gmtel  # noqa: E402
 import incident_replays  # noqa: E402
 import race_bundles as rb  # noqa: E402
 
-RULES = "v1.3"       # bump when a rule changes: fault_engine.py judges every race again
+RULES = "v1.4"       # bump when a rule changes: fault_engine.py judges every race again
 ALONGSIDE_M = 4.0    # less than this apart along the track = alongside (a car is ~5.6 m long)
 MOVE_M = 1.0         # moving across this much in the last 1.2 s counts as moving into the other car
 MOVE_MORE_M = 0.7    # ... and this much more than the other car did
@@ -78,6 +82,10 @@ UPSET_DEG = 20
 WET = 3              # weather code 3+ (light rain, heavy rain, storm) = wet
 REACT_WET_S = 1.5    # wet: the car ahead got upset this soon before = no time to react
 CLOSING_WET_KMH = 10 # wet: the car behind must close in this fast to be blamed for a rear-end
+PUSH_THROTTLE = 0.9  # R10: throttle this far down ...
+PUSH_S = 0.8         # ... for this long after the contact ...
+PUSH_M = 7.0         # ... while still this close (centre to centre; a car is ~5.6 m long)
+PUSH_BRAKE = 0.25   # ... into a car braking at least this hard all that time = pushing it on purpose
 
 
 def ai_at_start(path):
@@ -124,6 +132,20 @@ class Judge:
         k0, k1 = bisect.bisect_left(self.times, t0), bisect.bisect_right(self.times, t1)
         return max((math.hypot(c[a][0] - c[b][0], c[a][1] - c[b][1]) for _, c in self.frames[k0:k1] if a in c and b in c), default=0)
 
+    def push(self, me, other, t):
+        """R10: seconds after the contact at t that `me` kept full throttle (no brake) while still
+        touching `other` and `other` was braking (PUSH_BRAKE+). Stops at the first moment it isn't."""
+        held, k = 0.0, 0
+        while k < 25:
+            k += 1
+            c = self.at(t + 0.1 * k)
+            A, B = c.get(me), c.get(other)
+            if (not A or not B or math.hypot(A[0] - B[0], A[1] - B[1]) >= PUSH_M or A[5] < PUSH_THROTTLE or A[6] > 0.05
+                    or B[6] < PUSH_BRAKE):
+                break
+            held = 0.1 * k
+        return round(held, 1)
+
     def at(self, t):
         k = min(max(bisect.bisect_left(self.times, t), 0), len(self.frames) - 1)
         return self.frames[k][1]
@@ -161,6 +183,7 @@ class Judge:
         A1 = self.at(t - 0.2)   # pedals and steering just before the contact (how it happened)
         f["brake"] = {i: round(float(A1[i][6]), 2) for i in (a, b) if i in A1}
         f["steer"] = {i: round(float(A1[i][7]), 2) for i in (a, b) if i in A1}
+        f["push"] = {i: self.push(i, b if i == a else a, t) for i in (a, b)}
         f["moved"], f["rejoin"] = {}, {}
         if track:
             oa, ob = self.offset(track, a, t - 0.3)[0], self.offset(track, b, t - 0.3)[0]
@@ -240,6 +263,11 @@ class Judge:
         rej = [i for i in (a, b) if f["rejoin"].get(i) and f["moved"].get(i, 0) >= MOVE_M]
         if not rej and f.get("off_n", {}).get(front, 0) >= 2 and not alongside and closing >= closing_kmh:
             rej = [front]
+        push = f["push"].get(back, 0)
+        if not alongside and push >= PUSH_S:
+            return {"verdict": f"{name(back)} at fault", "at_fault": back, "rule": "R10", "severity": 10,
+                    "why": f"{name(back)} kept full throttle for {push:.1f} s after hitting {name(front)}, pushing it along",
+                    "features": f, "effects": eff}
         if earlier:
             rule = "R7"
             why = f"aftermath of a contact just before; {name(a)} and {name(b)} had no time to react"

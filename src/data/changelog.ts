@@ -10,6 +10,14 @@ export interface ChangelogEntry {
 // raw commit history also contains routine uploads and staff-only corrections.
 const changelog: ChangelogEntry[] = [
   {
+    id: "incident-inputs-rule",
+    date: "2026-11-06",
+    type: "feat",
+    message:
+      "Incident calls now look at the pedals too: keeping full throttle into a braking car after hitting it counts as pushing it on purpose, with the highest severity.",
+    destination: "incidents",
+  },
+  {
     id: "removed-test-races",
     date: "2026-11-06",
     type: "fix",

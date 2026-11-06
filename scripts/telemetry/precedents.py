@@ -197,6 +197,8 @@ def load_lessons(cache):
                 sev = _sev_of(float(c["pts"]))
         lid = "s-" + hashlib.sha1(f"{file}|{t}".encode()).hexdigest()[:8]
         out[lid] = {"id": lid, "by": "GreMi" if all(c.get("owner") for c in cs) else "staff", "lesson": True,
+                    "at": max(c.get("at") or "" for c in cs), "who": sorted({str(c.get("by")) for c in cs if c.get("by")}),
+                    "changes": [c["id"] for c in cs], "race_file": file,
                     "real": True, "at_fault": [name(x) for x in sorted(fault)], "severity": sev if fault else 0,
                     "verdict": blame_text(sorted(fault), name), "kind": kinds[0] if kinds else None,
                     "source": "protest rejected" if any(c["type"] == "confirm" for c in cs) else
@@ -306,13 +308,27 @@ def _build_one(job):
                  "f": fe.feats(p)}
             front, back, x = vector(c, cars)
             contacts.append({"a": p["a"], "b": p["b"], "t": round(p["t"], 1), "x": {n: round(val, 2) for n, val in x.items()},
-                             "label": role(front, back, fault, d["real"]), "rulebook": rule_role(c, front, back), "rule": p["rule"]})
+                             "label": role(front, back, fault, d["real"]), "rulebook": rule_role(c, front, back), "rule": p["rule"],
+                             "front": front})
         out.append((d["id"], {
             "key": key_of(d), "by": d.get("by", "GreMi"), "track": d.get("track"), "date": d.get("date"),
             "kind": d.get("kind"), "source": d.get("source") or "grade", "verdict": d["verdict"], "severity": d.get("severity") or 0, "note": (d.get("note") or "")[:300],
+            **meta(d),
             "recording": rec, "t": d["t"], "cars": sorted({x["car"] for x in inc["drivers"]}),
             "rulebook": {"verdict": v["verdict"], "rule": v["rule"]}, "contacts": contacts},
             f"{d['id']} {rec} t={d['t']} -> {d['verdict']} ({len(contacts)} contacts)"))
+    return out
+
+
+def meta(d):
+    """Who taught it and when, for the staff page's lesson log (learned.py): kept with every precedent."""
+    out = {k: d[k] for k in ("who", "changes", "race_file") if d.get(k)}
+    at = d.get("at")
+    if isinstance(at, (int, float)):
+        import datetime
+        at = datetime.datetime.fromtimestamp(at, datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    if at:
+        out["at"] = at
     return out
 
 
@@ -322,7 +338,7 @@ def _contact_entry(p, cars, fault, real):
          "f": fe.feats(p)}
     front, back, x = vector(c, cars)
     return {"a": p["a"], "b": p["b"], "t": round(p["t"], 1), "x": {n: round(val, 2) for n, val in x.items()},
-            "label": role(front, back, fault, real), "rulebook": rule_role(c, front, back), "rule": p["rule"]}
+            "label": role(front, back, fault, real), "rulebook": rule_role(c, front, back), "rule": p["rule"], "front": front}
 
 
 def _build_parts(d, rec, incs, vs):
@@ -336,7 +352,7 @@ def _build_parts(d, rec, incs, vs):
         sev = max([x.get("severity") or 0 for x in part["drivers"] if x["car"] in fault] or [0])
         pid = part_id(d, n)
         out.append((pid, {
-            "key": key_of(d), "parent": d["id"], "part": n + 1, "of": len(parts), "by": d.get("by", "GreMi"),
+            "key": key_of(d), **meta(d), "parent": d["id"], "part": n + 1, "of": len(parts), "by": d.get("by", "GreMi"),
             "track": d.get("track"), "date": d.get("date"), "verdict": part.get("verdict") or d["verdict"],
             "severity": sev, "note": (part.get("note") or "")[:300], "tags": part.get("tags") or [],
             "kind": part.get("kind"), "source": d.get("source") or "grade",
@@ -353,7 +369,7 @@ def _build_parts(d, rec, incs, vs):
                    and p["a"] in involved and p["b"] in involved and lo - 1 <= p["t"] <= hi + 1]
         if touches:
             pid = d["id"] + "-touches"
-            out.append((pid, {"key": key_of(d), "parent": d["id"], "by": d.get("by", "GreMi"), "track": d.get("track"),
+            out.append((pid, {"key": key_of(d), **meta(d), "parent": d["id"], "by": d.get("by", "GreMi"), "track": d.get("track"),
                               "date": d.get("date"), "verdict": "Not an incident", "severity": 0,
                               "note": "contacts in the graded incident outside its parts: innocent touches",
                               "recording": rec, "t": lo, "t1": hi, "cars": sorted(involved),
@@ -508,7 +524,7 @@ def summarize(inc, name):
         cars += [x for x in c["at_fault"] if x not in cars]
     if blamed:
         main = max(blamed, key=lambda c: c["severity"])
-        inc.update(rule=main["rule"] if len(cars) == 1 or main["rule"] == "R9" else "R8", severity=main["severity"],
+        inc.update(rule=main["rule"] if len(cars) == 1 or main["rule"] in ("R9", "R10") else "R8", severity=main["severity"],
                    verdict=blame_text(cars, name), why="; ".join(dict.fromkeys(c["why"] for c in blamed)), at_fault=cars)
     elif not counted or all(c["rule"] == "R1" for c in counted):
         first = (counted or inc["contacts"])[0]
@@ -676,7 +692,7 @@ def apply_file(path, store, decs, pts, ver):
         # 2. similar graded contacts
         moved = False
         for c in counted:
-            if not c.get("f") or c["rule"] == "R9" or (c.get("precedent") or {}).get("own"):
+            if not c.get("f") or c["rule"] in ("R9", "R10") or (c.get("precedent") or {}).get("own"):
                 continue
             front, back, x = vector(c, len(inc["cars"]))
             guess = predict(x, pts)

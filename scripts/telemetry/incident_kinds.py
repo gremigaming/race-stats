@@ -39,6 +39,8 @@ def kind_of(inc):
         return "Unsafe rejoin"
     if rule == "R9":
         return "Retaliation"
+    if rule == "R10":
+        return "Rear-end"   # kept full throttle into a braking car (GreMi graded daris into DDRK as a rear-end)
     if rule == "R4":
         return "Chain reaction"
     if rule == "R7":

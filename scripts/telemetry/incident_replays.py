@@ -446,10 +446,13 @@ def main():
                 print(file, ": no recording with every car")
     index["_failed"] = sorted(failed)
     json.dump(index, open(idx_path, "w"))
+    # keep which contact an item is (time + pair, no names): the staff page saves it with a change so
+    # the fault engine can learn from it (precedents.load_lessons); without it staff lessons were lost
     for d in data["drivers"]:
         for s in d["sessions"]:
             for it in s["items"]:
-                it.pop("inc", None)
+                if it.get("inc"):
+                    it["inc"] = {"t": it["inc"]["t"], "pair": it["inc"].get("pair")}
     json.dump(data, open(path, "w"), separators=(",", ":"))
     for it in incs["incidents"]:
         it.pop("inc", None)

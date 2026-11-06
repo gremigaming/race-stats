@@ -35,6 +35,8 @@ export function kindOf(inc: RaceIncident): IncidentKind {
       return "rejoin";
     case "R9":
       return "retaliation";
+    case "R10":
+      return "rear";
     case "R4":
       return "control";
     case "R7":

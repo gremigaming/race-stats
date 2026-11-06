@@ -26,6 +26,7 @@ import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
+sys.path.insert(0, HERE)
 STORE = os.path.join(ROOT, "grading", "precedents.json")
 OUT = os.path.join(ROOT, "public", "league", "learned.json")
 LABELS = {"front": "the car ahead at fault", "back": "the car behind at fault", "both": "both at fault",
@@ -62,6 +63,9 @@ RULEBOOK = [
                  "Wet track: a car behind that lost it just before the contact, closing slowly, is a racing incident",
                  "Rejected protests teach the engine too: its call was right",
                  "Incident types and the weather are kept with every call"]},
+    {"date": "2026-11-06", "version": "v1.4", "from": "GreMi: look at the inputs (daris_2190 into DDRK, Singapore 4 Nov)",
+     "changes": ["Inputs count: a car behind that keeps full throttle for 0.8 s or more after hitting a car that is braking, "
+                 "still touching it, pushed it on purpose: at fault, severity 10 (not when side by side)"]},
 ]
 
 
@@ -138,6 +142,223 @@ def changes(cache):
     return {"counts": dict(n), "total": sum(v for k, v in n.items() if k != "confirmed"), "recent": rows[:25]}
 
 
+# ---------------------------------------------------------------- the lesson log (GreMi, 6 Nov 2026)
+
+SITE = "https://gremigaming.github.io/race-stats/f1/"
+SEED_DAYS = {"b1": "2026-10-30", "b2": "2026-10-31", "b3": "2026-11-01"}   # batches 1-3: graded in the old artifact, day only
+SAME = {"no": "nobody", "none": "nobody"}
+CONFLICT_D = 2.0     # graded contacts this similar (scaled distance; precedents follow up to 2.5) ...
+CONFLICTS = 12       # ... with a different call: show the closest this many pairs
+
+
+def _short(name):
+    return re.sub(r"^#\d+\s+", "", name or "")
+
+
+def _front_back(main, sk):
+    """(front car, back car) of a contact from its sketch (the cars drive up the picture), or None."""
+    if not sk:
+        return None
+    at = {c["car"]: c["at"] for c in sk.get("cars") or []}
+    a, b = main["a"], main["b"]
+    if a not in at or b not in at:
+        return None
+    return (a, b) if at[a][1] < at[b][1] else (b, a)
+
+
+def why_text(p, sk, name):
+    """Why the call on a graded contact is what it is, in plain words from its numbers."""
+    cs = p.get("contacts") or []
+    if not cs:
+        return ""
+    main = next((c for c in cs if c.get("label") != "no"), cs[0])
+    x, lab = main["x"], main["label"]
+    fb = ((main["front"], main["b"] if main["front"] == main["a"] else main["a"]) if main.get("front") is not None
+          else _front_back(main, sk))
+    front, back = (name(fb[0]), name(fb[1])) if fb else ("the car ahead", "the car behind")
+    ins = {c["car"]: c for c in (sk or {}).get("cars") or []}
+    side = x["gap"] < 4
+    if lab == "back":
+        out = f"{back} was {x['gap']:.0f} m behind, closing in at {x['closing']:.0f} km/h, and ran into {front}"
+        if fb and ins.get(fb[0], {}).get("brake", 0) >= 0.2:
+            out += f" while {front} was braking"
+        if fb and ins.get(fb[1], {}).get("throttle", 0) >= 0.9 and ins.get(fb[1], {}).get("brake", 0) < 0.05:
+            out += f" ({back} still on full throttle)"
+        out += ": the car behind is at fault."
+    elif lab == "front":
+        if x.get("rejoin_front"):
+            out = f"{front} came back onto the track into {back}: an unsafe rejoin is the rejoining car's fault."
+        elif side:
+            out = (f"Side by side, {front} moved {x['moved_front']:.1f} m across into {back} "
+                   f"({back} moved {x['moved_back']:.1f} m): the car that keeps moving across is at fault.")
+        else:
+            out = f"{front} was ahead but moved {x['moved_front']:.1f} m across into {back}: the car ahead is at fault."
+    elif lab == "both":
+        out = (f"Both moved across into each other ({x['moved_front']:.1f} m and {x['moved_back']:.1f} m): shared blame.")
+    elif lab == "none":
+        out = ("Neither driver clearly caused it" + (f" (side by side, {x['moved_front']:.1f} m / {x['moved_back']:.1f} m)" if side
+               else f" ({x['gap']:.0f} m apart, closing at {x['closing']:.0f} km/h)") + ": a racing incident.")
+    else:
+        harm = []
+        if x["slide"] <= 20:
+            harm.append("nobody slid")
+        if not x["lost"]:
+            harm.append("nobody lost a place")
+        out = "A light contact" + (f": {', '.join(harm)}" if harm else "") + ": not an incident."
+    if x.get("reaction"):
+        out += " The car ahead slid or went off just before: no time to react."
+    if x.get("aftermath"):
+        out += " It came right after an earlier contact: aftermath."
+    return out
+
+
+def _incident_link(file, lap, names):
+    if not file:
+        return None
+    return (f"{SITE}incidents?file={file}" + (f"&lap={lap}" if lap else "")
+            + "&with=" + "|".join(_short(n) for n in names if n))
+
+
+def _verdict_files(cache):
+    out = []
+    for path in sorted(glob.glob(os.path.join(cache, "verdicts", "Race_*.json"))):
+        try:
+            out.append((os.path.basename(path), json.load(open(path, encoding="utf-8"))))
+        except (OSError, ValueError):
+            continue
+    return out
+
+
+def _where(vfiles, rec, t):
+    """(race file, lap) of the incident at recording time t."""
+    for file, data in vfiles:
+        if data.get("recording") != rec:
+            continue
+        off = data.get("offset") or 0
+        best = min(data.get("incidents") or [], key=lambda i: abs(i["t0"] - off - t), default=None)
+        if best is not None and abs(best["t0"] - off - t) < 8:
+            return file, best.get("lap")
+        return file, None
+    return None, None
+
+
+def followers(vfiles):
+    """{precedent id: [incident calls changed because they look like it]} (after precedents.py apply)."""
+    out = collections.defaultdict(list)
+    for file, data in vfiles:
+        track = re.sub(r"^Race_|_\d{4}_.*$", "", file).replace("_", " ")
+        date = "-".join(re.search(r"(\d{4})_(\d\d)_(\d\d)", file).groups())
+        names = {}
+        for inc in data.get("incidents") or []:
+            pr, rb = inc.get("precedent") or {}, inc.get("rulebook") or {}
+            if not pr.get("id") or pr.get("own"):
+                continue
+            before, after = sorted(rb.get("at_fault") or []), sorted(inc.get("at_fault") or [])
+            if before == after and rb.get("verdict") == inc.get("verdict"):
+                continue
+            who = [d.get("name") for d in inc.get("drivers") or [] if d.get("name")] or names.get(file, [])
+            out[pr["id"]].append({"track": track, "date": date, "lap": inc.get("lap"), "file": file,
+                                  "what": "cleared" if before and not after else "blamed" if after and not before else "moved",
+                                  "before": rb.get("verdict"), "after": inc.get("verdict"), "d": pr.get("d"),
+                                  "watch": _incident_link(file, inc.get("lap"), who)})
+    return out
+
+
+def lesson_log(store, cache, sketches=None):
+    """One entry per lesson, newest first: when, who, which incident, the call, why, a sketch and
+    the calls it changed. Lessons the rulebook now makes by itself, or a later grade replaced, are
+    marked outdated (the staff page folds them away); lessons that agreed with the rulebook are
+    "confirmed" (they keep it honest: a rule change that breaks them shows in the accuracy)."""
+    import precedents as P
+    try:
+        decs = P.load_decisions()
+    except Exception:
+        decs = {}
+    try:
+        decs.update({k: v for k, v in P.load_lessons(cache).items() if k not in decs})
+    except Exception as ex:
+        print("learned: staff lessons not read:", ex)
+    vfiles = _verdict_files(cache)
+    follow = followers(vfiles)
+    ps = store.get("precedents") or {}
+    sketches = sketches or {}
+    graded = {(p.get("recording"), round(p.get("t") or 0)) for pid, p in ps.items() if not pid.startswith("s-")}
+    out = []
+    for pid, p in ps.items():
+        parent = p.get("parent") or pid
+        d = decs.get(parent) or {}
+        names = {x["car"]: x["name"] for x in d.get("drivers") or []}
+        name = lambda i: _short(names.get(i) or f"car {i}")  # noqa: E731
+        sk = sketches.get(pid)
+        cs = p.get("contacts") or []
+        differs = any(c["label"] != c["rulebook"] and {c["label"], c["rulebook"]} - {"no", "none"} for c in cs)
+        changed = follow.get(pid, [])
+        at = p.get("at") or P.meta(d).get("at")
+        file = p.get("race_file") or d.get("race_file")
+        f2, lap = _where(vfiles, p.get("recording"), p.get("t") or 0)
+        file = file or f2
+        state, why_old = "active", None
+        if pid.startswith("s-") and (p.get("recording"), round(p.get("t") or 0)) in graded:
+            state, why_old = "outdated", "graded later: the grade wins"
+        elif pid.endswith("-touches"):
+            state, why_old = "outdated", "innocent touches around a graded incident"
+        elif not differs and not changed:
+            state, why_old = "confirmed", "the rulebook already made this call: kept as a check"
+        fault = set(d.get("at_fault") or [])
+        cars = [{"car": c, "name": name(c), "fault": names.get(c) in fault} for c in p.get("cars") or []]
+        for part in d.get("parts") or []:
+            if p.get("part") and part is (d.get("parts") or [])[p["part"] - 1]:
+                calls = {x["car"]: x.get("call") for x in part.get("drivers") or []}
+                for c in cars:
+                    c["call"] = calls.get(c["car"])
+                    c["fault"] = calls.get(c["car"]) in ("fault", "shared")
+        out.append({"id": pid, "parent": parent, "at": at, "day": p.get("date") if at else SEED_DAYS.get(pid[:2]),
+                    "by": p.get("by", "GreMi"), "who": p.get("who") or [], "source": p.get("source") or "grade",
+                    "changes": p.get("changes") or [], "track": p.get("track"), "date": p.get("date"), "lap": lap, "file": file,
+                    "part": p.get("part"), "of": p.get("of"), "kind": p.get("kind"), "call": p.get("verdict"),
+                    "severity": p.get("severity"), "rulebook": (p.get("rulebook") or {}).get("verdict"), "differs": differs,
+                    "cars": cars, "why": why_text(p, sk, name), "sketch": sk, "changed": changed[:40], "followers": len(changed),
+                    "watch": _incident_link(file, lap, [c["name"] for c in cars]), "state": state, "outdated": why_old})
+    out.sort(key=lambda e: (e["at"] or e["day"] or "", e["id"]), reverse=True)
+    return out
+
+
+def conflicts(store):
+    """Graded contacts that look very much alike but got a different call: either they are less alike
+    than the numbers say, or one of the calls is wrong. Closest pairs first, one pair per two incidents."""
+    import precedents as P
+    pts = []
+    for pid, p in (store.get("precedents") or {}).items():
+        if pid.endswith("-touches"):
+            continue
+        for k, c in enumerate(p.get("contacts") or []):
+            y, _ = P.canon(c["x"])
+            pts.append((pid, p.get("parent") or pid, k, y, SAME.get(c["label"], c["label"]), c))
+    pairs = []
+    for i in range(len(pts)):
+        for j in range(i + 1, len(pts)):
+            a, b = pts[i], pts[j]
+            if a[1] == b[1] or a[4] == b[4]:
+                continue
+            dist = P.distance(a[3], b[3])
+            if dist < CONFLICT_D:
+                pairs.append((dist, a, b))
+    pairs.sort(key=lambda x: x[0])
+    seen, out = set(), []
+    for dist, a, b in pairs:
+        key = tuple(sorted((a[1], b[1])))
+        if key in seen:
+            continue
+        seen.add(key)
+        diff = sorted(P.FEATURES, key=lambda f: -abs(P.FEATURES[f][1] * (a[3][f] - b[3][f]) / P.FEATURES[f][0]))[:3]
+        out.append({"d": round(dist, 2), "key": "|".join(key),
+                    "a": {"id": a[0], "label": LABELS[a[5]["label"]], "x": a[3]},
+                    "b": {"id": b[0], "label": LABELS[b[5]["label"]], "x": b[3]}, "differ": diff})
+        if len(out) >= CONFLICTS:
+            break
+    return out
+
+
 def main():
     cache = sys.argv[1] if len(sys.argv) > 1 else "/tmp/telemetry-cache"
     try:
@@ -154,9 +375,21 @@ def main():
     data = {"made": datetime.date.today().isoformat(), "rulebook": RULEBOOK[::-1],
             "accuracy": store.get("eval_history") or [], "graded": graded, "lessons": out_lessons,
             "changes": changes(cache)}
+    try:
+        import sketches as S
+        sk = S.sketch_all(cache, store)
+    except Exception as ex:
+        print("learned: no sketches:", ex)
+        sk = {}
+    try:
+        data["log"] = lesson_log(store, cache, sk)
+        data["conflicts"] = conflicts(store)
+    except Exception as ex:
+        print("learned: lesson log failed:", ex)
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     json.dump(data, open(OUT, "w", encoding="utf-8"), ensure_ascii=False)
-    print("learned:", len(out_lessons), "lessons,", data["changes"]["total"], "calls changed by grades")
+    print("learned:", len(out_lessons), "lessons,", data["changes"]["total"], "calls changed by grades,",
+          len(data.get("log") or []), "log entries,", len(data.get("conflicts") or []), "similar incidents with different calls")
 
 
 if __name__ == "__main__":

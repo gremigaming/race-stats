@@ -1,7 +1,7 @@
 {
  "precedents": {
   "1102b-1": {
-   "key": "e8b6a4e9a2a4",
+   "key": "4551b43c17b3",
    "by": "GreMi",
    "track": "Brazil",
    "date": "2026-11-02",
@@ -10,6 +10,8 @@
    "verdict": "Not an incident",
    "severity": 0,
    "note": "",
+   "race_file": "Race_Brazil_2026_11_02_19_22_19.json",
+   "at": "2026-11-03T07:45:56Z",
    "recording": "2026-11-02_19-14-53_Brazil_Race.gmtel.gz",
    "t": 37.6,
    "cars": [
@@ -41,12 +43,15 @@
      },
      "label": "no",
      "rulebook": "no",
-     "rule": "R1"
+     "rule": "R1",
+     "front": 9
     }
    ]
   },
   "1102b-2a": {
-   "key": "4768305c1a01",
+   "key": "460a92bda880",
+   "race_file": "Race_Brazil_2026_11_02_19_22_19.json",
+   "at": "2026-11-03T07:48:40Z",
    "parent": "1102b-2",
    "part": 1,
    "of": 1,
@@ -105,12 +110,13 @@
      },
      "label": "front",
      "rulebook": "front",
-     "rule": "R2"
+     "rule": "R2",
+     "front": 7
     }
    ]
   },
   "1102b-3": {
-   "key": "29b603d46a8c",
+   "key": "fbe6695c7ac5",
    "by": "GreMi",
    "track": "Abu Dhabi",
    "date": "2026-11-02",
@@ -119,6 +125,8 @@
    "verdict": "Not an incident",
    "severity": 0,
    "note": "It is mostly just driving contact, but flash does turn in too early, it went fine but if that resulted in a crash it would have been his fault.",
+   "race_file": "Race_Abu_Dhabi_2026_11_02_20_29_58.json",
+   "at": "2026-11-03T07:50:40Z",
    "recording": "2026-11-02_20-21-25_Abu_Dhabi_Race.gmtel.gz",
    "t": 84.6,
    "cars": [
@@ -151,7 +159,8 @@
      },
      "label": "no",
      "rulebook": "front",
-     "rule": "R2"
+     "rule": "R2",
+     "front": 7
     },
     {
      "a": 7,
@@ -173,7 +182,8 @@
      },
      "label": "no",
      "rulebook": "none",
-     "rule": "R7"
+     "rule": "R7",
+     "front": 7
     },
     {
      "a": 7,
@@ -195,12 +205,13 @@
      },
      "label": "no",
      "rulebook": "back",
-     "rule": "R3"
+     "rule": "R3",
+     "front": 7
     }
    ]
   },
   "1102b-4": {
-   "key": "c459460416ee",
+   "key": "61711bd3eb31",
    "by": "GreMi",
    "track": "Las Vegas",
    "date": "2026-11-02",
@@ -209,6 +220,8 @@
    "verdict": "#38 Ugzz98 at fault",
    "severity": 5,
    "note": "This is indeed a difficult one, cause it is not really ugzz causing a collision, but it is him losing control of his car, resulting in the crash.",
+   "race_file": "Race_Las_Vegas_Just_in_case_2026_11_02_20_04_27.json",
+   "at": "2026-11-03T07:52:45Z",
    "recording": "2026-11-02_19-47-01_Las_Vegas_Race.gmtel.gz",
    "t": 129.6,
    "cars": [
@@ -241,7 +254,8 @@
      },
      "label": "front",
      "rulebook": "no",
-     "rule": "R1"
+     "rule": "R1",
+     "front": 8
     },
     {
      "a": 14,
@@ -263,12 +277,13 @@
      },
      "label": "none",
      "rulebook": "none",
-     "rule": "R7"
+     "rule": "R7",
+     "front": 14
     }
    ]
   },
   "1102b-5": {
-   "key": "b535770d8476",
+   "key": "08b6944d5ca2",
    "by": "GreMi",
    "track": "Las Vegas",
    "date": "2026-11-02",
@@ -277,6 +292,8 @@
    "verdict": "#2 Alexowitsh77 at fault",
    "severity": 6,
    "note": "Alexowitsh just sends it in too fast, hitting stepino. almost causing a crash, this is reckless driving",
+   "race_file": "Race_Las_Vegas_Just_in_case_2026_11_02_20_04_27.json",
+   "at": "2026-11-03T07:55:23Z",
    "recording": "2026-11-02_19-47-01_Las_Vegas_Race.gmtel.gz",
    "t": 237.2,
    "cars": [
@@ -309,12 +326,15 @@
      },
      "label": "front",
      "rulebook": "no",
-     "rule": "R1"
+     "rule": "R1",
+     "front": 16
     }
    ]
   },
   "1104b-1a": {
-   "key": "db8f64505010",
+   "key": "6ff2d377250d",
+   "race_file": "Race_Singapore_2026_11_04_20_09_05.json",
+   "at": "2026-11-05T07:59:58Z",
    "parent": "1104b-1",
    "part": 1,
    "of": 1,
@@ -365,12 +385,15 @@
      },
      "label": "no",
      "rulebook": "front",
-     "rule": "R2"
+     "rule": "R2",
+     "front": 1
     }
    ]
   },
   "1104b-2a": {
-   "key": "0ad8cc96a035",
+   "key": "cad98eb0fbf7",
+   "race_file": "Race_Monza_2026_11_04_19_49_57.json",
+   "at": "2026-11-05T08:02:19Z",
    "parent": "1104b-2",
    "part": 1,
    "of": 1,
@@ -423,12 +446,15 @@
      },
      "label": "front",
      "rulebook": "front",
-     "rule": "R5"
+     "rule": "R5",
+     "front": 2
     }
    ]
   },
   "1104b-3a": {
-   "key": "34796a867583",
+   "key": "08516caf62bf",
+   "race_file": "Race_Monza_2026_11_04_19_49_57.json",
+   "at": "2026-11-05T08:05:46Z",
    "parent": "1104b-3",
    "part": 1,
    "of": 1,
@@ -486,7 +512,8 @@
      },
      "label": "both",
      "rulebook": "front",
-     "rule": "R2"
+     "rule": "R2",
+     "front": 11
     },
     {
      "a": 11,
@@ -508,7 +535,8 @@
      },
      "label": "back",
      "rulebook": "none",
-     "rule": "R7"
+     "rule": "R7",
+     "front": 6
     },
     {
      "a": 11,
@@ -530,12 +558,15 @@
      },
      "label": "both",
      "rulebook": "front",
-     "rule": "R2"
+     "rule": "R2",
+     "front": 11
     }
    ]
   },
   "1104b-4-touches": {
-   "key": "591938dc0637",
+   "key": "eec734ccc9f4",
+   "race_file": "Race_Monza_2026_11_04_19_49_57.json",
+   "at": "2026-11-05T08:10:37Z",
    "parent": "1104b-4",
    "by": "GreMi",
    "track": "Monza",
@@ -575,7 +606,8 @@
      },
      "label": "no",
      "rulebook": "back",
-     "rule": "R3"
+     "rule": "R3",
+     "front": 8
     },
     {
      "a": 10,
@@ -597,12 +629,15 @@
      },
      "label": "no",
      "rulebook": "none",
-     "rule": "R7"
+     "rule": "R7",
+     "front": 10
     }
    ]
   },
   "1104b-4a": {
-   "key": "591938dc0637",
+   "key": "eec734ccc9f4",
+   "race_file": "Race_Monza_2026_11_04_19_49_57.json",
+   "at": "2026-11-05T08:10:37Z",
    "parent": "1104b-4",
    "part": 1,
    "of": 2,
@@ -671,12 +706,15 @@
      },
      "label": "front",
      "rulebook": "none",
-     "rule": "R4"
+     "rule": "R4",
+     "front": 8
     }
    ]
   },
   "1104b-4b": {
-   "key": "591938dc0637",
+   "key": "eec734ccc9f4",
+   "race_file": "Race_Monza_2026_11_04_19_49_57.json",
+   "at": "2026-11-05T08:10:37Z",
    "parent": "1104b-4",
    "part": 2,
    "of": 2,
@@ -729,7 +767,9 @@
    "contacts": []
   },
   "1104b-5a": {
-   "key": "3da52f82c582",
+   "key": "2d79a4dbd5fe",
+   "race_file": "Race_Spa_2026_11_04_19_32_23.json",
+   "at": "2026-11-05T08:17:30Z",
    "parent": "1104b-5",
    "part": 1,
    "of": 2,
@@ -782,12 +822,15 @@
      },
      "label": "back",
      "rulebook": "back",
-     "rule": "R3"
+     "rule": "R3",
+     "front": 7
     }
    ]
   },
   "1104b-5b": {
-   "key": "3da52f82c582",
+   "key": "2d79a4dbd5fe",
+   "race_file": "Race_Spa_2026_11_04_19_32_23.json",
+   "at": "2026-11-05T08:17:30Z",
    "parent": "1104b-5",
    "part": 2,
    "of": 2,
@@ -840,12 +883,13 @@
      },
      "label": "back",
      "rulebook": "back",
-     "rule": "R3"
+     "rule": "R3",
+     "front": 6
     }
    ]
   },
   "b1-01": {
-   "key": "7faf5fe73bd3",
+   "key": "cef7e4893e4e",
    "by": "GreMi",
    "track": "Melbourne",
    "date": "2026-10-20",
@@ -854,6 +898,7 @@
    "verdict": "Stepino81 at fault",
    "severity": 4,
    "note": "It is a pretty good call, the only thing i wanna see it when i watch this is see that they touch the next corner agian, when the Redbull car almost spins, why do i not see a collision. That should be 1 incident btw. Because it was part of one battle and they never returned to normal racing lines.",
+   "race_file": "Race_Melbourne_2026_10_20_18_56_00.json",
    "recording": "2026-10-20_18-47-34_Melbourne_Race.gmtel.gz",
    "t": 391.0,
    "cars": [
@@ -885,12 +930,13 @@
      },
      "label": "front",
      "rulebook": "none",
-     "rule": "R2"
+     "rule": "R2",
+     "front": 2
     }
    ]
   },
   "b1-02": {
-   "key": "1d501cc92f44",
+   "key": "eefe9f4a4071",
    "by": "GreMi",
    "track": "Madrid",
    "date": "2026-10-20",
@@ -899,6 +945,7 @@
    "verdict": "Not an incident",
    "severity": 0,
    "note": "This is just a tapp, not an incident or collision, I do only see the driver number, I am watching the incident between car 53 and 99, i might be watching the wrong incident, but i dont think so.",
+   "race_file": "Race_Madrid_2026_10_20_19_17_17.json",
    "recording": "2026-10-20_19-07-08_Madrid_Race.gmtel.gz",
    "t": 93.0,
    "cars": [
@@ -930,12 +977,13 @@
      },
      "label": "no",
      "rulebook": "no",
-     "rule": "R1"
+     "rule": "R1",
+     "front": 6
     }
    ]
   },
   "b1-03": {
-   "key": "ebb064e1d10f",
+   "key": "e78abd0473dc",
    "by": "GreMi",
    "track": "Baku",
    "date": "2026-10-20",
@@ -944,6 +992,7 @@
    "verdict": "niketys2 at fault",
    "severity": 7,
    "note": "Okey this is an interessting one, it will taka a bit longer to explain. Let me start that this is a great example of a multi corner incident. At first i wanna say that Car 83 should also be part of the incident, even tho no one collided with them, Stepino had to change his line because of him. If yo",
+   "race_file": "Race_Baku_2026_10_20_19_56_34.json",
    "recording": "2026-10-20_19-45-13_Baku_Race.gmtel.gz",
    "t": 345.0,
    "cars": [
@@ -976,7 +1025,8 @@
      },
      "label": "none",
      "rulebook": "front",
-     "rule": "R2"
+     "rule": "R2",
+     "front": 2
     },
     {
      "a": 2,
@@ -998,12 +1048,13 @@
      },
      "label": "back",
      "rulebook": "front",
-     "rule": "R2"
+     "rule": "R2",
+     "front": 2
     }
    ]
   },
   "b1-04": {
-   "key": "b5c404faca75",
+   "key": "71279ff98570",
    "by": "GreMi",
    "track": "Mexico",
    "date": "2026-10-20",
@@ -1012,6 +1063,7 @@
    "verdict": "Racing incident",
    "severity": 3,
    "note": "Racing incident but i do think aloxowitsh triggers it, and gremi is a bit too eager their. Cause Alexo goes off his racing line a little bit on the right hand corner, a gap opens up, gremi goes for it but doesnt have enough speed. It looks like alexo is about to run into stepino and want to pass to ",
+   "race_file": "Race_Mexico_2026_10_20_20_13_46.json",
    "recording": "2026-10-20_20-05-21_Mexico_Race.gmtel.gz",
    "t": 391.0,
    "cars": [
@@ -1044,7 +1096,8 @@
      },
      "label": "none",
      "rulebook": "no",
-     "rule": "R1"
+     "rule": "R1",
+     "front": 2
     },
     {
      "a": 0,
@@ -1066,12 +1119,13 @@
      },
      "label": "none",
      "rulebook": "front",
-     "rule": "R2"
+     "rule": "R2",
+     "front": 1
     }
    ]
   },
   "b1-05": {
-   "key": "2529ee5a6f1f",
+   "key": "03997a2e84e0",
    "by": "GreMi",
    "track": "Abu Dhabi",
    "date": "2026-10-20",
@@ -1080,6 +1134,7 @@
    "verdict": "Hidden #15 (Polish, PlayStation) at fault",
    "severity": 2,
    "note": "This is only a small incident, the reason i still say it should be counted as an incident is cause DDRK does a nice move is full along side and even overtakes car 15. Until they collide car 15 keeps going more towards DDRK even when he is clearly there. DDRK should have been more carefull but if thi",
+   "race_file": "Race_Abu_Dhabi_Manual_2026_10_20_20_39_07.json",
    "recording": "2026-10-20_20-21-09_Abu_Dhabi_Race.gmtel.gz",
    "t": 107.0,
    "cars": [
@@ -1111,12 +1166,13 @@
      },
      "label": "back",
      "rulebook": "back",
-     "rule": "R2"
+     "rule": "R2",
+     "front": 7
     }
    ]
   },
   "b1-06": {
-   "key": "a106fb5e0fc0",
+   "key": "2aab0e8092ec",
    "by": "GreMi",
    "track": "Monaco",
    "date": "2026-10-23",
@@ -1125,6 +1181,7 @@
    "verdict": "Hidden #2 (Czech, PlayStation) at fault",
    "severity": 6,
    "note": "I dont really know what happend here, You said i was involved, but i was nowhere near this incident. The way i see it is car 34 hits car 8 first, which is just a tap, then car 2 in the RB hits car 34 trying to still fit in and spins himself. Im not sure if car 86 also collide with car 2 RB. You need",
+   "race_file": "Race_Monaco_2026_10_23_20_03_16.json",
    "recording": "2026-10-23_19-54-17_Monaco_Race.gmtel.gz",
    "t": 58.0,
    "cars": [
@@ -1156,12 +1213,13 @@
      },
      "label": "front",
      "rulebook": "back",
-     "rule": "R3"
+     "rule": "R3",
+     "front": 7
     }
    ]
   },
   "b1-07": {
-   "key": "1ed0918a9a9f",
+   "key": "15ee7273a2e4",
    "by": "GreMi",
    "track": "Jeddah",
    "date": "2026-10-23",
@@ -1170,6 +1228,7 @@
    "verdict": "Not an incident",
    "severity": 0,
    "note": "First i wanna say, The Redbull car number 2 is not an AI here, he is called lucas_ostepoppen. Car 77 is an AI BOTTAS. Collisions with them dont count. I do see that the race viewer labels this as a 10 car incident, which is not true, so maybe we need to confire a little bit more when you should coun",
+   "race_file": "Race_Jeddah_Manual_2026_10_23_21_13_31.json",
    "recording": "2026-10-23_21-00-10_Jeddah_Race.gmtel.gz",
    "t": 7.0,
    "cars": [
@@ -1184,7 +1243,7 @@
    "contacts": []
   },
   "b1-08": {
-   "key": "07dbd83452b6",
+   "key": "049edc1cf79d",
    "by": "GreMi",
    "track": "Imola",
    "date": "2026-10-25",
@@ -1193,6 +1252,7 @@
    "verdict": "NEX at fault",
    "severity": 2,
    "note": "",
+   "race_file": "Race_Imola_2026_10_25_15_20_36.json",
    "recording": "2026-10-25_15-12-35_Imola_Race.gmtel.gz",
    "t": 176.0,
    "cars": [
@@ -1224,12 +1284,13 @@
      },
      "label": "back",
      "rulebook": "no",
-     "rule": "R1"
+     "rule": "R1",
+     "front": 7
     }
    ]
   },
   "b1-09": {
-   "key": "99e895c042c4",
+   "key": "1705aa79a8cf",
    "by": "GreMi",
    "track": "Spa",
    "date": "2026-10-25",
@@ -1238,6 +1299,7 @@
    "verdict": "Not an incident",
    "severity": 0,
    "note": "",
+   "race_file": "Race_Spa_2026_10_25_15_54_11.json",
    "recording": "2026-10-25_15-42-41_Spa_Race.gmtel.gz",
    "t": 402.0,
    "cars": [
@@ -1269,12 +1331,13 @@
      },
      "label": "no",
      "rulebook": "none",
-     "rule": "R2"
+     "rule": "R2",
+     "front": 0
     }
    ]
   },
   "b1-10": {
-   "key": "bcfdf3f68092",
+   "key": "b94a1487673f",
    "by": "GreMi",
    "track": "Catalunya",
    "date": "2026-10-25",
@@ -1283,6 +1346,7 @@
    "verdict": "Overfast-_ at fault",
    "severity": 6,
    "note": "Again i dont know where you see car 11, there is not even a car 11 in this race. But the incident im looking at is betweern cars 53, 54, and 86 (I dont see overfast his name but i think he is number 86). Car 86 is at fault here for hitting the mercedes 54 on the rear, which causes Car 54 to hit car ",
+   "race_file": "Race_Catalunya_2026_10_25_16_07_58.json",
    "recording": "2026-10-25_15-59-16_Catalunya_Race.gmtel.gz",
    "t": 7.0,
    "cars": [
@@ -1315,7 +1379,8 @@
      },
      "label": "back",
      "rulebook": "no",
-     "rule": "R1"
+     "rule": "R1",
+     "front": 12
     },
     {
      "a": 12,
@@ -1337,12 +1402,13 @@
      },
      "label": "none",
      "rulebook": "none",
-     "rule": "R7"
+     "rule": "R7",
+     "front": 11
     }
    ]
   },
   "b1-11": {
-   "key": "ee1164e1b33c",
+   "key": "7d438051aeac",
    "by": "GreMi",
    "track": "Sakhir",
    "date": "2026-10-25",
@@ -1351,6 +1417,7 @@
    "verdict": "DevilDriver2396 at fault",
    "severity": 3,
    "note": "Devildriver goes around the outside, it is not an inside dive. This should probably not be a penalty but devildriver does push the limit here and could have left a bit more space.",
+   "race_file": "Race_Sakhir_2026_10_25_16_22_33.json",
    "recording": "2026-10-25_16-12-29_Bahrain_Race.gmtel.gz",
    "t": 209.0,
    "cars": [
@@ -1382,12 +1449,13 @@
      },
      "label": "back",
      "rulebook": "back",
-     "rule": "R2"
+     "rule": "R2",
+     "front": 4
     }
    ]
   },
   "b1-12": {
-   "key": "f6579b70331c",
+   "key": "da7a574a951b",
    "by": "GreMi",
    "track": "Jeddah",
    "date": "2026-10-25",
@@ -1396,6 +1464,7 @@
    "verdict": "Not an incident",
    "severity": 0,
    "note": "car 93 is not an AI, his name is javarionx. But this was just a little tap.",
+   "race_file": "Race_Jeddah_2026_10_25_16_37_02.json",
    "recording": "2026-10-25_16-27-27_Jeddah_Race.gmtel.gz",
    "t": 270.0,
    "cars": [
@@ -1427,12 +1496,13 @@
      },
      "label": "no",
      "rulebook": "front",
-     "rule": "R2"
+     "rule": "R2",
+     "front": 5
     }
    ]
   },
   "b1-13": {
-   "key": "bef8fb29a3b6",
+   "key": "7f310a34099c",
    "by": "GreMi",
    "track": "Shanghai",
    "date": "2026-10-25",
@@ -1441,6 +1511,7 @@
    "verdict": "Racing incident",
    "severity": 5,
    "note": "This is indeed a chain collision, I do just wanna point out that there is again no car 17. Let me tell you what happend. Car 2 ferrari hits Car 2 Audi, which makes him spin, and then chaos unfolds, Car 2 ferrari does start it but it looks like a small brake error and a huge incident. no one is fully",
+   "race_file": "Race_Shanghai_2026_10_25_16_53_29.json",
    "recording": "2026-10-25_16-42-14_Shanghai_Race.gmtel.gz",
    "t": 54.0,
    "cars": [
@@ -1473,12 +1544,13 @@
      },
      "label": "none",
      "rulebook": "back",
-     "rule": "R3"
+     "rule": "R3",
+     "front": 21
     }
    ]
   },
   "b1-14": {
-   "key": "88d4a74e1c79",
+   "key": "a78917d485b7",
    "by": "GreMi",
    "track": "Brazil",
    "date": "2026-10-25",
@@ -1487,6 +1559,7 @@
    "verdict": "Not an incident",
    "severity": 0,
    "note": "",
+   "race_file": "Race_Brazil_Manual_2026_10_25_17_06_47.json",
    "recording": "2026-10-25_16-57-26_Brazil_Race.gmtel.gz",
    "t": 234.0,
    "cars": [
@@ -1518,12 +1591,13 @@
      },
      "label": "no",
      "rulebook": "no",
-     "rule": "R1"
+     "rule": "R1",
+     "front": 11
     }
    ]
   },
   "b1-15": {
-   "key": "6bb344c882c0",
+   "key": "21a50b99049b",
    "by": "GreMi",
    "track": "Mexico",
    "date": "2026-10-28",
@@ -1532,6 +1606,7 @@
    "verdict": "DevilDriver2396 at fault",
    "severity": 3,
    "note": "I do think ethan could have left a little more room. But devil was wrong here.",
+   "race_file": "Race_Mexico_2026_10_28_19_22_23.json",
    "recording": "2026-10-28_19-14-35_Mexico_Race.gmtel.gz",
    "t": 111.0,
    "cars": [
@@ -1563,12 +1638,13 @@
      },
      "label": "back",
      "rulebook": "none",
-     "rule": "R2"
+     "rule": "R2",
+     "front": 4
     }
    ]
   },
   "b1-16": {
-   "key": "fba1ecd16dcc",
+   "key": "c115a4a21686",
    "by": "GreMi",
    "track": "Losail",
    "date": "2026-10-28",
@@ -1577,6 +1653,7 @@
    "verdict": "EthanMoonski at fault",
    "severity": 3,
    "note": "",
+   "race_file": "Race_Losail_2026_10_28_19_39_49.json",
    "recording": "2026-10-28_19-31-38_Losail_Race.gmtel.gz",
    "t": 199.0,
    "cars": [
@@ -1608,12 +1685,13 @@
      },
      "label": "back",
      "rulebook": "no",
-     "rule": "R1"
+     "rule": "R1",
+     "front": 5
     }
    ]
   },
   "b1-17": {
-   "key": "3e4066b02ee1",
+   "key": "2d32558ae74e",
    "by": "GreMi",
    "track": "Singapore",
    "date": "2026-10-28",
@@ -1622,6 +1700,7 @@
    "verdict": "Not an incident",
    "severity": 0,
    "note": "",
+   "race_file": "Race_Singapore_2026_10_28_19_57_08.json",
    "recording": "2026-10-28_19-47-35_Singapore_Race.gmtel.gz",
    "t": 58.0,
    "cars": [
@@ -1653,12 +1732,13 @@
      },
      "label": "no",
      "rulebook": "no",
-     "rule": "R1"
+     "rule": "R1",
+     "front": 2
     }
    ]
   },
   "b1-18": {
-   "key": "e3a00889fa4b",
+   "key": "0b55597f22ea",
    "by": "GreMi",
    "track": "Monza",
    "date": "2026-10-28",
@@ -1667,6 +1747,7 @@
    "verdict": "Not an incident",
    "severity": 0,
    "note": "I do need to say alot happend there including dabbinman spinning, which is his own fault.",
+   "race_file": "Race_Monza_2026_10_28_20_14_22.json",
    "recording": "2026-10-28_20-06-08_Monza_Race.gmtel.gz",
    "t": 118.0,
    "cars": [
@@ -1700,7 +1781,8 @@
      },
      "label": "no",
      "rulebook": "no",
-     "rule": "R1"
+     "rule": "R1",
+     "front": 10
     },
     {
      "a": 7,
@@ -1722,12 +1804,13 @@
      },
      "label": "no",
      "rulebook": "none",
-     "rule": "R7"
+     "rule": "R7",
+     "front": 7
     }
    ]
   },
   "b1-19": {
-   "key": "fa95ff4554dc",
+   "key": "86d85e4f48c7",
    "by": "GreMi",
    "track": "Montreal",
    "date": "2026-10-28",
@@ -1736,6 +1819,7 @@
    "verdict": "Typr3k at fault",
    "severity": 4,
    "note": "",
+   "race_file": "Race_Montreal_2026_10_28_20_29_49.json",
    "recording": "2026-10-28_20-22-05_Montreal_Race.gmtel.gz",
    "t": 126.0,
    "cars": [
@@ -1768,7 +1852,8 @@
      },
      "label": "back",
      "rulebook": "back",
-     "rule": "R3"
+     "rule": "R3",
+     "front": 2
     },
     {
      "a": 2,
@@ -1790,12 +1875,13 @@
      },
      "label": "none",
      "rulebook": "none",
-     "rule": "R7"
+     "rule": "R7",
+     "front": 5
     }
    ]
   },
   "b1-20": {
-   "key": "00def6cb14ea",
+   "key": "031483456872",
    "by": "GreMi",
    "track": "Suzuka",
    "date": "2026-10-28",
@@ -1804,6 +1890,7 @@
    "verdict": "TTV/GreMi_Gaming at fault",
    "severity": 4,
    "note": "There was a really big incident before why gremi rejoins weird, but it was an unsafe rejoin.",
+   "race_file": "Race_Suzuka_Just_in_case_2026_10_28_20_53_25.json",
    "recording": "2026-10-28_20-40-25_Suzuka_Race.gmtel.gz",
    "t": 183.0,
    "cars": [
@@ -1839,7 +1926,8 @@
      },
      "label": "front",
      "rulebook": "none",
-     "rule": "R2"
+     "rule": "R2",
+     "front": 0
     },
     {
      "a": 0,
@@ -1861,12 +1949,13 @@
      },
      "label": "back",
      "rulebook": "none",
-     "rule": "R7"
+     "rule": "R7",
+     "front": 10
     }
    ]
   },
   "b2-01": {
-   "key": "deab63fd402c",
+   "key": "e9c18b9b7243",
    "by": "GreMi",
    "track": "Monza",
    "date": "2026-10-28",
@@ -1875,6 +1964,7 @@
    "verdict": "Racing incident",
    "severity": 8,
    "note": "I spun by hitting the grass, so you could argue that is was at fault, but this shouldnt get me a massive amount of penalty points because it was just a mistake. Fajeckaaa just drives his normal line, i would ay he didnt try to avoid it at all but this is not on him, then ddrk and car 32 are just par",
+   "race_file": "Race_Monza_2026_10_28_20_14_22.json",
    "recording": "2026-10-28_20-06-08_Monza_Race.gmtel.gz",
    "t": 161.0,
    "cars": [
@@ -1908,7 +1998,8 @@
      },
      "label": "none",
      "rulebook": "none",
-     "rule": "R7"
+     "rule": "R7",
+     "front": 0
     },
     {
      "a": 10,
@@ -1930,7 +2021,8 @@
      },
      "label": "none",
      "rulebook": "none",
-     "rule": "R7"
+     "rule": "R7",
+     "front": 10
     },
     {
      "a": 7,
@@ -1952,12 +2044,13 @@
      },
      "label": "none",
      "rulebook": "none",
-     "rule": "R7"
+     "rule": "R7",
+     "front": 7
     }
    ]
   },
   "b2-02": {
-   "key": "acfb16dd2291",
+   "key": "dcc36ce78c63",
    "by": "GreMi",
    "track": "Brazil",
    "date": "2026-10-25",
@@ -1966,6 +2059,7 @@
    "verdict": "#8 Stepino81 at fault",
    "severity": 10,
    "note": "Stepino hitting car 2 ferrari twice on purpouse.",
+   "race_file": "Race_Brazil_Manual_2026_10_25_17_06_47.json",
    "recording": "2026-10-25_16-57-26_Brazil_Race.gmtel.gz",
    "t": 194.0,
    "cars": [
@@ -1997,7 +2091,8 @@
      },
      "label": "front",
      "rulebook": "front",
-     "rule": "R5"
+     "rule": "R5",
+     "front": 2
     },
     {
      "a": 14,
@@ -2019,12 +2114,13 @@
      },
      "label": "back",
      "rulebook": "back",
-     "rule": "R9"
+     "rule": "R9",
+     "front": 14
     }
    ]
   },
   "b2-03": {
-   "key": "b6db4b709009",
+   "key": "9c01ba3b75ce",
    "by": "GreMi",
    "track": "Texas",
    "date": "2026-10-28",
@@ -2033,6 +2129,7 @@
    "verdict": "#50 DevilDriver2396 + Hidden #54 at fault",
    "severity": 8,
    "note": "Car 54 and devildriver were both at fault for this. both not a massive mistake, but just reckless driving.",
+   "race_file": "Race_Texas_2026_10_28_21_06_48.json",
    "recording": "2026-10-28_20-57-01_Texas_Race.gmtel.gz",
    "t": 27.0,
    "cars": [
@@ -2069,7 +2166,8 @@
      },
      "label": "both",
      "rulebook": "front",
-     "rule": "R2"
+     "rule": "R2",
+     "front": 8
     },
     {
      "a": 8,
@@ -2091,12 +2189,13 @@
      },
      "label": "both",
      "rulebook": "front",
-     "rule": "R5"
+     "rule": "R5",
+     "front": 2
     }
    ]
   },
   "b2-04": {
-   "key": "78ef33abff6f",
+   "key": "af6a9ad60783",
    "by": "GreMi",
    "track": "Zandvoort",
    "date": "2026-10-23",
@@ -2105,6 +2204,7 @@
    "verdict": "#99 niketys2 at fault",
    "severity": 2,
    "note": "",
+   "race_file": "Race_Zandvoort_2026_10_23_20_19_12.json",
    "recording": "2026-10-23_20-11-07_Zandvoort_Race.gmtel.gz",
    "t": 153.0,
    "cars": [
@@ -2136,12 +2236,13 @@
      },
      "label": "back",
      "rulebook": "no",
-     "rule": "R1"
+     "rule": "R1",
+     "front": 11
     }
    ]
   },
   "b2-05": {
-   "key": "a20c8df0b72c",
+   "key": "a23526e0a7f0",
    "by": "GreMi",
    "track": "Montreal",
    "date": "2026-10-28",
@@ -2150,6 +2251,7 @@
    "verdict": "Not an incident",
    "severity": 0,
    "note": "",
+   "race_file": "Race_Montreal_2026_10_28_20_29_49.json",
    "recording": "2026-10-28_20-22-05_Montreal_Race.gmtel.gz",
    "t": 14.0,
    "cars": [
@@ -2181,12 +2283,13 @@
      },
      "label": "no",
      "rulebook": "no",
-     "rule": "R1"
+     "rule": "R1",
+     "front": 7
     }
    ]
   },
   "b3-01": {
-   "key": "a7d32f5d9543",
+   "key": "5e8ec7ad7e80",
    "by": "GreMi",
    "track": "Miami",
    "date": "2026-10-30",
@@ -2226,7 +2329,8 @@
      },
      "label": "no",
      "rulebook": "none",
-     "rule": "R7"
+     "rule": "R7",
+     "front": 7
     },
     {
      "a": 7,
@@ -2248,12 +2352,13 @@
      },
      "label": "no",
      "rulebook": "none",
-     "rule": "R3"
+     "rule": "R3",
+     "front": 7
     }
    ]
   },
   "b3-02": {
-   "key": "188e65a8a309",
+   "key": "fbdde3505692",
    "by": "GreMi",
    "track": "Miami",
    "date": "2026-10-30",
@@ -2294,7 +2399,8 @@
      },
      "label": "no",
      "rulebook": "none",
-     "rule": "R3"
+     "rule": "R3",
+     "front": 2
     },
     {
      "a": 1,
@@ -2316,12 +2422,13 @@
      },
      "label": "no",
      "rulebook": "no",
-     "rule": "R1"
+     "rule": "R1",
+     "front": 1
     }
    ]
   },
   "b3-03": {
-   "key": "f30284bb8a31",
+   "key": "21827c8f3b74",
    "by": "GreMi",
    "track": "Miami",
    "date": "2026-10-30",
@@ -2363,7 +2470,8 @@
      },
      "label": "front",
      "rulebook": "front",
-     "rule": "R2"
+     "rule": "R2",
+     "front": 4
     },
     {
      "a": 4,
@@ -2385,7 +2493,8 @@
      },
      "label": "back",
      "rulebook": "front",
-     "rule": "R2"
+     "rule": "R2",
+     "front": 3
     },
     {
      "a": 3,
@@ -2407,12 +2516,13 @@
      },
      "label": "none",
      "rulebook": "back",
-     "rule": "R2"
+     "rule": "R2",
+     "front": 3
     }
    ]
   },
   "b3-04": {
-   "key": "10d2ab3b5077",
+   "key": "cc8ace0b38c5",
    "by": "GreMi",
    "track": "Miami",
    "date": "2026-10-30",
@@ -2452,12 +2562,13 @@
      },
      "label": "no",
      "rulebook": "back",
-     "rule": "R5"
+     "rule": "R5",
+     "front": 0
     }
    ]
   },
   "b3-05": {
-   "key": "0d97d7b35ea2",
+   "key": "4ca28a97840d",
    "by": "GreMi",
    "track": "Baku",
    "date": "2026-10-30",
@@ -2497,12 +2608,13 @@
      },
      "label": "no",
      "rulebook": "both",
-     "rule": "R8"
+     "rule": "R8",
+     "front": 7
     }
    ]
   },
   "b3-06": {
-   "key": "92d62fdfb715",
+   "key": "23e3fc3bb3ad",
    "by": "GreMi",
    "track": "Baku",
    "date": "2026-10-30",
@@ -2544,7 +2656,8 @@
      },
      "label": "back",
      "rulebook": "back",
-     "rule": "R3"
+     "rule": "R3",
+     "front": 3
     },
     {
      "a": 5,
@@ -2566,12 +2679,13 @@
      },
      "label": "back",
      "rulebook": "back",
-     "rule": "R2"
+     "rule": "R2",
+     "front": 5
     }
    ]
   },
   "b3-07": {
-   "key": "7340f9dc650e",
+   "key": "cbdad3975c13",
    "by": "GreMi",
    "track": "Catalunya",
    "date": "2026-10-30",
@@ -2617,7 +2731,8 @@
      },
      "label": "none",
      "rulebook": "none",
-     "rule": "R2"
+     "rule": "R2",
+     "front": 15
     },
     {
      "a": 2,
@@ -2639,12 +2754,13 @@
      },
      "label": "none",
      "rulebook": "none",
-     "rule": "R7"
+     "rule": "R7",
+     "front": 5
     }
    ]
   },
   "b3-08": {
-   "key": "7f540985d21f",
+   "key": "1d1804d5e2e7",
    "by": "GreMi",
    "track": "Catalunya",
    "date": "2026-10-30",
@@ -2684,12 +2800,13 @@
      },
      "label": "front",
      "rulebook": "back",
-     "rule": "R2"
+     "rule": "R2",
+     "front": 7
     }
    ]
   },
   "b3-09": {
-   "key": "8090a6187b14",
+   "key": "ea7df35319dd",
    "by": "GreMi",
    "track": "Catalunya",
    "date": "2026-10-30",
@@ -2729,12 +2846,13 @@
      },
      "label": "both",
      "rulebook": "back",
-     "rule": "R3"
+     "rule": "R3",
+     "front": 7
     }
    ]
   },
   "b3-10": {
-   "key": "1e6b35ea98d9",
+   "key": "063db50104a1",
    "by": "GreMi",
    "track": "Imola",
    "date": "2026-10-30",
@@ -2778,7 +2896,8 @@
      },
      "label": "back",
      "rulebook": "front",
-     "rule": "R5"
+     "rule": "R5",
+     "front": 13
     },
     {
      "a": 13,
@@ -2800,7 +2919,8 @@
      },
      "label": "none",
      "rulebook": "none",
-     "rule": "R7"
+     "rule": "R7",
+     "front": 13
     },
     {
      "a": 5,
@@ -2822,12 +2942,13 @@
      },
      "label": "back",
      "rulebook": "back",
-     "rule": "R3"
+     "rule": "R3",
+     "front": 5
     }
    ]
   },
   "b3-11": {
-   "key": "012a131148b8",
+   "key": "efa306598370",
    "by": "GreMi",
    "track": "Imola",
    "date": "2026-10-30",
@@ -2868,12 +2989,13 @@
      },
      "label": "front",
      "rulebook": "front",
-     "rule": "R5"
+     "rule": "R5",
+     "front": 9
     }
    ]
   },
   "b3-12": {
-   "key": "04281acedf07",
+   "key": "7ffe1954f168",
    "by": "GreMi",
    "track": "Imola",
    "date": "2026-10-30",
@@ -2920,7 +3042,8 @@
      },
      "label": "none",
      "rulebook": "back",
-     "rule": "R3"
+     "rule": "R3",
+     "front": 9
     },
     {
      "a": 9,
@@ -2942,7 +3065,8 @@
      },
      "label": "front",
      "rulebook": "front",
-     "rule": "R2"
+     "rule": "R2",
+     "front": 16
     },
     {
      "a": 9,
@@ -2964,7 +3088,8 @@
      },
      "label": "none",
      "rulebook": "none",
-     "rule": "R7"
+     "rule": "R7",
+     "front": 9
     },
     {
      "a": 10,
@@ -2986,7 +3111,8 @@
      },
      "label": "none",
      "rulebook": "no",
-     "rule": "R1"
+     "rule": "R1",
+     "front": 10
     },
     {
      "a": 15,
@@ -3008,7 +3134,8 @@
      },
      "label": "none",
      "rulebook": "no",
-     "rule": "R1"
+     "rule": "R1",
+     "front": 10
     },
     {
      "a": 10,
@@ -3030,12 +3157,13 @@
      },
      "label": "none",
      "rulebook": "no",
-     "rule": "R1"
+     "rule": "R1",
+     "front": 10
     }
    ]
   },
   "b4-01": {
-   "key": "26024f370e54",
+   "key": "fe3956aa61b8",
    "by": "GreMi",
    "track": "Mexico",
    "date": "2026-10-20",
@@ -3044,6 +3172,8 @@
    "verdict": "Not an incident",
    "severity": 0,
    "note": "",
+   "race_file": "Race_Mexico_2026_10_20_20_13_46.json",
+   "at": "2026-11-02T11:18:45Z",
    "recording": "2026-10-20_20-05-21_Mexico_Race.gmtel.gz",
    "t": 55.6,
    "cars": [
@@ -3075,12 +3205,13 @@
      },
      "label": "no",
      "rulebook": "no",
-     "rule": "R1"
+     "rule": "R1",
+     "front": 1
     }
    ]
   },
   "b4-02": {
-   "key": "7672f30a5ce8",
+   "key": "049f011b80af",
    "by": "GreMi",
    "track": "Abu Dhabi",
    "date": "2026-10-20",
@@ -3089,6 +3220,8 @@
    "verdict": "Hidden #54 (Ferrari '26) at fault",
    "severity": 4,
    "note": "",
+   "race_file": "Race_Abu_Dhabi_2026_10_20_20_29_32.json",
+   "at": "2026-11-02T11:19:04Z",
    "recording": "2026-10-20_20-21-09_Abu_Dhabi_Race.gmtel.gz",
    "t": 281.5,
    "cars": [
@@ -3120,12 +3253,13 @@
      },
      "label": "front",
      "rulebook": "back",
-     "rule": "R3"
+     "rule": "R3",
+     "front": 9
     }
    ]
   },
   "b4-03": {
-   "key": "4c5b6c67aca6",
+   "key": "74fa56d16d45",
    "by": "GreMi",
    "track": "Brazil",
    "date": "2026-10-23",
@@ -3134,6 +3268,8 @@
    "verdict": "#2 MrOIDIOI at fault",
    "severity": 4,
    "note": "Technicly the corner was for car number 2, but i expect clean racing and room for others.",
+   "race_file": "Race_Brazil_Just_in_case_2026_10_23_20_38_23.json",
+   "at": "2026-11-02T11:21:02Z",
    "recording": "2026-10-23_20-25-40_Brazil_Race.gmtel.gz",
    "t": 52.3,
    "cars": [
@@ -3165,12 +3301,13 @@
      },
      "label": "front",
      "rulebook": "back",
-     "rule": "R3"
+     "rule": "R3",
+     "front": 7
     }
    ]
   },
   "b4-04": {
-   "key": "fa343b984c99",
+   "key": "e91890333f86",
    "by": "GreMi",
    "track": "Qatar",
    "date": "2026-10-23",
@@ -3179,6 +3316,8 @@
    "verdict": "#2 MrOIDIOI at fault",
    "severity": 5,
    "note": "Unsafe overtake by mrOidioi.",
+   "race_file": "Race_Losail_2026_10_23_20_50_37.json",
+   "at": "2026-11-02T11:22:49Z",
    "recording": "2026-10-23_20-42-00_Losail_Race.gmtel.gz",
    "t": 82.5,
    "cars": [
@@ -3210,12 +3349,13 @@
      },
      "label": "back",
      "rulebook": "front",
-     "rule": "R2"
+     "rule": "R2",
+     "front": 2
     }
    ]
   },
   "b4-05": {
-   "key": "a33a8f3ae407",
+   "key": "32fd6cd87af5",
    "by": "GreMi",
    "track": "Austin",
    "date": "2026-10-25",
@@ -3224,6 +3364,8 @@
    "verdict": "Not an incident",
    "severity": 0,
    "note": "",
+   "race_file": "Race_Texas_2026_10_25_15_36_33.json",
+   "at": "2026-11-02T15:43:16Z",
    "recording": "2026-10-25_15-26-25_Texas_Race.gmtel.gz",
    "t": 173.6,
    "cars": [
@@ -3255,12 +3397,13 @@
      },
      "label": "no",
      "rulebook": "back",
-     "rule": "R5"
+     "rule": "R5",
+     "front": 5
     }
    ]
   },
   "b4-06": {
-   "key": "5793023ba484",
+   "key": "804e75d9d0b5",
    "by": "GreMi",
    "track": "Catalunya",
    "date": "2026-10-25",
@@ -3269,6 +3412,8 @@
    "verdict": "#50 DevilDriver2396 at fault",
    "severity": 4,
    "note": "",
+   "race_file": "Race_Catalunya_2026_10_25_16_07_58.json",
+   "at": "2026-11-02T15:44:10Z",
    "recording": "2026-10-25_15-59-16_Catalunya_Race.gmtel.gz",
    "t": 58.6,
    "cars": [
@@ -3300,12 +3445,13 @@
      },
      "label": "front",
      "rulebook": "back",
-     "rule": "R2"
+     "rule": "R2",
+     "front": 1
     }
    ]
   },
   "b4-07": {
-   "key": "2256bc6995cc",
+   "key": "6190acbeb366",
    "by": "GreMi",
    "track": "Bahrain",
    "date": "2026-10-25",
@@ -3314,6 +3460,8 @@
    "verdict": "Hidden #99 (Audi '26) at fault",
    "severity": 4,
    "note": "",
+   "race_file": "Race_Sakhir_2026_10_25_16_22_33.json",
+   "at": "2026-11-02T15:45:58Z",
    "recording": "2026-10-25_16-12-29_Bahrain_Race.gmtel.gz",
    "t": 55.4,
    "cars": [
@@ -3349,7 +3497,8 @@
      },
      "label": "back",
      "rulebook": "back",
-     "rule": "R3"
+     "rule": "R3",
+     "front": 16
     },
     {
      "a": 14,
@@ -3371,7 +3520,8 @@
      },
      "label": "front",
      "rulebook": "none",
-     "rule": "R7"
+     "rule": "R7",
+     "front": 14
     },
     {
      "a": 16,
@@ -3393,7 +3543,8 @@
      },
      "label": "none",
      "rulebook": "none",
-     "rule": "R7"
+     "rule": "R7",
+     "front": 17
     },
     {
      "a": 17,
@@ -3415,7 +3566,8 @@
      },
      "label": "none",
      "rulebook": "none",
-     "rule": "R7"
+     "rule": "R7",
+     "front": 8
     },
     {
      "a": 15,
@@ -3437,12 +3589,13 @@
      },
      "label": "none",
      "rulebook": "back",
-     "rule": "R3"
+     "rule": "R3",
+     "front": 9
     }
    ]
   },
   "b4-08": {
-   "key": "c24762125e13",
+   "key": "df8f7cbd055d",
    "by": "GreMi",
    "track": "Jeddah",
    "date": "2026-10-25",
@@ -3451,6 +3604,8 @@
    "verdict": "Hidden #54 (Mercedes '26) at fault",
    "severity": 5,
    "note": "",
+   "race_file": "Race_Jeddah_2026_10_25_16_37_02.json",
+   "at": "2026-11-02T15:46:58Z",
    "recording": "2026-10-25_16-27-27_Jeddah_Race.gmtel.gz",
    "t": 149.8,
    "cars": [
@@ -3482,12 +3637,15 @@
      },
      "label": "front",
      "rulebook": "front",
-     "rule": "R2"
+     "rule": "R2",
+     "front": 9
     }
    ]
   },
   "b4-09a": {
-   "key": "4eb938c2b6c1",
+   "key": "fdb626745f4a",
+   "race_file": "Race_Shanghai_2026_10_25_16_53_29.json",
+   "at": "2026-11-02T15:48:51Z",
    "parent": "b4-09",
    "part": 1,
    "of": 1,
@@ -3543,12 +3701,13 @@
      },
      "label": "no",
      "rulebook": "front",
-     "rule": "R2"
+     "rule": "R2",
+     "front": 1
     }
    ]
   },
   "b4-10": {
-   "key": "1029d836da0f",
+   "key": "de9102c6b274",
    "by": "GreMi",
    "track": "Suzuka",
    "date": "2026-10-28",
@@ -3557,6 +3716,8 @@
    "verdict": "#50 DevilDriver2396 at fault",
    "severity": 8,
    "note": "",
+   "race_file": "Race_Suzuka_Just_in_case_2026_10_28_20_53_25.json",
+   "at": "2026-11-02T15:49:41Z",
    "recording": "2026-10-28_20-40-25_Suzuka_Race.gmtel.gz",
    "t": 276.5,
    "cars": [
@@ -3588,12 +3749,13 @@
      },
      "label": "front",
      "rulebook": "back",
-     "rule": "R2"
+     "rule": "R2",
+     "front": 3
     }
    ]
   },
   "b4-11": {
-   "key": "111e374daafe",
+   "key": "9edbcffe2e20",
    "by": "GreMi",
    "track": "Silverstone (reverse)",
    "date": "2026-10-30",
@@ -3602,6 +3764,8 @@
    "verdict": "Not an incident",
    "severity": 0,
    "note": "",
+   "race_file": "Race_Silverstone_Reverse_2026_10_30_15_19_42.json",
+   "at": "2026-11-02T15:50:50Z",
    "recording": "2026-10-30_15-10-21_Silverstone_Reverse_Race.gmtel.gz",
    "t": 131.5,
    "cars": [
@@ -3633,12 +3797,15 @@
      },
      "label": "no",
      "rulebook": "no",
-     "rule": "R1"
+     "rule": "R1",
+     "front": 1
     }
    ]
   },
   "b4-12-touches": {
-   "key": "fab4d5355bbf",
+   "key": "1de03ac9f792",
+   "race_file": "Race_Las_Vegas_Just_in_case_2026_10_30_15_47_45.json",
+   "at": "2026-11-02T15:58:00Z",
    "parent": "b4-12",
    "by": "GreMi",
    "track": "Las Vegas",
@@ -3676,7 +3843,8 @@
      },
      "label": "no",
      "rulebook": "back",
-     "rule": "R3"
+     "rule": "R3",
+     "front": 9
     },
     {
      "a": 14,
@@ -3698,7 +3866,8 @@
      },
      "label": "no",
      "rulebook": "back",
-     "rule": "R3"
+     "rule": "R3",
+     "front": 9
     },
     {
      "a": 8,
@@ -3720,12 +3889,15 @@
      },
      "label": "no",
      "rulebook": "none",
-     "rule": "R7"
+     "rule": "R7",
+     "front": 2
     }
    ]
   },
   "b4-12a": {
-   "key": "fab4d5355bbf",
+   "key": "1de03ac9f792",
+   "race_file": "Race_Las_Vegas_Just_in_case_2026_10_30_15_47_45.json",
+   "at": "2026-11-02T15:58:00Z",
    "parent": "b4-12",
    "part": 1,
    "of": 3,
@@ -3792,12 +3964,15 @@
      },
      "label": "front",
      "rulebook": "front",
-     "rule": "R2"
+     "rule": "R2",
+     "front": 2
     }
    ]
   },
   "b4-12b": {
-   "key": "fab4d5355bbf",
+   "key": "1de03ac9f792",
+   "race_file": "Race_Las_Vegas_Just_in_case_2026_10_30_15_47_45.json",
+   "at": "2026-11-02T15:58:00Z",
    "parent": "b4-12",
    "part": 2,
    "of": 3,
@@ -3864,12 +4039,15 @@
      },
      "label": "back",
      "rulebook": "back",
-     "rule": "R3"
+     "rule": "R3",
+     "front": 9
     }
    ]
   },
   "b4-12c": {
-   "key": "fab4d5355bbf",
+   "key": "1de03ac9f792",
+   "race_file": "Race_Las_Vegas_Just_in_case_2026_10_30_15_47_45.json",
+   "at": "2026-11-02T15:58:00Z",
    "parent": "b4-12",
    "part": 3,
    "of": 3,
@@ -3936,7 +4114,8 @@
      },
      "label": "both",
      "rulebook": "no",
-     "rule": "R1"
+     "rule": "R1",
+     "front": 2
     },
     {
      "a": 8,
@@ -3958,12 +4137,13 @@
      },
      "label": "both",
      "rulebook": "no",
-     "rule": "R1"
+     "rule": "R1",
+     "front": 9
     }
    ]
   },
   "b4-13": {
-   "key": "00f8b28a2f71",
+   "key": "98fdad3e6cda",
    "by": "GreMi",
    "track": "Miami",
    "date": "2026-10-30",
@@ -3972,6 +4152,8 @@
    "verdict": "Racing incident",
    "severity": 2,
    "note": "",
+   "race_file": "Race_Miami_2026_10_30_16_01_59.json",
+   "at": "2026-11-03T12:40:13Z",
    "recording": "2026-10-30_15-51-13_Miami_Race.gmtel.gz",
    "t": 139.1,
    "cars": [
@@ -4003,12 +4185,13 @@
      },
      "label": "none",
      "rulebook": "back",
-     "rule": "R2"
+     "rule": "R2",
+     "front": 13
     }
    ]
   },
   "b4-14": {
-   "key": "8dd543b32b7d",
+   "key": "66e1050fa06e",
    "by": "GreMi",
    "track": "Baku",
    "date": "2026-10-30",
@@ -4017,6 +4200,8 @@
    "verdict": "Hidden #99 (Audi '26) at fault",
    "severity": 4,
    "note": "Reckless driving from car 99 after a crash",
+   "race_file": "Race_Baku_2026_10_30_16_22_36.json",
+   "at": "2026-11-03T12:41:13Z",
    "recording": "2026-10-30_16-11-10_Baku_Race.gmtel.gz",
    "t": 379.4,
    "cars": [
@@ -4048,12 +4233,13 @@
      },
      "label": "front",
      "rulebook": "none",
-     "rule": "R7"
+     "rule": "R7",
+     "front": 17
     }
    ]
   },
   "b4-15": {
-   "key": "06a325cf96ae",
+   "key": "7211630729d9",
    "by": "GreMi",
    "track": "Imola",
    "date": "2026-10-30",
@@ -4062,6 +4248,8 @@
    "verdict": "Not an incident",
    "severity": 0,
    "note": "",
+   "race_file": "Race_Imola_2026_10_30_16_56_33.json",
+   "at": "2026-11-03T12:42:42Z",
    "recording": "2026-10-30_16-46-43_Imola_Race.gmtel.gz",
    "t": 34.0,
    "cars": [
@@ -4093,7 +4281,8 @@
      },
      "label": "no",
      "rulebook": "front",
-     "rule": "R5"
+     "rule": "R5",
+     "front": 9
     }
    ]
   }
@@ -4154,6 +4343,17 @@
    "overrides": 6,
    "date": "2026-11-05",
    "rules": "v1.3"
+  },
+  {
+   "incidents": 66,
+   "inc_rulebook": 26,
+   "inc_with_precedents": 26,
+   "contacts": 102,
+   "rulebook": 52,
+   "with_precedents": 51,
+   "overrides": 6,
+   "date": "2026-11-06",
+   "rules": "v1.4"
   }
  ]
 }
