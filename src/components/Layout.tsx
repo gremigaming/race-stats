@@ -29,7 +29,7 @@ import {
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import changelog from "../data/changelog";
 import { useTelemetry } from "../context/TelemetryContext";
-import { SETUP_MANAGER_ON } from "../league/setupManager";
+import { SETUP_MANAGER_ON, readKey } from "../league/setupManager";
 import { useGameScope } from "../hooks/useGameScope";
 import { useBackNavigation } from "../hooks/useBackNavigation";
 import { useScrollMemory } from "../hooks/usePageMemory";
@@ -41,6 +41,10 @@ import { APP_BRAND_LINE, APP_NAME, APP_SUBTITLE } from "../config/branding";
 import { readStoredString, writeStoredString } from "../utils/storage";
 import { CHANGELOG_SEEN_STORAGE_KEY } from "../constants/storage";
 import { AppBrand } from "./AppBrand";
+
+// The setup manager is GreMi's own tool: only browsers that passed its
+// owner-only Discord login (key stored by the setups page) see the link.
+const showSetups = SETUP_MANAGER_ON && Boolean(readKey());
 import { ChangelogModal } from "./ChangelogModal";
 import { DriverSearchSelect } from "./DriverSearchSelect";
 import { LeagueFilterPanel } from "./LeagueFilterPanel";
@@ -276,7 +280,7 @@ export function Layout() {
                   Incidents
                 </DropdownLink>
               </NavGroup>
-              {SETUP_MANAGER_ON && (
+              {showSetups && (
                 <NavLink to={`/${pageScope}/setups`} className={routeItemClass}>
                   <Wrench className="size-4" />
                   Setups
@@ -424,7 +428,7 @@ export function Layout() {
                   Incidents
                 </MobileNavLink>
               </div>
-              {SETUP_MANAGER_ON && (
+              {showSetups && (
                 <div className="space-y-1">
                   <p className="px-3 pb-1 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-500">
                     Setups

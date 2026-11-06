@@ -414,7 +414,8 @@ function RaceCard({
         <TrackFlag
           track={r.track}
           size="large"
-          className="absolute right-2 top-2 h-16 w-24 max-w-none rounded-sm object-cover object-center"
+          uniformArea={96 * 64}
+          className="absolute right-2 top-2 max-w-none rounded-sm object-fill"
         />
       </div>
       <TrackLayout

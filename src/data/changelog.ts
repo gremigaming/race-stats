@@ -38,7 +38,7 @@ const changelog: ChangelogEntry[] = [
     date: "2026-11-06",
     type: "fix",
     message:
-      "Race viewer track cards show every flag at the same size, and the track outline lights up red again on hover.",
+      "Race viewer track cards show every flag whole and at a similar size, and the track outline lights up red again on hover.",
     destination: "race",
   },
   {

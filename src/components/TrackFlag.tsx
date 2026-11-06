@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { cn } from "../utils/cn";
 import { getTrackCountryCode } from "../utils/tracks";
 
@@ -7,6 +8,12 @@ interface TrackFlagProps {
   track: string;
   size?: TrackFlagSize;
   className?: string;
+  /**
+   * Show every flag with about the same area: the real flag, never cropped,
+   * sized by its own aspect ratio. Near-square flags (Belgium, Monaco) are
+   * drawn at the usual 3:2 so they don't read as squares. Value = area in px².
+   */
+  uniformArea?: number;
 }
 
 const SIZE_CLASSES: Record<TrackFlagSize, string> = {
@@ -32,7 +39,9 @@ export function TrackFlag({
   track,
   size = "smaller",
   className = "",
+  uniformArea,
 }: TrackFlagProps) {
+  const [ratio, setRatio] = useState<number | null>(null);
   const code = getTrackCountryCode(track);
   if (!code) return null;
 
@@ -46,6 +55,25 @@ export function TrackFlag({
       srcSet={srcSet}
       alt=""
       loading="lazy"
+      onLoad={
+        uniformArea
+          ? (event) => {
+              const img = event.currentTarget;
+              if (img.naturalWidth && img.naturalHeight) {
+                setRatio(img.naturalWidth / img.naturalHeight);
+              }
+            }
+          : undefined
+      }
+      style={
+        uniformArea
+          ? (() => {
+              const r = Math.max(ratio ?? 1.5, 1.5);
+              const width = Math.round(Math.sqrt(uniformArea * r));
+              return { width, height: Math.round(width / r) };
+            })()
+          : undefined
+      }
       className={cn(
         "inline-block rounded-[2px] object-cover",
         SIZE_CLASSES[size],
