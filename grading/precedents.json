@@ -4845,6 +4845,89 @@
     }
    ]
   },
+  "s-74265590": {
+   "key": "27ecc6618aee",
+   "by": "GreMi",
+   "track": "Imola",
+   "date": "2026-10-30",
+   "kind": "Reckless driving",
+   "source": "staff change",
+   "verdict": "Racing incident",
+   "severity": 0,
+   "note": "Car 2 brakes too late in the rain, and releasing his brake twice so goes too quick into the corner",
+   "who": [
+    "319544045435224067"
+   ],
+   "changes": [
+    "Race_Imola_2026_10_30_16_56_33.json|6|contact|2|0"
+   ],
+   "race_file": "Race_Imola_2026_10_30_16_56_33.json",
+   "at": "2026-11-06T21:04:41Z",
+   "recording": "2026-10-30_16-46-43_Imola_Race.gmtel.gz",
+   "t": 109.7,
+   "cars": [
+    0,
+    2,
+    6,
+    9,
+    12,
+    13,
+    15,
+    16
+   ],
+   "rulebook": {
+    "verdict": "6 at fault",
+    "rule": "R2"
+   },
+   "contacts": [
+    {
+     "a": 6,
+     "b": 16,
+     "t": 109.7,
+     "x": {
+      "gap": 5.0,
+      "closing": 7,
+      "moved_front": 1.79,
+      "moved_back": 0.0,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 31,
+      "lost": 3,
+      "off": 2,
+      "cars": 8,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "none",
+     "rulebook": "front",
+     "rule": "R2",
+     "front": 6
+    },
+    {
+     "a": 6,
+     "b": 15,
+     "t": 111.2,
+     "x": {
+      "gap": 4.7,
+      "closing": -16,
+      "moved_front": 0.68,
+      "moved_back": 0.75,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 9,
+      "lost": 3,
+      "off": 1,
+      "cars": 8,
+      "reaction": 0.0,
+      "aftermath": 1.0
+     },
+     "label": "none",
+     "rulebook": "none",
+     "rule": "R7",
+     "front": 6
+    }
+   ]
+  },
   "s-7b69444a": {
    "key": "cc1236e53409",
    "by": "GreMi",
@@ -5333,6 +5416,17 @@
    "contacts": 122,
    "rulebook": 62,
    "with_precedents": 68,
+   "overrides": 9,
+   "date": "2026-11-06",
+   "rules": "v1.4"
+  },
+  {
+   "incidents": 82,
+   "inc_rulebook": 33,
+   "inc_with_precedents": 37,
+   "contacts": 124,
+   "rulebook": 63,
+   "with_precedents": 69,
    "overrides": 9,
    "date": "2026-11-06",
    "rules": "v1.4"
