@@ -1,0 +1,54 @@
+{
+ "title": "Severity 7+ · every one (1)",
+ "stream": "severe",
+ "rules": "v1.4",
+ "incidents": [
+  {
+   "id": "sev-11041959-1166",
+   "pick": "severe",
+   "track": "Singapore",
+   "date": "2026-11-04",
+   "type": "Rear-end",
+   "weather": "Clear",
+   "track_temp": 28,
+   "lap": 2,
+   "race_time": "1:56",
+   "replay": "https://gremigaming.github.io/race-stats/f1/race/2026-11-04_19-59-27_Singapore_Race?inc=116.7&car=10,3",
+   "race_file": "Race_Singapore_2026_11_04_20_09_05.json",
+   "recording": "2026-11-04_19-59-27_Singapore_Race.gmtel.gz",
+   "t0": 116.7,
+   "t1": 126.1,
+   "contacts": [
+    {
+     "t": 116.7,
+     "a": 10,
+     "b": 3
+    }
+   ],
+   "drivers": [
+    {
+     "car": 10,
+     "name": "#21 daris_2190"
+    },
+    {
+     "car": 3,
+     "name": "#19 DDRK"
+    }
+   ],
+   "engine": {
+    "rules": "v1.4",
+    "verdict": "daris_2190 at fault",
+    "rule": "R10",
+    "severity": 10,
+    "why": "daris_2190 kept full throttle for 1.0 s after hitting DDRK, pushing it along",
+    "at_fault": [
+     "#21 daris_2190"
+    ],
+    "contacts": 1,
+    "gray_score": 0.0
+   },
+   "claude": "In the list because it's severity 7+. My call: daris_2190 at fault (rule R10: kept full throttle into a braking car), severity 10, blame on #21 daris_2190. What I saw: daris_2190 kept full throttle for 1.0 s after hitting DDRK, pushing it along. I'm fairly confident: the numbers are clear of every limit; this one is here for its severity."
+  }
+ ],
+ "made": "2026-11-06"
+}
