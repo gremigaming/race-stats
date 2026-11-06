@@ -32,6 +32,7 @@ import { useTelemetry } from "../context/TelemetryContext";
 import { SETUP_MANAGER_ON } from "../league/setupManager";
 import { useGameScope } from "../hooks/useGameScope";
 import { useBackNavigation } from "../hooks/useBackNavigation";
+import { useScrollMemory } from "../hooks/usePageMemory";
 import { cn } from "../utils/cn";
 import { LiveDot, useIsLive } from "../viewer/LiveTab";
 import { ALL_FORMULA_SCOPE_KEY } from "../utils/formulaScope";
@@ -87,6 +88,9 @@ export function Layout() {
       routeParts[0] === scopeKey ||
       formulaOptions.some((option) => option.key === routeParts[0]));
   const goBack = useBackNavigation(homePath);
+  // Back to a page puts it back on the same spot (e.g. from the incident viewer to your SR page)
+  const mainRef = useRef<HTMLElement>(null);
+  useScrollMemory(mainRef);
   const [showChangelog, setShowChangelog] = useState(false);
   const [showFilterSettings, setShowFilterSettings] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
@@ -452,7 +456,7 @@ export function Layout() {
         )}
       </header>
 
-      <main className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto bg-canvas">
+      <main ref={mainRef} className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto bg-canvas">
         {!isDashboardPage && (
           <div className="mx-auto w-full max-w-6xl px-4 pt-3 sm:px-6 lg:px-8">
             <button

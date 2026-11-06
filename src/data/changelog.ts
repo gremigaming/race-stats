@@ -10,6 +10,14 @@ export interface ChangelogEntry {
 // raw commit history also contains routine uploads and staff-only corrections.
 const changelog: ChangelogEntry[] = [
   {
+    id: "incident-viewer-back",
+    date: "2026-11-06",
+    type: "fix",
+    message:
+      "The incident viewer has its Back button again. It returns to the page you came from, such as your Safety Rating page, with the same cards open and at the same scroll spot.",
+    destination: "incidents",
+  },
+  {
     id: "safety-incident-buttons",
     date: "2026-11-06",
     type: "feat",

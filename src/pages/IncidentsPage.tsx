@@ -1,6 +1,7 @@
 import { ArrowLeft, ChevronDown, ChevronLeft, Clapperboard, Eye, EyeOff, Flame, PanelRight, Pause, Play, RotateCcw, ShieldCheck, SlidersHorizontal, Swords, TriangleAlert, Trophy, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
+import { useBackNavigation } from "../hooks/useBackNavigation";
 import { chronological, biggestFirst, chunkStart, raceTime, rowsOf, streamOf, streamsOf, useManifests, useRaceIndex, type RaceRef, type Row } from "../components/incidents/data";
 import { IncidentStrip } from "../components/incidents/IncidentStrip";
 import { CAR_COLORS, IncidentMap, type Clock, type IncidentSeries } from "../components/incidents/IncidentMap";
@@ -62,6 +63,8 @@ export function IncidentsPage() {
   const { formulaKey } = useParams<{ formulaKey: string }>();
   const [params, setParams] = useSearchParams();
   const { league } = useTelemetry();
+  // Back = the page the user came from (their SR page, a race, ...); home only when opened from a link
+  const goBack = useBackNavigation(`/${formulaKey ?? ""}`);
   const index = useRaceIndex();
   const races = useMemo(() => (index.data ?? []).filter((r) => /race/i.test(r.session)), [index.data]);
 
@@ -566,13 +569,15 @@ export function IncidentsPage() {
         {!clean && (
           <div className={`pointer-events-none absolute inset-x-0 top-0 flex flex-col gap-2 p-2 md:p-3 ${menuCls}`}>
             <div className="flex items-start gap-2">
-              <Link
-                to={`/${formulaKey}`}
-                aria-label="Back to the site"
+              <button
+                type="button"
+                onClick={goBack}
+                title="Go back to the previous page"
+                aria-label="Go back to the previous page"
                 className="pointer-events-auto flex h-9 shrink-0 items-center gap-1 rounded-lg border border-white/10 bg-[#0c0e11]/85 px-2 text-sm text-zinc-300 backdrop-blur hover:text-white"
               >
-                <ArrowLeft className="h-4 w-4" /> <span className="hidden sm:inline">Site</span>
-              </Link>
+                <ArrowLeft className="h-4 w-4" /> <span className="hidden sm:inline">Back</span>
+              </button>
               <div className="pointer-events-auto flex min-w-0 items-center gap-2 rounded-lg border border-white/10 bg-[#0c0e11]/85 px-2 py-1 backdrop-blur">
                 <TriangleAlert className="hidden h-4 w-4 shrink-0 text-amber-400 sm:block" />
                 <select

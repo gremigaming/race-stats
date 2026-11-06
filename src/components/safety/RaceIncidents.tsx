@@ -1,5 +1,6 @@
 import { ChevronDown, Flag, TriangleAlert } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
+import { useRememberedState } from "../../hooks/usePageMemory";
 import { Link, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useTelemetry } from "../../context/TelemetryContext";
@@ -216,7 +217,7 @@ export function RaceIncidentList({
 }
 
 function IncidentCard({ inc, driver }: { inc: RaceIncident; driver: string }) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useRememberedState(`inc:${driver}:${inc.file}:${inc.lap ?? ""}:${inc.sides.map((s) => s.name).join("|")}`, false);
   const { formulaKey } = useParams<{ formulaKey: string }>();
   const viewer = `/${formulaKey ?? ""}/incidents?file=${encodeURIComponent(base(inc.file))}${inc.lap != null ? `&lap=${inc.lap}` : ""}&with=${encodeURIComponent(inc.sides.map((s) => s.name).join("|"))}`;
   const mine = inc.sides.find((s) => driverKey(s.name) === driver)?.item?.pts ?? 0;

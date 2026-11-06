@@ -123,6 +123,17 @@ function AppRoutes() {
             </Suspense>
           }
         />
+        {/* The incident viewer is full screen too: under the site layout its header covered the viewer's Back button */}
+        <Route
+          path=":formulaKey/incidents"
+          element={
+            <Suspense fallback={<RaceViewerLoading />}>
+              <ScopedFormulaRoute>
+                <IncidentsPage />
+              </ScopedFormulaRoute>
+            </Suspense>
+          }
+        />
         <Route element={<Layout />}>
           {UiDebugPage && (
             <Route
@@ -158,14 +169,6 @@ function AppRoutes() {
             element={
               <ScopedFormulaRoute>
                 <DriverInsightsPage />
-              </ScopedFormulaRoute>
-            }
-          />
-          <Route
-            path=":formulaKey/incidents"
-            element={
-              <ScopedFormulaRoute>
-                <IncidentsPage />
               </ScopedFormulaRoute>
             }
           />

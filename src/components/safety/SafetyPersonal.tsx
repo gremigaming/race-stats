@@ -10,7 +10,8 @@ import {
   TriangleAlert,
   Trophy,
 } from "lucide-react";
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, type ReactNode } from "react";
+import { useRememberedState, useWasRemembered } from "../../hooks/usePageMemory";
 import { Link, useParams } from "react-router-dom";
 import { cardClass, cardHighlight } from "../Card";
 import { SectionHeader } from "../ui/SectionHeader";
@@ -357,8 +358,8 @@ function Breakdown({ driver }: { driver: SafetyDriver }) {
 
 function Sessions({ driver, data }: { driver: SafetyDriver; data: SafetyData }) {
   const sr = srSettings(data);
-  const [filter, setFilter] = useState<ItemFilter>("all");
-  const [query, setQuery] = useState("");
+  const [filter, setFilter] = useRememberedState<ItemFilter>(`sr:${driver.name}:filter`, "all");
+  const [query, setQuery] = useRememberedState(`sr:${driver.name}:query`, "");
   const groups = useMemo(() => {
     const q = query.trim().toLowerCase();
     const byStream = new Map<number, SafetySession[]>();
@@ -503,8 +504,18 @@ function StreamGroup({
   defaultOpen: boolean;
   resetKey: string;
 }) {
-  const [open, setOpen] = useState(defaultOpen);
-  useEffect(() => setOpen(defaultOpen), [defaultOpen, resetKey]);
+  // open cards come back open after Back from the incident viewer
+  const memId = `sr:${driver}:stream:${date}:${sessions[0]?.file ?? ""}`;
+  const [open, setOpen] = useRememberedState(memId, defaultOpen);
+  const restored = useWasRemembered(memId);
+  const firstRun = useRef(true);
+  useEffect(() => {
+    if (firstRun.current) {
+      firstRun.current = false;
+      if (restored) return;
+    }
+    setOpen(defaultOpen);
+  }, [defaultOpen, resetKey]); // eslint-disable-line react-hooks/exhaustive-deps
   const incidentsLink = useIncidentsLink();
   const weight = sessions[0]?.weight ?? 1;
   const skipped = sessions.length === 0;
@@ -611,7 +622,7 @@ function SessionRow({
 }) {
   const { scopeKey } = useTelemetry();
   const incidentsLink = useIncidentsLink();
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useRememberedState(`sr:${driver}:session:${session.file}`, false);
   const { quali, track, time } = parseSessionFile(session.file);
   // contacts live in the incident list below, with both sides and the replay
   const points = session.items.filter((it) => it.cat !== "contact");
