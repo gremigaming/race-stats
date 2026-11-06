@@ -91,7 +91,7 @@ def pace_ratio(x, y, skip):
     r = [b[x] / b[y] for f, b in best.items() if f != skip and x in b and y in b]
     return statistics.median(r) if len(r) >= 2 else None
 
-VIEWER = "https://gremigaming.github.io/race-stats/f1/race/"   # same as grading_batch.SITE
+VIEWER = "https://gremigaming.github.io/race-stats/all/race/"   # same as grading_batch.SITE
 RULE_LABEL = {"G": "graded", "P": "like a graded one"}   # precedents.py: GreMi's own call / a similar graded call
 
 def v1_rows(path, names, cols, game_incs):

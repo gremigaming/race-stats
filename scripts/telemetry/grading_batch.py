@@ -39,7 +39,7 @@ SETTLE_H = 4                 # a stream counts as finished this long after its l
 SESSIONS = os.path.join("public", "league", "sessions")
 OUT_DIR = "grading"
 PUBLISHED = os.path.join("public", "league", "grading.json")
-SITE = "https://gremigaming.github.io/race-stats/f1/race/"
+SITE = "https://gremigaming.github.io/race-stats/all/race/"
 RULE_NAMES = {"R1": "no incident (light tap or squeeze)", "R2": "side by side, one car moved over",
               "R3": "the car behind ran into the one ahead", "R4": "chain started by a small error",
               "R5": "unsafe rejoin", "R7": "no time to react", "R8": "shared fault", "R9": "hit the same car again",

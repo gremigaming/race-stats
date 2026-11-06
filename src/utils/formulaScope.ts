@@ -8,6 +8,7 @@ import {
 } from "./sessionTypes";
 
 export const ALL_FORMULA_SCOPE_KEY = "all";
+const LEGACY_ALL_ALIAS = "f1";
 
 export function isAllFormulaScope(key: string | null | undefined): boolean {
   return key === ALL_FORMULA_SCOPE_KEY;
@@ -92,6 +93,9 @@ export function resolveFormulaScopeAlias(
   requestedKey: string | null | undefined,
 ): string | undefined {
   if (!requestedKey) return undefined;
+  // Links made before the game scopes (staff page, Discord posts, grading replays) all start
+  // with /f1/: they mean every game, so they open the same page under /all/.
+  if (requestedKey === LEGACY_ALL_ALIAS) return ALL_FORMULA_SCOPE_KEY;
 
   const options = getFormulaScopeOptions(sessions);
   const optionKeys = new Set(options.map((option) => option.key));

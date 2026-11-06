@@ -144,7 +144,7 @@ def changes(cache):
 
 # ---------------------------------------------------------------- the lesson log (GreMi, 6 Nov 2026)
 
-SITE = "https://gremigaming.github.io/race-stats/f1/"
+SITE = "https://gremigaming.github.io/race-stats/all/"
 SEED_DAYS = {"b1": "2026-10-30", "b2": "2026-10-31", "b3": "2026-11-01"}   # batches 1-3: graded in the old artifact, day only
 SAME = {"no": "nobody", "none": "nobody"}
 CONFLICT_D = 2.0     # graded contacts this similar (scaled distance; precedents follow up to 2.5) ...
