@@ -447,7 +447,7 @@ export function TrackProgressPage() {
           </section>
 
           <TrackSessionHistory
-            activeKind={activeTab}
+            activeKind={isTrackSessionTab(activeTab) ? activeTab : "race"}
             spectatorSessions={spectatorHistory}
           />
         </PageFrame>
@@ -566,23 +566,27 @@ export function TrackProgressPage() {
       : isTrackSessionTab(activeTab) && availableTabs.includes(activeTab)
         ? activeTab
         : getPreferredTrackTab(availableTabs);
-  const tabOptions: SegmentedOption<TrackPageTab>[] = [
-    ...availableTabs.map((value) => ({
+  const sessionTabOptions: SegmentedOption<TrackPageTab>[] = availableTabs.map(
+    (value) => ({
       value,
       label: TRACK_TAB_LABELS[value],
       mobileLabel: TRACK_TAB_MOBILE_LABELS[value],
       icon: getSessionTypeMeta(TRACK_TAB_META_LABEL[value]).icon,
-    })),
-    ...(hasRecordHistory
-      ? [
-          {
-            value: TRACK_RECORDS_TAB,
-            label: "Record lineage",
-            mobileLabel: "Records",
-            icon: TimerReset,
-          },
-        ]
-      : []),
+    }),
+  );
+  const recordTabOptions: SegmentedOption<TrackPageTab>[] = hasRecordHistory
+    ? [
+        {
+          value: TRACK_RECORDS_TAB,
+          label: "Record lineage",
+          mobileLabel: "Records",
+          icon: TimerReset,
+        },
+      ]
+    : [];
+  const tabOptions: SegmentedOption<TrackPageTab>[] = [
+    ...sessionTabOptions,
+    ...recordTabOptions,
   ];
   const handleRaceLengthChange = (raceLaps: string) => {
     const nextParams = new URLSearchParams(searchParams);
