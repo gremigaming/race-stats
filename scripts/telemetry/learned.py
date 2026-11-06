@@ -179,7 +179,8 @@ def why_text(p, sk, name):
     ins = {c["car"]: c for c in (sk or {}).get("cars") or []}
     side = x["gap"] < 4
     if lab == "back":
-        out = f"{back} was {x['gap']:.0f} m behind, closing in at {x['closing']:.0f} km/h, and ran into {front}"
+        out = (f"{back} was {x['gap']:.0f} m behind, closing in at {x['closing']:.0f} km/h, and ran into {front}" if x["closing"] >= 5
+               else f"{back} was {x['gap']:.0f} m behind and touched {front}")
         if fb and ins.get(fb[0], {}).get("brake", 0) >= 0.2:
             out += f" while {front} was braking"
         if fb and ins.get(fb[1], {}).get("throttle", 0) >= 0.9 and ins.get(fb[1], {}).get("brake", 0) < 0.05:
@@ -188,11 +189,14 @@ def why_text(p, sk, name):
     elif lab == "front":
         if x.get("rejoin_front"):
             out = f"{front} came back onto the track into {back}: an unsafe rejoin is the rejoining car's fault."
-        elif side:
+        elif side and x["moved_front"] >= 0.5:
             out = (f"Side by side, {front} moved {x['moved_front']:.1f} m across into {back} "
                    f"({back} moved {x['moved_back']:.1f} m): the car that keeps moving across is at fault.")
-        else:
+        elif x["moved_front"] >= 0.5:
             out = f"{front} was ahead but moved {x['moved_front']:.1f} m across into {back}: the car ahead is at fault."
+        else:
+            out = (f"{front} was ahead and hardly moved across ({x['moved_front']:.1f} m), {back} {x['gap']:.0f} m behind "
+                   f"closing at {x['closing']:.0f} km/h, yet the call blames the car ahead: see the note for why.")
     elif lab == "both":
         out = (f"Both moved across into each other ({x['moved_front']:.1f} m and {x['moved_back']:.1f} m): shared blame.")
     elif lab == "none":

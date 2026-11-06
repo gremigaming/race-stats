@@ -4285,6 +4285,883 @@
      "front": 9
     }
    ]
+  },
+  "s-2d31658c": {
+   "key": "6a2439de74ca",
+   "by": "GreMi",
+   "track": "Miami",
+   "date": "2026-10-30",
+   "kind": null,
+   "source": "staff change",
+   "verdict": "Jakubm18_F1 at fault",
+   "severity": 2,
+   "note": "Small wheel bang but nothing too bad",
+   "who": [
+    "319544045435224067"
+   ],
+   "changes": [
+    "Race_Miami_2026_10_30_16_01_59.json|4|contact|1|0"
+   ],
+   "race_file": "Race_Miami_2026_10_30_16_01_59.json",
+   "at": "2026-11-04T13:05:31Z",
+   "recording": "2026-10-30_15-51-13_Miami_Race.gmtel.gz",
+   "t": 68.9,
+   "cars": [
+    4,
+    7,
+    13
+   ],
+   "rulebook": {
+    "verdict": "4 at fault",
+    "rule": "R2"
+   },
+   "contacts": [
+    {
+     "a": 13,
+     "b": 4,
+     "t": 68.9,
+     "x": {
+      "gap": 3.3,
+      "closing": -13,
+      "moved_front": -0.68,
+      "moved_back": 2.56,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 35,
+      "lost": 0,
+      "off": 2,
+      "cars": 3,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "back",
+     "rulebook": "back",
+     "rule": "R2",
+     "front": 13
+    }
+   ]
+  },
+  "s-336640e8": {
+   "key": "d2aadd7fed8e",
+   "by": "GreMi",
+   "track": "Miami",
+   "date": "2026-10-30",
+   "kind": null,
+   "source": "staff change",
+   "verdict": "Jakubm18_F1 at fault",
+   "severity": 2,
+   "note": "Small incident, is on Jakub who could have left some space but was just okay",
+   "who": [
+    "319544045435224067"
+   ],
+   "changes": [
+    "Race_Miami_2026_10_30_16_01_59.json|4|contact|4|1"
+   ],
+   "race_file": "Race_Miami_2026_10_30_16_01_59.json",
+   "at": "2026-11-04T13:10:59Z",
+   "recording": "2026-10-30_15-51-13_Miami_Race.gmtel.gz",
+   "t": 420.6,
+   "cars": [
+    3,
+    4,
+    6,
+    7
+   ],
+   "rulebook": {
+    "verdict": "4 + 3 + 7 at fault",
+    "rule": "R8"
+   },
+   "contacts": [
+    {
+     "a": 7,
+     "b": 4,
+     "t": 420.6,
+     "x": {
+      "gap": 6.9,
+      "closing": 8,
+      "moved_front": 1.88,
+      "moved_back": 0.0,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 16,
+      "lost": 2,
+      "off": 2,
+      "cars": 4,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "front",
+     "rulebook": "front",
+     "rule": "R2",
+     "front": 4
+    },
+    {
+     "a": 4,
+     "b": 3,
+     "t": 424.1,
+     "x": {
+      "gap": 0.1,
+      "closing": -14,
+      "moved_front": 2.57,
+      "moved_back": -1.1,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 18,
+      "lost": 2,
+      "off": 2,
+      "cars": 4,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "back",
+     "rulebook": "front",
+     "rule": "R2",
+     "front": 3
+    },
+    {
+     "a": 3,
+     "b": 7,
+     "t": 426.6,
+     "x": {
+      "gap": 1.5,
+      "closing": 12,
+      "moved_front": -3.77,
+      "moved_back": 5.13,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 18,
+      "lost": 0,
+      "off": 2,
+      "cars": 4,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "none",
+     "rulebook": "back",
+     "rule": "R2",
+     "front": 3
+    }
+   ]
+  },
+  "s-41ea2248": {
+   "key": "943a49ddbca0",
+   "by": "GreMi",
+   "track": "Singapore",
+   "date": "2026-11-04",
+   "kind": "Rear-end",
+   "source": "staff change",
+   "verdict": "daris_2190 at fault",
+   "severity": 10,
+   "note": "Keeps full trottle long after the corner, that was on purpose.",
+   "who": [
+    "319544045435224067"
+   ],
+   "changes": [
+    "Race_Singapore_2026_11_04_20_09_05.json|10|contact|2|0"
+   ],
+   "race_file": "Race_Singapore_2026_11_04_20_09_05.json",
+   "at": "2026-11-05T11:26:13Z",
+   "recording": "2026-11-04_19-59-27_Singapore_Race.gmtel.gz",
+   "t": 116.7,
+   "cars": [
+    3,
+    10
+   ],
+   "rulebook": {
+    "verdict": "10 at fault",
+    "rule": "R10"
+   },
+   "contacts": [
+    {
+     "a": 10,
+     "b": 3,
+     "t": 116.7,
+     "x": {
+      "gap": 9.0,
+      "closing": 24,
+      "moved_front": 0.16,
+      "moved_back": -0.71,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 95,
+      "lost": 2,
+      "off": 0,
+      "cars": 2,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "back",
+     "rulebook": "back",
+     "rule": "R10",
+     "front": 3
+    }
+   ]
+  },
+  "s-4beb167e": {
+   "key": "8fe35392da32",
+   "by": "GreMi",
+   "track": "Brazil",
+   "date": "2026-11-04",
+   "kind": "Racing incident",
+   "source": "staff change",
+   "verdict": "Racing incident",
+   "severity": 0,
+   "note": "Close to a crash, both should have left a bit more room",
+   "who": [
+    "319544045435224067"
+   ],
+   "changes": [
+    "Race_Brazil_2026_11_04_20_24_42.json|4|contact|2|0"
+   ],
+   "race_file": "Race_Brazil_2026_11_04_20_24_42.json",
+   "at": "2026-11-05T11:22:47Z",
+   "recording": "2026-11-04_20-17-06_Brazil_Race.gmtel.gz",
+   "t": 99.1,
+   "cars": [
+    4,
+    14
+   ],
+   "rulebook": {
+    "verdict": "4 at fault",
+    "rule": "R2"
+   },
+   "contacts": [
+    {
+     "a": 14,
+     "b": 4,
+     "t": 99.1,
+     "x": {
+      "gap": 2.9,
+      "closing": -9,
+      "moved_front": -0.2,
+      "moved_back": 3.14,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 8,
+      "lost": 1,
+      "off": 1,
+      "cars": 2,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "none",
+     "rulebook": "back",
+     "rule": "R2",
+     "front": 14
+    }
+   ]
+  },
+  "s-50eef53f": {
+   "key": "0a9eb86e7fae",
+   "by": "staff",
+   "track": "Imola",
+   "date": "2026-10-25",
+   "kind": null,
+   "source": "protest accepted",
+   "verdict": "Racing incident",
+   "severity": 0,
+   "note": "Protest accepted: Agreed",
+   "who": [
+    "452166434588590080"
+   ],
+   "changes": [
+    "Race_Imola_2026_10_25_15_20_36.json|4|contact|1|0"
+   ],
+   "race_file": "Race_Imola_2026_10_25_15_20_36.json",
+   "at": "2026-10-25T16:04:32Z",
+   "recording": "2026-10-25_15-12-35_Imola_Race.gmtel.gz",
+   "t": 43.5,
+   "cars": [
+    4,
+    7
+   ],
+   "rulebook": {
+    "verdict": "4 at fault",
+    "rule": "R3"
+   },
+   "contacts": [
+    {
+     "a": 7,
+     "b": 4,
+     "t": 43.5,
+     "x": {
+      "gap": 7.1,
+      "closing": 24,
+      "moved_front": 2.09,
+      "moved_back": -2.26,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 48,
+      "lost": 4,
+      "off": 2,
+      "cars": 2,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "none",
+     "rulebook": "back",
+     "rule": "R3",
+     "front": 7
+    }
+   ]
+  },
+  "s-53705b96": {
+   "key": "87ba87d3f4d3",
+   "by": "GreMi",
+   "track": "Austria",
+   "date": "2026-11-04",
+   "kind": "Rear-end",
+   "source": "protest accepted",
+   "verdict": "Racing incident",
+   "severity": 0,
+   "note": "Protest accepted: DDRk did hit car 86, but it was such a small tap and no consequents for either",
+   "who": [
+    "319544045435224067"
+   ],
+   "changes": [
+    "Race_Austria_2026_11_04_20_56_44.json|3|contact|2|0"
+   ],
+   "race_file": "Race_Austria_2026_11_04_20_56_44.json",
+   "at": "2026-11-05T07:54:07Z",
+   "recording": "2026-11-04_20-49-01_Austria_Race.gmtel.gz",
+   "t": 92.9,
+   "cars": [
+    3,
+    4
+   ],
+   "rulebook": {
+    "verdict": "3 at fault",
+    "rule": "R3"
+   },
+   "contacts": [
+    {
+     "a": 4,
+     "b": 3,
+     "t": 92.9,
+     "x": {
+      "gap": 9.6,
+      "closing": 21,
+      "moved_front": -0.48,
+      "moved_back": -3.41,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 5,
+      "lost": 1,
+      "off": 0,
+      "cars": 2,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "none",
+     "rulebook": "back",
+     "rule": "R3",
+     "front": 4
+    }
+   ]
+  },
+  "s-60c3b341": {
+   "key": "01eaaaa29f79",
+   "by": "GreMi",
+   "track": "Singapore",
+   "date": "2026-11-04",
+   "kind": "Moved across alongside",
+   "source": "staff change",
+   "verdict": "EthanMoonski at fault",
+   "severity": 4,
+   "note": "Ethan brakes at his normal braking point, hitting gremi trying to battle devildriver, he didnt brake too late but he should have braked a bit earlier because of a battle in front.",
+   "who": [
+    "319544045435224067"
+   ],
+   "changes": [
+    "Race_Singapore_2026_11_04_20_09_05.json|5|contact|3|0"
+   ],
+   "race_file": "Race_Singapore_2026_11_04_20_09_05.json",
+   "at": "2026-11-05T11:18:21Z",
+   "recording": "2026-11-04_19-59-27_Singapore_Race.gmtel.gz",
+   "t": 274.2,
+   "cars": [
+    0,
+    5
+   ],
+   "rulebook": {
+    "verdict": "5 at fault",
+    "rule": "R3"
+   },
+   "contacts": [
+    {
+     "a": 0,
+     "b": 5,
+     "t": 274.2,
+     "x": {
+      "gap": 10.1,
+      "closing": 44,
+      "moved_front": -1.37,
+      "moved_back": 0.65,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 107,
+      "lost": 3,
+      "off": 1,
+      "cars": 2,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "back",
+     "rulebook": "back",
+     "rule": "R3",
+     "front": 0
+    }
+   ]
+  },
+  "s-60e294d4": {
+   "key": "cb8d291820e5",
+   "by": "GreMi",
+   "track": "Miami",
+   "date": "2026-10-30",
+   "kind": null,
+   "source": "staff change",
+   "verdict": "Jakubm18_F1 at fault",
+   "severity": 2,
+   "note": "This is more like equal, Jakub went wide but Sethonhere went in too quick",
+   "who": [
+    "319544045435224067"
+   ],
+   "changes": [
+    "Race_Miami_2026_10_30_16_01_59.json|4|contact|3|0"
+   ],
+   "race_file": "Race_Miami_2026_10_30_16_01_59.json",
+   "at": "2026-11-04T13:07:41Z",
+   "recording": "2026-10-30_15-51-13_Miami_Race.gmtel.gz",
+   "t": 255.5,
+   "cars": [
+    4,
+    13
+   ],
+   "rulebook": {
+    "verdict": "4 at fault",
+    "rule": "R2"
+   },
+   "contacts": [
+    {
+     "a": 13,
+     "b": 4,
+     "t": 255.5,
+     "x": {
+      "gap": 2.2,
+      "closing": 26,
+      "moved_front": 1.59,
+      "moved_back": -0.14,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 40,
+      "lost": 0,
+      "off": 2,
+      "cars": 2,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "front",
+     "rulebook": "front",
+     "rule": "R2",
+     "front": 4
+    }
+   ]
+  },
+  "s-6b97f913": {
+   "key": "0feae2b2093e",
+   "by": "GreMi",
+   "track": "Imola",
+   "date": "2026-10-30",
+   "kind": null,
+   "source": "protest accepted",
+   "verdict": "Haas '26 #19 at fault",
+   "severity": 4,
+   "note": "Protest accepted: Nowhere near, sorry",
+   "who": [
+    "319544045435224067"
+   ],
+   "changes": [
+    "Race_Imola_2026_10_30_16_56_33.json|6|contact|1|0"
+   ],
+   "race_file": "Race_Imola_2026_10_30_16_56_33.json",
+   "at": "2026-11-02T16:03:16Z",
+   "recording": "2026-10-30_16-46-43_Imola_Race.gmtel.gz",
+   "t": 17.8,
+   "cars": [
+    3,
+    6,
+    15
+   ],
+   "rulebook": {
+    "verdict": "15 + 6 at fault",
+    "rule": "R8"
+   },
+   "contacts": [
+    {
+     "a": 15,
+     "b": 3,
+     "t": 17.8,
+     "x": {
+      "gap": 1.1,
+      "closing": 10,
+      "moved_front": 5.48,
+      "moved_back": -2.5,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 16,
+      "lost": 2,
+      "off": 2,
+      "cars": 3,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "front",
+     "rulebook": "front",
+     "rule": "R2",
+     "front": 15
+    },
+    {
+     "a": 6,
+     "b": 15,
+     "t": 28.7,
+     "x": {
+      "gap": 6.3,
+      "closing": 36,
+      "moved_front": 1.11,
+      "moved_back": -0.73,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 11,
+      "lost": 2,
+      "off": 2,
+      "cars": 3,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "front",
+     "rulebook": "back",
+     "rule": "R3",
+     "front": 15
+    }
+   ]
+  },
+  "s-7b69444a": {
+   "key": "cc1236e53409",
+   "by": "GreMi",
+   "track": "Silverstone Reverse",
+   "date": "2026-10-30",
+   "kind": null,
+   "source": "staff change",
+   "verdict": "Jakubm18_F1 at fault",
+   "severity": 2,
+   "note": "Medium incident,Jakub should have backed off but enexvery could have left a bit of space",
+   "who": [
+    "319544045435224067"
+   ],
+   "changes": [
+    "Race_Silverstone_Reverse_2026_10_30_15_19_42.json|13|contact|1|0"
+   ],
+   "race_file": "Race_Silverstone_Reverse_2026_10_30_15_19_42.json",
+   "at": "2026-11-04T13:02:02Z",
+   "recording": "2026-10-30_15-10-21_Silverstone_Reverse_Race.gmtel.gz",
+   "t": 20.7,
+   "cars": [
+    12,
+    13
+   ],
+   "rulebook": {
+    "verdict": "13 at fault",
+    "rule": "R3"
+   },
+   "contacts": [
+    {
+     "a": 12,
+     "b": 13,
+     "t": 20.7,
+     "x": {
+      "gap": 6.4,
+      "closing": 16,
+      "moved_front": 4.69,
+      "moved_back": -4.85,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 71,
+      "lost": 4,
+      "off": 2,
+      "cars": 2,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "back",
+     "rulebook": "back",
+     "rule": "R3",
+     "front": 12
+    }
+   ]
+  },
+  "s-8c8720d3": {
+   "key": "3d28e00c70c0",
+   "by": "GreMi",
+   "track": "Brazil",
+   "date": "2026-11-02",
+   "kind": null,
+   "source": "staff change",
+   "verdict": "[LCR] Turbodruif at fault",
+   "severity": 2,
+   "note": "Small unnecessary wheelbang, not a medium incident",
+   "who": [
+    "319544045435224067"
+   ],
+   "changes": [
+    "Race_Brazil_2026_11_02_19_22_19.json|2|contact|1|0"
+   ],
+   "race_file": "Race_Brazil_2026_11_02_19_22_19.json",
+   "at": "2026-11-04T13:19:34Z",
+   "recording": "2026-11-02_19-14-53_Brazil_Race.gmtel.gz",
+   "t": 7.0,
+   "cars": [
+    2,
+    7
+   ],
+   "rulebook": {
+    "verdict": "2 at fault",
+    "rule": "R3"
+   },
+   "contacts": [
+    {
+     "a": 2,
+     "b": 7,
+     "t": 7.0,
+     "x": {
+      "gap": 5.7,
+      "closing": 8,
+      "moved_front": 1.15,
+      "moved_back": -0.15,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 10,
+      "lost": 3,
+      "off": 0,
+      "cars": 2,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "back",
+     "rulebook": "back",
+     "rule": "R3",
+     "front": 7
+    }
+   ]
+  },
+  "s-9675d8d4": {
+   "key": "212bf4b893cd",
+   "by": "GreMi",
+   "track": "Monza",
+   "date": "2026-11-04",
+   "kind": "Reckless driving",
+   "source": "protest accepted",
+   "verdict": "Racing incident",
+   "severity": 0,
+   "note": "Protest accepted: Lico is a part of this game, but being off trottle halfway on the straight is just too early. But he did give back the position and it was just a small mistake by stepino",
+   "who": [
+    "319544045435224067"
+   ],
+   "changes": [
+    "Race_Monza_2026_11_04_19_49_57.json|3|contact|2|0"
+   ],
+   "race_file": "Race_Monza_2026_11_04_19_49_57.json",
+   "at": "2026-11-05T07:58:28Z",
+   "recording": "2026-11-04_19-41-26_Monza_Race.gmtel.gz",
+   "t": 158.3,
+   "cars": [
+    2,
+    3
+   ],
+   "rulebook": {
+    "verdict": "3 at fault",
+    "rule": "R3"
+   },
+   "contacts": [
+    {
+     "a": 2,
+     "b": 3,
+     "t": 158.3,
+     "x": {
+      "gap": 6.0,
+      "closing": 60.0,
+      "moved_front": 3.33,
+      "moved_back": -4.6,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 55,
+      "lost": 6,
+      "off": 0,
+      "cars": 2,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "none",
+     "rulebook": "back",
+     "rule": "R3",
+     "front": 2
+    }
+   ]
+  },
+  "s-b5285abb": {
+   "key": "f3dfb8de671e",
+   "by": "GreMi",
+   "track": "Miami",
+   "date": "2026-10-30",
+   "kind": null,
+   "source": "staff change",
+   "verdict": "Jakubm18_F1 at fault",
+   "severity": 4,
+   "note": "Lost control of his car in the wet. not ideal but not on purpose",
+   "who": [
+    "319544045435224067"
+   ],
+   "changes": [
+    "Race_Miami_2026_10_30_16_01_59.json|4|contact|4|2"
+   ],
+   "race_file": "Race_Miami_2026_10_30_16_01_59.json",
+   "at": "2026-11-04T13:11:39Z",
+   "recording": "2026-10-30_15-51-13_Miami_Race.gmtel.gz",
+   "t": 429.0,
+   "cars": [
+    3,
+    4,
+    6,
+    7
+   ],
+   "rulebook": {
+    "verdict": "4 + 3 + 7 at fault",
+    "rule": "R8"
+   },
+   "contacts": [
+    {
+     "a": 7,
+     "b": 4,
+     "t": 420.6,
+     "x": {
+      "gap": 6.9,
+      "closing": 8,
+      "moved_front": 1.88,
+      "moved_back": 0.0,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 16,
+      "lost": 2,
+      "off": 2,
+      "cars": 4,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "front",
+     "rulebook": "front",
+     "rule": "R2",
+     "front": 4
+    },
+    {
+     "a": 4,
+     "b": 3,
+     "t": 424.1,
+     "x": {
+      "gap": 0.1,
+      "closing": -14,
+      "moved_front": 2.57,
+      "moved_back": -1.1,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 18,
+      "lost": 2,
+      "off": 2,
+      "cars": 4,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "back",
+     "rulebook": "front",
+     "rule": "R2",
+     "front": 3
+    },
+    {
+     "a": 3,
+     "b": 7,
+     "t": 426.6,
+     "x": {
+      "gap": 1.5,
+      "closing": 12,
+      "moved_front": -3.77,
+      "moved_back": 5.13,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 18,
+      "lost": 0,
+      "off": 2,
+      "cars": 4,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "none",
+     "rulebook": "back",
+     "rule": "R2",
+     "front": 3
+    }
+   ]
+  },
+  "s-ed58b197": {
+   "key": "1ab1beace34f",
+   "by": "GreMi",
+   "track": "Brazil",
+   "date": "2026-11-04",
+   "kind": "Wheelbanging",
+   "source": "staff change",
+   "verdict": "Racing incident",
+   "severity": 0,
+   "note": "Just a little wheelbang in a fast corner",
+   "who": [
+    "319544045435224067"
+   ],
+   "changes": [
+    "Race_Brazil_2026_11_04_20_24_42.json|4|contact|3|0"
+   ],
+   "race_file": "Race_Brazil_2026_11_04_20_24_42.json",
+   "at": "2026-11-05T11:21:11Z",
+   "recording": "2026-11-04_20-17-06_Brazil_Race.gmtel.gz",
+   "t": 178.2,
+   "cars": [
+    4,
+    14
+   ],
+   "rulebook": {
+    "verdict": "4 at fault",
+    "rule": "R2"
+   },
+   "contacts": [
+    {
+     "a": 4,
+     "b": 14,
+     "t": 178.2,
+     "x": {
+      "gap": 0.8,
+      "closing": -8,
+      "moved_front": -1.01,
+      "moved_back": 1.29,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 4,
+      "lost": 1,
+      "off": 1,
+      "cars": 2,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "none",
+     "rulebook": "back",
+     "rule": "R2",
+     "front": 14
+    }
+   ]
   }
  },
  "about": "Numbers of every graded incident's contacts and the final call (scripts/telemetry/precedents.py).",
@@ -4352,6 +5229,17 @@
    "rulebook": 52,
    "with_precedents": 51,
    "overrides": 6,
+   "date": "2026-11-06",
+   "rules": "v1.4"
+  },
+  {
+   "incidents": 80,
+   "inc_rulebook": 32,
+   "inc_with_precedents": 36,
+   "contacts": 121,
+   "rulebook": 61,
+   "with_precedents": 67,
+   "overrides": 9,
    "date": "2026-11-06",
    "rules": "v1.4"
   }
