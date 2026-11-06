@@ -1,0 +1,53 @@
+<!doctype html>
+<!-- OBS browser source: full-screen background for Starting soon / BRB / Ending / Between races.
+     Size 1920x1080 (horizontal) or 1080x1920 (vertical, it adapts).
+     ?mode=starting|brb|ending|bg  (bg = only the animated background, no text)
+     ?min=5 countdown minutes for starting (restarts when the source becomes visible: tick
+     "Refresh browser when scene becomes active" in OBS). ?sub= replaces the small line. -->
+<html><head><meta charset="utf-8"><title>Screen</title>
+<link rel="stylesheet" href="brand.css">
+<style>
+  html, body { width: 100%; height: 100%; }
+  .bg { position: fixed; inset: 0; background: linear-gradient(120deg, #1a0308 0%, #0e0420 60%, #08020f 100%); overflow: hidden; }
+  .bg i { position: absolute; top: -20%; bottom: -20%; transform: skewX(-31deg); filter: blur(30px); animation: drift 14s ease-in-out infinite alternate; }
+  .bg i:nth-child(1) { left: 5%; width: 9vw; background: rgba(225,6,0,.35); }
+  .bg i:nth-child(2) { left: 55%; width: 13vw; background: rgba(145,70,255,.3); animation-duration: 18s; }
+  .bg i:nth-child(3) { left: 85%; width: 4vw; background: rgba(255,255,255,.08); animation-duration: 11s; }
+  @keyframes drift { to { transform: skewX(-31deg) translateX(8vw); } }
+  .text { position: fixed; left: 6.25vw; top: 50%; transform: translateY(-50%); }
+  .title { font-weight: 800; text-transform: uppercase; line-height: .95; letter-spacing: .02em; font-size: 9.9vw; }
+  .sub { font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--dim); font-size: max(1.5vw, 22px); margin-top: 1.4vw; }
+  .count { font-weight: 800; font-size: 5vw; margin-top: 1.6vw; font-variant-numeric: tabular-nums; }
+  @media (orientation: portrait) {
+    .text { left: 7vw; top: 9vh; transform: none; }
+    .title { font-size: 19vw; } .sub { font-size: 4vw; } .count { font-size: 12vw; }
+  }
+</style></head>
+<body>
+<div class="bg"><i></i><i></i><i></i></div>
+<div class="text" id="text"></div>
+<script>
+const q = new URLSearchParams(location.search);
+const mode = q.get("mode") || "starting";
+const T = {
+  starting: ["Starting", "soon", "GreMi Gang · F1 25 lobby night"],
+  brb: ["Be right", "back", "Setting up the next lobby · grab a drink"],
+  ending: ["Thanks for", "watching", "GG everyone · see you next race night"],
+};
+if (T[mode]) {
+  const [a, b, sub] = T[mode];
+  document.getElementById("text").innerHTML =
+    `<div class="title">${a}<br><span class="grad">${b}</span></div><div class="sub">${q.get("sub") || sub}</div>` +
+    (mode === "starting" ? `<div class="count" id="count"></div>` : "");
+}
+if (mode === "starting") {
+  const end = Date.now() + (+(q.get("min") || 5)) * 60e3;
+  const el = document.getElementById("count");
+  const tick = () => {
+    const s = Math.max(0, Math.round((end - Date.now()) / 1000));
+    el.textContent = s ? `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}` : "Any second now";
+  };
+  tick(); setInterval(tick, 500);
+}
+</script>
+</body></html>

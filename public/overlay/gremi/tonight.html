@@ -1,0 +1,48 @@
+<!doctype html>
+<!-- OBS browser source: "Tonight so far" for GreMi, from tonight's race files in the live league data.
+     A night runs until 06:00 the next morning. ?w=1110 card width. -->
+<html><head><meta charset="utf-8"><title>Tonight so far</title>
+<link rel="stylesheet" href="brand.css">
+<style>
+  .card { margin: 10px 24px 30px; height: 104px; display: flex; align-items: center; justify-content: space-between; gap: 30px; }
+  .stat { text-align: right; }
+  .big { margin-top: 6px; font-variant-numeric: tabular-nums; }
+  .pips { display: flex; gap: 6px; margin-top: 8px; }
+  .pip { min-width: 34px; height: 22px; padding: 0 6px; border-radius: 4px; font: 800 16px/22px "Saira Condensed"; text-align: center;
+         background: rgba(255,255,255,.14); }
+  .pip.p1 { background: linear-gradient(90deg,#d4464a,#c4509f,#8a6cd0); box-shadow: 0 0 12px rgba(196,80,159,.6); }
+  .pip.pod { background: rgba(197,139,255,.45); }
+</style></head>
+<body>
+<div class="card fade out" id="card"><div class="streaks"><i></i><i></i><i></i><i></i></div>
+  <div><div class="label">Tonight so far</div><div class="big" id="sum">—</div><div class="pips" id="pips"></div></div>
+  <div class="stat"><div class="label">Best finish</div><div class="big" id="best">—</div></div>
+  <div class="stat"><div class="label">Avg finish</div><div class="big" id="avg">—</div></div>
+</div>
+<script type="module">
+import { poll, races, loadSession, classification, isMe } from "./league.js";
+const q = new URLSearchParams(location.search);
+const card = document.getElementById("card");
+card.style.width = (q.get("w") || 1110) + "px";
+
+poll(async (src) => {
+  const all = races(src.index);
+  if (!all.length) return;
+  const night = all[0].night;
+  const tonight = all.filter((r) => r.night === night).reverse();
+  const mine = [];
+  for (const r of tonight) {
+    try {
+      const me = classification(await loadSession(src, r.file)).find((c) => isMe(c.name));
+      if (me) mine.push({ track: r.track, pos: me.pos });
+    } catch { /* skip a missing file */ }
+  }
+  const n = tonight.length;
+  document.getElementById("sum").textContent = `${n} race${n === 1 ? "" : "s"}${mine.filter((m) => m.pos === 1).length ? ` · ${mine.filter((m) => m.pos === 1).length} win${mine.filter((m) => m.pos === 1).length > 1 ? "s" : ""}` : ""}`;
+  document.getElementById("pips").innerHTML = mine.slice(-10).map((m) => `<span class="pip ${m.pos === 1 ? "p1" : m.pos <= 3 ? "pod" : ""}" title="${m.track}">P${m.pos}</span>`).join("");
+  document.getElementById("best").textContent = mine.length ? "P" + Math.min(...mine.map((m) => m.pos)) : "—";
+  document.getElementById("avg").textContent = mine.length ? "P" + (mine.reduce((a, m) => a + m.pos, 0) / mine.length).toFixed(1) : "—";
+  card.classList.remove("out");
+});
+</script>
+</body></html>
