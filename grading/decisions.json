@@ -1,6 +1,72 @@
 {
   "about": "Final calls on graded incidents (GreMi's grade, else the staff majority). Written by the staff page; the fault engine uses them as precedents.",
   "decisions": {
+    "sev-11041959-1166": {
+      "verdict": "#21 daris_2190 at fault",
+      "by": "staff",
+      "real": true,
+      "at_fault": [
+        "#21 daris_2190"
+      ],
+      "severity": 10.0,
+      "note": "",
+      "votes": 1,
+      "agree": 100,
+      "parts": [
+        {
+          "t0": 116.7,
+          "t1": 126.1,
+          "real": true,
+          "verdict": "#21 daris_2190 at fault",
+          "tags": [
+            "Ran into the back"
+          ],
+          "kind": "Rear-end",
+          "note": "",
+          "drivers": [
+            {
+              "car": 10,
+              "name": "#21 daris_2190",
+              "call": "fault",
+              "severity": 10
+            },
+            {
+              "car": 3,
+              "name": "#19 DDRK",
+              "call": "clear"
+            }
+          ]
+        }
+      ],
+      "kind": "Rear-end",
+      "drivers": [
+        {
+          "car": 10,
+          "name": "#21 daris_2190"
+        },
+        {
+          "car": 3,
+          "name": "#19 DDRK"
+        }
+      ],
+      "track": "Singapore",
+      "date": "2026-11-04",
+      "race_file": "Race_Singapore_2026_11_04_20_09_05.json",
+      "recording": "2026-11-04_19-59-27_Singapore_Race.gmtel.gz",
+      "replay": "https://gremigaming.github.io/race-stats/f1/race/2026-11-04_19-59-27_Singapore_Race?inc=116.7&car=10,3",
+      "engine": {
+        "rules": "v1.4",
+        "verdict": "daris_2190 at fault",
+        "rule": "R10",
+        "severity": 10,
+        "why": "daris_2190 kept full throttle for 1.0 s after hitting DDRK, pushing it along",
+        "at_fault": [
+          "#21 daris_2190"
+        ],
+        "contacts": 1,
+        "gray_score": 0.0
+      }
+    },
     "1104b-1": {
       "verdict": "Not an incident",
       "by": "GreMi",
