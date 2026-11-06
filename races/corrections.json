@@ -705,6 +705,33 @@
           10
         ]
       }
+    },
+    {
+      "id": "Race_Imola_2026_10_30_16_56_33.json|6|contact|2|0",
+      "type": "incident",
+      "reason": "Car 2 brakes too late in the rain, and releasing his brake twice so goes too quick into the corner",
+      "by": "319544045435224067",
+      "at": "2026-11-06T21:04:41Z",
+      "file": "Race_Imola_2026_10_30_16_56_33.json",
+      "driver": "Stepino81",
+      "car": 6,
+      "pts": 0.0,
+      "call": {
+        "kind": "Reckless driving",
+        "fault": "clear",
+        "severity": 6
+      },
+      "learn": true,
+      "owner": true,
+      "was": -6.0,
+      "inc": {
+        "t": 1793375367.4,
+        "pair": [
+          6,
+          16
+        ]
+      },
+      "text": "Variante Tamburello, with RB #2, Haas '26 #19: severity 6/10, to blame (R2) 6; Stepino81 was ahead but swept 1.8 m across into RB #2"
     }
   ]
 }
