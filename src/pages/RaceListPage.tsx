@@ -414,12 +414,12 @@ function RaceCard({
         <TrackFlag
           track={r.track}
           size="large"
-          className="absolute right-2 top-2 h-auto max-h-16 w-24 max-w-none rounded-sm object-contain"
+          className="absolute right-2 top-2 h-16 w-24 max-w-none rounded-sm object-cover object-center"
         />
       </div>
       <TrackLayout
         track={r.track}
-        className="pointer-events-none absolute bottom-2 right-2 z-[2] size-20 text-white/[0.05] transition group-hover:text-brand-red/15 [&>svg]:size-full"
+        className="pointer-events-none absolute bottom-2 right-2 z-[2] size-20 text-white/[0.06] transition-colors duration-200 group-hover:text-brand-red/45 [&>svg]:size-full"
       />
       <div className="relative z-10 flex items-start justify-between gap-2">
         <div className="min-w-0">

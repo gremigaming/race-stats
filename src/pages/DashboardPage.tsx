@@ -4,9 +4,10 @@ import {
   CalendarDays,
   Clapperboard,
   Flag,
+  ShieldCheck,
+  TriangleAlert,
   Trophy,
   UsersRound,
-  Wrench,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { buildDashboardActivity } from "../analysis/dashboardActivity";
@@ -16,7 +17,6 @@ import { SafetySummary } from "../components/safety/SafetySummary";
 import { LoadingState } from "../components/ui/LoadingState";
 import { PageFrame } from "../components/ui/PageFrame";
 import { useTelemetry } from "../context/TelemetryContext";
-import { SETUP_MANAGER_ON } from "../league/setupManager";
 import {
   areSessionFiltersDefault,
   matchesSessionFilters,
@@ -34,6 +34,14 @@ const SHORTCUTS = [
     icon: Trophy,
     path: "drivers",
     tone: "from-rose-500/15 to-fuchsia-500/5 text-rose-200",
+  },
+  {
+    key: "safety",
+    label: "Safety rating",
+    detail: "Your SR, streams and penalty points",
+    icon: ShieldCheck,
+    path: "safety",
+    tone: "from-emerald-500/15 to-sky-500/5 text-emerald-200",
   },
   {
     key: "sessions",
@@ -58,6 +66,14 @@ const SHORTCUTS = [
     icon: Clapperboard,
     path: "race",
     tone: "from-red-500/15 to-orange-500/5 text-red-200",
+  },
+  {
+    key: "incidents",
+    label: "Incidents",
+    detail: "Replay every contact and call",
+    icon: TriangleAlert,
+    path: "incidents",
+    tone: "from-amber-500/15 to-red-500/5 text-amber-200",
   },
   {
     key: "insights",
@@ -204,25 +220,6 @@ export function DashboardPage() {
               <ArrowRight className="relative z-10 size-4 shrink-0 text-zinc-600 transition group-hover:translate-x-0.5 group-hover:text-rose-200" />
             </Link>
           ))}
-          {SETUP_MANAGER_ON && (
-            <Link
-              to={`${rootPath}/setups`}
-              className="group relative flex min-h-24 items-center gap-3 overflow-hidden rounded-2xl border border-white/[0.07] bg-zinc-900/65 p-4 transition duration-200 hover:-translate-y-0.5 hover:border-violet-300/20 hover:bg-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-red/70"
-            >
-              <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500/15 to-sky-500/5 text-violet-200 ring-1 ring-inset ring-white/[0.06]">
-                <Wrench className="size-5" />
-              </span>
-              <span className="min-w-0 flex-1">
-                <span className="block text-sm font-semibold text-zinc-100 group-hover:text-white">
-                  Setups
-                </span>
-                <span className="mt-0.5 block text-xs text-zinc-500">
-                  Recommendations by track
-                </span>
-              </span>
-              <ArrowRight className="size-4 shrink-0 text-zinc-600 transition group-hover:translate-x-0.5 group-hover:text-violet-200" />
-            </Link>
-          )}
           <Link
             to={`${rootPath}/head-to-head`}
             className="group relative flex min-h-24 items-center gap-3 overflow-hidden rounded-2xl border border-white/[0.07] bg-zinc-900/65 p-4 transition duration-200 hover:-translate-y-0.5 hover:border-fuchsia-300/20 hover:bg-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-red/70"

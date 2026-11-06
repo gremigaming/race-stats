@@ -26,6 +26,22 @@ const changelog: ChangelogEntry[] = [
     destination: "personal-safety",
   },
   {
+    id: "home-tools-safety-incidents",
+    date: "2026-11-06",
+    type: "feat",
+    message:
+      "The home page racing tools now link straight to Safety rating and Incidents.",
+    destination: "home",
+  },
+  {
+    id: "race-picker-flags-hover",
+    date: "2026-11-06",
+    type: "fix",
+    message:
+      "Race viewer track cards show every flag at the same size, and the track outline lights up red again on hover.",
+    destination: "race",
+  },
+  {
     id: "incident-viewer",
     date: "2026-11-05",
     type: "feat",
