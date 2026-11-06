@@ -1,6 +1,7 @@
 import {
   ChevronDown,
   ChevronRight,
+  Clapperboard,
   Flag,
   Search,
   ShieldAlert,
@@ -10,7 +11,7 @@ import {
   Trophy,
 } from "lucide-react";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { cardClass, cardHighlight } from "../Card";
 import { SectionHeader } from "../ui/SectionHeader";
 import { SegmentedControl } from "../ui/SegmentedControl";
@@ -44,6 +45,32 @@ const half = (n: number) => Math.floor(n * 2 + 0.5) / 2;
 
 export const changeClass = (n: number) =>
   n > 0 ? "text-emerald-300" : n < 0 ? "text-red-300" : "text-zinc-500";
+
+/**
+ * The incident viewer with this driver's incidents: one race (race order), or with `stream` the
+ * whole evening that race was part of. The viewer finds the race from the file name.
+ */
+export function useIncidentsLink() {
+  const { formulaKey } = useParams<{ formulaKey: string }>();
+  const { scopeKey } = useTelemetry();
+  return (file: string, driver: string, stream = false) =>
+    `/${formulaKey ?? scopeKey ?? "all"}/incidents?file=${encodeURIComponent(file.split("/").pop() ?? file)}` +
+    `&d=${encodeURIComponent(driverKey(driver))}&sort=time${stream ? "&scope=range" : ""}`;
+}
+
+function IncidentsButton({ to, label, title }: { to: string; label: string; title: string }) {
+  return (
+    <Link
+      to={to}
+      title={title}
+      aria-label={title}
+      className="inline-flex h-7 shrink-0 items-center justify-center gap-1.5 rounded-md sm:w-[5.75rem] bg-white/[0.06] px-2 text-[11px] font-medium text-zinc-200 ring-1 ring-white/[0.06] transition-colors hover:bg-red-500/15 hover:text-red-200 hover:ring-red-400/30"
+    >
+      <Clapperboard className="h-3.5 w-3.5 text-red-300" />
+      <span className="hidden sm:inline">{label}</span>
+    </Link>
+  );
+}
 
 /** Pulls track, kind and time out of a race file name. */
 export function parseSessionFile(file: string) {
@@ -478,17 +505,20 @@ function StreamGroup({
 }) {
   const [open, setOpen] = useState(defaultOpen);
   useEffect(() => setOpen(defaultOpen), [defaultOpen, resetKey]);
+  const incidentsLink = useIncidentsLink();
   const weight = sessions[0]?.weight ?? 1;
   const skipped = sessions.length === 0;
+  const firstRace = sessions.find((s) => !parseSessionFile(s.file).quali);
   // SR v2.5: the change from the exact split, so the header matches the sum in the box
   const shownChange = parts ? Math.round((parts.after - parts.before) * 10) / 10 : half(change ?? 0);
   return (
     <div className="overflow-hidden rounded-xl bg-zinc-950/50">
+      <div className="flex items-center gap-2 pr-3 hover:bg-white/[0.02]">
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
-        className="flex w-full items-center gap-3 px-3 py-2.5 text-left hover:bg-white/[0.02]"
+        className="flex min-w-0 flex-1 items-center gap-3 py-2.5 pl-3 text-left"
       >
         <ChevronRight
           className={cn("h-4 w-4 shrink-0 text-zinc-500 transition-transform", open && "rotate-90")}
@@ -550,6 +580,14 @@ function StreamGroup({
           </div>
         )}
       </button>
+      {firstRace && (
+        <IncidentsButton
+          to={incidentsLink(firstRace.file, driver, true)}
+          label="Incidents"
+          title={`Watch all of ${driver}'s incidents from this stream in the incident viewer`}
+        />
+      )}
+      </div>
       {open && (
         <div className="space-y-1 px-2 pb-2">
           {parts && <PartsBox parts={parts} params={params} sessions={sessions} />}
@@ -572,6 +610,7 @@ function SessionRow({
   params?: SrSettings;
 }) {
   const { scopeKey } = useTelemetry();
+  const incidentsLink = useIncidentsLink();
   const [open, setOpen] = useState(false);
   const { quali, track, time } = parseSessionFile(session.file);
   // contacts live in the incident list below, with both sides and the replay
@@ -585,11 +624,12 @@ function SessionRow({
   const fmt = (x: number) => x.toFixed(1).replace(/\.0$/, "");
   return (
     <div className="rounded-lg bg-zinc-900/60">
+      <div className="flex items-center gap-2 pr-2">
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
-        className="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm"
+        className="flex min-w-0 flex-1 items-center gap-2.5 py-2 pl-3 text-left text-sm"
       >
         <span
           className={cn(
@@ -641,6 +681,16 @@ function SessionRow({
           className={cn("h-3.5 w-3.5 shrink-0 text-zinc-600 transition-transform", open && "rotate-180")}
         />
       </button>
+      {!quali ? (
+        <IncidentsButton
+          to={incidentsLink(session.file, driver)}
+          label="Incidents"
+          title={`Watch all of ${driver}'s incidents from this race in the incident viewer`}
+        />
+      ) : (
+        <span className="w-7 shrink-0 sm:w-[5.75rem]" aria-hidden />
+      )}
+      </div>
       {open && (
         <div className="space-y-1.5 border-t border-white/[0.04] px-3 py-2.5 text-xs">
           <div className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500">Incidents</div>

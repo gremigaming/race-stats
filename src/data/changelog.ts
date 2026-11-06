@@ -10,6 +10,14 @@ export interface ChangelogEntry {
 // raw commit history also contains routine uploads and staff-only corrections.
 const changelog: ChangelogEntry[] = [
   {
+    id: "safety-incident-buttons",
+    date: "2026-11-06",
+    type: "feat",
+    message:
+      "Your Safety Rating page has an Incidents button on every stream and race that opens all your incidents from it in the incident viewer, and incident severities and penalty points now always match the current SR settings.",
+    destination: "personal-safety",
+  },
+  {
     id: "incident-viewer",
     date: "2026-11-05",
     type: "feat",

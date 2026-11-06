@@ -8,6 +8,8 @@ import { KIND_META, KIND_ORDER, type IncidentKind } from "../viewer/incidentKind
 import { clock, IconButton } from "../viewer/panels";
 import type { MapPin } from "../viewer/scene";
 import { driverKey } from "../league/league";
+import { SEV_CLASS_META, sevClass, sevPoints, srNum, srSettings, type SrSettings } from "../league/safety";
+import { useTelemetry } from "../context/TelemetryContext";
 
 /**
  * The incident viewer (GreMi, 5 Nov 2026): every incident, easy to find. A race's full track with
@@ -30,10 +32,17 @@ const dateLabel = (r: RaceRef) =>
   new Date(raceTime(r)).toLocaleString(undefined, { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
 const short = (r: RaceRef) => `${r.track} · ${new Date(raceTime(r)).toLocaleDateString(undefined, { day: "numeric", month: "short" })}`;
 
+/** "Severity 2/10 (small, 1-3): the driver to blame loses 0.5" from the live SR settings, so it matches the SR page. */
+function sevCost(sev: number, settings: SrSettings) {
+  const c = sevClass(sev);
+  return `Severity ${sev}/10 (${SEV_CLASS_META[c].label.toLowerCase()}, ${SEV_CLASS_META[c].range}): the driver to blame loses ${srNum(sevPoints(sev, settings))} SR points, shared blame half`;
+}
+
 function SevBadge({ sev, big }: { sev: number; big?: boolean }) {
-  const cls = sev >= 8 ? "bg-red-500 text-white" : sev >= 6 ? "bg-orange-500 text-black" : sev >= 3 ? "bg-amber-400/80 text-black" : "bg-zinc-600 text-zinc-100";
+  const { league } = useTelemetry();
+  const cls = sev >= 8 ? "bg-red-500 text-white" : sev >= 6 ? "bg-orange-500 text-black" : sev >= 4 ? "bg-amber-400/80 text-black" : "bg-zinc-600 text-zinc-100";
   return (
-    <span className={`inline-flex shrink-0 items-center justify-center rounded-md font-mono font-bold tabular-nums ${cls} ${big ? "h-9 w-9 text-base" : "h-6 w-6 text-xs"}`} title={`Severity ${sev}/10`}>
+    <span className={`inline-flex shrink-0 items-center justify-center rounded-md font-mono font-bold tabular-nums ${cls} ${big ? "h-9 w-9 text-base" : "h-6 w-6 text-xs"}`} title={sevCost(sev, srSettings(league?.safetyData))}>
       {sev}
     </span>
   );
@@ -52,6 +61,7 @@ function KindPill({ kind }: { kind: IncidentKind }) {
 export function IncidentsPage() {
   const { formulaKey } = useParams<{ formulaKey: string }>();
   const [params, setParams] = useSearchParams();
+  const { league } = useTelemetry();
   const index = useRaceIndex();
   const races = useMemo(() => (index.data ?? []).filter((r) => /race/i.test(r.session)), [index.data]);
 
@@ -757,6 +767,9 @@ export function IncidentsPage() {
                 <div className="mt-2 rounded-lg bg-white/[0.04] px-3 py-1.5 text-xs md:text-sm">
                   <span className="font-semibold">{open.inc.verdict.verdict}</span>
                   {open.inc.verdict.why && <span className="text-zinc-400">: {open.inc.verdict.why}</span>}
+                  {open.fault.length > 0 && !open.tap && (
+                    <div className="mt-0.5 text-[11px] text-zinc-500">{sevCost(open.sev, srSettings(league?.safetyData))}.</div>
+                  )}
                 </div>
               )}
               {open.uid === raceUid ? (

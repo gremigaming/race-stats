@@ -4,7 +4,21 @@ import { Link, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useTelemetry } from "../../context/TelemetryContext";
 import { driverKey } from "../../league/league";
-import { scaledPts, signedHalf, STAFF_URL, type SafetyData, type SafetyItem, type SafetyScale } from "../../league/safety";
+import {
+  scaleContactText,
+  scaledPts,
+  SEV_CLASS_META,
+  sevClass,
+  sevOfText,
+  sevPoints,
+  signedHalf,
+  srNum,
+  srSettings,
+  STAFF_URL,
+  type SafetyData,
+  type SafetyItem,
+  type SafetyScale,
+} from "../../league/safety";
 import { loadLeagueJson } from "../../league/liveData";
 import { cn } from "../../utils/cn";
 
@@ -29,7 +43,7 @@ export interface RaceIncident {
   where: string;
   sides: Side[];
   replay?: string;
-  /** Game severity: LOW, MEDIUM or HIGH. */
+  /** Game severity: LOW, MEDIUM or HIGH (only used when no call names a 1-10 severity). */
   sev?: string;
 }
 
@@ -57,7 +71,10 @@ function useAllIncidents(): AllIncidents | null {
         const sc = all.scale;
         if (sc)
           for (const inc of all.incidents)
-            for (const line of Object.values(inc.lines)) line[0] = scaledPts(line[0], "contact", sc);
+            for (const line of Object.values(inc.lines)) {
+              line[0] = scaledPts(line[0], "contact", sc);
+              line[1] = scaleContactText(line[1], sc);
+            }
         return all;
       }),
     staleTime: 0,
@@ -204,6 +221,11 @@ function IncidentCard({ inc, driver }: { inc: RaceIncident; driver: string }) {
   const viewer = `/${formulaKey ?? ""}/incidents?file=${encodeURIComponent(base(inc.file))}${inc.lap != null ? `&lap=${inc.lap}` : ""}&with=${encodeURIComponent(inc.sides.map((s) => s.name).join("|"))}`;
   const mine = inc.sides.find((s) => driverKey(s.name) === driver)?.item?.pts ?? 0;
   const others = inc.sides.filter((s) => driverKey(s.name) !== driver).map((s) => s.name);
+  const { league } = useTelemetry();
+  const settings = srSettings(league?.safetyData);
+  // the severity the call used (its points come from it), so the badge and the points always agree
+  const sevs = inc.sides.map((s) => (s.item ? sevOfText(s.item.text) : null)).filter((x): x is number => x != null);
+  const sev = sevs.length ? Math.max(...sevs) : null;
 
   return (
     <div className="rounded-lg bg-black/25">
@@ -217,10 +239,20 @@ function IncidentCard({ inc, driver }: { inc: RaceIncident; driver: string }) {
           <span className="text-zinc-200">with {others.join(", ") || "another car"}</span>
           {inc.where && <span className="text-zinc-500"> · {cap(inc.where)}</span>}
         </span>
-        {inc.sev && SEV[inc.sev] && (
-          <span className={cn("shrink-0 rounded px-1.5 py-0.5 text-[10px] font-semibold", SEV[inc.sev].cls)}>
-            {SEV[inc.sev].label}
+        {sev != null ? (
+          <span
+            className={cn("shrink-0 rounded px-1.5 py-0.5 text-[10px] font-semibold", SEV_CLASS_META[sevClass(sev)].cls)}
+            title={`Severity ${sev}/10: ${SEV_CLASS_META[sevClass(sev)].label.toLowerCase()} (${SEV_CLASS_META[sevClass(sev)].range}). The driver to blame loses ${srNum(sevPoints(sev, settings))}, shared blame half.`}
+          >
+            {sev}/10 · {SEV_CLASS_META[sevClass(sev)].label}
           </span>
+        ) : (
+          inc.sev &&
+          SEV[inc.sev] && (
+            <span className={cn("shrink-0 rounded px-1.5 py-0.5 text-[10px] font-semibold", SEV[inc.sev].cls)}>
+              {SEV[inc.sev].label}
+            </span>
+          )
         )}
         <span className={cn("w-10 text-right font-mono", mine < 0 ? "text-red-300" : "text-zinc-500")}>{signedHalf(mine)}</span>
         <ChevronDown className={cn("h-3.5 w-3.5 shrink-0 text-zinc-600 transition-transform", open && "rotate-180")} />

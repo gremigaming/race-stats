@@ -244,13 +244,47 @@ export function scaledPts(pts: number, cat: string, sc: SafetyScale): number {
   return pts * (sc.otherCat?.[cat] ?? sc.other);
 }
 
+/** A contact's points class by severity 1-10 (scripts/sr_settings.py: 1-3 small, 4-5 medium, 6-7 big, 8-10 huge). */
+export type SevClass = "small" | "medium" | "big" | "huge";
+export const sevClass = (sev: number): SevClass =>
+  sev <= 3 ? "small" : sev <= 5 ? "medium" : sev <= 7 ? "big" : "huge";
+export const SEV_CLASS_META: Record<SevClass, { label: string; range: string; cls: string }> = {
+  small: { label: "Small", range: "1-3", cls: "bg-zinc-500/15 text-zinc-300" },
+  medium: { label: "Medium", range: "4-5", cls: "bg-amber-500/15 text-amber-300" },
+  big: { label: "Big", range: "6-7", cls: "bg-orange-500/15 text-orange-300" },
+  huge: { label: "Huge", range: "8-10", cls: "bg-red-500/15 text-red-300" },
+};
+/** What a contact of this severity costs the driver to blame, from the live SR settings (shared blame: half). */
+export const sevPoints = (sev: number, s: SrSettings) => s[`contact_${sevClass(sev)}` as const];
+/** "severity 4/10" in an item text, or null. */
+export const sevOfText = (text: string): number | null => {
+  const m = /severity (\d+)\/10/.exec(text);
+  return m ? Number(m[1]) : null;
+};
+
+/**
+ * Item texts name the points on the v2.2 scale the build and staff page work in
+ * ("severity 2/10, to blame (rear-end) 1"). Swap those numbers for the live points so the text
+ * always matches the points shown next to it.
+ */
+export function scaleContactText(text: string, sc?: SafetyScale | null): string {
+  if (!sc) return text;
+  return text.replace(/\b(to blame(?: \([^)]*\))?|shared blame) (\d+(?:\.\d+)?)(?=$|[;,.)\s])/g, (all, what: string, n: string) => {
+    const v = Number(n);
+    if (!Number.isFinite(v) || v === 0) return all;
+    return `${what} ${srNum(-scaledPts(-v, "contact", sc))}`;
+  });
+}
+
 /** Shows every item on the v2.5 scale when the data carries one (SR v2.5 live). */
 export function applySafetyScale(data: SafetyData): SafetyData {
   const sc = data.scale;
   if (!sc) return data;
   for (const d of data.drivers)
     for (const s of d.sessions) {
+      for (const c of s.calc ?? []) if (c.cat === "contact" || c.cat === "staff") c.text = scaleContactText(c.text, sc);
       for (const it of s.items) {
+        if (it.cat === "contact" || it.cat === "staff") it.text = scaleContactText(it.text, sc);
         if (it.orig != null) it.orig = scaledPts(it.orig, it.cat, sc);
         it.pts = scaledPts(it.pts, it.cat, sc);
         if (it.pts > 0)   // the bonus texts name their v2.2 values
