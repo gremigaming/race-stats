@@ -4342,13 +4342,13 @@
    ]
   },
   "s-336640e8": {
-   "key": "375a81538574",
+   "key": "d2aadd7fed8e",
    "by": "GreMi",
    "track": "Miami",
    "date": "2026-10-30",
    "kind": null,
    "source": "staff change",
-   "verdict": "AXECTS + Jakubm18_F1 + rubengggarcia at fault",
+   "verdict": "Jakubm18_F1 at fault",
    "severity": 2,
    "note": "Small incident, is on Jakub who could have left some space but was just okay",
    "who": [
@@ -4390,7 +4390,7 @@
       "reaction": 0.0,
       "aftermath": 0.0
      },
-     "label": "both",
+     "label": "front",
      "rulebook": "front",
      "rule": "R2",
      "front": 4
@@ -4413,7 +4413,7 @@
       "reaction": 0.0,
       "aftermath": 0.0
      },
-     "label": "both",
+     "label": "back",
      "rulebook": "front",
      "rule": "R2",
      "front": 3
@@ -4436,7 +4436,7 @@
       "reaction": 0.0,
       "aftermath": 0.0
      },
-     "label": "both",
+     "label": "none",
      "rulebook": "back",
      "rule": "R2",
      "front": 3
@@ -5251,6 +5251,17 @@
    "rulebook": 60,
    "with_precedents": 60,
    "overrides": 5,
+   "date": "2026-11-06",
+   "rules": "v1.4"
+  },
+  {
+   "incidents": 80,
+   "inc_rulebook": 32,
+   "inc_with_precedents": 36,
+   "contacts": 121,
+   "rulebook": 61,
+   "with_precedents": 67,
+   "overrides": 9,
    "date": "2026-11-06",
    "rules": "v1.4"
   }
