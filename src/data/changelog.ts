@@ -10,6 +10,22 @@ export interface ChangelogEntry {
 // raw commit history also contains routine uploads and staff-only corrections.
 const changelog: ChangelogEntry[] = [
   {
+    id: "incident-viewer-driver-links",
+    date: "2026-11-06",
+    type: "feat",
+    message:
+      "Tap a driver's name on an open incident to jump to their Safety Rating page with that race open and the incident in view.",
+    destination: "incidents",
+  },
+  {
+    id: "incident-viewer-final-calls",
+    date: "2026-11-06",
+    type: "fix",
+    message:
+      "The incident viewer now shows the same blame and severity as the Safety Rating, including stewards' calls, and older shared incident links open again.",
+    destination: "incidents",
+  },
+  {
     id: "incident-inputs-rule",
     date: "2026-11-06",
     type: "feat",

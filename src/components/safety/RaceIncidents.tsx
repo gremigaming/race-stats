@@ -1,7 +1,7 @@
 import { ChevronDown, Flag, TriangleAlert } from "lucide-react";
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useRememberedState } from "../../hooks/usePageMemory";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useTelemetry } from "../../context/TelemetryContext";
 import { driverKey } from "../../league/league";
@@ -216,10 +216,30 @@ export function RaceIncidentList({
   );
 }
 
+/** A link from the incident viewer (?file=&lap=&with=) points at this incident: open it and scroll to it. */
+export function useFocusedIncident(file: string, lap: number | null | undefined, names: string[]) {
+  const [params] = useSearchParams();
+  const f = params.get("file");
+  if (!f || base(f) !== base(file)) return false;
+  const l = params.get("lap");
+  if (l && lap != null && Number(l) !== lap) return false;
+  const want = (params.get("with") ?? "").split("|").filter(Boolean).map(driverKey);
+  return !want.length || names.some((n) => want.includes(driverKey(n)));
+}
+
 function IncidentCard({ inc, driver }: { inc: RaceIncident; driver: string }) {
-  const [open, setOpen] = useRememberedState(`inc:${driver}:${inc.file}:${inc.lap ?? ""}:${inc.sides.map((s) => s.name).join("|")}`, false);
+  const focused = useFocusedIncident(inc.file, inc.lap, inc.sides.map((s) => s.name));
+  const [open, setOpen] = useRememberedState(`inc:${driver}:${inc.file}:${inc.lap ?? ""}:${inc.sides.map((s) => s.name).join("|")}`, focused);
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!focused) return;
+    setOpen(true);
+    const id = window.setTimeout(() => ref.current?.scrollIntoView({ block: "center", behavior: "smooth" }), 250);
+    return () => window.clearTimeout(id);
+  }, [focused]); // eslint-disable-line react-hooks/exhaustive-deps
   const { formulaKey } = useParams<{ formulaKey: string }>();
-  const viewer = `/${formulaKey ?? ""}/incidents?file=${encodeURIComponent(base(inc.file))}${inc.lap != null ? `&lap=${inc.lap}` : ""}&with=${encodeURIComponent(inc.sides.map((s) => s.name).join("|"))}`;
+  const { scopeKey } = useTelemetry();
+  const viewer = `/${formulaKey ?? scopeKey ?? "all"}/incidents?file=${encodeURIComponent(base(inc.file))}${inc.lap != null ? `&lap=${inc.lap}` : ""}&with=${encodeURIComponent(inc.sides.map((s) => s.name).join("|"))}`;
   const mine = inc.sides.find((s) => driverKey(s.name) === driver)?.item?.pts ?? 0;
   const others = inc.sides.filter((s) => driverKey(s.name) !== driver).map((s) => s.name);
   const { league } = useTelemetry();
@@ -229,7 +249,7 @@ function IncidentCard({ inc, driver }: { inc: RaceIncident; driver: string }) {
   const sev = sevs.length ? Math.max(...sevs) : null;
 
   return (
-    <div className="rounded-lg bg-black/25">
+    <div ref={ref} className={cn("rounded-lg bg-black/25", focused && "ring-1 ring-red-400/50")}>
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}

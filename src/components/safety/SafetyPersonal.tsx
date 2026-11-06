@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useRef, type ReactNode } from "react";
 import { useRememberedState, useWasRemembered } from "../../hooks/usePageMemory";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import { cardClass, cardHighlight } from "../Card";
 import { SectionHeader } from "../ui/SectionHeader";
 import { SegmentedControl } from "../ui/SegmentedControl";
@@ -51,6 +51,13 @@ export const changeClass = (n: number) =>
  * The incident viewer with this driver's incidents: one race (race order), or with `stream` the
  * whole evening that race was part of. The viewer finds the race from the file name.
  */
+/** The race a link from the incident viewer points at (?file=Race_...json): its stream and race open. */
+function useFocusFile(): string | null {
+  const [params] = useSearchParams();
+  const f = params.get("file");
+  return f ? f.split("/").pop() ?? f : null;
+}
+
 export function useIncidentsLink() {
   const { formulaKey } = useParams<{ formulaKey: string }>();
   const { scopeKey } = useTelemetry();
@@ -506,15 +513,20 @@ function StreamGroup({
 }) {
   // open cards come back open after Back from the incident viewer
   const memId = `sr:${driver}:stream:${date}:${sessions[0]?.file ?? ""}`;
-  const [open, setOpen] = useRememberedState(memId, defaultOpen);
+  const focusFile = useFocusFile();
+  const holdsFocus = !!focusFile && sessions.some((x) => x.file.split("/").pop() === focusFile);
+  const [open, setOpen] = useRememberedState(memId, defaultOpen || holdsFocus);
+  useEffect(() => {
+    if (holdsFocus) setOpen(true);
+  }, [holdsFocus]); // eslint-disable-line react-hooks/exhaustive-deps
   const restored = useWasRemembered(memId);
   const firstRun = useRef(true);
   useEffect(() => {
     if (firstRun.current) {
       firstRun.current = false;
-      if (restored) return;
+      if (restored && !holdsFocus) return;
     }
-    setOpen(defaultOpen);
+    setOpen(defaultOpen || holdsFocus);
   }, [defaultOpen, resetKey]); // eslint-disable-line react-hooks/exhaustive-deps
   const incidentsLink = useIncidentsLink();
   const weight = sessions[0]?.weight ?? 1;
@@ -622,7 +634,11 @@ function SessionRow({
 }) {
   const { scopeKey } = useTelemetry();
   const incidentsLink = useIncidentsLink();
-  const [open, setOpen] = useRememberedState(`sr:${driver}:session:${session.file}`, false);
+  const focused = useFocusFile() === session.file.split("/").pop();
+  const [open, setOpen] = useRememberedState(`sr:${driver}:session:${session.file}`, focused);
+  useEffect(() => {
+    if (focused) setOpen(true);
+  }, [focused]); // eslint-disable-line react-hooks/exhaustive-deps
   const { quali, track, time } = parseSessionFile(session.file);
   // contacts live in the incident list below, with both sides and the replay
   const points = session.items.filter((it) => it.cat !== "contact");

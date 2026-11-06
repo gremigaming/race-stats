@@ -2,7 +2,7 @@ import { ArrowLeft, ChevronDown, ChevronLeft, Clapperboard, Eye, EyeOff, Flame, 
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { useBackNavigation } from "../hooks/useBackNavigation";
-import { chronological, biggestFirst, chunkStart, raceTime, rowsOf, streamOf, streamsOf, useManifests, useRaceIndex, type RaceRef, type Row } from "../components/incidents/data";
+import { callsOfRace, chronological, biggestFirst, chunkStart, raceTime, rowsOf, streamOf, streamsOf, useLeagueCalls, useManifests, useRaceIndex, type RaceRef, type Row } from "../components/incidents/data";
 import { IncidentStrip } from "../components/incidents/IncidentStrip";
 import { CAR_COLORS, IncidentMap, type Clock, type IncidentSeries } from "../components/incidents/IncidentMap";
 import { KIND_META, KIND_ORDER, type IncidentKind } from "../viewer/incidentKinds";
@@ -114,15 +114,16 @@ export function IncidentsPage() {
     [raceUid, inRange, streamRaces],
   );
   const { map: manifests, loading } = useManifests(uids);
+  const { data: leagueCalls } = useLeagueCalls();
 
   const rowsByRace = useMemo(() => {
     const out = new Map<string, Row[]>();
     for (const r of [...inRange, ...streamRaces, ...(race ? [race] : [])]) {
       const m = manifests.get(r.uid);
-      if (m && !out.has(r.uid)) out.set(r.uid, rowsOf(r, m.manifest));
+      if (m && !out.has(r.uid)) out.set(r.uid, rowsOf(r, m.manifest, callsOfRace(r, leagueCalls)));
     }
     return out;
-  }, [inRange, streamRaces, race, manifests]);
+  }, [inRange, streamRaces, race, manifests, leagueCalls]);
   const rangeRows = useMemo(() => inRange.flatMap((r) => rowsByRace.get(r.uid) ?? []), [inRange, rowsByRace]);
   const raceRows = rowsByRace.get(raceUid) ?? [];
 
@@ -343,6 +344,16 @@ export function IncidentsPage() {
         return `/${formulaKey}/race/${encodeURIComponent(open.uid)}?inc=${at}${open.cars.length ? `&car=${open.cars.slice(0, 4).join(",")}` : ""}`;
       })()
     : "";
+  /** A driver's safety rating page, opened at this incident (its stream and race open, the incident in view). */
+  const srLink = (row: Row, name: string) => {
+    const q = new URLSearchParams({ tab: "personal", driver: driverKey(name) });
+    if (row.file) {
+      q.set("file", row.file);
+      if (row.inc.lap) q.set("lap", String(row.inc.lap));
+      q.set("with", row.names.join("|"));
+    }
+    return `/${formulaKey ?? "all"}/safety?${q.toString()}`;
+  };
   const fade = idle && !!open && tick.playing && !filtersOpen;
   const menuCls = `transition-opacity duration-500 ${fade ? "pointer-events-none opacity-0" : "opacity-100"}`;
   const nFilters = (range !== "stream" ? 1 : 0) + (track ? 1 : 0) + drivers.length + hidden.size + (sort !== "big" ? 1 : 0);
@@ -756,7 +767,18 @@ export function IncidentsPage() {
                       <span key={c} className="inline-flex items-center gap-1.5">
                         {i > 0 && <span className="text-sm font-normal text-zinc-500">&</span>}
                         <span className="h-3 w-3 rounded-full" style={{ background: CAR_COLORS[i] }} />
-                        {open.names[i]}
+                        {/^Car \d+$|#\d+$/.test(open.names[i]) ? (
+                          open.names[i]
+                        ) : (
+                          // GreMi, 6 Nov 2026: the name opens that driver's safety rating at this incident
+                          <Link
+                            to={srLink(open, open.names[i])}
+                            title={`${open.names[i]}'s safety rating, at this incident`}
+                            className="underline decoration-white/20 underline-offset-4 hover:text-red-200 hover:decoration-red-300/60"
+                          >
+                            {open.names[i]}
+                          </Link>
+                        )}
                       </span>
                     ))}
                   </div>
