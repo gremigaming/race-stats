@@ -10,6 +10,14 @@ export interface ChangelogEntry {
 // raw commit history also contains routine uploads and staff-only corrections.
 const changelog: ChangelogEntry[] = [
   {
+    id: "removed-test-races",
+    date: "2026-11-06",
+    type: "fix",
+    message:
+      "Test races no longer show up in the race viewer or the incident viewer, including races published live, such as the 3-driver Losail test race from the 2 Nov stream night.",
+    destination: "race",
+  },
+  {
     id: "incident-viewer-back",
     date: "2026-11-06",
     type: "fix",

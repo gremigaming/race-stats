@@ -77,9 +77,11 @@ def test_windows():
     names): test lobbies and personal races, kept in the release but off the viewer."""
     path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "races", "test-sessions.json")
     try:
-        windows = json.load(open(path)).get("windows", [])
+        t = json.load(open(path))
     except (OSError, ValueError):
         return []
+    # races removed on the staff page carry the window their recording started in
+    windows = t.get("windows", []) + [r for r in t.get("races", []) if r.get("from") and r.get("to") and r.get("kind", "race") == "race"]
     digits = lambda s: "".join(c for c in s if c.isdigit()).ljust(14, "0")
     return [(digits(w["from"]), digits(w["to"])) for w in windows]
 

@@ -548,6 +548,16 @@ def apply_staff(name, items, car, is_race, would):
             if fx:
                 it["orig"] = it["pts"]; it["pts"] = half(float(fx["pts"])); it["staff"] = fx.get("reason") or "changed by staff"
     by_car = {v: n for n, v in car.items()}
+    # the staff page's incident editor (GreMi 2026-11-06) can blame a driver the engine cleared, or one
+    # the telemetry left out of the contact: that change has no item yet, so it becomes one
+    have = {(car.get(n), round(it["inc"]["t"], 1)) for n, its in items.items() for it in its if it.get("inc") and it.get("cat") == "contact"}
+    for (f_, cr, t_), c in FIX_INC.items():
+        if f_ != name or not c.get("blame") or (cr, t_) in have or float(c["pts"]) >= 0: continue
+        n = by_car.get(cr)
+        if n is None or AI.search(n): continue
+        items[n].append({"pts": half(float(c["pts"])), "orig": 0, "text": c.get("text") or "Contact (staff call)", "lap": c.get("lap"),
+                         "cat": "contact", "id": c["id"], "staff": c.get("reason") or "changed by staff", "inc": c["inc"],
+                         **{k: c[k] for k in ("watch", "weather") if c.get(k)}, **({"type": c["call"]["kind"]} if (c.get("call") or {}).get("kind") else {})})
     for c in ADD[name]:
         n = by_car.get(c.get("car"))
         if n is None or AI.search(n): continue

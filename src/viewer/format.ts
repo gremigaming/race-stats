@@ -254,8 +254,46 @@ export interface RaceIndexLoadResult {
   availableSources: number;
 }
 
+type RemovedWindow = { from: string; to: string; kind?: string };
+type RemovedList = { windows?: RemovedWindow[]; races?: RemovedWindow[] };
+
+/**
+ * Test races and races removed on the staff page (races/test-sessions.json, written to
+ * league/removed.json by scripts/build-league-data.mjs). The live server publishes every race it
+ * sees, so the race lists drop these here. Times are Amsterdam time, as in the race file names.
+ */
+async function loadRemoved(): Promise<{ all: [string, string][]; race: [string, string][]; quali: [string, string][] }> {
+  const lists = await Promise.all([
+    getJson<RemovedList>(`${import.meta.env.BASE_URL}league/removed.json`),
+    import("../league/liveData")
+      .then((m) => m.loadLeagueJson<RemovedList>("removed.json"))
+      .catch(() => null),
+  ]);
+  const digits = (s: string) => s.replace(/\D/g, "").padEnd(14, "0");
+  const pairs = (xs?: RemovedWindow[]) =>
+    (xs ?? []).map((w) => [digits(w.from), digits(w.to)] as [string, string]);
+  const ofKind = (kind: string) => lists.flatMap((l) => pairs(l?.races?.filter((r) => (r.kind ?? "race") === kind)));
+  return { all: lists.flatMap((l) => pairs(l?.windows)), race: ofKind("race"), quali: ofKind("quali") };
+}
+
+const AMS = new Intl.DateTimeFormat("sv-SE", {
+  timeZone: "Europe/Amsterdam", year: "numeric", month: "2-digit", day: "2-digit",
+  hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false,
+});
+
+/** A race's start as Amsterdam digits (YYYYMMDDHHMMSS): live entries are UTC ("...Z"), site bundles local. */
+function amsterdamKey(started: string): string {
+  const s = started.trim();
+  if (/(Z|[+-]\d\d:?\d\d)$/i.test(s)) {
+    const ms = Date.parse(s);
+    if (Number.isFinite(ms)) return AMS.format(new Date(ms)).replace(/\D/g, "").padEnd(14, "0");
+  }
+  return s.replace(/\D/g, "").slice(0, 14).padEnd(14, "0");
+}
+
 /** Every race from every source, newest first, each with the source it lives in. */
 export async function loadRaceIndexDetailed(): Promise<RaceIndexLoadResult> {
+  const removed = loadRemoved().catch(() => ({ all: [], race: [], quali: [] }));
   const lists = await Promise.all(
     RACE_SOURCES.map(async (base) => {
       const idx = await getJson<{ races: RaceIndexEntry[] }>(
@@ -285,6 +323,13 @@ export async function loadRaceIndexDetailed(): Promise<RaceIndexLoadResult> {
           }
         : r,
     );
+  }
+  const gone = await removed;
+  const inside = (k: string, ws: [string, string][]) => ws.some(([a, b]) => k >= a && k < b);
+  for (const [key, r] of byUid) {
+    const k = amsterdamKey(r.started);
+    const quali = /quali|shootout/i.test(r.session ?? "");
+    if (inside(k, gone.all) || inside(k, quali ? gone.quali : gone.race)) byUid.delete(key);
   }
   return {
     races: [...byUid.values()].sort((a, b) =>

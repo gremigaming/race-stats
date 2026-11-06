@@ -475,16 +475,23 @@ const readSave = (path) => {
 // (Amsterdam time, as in the file names) are kept in races/ but left off the
 // site, the safety rating and the Discord boards. GreMi 2026-10-19: random
 // open lobbies joined to test the recorder.
+// Races removed on the staff page ("races": GreMi 2026-11-06, test races and the like) are left
+// off everywhere: this file, the safety rating, the race viewer and the incident viewer.
 let testWindows = [];
+let removedRaces = [];
 try {
-  testWindows = JSON.parse(readFileSync(join(SRC, "test-sessions.json"), "utf8")).windows ?? [];
+  const t = JSON.parse(readFileSync(join(SRC, "test-sessions.json"), "utf8"));
+  testWindows = t.windows ?? [];
+  removedRaces = t.races ?? [];
 } catch {
   // no test sessions
 }
 const digits = (s) => s.replace(/\D/g, "").padEnd(14, "0");
+const stem = (f) => f.split(/[\\/]/).pop().replace(/\.json$/, "");
+const removedFiles = new Set(removedRaces.map((r) => stem(r.file ?? "")));
 const isTest = (name) => {
   const k = dateKey(name);
-  return !!k && testWindows.some((w) => k >= digits(w.from) && k < digits(w.to));
+  return (!!k && testWindows.some((w) => k >= digits(w.from) && k < digits(w.to))) || removedFiles.has(stem(name));
 };
 const OWN_FILES = new Set(["aliases.json", "corrections.json", "test-sessions.json"]);
 
@@ -576,6 +583,11 @@ for (const backup of backups) {
   }
 }
 files.sort((a, b) => dateKey(b).localeCompare(dateKey(a)));
+// the race viewer drops recordings in these windows from every race list (also the live server's)
+writeFileSync(join(OUT, "removed.json"), JSON.stringify({
+  windows: testWindows.map((w) => ({ from: w.from, to: w.to })),
+  races: removedRaces.filter((r) => r.from && r.to).map((r) => ({ from: r.from, to: r.to, kind: r.kind ?? "race", file: stem(r.file ?? "") })),
+}));
 writeFileSync(join(OUT, "merges.json"), JSON.stringify({ merges: mergeList }, null, 2));
 // The race viewer and incident viewer draw names from the telemetry ("Car #69"): this file gives
 // them the merged names, per game session uid (src/viewer/format.ts loadManifest).
