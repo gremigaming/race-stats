@@ -15,5 +15,17 @@
       "to": "2026-11-03 06:00",
       "why": "GreMi's test races after the 2 Nov stream (Brazil, Mexico, Losail), not a stream"
     }
+  ],
+  "races": [
+    {
+      "file": "Race_Zandvoort_Just_in_case_2026_11_06_22_57_03",
+      "from": "2026-11-06 22:36:33",
+      "to": "2026-11-06 22:59:03",
+      "kind": "race",
+      "why": "No stream race",
+      "by": "GreMi_Gaming",
+      "by_id": "319544045435224067",
+      "at": "2026-11-07T08:11:58Z"
+    }
   ]
 }
