@@ -1,14 +1,18 @@
 import {
   ArrowLeft,
   ArrowUpRight,
+  CloudRain,
+  CircleHelp,
   Crown,
   Flame,
   Flag,
   Gauge,
   Link2,
+  MapPin,
   Medal,
   Rocket,
   Search,
+  Shield,
   ShieldCheck,
   Sparkles,
   Swords,
@@ -19,7 +23,9 @@ import {
 import { useMemo, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { accentCardClass, interactiveFocusClass } from "../components/Card";
+import { ArchetypeFitHistory } from "../components/dna/ArchetypeFitHistory";
 import { CopyButton } from "../components/ui/CopyButton";
+import { Modal } from "../components/ui/Modal";
 import { PageFrame } from "../components/ui/PageFrame";
 import { PageHeader } from "../components/ui/PageHeader";
 import { PillSelect } from "../components/ui/PillSelect";
@@ -28,6 +34,7 @@ import { useTelemetry } from "../context/TelemetryContext";
 import type { AccentColor } from "../constants/accents";
 import {
   buildDriverDna,
+  buildDriverDnaHistory,
   DRIVER_DNA_STYLES,
   type DriverDnaCard,
   type DriverDnaStyle,
@@ -54,7 +61,12 @@ const STYLE_ICONS: Record<DriverDnaStyle, LucideIcon> = {
   fastestLapHunter: Zap,
   ironWill: ShieldCheck,
   paceSetter: Crown,
+  cleanDuelist: Shield,
+  rainMaster: CloudRain,
+  tyreWhisperer: Gauge,
+  streetCircuitSpecialist: MapPin,
   allRounder: Sparkles,
+  noSignature: CircleHelp,
   developing: Gauge,
 };
 
@@ -68,7 +80,12 @@ const STYLE_ACCENTS: Record<DriverDnaStyle, AccentColor> = {
   fastestLapHunter: "purple",
   ironWill: "sky",
   paceSetter: "lime",
+  cleanDuelist: "cyan",
+  rainMaster: "sky",
+  tyreWhisperer: "amber",
+  streetCircuitSpecialist: "fuchsia",
   allRounder: "violet",
+  noSignature: "zinc",
   developing: "zinc",
 };
 
@@ -82,13 +99,41 @@ const SHARE_ACCENTS: Record<DriverDnaStyle, string> = {
   fastestLapHunter: "#c084fc",
   ironWill: "#7dd3fc",
   paceSetter: "#a3e635",
+  cleanDuelist: "#67e8f9",
+  rainMaster: "#38bdf8",
+  tyreWhisperer: "#fbbf24",
+  streetCircuitSpecialist: "#e879f9",
   allRounder: "#c4b5fd",
+  noSignature: "#a1a1aa",
   developing: "#a1a1aa",
 };
 
+type SignatureStyle = Exclude<DriverDnaStyle, "noSignature" | "developing">;
+
 const SIGNATURE_STYLES = (
   Object.keys(DRIVER_DNA_STYLES) as DriverDnaStyle[]
-).filter((style) => style !== "allRounder" && style !== "developing");
+).filter(
+  (style): style is SignatureStyle =>
+    style !== "noSignature" && style !== "developing",
+);
+
+const REAL_F1_EXAMPLES: Record<SignatureStyle, string> = {
+  comeback: "Sebastian Vettel, Lewis Hamilton, Fernando Alonso",
+  qualifying: "Charles Leclerc, George Russell, Jarno Trulli",
+  consistency: "Alain Prost, Lewis Hamilton, Jenson Button",
+  openingLap: "Kevin Magnussen, Fernando Alonso, Max Verstappen",
+  overtakeArtist: "Daniel Ricciardo, Max Verstappen, Kamui Kobayashi",
+  podiumMagnet: "Lewis Hamilton, Michael Schumacher, Sebastian Vettel",
+  fastestLapHunter: "Michael Schumacher, Lewis Hamilton, Kimi Räikkönen",
+  ironWill: "Fernando Alonso, Lewis Hamilton, Michael Schumacher",
+  paceSetter: "Max Verstappen, Sebastian Vettel, Lewis Hamilton",
+  cleanDuelist: "Jenson Button, Mika Häkkinen, Fernando Alonso",
+  rainMaster:
+    "Ayrton Senna, Michael Schumacher, Lewis Hamilton, Max Verstappen",
+  tyreWhisperer: "Jenson Button, Lewis Hamilton, Sergio Pérez",
+  streetCircuitSpecialist: "Ayrton Senna, Sergio Pérez, Charles Leclerc",
+  allRounder: "Fernando Alonso, Alain Prost, Lewis Hamilton",
+};
 
 const plural = (value: number, singular: string, pluralForm = `${singular}s`) =>
   `${value} ${value === 1 ? singular : pluralForm}`;
@@ -184,15 +229,45 @@ function cardEvidence(card: DriverDnaCard): {
         primary: `${card.lapsLed} / ${card.recordedPositionSamples} laps led`,
         secondary: `${Math.round((card.lapsLedShare ?? 0) * 100)}% of recorded race laps`,
       };
+    case "cleanDuelist":
+      return {
+        primary: `${(card.cleanCloseSectorsPerRace ?? 0).toFixed(1)} clean close sectors / race`,
+        secondary: `${Math.round((card.cleanCloseShare ?? 0) * 100)}% of close sectors stayed clean · ${card.cleanOvertakes} clean passes`,
+      };
+    case "rainMaster": {
+      const delta = card.wetPerformanceDelta ?? 0;
+      return {
+        primary: `${delta > 0 ? "+" : ""}${Math.round(delta * 100)} race-performance points`,
+        secondary: `${plural(card.wetRaces, "wet race")} · compared with ${plural(card.dryRaces, "dry race", "dry races")}`,
+      };
+    }
+    case "tyreWhisperer":
+      return {
+        primary: `Top ${Math.max(1, 100 - Math.round((card.tyreCareRank ?? 0) * 100))}% matched-compound wear control`,
+        secondary: `${plural(card.tyreWearStints, "measured stint")} across ${plural(card.tyreWearRaces, "race")} · same-race, same-compound comparison`,
+      };
+    case "streetCircuitSpecialist": {
+      const delta = card.streetPerformanceDelta ?? 0;
+      return {
+        primary: `${delta > 0 ? "+" : ""}${Math.round(delta * 100)} race-performance points`,
+        secondary: `${plural(card.streetRaces, "street race")} across ${plural(card.streetTrackCount, "circuit")} · compared with ${plural(card.nonStreetRaces, "other race")}`,
+      };
+    }
     case "developing":
       return {
         primary: plural(card.races, "race counted", "races counted"),
-        secondary: `${Math.max(0, 3 - card.races)} more ${card.races === 2 ? "race" : "races"} to reveal a signature`,
+        secondary:
+          "More race data is needed for a reliable multi-signal style fit",
       };
     case "allRounder":
       return {
-        primary: formatPosition(card.averageFinish),
-        secondary: `${plural(card.finishedRaces, "classified finish", "classified finishes")} · ${card.points} points`,
+        primary: "Balanced across three areas",
+        secondary: "Above-peer pace, racecraft, and results",
+      };
+    case "noSignature":
+      return {
+        primary: "No usable style signals",
+        secondary: "More race data is needed to find a supported archetype",
       };
   }
 }
@@ -216,6 +291,10 @@ function escapeDiscordMarkdown(value: string): string {
 function discordShareText(card: DriverDnaCard, shareUrl: string): string {
   const style = DRIVER_DNA_STYLES[card.style];
   const evidence = cardEvidence(card);
+  const tagline =
+    card.matchKind === "developing" && card.style !== "developing"
+      ? `Early data points toward this style. ${style.tagline}`
+      : style.tagline;
   const supportingSignals = card.supportingSignals.map(
     (signal) =>
       `• **${signal.label}:** ${signal.value} · Top ${Math.max(1, 100 - Math.round(signal.percentile * 100))}%`,
@@ -224,12 +303,16 @@ function discordShareText(card: DriverDnaCard, shareUrl: string): string {
   return [
     `🏎️ **${escapeDiscordMarkdown(card.name)}** · **${style.label}**`,
     card.team ? `🏁 ${escapeDiscordMarkdown(card.team)}` : null,
-    `_${style.tagline}_`,
+    `_${tagline}_`,
     "",
     `📊 **${evidence.primary}**`,
     evidence.secondary,
     ...supportingSignals,
-    card.signatureFit != null ? `**${card.signatureFit}% confidence**` : null,
+    card.signatureConfidence != null
+      ? `**${card.signatureConfidence}% confidence**`
+      : card.signatureFit != null
+        ? `**${card.signatureFit}% weighted fit**`
+        : null,
     plural(card.races, "race counted", "races counted"),
     "",
     shareUrl,
@@ -318,7 +401,11 @@ async function createDriverDnaPng(card: DriverDnaCard): Promise<Blob | null> {
 
   context.fillStyle = accent;
   context.font = '700 16px "Geist Variable", system-ui, sans-serif';
-  context.fillText(DRIVER_DNA_STYLES[card.style].label.toUpperCase(), 76, 128);
+  const imageStyleLabel =
+    card.matchKind === "developing" && card.style !== "developing"
+      ? `IN THE MAKING  ·  ${DRIVER_DNA_STYLES[card.style].label.toUpperCase()}`
+      : DRIVER_DNA_STYLES[card.style].label.toUpperCase();
+  context.fillText(imageStyleLabel, 76, 128);
 
   context.fillStyle = "#fafafa";
   context.font = '700 48px "Geist Variable", system-ui, sans-serif';
@@ -332,7 +419,9 @@ async function createDriverDnaPng(card: DriverDnaCard): Promise<Blob | null> {
   context.font = '400 22px "Geist Variable", system-ui, sans-serif';
   drawFittedText(
     context,
-    DRIVER_DNA_STYLES[card.style].tagline,
+    card.matchKind === "developing" && card.style !== "developing"
+      ? `Early data points toward this style. ${DRIVER_DNA_STYLES[card.style].tagline}`
+      : DRIVER_DNA_STYLES[card.style].tagline,
     76,
     267,
     1030,
@@ -359,7 +448,8 @@ async function createDriverDnaPng(card: DriverDnaCard): Promise<Blob | null> {
 
   if (signals.length) {
     const gap = 12;
-    const signalWidth = (panelWidth - gap * (signals.length - 1)) / signals.length;
+    const signalWidth =
+      (panelWidth - gap * (signals.length - 1)) / signals.length;
     signals.forEach((signal, index) => {
       const x = panelX + index * (signalWidth + gap);
       context.beginPath();
@@ -369,7 +459,13 @@ async function createDriverDnaPng(card: DriverDnaCard): Promise<Blob | null> {
 
       context.fillStyle = "#858594";
       context.font = '600 12px "Geist Variable", system-ui, sans-serif';
-      drawFittedText(context, signal.label.toUpperCase(), x + 16, 494, signalWidth - 32);
+      drawFittedText(
+        context,
+        signal.label.toUpperCase(),
+        x + 16,
+        494,
+        signalWidth - 32,
+      );
       context.fillStyle = "#f4f4f5";
       context.font = '600 18px "Geist Variable", system-ui, sans-serif';
       drawFittedText(context, signal.value, x + 16, 526, signalWidth - 32);
@@ -395,11 +491,14 @@ async function createDriverDnaPng(card: DriverDnaCard): Promise<Blob | null> {
   context.font = '400 15px "iA Writer Quattro", ui-monospace, monospace';
   const raceLabel = plural(card.races, "race counted", "races counted");
   context.fillText(raceLabel, panelX, footerY);
-  if (card.signatureFit != null) {
+  const shownScore = card.signatureConfidence ?? card.signatureFit;
+  if (shownScore != null) {
     const raceLabelWidth = context.measureText(raceLabel).width;
     context.fillStyle = accent;
+    const fitLabel =
+      card.signatureConfidence != null ? "confidence" : "weighted fit";
     context.fillText(
-      `${card.signatureFit}% confidence`,
+      `${shownScore}% ${fitLabel}`,
       panelX + raceLabelWidth + 22,
       footerY,
     );
@@ -407,7 +506,11 @@ async function createDriverDnaPng(card: DriverDnaCard): Promise<Blob | null> {
   context.textAlign = "right";
   context.fillStyle = "#858594";
   context.font = '600 13px "Geist Variable", system-ui, sans-serif';
-  context.fillText("GREMI GAMING  ·  F1 LOBBY MANAGER", panelX + panelWidth, footerY);
+  context.fillText(
+    "GREMI GAMING  ·  F1 LOBBY MANAGER",
+    panelX + panelWidth,
+    footerY,
+  );
 
   return new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
 }
@@ -438,6 +541,7 @@ export function DriverDnaPage() {
   const navigate = useNavigate();
   const [styleFilter, setStyleFilter] = useState<StyleFilter>("all");
   const [query, setQuery] = useState("");
+  const [fitModalCard, setFitModalCard] = useState<DriverDnaCard | null>(null);
 
   const sharedFilter = useMemo(
     () => parseSharedFilter(params.get("dnaFilter")),
@@ -447,16 +551,17 @@ export function DriverDnaPage() {
     () => buildStreams(league?.allRaces ?? []),
     [league?.allRaces],
   );
+  const leagueRaces = league?.races;
+  const allLeagueRaces = league?.allRaces;
   const selectedFilter = sharedFilter ??
     league?.filter ?? { kind: "all" as const };
   const selectedRaces = useMemo(() => {
-    if (!league) return [];
-    if (!sharedFilter) return league.races;
-    const files = allowedFiles(sharedFilter, league.allRaces, allStreams);
-    return files
-      ? league.allRaces.filter((race) => files.has(race.file))
-      : league.allRaces;
-  }, [league, sharedFilter, allStreams]);
+    if (!leagueRaces) return [];
+    if (!sharedFilter) return leagueRaces;
+    const races = allLeagueRaces ?? leagueRaces;
+    const files = allowedFiles(sharedFilter, races, allStreams);
+    return files ? races.filter((race) => files.has(race.file)) : races;
+  }, [allLeagueRaces, leagueRaces, sharedFilter, allStreams]);
 
   const formulaRaces = useMemo(
     () =>
@@ -472,6 +577,10 @@ export function DriverDnaPage() {
   const profileCard = profileKey
     ? cards.find((card) => card.key === profileKey)
     : null;
+  const profileHistory = useMemo(
+    () => (profileKey ? buildDriverDnaHistory(formulaRaces, profileKey) : []),
+    [formulaRaces, profileKey],
+  );
   const search = query.trim().toLocaleLowerCase();
   const searchedCards = useMemo(
     () =>
@@ -485,13 +594,12 @@ export function DriverDnaPage() {
     [cards, search],
   );
   const styleOptions = useMemo(() => {
-    const counts = searchedCards.reduce<Partial<Record<DriverDnaStyle, number>>>(
-      (result, card) => {
-        result[card.style] = (result[card.style] ?? 0) + 1;
-        return result;
-      },
-      {},
-    );
+    const counts = searchedCards.reduce<
+      Partial<Record<DriverDnaStyle, number>>
+    >((result, card) => {
+      result[card.style] = (result[card.style] ?? 0) + 1;
+      return result;
+    }, {});
     return [
       { value: "all" as const, label: `All styles (${searchedCards.length})` },
       ...(Object.keys(DRIVER_DNA_STYLES) as DriverDnaStyle[]).map((value) => ({
@@ -532,6 +640,12 @@ export function DriverDnaPage() {
     next.delete("embed");
     navigate(`${location.pathname}${next.size ? `?${next.toString()}` : ""}`);
   };
+  const openDriverDnaProfile = (driverKey: string) => {
+    const next = new URLSearchParams(location.search);
+    next.set("profile", driverKey);
+    next.delete("embed");
+    navigate(`${location.pathname}?${next.toString()}`);
+  };
 
   return (
     <PageFrame
@@ -548,7 +662,7 @@ export function DriverDnaPage() {
         description={
           profileCard
             ? "A playful racing style, with the race data behind it."
-            : "Every driver has a signature. See what their race starts, finishes, and first lap say about them."
+            : "See each driver's primary racing style, confidence, and the data behind every archetype."
         }
         meta={titleMeta}
         action={
@@ -567,11 +681,72 @@ export function DriverDnaPage() {
         }
       />
 
+      {!profileCard && !profileKey && (
+        <details className="group rounded-2xl border border-white/[0.06] bg-black/15 px-4 py-3">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-sm font-medium text-zinc-300 marker:hidden">
+            <span>How a racing signature is earned</span>
+            <span className="inline-flex shrink-0 items-center gap-2">
+              <span className="hidden text-xs font-normal text-zinc-500 sm:inline">
+                Scoring method and F1 examples
+              </span>
+              <span className="text-zinc-500 transition-transform group-open:rotate-180">
+                ⌄
+              </span>
+            </span>
+          </summary>
+          <div className="mt-3 border-t border-white/[0.06] pt-3">
+            <p className="mb-3 text-xs leading-relaxed text-zinc-500">
+              Real F1 names are illustrative parallels, not part of the
+              game-data scoring. Drivers can be examples of more than one style.
+            </p>
+            <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+              {SIGNATURE_STYLES.map((style) => (
+                <article
+                  key={style}
+                  className="rounded-xl bg-white/[0.025] px-3 py-2.5 text-xs leading-relaxed text-zinc-400"
+                >
+                  <p>
+                    <strong className="text-zinc-200">
+                      {DRIVER_DNA_STYLES[style].label}:
+                    </strong>{" "}
+                    {DRIVER_DNA_STYLES[style].criterion}
+                  </p>
+                  <p className="mt-1.5 text-[11px] text-zinc-500">
+                    {REAL_F1_EXAMPLES[style]}
+                  </p>
+                </article>
+              ))}
+            </div>
+            <p className="mt-3 border-t border-white/[0.06] pt-3 text-xs leading-relaxed text-zinc-400">
+              The page compares multiple race signals with every archetype's
+              weighted profile. A signature also needs enough starts and data, a
+              meaningful defining stat, a strong peer rank, at least three
+              strong signals, and a clear lead over the next style. The highest
+              weighted style becomes the driver's archetype; weaker defining
+              stats reduce its fit score directly. Front-Runner, for example, is
+              penalized when a driver leads only a small share of recorded laps.
+              All-Rounder enters the comparison only when pace, racecraft, and
+              results are all strong, and its fit is within five points of the
+              strongest specialist. The fit breakdown lists every style and
+              which core criteria each one meets. Confidence combines fit,
+              separation, defining-stat strength, supporting signals, and sample
+              size; it is a model score, not a statistical probability. Clean
+              Combatant compares close sectors, the share of close sectors
+              without a logged collision or penalty, and clean overtakes. Rain
+              Master and Street Circuit Specialist compare a driver's race-field
+              performance with their own baseline in dry weather or on other
+              circuits. Tire Whisperer compares measured wear only with the same
+              compound in the same race.
+            </p>
+          </div>
+        </details>
+      )}
+
       {!profileKey && (
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <SectionHeader
             title="Racing signatures"
-            hint={`${plural(visibleCards.length, "card")} shown · styles are earned from race data, not assigned by hand`}
+            hint={`${plural(visibleCards.length, "card")} shown · archetypes are scored from multiple race signals`}
             className="mb-0"
           />
           <div className="flex flex-wrap items-center gap-2">
@@ -616,8 +791,8 @@ export function DriverDnaPage() {
       ) : visibleCards.length ? (
         <div
           className={cn(
-            "grid grid-cols-1 gap-3 sm:grid-cols-2",
-            profileCard && "mx-auto max-w-2xl",
+            "grid grid-cols-1 gap-3",
+            !profileCard && "sm:grid-cols-2",
           )}
         >
           {visibleCards.map((card) => (
@@ -625,6 +800,9 @@ export function DriverDnaPage() {
               key={card.key}
               card={card}
               filter={selectedFilter}
+              profileLayout={Boolean(profileCard)}
+              onShowFits={() => setFitModalCard(card)}
+              onOpenProfile={() => openDriverDnaProfile(card.key)}
               onOpenStats={() => {
                 league.setSelectedDriver(card.key);
                 navigate(dashboardPath(scopeKey));
@@ -648,49 +826,158 @@ export function DriverDnaPage() {
         </section>
       )}
 
-      {!profileCard && !profileKey && (
-        <details className="group rounded-2xl border border-white/[0.06] bg-black/15 px-4 py-3">
-          <summary className="cursor-pointer list-none text-sm font-medium text-zinc-300 marker:hidden">
-            How a racing signature is earned
-            <span className="float-right text-zinc-500 transition-transform group-open:rotate-180">
-              ⌄
-            </span>
-          </summary>
-          <div className="mt-3 grid gap-2 border-t border-white/[0.06] pt-3 text-xs leading-relaxed text-zinc-400 sm:grid-cols-2">
-            {SIGNATURE_STYLES.map((style) => (
-              <p key={style}>
-                <strong className="text-zinc-200">
-                  {DRIVER_DNA_STYLES[style].label}:
-                </strong>{" "}
-                {DRIVER_DNA_STYLES[style].criterion}
-              </p>
-            ))}
-            <p className="sm:col-span-2">
-              The page ranks available signals among drivers in the current
-              game/date view, then blends them using each style's weights. A
-              signature needs a fit of at least 64/100, a 4.5-point lead over
-              the next style, and at least two signals above the 62nd peer
-              percentile. Overtake Artist also requires its passing signal to
-              rank above the 72nd percentile and six starts. Some other styles
-              need four finishes, five starts, or three races with position
-              history. The confidence figure is the style's relative, weighted
-              composite fit, not a statistical probability; All-Rounder means
-              no style stands out clearly.
-            </p>
-          </div>
-        </details>
+      {profileCard && (
+        <ArchetypeFitHistory
+          key={profileCard.key}
+          points={profileHistory}
+          currentStyle={profileCard.style}
+        />
+      )}
+
+      {fitModalCard && (
+        <DriverDnaFitModal
+          card={fitModalCard}
+          onClose={() => setFitModalCard(null)}
+        />
       )}
     </PageFrame>
+  );
+}
+
+function DriverDnaFitModal({
+  card,
+  onClose,
+}: {
+  card: DriverDnaCard;
+  onClose: () => void;
+}) {
+  const fits = [...card.archetypeFits].sort(
+    (a, b) => (b.fit ?? -1) - (a.fit ?? -1),
+  );
+
+  return (
+    <Modal
+      onClose={onClose}
+      ariaLabelledBy="driver-dna-fit-title"
+      ariaDescribedBy="driver-dna-fit-description"
+      className="max-h-[min(86vh,760px)] max-w-xl overflow-hidden"
+    >
+      <div className="border-b border-white/[0.07] px-5 pb-4 pt-5 sm:px-6">
+        <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-cyan-300">
+          Driver DNA breakdown
+        </p>
+        <h2
+          id="driver-dna-fit-title"
+          className="mt-1 pr-8 text-xl font-bold text-zinc-50"
+        >
+          {card.name}&apos;s archetype fits
+        </h2>
+        <p
+          id="driver-dna-fit-description"
+          className="mt-1 text-xs leading-relaxed text-zinc-400"
+        >
+          Each score blends peer-ranked race signals with that style&apos;s
+          defining-stat strength. Scores are independent fits, not
+          probabilities, so they do not add to 100%.
+        </p>
+      </div>
+      <div className="min-h-0 overflow-y-auto px-5 py-4 sm:px-6">
+        <div className="space-y-3">
+          {fits.map((fit) => {
+            const style = DRIVER_DNA_STYLES[fit.style];
+            const Icon = STYLE_ICONS[fit.style];
+            const isAssigned = card.style === fit.style;
+            const status = !fit.hasEnoughStarts
+              ? "Needs more starts"
+              : fit.style === "allRounder"
+                ? fit.qualifies
+                  ? "Balanced profile qualifies"
+                  : "Needs strength across all three areas"
+                : !fit.meetsDefiningStat
+                  ? "Defining stat below minimum"
+                  : !fit.hasEnoughSignals
+                    ? "Not enough measured signals"
+                    : isAssigned && card.matchKind === "signature"
+                      ? "Signature criteria met"
+                      : isAssigned
+                        ? card.matchKind === "developing"
+                          ? "Early archetype"
+                          : "Primary archetype"
+                        : "Core criteria met";
+
+            return (
+              <div
+                key={fit.style}
+                className={cn(
+                  "rounded-xl border px-3.5 py-3",
+                  isAssigned
+                    ? "border-cyan-300/25 bg-cyan-300/[0.05]"
+                    : "border-white/[0.06] bg-black/15",
+                )}
+              >
+                <div className="flex items-center gap-3">
+                  <span className="inline-flex size-8 shrink-0 items-center justify-center rounded-lg bg-white/[0.04] text-zinc-300">
+                    <Icon className="size-4" aria-hidden="true" />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="truncate text-sm font-semibold text-zinc-100">
+                        {style.label}
+                        {isAssigned && (
+                          <span className="ml-2 text-[10px] font-medium uppercase tracking-wide text-cyan-300">
+                            Current
+                          </span>
+                        )}
+                      </p>
+                      <span className="shrink-0 font-mono text-sm tabular-nums text-zinc-200">
+                        {fit.fit == null ? "—" : `${fit.fit}%`}
+                      </span>
+                    </div>
+                    <div
+                      className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/[0.08]"
+                      role="meter"
+                      aria-label={`${style.label} weighted fit`}
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                      aria-valuenow={fit.fit ?? 0}
+                    >
+                      <div
+                        className={cn(
+                          "h-full rounded-full transition-[width]",
+                          isAssigned ? "bg-cyan-300" : "bg-zinc-400/70",
+                        )}
+                        style={{ width: `${fit.fit ?? 0}%` }}
+                      />
+                    </div>
+                    <p className="mt-1.5 text-[11px] text-zinc-500">{status}</p>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+      <div className="border-t border-white/[0.07] px-5 py-3 text-[11px] text-zinc-500 sm:px-6">
+        Based on {plural(card.races, "race counted", "races counted")} in this
+        game and date view.
+      </div>
+    </Modal>
   );
 }
 
 function DriverDnaTile({
   card,
   filter,
+  profileLayout = false,
+  onShowFits,
+  onOpenProfile,
   onOpenStats,
 }: {
   card: DriverDnaCard;
   filter: LeagueFilter;
+  profileLayout?: boolean;
+  onShowFits: () => void;
+  onOpenProfile: () => void;
   onOpenStats: () => void;
 }) {
   const style = DRIVER_DNA_STYLES[card.style];
@@ -712,70 +999,102 @@ function DriverDnaTile({
         className="pointer-events-none absolute -right-3 -top-4 -z-10 size-36 opacity-[0.07]"
         strokeWidth={1.1}
       />
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-400">
-            {style.label}
+      <div
+        className={cn(
+          profileLayout &&
+            "grid gap-5 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.4fr)] md:items-center md:gap-8",
+        )}
+      >
+        <div>
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-400">
+                {card.matchKind === "developing" && card.style !== "developing"
+                  ? `In the Making · ${style.label}`
+                  : style.label}
+              </p>
+              <h2 className="mt-1 truncate text-xl font-bold tracking-tight text-zinc-50">
+                {card.name}
+              </h2>
+              {card.team && (
+                <p className="mt-0.5 truncate text-xs text-zinc-500">
+                  {card.team}
+                </p>
+              )}
+            </div>
+            <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-xl bg-black/20 ring-1 ring-inset ring-white/[0.08]">
+              <Icon className="size-5 text-zinc-100" aria-hidden="true" />
+            </span>
+          </div>
+
+          <p className="mt-4 max-w-md text-sm leading-relaxed text-zinc-300">
+            {card.matchKind === "developing" && card.style !== "developing"
+              ? `Early data points toward this style. ${style.tagline}`
+              : style.tagline}
           </p>
-          <h2 className="mt-1 truncate text-xl font-bold tracking-tight text-zinc-50">
-            {card.name}
-          </h2>
-          {card.team && (
-            <p className="mt-0.5 truncate text-xs text-zinc-500">{card.team}</p>
+        </div>
+
+        <div
+          className={cn(
+            "mt-4 rounded-xl bg-black/20 px-3.5 py-3 ring-1 ring-inset ring-white/[0.06]",
+            profileLayout && "md:mt-0",
+          )}
+        >
+          <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-zinc-500">
+            The evidence
+          </p>
+          <p className="mt-1 font-mono text-lg font-semibold tabular-nums text-zinc-100">
+            {evidence.primary}
+          </p>
+          <p className="mt-0.5 text-xs text-zinc-400">{evidence.secondary}</p>
+          {card.supportingSignals.length > 0 && (
+            <div
+              className={cn(
+                "mt-3 grid gap-1.5 border-t border-white/[0.06] pt-2.5",
+                profileLayout ? "grid-cols-2 md:grid-cols-3" : "grid-cols-3",
+              )}
+            >
+              {card.supportingSignals.map((signal) => (
+                <div
+                  key={signal.label}
+                  title={`${signal.value} · ${Math.round(signal.percentile * 100)}th percentile among drivers in this view`}
+                  className="min-w-0 rounded-lg bg-white/[0.035] px-2 py-1.5"
+                >
+                  <p className="truncate text-[9px] font-semibold uppercase tracking-wide text-zinc-500">
+                    {signal.label}
+                  </p>
+                  <p className="truncate text-[10px] font-medium text-zinc-200">
+                    {signal.value}
+                  </p>
+                  <p className="font-mono text-[9px] tabular-nums text-zinc-500">
+                    Top {Math.max(1, 100 - Math.round(signal.percentile * 100))}
+                    %
+                  </p>
+                </div>
+              ))}
+            </div>
           )}
         </div>
-        <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-xl bg-black/20 ring-1 ring-inset ring-white/[0.08]">
-          <Icon className="size-5 text-zinc-100" aria-hidden="true" />
-        </span>
-      </div>
-
-      <p className="mt-4 max-w-md text-sm leading-relaxed text-zinc-300">
-        {style.tagline}
-      </p>
-
-      <div className="mt-4 rounded-xl bg-black/20 px-3.5 py-3 ring-1 ring-inset ring-white/[0.06]">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-zinc-500">
-          The evidence
-        </p>
-        <p className="mt-1 font-mono text-lg font-semibold tabular-nums text-zinc-100">
-          {evidence.primary}
-        </p>
-        <p className="mt-0.5 text-xs text-zinc-400">{evidence.secondary}</p>
-        {card.supportingSignals.length > 0 && (
-          <div className="mt-3 grid grid-cols-3 gap-1.5 border-t border-white/[0.06] pt-2.5">
-            {card.supportingSignals.map((signal) => (
-              <div
-                key={signal.label}
-                title={`${signal.value} · ${Math.round(signal.percentile * 100)}th percentile among drivers in this view`}
-                className="min-w-0 rounded-lg bg-white/[0.035] px-2 py-1.5"
-              >
-                <p className="truncate text-[9px] font-semibold uppercase tracking-wide text-zinc-500">
-                  {signal.label}
-                </p>
-                <p className="truncate text-[10px] font-medium text-zinc-200">
-                  {signal.value}
-                </p>
-                <p className="font-mono text-[9px] tabular-nums text-zinc-500">
-                  Top {Math.max(1, 100 - Math.round(signal.percentile * 100))}%
-                </p>
-              </div>
-            ))}
-          </div>
-        )}
       </div>
 
       <div className="mt-auto flex flex-wrap items-center justify-between gap-3 pt-4">
         <span className="inline-flex flex-wrap items-center gap-x-1.5 font-mono text-[11px] tabular-nums text-zinc-500">
           {plural(card.races, "race counted", "races counted")}
-          {card.signatureFit != null && (
+          {(card.signatureConfidence ?? card.signatureFit) != null && (
             <>
               <span aria-hidden="true">·</span>
-              <span
-                className="text-cyan-300"
-                title="Relative weighted fit for this archetype, not a statistical probability"
+              <button
+                type="button"
+                onClick={onShowFits}
+                aria-haspopup="dialog"
+                className="rounded-sm text-cyan-300 underline decoration-cyan-300/30 underline-offset-2 transition hover:text-cyan-200 hover:decoration-cyan-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300"
+                title="Open the fit breakdown for every archetype"
+                aria-label={`Open archetype fit breakdown for ${card.name}`}
               >
-                {card.signatureFit}% confidence
-              </span>
+                {card.signatureConfidence != null
+                  ? `${card.signatureConfidence}% confidence`
+                  : `${card.signatureFit}% fit`}
+              </button>
             </>
           )}
         </span>
@@ -794,13 +1113,14 @@ function DriverDnaTile({
           />
           <button
             type="button"
-            onClick={onOpenStats}
+            onClick={profileLayout ? onOpenStats : onOpenProfile}
             className={cn(
               "inline-flex min-h-8 items-center gap-1.5 rounded-lg bg-white/[0.07] px-2.5 text-xs font-medium text-zinc-200 transition hover:bg-white/[0.12]",
               interactiveFocusClass,
             )}
           >
-            Driver stats <ArrowUpRight className="size-3.5" />
+            {profileLayout ? "Driver stats" : "View profile"}{" "}
+            <ArrowUpRight className="size-3.5" />
           </button>
         </div>
       </div>

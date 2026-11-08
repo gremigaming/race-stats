@@ -13,6 +13,7 @@ import { Link } from "react-router-dom";
 import { buildDashboardActivity } from "../analysis/dashboardActivity";
 import { getDashboardResultStats } from "../analysis/dashboardResultStats";
 import { ActivityRow } from "../components/dashboard/ActivityRow";
+import { DriverDnaSummary } from "../components/dashboard/DriverDnaSummary";
 import { SafetySummary } from "../components/safety/SafetySummary";
 import { LoadingState } from "../components/ui/LoadingState";
 import { PageFrame } from "../components/ui/PageFrame";
@@ -134,7 +135,10 @@ export function DashboardPage() {
               {filtered ? " · Filtered" : ""}
             </p>
           </div>
-          <SafetySummary />
+          <div className="relative flex flex-wrap items-center gap-2">
+            <DriverDnaSummary />
+            <SafetySummary />
+          </div>
         </div>
 
         {hasData ? (

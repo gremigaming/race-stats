@@ -74,6 +74,13 @@ export function sessionsPath(formulaKey: string): string {
   return `/${encodeURIComponent(formulaKey)}/${SESSIONS_ROUTE_SEGMENT}`;
 }
 
+export function driverDnaProfilePath(
+  scopeKey: string | null | undefined,
+  driverKey: string,
+): string {
+  return `${dashboardPath(scopeKey ?? ALL_FORMULA_SCOPE_KEY)}/drivers/dna?profile=${encodeURIComponent(driverKey)}`;
+}
+
 export function sessionPath(formulaKey: string, slug: string): string {
   return `/${encodeURIComponent(formulaKey)}/${SESSIONS_ROUTE_SEGMENT}/${slug}`;
 }

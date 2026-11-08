@@ -21,11 +21,26 @@ export interface ChangelogEntry {
 // raw commit history also contains routine uploads and staff-only corrections.
 const changelog: ChangelogEntry[] = [
   {
+    id: "driver-dna-profile-history",
+    date: "2026-11-08",
+    type: "feat",
+    message:
+      "Open wide DNA profiles from cards or driver home, with archetype fit history.",
+    destination: "driver-dna",
+  },
+  {
+    id: "driver-dna-racing-archetypes",
+    date: "2026-11-08",
+    type: "feat",
+    message:
+      "Explore refreshed DNA styles, including clean racing, rain, tire care, and street circuits, with real F1 examples.",
+    destination: "driver-dna",
+  },
+  {
     id: "track-page-polish",
     date: "2026-11-06",
     type: "fix",
-    message:
-      "Dropdowns stay above other panels and no longer jump the page.",
+    message: "Track filters no longer jump the page or hide behind panels.",
     destination: "tracks",
   },
   {
@@ -33,7 +48,7 @@ const changelog: ChangelogEntry[] = [
     date: "2026-11-06",
     type: "feat",
     message:
-      "Explore drivers' racing styles, see the stats behind each profile, and copy Driver DNA cards as PNGs for Discord.",
+      "DNA cards compare multiple race signals, show every style fit, and copy as PNGs for Discord.",
     destination: "driver-dna",
   },
   {
@@ -41,15 +56,14 @@ const changelog: ChangelogEntry[] = [
     date: "2026-11-06",
     type: "feat",
     message:
-      "Compare pace corner by corner or against the field, sort tracks, and follow race and qualifying record holders over time.",
+      "Compare corner pace, sort tracks, and follow race and qualifying records.",
     destination: "tracks",
   },
   {
     id: "session-archive-search",
     date: "2026-11-06",
     type: "feat",
-    message:
-      "Find sessions faster with track search and session-type filters.",
+    message: "Search sessions by track and type.",
     destination: "sessions",
   },
   {
@@ -57,7 +71,7 @@ const changelog: ChangelogEntry[] = [
     date: "2026-11-06",
     type: "feat",
     message:
-      "See expanded league stats and who had the most collisions where someone else was at fault, with one date filter.",
+      "Compare expanded league stats and collision blame with one date filter.",
     destination: "drivers",
   },
   {
@@ -65,7 +79,7 @@ const changelog: ChangelogEntry[] = [
     date: "2026-11-06",
     type: "feat",
     message:
-      "Review incidents on a map, filter by driver or type, and replay each moment. Open reviews from Safety Rating; calls match its blame and severity, including stewards' decisions.",
+      "Map, filter, and replay incidents; reviews include blame and steward decisions.",
     destination: "incidents",
   },
   {
@@ -73,8 +87,7 @@ const changelog: ChangelogEntry[] = [
     date: "2026-11-05",
     type: "feat",
     title: "A fresh look for GreMi Gang Race Stats",
-    message:
-      "A refreshed site with clearer navigation, calmer race cards, and easier-to-use pages.",
+    message: "A cleaner layout, calmer race cards, and simpler navigation.",
     milestone: true,
     destination: "home",
   },
@@ -83,7 +96,7 @@ const changelog: ChangelogEntry[] = [
     date: "2026-11-04",
     type: "feat",
     message:
-      "See how Safety Rating 2.5 uses your last 30 races and what affects each score change.",
+      "Safety Rating 2.5 uses your last 30 races and explains score changes.",
     destination: "personal-safety",
   },
   {
@@ -91,7 +104,7 @@ const changelog: ChangelogEntry[] = [
     date: "2026-11-02",
     type: "feat",
     message:
-      "Follow live and recorded races, check the running order, jump to incidents, and share links to exact moments.",
+      "Follow races, jump to incidents, and share links to exact moments.",
     destination: "race",
   },
 ];
