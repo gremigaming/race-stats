@@ -1,0 +1,23 @@
+<!doctype html>
+<!-- OBS browser source: red-to-purple border to put on top of a camera.
+     Make the source the same size as the camera (for example 405x405) and place it over it.
+     ?r=19 corner radius, ?w=3 border width, ?label=Main%20cam small label bottom left. -->
+<html><head><meta charset="utf-8"><title>Cam frame</title>
+<link rel="stylesheet" href="brand.css">
+<style>
+  html, body { width: 100%; height: 100%; }
+  .f { position: fixed; inset: 0; border-radius: var(--r); padding: var(--w);
+       background: linear-gradient(90deg, var(--red), var(--purple));
+       -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; }
+  .glow { position: fixed; inset: 0; border-radius: var(--r); box-shadow: inset 0 0 18px rgba(145,70,255,.35); }
+  .lbl { position: fixed; left: 16px; bottom: 12px; }
+</style></head>
+<body>
+<div class="glow"></div><div class="f"></div>
+<script>
+const q = new URLSearchParams(location.search);
+document.documentElement.style.setProperty("--r", (q.get("r") || 19) + "px");
+document.documentElement.style.setProperty("--w", (q.get("w") || 3) + "px");
+if (q.get("label")) document.body.insertAdjacentHTML("beforeend", `<div class="label lbl">${q.get("label").replace(/</g, "&lt;")}</div>`);
+</script>
+</body></html>

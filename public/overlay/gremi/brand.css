@@ -1,0 +1,24 @@
+/* Shared look for GreMi's OBS overlays: same card as the socials and giveaway overlays. */
+@import url("https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@500;600;800&display=swap");
+:root { --red: #e10600; --purple: #9146ff; --ink: #fff; --dim: rgba(255,255,255,.62); }
+* { box-sizing: border-box; }
+html, body { margin: 0; background: transparent; overflow: hidden; }
+body { font-family: "Saira Condensed", "Arial Narrow", sans-serif; color: var(--ink); }
+.card { position: relative; padding: 18px 24px; border-radius: 14px; isolation: isolate; overflow: hidden;
+        background: linear-gradient(90deg, #460612 0%, #280a5a 100%); box-shadow: 0 5px 18px rgba(0,0,0,.45); }
+.card::before { content: ""; position: absolute; inset: 0; border-radius: 14px; padding: 2px; pointer-events: none;
+        background: linear-gradient(90deg, var(--red), var(--purple));
+        -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; }
+.streaks { position: absolute; inset: 0; z-index: -1; overflow: hidden; }
+.streaks i { position: absolute; top: -20px; bottom: -20px; transform: skewX(-31deg); filter: blur(4px); }
+.streaks i:nth-child(1) { left: -30px; width: 46px; background: rgba(225,6,0,.3); }
+.streaks i:nth-child(2) { left: 58%; width: 70px; background: rgba(145,70,255,.26); }
+.streaks i:nth-child(3) { left: 84%; width: 20px; background: rgba(255,255,255,.1); }
+.streaks i:nth-child(4) { left: -60%; width: 60px; background: rgba(255,255,255,.22); filter: blur(8px); opacity: 0; }
+.card.sweep .streaks i:nth-child(4) { animation: sweep 1.4s ease-in-out; }
+@keyframes sweep { 0% { left: -60%; opacity: 0; } 20% { opacity: 1; } 60%, 100% { left: 130%; opacity: 0; } }
+.label { font-weight: 600; font-size: 17px; letter-spacing: .14em; color: var(--dim); text-transform: uppercase; line-height: 1; white-space: nowrap; }
+.big { font-weight: 800; font-size: 40px; line-height: 1; text-transform: uppercase; letter-spacing: .02em; white-space: nowrap; }
+.grad { background: linear-gradient(90deg, #ff3b30, #b07bff); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.fade { transition: opacity .5s, transform .5s; }
+.fade.out { opacity: 0; transform: translateY(10px); }

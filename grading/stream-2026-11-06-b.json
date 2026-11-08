@@ -1,0 +1,277 @@
+{
+ "title": "Stream 6 Nov · 5 picks",
+ "stream": "1106b",
+ "made": "2026-11-07",
+ "rules": "v1.4",
+ "incidents": [
+  {
+   "id": "1106b-1",
+   "pick": "low",
+   "track": "Suzuka",
+   "date": "2026-11-06",
+   "type": "Moved across alongside",
+   "weather": "Clear",
+   "track_temp": 22,
+   "lap": 1,
+   "race_time": "1:12",
+   "replay": "https://gremigaming.github.io/race-stats/all/race/2026-11-06_22-57-04_Suzuka_Race?inc=72.7&car=2,4",
+   "race_file": "Race_Suzuka_2026_11_06_23_06_32.json",
+   "recording": "2026-11-06_22-57-04_Suzuka_Race.gmtel.gz",
+   "t0": 72.7,
+   "t1": 75.8,
+   "contacts": [
+    {
+     "t": 72.7,
+     "a": 2,
+     "b": 4
+    }
+   ],
+   "drivers": [
+    {
+     "car": 2,
+     "name": "Hidden #2 (Haas '26)"
+    },
+    {
+     "car": 4,
+     "name": "#99 meistermotion_33"
+    }
+   ],
+   "engine": {
+    "rules": "v1.4",
+    "verdict": "meistermotion_33 at fault",
+    "rule": "R2",
+    "severity": 2,
+    "why": "side by side; meistermotion_33 moved 3.5 m across into the other car",
+    "at_fault": [
+     "#99 meistermotion_33"
+    ],
+    "contacts": 1,
+    "gray_score": 0.0
+   },
+   "claude": "Picked as the low-severity case. My call: meistermotion_33 at fault (rule R2: side by side, one car moved over), severity 2, blame on #99 meistermotion_33. What I saw: side by side; meistermotion_33 moved 3.5 m across into the other car. I'm fairly confident: the numbers are clear of every limit; this one is here for its severity."
+  },
+  {
+   "id": "1106b-2",
+   "pick": "high",
+   "track": "Austria",
+   "date": "2026-11-07",
+   "type": "Moved across alongside",
+   "weather": "Overcast",
+   "track_temp": 34,
+   "lap": 1,
+   "race_time": "0:36",
+   "replay": "https://gremigaming.github.io/race-stats/all/race/2026-11-06_23-11-37_Austria_Race?inc=36.8&car=4,1,8,2",
+   "race_file": "Race_Austria_Just_in_case_2026_11_07_00_07_11.json",
+   "recording": "2026-11-06_23-11-37_Austria_Race.gmtel.gz",
+   "t0": 36.8,
+   "t1": 51.8,
+   "contacts": [
+    {
+     "t": 36.8,
+     "a": 4,
+     "b": 1
+    }
+   ],
+   "drivers": [
+    {
+     "car": 4,
+     "name": "#99 meistermotion_33"
+    },
+    {
+     "car": 1,
+     "name": "#51 Bananensaus17"
+    },
+    {
+     "car": 8,
+     "name": "Hidden #3 (Haas '26)"
+    },
+    {
+     "car": 2,
+     "name": "Hidden #2 (Haas '26)"
+    }
+   ],
+   "engine": {
+    "rules": "v1.4",
+    "verdict": "Bananensaus17 at fault",
+    "rule": "R2",
+    "severity": 6,
+    "why": "side by side; Bananensaus17 moved 12.6 m across into the other car",
+    "at_fault": [
+     "#51 Bananensaus17"
+    ],
+    "contacts": 1,
+    "gray_score": 0.87
+   },
+   "claude": "Picked as the high-severity case. My call: Bananensaus17 at fault (rule R2: side by side, one car moved over), severity 6, blame on #51 Bananensaus17. What I saw: side by side; Bananensaus17 moved 12.6 m across into the other car. I'm fairly confident: the worst slide was 19°, near the 20° where I count it as harm done."
+  },
+  {
+   "id": "1106b-3",
+   "pick": "gray",
+   "track": "Austria",
+   "date": "2026-11-07",
+   "type": "Late lunge / divebomb",
+   "weather": "Overcast",
+   "track_temp": 34,
+   "lap": 1,
+   "race_time": "0:23",
+   "replay": "https://gremigaming.github.io/race-stats/all/race/2026-11-06_23-11-37_Austria_Race?inc=24.0&car=2,4,8",
+   "race_file": "Race_Austria_Just_in_case_2026_11_07_00_07_11.json",
+   "recording": "2026-11-06_23-11-37_Austria_Race.gmtel.gz",
+   "t0": 24.0,
+   "t1": 29.5,
+   "contacts": [
+    {
+     "t": 24.0,
+     "a": 2,
+     "b": 4
+    },
+    {
+     "t": 24.0,
+     "a": 2,
+     "b": 8
+    }
+   ],
+   "drivers": [
+    {
+     "car": 2,
+     "name": "Hidden #2 (Haas '26)"
+    },
+    {
+     "car": 4,
+     "name": "#99 meistermotion_33"
+    },
+    {
+     "car": 8,
+     "name": "Hidden #3 (Haas '26)"
+    }
+   ],
+   "engine": {
+    "rules": "v1.4",
+    "verdict": "Haas '26 #2 + Haas '26 #3 at fault",
+    "rule": "R8",
+    "severity": 3,
+    "why": "Haas '26 #2 ran into the back of meistermotion_33, closing at 37 km/h; side by side; Haas '26 #3 moved 1.3 m across into the other car",
+    "at_fault": [
+     "Hidden #2 (Haas '26)",
+     "Hidden #3 (Haas '26)"
+    ],
+    "contacts": 2,
+    "gray_score": 1.6
+   },
+   "claude": "Picked because it's a gray area for me. My call: Hidden #2 (Haas '26) + Hidden #3 (Haas '26) at fault (rule R8: shared fault), severity 3, blame on Hidden #2 (Haas '26), Hidden #3 (Haas '26). What I saw: Hidden #2 (Haas '26) ran into the back of meistermotion_33, closing at 37 km/h; side by side; Hidden #3 (Haas '26) moved 1.3 m across into the other car. Why I'm not sure: more than one car gets the blame, and splitting it is a judgement call; Hidden #2 (Haas '26) moved 0.5 m across and Hidden #3 (Haas '26) 1.3 m: the difference (0.8 m) is close to the 0.7 m that decides who moved into whom; its 2 contacts don't point the same way (Hidden #2 (Haas '26) at fault; Hidden #3 (Haas '26) at fault)."
+  },
+  {
+   "id": "1106b-4",
+   "pick": "gray",
+   "track": "Zandvoort",
+   "date": "2026-11-06",
+   "type": "Moved across alongside",
+   "weather": "Overcast",
+   "track_temp": 29,
+   "lap": 1,
+   "race_time": "0:06",
+   "replay": "https://gremigaming.github.io/race-stats/all/race/2026-11-06_22-45-42_Zandvoort_Race?inc=6.6&car=2,3,1,0",
+   "race_file": "Race_Zandvoort_Just_in_case_2026_11_06_22_57_03.json",
+   "recording": "2026-11-06_22-45-42_Zandvoort_Race.gmtel.gz",
+   "t0": 6.6,
+   "t1": 18.2,
+   "contacts": [
+    {
+     "t": 6.6,
+     "a": 2,
+     "b": 3
+    },
+    {
+     "t": 7.5,
+     "a": 2,
+     "b": 1
+    },
+    {
+     "t": 7.8,
+     "a": 1,
+     "b": 0
+    },
+    {
+     "t": 10.9,
+     "a": 1,
+     "b": 3
+    }
+   ],
+   "drivers": [
+    {
+     "car": 2,
+     "name": "#2 thunder-of_war21"
+    },
+    {
+     "car": 3,
+     "name": "#34 [LCR] Turbodruif"
+    },
+    {
+     "car": 1,
+     "name": "#51 Bananensaus17"
+    },
+    {
+     "car": 0,
+     "name": "#29 WQLF"
+    }
+   ],
+   "engine": {
+    "rules": "v1.4",
+    "verdict": "Haas '26 #2 at fault",
+    "rule": "R2",
+    "severity": 6,
+    "why": "side by side; Haas '26 #2 moved 2.6 m across into the other car",
+    "at_fault": [
+     "#2 thunder-of_war21"
+    ],
+    "contacts": 4,
+    "gray_score": 1.13
+   },
+   "claude": "Picked because it's a gray area for me. My call: Hidden #2 (Haas '26) at fault (rule R2: side by side, one car moved over), severity 6, blame on #2 thunder-of_war21. What I saw: side by side; Hidden #2 (Haas '26) moved 2.6 m across into the other car. Why I'm not sure: the cars were 4.4 m apart along the track, right at the 4 m line between 'side by side' (the car moving over is to blame) and 'one behind the other' (the car behind is to blame); its 4 contacts don't point the same way (Hidden #2 (Haas '26) at fault; Racing incident; Racing incident); 4 cars are involved, so the first move is hard to pick out."
+  },
+  {
+   "id": "1106b-5",
+   "pick": "gray",
+   "track": "Suzuka",
+   "date": "2026-11-06",
+   "type": "Not an incident",
+   "weather": "Clear",
+   "track_temp": 22,
+   "lap": 2,
+   "race_time": "1:38",
+   "replay": "https://gremigaming.github.io/race-stats/all/race/2026-11-06_22-57-04_Suzuka_Race?inc=98.6&car=3,1",
+   "race_file": "Race_Suzuka_2026_11_06_23_06_32.json",
+   "recording": "2026-11-06_22-57-04_Suzuka_Race.gmtel.gz",
+   "t0": 98.6,
+   "t1": 98.6,
+   "contacts": [
+    {
+     "t": 98.6,
+     "a": 3,
+     "b": 1
+    }
+   ],
+   "drivers": [
+    {
+     "car": 3,
+     "name": "#34 [LCR] Turbodruif"
+    },
+    {
+     "car": 1,
+     "name": "#51 Bananensaus17"
+    }
+   ],
+   "engine": {
+    "rules": "v1.4",
+    "verdict": "Not an incident",
+    "rule": "R1",
+    "severity": 1,
+    "why": "light side-by-side contact, nobody slowed, slid or went off",
+    "at_fault": [],
+    "contacts": 1,
+    "gray_score": 1.0
+   },
+   "claude": "Picked because it's a gray area for me. My call: not an incident (rule R1: no incident (light tap or squeeze)), severity 1, blame on nobody. What I saw: light side-by-side contact, nobody slowed, slid or went off. Why I'm not sure: the car behind was closing at only 7 km/h, near the 7 km/h where I stop calling it 'ran into the back'."
+  }
+ ]
+}
