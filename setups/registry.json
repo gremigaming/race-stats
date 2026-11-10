@@ -8,7 +8,7 @@
   "requested": null,
   "last": "2026-11-02"
  },
- "pending": 14,
+ "pending": 15,
  "tracks": [
   {
    "track": "Melbourne",
@@ -1600,6 +1600,87 @@
        "change": null,
        "text": "Starting setup",
        "why": "Your last quali setup.",
+       "sessions": [],
+       "verdict": {
+        "result": "untested",
+        "text": "Wrong start: Mexico's values, replaced by V2."
+       }
+      },
+      {
+       "v": 2,
+       "base": 1,
+       "created": "2026-11-10",
+       "saved": null,
+       "values": {
+        "fw": 24,
+        "rw": 0,
+        "don": 100,
+        "doff": 35,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 30,
+        "farb": 3,
+        "rarb": 8,
+        "frh": 21,
+        "rrh": 41,
+        "bb": 55,
+        "bp": 100,
+        "fr": 29.5,
+        "fl": 29.5,
+        "rr": 25.5,
+        "rl": 25.5
+       },
+       "change": {
+        "fw": [
+         48,
+         24
+        ],
+        "rw": [
+         32,
+         0
+        ],
+        "doff": [
+         30,
+         35
+        ],
+        "fs": [
+         37,
+         41
+        ],
+        "rs": [
+         17,
+         30
+        ],
+        "farb": [
+         13,
+         3
+        ],
+        "frh": [
+         23,
+         21
+        ],
+        "fr": [
+         24.2,
+         29.5
+        ],
+        "fl": [
+         24.2,
+         29.5
+        ],
+        "rr": [
+         20.5,
+         25.5
+        ],
+        "rl": [
+         20.5,
+         25.5
+        ]
+       },
+       "text": "Fix: Spa race values (wings 24-0)",
+       "why": "V1 was copied from Mexico by mistake (wings 48-32). V2 uses your Spa race setup, like most tracks where quali and race start the same.",
        "sessions": [],
        "verdict": {
         "result": "untested",
