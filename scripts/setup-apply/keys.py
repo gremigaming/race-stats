@@ -3,7 +3,8 @@
 versions that wait in setups/registry.json into F1 25 on GreMi's PC.
 
     python3 scripts/setup-apply/keys.py list            # what waits, in game order
-    python3 scripts/setup-apply/keys.py plan OUT_DIR    # one JSON per computer_batch call
+    python3 scripts/setup-apply/keys.py plan OUT_DIR [ROW] [new]   # one JSON per computer_batch call
+                                                       # ("new": only tracks with nothing saved yet)
     python3 scripts/setup-apply/keys.py done TRACK KIND V [DATE]   # mark one as saved
 
 The plan starts in a Time Trial garage (F1 2026, Red Bull) on any track, in
@@ -102,12 +103,13 @@ def pending(reg):
         for kind in KINDS:
             vs = t["kinds"][kind]["versions"]
             if not vs[-1].get("saved"):
-                old = next(v for v in reversed(vs) if v.get("saved"))
+                # None: a new track (reverse layouts), saved in its own empty slot
+                old = next((v for v in reversed(vs) if v.get("saved")), None)
                 out.append((t, kind, vs[-1], old))
     return out
 
 
-def plan(reg, out_dir, row=0):
+def plan(reg, out_dir, row=0, only_new=False):
     """row: the track the game is on now (its "row" in the registry), in the
     garage before Session Info is opened."""
     os.makedirs(out_dir, exist_ok=True)
@@ -124,6 +126,8 @@ def plan(reg, out_dir, row=0):
     put("open_setup_balanced", PRESET)
     cur, tab = BALANCED, -1
     for t, kind, new, old in pending(reg):
+        if only_new and old:
+            continue
         tag = f"{t['name'].replace(' ', '-')}-{kind}-V{new['v']}"
         if t["row"] != row:
             put(f"switch_check_track-is-{t['name'].replace(' ', '-')}", switch(t["row"] - row))
@@ -134,7 +138,10 @@ def plan(reg, out_dir, row=0):
         cur = new["values"]
         if keys:
             put(f"edit_{tag}", keys)
-        put(f"savelist_check_row-is-{t['name'].replace(' ', '-')}-{kind.upper()}-V{old['v']}", to_slot(old["slot"]))
+        if old:
+            put(f"savelist_check_row-is-{t['name'].replace(' ', '-')}-{kind.upper()}-V{old['v']}", to_slot(old["slot"]))
+        else:
+            put(f"savelist_check_row-is-EMPTY-{new['slot']}-for-{tag}", to_slot(new["slot"]))
     return files
 
 
@@ -143,10 +150,11 @@ def main():
     cmd = sys.argv[1] if len(sys.argv) > 1 else "list"
     if cmd == "list":
         for t, kind, new, old in pending(reg):
-            print(f"{t['name']} - {kind.upper()} - V{new['v']}  (replaces V{old['v']} in row {old['slot']}): {new['text']}")
+            where = f"replaces V{old['v']} in row {old['slot']}" if old else f"new, empty row {new['slot']}"
+            print(f"{t['name']} - {kind.upper()} - V{new['v']}  ({where}): {new['text']}")
     elif cmd == "plan":
         start_row = int(sys.argv[3]) if len(sys.argv) > 3 else 0
-        for f in plan(reg, sys.argv[2], start_row):
+        for f in plan(reg, sys.argv[2], start_row, "new" in sys.argv[4:]):
             print(f)
     elif cmd == "done":
         track, kind, v = sys.argv[2].upper(), sys.argv[3].lower(), int(sys.argv[4])
@@ -154,8 +162,8 @@ def main():
         t = next(t for t in reg["tracks"] if t["name"] == track)
         vs = t["kinds"][kind]["versions"]
         new = next(x for x in vs if x["v"] == v)
-        old = next(x for x in reversed(vs) if x.get("saved") and x["v"] != v)
-        new.update(saved=date, slot=old["slot"])
+        old = next((x for x in reversed(vs) if x.get("saved") and x["v"] != v), None)
+        new.update(saved=date, slot=old["slot"] if old else new["slot"])
         reg["pending"] = len(pending(reg))
         reg["apply"]["last"] = date
         if not reg["pending"]:

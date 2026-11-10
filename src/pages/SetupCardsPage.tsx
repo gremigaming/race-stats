@@ -159,6 +159,8 @@ const CIRCUITS: Record<string, string> = {
   Netherlands: "Zandvoort", Monza: "Monza", Madrid: "Madring", Azerbaijan: "Baku",
   Singapore: "Marina Bay", Austin: "COTA", Mexico: "Mexico City", Brazil: "Interlagos",
   "Las Vegas": "Las Vegas", Qatar: "Lusail", "Abu Dhabi": "Yas Marina",
+  "Austria Reverse": "Red Bull Ring reverse", "Great Britain Reverse": "Silverstone reverse",
+  "Netherlands Reverse": "Zandvoort reverse",
 };
 
 const fmt = (v: number, digits = 0) => (Number.isInteger(v) && !digits ? String(v) : v.toFixed(digits || 1));

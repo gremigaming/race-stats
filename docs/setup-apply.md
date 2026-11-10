@@ -32,6 +32,11 @@ under 48 s of waits). Files named `*check*` end on a zoom:
 
 - `switch_check_track-is-X`: the track row must show X. If not, press
   Left/Right until it does, then go on with `confirm`.
+- `savelist_check_row-is-EMPTY-N-for-TRACK-KIND-V1`: a new track (the
+  reverse layouts). The highlighted row must be the first empty slot after
+  the last saved setup (Imola, then the reverse layouts in save order). Enter,
+  type "TRACK - KIND - V1", Enter, zoom to check, Esc back to the tabs, then
+  `keys.py done "TRACK" KIND 1` (quote names with a space).
 - `savelist_check_row-is-TRACK-KIND-Vn`: the highlighted row of the save
   list must be "TRACK - KIND - Vn" (the version being replaced). If not, move
   Up/Down to it. Then:
