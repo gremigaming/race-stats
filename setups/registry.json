@@ -8,7 +8,7 @@
   "requested": null,
   "last": "2026-11-10"
  },
- "pending": 4,
+ "pending": 5,
  "tracks": [
   {
    "track": "Melbourne",
@@ -1373,6 +1373,61 @@
        "change": null,
        "text": "Starting setup",
        "why": "Your last wet setup.",
+       "sessions": [
+        {
+         "file": "2026-11-10_20-46-46_Miami_P2.gmtel.gz",
+         "date": "2026-11-10",
+         "session": "practice",
+         "osq": false,
+         "weather": 5,
+         "pace": 103952,
+         "best": 102949,
+         "mean": 103952,
+         "run": 7,
+         "laps": 6,
+         "bb": 57
+        }
+       ],
+       "verdict": {
+        "result": "baseline",
+        "text": "Starting point: 1:43.952 over 1 session."
+       }
+      },
+      {
+       "v": 2,
+       "base": 1,
+       "created": "2026-11-10",
+       "saved": null,
+       "values": {
+        "fw": 35,
+        "rw": 18,
+        "don": 100,
+        "doff": 45,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 40,
+        "rs": 12,
+        "farb": 7,
+        "rarb": 8,
+        "frh": 22,
+        "rrh": 43,
+        "bb": 55,
+        "bp": 100,
+        "fr": 28.5,
+        "fl": 28.5,
+        "rr": 21.5,
+        "rl": 21.5
+       },
+       "change": {
+        "rw": [
+         15,
+         18
+        ]
+       },
+       "text": "Rear wing 15 → 18",
+       "why": "More rear grip against oversteer and wheelspin. Costs a little top speed.",
        "sessions": [],
        "verdict": {
         "result": "untested",
