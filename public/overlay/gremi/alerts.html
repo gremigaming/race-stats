@@ -72,7 +72,7 @@ function next() {
 }
 
 // ---------- Streamer.bot ----------
-const tierName = (t) => ({ prime: "Prime", tier1: "Tier 1", tier2: "Tier 2", tier3: "Tier 3", 1000: "Tier 1", 2000: "Tier 2", 3000: "Tier 3" }[String(t).toLowerCase()] || "");
+const tierName = (t) => ({ 0: "Prime", prime: "Prime", 1: "Tier 1", 2: "Tier 2", 3: "Tier 3", tier1: "Tier 1", tier2: "Tier 2", tier3: "Tier 3", 1000: "Tier 1", 2000: "Tier 2", 3000: "Tier 3" }[String(t ?? "").toLowerCase()] || "");
 function roleOf(u = {}, d = {}) {
   const login = String(u.login || u.name || d.user?.login || "").toLowerCase();
   if (LEAD.includes(login)) return "lead mod";
@@ -88,15 +88,16 @@ function roleOf(u = {}, d = {}) {
 function onSB(ev, d) {
   const s = ev.source, t = ev.type;
   const who = (x) => x?.name || x?.display_name || x?.displayName || x?.login || x?.userName || "";
+  const dn = d.displayName || d.userName || who(d.user) || "";
   if (s === "Twitch") {
-    if (t === "Follow") return push({ platform: "twitch", kind: "follow", label: "New follower", name: d.user_name || d.displayName || who(d.user) });
-    if (t === "Sub") return push({ platform: "twitch", kind: "sub", label: "New sub", chip: tierName(d.sub_tier ?? d.tier) || (d.is_prime ? "Prime" : ""), name: who(d.user) || d.userName, msg: d.message?.text || d.message, big: true });
-    if (t === "ReSub") return push({ platform: "twitch", kind: "sub", label: `Resub · ${d.cumulativeMonths || d.cumulative_months || d.cumulative || "?"} months`, chip: tierName(d.sub_tier ?? d.tier), name: who(d.user) || d.userName, msg: d.text || d.message?.text, big: true });
-    if (t === "GiftSub") return push({ platform: "twitch", kind: "gift", label: `Gifted a sub to ${who(d.recipient) || d.recipientUserName || ""}`, chip: tierName(d.sub_tier ?? d.tier), name: d.isAnonymous ? "Anonymous" : who(d.user) || d.userName });
-    if (t === "GiftBomb") return push({ platform: "twitch", kind: "gift", label: `Gifted ${d.total || d.gifts || ""} subs`, chip: tierName(d.sub_tier ?? d.tier), name: d.isAnonymous ? "Anonymous" : who(d.user) || d.userName, big: true });
+    if (t === "Follow") return push({ platform: "twitch", kind: "follow", label: "New follower", name: d.user_name || dn });
+    if (t === "Sub") return push({ platform: "twitch", kind: "sub", label: "New sub", chip: tierName(d.subTier ?? d.sub_tier ?? d.tier), name: dn, msg: typeof d.message === "string" ? d.message : d.message?.text, big: true });
+    if (t === "ReSub") return push({ platform: "twitch", kind: "sub", label: `Resub · ${d.cumulativeMonths || d.cumulative_months || d.cumulative || "?"} months`, chip: tierName(d.subTier ?? d.sub_tier ?? d.tier), name: dn, msg: typeof d.message === "string" ? d.message : d.text || d.message?.text, big: true });
+    if (t === "GiftSub") return push({ platform: "twitch", kind: "gift", label: `Gifted a sub to ${d.recipientDisplayName || d.recipientUsername || who(d.recipient)}`, chip: tierName(d.subTier ?? d.sub_tier), name: d.isAnonymous ? "Anonymous" : dn });
+    if (t === "GiftBomb") return push({ platform: "twitch", kind: "gift", label: `Gifted ${d.gifts ?? d.total ?? ""} subs`, chip: tierName(d.subTier ?? d.sub_tier), name: d.isAnonymous ? "Anonymous" : dn, big: true });
     if (t === "Raid") return push({ platform: "twitch", kind: "raid", label: `Raid · ${d.viewers ?? d.viewerCount ?? ""} viewers`, name: d.from_broadcaster_user_name || who(d.user) || d.from_broadcaster_user_login, big: true, secs: 10 });
-    if (t === "Cheer") return push({ platform: "twitch", kind: "cheer", label: `Cheered ${d.message?.bits ?? d.bits ?? ""} bits`, name: who(d.user) || d.message?.displayName, msg: d.message?.message || d.message?.text });
-    if (t === "FirstWord") { const u = d.user || d.message || {}; return push({ platform: "twitch", kind: "welcome", label: "Welcome in the stream", role: roleOf(u, d), name: who(u) || d.message?.displayName, secs: 4 }); }
+    if (t === "Cheer") return push({ platform: "twitch", kind: "cheer", label: `Cheered ${d.bits ?? d.message?.bits ?? ""} bits`, name: d.displayName || d.message?.displayName || dn, msg: typeof d.message === "string" ? d.message : d.message?.message });
+    if (t === "FirstWord") { const u = d.message || d.user || {}; return push({ platform: "twitch", kind: "welcome", label: "Welcome in the stream", role: roleOf({ ...u, login: u.username }, d), name: u.displayName || who(d.user), secs: 4 }); }
   }
   if (s === "YouTube") {
     if (t === "NewSubscriber") return push({ platform: "youtube", kind: "follow", label: "New subscriber", name: who(d.user) || d.userName });

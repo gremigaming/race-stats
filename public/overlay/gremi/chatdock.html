@@ -1,0 +1,165 @@
+<!doctype html>
+<!-- OBS custom browser dock: GreMi's chat from every platform in one list.
+     Twitch, YouTube and Kick come from Streamer.bot (ws://127.0.0.1:8080), TikTok from TikFinity (ws://localhost:21213).
+     Add it in OBS: Docks > Custom Browser Docks, URL = this page.
+     ?sb=127.0.0.1:8080  ?tikfinity=21213  ?fs=15 font size  ?me=gremi words that highlight a message
+     ?demo fills it with sample messages. -->
+<html><head><meta charset="utf-8"><title>Chat</title>
+<style>
+  :root { --bg: #14111b; --row: #1c1826; --ink: #ecebf2; --dim: #8d88a0; --line: rgba(255,255,255,.06);
+          --twitch: #a970ff; --youtube: #ff4e45; --tiktok: #25f4ee; --kick: #53fc18; --hl: rgba(225,6,0,.18); --fs: 15px; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink);
+               font: 400 var(--fs)/1.35 "Segoe UI", system-ui, sans-serif; overflow: hidden; }
+  header { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 6px 8px; border-bottom: 1px solid var(--line); background: #100d16; }
+  header .st { display: flex; gap: 6px; margin-right: auto; font-size: 12px; color: var(--dim); }
+  .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 4px; vertical-align: 0; background: #555; }
+  .dot.on { background: #3ad07a; box-shadow: 0 0 6px #3ad07a; }
+  header button { font: 600 12px "Segoe UI"; color: var(--ink); background: #241f31; border: 1px solid var(--line); border-radius: 6px; padding: 3px 7px; cursor: pointer; }
+  header button.off { opacity: .35; }
+  #list { position: absolute; top: var(--head, 37px); bottom: 0; left: 0; right: 0; overflow-y: auto; padding: 4px 0 8px; scrollbar-width: thin; }
+  .m { display: flex; gap: 7px; padding: 4px 10px 4px 8px; border-left: 3px solid transparent; }
+  .m:hover { background: var(--row); }
+  .m.twitch { border-color: var(--twitch); } .m.youtube { border-color: var(--youtube); } .m.tiktok { border-color: var(--tiktok); } .m.kick { border-color: var(--kick); }
+  .m.hl { background: var(--hl); }
+  .m.first { background: rgba(145,70,255,.14); }
+  .m.ev { background: linear-gradient(90deg, rgba(225,6,0,.22), rgba(145,70,255,.18)); font-weight: 600; }
+  .t { color: var(--dim); font-size: .78em; flex: none; padding-top: .18em; width: 34px; }
+  .b { flex: 1; min-width: 0; overflow-wrap: anywhere; white-space: normal; }
+  .m { width: 100%; }
+  .n { font-weight: 700; margin-right: 4px; }
+  .badge { height: 1.05em; vertical-align: -0.15em; margin-right: 3px; }
+  .tag { font-size: .72em; font-weight: 700; padding: 1px 5px; border-radius: 4px; margin-right: 4px; vertical-align: .1em; background: #3a3350; }
+  .tag.first { background: #7c3aed; } .tag.mod { background: #00a650; } .tag.vip { background: #c026d3; } .tag.sub { background: #6d28d9; }
+  .emote { height: 1.6em; vertical-align: middle; margin: -0.3em 1px; }
+  #more { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); display: none; font: 600 12px "Segoe UI";
+          color: #fff; background: #7c3aed; border: 0; border-radius: 14px; padding: 5px 12px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,.5); }
+</style></head>
+<body>
+<header>
+  <div class="st"><span><span class="dot" id="sbdot"></span>Streamer.bot</span><span><span class="dot" id="tfdot"></span>TikFinity</span></div>
+  <button data-p="twitch">Twitch</button><button data-p="youtube">YouTube</button><button data-p="kick">Kick</button><button data-p="tiktok">TikTok</button>
+  <button id="clear" title="Clear">✕</button>
+</header>
+<div id="list"></div><button id="more">New messages ↓</button>
+<script>
+const q = new URLSearchParams(location.search);
+if (q.get("fs")) document.documentElement.style.setProperty("--fs", q.get("fs") + "px");
+const ME = (q.get("me") || "gremi").toLowerCase().split(",");
+const list = document.getElementById("list"), more = document.getElementById("more");
+const hidden = new Set(JSON.parse(localStorage.getItem("gremi-chat-hidden") || "[]"));
+const MAX = 400; let stick = true;
+const fitHead = () => document.documentElement.style.setProperty('--head', document.querySelector('header').offsetHeight + 'px');
+addEventListener('resize', fitHead); fitHead();
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+document.querySelectorAll("header button[data-p]").forEach((b) => {
+  const p = b.dataset.p; b.classList.toggle("off", hidden.has(p));
+  b.onclick = () => { hidden.has(p) ? hidden.delete(p) : hidden.add(p); b.classList.toggle("off", hidden.has(p));
+    localStorage.setItem("gremi-chat-hidden", JSON.stringify([...hidden]));
+    list.querySelectorAll(".m." + p).forEach((m) => (m.style.display = hidden.has(p) ? "none" : "")); };
+});
+document.getElementById("clear").onclick = () => (list.innerHTML = "");
+list.onscroll = () => { stick = list.scrollTop + list.clientHeight >= list.scrollHeight - 30; if (stick) more.style.display = "none"; };
+more.onclick = () => { list.scrollTop = list.scrollHeight; };
+
+// Replace emote ranges (Twitch style: [{name, imageUrl, startIndex, endIndex}]) or emote names with images.
+function render(text, emotes = []) {
+  if (!emotes.length) return esc(text);
+  const byIndex = emotes.filter((e) => e.startIndex != null).sort((a, b) => a.startIndex - b.startIndex);
+  if (byIndex.length) {
+    const chars = Array.from(text); let out = "", i = 0;
+    for (const e of byIndex) { out += esc(chars.slice(i, e.startIndex).join("")) + `<img class="emote" src="${esc(e.imageUrl)}" alt="${esc(e.name)}">`; i = e.endIndex + 1; }
+    return out + esc(chars.slice(i).join(""));
+  }
+  const map = Object.fromEntries(emotes.map((e) => [e.name, e.imageUrl]));
+  return text.split(/(\s+)/).map((w) => (map[w] ? `<img class="emote" src="${esc(map[w])}" alt="${esc(w)}">` : esc(w))).join("");
+}
+
+function add({ platform, name, color, text, html, badges = [], tags = [], event = false, first = false }) {
+  const m = document.createElement("div");
+  const hl = !event && ME.some((w) => String(text || "").toLowerCase().includes(w));
+  m.className = `m ${platform}${event ? " ev" : ""}${hl ? " hl" : ""}${first ? " first" : ""}`;
+  if (hidden.has(platform)) m.style.display = "none";
+  const now = new Date();
+  m.innerHTML = `<span class="t">${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}</span><div class="b">` +
+    (first ? `<span class="tag first">First chat</span>` : "") + tags.map((t) => `<span class="tag ${t}">${t.toUpperCase()}</span>`).join("") +
+    badges.map((b) => `<img class="badge" src="${esc(b)}">`).join("") +
+    (name ? `<span class="n" style="color:${esc(color || `var(--${platform})`)}">${esc(name)}</span>` : "") + (html ?? esc(text)) + `</div>`;
+  list.appendChild(m);
+  while (list.children.length > MAX) list.firstChild.remove();
+  if (stick) list.scrollTop = list.scrollHeight; else more.style.display = "block";
+}
+
+// ---------- Streamer.bot ----------
+function sbChat(platform, d) {
+  const msg = d.message || {}, user = d.user || {};
+  const text = typeof msg === "string" ? msg : msg.message ?? msg.text ?? d.text ?? "";
+  const name = user.name || user.display_name || msg.displayName || msg.username || d.userName || "";
+  const badges = (msg.badges || user.badges || []).map((b) => b.imageUrl || b.image_url).filter(Boolean);
+  const tags = [];
+  if (platform === "youtube") { if (user.isModerator) tags.push("mod"); if (user.isSponsor) tags.push("sub"); }
+  if (platform === "kick") { const b = (user.badges || d.sender?.identity?.badges || []).map((x) => String(x.type || x.name || x).toLowerCase()); if (b.includes("moderator")) tags.push("mod"); if (b.includes("vip")) tags.push("vip"); if (b.includes("subscriber")) tags.push("sub"); }
+  add({ platform, name, color: user.color || msg.color, text, html: render(text, msg.emotes || d.emotes || []), badges,
+        tags, first: !!(msg.firstMessage || d.isFirstMessage || user.firstMessage) });
+}
+function sbEvent(ev, d) {
+  const who = d.displayName || d.user?.name || d.user_name || d.userName || d.user?.display_name || "";
+  const P = ev.source.toLowerCase();
+  const say = (t) => add({ platform: P === "youtube" ? "youtube" : P === "kick" ? "kick" : "twitch", text: t, event: true });
+  switch (`${ev.source}.${ev.type}`) {
+    case "Twitch.ChatMessage": return sbChat("twitch", d);
+    case "YouTube.Message": return sbChat("youtube", d);
+    case "Kick.ChatMessage": return sbChat("kick", d);
+    case "Twitch.Follow": return say(`★ ${who} followed`);
+    case "Twitch.Sub": return say(`★ ${who} subscribed`);
+    case "Twitch.ReSub": return say(`★ ${who} resubscribed (${d.cumulativeMonths ?? d.cumulative ?? "?"} months)`);
+    case "Twitch.GiftSub": return say(`🎁 ${who} gifted a sub to ${d.recipientDisplayName || d.recipientUsername || ""}`);
+    case "Twitch.GiftBomb": return say(`🎁 ${who} gifted ${d.gifts ?? d.total ?? ""} subs`);
+    case "Twitch.Raid": return say(`⚑ ${d.from_broadcaster_user_name || who} raided with ${d.viewers ?? ""} viewers`);
+    case "Twitch.Cheer": return say(`◆ ${who} cheered ${d.bits ?? d.message?.bits ?? ""} bits`);
+    case "YouTube.NewSubscriber": return say(`★ ${who} subscribed`);
+    case "YouTube.SuperChat": return say(`$ ${who} Super Chat ${d.amount ?? ""}: ${d.message ?? ""}`);
+    case "YouTube.NewSponsor": return say(`★ ${who} became a member`);
+    case "Kick.Follow": return say(`★ ${who} followed`);
+    case "Kick.Subscription": case "Kick.Resubscription": return say(`★ ${who} subscribed`);
+  }
+}
+function connectSB() {
+  const dot = document.getElementById("sbdot");
+  const ws = new WebSocket(`ws://${q.get("sb") || "127.0.0.1:8080"}/`);
+  ws.onopen = () => { dot.classList.add("on"); ws.send(JSON.stringify({ request: "Subscribe", id: "gremi-chatdock", events: {
+    Twitch: ["ChatMessage", "Follow", "Sub", "ReSub", "GiftSub", "GiftBomb", "Raid", "Cheer"],
+    YouTube: ["Message", "NewSubscriber", "SuperChat", "NewSponsor"],
+    Kick: ["ChatMessage", "Follow", "Subscription", "Resubscription"] } })); };
+  ws.onmessage = (m) => { try { const j = JSON.parse(m.data); if (j.event) sbEvent(j.event, j.data || {}); } catch (e) { console.warn(e); } };
+  ws.onclose = () => { dot.classList.remove("on"); setTimeout(connectSB, 5000); };
+}
+
+// ---------- TikFinity ----------
+function connectTF() {
+  const dot = document.getElementById("tfdot");
+  const ws = new WebSocket(`ws://localhost:${q.get("tikfinity") || 21213}/`);
+  ws.onopen = () => dot.classList.add("on");
+  ws.onmessage = (m) => {
+    try {
+      const j = JSON.parse(m.data), d = j.data || {}, name = d.nickname || d.uniqueId;
+      if (j.event === "chat") add({ platform: "tiktok", name, text: d.comment, tags: [d.isModerator && "mod", d.isSubscriber && "sub"].filter(Boolean) });
+      if (j.event === "follow") add({ platform: "tiktok", text: `★ ${name} followed`, event: true });
+      if (j.event === "gift" && (d.giftType !== 1 || d.repeatEnd)) add({ platform: "tiktok", text: `🎁 ${name} sent ${d.repeatCount || 1}× ${d.giftName || "gift"}`, event: true });
+      if (j.event === "subscribe") add({ platform: "tiktok", text: `★ ${name} subscribed`, event: true });
+    } catch (e) { console.warn(e); }
+  };
+  ws.onclose = () => { dot.classList.remove("on"); setTimeout(connectTF, 5000); };
+}
+
+if (q.has("demo")) {
+  [["twitch", "0verfast", "#ff7b00", "that pass into 130R 😳"], ["youtube", "DrewDrew Playz", null, "P4 from P9, GG"],
+   ["tiktok", "markbonner189", null, "lets gooo"], ["kick", "kickfan22", null, "hi from kick"],
+   ["twitch", "Bananensaus17", "#00c3ff", "fastest lap is mine 😎"], ["twitch", "lisa_simracing", "#ff4fa3", "first time here, is gremi always this fast?"]]
+    .forEach(([p, n, c, t], i) => add({ platform: p, name: n, color: c, text: t, first: i === 5, tags: i === 0 ? ["mod"] : [] }));
+  add({ platform: "twitch", text: "★ Lisa_SimRacing followed", event: true });
+  add({ platform: "tiktok", text: "🎁 markbonner189 sent 1× Galaxy", event: true });
+} else { connectSB(); connectTF(); }
+</script>
+</body></html>
