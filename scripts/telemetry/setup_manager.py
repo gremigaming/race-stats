@@ -250,7 +250,10 @@ def main():
     names = sorted(a["name"] for a in http_json(RELEASE)["assets"])
     # Every recorded session (GreMi 2026-11-10: practice, time trial and offline races count too,
     # stream or not); setup_loop.py only judges a setup on runs of 3+ laps in a row.
-    sessions = [n for n in names if n.endswith(".gmtel.gz")]
+    # Other session types only from the in-game setups on (2 Nov 2026): older practice and time
+    # trial files (one is 110 MB) would only slow every build down.
+    sessions = [n for n in names if n.endswith(("_Race.gmtel.gz", "_s15.gmtel.gz", "_OSQ.gmtel.gz"))
+                or (n.endswith(".gmtel.gz") and n >= "2026-11-02" and "unfinished" not in n)]
     for name in sessions:
         if name not in metrics:
             print("measuring", name, flush=True)
