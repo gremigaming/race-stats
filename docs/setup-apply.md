@@ -49,6 +49,11 @@ under 48 s of waits). Files named `*check*` end on a zoom:
   5. `python3 scripts/setup-apply/keys.py done TRACK KIND V<new>` (for example
      `done AUSTRALIA race 2`).
 
+Names: the game takes at most 26 characters, so the reverse layouts are
+"AUSTRIA R", "BRITAIN R" and "NETHERLANDS R" (Car and Track Selection shows
+them as "Austria (R)" and so on). Brake bias runs Front 70% (Left) to 50%
+(Right): Left raises the front bias; keys.py knows this.
+
 ## 4. Close
 
 Esc x2, Esc (pause), Down x6 End Session, Enter, Up, Enter; results Enter;

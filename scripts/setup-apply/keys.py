@@ -54,11 +54,13 @@ def edit(cur, tgt, tab):
             tab -= 1
         out += k("up", "Top row", r=8, w=0.3)
         last = max(i for i, d in enumerate(diffs) if d)
-        for i, d in enumerate(diffs[:last + 1]):
+        for i, (x, d) in enumerate(zip(rows, diffs[:last + 1])):
             if i:
                 out.append({"action": "key", "text": "down", "action_summary": "Next row"})
             if d:
-                a = {"action": "key", "text": "right" if d > 0 else "left", "action_summary": "Adjusts slider"}
+                # the brake bias slider runs Front 70% (left) to 50% (right)
+                up = d > 0 if x != "bb" else d < 0
+                a = {"action": "key", "text": "right" if up else "left", "action_summary": "Adjusts slider"}
                 if abs(d) > 1:
                     a["repeat"] = abs(d)
                 out.append(a)

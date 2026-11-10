@@ -6,9 +6,9 @@
  },
  "apply": {
   "requested": null,
-  "last": "2026-11-02"
+  "last": "2026-11-10"
  },
- "pending": 36,
+ "pending": 27,
  "tracks": [
   {
    "track": "Melbourne",
@@ -5045,7 +5045,7 @@
   },
   {
    "track": "Austria Reverse",
-   "name": "AUSTRIA REVERSE",
+   "name": "AUSTRIA R",
    "post": "Austria Reverse",
    "trackIds": [
     "Austria Reverse"
@@ -5059,7 +5059,7 @@
        "v": 1,
        "base": null,
        "created": "2026-11-10",
-       "saved": null,
+       "saved": "2026-11-10",
        "slot": 75,
        "values": {
         "fw": 50,
@@ -5100,7 +5100,7 @@
        "v": 1,
        "base": null,
        "created": "2026-11-10",
-       "saved": null,
+       "saved": "2026-11-10",
        "slot": 76,
        "values": {
         "fw": 50,
@@ -5141,7 +5141,7 @@
        "v": 1,
        "base": null,
        "created": "2026-11-10",
-       "saved": null,
+       "saved": "2026-11-10",
        "slot": 77,
        "values": {
         "fw": 50,
@@ -5180,7 +5180,7 @@
   },
   {
    "track": "Silverstone Reverse",
-   "name": "GREAT BRITAIN REVERSE",
+   "name": "BRITAIN R",
    "post": "Great Britain Reverse",
    "trackIds": [
     "Silverstone Reverse"
@@ -5194,7 +5194,7 @@
        "v": 1,
        "base": null,
        "created": "2026-11-10",
-       "saved": null,
+       "saved": "2026-11-10",
        "slot": 78,
        "values": {
         "fw": 35,
@@ -5235,7 +5235,7 @@
        "v": 1,
        "base": null,
        "created": "2026-11-10",
-       "saved": null,
+       "saved": "2026-11-10",
        "slot": 79,
        "values": {
         "fw": 35,
@@ -5276,7 +5276,7 @@
        "v": 1,
        "base": null,
        "created": "2026-11-10",
-       "saved": null,
+       "saved": "2026-11-10",
        "slot": 80,
        "values": {
         "fw": 41,
@@ -5315,7 +5315,7 @@
   },
   {
    "track": "Zandvoort Reverse",
-   "name": "NETHERLANDS REVERSE",
+   "name": "NETHERLANDS R",
    "post": "Netherlands Reverse",
    "trackIds": [
     "Zandvoort Reverse"
@@ -5329,7 +5329,7 @@
        "v": 1,
        "base": null,
        "created": "2026-11-10",
-       "saved": null,
+       "saved": "2026-11-10",
        "slot": 81,
        "values": {
         "fw": 50,
@@ -5370,7 +5370,7 @@
        "v": 1,
        "base": null,
        "created": "2026-11-10",
-       "saved": null,
+       "saved": "2026-11-10",
        "slot": 82,
        "values": {
         "fw": 50,
@@ -5411,7 +5411,7 @@
        "v": 1,
        "base": null,
        "created": "2026-11-10",
-       "saved": null,
+       "saved": "2026-11-10",
        "slot": 83,
        "values": {
         "fw": 50,
