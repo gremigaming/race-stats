@@ -8,7 +8,7 @@
   "requested": null,
   "last": "2026-11-10"
  },
- "pending": 2,
+ "pending": 4,
  "tracks": [
   {
    "track": "Melbourne",
@@ -1181,6 +1181,61 @@
        "change": null,
        "text": "Starting setup",
        "why": "Your last quali setup.",
+       "sessions": [
+        {
+         "file": "2026-11-10_20-34-16_Miami_P1.gmtel.gz",
+         "date": "2026-11-10",
+         "session": "practice",
+         "osq": false,
+         "weather": 0,
+         "pace": 89740,
+         "best": 89740,
+         "mean": 90440,
+         "run": 5,
+         "laps": 4,
+         "bb": 58
+        }
+       ],
+       "verdict": {
+        "result": "baseline",
+        "text": "Starting point: 1:29.740 over 1 session."
+       }
+      },
+      {
+       "v": 2,
+       "base": 1,
+       "created": "2026-11-10",
+       "saved": null,
+       "values": {
+        "fw": 35,
+        "rw": 16,
+        "don": 100,
+        "doff": 45,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 40,
+        "rs": 12,
+        "farb": 7,
+        "rarb": 8,
+        "frh": 22,
+        "rrh": 43,
+        "bb": 56,
+        "bp": 100,
+        "fr": 28.5,
+        "fl": 28.5,
+        "rr": 21.5,
+        "rl": 21.5
+       },
+       "change": {
+        "rw": [
+         13,
+         16
+        ]
+       },
+       "text": "Rear wing 13 → 16",
+       "why": "More rear grip against oversteer and wheelspin. Costs a little top speed.",
        "sessions": [],
        "verdict": {
         "result": "untested",
@@ -1222,6 +1277,61 @@
        "change": null,
        "text": "Starting setup",
        "why": "Your quali setup (no race setup recorded).",
+       "sessions": [
+        {
+         "file": "2026-11-10_20-34-16_Miami_P1.gmtel.gz",
+         "date": "2026-11-10",
+         "session": "practice",
+         "osq": false,
+         "weather": 0,
+         "pace": 90440,
+         "best": 89740,
+         "mean": 90440,
+         "run": 5,
+         "laps": 4,
+         "bb": 58
+        }
+       ],
+       "verdict": {
+        "result": "baseline",
+        "text": "Starting point: 1:30.440 over 1 session."
+       }
+      },
+      {
+       "v": 2,
+       "base": 1,
+       "created": "2026-11-10",
+       "saved": null,
+       "values": {
+        "fw": 35,
+        "rw": 16,
+        "don": 100,
+        "doff": 45,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 40,
+        "rs": 12,
+        "farb": 7,
+        "rarb": 8,
+        "frh": 22,
+        "rrh": 43,
+        "bb": 56,
+        "bp": 100,
+        "fr": 28.5,
+        "fl": 28.5,
+        "rr": 21.5,
+        "rl": 21.5
+       },
+       "change": {
+        "rw": [
+         13,
+         16
+        ]
+       },
+       "text": "Rear wing 13 → 16",
+       "why": "More rear grip against oversteer and wheelspin. Costs a little top speed.",
        "sessions": [],
        "verdict": {
         "result": "untested",
