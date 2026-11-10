@@ -1,0 +1,149 @@
+<!doctype html>
+<!-- OBS browser source: every alert in one card, in the socials/giveaway style.
+     Listens to Streamer.bot (WebSocket server, default ws://127.0.0.1:8080) for Twitch and YouTube,
+     and to TikFinity (ws://localhost:21213) for TikTok. Alerts queue up and show one at a time.
+     Size 900 x 300. ?sb=127.0.0.1:8080  ?tikfinity=21213  ?secs=6 time on screen
+     ?only=tiktok shows only TikTok alerts, ?skip=tiktok hides them (for the TikTok canvas use only=tiktok)
+     ?welcome=0 turns welcome alerts off. ?demo plays every alert type in a loop. -->
+<html><head><meta charset="utf-8"><title>Alerts</title>
+<link rel="stylesheet" href="brand.css">
+<style>
+  html, body { width: 100%; height: 100%; }
+  .wrap { position: fixed; inset: 0; display: flex; justify-content: center; align-items: flex-start; padding-top: 14px; }
+  .card { min-width: 560px; max-width: 860px; padding: 16px 34px 18px; text-align: center;
+          opacity: 0; transform: translateY(-24px) scale(.96); transition: opacity .35s, transform .45s cubic-bezier(.2,1.3,.4,1); }
+  .card.show { opacity: 1; transform: none; }
+  .card.show .streaks i:nth-child(4) { animation: sweep 1.4s .2s ease-in-out; }
+  .top { display: flex; align-items: center; justify-content: center; gap: 10px; }
+  .chip { font: 800 15px/1 "Saira Condensed"; letter-spacing: .12em; padding: 5px 10px 4px; border-radius: 6px; text-transform: uppercase; }
+  .pf { width: 10px; height: 10px; border-radius: 50%; }
+  .name { font-weight: 800; font-size: 54px; line-height: 1.05; margin-top: 8px; text-transform: uppercase; white-space: nowrap;
+          overflow: hidden; text-overflow: ellipsis; }
+  .msg { text-transform: none; font-weight: 500; font-size: 24px; color: #fff; opacity: .9; margin-top: 6px; max-width: 790px; margin-inline: auto;
+         display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .msg:empty { display: none; }
+  .badge { width: 26px; height: 26px; object-fit: contain; }
+  .card.big .name { font-size: 64px; }
+  .card.big { animation: glow 1.6s ease-in-out 2; }
+  @keyframes glow { 50% { box-shadow: 0 5px 18px rgba(0,0,0,.45), 0 0 34px rgba(145,70,255,.8); } }
+</style></head>
+<body>
+<div class="wrap"><div class="card" id="card"><div class="streaks"><i></i><i></i><i></i><i></i></div>
+  <div class="top"><span class="pf" id="pf"></span><span class="label" id="label"></span><span class="chip" id="chip"></span></div>
+  <div class="name" id="name"></div><div class="msg" id="msg"></div>
+</div></div>
+<script>
+const q = new URLSearchParams(location.search);
+const SECS = +(q.get("secs") || 6);
+const ONLY = q.get("only"), SKIP = (q.get("skip") || "").split(",");
+const WELCOME = q.get("welcome") !== "0";
+const PF = { twitch: "#a970ff", youtube: "#ff4e45", tiktok: "#25f4ee" };
+// Role colours match the badge colours in GreMi's Streamer.bot welcome alert.
+const ROLE = { "lead mod": ["#006200", "Lead mod"], mod: ["#008000", "Mod"], partner: ["#6200c4", "Partner"],
+               vip: ["#970097", "VIP"], prime: ["#006a9d", "Prime sub"], sub: ["#50009f", "Sub"], viewer: ["rgba(255,255,255,.16)", "Viewer"] };
+const LEAD = ["ddrk0", "littleegend"];
+const queue = []; let busy = false; const seen = new Set();
+const $ = (id) => document.getElementById(id);
+
+function push(a) {
+  if (ONLY && a.platform !== ONLY) return;
+  if (SKIP.includes(a.platform)) return;
+  if (a.kind === "welcome" && !WELCOME) return;
+  const key = a.platform + a.kind + a.name + (a.msg || "");
+  if (seen.has(key) && a.kind !== "gift") return;   // Streamer.bot can send the same event twice
+  seen.add(key); setTimeout(() => seen.delete(key), 15000);
+  queue.push(a); next();
+}
+function next() {
+  if (busy || !queue.length) return;
+  busy = true;
+  const a = queue.shift(), card = $("card");
+  $("pf").style.background = PF[a.platform] || "#fff";
+  $("label").textContent = a.label;
+  const chip = $("chip");
+  if (a.role) { chip.style.display = ""; chip.style.background = ROLE[a.role][0]; chip.textContent = ROLE[a.role][1]; }
+  else if (a.chip) { chip.style.display = ""; chip.style.background = "linear-gradient(90deg,#d4464a,#c4509f,#8a6cd0)"; chip.textContent = a.chip; }
+  else chip.style.display = "none";
+  $("name").textContent = a.name;
+  $("msg").textContent = a.msg || "";
+  card.classList.toggle("big", !!a.big);
+  card.classList.add("show");
+  setTimeout(() => { card.classList.remove("show"); setTimeout(() => { busy = false; next(); }, 600); }, (a.secs || SECS) * 1000);
+}
+
+// ---------- Streamer.bot ----------
+const tierName = (t) => ({ prime: "Prime", tier1: "Tier 1", tier2: "Tier 2", tier3: "Tier 3", 1000: "Tier 1", 2000: "Tier 2", 3000: "Tier 3" }[String(t).toLowerCase()] || "");
+function roleOf(u = {}, d = {}) {
+  const login = String(u.login || u.name || d.user?.login || "").toLowerCase();
+  if (LEAD.includes(login)) return "lead mod";
+  const r = Number(u.role ?? d.message?.role ?? 0);         // Streamer.bot: 1 viewer, 2 VIP, 3 mod, 4 broadcaster
+  const badges = (d.message?.badges || u.badges || []).map((b) => String(b.name || b).toLowerCase());
+  if (r === 3 || u.moderator || badges.includes("moderator")) return "mod";
+  if (badges.includes("partner")) return "partner";
+  if (r === 2 || u.vip || badges.includes("vip")) return "vip";
+  if (badges.includes("premium")) return "prime";
+  if (u.subscribed || d.message?.subscriber || badges.includes("subscriber")) return "sub";
+  return "viewer";
+}
+function onSB(ev, d) {
+  const s = ev.source, t = ev.type;
+  const who = (x) => x?.name || x?.display_name || x?.displayName || x?.login || x?.userName || "";
+  if (s === "Twitch") {
+    if (t === "Follow") return push({ platform: "twitch", kind: "follow", label: "New follower", name: d.user_name || d.displayName || who(d.user) });
+    if (t === "Sub") return push({ platform: "twitch", kind: "sub", label: "New sub", chip: tierName(d.sub_tier ?? d.tier) || (d.is_prime ? "Prime" : ""), name: who(d.user) || d.userName, msg: d.message?.text || d.message, big: true });
+    if (t === "ReSub") return push({ platform: "twitch", kind: "sub", label: `Resub · ${d.cumulativeMonths || d.cumulative_months || d.cumulative || "?"} months`, chip: tierName(d.sub_tier ?? d.tier), name: who(d.user) || d.userName, msg: d.text || d.message?.text, big: true });
+    if (t === "GiftSub") return push({ platform: "twitch", kind: "gift", label: `Gifted a sub to ${who(d.recipient) || d.recipientUserName || ""}`, chip: tierName(d.sub_tier ?? d.tier), name: d.isAnonymous ? "Anonymous" : who(d.user) || d.userName });
+    if (t === "GiftBomb") return push({ platform: "twitch", kind: "gift", label: `Gifted ${d.total || d.gifts || ""} subs`, chip: tierName(d.sub_tier ?? d.tier), name: d.isAnonymous ? "Anonymous" : who(d.user) || d.userName, big: true });
+    if (t === "Raid") return push({ platform: "twitch", kind: "raid", label: `Raid · ${d.viewers ?? d.viewerCount ?? ""} viewers`, name: d.from_broadcaster_user_name || who(d.user) || d.from_broadcaster_user_login, big: true, secs: 10 });
+    if (t === "Cheer") return push({ platform: "twitch", kind: "cheer", label: `Cheered ${d.message?.bits ?? d.bits ?? ""} bits`, name: who(d.user) || d.message?.displayName, msg: d.message?.message || d.message?.text });
+    if (t === "FirstWord") { const u = d.user || d.message || {}; return push({ platform: "twitch", kind: "welcome", label: "Welcome in the stream", role: roleOf(u, d), name: who(u) || d.message?.displayName, secs: 4 }); }
+  }
+  if (s === "YouTube") {
+    if (t === "NewSubscriber") return push({ platform: "youtube", kind: "follow", label: "New subscriber", name: who(d.user) || d.userName });
+    if (t === "SuperChat") return push({ platform: "youtube", kind: "superchat", label: "Super Chat", chip: d.amount, name: who(d.user) || d.userName, msg: d.message, big: true });
+    if (t === "SuperSticker") return push({ platform: "youtube", kind: "superchat", label: "Super Sticker", chip: d.amount, name: who(d.user) || d.userName, big: true });
+    if (t === "NewSponsor" || t === "MembershipGift") return push({ platform: "youtube", kind: "sub", label: t === "NewSponsor" ? "New member" : `Gifted ${d.count || ""} memberships`, chip: d.levelName || d.tier, name: who(d.user) || d.userName, big: true });
+    if (t === "FirstWords") return push({ platform: "youtube", kind: "welcome", label: "Welcome in the stream", role: d.user?.isModerator ? "mod" : d.user?.isSponsor ? "sub" : "viewer", name: who(d.user), secs: 4 });
+  }
+}
+function connectSB() {
+  const ws = new WebSocket(`ws://${q.get("sb") || "127.0.0.1:8080"}/`);
+  ws.onopen = () => ws.send(JSON.stringify({ request: "Subscribe", id: "gremi-alerts", events: {
+    Twitch: ["Follow", "Sub", "ReSub", "GiftSub", "GiftBomb", "Raid", "Cheer", "FirstWord"],
+    YouTube: ["NewSubscriber", "SuperChat", "SuperSticker", "NewSponsor", "MembershipGift", "FirstWords"] } }));
+  ws.onmessage = (m) => { try { const j = JSON.parse(m.data); if (j.event) onSB(j.event, j.data || {}); } catch (e) { console.warn(e); } };
+  ws.onclose = () => setTimeout(connectSB, 5000);
+}
+
+// ---------- TikFinity ----------
+function connectTF() {
+  const ws = new WebSocket(`ws://localhost:${q.get("tikfinity") || 21213}/`);
+  ws.onmessage = (m) => {
+    try {
+      const j = JSON.parse(m.data), d = j.data || {}, name = d.nickname || d.uniqueId;
+      if (j.event === "follow") push({ platform: "tiktok", kind: "follow", label: "New follower", name });
+      if (j.event === "gift" && (d.giftType !== 1 || d.repeatEnd)) push({ platform: "tiktok", kind: "gift", label: `Sent ${d.repeatCount > 1 ? d.repeatCount + "× " : ""}${d.giftName || "a gift"}`, chip: d.diamondCount ? `${d.diamondCount * (d.repeatCount || 1)} coins` : "", name, big: (d.diamondCount || 0) * (d.repeatCount || 1) >= 100 });
+      if (j.event === "subscribe") push({ platform: "tiktok", kind: "sub", label: "New subscriber", name, big: true });
+      if (j.event === "share") push({ platform: "tiktok", kind: "share", label: "Shared the stream", name, secs: 4 });
+    } catch (e) { console.warn(e); }
+  };
+  ws.onclose = () => setTimeout(connectTF, 5000);
+}
+
+if (q.has("demo")) {
+  const demo = [
+    { platform: "twitch", kind: "welcome", label: "Welcome in the stream", role: "mod", name: "devildriver2396", secs: 3 },
+    { platform: "twitch", kind: "follow", label: "New follower", name: "Lisa.SimRacing", secs: 3 },
+    { platform: "twitch", kind: "sub", label: "Resub · 12 months", chip: "Tier 1", name: "0verfast", msg: "a year of watching GreMi brake too late", big: true, secs: 4 },
+    { platform: "twitch", kind: "raid", label: "Raid · 23 viewers", name: "Bananensaus17", big: true, secs: 4 },
+    { platform: "youtube", kind: "superchat", label: "Super Chat", chip: "€5.00", name: "DrewDrew Playz", msg: "P4 from P9, GG", big: true, secs: 4 },
+    { platform: "tiktok", kind: "gift", label: "Sent 1× Galaxy", chip: "1000 coins", name: "markbonner189", big: true, secs: 4 },
+  ];
+  if (q.has("show")) { push({ ...demo[+q.get("show")], secs: 9999 }); } else {
+  let i = 0; const loop = () => { push({ ...demo[i++ % demo.length], msg: demo[(i - 1) % demo.length].msg }); seen.clear(); setTimeout(loop, 5200); }; loop(); }
+} else {
+  if (ONLY !== "tiktok") connectSB();
+  if (ONLY !== "twitch" && ONLY !== "youtube" && !SKIP.includes("tiktok")) connectTF();
+}
+</script>
+</body></html>
