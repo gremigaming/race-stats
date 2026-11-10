@@ -8,7 +8,7 @@
   "requested": null,
   "last": "2026-11-10"
  },
- "pending": 0,
+ "pending": 2,
  "tracks": [
   {
    "track": "Melbourne",
@@ -109,12 +109,68 @@
        },
        "text": "Rear wing 15 → 17",
        "why": "More rear wing for a calmer rear in fast corners.",
+       "sessions": [
+        {
+         "file": "2026-11-10_18-30-06_Melbourne_TimeTrial.gmtel.gz",
+         "date": "2026-11-10",
+         "session": "time trial",
+         "osq": false,
+         "weather": 0,
+         "pace": 78086,
+         "best": 78086,
+         "mean": 78214,
+         "run": 3,
+         "laps": 2,
+         "bb": 56
+        }
+       ],
+       "verdict": {
+        "result": "better",
+        "delta": -4.98,
+        "text": "Better: quali lap 1:18.086 against 1:22.179 on V1 (4.093 s faster)."
+       },
+       "slot": 0
+      },
+      {
+       "v": 3,
+       "base": 2,
+       "created": "2026-11-10",
+       "saved": null,
+       "values": {
+        "fw": 45,
+        "rw": 17,
+        "don": 90,
+        "doff": 25,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 30,
+        "farb": 1,
+        "rarb": 14,
+        "frh": 21,
+        "rrh": 45,
+        "bb": 56,
+        "bp": 100,
+        "fr": 27.0,
+        "fl": 27.0,
+        "rr": 20.5,
+        "rl": 20.5
+       },
+       "change": {
+        "don": [
+         100,
+         90
+        ]
+       },
+       "text": "On-throttle diff 100% → 90%",
+       "why": "A more open on-throttle diff for less wheelspin out of slow corners.",
        "sessions": [],
        "verdict": {
         "result": "untested",
         "text": "Not driven yet."
-       },
-       "slot": 0
+       }
       }
      ]
     },
@@ -206,12 +262,68 @@
        },
        "text": "Rear wing 15 → 17",
        "why": "More rear wing for a calmer rear in fast corners.",
+       "sessions": [
+        {
+         "file": "2026-11-10_18-30-06_Melbourne_TimeTrial.gmtel.gz",
+         "date": "2026-11-10",
+         "session": "time trial",
+         "osq": false,
+         "weather": 0,
+         "pace": 78214,
+         "best": 78086,
+         "mean": 78214,
+         "run": 3,
+         "laps": 2,
+         "bb": 56
+        }
+       ],
+       "verdict": {
+        "result": "better",
+        "delta": -7.31,
+        "text": "Better: average lap 1:18.214 against 1:24.382 on V1 (6.168 s faster)."
+       },
+       "slot": 1
+      },
+      {
+       "v": 3,
+       "base": 2,
+       "created": "2026-11-10",
+       "saved": null,
+       "values": {
+        "fw": 45,
+        "rw": 17,
+        "don": 90,
+        "doff": 25,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 30,
+        "farb": 1,
+        "rarb": 14,
+        "frh": 21,
+        "rrh": 45,
+        "bb": 57,
+        "bp": 100,
+        "fr": 27.0,
+        "fl": 27.0,
+        "rr": 20.5,
+        "rl": 20.5
+       },
+       "change": {
+        "don": [
+         100,
+         90
+        ]
+       },
+       "text": "On-throttle diff 100% → 90%",
+       "why": "A more open on-throttle diff for less wheelspin out of slow corners.",
        "sessions": [],
        "verdict": {
         "result": "untested",
         "text": "Not driven yet."
-       },
-       "slot": 1
+       }
       }
      ]
     },
