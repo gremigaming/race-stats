@@ -66,6 +66,33 @@ TESTED = {
 }
 
 
+MIN_RUN = 3  # laps in a row that make a session count (GreMi 2026-11-10)
+
+
+def session_type(name):
+    """'quali', 'race', 'practice', 'time trial' or 'session', from the recorder's file name."""
+    kind = name.rsplit("_", 1)[-1].split(".")[0]
+    if kind in ("OSQ", "OSSQ", "Quali", "Q1", "Q2", "Q3", "SQ1", "SQ2", "SQ3", "SprintQuali"):
+        return "quali"
+    if kind.startswith("Race") or kind == "s15":
+        return "race"
+    if kind in ("P1", "P2", "P3", "Practice"):
+        return "practice"
+    if kind == "TimeTrial":
+        return "time trial"
+    return "session"
+
+
+def run_length(r):
+    """Most completed laps in a row in a measured session."""
+    best = cur = 0
+    prev = None
+    for n, t, _valid in (r or {}).get("laps") or []:
+        cur = cur + 1 if prev is not None and n == prev + 1 and t else (1 if t else 0)
+        best, prev = max(best, cur), n
+    return best
+
+
 def http_json(url):
     headers = {"Accept": "application/vnd.github+json", "User-Agent": "race-stats"}
     if os.environ.get("GITHUB_TOKEN"):   # unauthenticated calls share 60/hour per runner IP and run out
@@ -221,7 +248,9 @@ def main():
     metrics_file = os.path.join(cache, f"metrics-v{METRICS_VERSION}.json")
     metrics = json.load(open(metrics_file)) if os.path.exists(metrics_file) else {}
     names = sorted(a["name"] for a in http_json(RELEASE)["assets"])
-    sessions = [n for n in names if n.endswith(("_Race.gmtel.gz", "_s15.gmtel.gz", "_OSQ.gmtel.gz"))]
+    # Every recorded session (GreMi 2026-11-10: practice, time trial and offline races count too,
+    # stream or not); setup_loop.py only judges a setup on runs of 3+ laps in a row.
+    sessions = [n for n in names if n.endswith(".gmtel.gz")]
     for name in sessions:
         if name not in metrics:
             print("measuring", name, flush=True)
@@ -238,6 +267,8 @@ def main():
         if not r or not r.get("setup") or not r.get("track"):
             continue
         quali = "_OSQ" in name
+        if not quali and run_length(r) < MIN_RUN:
+            continue   # an out lap or two in practice says nothing about a race setup
         kind = "wet" if (r["weather"] or 0) >= 3 else "quali" if quali else "race"
         t = tracks.setdefault(r["track"], {"track": r["track"], "kinds": {}})
         t["kinds"][kind] = kind_entry(r, name[:10], "quali" if quali else "race")

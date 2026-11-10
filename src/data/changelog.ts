@@ -21,6 +21,14 @@ export interface ChangelogEntry {
 // raw commit history also contains routine uploads and staff-only corrections.
 const changelog: ChangelogEntry[] = [
   {
+    id: "stream-races-only",
+    date: "2026-11-10",
+    type: "fix",
+    message:
+      "Results, standings and safety ratings now only count races driven live on stream; offline races are left out automatically.",
+    destination: "sessions",
+  },
+  {
     id: "driver-dna-profile-history",
     date: "2026-11-08",
     type: "feat",

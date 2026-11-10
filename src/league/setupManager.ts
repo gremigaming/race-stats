@@ -51,7 +51,7 @@ export interface SetupTrack {
 export interface VersionSession {
   file: string;
   date: string;
-  session: "quali" | "race";
+  session: "quali" | "race" | "practice" | "time trial" | "session";
   weather: number | null;
   pace: number | null;
   best: number | null;

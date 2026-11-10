@@ -486,6 +486,49 @@ try {
 } catch {
   // no test sessions
 }
+// Stream races only (GreMi 2026-11-10): race-control-stats keeps a log of his Twitch streams
+// (stream_log.py, streams.json). From the log's first stream on, saves outside every stream
+// window (10 min before the start to 20 min after the end) are left off like test sessions.
+// No log (offline, GitHub down): every race stays, as before.
+const amsterdam = (ms) => {
+  const p = Object.fromEntries(
+    new Intl.DateTimeFormat("en-GB", {
+      timeZone: "Europe/Amsterdam", year: "numeric", month: "2-digit", day: "2-digit",
+      hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23",
+    }).formatToParts(new Date(ms)).map((x) => [x.type, x.value]),
+  );
+  return `${p.year}-${p.month}-${p.day} ${p.hour}:${p.minute}:${p.second}`;
+};
+async function streamLog() {
+  if (process.env.STREAM_LOG_FILE) return JSON.parse(readFileSync(process.env.STREAM_LOG_FILE, "utf8"));
+  const headers = { Accept: "application/vnd.github.raw+json", "User-Agent": "race-stats" };
+  if (process.env.GITHUB_TOKEN) headers.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
+  const r = await fetch("https://api.github.com/repos/gremigaming/race-control-stats/contents/streams.json",
+    { headers, signal: AbortSignal.timeout(20000) });
+  if (!r.ok) throw new Error(`HTTP ${r.status}`);
+  return r.json();
+}
+function offStreamWindows(log) {
+  const streams = (log?.streams ?? []).filter((x) => x.start).sort((a, b) => a.start.localeCompare(b.start));
+  if (!log?.since || !streams.length) return [];
+  const out = [];
+  let from = Date.parse(log.since);
+  for (const x of streams) {
+    const to = Date.parse(x.start) - 10 * 60 * 1000;
+    if (to > from) out.push({ from: amsterdam(from), to: amsterdam(to), why: "No stream (Twitch stream log)" });
+    if (!x.end) return out;   // live now: everything from its start on is a stream race
+    from = Math.max(from, Date.parse(x.end) + 20 * 60 * 1000);
+  }
+  out.push({ from: amsterdam(from), to: "9999-12-31 23:59:59", why: "No stream (Twitch stream log)" });
+  return out;
+}
+try {
+  const off = offStreamWindows(await streamLog());
+  testWindows.push(...off);
+  console.log(`stream log: ${off.length} windows without a stream left off`);
+} catch (e) {
+  console.warn(`stream log not read (${e.message}): every race stays`);
+}
 const digits = (s) => s.replace(/\D/g, "").padEnd(14, "0");
 const stem = (f) => f.split(/[\\/]/).pop().replace(/\.json$/, "");
 const removedFiles = new Set(removedRaces.map((r) => stem(r.file ?? "")));

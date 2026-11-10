@@ -47,6 +47,7 @@ const KIND_TEXT: Record<SetupKind, string> = {
   wet: "text-sky-300",
 };
 const KINDS: SetupKind[] = ["quali", "race", "wet"];
+const SESSION_LABEL: Record<string, string> = { quali: "Quali", race: "Race", practice: "Practice", "time trial": "Time trial" };
 const WEATHER = ["Clear", "Light cloud", "Overcast", "Light rain", "Heavy rain", "Storm"];
 
 const LABEL: Record<string, string> = {
@@ -488,9 +489,9 @@ function VersionsView({ track, kind }: { track: ManagedTrack; kind: SetupKind })
               <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 font-mono text-2xs tabular-nums text-zinc-500">
                 {v.sessions.map((x) => (
                   <span key={x.file}>
-                    {x.date} {x.session === "quali" ? "Quali" : "Race"}
+                    {x.date} {SESSION_LABEL[x.session] ?? "Session"}
                     {(x.weather ?? 0) >= 3 ? " (wet)" : ""} {formatLap(x.pace)}
-                    {x.session === "race" ? ` · ${x.laps} laps` : ""}
+                    {x.session !== "quali" ? ` · ${x.laps} laps` : ""}
                   </span>
                 ))}
               </div>

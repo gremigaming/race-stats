@@ -7,7 +7,10 @@ Every track keeps three setups in F1 25 Time Trial (F1 2026 car, Red Bull):
 QUALI, RACE and WET, saved as "TRACK - KIND - V<n>". After a stream this:
 
 1. finds the sessions driven on a saved version (the car setup in the
-   telemetry matches the version's values exactly),
+   telemetry matches the version's values; brake bias is left out because
+   GreMi sets it in the car). Any session counts, stream or not: qualifying
+   laps for QUALI, and for RACE and WET any session with 3+ laps in a row
+   (race, practice, time trial; GreMi 2026-11-10),
 2. gives every change a verdict: the version against the one it was based on
    (average clean race lap, or the quali lap),
 3. for every track that isn't finished and whose newest version was driven,
@@ -65,7 +68,6 @@ EXPLORE = [
     ({"doff": 5}, "A slightly more locked off-throttle diff for a calmer rear on entry."),
     ({"rarb": -1}, "A softer rear anti-roll bar for more rear grip mid-corner."),
     ({"farb": 1}, "A slightly stiffer front anti-roll bar for a quicker change of direction."),
-    ({"bb": -1}, "A little more brake bias to the rear to help the car turn under braking."),
     ({"bp": -2}, "A little less brake pressure for more feel without ABS."),
     ({"rs": -2}, "Softer rear springs for more traction over the kerbs."),
     ({"fs": -2}, "Softer front springs for more front grip over bumps."),
@@ -77,7 +79,6 @@ EXPLORE = [
     ({"don": 10}, "A more locked on-throttle diff for a stronger exit."),
     ({"fw": -2}, "Less front wing for a calmer front end."),
     ({"doff": -5}, "A more open off-throttle diff for an easier turn-in."),
-    ({"bb": 1}, "A little more brake bias to the front for more stable braking."),
 ]
 BETTER, WORSE = -0.15, 0.15   # % of the lap time; between them there's no clear difference
 
@@ -92,8 +93,13 @@ def short_setup(tel):
     return {k: tel[t] for k, t in TEL.items() if t in tel}
 
 
+# Set in the car during a session (MFD), so the saved value says nothing about
+# which setup was loaded: GreMi starts on 58 whatever the save says.
+IN_CAR = {"bb"}
+
+
 def same(a, b):
-    return all(abs(a.get(k, 1e9) - b.get(k, -1e9)) < STEP[k] / 2 for k in TEL)
+    return all(abs(a.get(k, 1e9) - b.get(k, -1e9)) < STEP[k] / 2 for k in TEL if k not in IN_CAR)
 
 
 def describe(change):
@@ -136,23 +142,27 @@ def sessions_by_version(reg, metrics):
         track = next(t for t in reg["tracks"] if t["track"] == ids[r["track"]])
         setup = short_setup(r["setup"])
         date = name[:10].replace("_", "-")
-        quali = "_OSQ" in name
+        session = SM.session_type(name)
+        run = SM.run_length(r)
         for kind in KINDS:
-            for v in track["kinds"][kind]["versions"]:
-                if v.get("saved") and date >= v["saved"] and same(setup, v["values"]):
-                    pace = r.get("best") if quali else r.get("mean")
-                    out.setdefault((track["track"], kind, v["v"]), []).append({
-                        "file": name, "date": date, "session": "quali" if quali else "race",
-                        "weather": r.get("weather"), "pace": pace, "best": r.get("best"),
-                        "mean": r.get("mean"), "laps": len(r.get("clean") or []), "_r": r})
+            # versions that differ only in brake bias look the same: the newest saved one wins
+            match = [v for v in track["kinds"][kind]["versions"]
+                     if v.get("saved") and date >= v["saved"] and same(setup, v["values"])]
+            for v in match[-1:]:
+                out.setdefault((track["track"], kind, v["v"]), []).append({
+                    "file": name, "date": date, "session": session, "osq": "_OSQ" in name,
+                    "weather": r.get("weather"), "pace": r.get("best") if kind == "quali" else r.get("mean"),
+                    "best": r.get("best"), "mean": r.get("mean"), "run": run,
+                    "laps": len(r.get("clean") or []), "bb": setup.get("bb"), "_r": r})
     return out
 
 
 def counted(kind, sessions):
-    """Sessions that judge a setup of this kind: quali laps for QUALI, races for
-    RACE and WET (in the wet only when it rained)."""
-    want = "quali" if kind == "quali" else "race"
-    s = [x for x in sessions if x["session"] == want and x["pace"]]
+    """Sessions that judge a setup of this kind: for QUALI the best lap of any
+    session on it (one-shot qualifying when both sides have one), for RACE and
+    WET the average clean lap of any session with 3+ laps in a row (in the wet
+    only when it rained)."""
+    s = [x for x in sessions if x["pace"] and (kind == "quali" or x.get("run", 0) >= SM.MIN_RUN)]
     if kind == "wet":
         s = [x for x in s if (x["weather"] or 0) >= 3]
     elif kind == "race":
@@ -174,6 +184,8 @@ def verdict(kind, version, base, found):
     theirs = counted(kind, found.get(base["v"], []))
     if not theirs:
         return {"result": "untested", "text": f"V{base['v']} has no laps to compare with."}
+    if kind == "quali" and any(x.get("osq") for x in mine) and any(x.get("osq") for x in theirs):
+        mine, theirs = [x for x in mine if x.get("osq")], [x for x in theirs if x.get("osq")]  # like with like
     a, b = mean_pace(mine), mean_pace(theirs)
     d = (a - b) / b * 100
     what = "quali lap" if kind == "quali" else "average lap"
@@ -205,7 +217,7 @@ def next_change(kind, versions, base, last_session):
         rec, _, findings = SM.advise(r)
         for tk, (value, why) in rec.items():
             k = SHORT.get(tk)
-            if not k:
+            if not k or k in IN_CAR:
                 continue
             delta = value - base["values"][k]
             keys = PAIRS.get(k, (k,))
@@ -231,7 +243,7 @@ def run(reg, metrics, today):
             found = {v["v"]: found_all.get((t["track"], kind, v["v"]), []) for v in versions}
             by_v = {v["v"]: v for v in versions}
             for v in versions:
-                v["sessions"] = [{k: x[k] for k in x if k != "_r"} for x in found[v["v"]]]
+                v["sessions"] = [{k: x[k] for k in x if k != "_r"} for x in counted(kind, found[v["v"]])]
                 v["verdict"] = verdict(kind, v, by_v.get(v.get("base")), found)
             last = versions[-1]
             if t.get("finished") or not last.get("saved") or last["verdict"]["result"] == "untested":
