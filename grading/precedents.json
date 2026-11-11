@@ -4286,6 +4286,137 @@
     }
    ]
   },
+  "s-0b2f143f": {
+   "key": "f9b0fd4d29c3",
+   "by": "GreMi",
+   "track": "Mexico",
+   "date": "2026-11-11",
+   "kind": "Late lunge / divebomb",
+   "source": "staff change",
+   "verdict": "vanderdeured at fault",
+   "severity": 5,
+   "note": "The divebomb was from a bit far back but it was a bit to much. I also see something happen with jakub, but that should be a different incident; The divebomb was from a bit far back but it was a bit to much. I also see something happen with jakub, but that should be a different incident; The divebomb",
+   "who": [
+    "319544045435224067"
+   ],
+   "changes": [
+    "Race_Mexico_2026_11_11_20_03_13.json|15|contact|1|s1794423379.5",
+    "Race_Mexico_2026_11_11_20_03_13.json|1|contact|1|0",
+    "Race_Mexico_2026_11_11_20_03_13.json|16|contact|1|s1794423379.5",
+    "Race_Mexico_2026_11_11_20_03_13.json|14|contact|1|s1794423379.5",
+    "Race_Mexico_2026_11_11_20_03_13.json|0|contact|1|0"
+   ],
+   "race_file": "Race_Mexico_2026_11_11_20_03_13.json",
+   "at": "2026-11-11T21:13:05Z",
+   "recording": "2026-11-11_19-55-20_Mexico_Race.gmtel.gz",
+   "t": 18.7,
+   "cars": [
+    0,
+    1,
+    14,
+    15,
+    16,
+    17
+   ],
+   "rulebook": {
+    "verdict": "1 + 0 at fault",
+    "rule": "R8"
+   },
+   "contacts": [
+    {
+     "a": 15,
+     "b": 1,
+     "t": 18.7,
+     "x": {
+      "gap": 10.4,
+      "closing": 60.0,
+      "moved_front": -4.76,
+      "moved_back": 2.87,
+      "rejoin_front": 1.0,
+      "rejoin_back": 1.0,
+      "slide": 11,
+      "lost": 0,
+      "off": 2,
+      "cars": 6,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "back",
+     "rulebook": "back",
+     "rule": "R5",
+     "front": 15
+    },
+    {
+     "a": 15,
+     "b": 16,
+     "t": 19.0,
+     "x": {
+      "gap": 3.9,
+      "closing": 22,
+      "moved_front": -2.16,
+      "moved_back": 5.91,
+      "rejoin_front": 0.0,
+      "rejoin_back": 1.0,
+      "slide": 39,
+      "lost": 3,
+      "off": 2,
+      "cars": 6,
+      "reaction": 0.0,
+      "aftermath": 1.0
+     },
+     "label": "none",
+     "rulebook": "none",
+     "rule": "R7",
+     "front": 16
+    },
+    {
+     "a": 16,
+     "b": 14,
+     "t": 19.5,
+     "x": {
+      "gap": 2.7,
+      "closing": -30.0,
+      "moved_front": 2.08,
+      "moved_back": -1.07,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 39,
+      "lost": 3,
+      "off": 2,
+      "cars": 6,
+      "reaction": 0.0,
+      "aftermath": 1.0
+     },
+     "label": "none",
+     "rulebook": "none",
+     "rule": "R7",
+     "front": 14
+    },
+    {
+     "a": 16,
+     "b": 0,
+     "t": 22.5,
+     "x": {
+      "gap": 6.2,
+      "closing": 23,
+      "moved_front": -1.05,
+      "moved_back": 0.86,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 39,
+      "lost": 3,
+      "off": 1,
+      "cars": 6,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "none",
+     "rulebook": "back",
+     "rule": "R3",
+     "front": 16
+    }
+   ]
+  },
   "s-2d31658c": {
    "key": "6a2439de74ca",
    "by": "GreMi",
@@ -5192,6 +5323,61 @@
     }
    ]
   },
+  "s-de56b5a5": {
+   "key": "f621a9d2cdcf",
+   "by": "GreMi",
+   "track": "Silverstone",
+   "date": "2026-11-11",
+   "kind": "Moved across alongside",
+   "source": "staff change",
+   "verdict": "[SSL]RYLAN at fault",
+   "severity": 3,
+   "note": "I dont understand, i dont see stepino in this incident; I dont understand, i dont see stepino in this incident",
+   "who": [
+    "319544045435224067"
+   ],
+   "changes": [
+    "Race_Silverstone_2026_11_11_20_42_12.json|6|contact|1|0",
+    "Race_Silverstone_2026_11_11_20_42_12.json|7|contact|1|s1794425590.2"
+   ],
+   "race_file": "Race_Silverstone_2026_11_11_20_42_12.json",
+   "at": "2026-11-11T21:13:50Z",
+   "recording": "2026-11-11_20-32-10_Silverstone_Race.gmtel.gz",
+   "t": 10.6,
+   "cars": [
+    6,
+    7
+   ],
+   "rulebook": {
+    "verdict": "6 at fault",
+    "rule": "R2"
+   },
+   "contacts": [
+    {
+     "a": 6,
+     "b": 7,
+     "t": 10.6,
+     "x": {
+      "gap": 3.0,
+      "closing": -13,
+      "moved_front": 3.26,
+      "moved_back": -0.58,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 3,
+      "lost": 1,
+      "off": 0,
+      "cars": 2,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "front",
+     "rulebook": "front",
+     "rule": "R2",
+     "front": 6
+    }
+   ]
+  },
   "s-ed58b197": {
    "key": "1ab1beace34f",
    "by": "GreMi",
@@ -5247,20 +5433,19 @@
    ]
   },
   "sev-11041959-1166a": {
-   "key": "85bba11a5949",
+   "key": "17a945e99803",
    "race_file": "Race_Singapore_2026_11_04_20_09_05.json",
+   "at": "2026-11-11T21:14:31Z",
    "parent": "sev-11041959-1166",
    "part": 1,
    "of": 1,
-   "by": "staff",
+   "by": "GreMi",
    "track": "Singapore",
    "date": "2026-11-04",
    "verdict": "#21 daris_2190 at fault",
    "severity": 10,
    "note": "",
-   "tags": [
-    "Ran into the back"
-   ],
+   "tags": [],
    "kind": "Rear-end",
    "source": "grade",
    "calls": {
@@ -5429,6 +5614,17 @@
    "with_precedents": 69,
    "overrides": 9,
    "date": "2026-11-06",
+   "rules": "v1.4"
+  },
+  {
+   "incidents": 84,
+   "inc_rulebook": 34,
+   "inc_with_precedents": 38,
+   "contacts": 129,
+   "rulebook": 67,
+   "with_precedents": 73,
+   "overrides": 9,
+   "date": "2026-11-11",
    "rules": "v1.4"
   }
  ]
