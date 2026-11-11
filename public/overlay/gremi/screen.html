@@ -3,7 +3,7 @@
      Size 1920x1080 (horizontal) or 1080x1920 (vertical, it adapts).
      ?mode=starting|brb|ending|bg  (bg = only the animated background, no text)
      ?min=5 countdown minutes for starting (restarts when the source becomes visible: tick
-     "Refresh browser when scene becomes active" in OBS). ?sub= replaces the small line. -->
+     "Refresh browser when scene becomes active" in OBS) and again when OBS starts streaming. ?sub= replaces the small line. -->
 <html><head><meta charset="utf-8"><title>Screen</title>
 <link rel="stylesheet" href="brand.css">
 <style>
@@ -41,7 +41,10 @@ if (T[mode]) {
     (mode === "starting" ? `<div class="count" id="count"></div>` : "");
 }
 if (mode === "starting") {
-  const end = Date.now() + (+(q.get("min") || 5)) * 60e3;
+  const MIN = +(q.get("min") || 5);
+  let end = Date.now() + MIN * 60e3;
+  // in OBS the countdown restarts the moment the stream goes live
+  window.addEventListener("obsStreamingStarted", () => { end = Date.now() + MIN * 60e3; });
   const el = document.getElementById("count");
   const tick = () => {
     const s = Math.max(0, Math.round((end - Date.now()) / 1000));
