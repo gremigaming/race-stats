@@ -8,7 +8,7 @@
   "requested": null,
   "last": "2026-11-10"
  },
- "pending": 11,
+ "pending": 13,
  "tracks": [
   {
    "track": "Melbourne",
@@ -949,6 +949,61 @@
        "change": null,
        "text": "Starting setup",
        "why": "Your last quali setup.",
+       "sessions": [
+        {
+         "file": "2026-11-11_20-12-52_Bahrain_Race.gmtel.gz",
+         "date": "2026-11-11",
+         "session": "race",
+         "osq": false,
+         "weather": 1,
+         "pace": 90215,
+         "best": 90215,
+         "mean": 91633,
+         "run": 5,
+         "laps": 4,
+         "bb": 58
+        }
+       ],
+       "verdict": {
+        "result": "baseline",
+        "text": "Starting point: 1:30.215 over 1 session."
+       }
+      },
+      {
+       "v": 2,
+       "base": 1,
+       "created": "2026-11-11",
+       "saved": null,
+       "values": {
+        "fw": 50,
+        "rw": 30,
+        "don": 100,
+        "doff": 50,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 30,
+        "farb": 8,
+        "rarb": 16,
+        "frh": 20,
+        "rrh": 44,
+        "bb": 56,
+        "bp": 100,
+        "fr": 25.0,
+        "fl": 25.0,
+        "rr": 20.5,
+        "rl": 20.5
+       },
+       "change": {
+        "rs": [
+         5,
+         30
+        ]
+       },
+       "text": "Rear springs 5 → 30",
+       "why": "The soft rear lets the floor scrape. 30 keeps it off the ground and makes laps more consistent.",
        "sessions": [],
        "verdict": {
         "result": "untested",
@@ -990,6 +1045,61 @@
        "change": null,
        "text": "Starting setup",
        "why": "Your last race setup.",
+       "sessions": [
+        {
+         "file": "2026-11-11_20-12-52_Bahrain_Race.gmtel.gz",
+         "date": "2026-11-11",
+         "session": "race",
+         "osq": false,
+         "weather": 1,
+         "pace": 91633,
+         "best": 90215,
+         "mean": 91633,
+         "run": 5,
+         "laps": 4,
+         "bb": 58
+        }
+       ],
+       "verdict": {
+        "result": "baseline",
+        "text": "Starting point: 1:31.633 over 1 session."
+       }
+      },
+      {
+       "v": 2,
+       "base": 1,
+       "created": "2026-11-11",
+       "saved": null,
+       "values": {
+        "fw": 50,
+        "rw": 30,
+        "don": 100,
+        "doff": 50,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 30,
+        "farb": 8,
+        "rarb": 16,
+        "frh": 20,
+        "rrh": 44,
+        "bb": 56,
+        "bp": 100,
+        "fr": 25.0,
+        "fl": 25.0,
+        "rr": 20.5,
+        "rl": 20.5
+       },
+       "change": {
+        "rs": [
+         5,
+         30
+        ]
+       },
+       "text": "Rear springs 5 → 30",
+       "why": "The soft rear lets the floor scrape. 30 keeps it off the ground and makes laps more consistent.",
        "sessions": [],
        "verdict": {
         "result": "untested",
