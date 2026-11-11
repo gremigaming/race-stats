@@ -788,7 +788,10 @@ const REGISTRY_KEYS = {
 const registryFile = join("setups", "registry.json");
 const registry = existsSync(registryFile) ? JSON.parse(readFileSync(registryFile, "utf8")) : null;
 const setupCards = registry
-  ? [...registry.tracks].sort((a, b) => a.row - b.row).map((t) => ({
+  // registry order = GreMi's order: normal tracks (Imola last), then the
+  // reverse layouts. Not by save-list row: those put each reverse layout
+  // next to its normal track.
+  ? registry.tracks.map((t) => ({
       post: t.post,
       cards: SETUP_ORDER.map(([kind, label]) => {
         const v = [...(t.kinds[kind]?.versions ?? [])].reverse().find((x) => x.saved);
