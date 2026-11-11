@@ -2,6 +2,7 @@ import { ArrowLeft, ChevronDown, ChevronLeft, Clapperboard, Eye, EyeOff, Flame, 
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { useBackNavigation } from "../hooks/useBackNavigation";
+import { useStewardSignal } from "../hooks/useStewardSignal";
 import { callsOfRace, chronological, biggestFirst, chunkStart, raceTime, rowsOf, streamOf, streamsOf, useLeagueCalls, useManifests, useRaceIndex, type RaceRef, type Row } from "../components/incidents/data";
 import { IncidentStrip } from "../components/incidents/IncidentStrip";
 import { CAR_COLORS, IncidentMap, type Clock, type IncidentSeries } from "../components/incidents/IncidentMap";
@@ -65,6 +66,8 @@ export function IncidentsPage() {
   const { league } = useTelemetry();
   // Back = the page the user came from (their SR page, a race, ...); home only when opened from a link
   const goBack = useBackNavigation(`/${formulaKey ?? ""}`);
+  // GreMi's streaming PC only (opt-in): switches OBS to the steward scene while this page is open
+  const steward = useStewardSignal();
   const index = useRaceIndex();
   const races = useMemo(() => (index.data ?? []).filter((r) => /race/i.test(r.session)), [index.data]);
 
@@ -552,6 +555,14 @@ export function IncidentsPage() {
 
   return (
     <div className="fixed inset-0 flex flex-col bg-[#0c0e11] text-zinc-100 md:flex-row">
+      {steward !== "off" && (
+        <div
+          className={`pointer-events-none fixed bottom-2 left-2 z-50 rounded-md px-2 py-1 text-[11px] font-semibold ${steward === "linked" ? "bg-emerald-600/80 text-white" : "bg-zinc-700/80 text-zinc-300"}`}
+          title="This browser switches OBS to the steward scene through Streamer.bot (?steward=off turns it off)"
+        >
+          {steward === "linked" ? "Steward scene on stream" : steward === "connecting" ? "Connecting to Streamer.bot…" : "Streamer.bot not reachable"}
+        </div>
+      )}
       <div className="relative min-h-0 min-w-0 flex-1 overflow-hidden">
         <div className="absolute inset-0">
           {mapRace ? (

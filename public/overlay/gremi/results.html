@@ -1,61 +1,78 @@
 <!doctype html>
 <!-- OBS browser source: result of the last GreMi Gang race, read from the live league data.
      Updates by itself a few seconds after a race file is uploaded.
-     ?rows=8 rows to show (default 8), ?w=690 card width, ?fs=27 row font size,
-     ?title=Final%20classification heading, ?big shows the track as a large heading instead. -->
+     Per driver: places gained from the grid, tyre stints, penalties, best lap and gap to the winner.
+     ?rows=8 rows to show (default 8), ?w=1100 card width, ?fs=27 row font size,
+     ?title=Final%20classification heading, ?race=<file> show one race (testing). -->
 <html><head><meta charset="utf-8"><title>Race result</title>
 <link rel="stylesheet" href="brand.css">
 <style>
   .card { margin: 10px 24px 30px; }
   .head { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 10px; }
   .side { text-align: right; line-height: 1.5; }
-  .fl { color: #c58bff; }
+  .fl, td.best.fl { color: #c58bff; }
   table { width: 100%; border-collapse: collapse; }
-  td { padding: 6px 8px; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,.08); white-space: nowrap; }
+  th { font-weight: 600; font-size: 15px; letter-spacing: .14em; color: var(--dim); text-transform: uppercase; text-align: left; padding: 0 8px 4px; }
+  th.r, td.r { text-align: right; }
+  td { padding: 6px 8px; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,.08); white-space: nowrap; font-variant-numeric: tabular-nums; }
   td.pos { width: 1.8em; font-weight: 800; text-align: center; }
+  td.gain { width: 2.6em; font-size: .72em; font-weight: 800; }
+  .up { color: #3ee08f; } .down { color: #ff5a52; } .same { color: var(--dim); }
   td.team { color: var(--dim); font-weight: 500; font-size: .82em; }
-  td.time { text-align: right; font-variant-numeric: tabular-nums; }
-  td.name { overflow: hidden; text-overflow: ellipsis; max-width: 0; width: 55%; }
+  td.name { overflow: hidden; text-overflow: ellipsis; max-width: 0; width: 40%; }
+  td.best { font-size: .86em; color: rgba(255,255,255,.85); }
+  td.gap { width: 6em; }
   tr.me td { background: rgba(190,40,120,.32); }
   tr.me td:first-child { box-shadow: inset 4px 0 0 #ff3b30; }
   .bar { display: inline-block; width: 6px; height: 1.05em; border-radius: 3px; vertical-align: -0.15em; margin-right: 10px; }
+  .tyre { display: inline-block; width: 1em; height: 1em; border-radius: 50%; border: .13em solid; font-size: 1em; position: relative;
+          vertical-align: -0.12em; margin-right: 4px; box-sizing: border-box; }
+  .tyre b { position: absolute; inset: 0; font: 800 .5em/1 "Saira Condensed"; display: flex; align-items: center; justify-content: center; color: #fff; }
+  .pen { display: inline-block; margin-left: 6px; padding: 0 5px; border-radius: 4px; background: rgba(255,170,0,.85); color: #000; font-size: .62em; font-weight: 800; vertical-align: .15em; }
   .dnf { color: var(--dim); }
-  tr { animation: rowin .5s ease both; }
+  tbody tr { animation: rowin .5s ease both; }
   @keyframes rowin { from { opacity: 0; transform: translateX(-12px); } }
 </style></head>
 <body>
 <div class="card fade out" id="card"><div class="streaks"><i></i><i></i><i></i><i></i></div>
   <div class="head"><div><div class="label" id="sub">Last race</div><div class="big" id="title" style="font-size:38px;margin-top:4px">—</div></div>
-  <div class="label side">GreMi Gang lobby<br><span class="fl">◆ Fastest lap</span></div></div>
-  <table id="rows"></table>
+  <div class="label side" id="side">GreMi Gang lobby<br><span class="fl">◆ Fastest lap</span></div></div>
+  <table><thead><tr><th>Pos</th><th>+/-</th><th>Driver</th><th>Team</th><th>Tyres</th><th class="r">Best lap</th><th class="r">Gap</th></tr></thead><tbody id="rows"></tbody></table>
 </div>
 <script type="module">
-import { poll, races, loadSession, classification, isMe, teamColor, fmtLap } from "./league.js";
+import { poll, races, loadSession, raceStats, isMe, teamColor, TYRE } from "./league.js";
 const q = new URLSearchParams(location.search);
 const rows = +(q.get("rows") || 8), fs = +(q.get("fs") || 27);
 const card = document.getElementById("card");
-card.style.width = (q.get("w") || 690) + "px";
+card.style.width = (q.get("w") || 1100) + "px";
 document.getElementById("rows").style.fontSize = fs + "px";
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const gain = (g) => g == null ? "" : g > 0 ? `<span class="up">▲${g}</span>` : g < 0 ? `<span class="down">▼${-g}</span>` : `<span class="same">–</span>`;
+const tyres = (list) => list.map((t) => `<span class="tyre" style="border-color:${TYRE[t] || "#888"}"><b>${esc(t[0])}</b></span>`).join("");
 
 poll(async (src) => {
-  const last = races(src.index)[0];
+  const all = races(src.index);
+  const last = all.find((r) => r.file === q.get("race")) || all[0];
   if (!last) return;
-  const s = await loadSession(src, last.file);
-  const list = classification(s);
-  const fast = s.records?.fastest?.lap?.["driver-name"];
+  const st = raceStats(await loadSession(src, last.file));
+  const list = st.rows;
   const me = list.find((c) => isMe(c.name));
   let shown = list.slice(0, rows);
   if (me && !shown.includes(me)) shown = [...list.slice(0, rows - 1), me];
-  document.getElementById("sub").textContent = q.get("title") ? "Last race" : `Last race · ${last.date.toLocaleDateString("en-GB", { day: "2-digit", month: "short" })}`;
+  const day = last.date.toLocaleDateString("en-GB", { day: "2-digit", month: "short" });
+  document.getElementById("sub").textContent = `Last race · ${day} · ${st.laps} laps${st.weather ? " · " + st.weather : ""}`;
   document.getElementById("title").textContent = `${last.track} · ${q.get("title") || "Race result"}`;
+  document.getElementById("side").innerHTML = `GreMi Gang lobby · ${list.length} drivers<br><span class="fl">◆ Fastest lap</span>`;
   document.getElementById("rows").innerHTML = shown.map((c, i) => {
     const out = c.status && !/FINISHED/i.test(c.status);
-    const fl = c.name === fast;
+    const fl = c.name === st.fastest?.name;
     return `<tr class="${isMe(c.name) ? "me" : ""}" style="animation-delay:${i * 60}ms"><td class="pos">${c.pos}</td>
-      <td class="name"><span class="bar" style="background:${teamColor(c.team)}"></span>${esc(c.name)}</td>
+      <td class="gain">${gain(c.gained)}</td>
+      <td class="name"><span class="bar" style="background:${teamColor(c.team)}"></span>${esc(c.name.replace(/^ttv\//i, ""))}</td>
       <td class="team">${esc(c.team)}</td>
-      <td class="time ${fl ? "fl" : ""} ${out ? "dnf" : ""}">${out ? esc(c.status.replace(/_/g, " ")) : (fl ? "◆ " : "") + fmtLap(c.best)}</td></tr>`;
+      <td>${tyres(c.stints)}</td>
+      <td class="best r ${fl ? "fl" : ""}">${fl ? "◆ " : ""}${esc(c.best.replace(/^0(\d:)/, "$1").replace(/^00:/, ""))}</td>
+      <td class="gap r ${out ? "dnf" : ""}">${esc(c.gap)}${c.pen ? `<span class="pen">+${c.pen}s</span>` : ""}</td></tr>`;
   }).join("");
   card.classList.remove("out");
   card.classList.remove("sweep"); void card.offsetWidth; card.classList.add("sweep");
