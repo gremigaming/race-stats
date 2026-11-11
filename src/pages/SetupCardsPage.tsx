@@ -237,9 +237,13 @@ function SetupOverview({ track }: { track: SetupTrack }) {
       data-post={track.post}
       data-kind="overview"
       data-circuit={CIRCUITS[track.post] ?? ""}
-      className={cn(cardClass, "flex h-[450px] w-[680px] flex-col p-6")}
+      className={cn(cardClass, "relative flex h-[450px] w-[680px] flex-col overflow-hidden p-6")}
     >
-      <div className="mb-5 flex items-end justify-between">
+      {/* the same colour fade as the full cards, one colour per column:
+          quali violet, race red, wet sky, fading out downwards */}
+      <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-violet-500 via-red-500 to-sky-500" />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-violet-500/[0.16] via-red-500/[0.12] to-sky-500/[0.16] [mask-image:linear-gradient(to_bottom,black,transparent_75%)]" />
+      <div className="relative mb-5 flex items-end justify-between">
         <div>
           <div className="font-mono text-2xs uppercase tracking-[0.25em] text-zinc-500">
             {CIRCUITS[track.post] ?? track.post}
@@ -251,7 +255,7 @@ function SetupOverview({ track }: { track: SetupTrack }) {
           <div className="text-zinc-600">gremigaming.github.io/race-stats</div>
         </div>
       </div>
-      <div className="flex flex-1 gap-3">
+      <div className="relative flex flex-1 gap-3">
         <OverviewColumn
           kind="quali"
           setup={quali?.setup}

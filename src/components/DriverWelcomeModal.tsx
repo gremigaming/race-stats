@@ -12,7 +12,9 @@ import { Modal } from "./ui/Modal";
 
 export function DriverWelcomeModal() {
   const { mode, league } = useTelemetry();
-  const [, setSearchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
+  // ?embed pages are rendered as pictures (Discord cards): never cover them.
+  const embedded = searchParams.has("embed");
   const [dismissed, setDismissed] = useState(() =>
     readStoredBoolean(LEAGUE_DRIVER_ONBOARDING_STORAGE_KEY),
   );
@@ -26,6 +28,7 @@ export function DriverWelcomeModal() {
   const savedDriver = readStoredString(LEAGUE_DRIVER_STORAGE_KEY);
   const hasSavedDriver = drivers.some((driver) => driver.key === savedDriver);
   const visible =
+    !embedded &&
     mode === "league" &&
     drivers.length > 0 &&
     !dismissed &&

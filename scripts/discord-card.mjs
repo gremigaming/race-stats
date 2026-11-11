@@ -30,6 +30,8 @@ mkdirSync(out, { recursive: true });
 // PW_CHANNEL=chrome uses the runner's own Google Chrome (no browser download, which took minutes)
 const browser = await chromium.launch(process.env.PW_CHANNEL ? { channel: process.env.PW_CHANNEL } : {});
 const page = await browser.newPage({ viewport: { width: 1100, height: 900 }, deviceScaleFactor: 2, timezoneId: "Europe/Amsterdam" });
+// No "Who's driving?" welcome popup over the pictures (?embed hides it too)
+await page.addInitScript(() => localStorage.setItem("league-driver-onboarding-dismissed", "true"));
 await page.goto(base);
 await page.waitForTimeout(4000);
 const scope = new URL(page.url()).pathname.replace(/^\/race-stats\//, "").split("/")[0];
@@ -60,6 +62,8 @@ console.log(`discord safety card: ${srHash}`);
 // GreMi's setup per track for the F1-SETUPS forum: one picture per card
 // (dry race, dry quali, wet, or a grayed "No setup yet" placeholder), listed
 // in setups.json with a hash that only changes when the card does.
+// Bump on a visual change: every card's hash changes, so Race Control redraws all posts
+const SETUP_LAYOUT = "2";
 const setupOut = join(out, "setups");
 mkdirSync(setupOut, { recursive: true });
 await page.goto(`${base}setup-cards?embed=1`);
@@ -71,7 +75,7 @@ for (const section of await page.$$("#setup-cards section")) {
   const post = await section.getAttribute("data-post");
   const kind = await section.getAttribute("data-kind");
   await section.screenshot({ path: join(setupOut, `${id}.png`) });
-  const hash = createHash("sha256").update(await section.innerText()).digest("hex").slice(0, 12);
+  const hash = createHash("sha256").update(SETUP_LAYOUT + await section.innerText()).digest("hex").slice(0, 12);
   let track = setupTracks.find((t) => t.post === post);
   if (!track) setupTracks.push((track = { post, cards: [] }));
   const extra = {};
