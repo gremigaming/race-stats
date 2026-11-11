@@ -2338,11 +2338,24 @@
          "run": 8,
          "laps": 5,
          "bb": 58
+        },
+        {
+         "file": "2026-11-11_20-28-51_Silverstone_OSQ.gmtel.gz",
+         "date": "2026-11-11",
+         "session": "quali",
+         "osq": true,
+         "weather": 1,
+         "pace": 88470,
+         "best": 88470,
+         "mean": 88470,
+         "run": 1,
+         "laps": 1,
+         "bb": 58
         }
        ],
        "verdict": {
         "result": "baseline",
-        "text": "Starting point: 0:54.171 over 1 session."
+        "text": "Starting point: 1:11.320 over 2 sessions."
        }
       },
       {
