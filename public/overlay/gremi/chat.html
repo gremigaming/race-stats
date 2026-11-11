@@ -1,0 +1,111 @@
+<!doctype html>
+<!-- OBS on-screen chat for the horizontal scenes: Twitch + YouTube from Streamer.bot (ws://127.0.0.1:8080), TikTok from TikFinity (ws://localhost:21213).
+     Same look as the old Nutty multichat: semi-transparent black bubbles, Koulen, newest at the bottom, messages fade after ?hide= seconds.
+     ?fs=20 font px  ?hide=60 seconds (0 = never)  ?max=12 bubbles  ?ignore=a,b bot names  ?commands=1 show !commands
+     ?sb=127.0.0.1:8080  ?tikfinity=21213  ?demo sample messages. Transparent background: no OBS CSS needed. -->
+<html><head><meta charset="utf-8"><title>Chat overlay</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Koulen&display=swap" rel="stylesheet">
+<style>
+  :root { --fs: 20px; --twitch: #a970ff; --youtube: #ff3b30; --tiktok: #25f4ee; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: transparent; overflow: hidden; }
+  body { font: 400 var(--fs)/1.15 "Koulen", "Bebas Neue", Impact, sans-serif; color: #fff; letter-spacing: .02em; }
+  #list { position: absolute; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; align-items: flex-start; gap: calc(var(--fs) * .3); }
+  .m { max-width: 100%; background: rgba(0,0,0,.5); border-radius: calc(var(--fs) * .45); padding: calc(var(--fs) * .28) calc(var(--fs) * .5) calc(var(--fs) * .2);
+       overflow-wrap: anywhere; text-shadow: 0 1px 2px rgba(0,0,0,.6); animation: in .25s ease-out; transition: opacity .6s, transform .6s; }
+  .m.out { opacity: 0; transform: translateX(-12px); }
+  .m.ev { background: linear-gradient(90deg, rgba(225,6,0,.6), rgba(145,70,255,.6)); }
+  .ico { display: inline-block; width: .9em; height: .9em; vertical-align: -.08em; margin-right: .3em; }
+  .n { margin-right: .35em; }
+  .emote { height: 1.3em; vertical-align: middle; margin: -.25em 1px; }
+  @keyframes in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+</style></head>
+<body><div id="list"></div>
+<script>
+const q = new URLSearchParams(location.search);
+if (q.get("fs")) document.documentElement.style.setProperty("--fs", q.get("fs") + "px");
+const HIDE = +(q.get("hide") ?? 60), MAX = +(q.get("max") || 12), SHOW_CMD = q.get("commands") === "1";
+const IGNORE = new Set((q.get("ignore") || "StreamElements,Streamlabs,GreMi_Chat,RaceControll,GreMi_Bot,Nightbot").toLowerCase().split(","));
+const list = document.getElementById("list");
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const ICON = {
+  twitch: '<svg class="ico" viewBox="0 0 24 24"><path fill="#a970ff" d="M4 2 2.5 6v14h5v3h3l3-3h4l5-5V2H4Zm16 12-3 3h-4.5l-3 3v-3H5.5V4H20v10Zm-3.5-6.5h-2v6h2v-6Zm-5 0h-2v6h2v-6Z"/></svg>',
+  youtube: '<svg class="ico" viewBox="0 0 24 24"><path fill="#ff3b30" d="M23 7.2a3 3 0 0 0-2.1-2.1C19 4.6 12 4.6 12 4.6s-7 0-8.9.5A3 3 0 0 0 1 7.2C.5 9.1.5 12 .5 12s0 2.9.5 4.8a3 3 0 0 0 2.1 2.1c1.9.5 8.9.5 8.9.5s7 0 8.9-.5a3 3 0 0 0 2.1-2.1c.5-1.9.5-4.8.5-4.8s0-2.9-.5-4.8Z"/><path fill="#fff" d="m9.7 15.5 6-3.5-6-3.5v7Z"/></svg>',
+  tiktok: '<svg class="ico" viewBox="0 0 24 24"><path fill="#25f4ee" d="M16.6 2h-3.4v13.3a2.9 2.9 0 1 1-2.1-2.8V9a6.4 6.4 0 1 0 5.5 6.3V8.6a8 8 0 0 0 4.7 1.5V6.7A4.8 4.8 0 0 1 16.6 2Z"/><path fill="#fe2c55" d="M17.4 2.8h-.8V15.3a5.6 5.6 0 0 1-9.2 4.3 6.4 6.4 0 0 0 10-5.1V8.6a8 8 0 0 0 4.7 1.5v-.8a4.8 4.8 0 0 1-4.7-6.5Z" opacity=".7"/></svg>',
+};
+
+function render(text, emotes = []) {
+  if (!emotes.length) return esc(text);
+  const byIndex = emotes.filter((e) => e.startIndex != null).sort((a, b) => a.startIndex - b.startIndex);
+  if (byIndex.length) {
+    const chars = Array.from(text); let out = "", i = 0;
+    for (const e of byIndex) { out += esc(chars.slice(i, e.startIndex).join("")) + `<img class="emote" src="${esc(e.imageUrl)}" alt="">`; i = e.endIndex + 1; }
+    return out + esc(chars.slice(i).join(""));
+  }
+  const map = Object.fromEntries(emotes.map((e) => [e.name, e.imageUrl]));
+  return text.split(/(\s+)/).map((w) => (map[w] ? `<img class="emote" src="${esc(map[w])}" alt="">` : esc(w))).join("");
+}
+
+function add({ platform, name = "", color, text = "", html, event = false }) {
+  if (!event && (IGNORE.has(String(name).toLowerCase()) || (!SHOW_CMD && /^\s*!/.test(text)))) return;
+  const m = document.createElement("div");
+  m.className = "m" + (event ? " ev" : "");
+  m.innerHTML = (ICON[platform] || "") + (name ? `<span class="n" style="color:${esc(color || `var(--${platform})`)}">${esc(name)}</span>` : "") + (html ?? esc(text));
+  list.appendChild(m);
+  while (list.children.length > MAX) list.firstChild.remove();
+  // drop bubbles that no longer fit above the top edge
+  while (list.firstChild && list.offsetHeight > innerHeight) list.firstChild.remove();
+  if (HIDE > 0) setTimeout(() => { m.classList.add("out"); setTimeout(() => m.remove(), 700); }, HIDE * 1000);
+}
+
+function sbChat(platform, d) {
+  const msg = d.message || {}, user = d.user || {};
+  const text = typeof msg === "string" ? msg : msg.message ?? msg.text ?? d.text ?? "";
+  const name = user.name || user.display_name || msg.displayName || msg.username || d.userName || "";
+  add({ platform, name, color: user.color || msg.color, text, html: render(text, msg.emotes || d.emotes || []) });
+}
+function sbEvent(ev, d) {
+  const who = d.displayName || d.user?.name || d.user_name || d.userName || d.user?.display_name || "";
+  const platform = ev.source === "YouTube" ? "youtube" : "twitch";
+  const say = (t) => add({ platform, text: t, event: true });
+  switch (`${ev.source}.${ev.type}`) {
+    case "Twitch.ChatMessage": return sbChat("twitch", d);
+    case "YouTube.Message": return sbChat("youtube", d);
+    case "Twitch.Follow": return say(`${who} followed`);
+    case "Twitch.Sub": return say(`${who} subscribed`);
+    case "Twitch.ReSub": return say(`${who} resubscribed`);
+    case "Twitch.GiftBomb": return say(`${who} gifted ${d.gifts ?? d.total ?? ""} subs`);
+    case "Twitch.Raid": return say(`${d.from_broadcaster_user_name || who} raided with ${d.viewers ?? ""}`);
+    case "YouTube.SuperChat": return say(`${who} Super Chat ${d.amount ?? ""}`);
+    case "YouTube.NewSponsor": return say(`${who} became a member`);
+  }
+}
+function connectSB() {
+  const ws = new WebSocket(`ws://${q.get("sb") || "127.0.0.1:8080"}/`);
+  ws.onopen = () => ws.send(JSON.stringify({ request: "Subscribe", id: "gremi-chat-overlay", events: {
+    Twitch: ["ChatMessage", "Follow", "Sub", "ReSub", "GiftBomb", "Raid"], YouTube: ["Message", "SuperChat", "NewSponsor"] } }));
+  ws.onmessage = (m) => { try { const j = JSON.parse(m.data); if (j.event) sbEvent(j.event, j.data || {}); } catch (e) { console.warn(e); } };
+  ws.onclose = () => setTimeout(connectSB, 5000);
+}
+function connectTF() {
+  const ws = new WebSocket(`ws://localhost:${q.get("tikfinity") || 21213}/`);
+  ws.onmessage = (m) => {
+    try {
+      const j = JSON.parse(m.data), d = j.data || {}, name = d.nickname || d.uniqueId;
+      if (j.event === "chat") add({ platform: "tiktok", name, text: d.comment });
+      if (j.event === "follow") add({ platform: "tiktok", text: `${name} followed`, event: true });
+      if (j.event === "gift" && (d.giftType !== 1 || d.repeatEnd)) add({ platform: "tiktok", text: `${name} sent ${d.repeatCount || 1}x ${d.giftName || "gift"}`, event: true });
+    } catch (e) { console.warn(e); }
+  };
+  ws.onclose = () => setTimeout(connectTF, 5000);
+}
+
+if (q.has("demo")) {
+  [["twitch", "0verfast", "#ff7b00", "that pass into 130R was insane"], ["youtube", "DrewDrew Playz", null, "P4 from P9, GG"],
+   ["tiktok", "markbonner189", null, "lets gooo"], ["twitch", "Bananensaus17", "#00c3ff", "fastest lap is mine"],
+   ["twitch", "lisa_simracing", "#ff4fa3", "first time here, is gremi always this fast?"]]
+    .forEach(([p, n, c, t]) => add({ platform: p, name: n, color: c, text: t }));
+  add({ platform: "twitch", text: "Lisa_SimRacing followed", event: true });
+} else { connectSB(); connectTF(); }
+</script>
+</body></html>
