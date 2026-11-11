@@ -8,7 +8,7 @@
   "requested": null,
   "last": "2026-11-10"
  },
- "pending": 7,
+ "pending": 8,
  "tracks": [
   {
    "track": "Melbourne",
@@ -4443,12 +4443,68 @@
        },
        "text": "Off-throttle diff 30% → 25%",
        "why": "The car is reluctant to turn in; a slightly more open diff helps the nose into the corner.",
+       "sessions": [
+        {
+         "file": "2026-11-11_19-32-53_Brazil_OSQ.gmtel.gz",
+         "date": "2026-11-11",
+         "session": "quali",
+         "osq": true,
+         "weather": 0,
+         "pace": 69758,
+         "best": 69758,
+         "mean": 69758,
+         "run": 1,
+         "laps": 1,
+         "bb": 60
+        }
+       ],
+       "verdict": {
+        "result": "better",
+        "delta": -1.16,
+        "text": "Better: quali lap 1:09.758 against 1:10.574 on V1 (0.816 s faster)."
+       },
+       "slot": 60
+      },
+      {
+       "v": 3,
+       "base": 2,
+       "created": "2026-11-11",
+       "saved": null,
+       "values": {
+        "fw": 50,
+        "rw": 25,
+        "don": 100,
+        "doff": 25,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 14,
+        "farb": 2,
+        "rarb": 3,
+        "frh": 22,
+        "rrh": 46,
+        "bb": 54,
+        "bp": 100,
+        "fr": 29.5,
+        "fl": 29.5,
+        "rr": 22.0,
+        "rl": 22.0
+       },
+       "change": {
+        "rw": [
+         22,
+         25
+        ]
+       },
+       "text": "Rear wing 22 → 25",
+       "why": "More rear grip against oversteer and wheelspin. Costs a little top speed.",
        "sessions": [],
        "verdict": {
         "result": "untested",
         "text": "Not driven yet."
-       },
-       "slot": 60
+       }
       }
      ]
     },
