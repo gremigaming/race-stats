@@ -2351,11 +2351,24 @@
          "run": 1,
          "laps": 1,
          "bb": 58
+        },
+        {
+         "file": "2026-11-11_20-32-10_Silverstone_Race.gmtel.gz",
+         "date": "2026-11-11",
+         "session": "race",
+         "osq": false,
+         "weather": 2,
+         "pace": 90220,
+         "best": 90220,
+         "mean": 90464,
+         "run": 5,
+         "laps": 4,
+         "bb": 58
         }
        ],
        "verdict": {
         "result": "baseline",
-        "text": "Starting point: 1:11.320 over 2 sessions."
+        "text": "Starting point: 1:17.620 over 3 sessions."
        }
       },
       {
@@ -2447,11 +2460,24 @@
          "run": 8,
          "laps": 5,
          "bb": 58
+        },
+        {
+         "file": "2026-11-11_20-32-10_Silverstone_Race.gmtel.gz",
+         "date": "2026-11-11",
+         "session": "race",
+         "osq": false,
+         "weather": 2,
+         "pace": 90464,
+         "best": 90220,
+         "mean": 90464,
+         "run": 5,
+         "laps": 4,
+         "bb": 58
         }
        ],
        "verdict": {
         "result": "baseline",
-        "text": "Starting point: 1:23.797 over 1 session."
+        "text": "Starting point: 1:27.131 over 2 sessions."
        }
       },
       {
