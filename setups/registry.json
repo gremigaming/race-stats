@@ -8,7 +8,7 @@
   "requested": null,
   "last": "2026-11-10"
  },
- "pending": 9,
+ "pending": 10,
  "tracks": [
   {
    "track": "Melbourne",
@@ -4227,6 +4227,61 @@
        "change": null,
        "text": "Starting setup",
        "why": "Your last quali setup.",
+       "sessions": [
+        {
+         "file": "2026-11-11_19-51-48_Mexico_OSQ.gmtel.gz",
+         "date": "2026-11-11",
+         "session": "quali",
+         "osq": true,
+         "weather": 1,
+         "pace": 77565,
+         "best": 77565,
+         "mean": 77565,
+         "run": 1,
+         "laps": 1,
+         "bb": 59
+        }
+       ],
+       "verdict": {
+        "result": "baseline",
+        "text": "Starting point: 1:17.565 over 1 session."
+       }
+      },
+      {
+       "v": 2,
+       "base": 1,
+       "created": "2026-11-11",
+       "saved": null,
+       "values": {
+        "fw": 48,
+        "rw": 32,
+        "don": 100,
+        "doff": 30,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 37,
+        "rs": 30,
+        "farb": 13,
+        "rarb": 8,
+        "frh": 23,
+        "rrh": 41,
+        "bb": 55,
+        "bp": 100,
+        "fr": 24.2,
+        "fl": 24.2,
+        "rr": 20.5,
+        "rl": 20.5
+       },
+       "change": {
+        "rs": [
+         17,
+         30
+        ]
+       },
+       "text": "Rear springs 17 → 30",
+       "why": "The soft rear lets the floor scrape. 30 keeps it off the ground and makes laps more consistent.",
        "sessions": [],
        "verdict": {
         "result": "untested",
