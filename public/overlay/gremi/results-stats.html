@@ -1,8 +1,8 @@
 <!doctype html>
 <!-- OBS browser source: race stats next to the race result, from the live league data.
-     Cycles three pages: race awards, GreMi's race (with a position chart) and tonight's leaderboard.
+     Cycles four pages: race awards, more awards (both for the other drivers), GreMi's race (with a position chart) and tonight's leaderboard.
      Source size 668x338 for the default 620x290 card (the card has a 24px margin).
-     ?w=620 ?h=290 card size, ?every=12 seconds per page, ?page=awards|me|tonight shows one page,
+     ?w=620 ?h=290 card size, ?every=12 seconds per page, ?page=awards|awards2|me|tonight, ?me=1 lets GreMi win awards too, shows one page,
      ?race=<file> show one race (testing). -->
 <html><head><meta charset="utf-8"><title>Race stats</title>
 <link rel="stylesheet" href="brand.css">
@@ -41,7 +41,7 @@
   <div class="page" id="page"></div>
 </div>
 <script type="module">
-import { poll, races, loadSession, raceStats, classification, isMe, teamColor, fmtLap, shortName } from "./league.js";
+import { poll, races, loadSession, raceStats, classification, isMe, teamColor, fmtLap, fmtMs, shortName } from "./league.js";
 const q = new URLSearchParams(location.search);
 const card = document.getElementById("card");
 card.style.width = (q.get("w") || 620) + "px";
@@ -49,16 +49,45 @@ card.style.height = (q.get("h") || 290) + "px";
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const who = (n) => `<div class="who ${isMe(n) ? "me" : ""}">${esc(shortName(n))}</div>`;
 
+// Awards go to the other drivers (GreMi has his own page): ?me=1 lets him win them too.
+const others = (st) => st.rows.filter((r) => q.get("me") || !isMe(r.name));
+const best = (list, score) => list.filter((r) => score(r) != null).sort((a, b) => score(a) - score(b) || a.pos - b.pos)[0] || null;
+const tile = (label, v, sub) => `<div class="tile"><div class="label">${label}</div><div class="v">${v}</div>${sub}</div>`;
+const plural = (n, w) => `${n} ${w}${n === 1 ? "" : "s"}`;
+
 function awards(st) {
-  const t = (label, v, sub) => `<div class="tile"><div class="label">${label}</div><div class="v">${v}</div>${sub}</div>`;
-  const tiles = [];
-  if (st.fastest) tiles.push(t("Fastest lap", `<span class="fl" style="color:#c58bff">${esc(st.fastest.time)}</span>`, who(st.fastest.name)));
-  if (st.topSpeed) tiles.push(t("Top speed", `${Math.round(st.topSpeed.kmh)}<small style="font-size:18px"> km/h</small>`, who(st.topSpeed.name)));
-  if (st.overtakeKing) tiles.push(t("Overtake king", `${st.overtakeKing[1]} passes`, who(st.overtakeKing[0])));
-  tiles.push(t("Biggest climber", st.climber ? `P${st.climber.grid} → P${st.climber.pos}` : "—", st.climber ? who(st.climber.name) : `<div class="who">nobody gained</div>`));
+  const rs = others(st), fin = rs.filter((r) => !r.out), tiles = [];
+  const fl = best(rs, (r) => r.best ? toMs(r.best) : null);
+  if (fl) tiles.push(tile("Fastest lap", `<span style="color:${fl.name === st.fastest?.name ? "#c58bff" : "#fff"}">${esc(fmtLap(fl.best))}</span>`, who(fl.name)));
+  const ts = best(rs, (r) => st.trapOf(r.name) ? -st.trapOf(r.name) : null);
+  if (ts) tiles.push(tile("Top speed", `${Math.round(st.trapOf(ts.name))}<small style="font-size:18px"> km/h</small>`, who(ts.name)));
+  const ok = best(rs, (r) => r.made ? -r.made : null);
+  if (ok) tiles.push(tile("Overtake king", plural(ok.made, "pass").replace("passs", "passes"), who(ok.name)));
+  const cl = best(rs, (r) => r.gained > 0 ? -r.gained : null);
+  tiles.push(tile("Biggest climber", cl ? `P${cl.grid} → P${cl.pos}` : "—", cl ? who(cl.name) : `<div class="who">nobody gained</div>`));
+  // Cleanest: the finisher with the fewest contacts and penalties, then fewest track limit warnings, best placed.
+  const cn = best(fin, (r) => (r.contacts + r.pens) * 100 + r.warns);
+  if (cn) tiles.push(tile("Cleanest driver", cn.contacts ? plural(cn.contacts, "contact") : cn.pens ? plural(cn.pens, "penalty").replace("penaltys", "penalties") : cn.warns ? plural(cn.warns, "warning") : "Spotless", who(cn.name)));
+  const l1 = best(rs, (r) => r.lap1 > 0 ? -r.lap1 : null);
+  if (l1) tiles.push(tile("Lap 1 hero", `+${plural(l1.lap1, "place")}`, who(l1.name)));
+  return `<div class="tiles">${tiles.slice(0, 6).join("")}</div>`;
+}
+
+function awards2(st) {
+  const rs = others(st), fin = rs.filter((r) => !r.out), tiles = [];
+  const mine = (s) => q.get("me") || !isMe(s?.name);
   if (st.sectors.some(Boolean))
-    tiles.push(`<div class="tile"><div class="label">Purple sectors</div>${st.sectors.map((s, i) => s ? `<div class="sec"><b>S${i + 1}</b>${esc(shortName(s.name))}</div>` : "").join("")}</div>`);
-  tiles.push(t("Race control", `${st.contacts.length} contacts`, `<div class="who">${st.overtakes} passes · ${st.pens} pen${st.pens === 1 ? "" : "s"}</div>`));
+    tiles.push(`<div class="tile"><div class="label">Purple sectors</div>${st.sectors.map((s, i) => s ? `<div class="sec"><b>S${i + 1}</b>${mine(s) ? esc(shortName(s.name)) : "GreMi"}</div>` : "").join("")}</div>`);
+  const co = best(fin, (r) => r.spread);
+  if (co) tiles.push(tile("Most consistent", `±${co.spread.toFixed(2)}<small style="font-size:18px"> s</small>`, who(co.name)));
+  const tw = best(fin, (r) => r.wear);
+  if (tw) tiles.push(tile("Tyre whisperer", `${tw.wear.toFixed(1)}%<small style="font-size:18px"> /lap</small>`, who(tw.name)));
+  const ll = best(fin, (r) => r.lastLap || null);
+  if (ll) tiles.push(tile("Fastest last lap", esc(fmtMs(ll.lastLap)), who(ll.name)));
+  // Hardest to pass: a finisher nobody (or the fewest) got past, best placed.
+  const hp = best(fin.filter((r) => r.pos > 1), (r) => r.lost);
+  if (hp) tiles.push(tile("Hardest to pass", hp.lost ? `passed only ${hp.lost}x` : "Never passed", who(hp.name)));
+  tiles.push(tile("Race control", plural(st.contacts.length, "contact"), `<div class="who">${st.overtakes} passes · ${plural(st.pens, "penalty").replace("penaltys", "penalties")}</div>`));
   return `<div class="tiles">${tiles.slice(0, 6).join("")}</div>`;
 }
 
@@ -118,7 +147,7 @@ async function tonight(src, all) {
 }
 
 let pages = [], at = 0, timer = 0;
-const titles = { awards: "Race awards", me: "GreMi's race", tonight: "Tonight's leaderboard" };
+const titles = { awards: "Race awards", awards2: "More awards", me: "GreMi's race", tonight: "Tonight's leaderboard" };
 function show() {
   if (!pages.length) return;
   const p = pages[at % pages.length];
@@ -134,7 +163,7 @@ poll(async (src) => {
   const last = all.find((r) => r.file === q.get("race")) || all[0];
   if (!last) return;
   const st = raceStats(await loadSession(src, last.file));
-  const next = [{ key: "awards", html: awards(st) }];
+  const next = [{ key: "awards", html: awards(st) }, { key: "awards2", html: awards2(st) }];
   const m = mine(st);
   if (m) next.push({ key: "me", html: m });
   next.push({ key: "tonight", html: await tonight(src, all) });

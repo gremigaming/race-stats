@@ -120,6 +120,32 @@ export function raceStats(s) {
   const climber = rows.filter((r) => r.gained > 0).sort((a, b) => b.gained - a.gained)[0] || null;
   const hist = (s["position-history"] || []).map((p) => ({ name: p.name, team: String(p.team || "").replace(/ '\d\d$/, ""),
     pts: (p["driver-position-history"] || []).map((x) => [x["lap-number"], x.position]) }));
+  // Per driver extras for the awards: contacts, warnings, lap 1 gain, lap consistency, last lap, tyre wear.
+  const wear = {};
+  for (const [, v] of Object.entries(s.records?.["tyre-stats"] || {})) {
+    const w = v?.["lowest-tyre-wear-per-lap"];
+    if (w?.["driver-name"] && (wear[w["driver-name"]] == null || w.value < wear[w["driver-name"]])) wear[w["driver-name"]] = w.value;
+  }
+  for (const r of rows) {
+    const raw = cls.find((x) => x["driver-name"] === r.name) || {};
+    const idx = raw.index;
+    r.contacts = contacts.filter((c) => c.cars.includes(idx)).length;
+    r.warns = warnings.get(r.name) || 0;
+    r.made = made.get(r.name) || 0;
+    r.lost = lost.get(r.name) || 0;
+    const h = hist.find((x) => x.name === r.name)?.pts || [];
+    const p0 = h.find((x) => x[0] === 0)?.[1], p1 = h.find((x) => x[0] === 1)?.[1];
+    r.lap1 = p0 && p1 ? p0 - p1 : 0;
+    const laps = (raw["session-history"]?.["lap-history-data"] || []).map((l) => ({ ms: l["lap-time-in-ms"], ok: (l["lap-valid-bit-flags"] & 1) === 1 })).filter((l) => l.ms > 0);
+    r.lastLap = !out(r) && laps.length ? laps.at(-1).ms : 0;
+    const clean = laps.slice(1).filter((l) => l.ok).map((l) => l.ms);
+    if (clean.length >= 3) {
+      const avg = clean.reduce((a, b) => a + b, 0) / clean.length;
+      r.spread = Math.sqrt(clean.reduce((a, b) => a + (b - avg) ** 2, 0) / clean.length) / 1000;
+    } else r.spread = null;
+    r.wear = wear[r.name] ?? null;
+    r.out = !!out(r);
+  }
   const info = s["session-info"] || {};
   return {
     rows, win, hist, traps, contacts, warnings,
@@ -133,6 +159,7 @@ export function raceStats(s) {
   };
 }
 
+export const fmtMs = (ms) => fmtRace(ms / 1000).replace(/^0:/, "");
 export const fmtRace = (sec) => { const m = Math.floor(sec / 60); return `${m}:${(sec - m * 60).toFixed(3).padStart(6, "0")}`; };
 export const TYRE = { Soft: "#ff3b30", Medium: "#ffd21f", Hard: "#f2f2f2", Inters: "#3ccf4e", Intermediate: "#3ccf4e", Wet: "#2f8cff" };
 export const shortName = (n) => String(n || "").replace(/^ttv\//i, "").replace(/^\[[^\]]+\]\s*/, "");
