@@ -8,7 +8,7 @@
   "requested": null,
   "last": "2026-11-10"
  },
- "pending": 10,
+ "pending": 11,
  "tracks": [
   {
    "track": "Melbourne",
@@ -4240,11 +4240,24 @@
          "run": 1,
          "laps": 1,
          "bb": 59
+        },
+        {
+         "file": "2026-11-11_19-55-20_Mexico_Race.gmtel.gz",
+         "date": "2026-11-11",
+         "session": "race",
+         "osq": false,
+         "weather": 2,
+         "pace": 77263,
+         "best": 77263,
+         "mean": 78174,
+         "run": 5,
+         "laps": 4,
+         "bb": 59
         }
        ],
        "verdict": {
         "result": "baseline",
-        "text": "Starting point: 1:17.565 over 1 session."
+        "text": "Starting point: 1:17.414 over 2 sessions."
        }
       },
       {
@@ -4323,6 +4336,61 @@
        "change": null,
        "text": "Starting setup",
        "why": "Your last race setup.",
+       "sessions": [
+        {
+         "file": "2026-11-11_19-55-20_Mexico_Race.gmtel.gz",
+         "date": "2026-11-11",
+         "session": "race",
+         "osq": false,
+         "weather": 2,
+         "pace": 78174,
+         "best": 77263,
+         "mean": 78174,
+         "run": 5,
+         "laps": 4,
+         "bb": 59
+        }
+       ],
+       "verdict": {
+        "result": "baseline",
+        "text": "Starting point: 1:18.174 over 1 session."
+       }
+      },
+      {
+       "v": 2,
+       "base": 1,
+       "created": "2026-11-11",
+       "saved": null,
+       "values": {
+        "fw": 48,
+        "rw": 35,
+        "don": 100,
+        "doff": 30,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 37,
+        "rs": 17,
+        "farb": 13,
+        "rarb": 8,
+        "frh": 23,
+        "rrh": 41,
+        "bb": 55,
+        "bp": 100,
+        "fr": 24.2,
+        "fl": 24.2,
+        "rr": 20.5,
+        "rl": 20.5
+       },
+       "change": {
+        "rw": [
+         32,
+         35
+        ]
+       },
+       "text": "Rear wing 32 → 35",
+       "why": "More rear grip against oversteer and wheelspin. Costs a little top speed.",
        "sessions": [],
        "verdict": {
         "result": "untested",
