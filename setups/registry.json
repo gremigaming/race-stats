@@ -8,7 +8,7 @@
   "requested": null,
   "last": "2026-11-10"
  },
- "pending": 8,
+ "pending": 9,
  "tracks": [
   {
    "track": "Melbourne",
@@ -4456,12 +4456,25 @@
          "run": 1,
          "laps": 1,
          "bb": 60
+        },
+        {
+         "file": "2026-11-11_19-35-29_Brazil_Race.gmtel.gz",
+         "date": "2026-11-11",
+         "session": "race",
+         "osq": false,
+         "weather": 1,
+         "pace": 70560,
+         "best": 70560,
+         "mean": 71648,
+         "run": 5,
+         "laps": 3,
+         "bb": 58
         }
        ],
        "verdict": {
         "result": "better",
-        "delta": -1.16,
-        "text": "Better: quali lap 1:09.758 against 1:10.574 on V1 (0.816 s faster)."
+        "delta": -0.59,
+        "text": "Better: quali lap 1:10.159 against 1:10.574 on V1 (0.415 s faster)."
        },
        "slot": 60
       },
@@ -4622,12 +4635,68 @@
        },
        "text": "Off-throttle diff 30% → 25%",
        "why": "The car is reluctant to turn in; a slightly more open diff helps the nose into the corner.",
+       "sessions": [
+        {
+         "file": "2026-11-11_19-35-29_Brazil_Race.gmtel.gz",
+         "date": "2026-11-11",
+         "session": "race",
+         "osq": false,
+         "weather": 1,
+         "pace": 71648,
+         "best": 70560,
+         "mean": 71648,
+         "run": 5,
+         "laps": 3,
+         "bb": 58
+        }
+       ],
+       "verdict": {
+        "result": "worse",
+        "delta": 1.01,
+        "text": "Worse: average lap 1:11.648 against 1:10.935 on V1 (0.713 s slower)."
+       },
+       "slot": 61
+      },
+      {
+       "v": 3,
+       "base": 1,
+       "created": "2026-11-11",
+       "saved": null,
+       "values": {
+        "fw": 50,
+        "rw": 22,
+        "don": 100,
+        "doff": 30,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 14,
+        "farb": 2,
+        "rarb": 5,
+        "frh": 22,
+        "rrh": 46,
+        "bb": 54,
+        "bp": 100,
+        "fr": 29.5,
+        "fl": 29.5,
+        "rr": 22.0,
+        "rl": 22.0
+       },
+       "change": {
+        "rarb": [
+         3,
+         5
+        ]
+       },
+       "text": "Rear anti-roll bar 3 → 5",
+       "why": "The front wing is already at 50, so a slightly stiffer rear anti-roll bar helps the car rotate. V2's change is undone (it didn't make the car faster).",
        "sessions": [],
        "verdict": {
         "result": "untested",
         "text": "Not driven yet."
-       },
-       "slot": 61
+       }
       }
      ]
     },
