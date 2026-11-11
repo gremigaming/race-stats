@@ -2,8 +2,8 @@
 <!-- OBS browser source: full-screen background for Starting soon / BRB / Ending / Between races.
      Size 1920x1080 (horizontal) or 1080x1920 (vertical, it adapts).
      ?mode=starting|brb|ending|bg  (bg = only the animated background, no text)
-     ?min=5 countdown minutes for starting (restarts when the source becomes visible: tick
-     "Refresh browser when scene becomes active" in OBS) and again when OBS starts streaming. ?sub= replaces the small line. -->
+     ?min=5 countdown minutes for starting. In OBS it waits at the full time and starts when the stream goes live
+     (start time kept in localStorage, so every canvas and a refresh show the same time). ?sub= replaces the small line. -->
 <html><head><meta charset="utf-8"><title>Screen</title>
 <link rel="stylesheet" href="brand.css">
 <style>
@@ -41,13 +41,23 @@ if (T[mode]) {
     (mode === "starting" ? `<div class="count" id="count"></div>` : "");
 }
 if (mode === "starting") {
-  const MIN = +(q.get("min") || 5);
-  let end = Date.now() + MIN * 60e3;
-  // in OBS the countdown restarts the moment the stream goes live
-  window.addEventListener("obsStreamingStarted", () => { end = Date.now() + MIN * 60e3; });
+  const MIN = +(q.get("min") || 5), KEY = "gremi-stream-start";
+  const store = { get() { try { return +localStorage.getItem(KEY) || 0; } catch (e) { return 0; } },
+                  set(v) { try { localStorage.setItem(KEY, String(v)); } catch (e) {} } };
+  // In OBS the countdown waits at the full time and only starts when the stream goes live.
+  // The start time is remembered, so a refresh or another canvas shows the same remaining time.
+  let end = null;
+  const startAt = (t) => { end = t + MIN * 60e3; };
+  if (window.obsstudio) {
+    window.addEventListener("obsStreamingStarted", () => { store.set(Date.now()); startAt(Date.now()); });
+    window.addEventListener("obsStreamingStopped", () => { end = null; });
+    if (window.obsstudio.getStatus) window.obsstudio.getStatus((s) => {
+      if (s && s.streaming) { const t = store.get(); startAt(t && Date.now() - t < 6 * 3600e3 ? t : Date.now()); }
+    });
+  } else startAt(Date.now());   // outside OBS (preview in a browser): run straight away
   const el = document.getElementById("count");
   const tick = () => {
-    const s = Math.max(0, Math.round((end - Date.now()) / 1000));
+    const s = end === null ? MIN * 60 : Math.max(0, Math.round((end - Date.now()) / 1000));
     el.textContent = s ? `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}` : "Any second now";
   };
   tick(); setInterval(tick, 500);
