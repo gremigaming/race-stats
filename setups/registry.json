@@ -8,7 +8,7 @@
   "requested": null,
   "last": "2026-11-10"
  },
- "pending": 14,
+ "pending": 15,
  "tracks": [
   {
    "track": "Melbourne",
@@ -1779,11 +1779,24 @@
          "run": 1,
          "laps": 1,
          "bb": 58
+        },
+        {
+         "file": "2026-11-11_20-51-15_Monaco_Race.gmtel.gz",
+         "date": "2026-11-11",
+         "session": "race",
+         "osq": false,
+         "weather": 0,
+         "pace": 72994,
+         "best": 72994,
+         "mean": 73080,
+         "run": 5,
+         "laps": 4,
+         "bb": 58
         }
        ],
        "verdict": {
         "result": "baseline",
-        "text": "Starting point: 1:11.326 over 1 session."
+        "text": "Starting point: 1:12.160 over 2 sessions."
        }
       },
       {
@@ -1862,6 +1875,61 @@
        "change": null,
        "text": "Starting setup",
        "why": "Your last race setup.",
+       "sessions": [
+        {
+         "file": "2026-11-11_20-51-15_Monaco_Race.gmtel.gz",
+         "date": "2026-11-11",
+         "session": "race",
+         "osq": false,
+         "weather": 0,
+         "pace": 73080,
+         "best": 72994,
+         "mean": 73080,
+         "run": 5,
+         "laps": 4,
+         "bb": 58
+        }
+       ],
+       "verdict": {
+        "result": "baseline",
+        "text": "Starting point: 1:13.080 over 1 session."
+       }
+      },
+      {
+       "v": 2,
+       "base": 1,
+       "created": "2026-11-11",
+       "saved": null,
+       "values": {
+        "fw": 50,
+        "rw": 48,
+        "don": 100,
+        "doff": 20,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 10,
+        "farb": 1,
+        "rarb": 6,
+        "frh": 21,
+        "rrh": 43,
+        "bb": 57,
+        "bp": 100,
+        "fr": 24.0,
+        "fl": 24.0,
+        "rr": 21.0,
+        "rl": 21.0
+       },
+       "change": {
+        "rw": [
+         45,
+         48
+        ]
+       },
+       "text": "Rear wing 45 → 48",
+       "why": "More rear grip against oversteer and wheelspin. Costs a little top speed.",
        "sessions": [],
        "verdict": {
         "result": "untested",
