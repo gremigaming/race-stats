@@ -2,7 +2,7 @@
 <!-- OBS browser source: race stats next to the race result, from the live league data.
      Cycles four pages: race awards, more awards (both for the other drivers), GreMi's race (with a position chart) and tonight's leaderboard.
      Source size 668x338 for the default 620x290 card (the card has a 24px margin).
-     ?w=620 ?h=290 card size, ?every=12 seconds per page, ?page=awards|awards2|me|tonight, ?me=1 lets GreMi win awards too, shows one page,
+     ?w=620 ?h=290 card size (w >= 1000 lays the awards out in one row of six, e.g. ?w=1536&h=310),, ?every=12 seconds per page, ?page=awards|awards2|me|tonight, ?me=1 lets GreMi win awards too, shows one page,
      ?race=<file> show one race (testing). -->
 <html><head><meta charset="utf-8"><title>Race stats</title>
 <link rel="stylesheet" href="brand.css">
@@ -34,6 +34,19 @@
   .pips { display: flex; gap: 5px; margin-top: 10px; flex-wrap: wrap; }
   .pip { min-width: 32px; height: 21px; padding: 0 5px; border-radius: 4px; font: 800 15px/21px "Saira Condensed"; text-align: center; background: rgba(255,255,255,.14); }
   .pip.p1 { background: linear-gradient(90deg,#d4464a,#c4509f,#8a6cd0); } .pip.pod { background: rgba(197,139,255,.45); }
+  /* Wide card (w >= 1000, full width under the results table): awards in one row of six, bigger type. */
+  .wide .tiles { grid-template-columns: repeat(6, 1fr); grid-template-rows: 1fr; gap: 12px; }
+  .wide .tile { padding: 14px 16px; justify-content: center; }
+  .wide .tile .label { font-size: 16px; }
+  .wide .v { font-size: 42px; margin-top: 10px; }
+  .wide .who { font-size: 23px; margin-top: 4px; }
+  .wide .sec { font-size: 22px; line-height: 1.35; }
+  .wide .mine { grid-template-columns: 420px 1fr; gap: 28px; }
+  .wide .bigpos { font-size: 60px; } .wide .bigpos .up, .wide .bigpos .down { font-size: 36px; }
+  .wide .kv { font-size: 22px; line-height: 1.5; }
+  .wide .lb { display: grid; grid-template-rows: repeat(4, auto); grid-auto-flow: column; grid-auto-columns: 1fr; column-gap: 28px; }
+  .wide .lbr { font-size: 27px; }
+  .wide .pip { min-width: 38px; height: 25px; font-size: 17px; line-height: 25px; }
 </style></head>
 <body>
 <div class="card fade out" id="card"><div class="streaks"><i></i><i></i><i></i><i></i></div>
@@ -46,6 +59,8 @@ const q = new URLSearchParams(location.search);
 const card = document.getElementById("card");
 card.style.width = (q.get("w") || 620) + "px";
 card.style.height = (q.get("h") || 290) + "px";
+const WIDE = +(q.get("w") || 620) >= 1000;
+if (WIDE) card.classList.add("wide");
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const who = (n) => `<div class="who ${isMe(n) ? "me" : ""}">${esc(shortName(n))}</div>`;
 
@@ -86,13 +101,13 @@ function awards2(st) {
   if (ll) tiles.push(tile("Fastest last lap", esc(fmtMs(ll.lastLap)), who(ll.name)));
   // Hardest to pass: a finisher nobody (or the fewest) got past, best placed.
   const hp = best(fin.filter((r) => r.pos > 1), (r) => r.lost);
-  if (hp) tiles.push(tile("Hardest to pass", hp.lost ? `passed only ${hp.lost}x` : "Never passed", who(hp.name)));
+  if (hp) tiles.push(tile("Hardest to pass", hp.lost ? `Passed ${hp.lost}x` : "Never passed", who(hp.name)));
   tiles.push(tile("Race control", plural(st.contacts.length, "contact"), `<div class="who">${st.overtakes} passes · ${plural(st.pens, "penalty").replace("penaltys", "penalties")}</div>`));
   return `<div class="tiles">${tiles.slice(0, 6).join("")}</div>`;
 }
 
 function chart(st, me) {
-  const W = 360, H = 200, n = st.rows.length || 10;
+  const W = WIDE ? 1000 : 360, H = 200, n = st.rows.length || 10;
   const maxLap = Math.max(1, ...st.hist.flatMap((h) => h.pts.map((p) => p[0])));
   const x = (l) => 26 + (l / maxLap) * (W - 36), y = (p) => 10 + ((p - 1) / Math.max(1, n - 1)) * (H - 20);
   const line = (h) => h.pts.map((p, i) => `${i ? "L" : "M"}${x(p[0]).toFixed(1)},${y(p[1]).toFixed(1)}`).join("");
@@ -138,9 +153,10 @@ async function tonight(src, all) {
     } catch { /* skip a missing file */ }
   }
   const board = [...pts].sort((a, b) => b[1] - a[1]).map(([name, p], i) => ({ name, p, i: i + 1 }));
-  let show = board.slice(0, 4);
+  const many = WIDE ? 8 : 4;
+  let show = board.slice(0, many);
   const me = board.find((b) => isMe(b.name));
-  if (me && !show.includes(me)) show = [...board.slice(0, 3), me];
+  if (me && !show.includes(me)) show = [...board.slice(0, many - 1), me];
   return `<div class="lb">${show.map((b) => `<div class="lbr ${isMe(b.name) ? "me" : ""}"><span class="p">${b.i}</span><span>${esc(shortName(b.name))}</span>
       <span class="w">${wins.get(b.name) ? `${wins.get(b.name)} win${wins.get(b.name) > 1 ? "s" : ""}` : ""}</span><span class="p">${b.p} pts</span></div>`).join("")}</div>
     <div class="pips">${mine.slice(-12).map((p) => `<span class="pip ${p === 1 ? "p1" : p <= 3 ? "pod" : ""}">P${p}</span>`).join("")}</div>`;
