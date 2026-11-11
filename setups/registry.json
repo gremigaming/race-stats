@@ -135,12 +135,25 @@
          "run": 1,
          "laps": 1,
          "bb": 56
+        },
+        {
+         "file": "2026-11-11_19-19-10_Melbourne_Race.gmtel.gz",
+         "date": "2026-11-11",
+         "session": "race",
+         "osq": false,
+         "weather": 0,
+         "pace": 79280,
+         "best": 79280,
+         "mean": 80113,
+         "run": 5,
+         "laps": 4,
+         "bb": 57
         }
        ],
        "verdict": {
         "result": "better",
-        "delta": -5.15,
-        "text": "Better: quali lap 1:17.944 against 1:22.179 on V1 (4.236 s faster)."
+        "delta": -4.61,
+        "text": "Better: quali lap 1:18.389 against 1:22.179 on V1 (3.790 s faster)."
        },
        "slot": 0
       },
@@ -288,12 +301,25 @@
          "run": 3,
          "laps": 2,
          "bb": 56
+        },
+        {
+         "file": "2026-11-11_19-19-10_Melbourne_Race.gmtel.gz",
+         "date": "2026-11-11",
+         "session": "race",
+         "osq": false,
+         "weather": 0,
+         "pace": 80113,
+         "best": 79280,
+         "mean": 80113,
+         "run": 5,
+         "laps": 4,
+         "bb": 57
         }
        ],
        "verdict": {
         "result": "better",
-        "delta": -7.31,
-        "text": "Better: average lap 1:18.214 against 1:24.382 on V1 (6.168 s faster)."
+        "delta": -6.18,
+        "text": "Better: average lap 1:19.163 against 1:24.382 on V1 (5.218 s faster)."
        },
        "slot": 1
       },
