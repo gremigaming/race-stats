@@ -3,24 +3,21 @@
   "decisions": {
     "sev-11041959-1166": {
       "verdict": "#21 daris_2190 at fault",
-      "by": "staff",
+      "by": "GreMi",
       "real": true,
       "at_fault": [
         "#21 daris_2190"
       ],
-      "severity": 10.0,
+      "severity": 10,
       "note": "",
-      "votes": 1,
-      "agree": 100,
+      "at": 1794431671,
       "parts": [
         {
           "t0": 116.7,
           "t1": 126.1,
           "real": true,
           "verdict": "#21 daris_2190 at fault",
-          "tags": [
-            "Ran into the back"
-          ],
+          "tags": [],
           "kind": "Rear-end",
           "note": "",
           "drivers": [
