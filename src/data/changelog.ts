@@ -21,6 +21,14 @@ export interface ChangelogEntry {
 // raw commit history also contains routine uploads and staff-only corrections.
 const changelog: ChangelogEntry[] = [
   {
+    id: "incident-race-timer",
+    date: "2026-11-12",
+    type: "feat",
+    message:
+      "Incidents show a race timer while they play, in the same minutes:seconds as the race viewer, and new incidents are kept smaller: at most 15 seconds, two corners and three drivers unless it's one pile-up.",
+    destination: "incidents",
+  },
+  {
     id: "stream-races-only",
     date: "2026-11-10",
     type: "fix",

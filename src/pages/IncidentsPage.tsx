@@ -3,11 +3,11 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { useBackNavigation } from "../hooks/useBackNavigation";
 import { useStewardSignal } from "../hooks/useStewardSignal";
-import { callsOfRace, chronological, biggestFirst, chunkStart, raceTime, rowsOf, streamOf, streamsOf, useLeagueCalls, useManifests, useRaceIndex, type RaceRef, type Row } from "../components/incidents/data";
+import { callsOfRace, chronological, biggestFirst, chunkStart, raceTime, replayClock, rowsOf, streamOf, streamsOf, useLeagueCalls, useManifests, useRaceIndex, type RaceRef, type Row } from "../components/incidents/data";
 import { IncidentStrip } from "../components/incidents/IncidentStrip";
 import { CAR_COLORS, IncidentMap, type Clock, type IncidentSeries } from "../components/incidents/IncidentMap";
 import { KIND_META, KIND_ORDER, type IncidentKind } from "../viewer/incidentKinds";
-import { clock, IconButton } from "../viewer/panels";
+import { IconButton } from "../viewer/panels";
 import type { MapPin } from "../viewer/scene";
 import { driverKey } from "../league/league";
 import { SEV_CLASS_META, sevClass, sevPoints, srNum, srSettings, type SrSettings } from "../league/safety";
@@ -434,7 +434,8 @@ export function IncidentsPage() {
                     <KindPill kind={r.kind} />
                     <span>
                       {scope === "range" ? `${short(r.race)} · ` : ""}
-                      {r.inc.lap ? `Lap ${r.inc.lap}` : clock(r.inc.t0 - r.start)}
+                      {r.inc.lap ? `Lap ${r.inc.lap} · ` : ""}
+                      {replayClock(r.inc.t0 - r.clock0)}
                     </span>
                     {r.inc.verdict?.verdict && <span className="truncate">{r.inc.verdict.verdict}</span>}
                   </span>
@@ -770,7 +771,7 @@ export function IncidentsPage() {
                     <KindPill kind={open.kind} />
                     <span className="text-[11px] text-zinc-500">
                       {short(open.race)}
-                      {open.inc.lap ? ` · lap ${open.inc.lap}` : ""} · {clock(open.inc.t0 - open.start)}
+                      {open.inc.lap ? ` · lap ${open.inc.lap}` : ""} · at {replayClock(open.inc.t0 - open.clock0)}
                     </span>
                   </div>
                   <div className="mt-0.5 flex flex-wrap items-center gap-x-2 text-sm font-semibold md:text-base">
@@ -846,12 +847,19 @@ export function IncidentsPage() {
                         </button>
                       ))}
                     </div>
+                    {/* the race timer (GreMi, 12 Nov 2026): the replay clock, as typed in the grading form's split windows */}
+                    <span
+                      className="rounded-md bg-white/10 px-2 py-0.5 font-mono text-sm font-semibold tabular-nums text-white"
+                      title="Race timer: the replay clock, the same time as in the race viewer and the grading form (minutes:seconds)"
+                    >
+                      {replayClock((tick.phase === "loading" || tick.phase === "preview" ? open.inc.t0 : tick.t) - open.clock0)}
+                    </span>
                     <span className="font-mono text-xs tabular-nums text-zinc-400">
                       {tick.phase === "loading"
                         ? "Loading the cars…"
                         : tick.phase === "preview"
                           ? "Click the marker again (or Play) to watch it"
-                          : `${tick.t - open.inc.t0 >= 0 ? "+" : ""}${(tick.t - open.inc.t0).toFixed(1)} s`}
+                          : `${tick.t - open.inc.t0 >= 0 ? "+" : ""}${(tick.t - open.inc.t0).toFixed(1)} s from the contact`}
                     </span>
                     <Link to={viewerLink} className="ml-auto flex items-center gap-1.5 rounded-md px-2 py-1 text-xs text-zinc-300 hover:bg-white/10 hover:text-white">
                       <Clapperboard className="h-4 w-4" /> <span className="hidden sm:inline">Open in the race viewer</span>

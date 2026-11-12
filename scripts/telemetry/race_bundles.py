@@ -46,6 +46,14 @@ NORMAL = 0.9         # below 90% of a driver's own normal speed = not back to no
 CONTACT_M = 7.0      # centres further apart than this: not a real contact (a car is ~5.6 m long)
 SLIP_DEG = 20        # heading this far off the direction of travel = sliding or spinning
 AVOID_M = 60         # a non-contact car joins only from this close behind an upset car
+# How big one incident can get (GreMi, 12 Nov 2026: "bundled incidents are way harder to judge")
+MAX_S = 15           # seconds from its first contact to its end, at most
+MAX_CORNERS = 2      # corners it covers: the same drivers touching after that = a new incident
+MAX_CARS = 3         # drivers in it (avoiders included), unless it is clearly one pile-up:
+PILEUP_S, PILEUP_CARS = 4, 6   # more cars only in a chain at the first corner, this soon, this many
+CHAIN_S = 3          # a new car joins only by touching a car of the incident this soon after that car's contact
+AVOID_S = 2.5        # an avoider reacts this soon after a contact of the incident
+CORNER_DROP = 20     # km/h the field slows down into a corner (apexes from its median speed by lap distance)
 GHOST_LON, GHOST_LAT = 3.5, 1.4  # two car centres this close (along, across): driving through each other
 
 # Team ids in the participants packet; the 2026 season pack starts at 476, with Audi in
@@ -351,21 +359,27 @@ def ghosted(windows, car, t):
 
 
 def incidents(frames, collisions, track_len, ghost_windows=None):
-    """Group the game's contacts into incidents (rules calibrated with GreMi, batch 1, 30 Oct 2026).
+    """Group the game's contacts into incidents (rules calibrated with GreMi, batch 1, 30 Oct 2026;
+    sizes capped 12 Nov 2026).
 
     - A contact counts only when the two cars really were together (centres under CONTACT_M
       apart): the game sometimes reports contacts between cars that are metres apart.
     - A car is "upset" while it is below 90% of its normal speed there, slides (heading 20+
       degrees off its direction of travel) or has 2+ wheels off the track.
-    - A contact opens a new incident unless one of its cars is already in an open incident and
-      still upset (or touched in it less than 1.5 s ago): then it joins that one. So a battle over
-      several corners stays one incident, a chain (A hits B, B hits C) is one incident, and two
-      separate contacts at the same corner stay apart.
+    - An incident lasts MAX_S (15 s) at most from its first contact and covers MAX_CORNERS (2)
+      corners at most (corners: track_corners()); a contact later or further on opens a new one.
+    - A contact between cars that are both in an incident joins it (even after things settled):
+      a battle over two corners is one incident (GreMi, b1-01 and b1-03).
+    - A contact that brings in a new car joins only as a chain: one of its cars touched in the
+      incident less than CHAIN_S (3 s) ago, and the incident stays at MAX_CARS (3) drivers. More
+      only for a pile-up: within PILEUP_S of the first contact at the same corner (6 cars at most).
+      So a crash where someone else hits the stranded car later is its own incident.
     - A contact after which nobody gets upset is a tap: kind "tap", not an incident.
     - Cars that never touched anyone join as "avoided" only when they were close behind an upset
-      car of the incident (same lap, under AVOID_M behind) and then braked hard, slid or went off.
-      Cars ahead of it never join.
-    - An incident ends when all its cars have been back to normal for 2 s (15 s at most).
+      car of the incident (same lap, under AVOID_M behind), braked hard, slid or went off less
+      than AVOID_S after one of its contacts, and the incident has room (MAX_CARS). Cars ahead of
+      it never join, and a car avoids in one incident at a time.
+    - An incident ends when all its cars have been back to normal for 2 s (MAX_S at most).
     - Ghosted cars (ghosts()) never join: not by contact, not as avoiders.
     """
     gw = ghost_windows or {}
@@ -390,6 +404,21 @@ def incidents(frames, collisions, track_len, ghost_windows=None):
                 return True
         return False
 
+    corner_of = track_corners(frames, track_len)
+
+    def can_join(inc, c, cn):
+        if c["t"] - inc["t0"] > MAX_S or cn - inc["corner"] >= MAX_CORNERS:
+            return False
+        ins = [i for i in (c["a"], c["b"]) if i in inc["cars"]]
+        if not ins:
+            return False
+        if len(ins) == 2:   # the same drivers within two corners: one battle
+            return True
+        if not any(c["t"] - inc["last"].get(i, -99) < CHAIN_S for i in ins):
+            return False
+        n = len(inc["cars"]) + 1
+        return n <= MAX_CARS or (n <= PILEUP_CARS and c["t"] - inc["t0"] <= PILEUP_S and cn == inc["corner"])
+
     out, open_ = [], []
     for c in sorted(collisions, key=lambda c: c["t"]):
         cars = at(c["t"])
@@ -398,17 +427,11 @@ def incidents(frames, collisions, track_len, ghost_windows=None):
             continue
         if ghosted(gw, c["a"], c["t"]) or ghosted(gw, c["b"], c["t"]):
             continue
-        open_ = [x for x in open_ if x["end"] is None or x["end"] > c["t"]]
-        joined = None
-        for inc in reversed(open_):
-            for i in (c["a"], c["b"]):
-                if i in inc["cars"] and (c["t"] - inc["last"].get(i, -99) < 1.5 or upset_within(i, c["t"] - 0.5, c["t"])):
-                    joined = inc
-                    break
-            if joined:
-                break
+        open_ = [x for x in open_ if c["t"] - x["t0"] <= MAX_S]
+        cn = corner_of(A)
+        joined = next((inc for inc in reversed(open_) if can_join(inc, c, cn)), None)
         if joined is None:
-            joined = {"t0": c["t"], "t1": c["t"], "lap": max(A[11], B[11]), "dist": A[10], "cars": [], "last": {},
+            joined = {"t0": c["t"], "t1": c["t"], "lap": max(A[11], B[11]), "dist": A[10], "cars": [], "last": {}, "corner": cn,
                       "contacts": [], "x": round((A[0] + B[0]) / 2, 1), "z": round((A[1] + B[1]) / 2, 1), "end": None}
             out.append(joined)
             open_.append(joined)
@@ -419,9 +442,11 @@ def incidents(frames, collisions, track_len, ghost_windows=None):
             if i not in joined["cars"]:
                 joined["cars"].append(i)
         joined["end"] = ending(joined, frames, times, normal, slip, joined["t1"])
-    res = []
+    res, avoided = [], collections.defaultdict(list)   # car -> [(t0, end)] of incidents it avoided in
     for inc in out:
         role = {i: "contact" for i in inc["cars"]}
+        room = MAX_CARS - len(role)
+        cts = [x["t"] for x in inc["contacts"]]
         hurt = [i for i in inc["cars"] if upset_within(i, inc["t0"], inc["t1"] + 2)]
         # avoiders: close behind an upset car of the incident, then braked hard, slid or went off
         k0, k1 = bisect.bisect_left(times, inc["t0"] - 0.5), bisect.bisect_right(times, inc["end"])
@@ -433,7 +458,11 @@ def incidents(frames, collisions, track_len, ghost_windows=None):
                 if t < inc["t0"] + 0.3:   # already in trouble before the incident: not ours
                     calm[i] = calm.get(i, True) and not upset_within(i, t, t)
                     continue
-                if not calm.get(i, True):
+                if not calm.get(i, True) or len(role) - len(inc["cars"]) >= room:
+                    continue
+                if not any(0 <= t - ct <= AVOID_S for ct in cts):
+                    continue
+                if any(a0 <= t <= a1 for a0, a1 in avoided[i]):
                     continue
                 near = any(m in cars and 0 < behind(c, cars[m]) < AVOID_M and upset_within(m, t - 0.2, t) for m in hurt)
                 if not near:
@@ -444,6 +473,9 @@ def incidents(frames, collisions, track_len, ghost_windows=None):
                     role[i] = "spun"
                 elif c[6] > 0.8 and normal.ratio(i, c) < 0.75:
                     role[i] = "hard braking"
+        for i, r in role.items():
+            if r != "contact":
+                avoided[i].append((inc["t0"] - 0.5, inc["end"]))
         res.append({"t0": round(inc["t0"], 2), "t1": round(ending(inc, frames, times, normal, slip, inc["t1"], list(role)), 2),
                     "lap": inc["lap"], "dist": round(inc["dist"]), "x": inc["x"], "z": inc["z"],
                     "kind": "incident" if hurt else "tap", "contacts": inc["contacts"],
@@ -452,12 +484,12 @@ def incidents(frames, collisions, track_len, ghost_windows=None):
 
 
 def ending(inc, frames, times, normal, slip, t1, cars=None):
-    """When every car of the incident has been back to normal for 2 s (15 s after the last contact at most)."""
+    """When every car of the incident has been back to normal for 2 s (MAX_S after its first contact at most)."""
     cars = cars or inc["cars"]
     calm_since = None
     for t, row in frames[bisect.bisect_left(times, t1):]:
-        if t - t1 > 15:
-            return t
+        if t - inc["t0"] > MAX_S:
+            return inc["t0"] + MAX_S
         ok = all(i not in row or (normal.ratio(i, row[i]) >= NORMAL and slip.get((i, t), 0) <= SLIP_DEG
                                   and bin(row[i][9]).count("1") < 2) for i in cars)
         if not ok:
@@ -467,6 +499,42 @@ def ending(inc, frames, times, normal, slip, t1, cars=None):
         elif t - calm_since >= 2:
             return calm_since
     return frames[-1][0]
+
+
+def track_corners(frames, track_len):
+    """A function giving the corner number of a car's spot, counted from the race start: the
+    corners are the field's speed minima by lap distance (laps 2+, median per 20 m, a drop of
+    CORNER_DROP km/h in and out), each owning the track up to halfway to its neighbours. Without a
+    track length or a clear speed profile every spot is corner 0 (only time and cars split)."""
+    bins = collections.defaultdict(list)
+    for _, cars in frames[::3]:
+        for c in cars.values():
+            if c[11] >= 2 and 0 <= c[10] and c[4] > 30:
+                bins[int(c[10] // 20)].append(c[4])
+    prof = sorted((k * 20 + 10, statistics.median(v)) for k, v in bins.items() if len(v) >= 3)
+    apex, peak, low = [], 0, None
+    for d, v in prof + [(d + (track_len or 0), v) for d, v in prof]:   # twice round: a corner across the line
+        if low is None:
+            if v > peak:
+                peak = v
+            elif peak - v >= CORNER_DROP:
+                low = (v, d)
+        elif v < low[0]:
+            low = (v, d)
+        elif v - low[0] >= CORNER_DROP:
+            apex.append(low[1] % track_len if track_len else low[1])
+            peak, low = v, None
+    apex = sorted({round(a) for a in apex})
+    apex = [a for k, a in enumerate(apex) if k == 0 or a - apex[k - 1] > 60]
+    if not track_len or len(apex) < 2:
+        return lambda c: 0
+    bounds = [(apex[k] + apex[k + 1]) / 2 for k in range(len(apex) - 1)]
+
+    def corner(c):
+        total = c[11] * track_len + c[10] if c[11] >= 1 else c[10]
+        lap, d = divmod(total, track_len)
+        return int(lap) * len(apex) + bisect.bisect_left(bounds, d)
+    return corner
 
 
 def slip_angles(frames):

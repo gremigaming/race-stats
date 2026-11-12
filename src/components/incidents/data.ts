@@ -24,6 +24,8 @@ export interface Row {
   fault: string[];
   /** Race time (session s) of the race's first lap start: clocks are shown from it. */
   start: number;
+  /** Session time of the replay clock's 0: the race viewer's timeline and the staff grading form count from it. */
+  clock0: number;
   /** When the race started (ms since epoch), for time ranges and chronological order. */
   at: number;
   /** The race file of the league data (for links to the safety rating), when the league call was found. */
@@ -75,6 +77,14 @@ export function useManifests(uids: string[]) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stamp]);
   return { map, loading: results.filter((r) => r.isLoading).length };
+}
+
+/** The replay clock as m:ss.s (70.4 s = "1:10.4"): the same clock and format as the race viewer
+ * and the staff grading form's split windows (GreMi, 12 Nov 2026: type the time you see). */
+export function replayClock(s: number) {
+  const t = Math.max(0, Math.round(s * 10) / 10);
+  const m = Math.floor(t / 60);
+  return `${m}:${(t - m * 60).toFixed(1).padStart(4, "0")}`;
 }
 
 /** Session time where the race's chunks begin (the race viewer counts ?inc= from here). */
@@ -187,6 +197,7 @@ export function rowsOf(race: RaceRef, m: RaceManifest, calls: LeagueCall[] = [])
       keys: names.map(driverKey),
       fault: fc ? fc.fault.map(driverKey) : atFaultOf(inc).map((c) => driverKey(name(c))),
       start,
+      clock0: chunkStart(m),
       at,
       file: fc?.call.file,
     };
