@@ -62,7 +62,7 @@ import gmtel  # noqa: E402
 import incident_replays  # noqa: E402
 import race_bundles as rb  # noqa: E402
 
-RULES = "v1.4"       # bump when a rule changes: fault_engine.py judges every race again
+RULES = "v1.5"       # bump when a rule changes: fault_engine.py judges every race again
 ALONGSIDE_M = 4.0    # less than this apart along the track = alongside (a car is ~5.6 m long)
 MOVE_M = 1.0         # moving across this much in the last 1.2 s counts as moving into the other car
 MOVE_MORE_M = 0.7    # ... and this much more than the other car did

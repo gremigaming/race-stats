@@ -36,7 +36,7 @@ import gmtel  # noqa: E402
 RELEASE = "https://api.github.com/repos/gremigaming/race-stats/releases/tags/telemetry"
 DOWNLOAD = "https://github.com/gremigaming/race-stats/releases/download/telemetry/"
 
-VERSION = 11         # bump to rebuild every bundle (10: fault engine verdicts per incident, 11: names by showOnlineNames)
+VERSION = 12         # bump to rebuild every bundle (10: fault engine verdicts per incident, 11: names by showOnlineNames, 12: smaller incidents)
 KEEP = 40            # newest races published on the site (R2 keeps everything later)
 CHUNK_SECONDS = 10
 CHUNK_HEAD = struct.Struct("<4sBBHd")
