@@ -21,6 +21,14 @@ export interface ChangelogEntry {
 // raw commit history also contains routine uploads and staff-only corrections.
 const changelog: ChangelogEntry[] = [
   {
+    id: "award-roles-per-stream",
+    date: "2026-11-12",
+    type: "fix",
+    message:
+      "Award highlights and the Discord award roles count only finished streams and change once per stream, never mid-stream or on days without one. A tie keeps the current holder, equal counts favour fewer races, and Cleanest and DOTD need 5 races.",
+    destination: "home",
+  },
+  {
     id: "safety-active-drivers",
     date: "2026-11-12",
     type: "feat",

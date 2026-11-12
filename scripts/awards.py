@@ -2,7 +2,15 @@
 
 Writes public/league/awards.json after build-league-data.mjs. Race Control (the
 Discord bot) reads it, keeps only drivers linked to a Discord member (never
-GreMi) and hands each role to the best of them, for at least a week at a time.
+GreMi) and hands each role to the best of them once per stream: only when a new
+finished stream enters the "streams" list (GreMi 2026-11-12: roles moved
+mid-stream and on days without a stream).
+
+Only finished streams count. A stream that is still live in the Twitch stream
+log (race-control-stats streams.json, "end" null) is left out until it ends;
+without the log, the newest stream is left out until its last race is
+LIVE_GAP_H hours old. Ties keep the order "fewer races first" for the counting
+awards (6 wins in 7 races beats 6 wins in 9).
 
   wins       most race wins
   fastest    most fastest laps
@@ -24,7 +32,8 @@ SESSIONS = os.environ.get("LEAGUE_SESSIONS_DIR", os.path.join("public", "league"
 OUT = os.environ.get("AWARDS_OUT", os.path.join("public", "league", "awards.json"))
 STREAMS = 5
 STREAM_GAP_H = 3
-MIN_RACES = 3
+MIN_RACES = 5   # GreMi 2026-11-12: 3 races let one lucky stream beat a regular
+LIVE_GAP_H = 2
 FINISHED = {"FINISHED", "ACTIVE", ""}
 HIDDEN = re.compile(r"^\d+ #\d+$")
 WARN = {"Corner Cutting Warning": 0.5, "Other Warning": 1, "Time Penalty": 2,
@@ -119,7 +128,9 @@ def rank(stats):
 
     def table(pool, key, reverse, text):
         pool = [s for s in pool if not reverse or s[key] > 0]
-        pool.sort(key=lambda s: ((-s[key] if reverse else s[key]), -s["races"], s["name"].lower()))
+        # equal counts: fewer races first (better per race); equal clean/dotd: more races first
+        tie = 1 if key in ("wins", "fastest", "overtakes") else -1
+        pool.sort(key=lambda s: ((-s[key] if reverse else s[key]), tie * s["races"], s["name"].lower()))
         return [{"name": s["name"], "value": round(s[key], 3), "races": s["races"], "text": text(s)} for s in pool]
 
     return {
@@ -134,9 +145,51 @@ def rank(stats):
     }
 
 
+def stream_log():
+    """race-control-stats streams.json, or None when it can't be read."""
+    import urllib.request
+    if os.environ.get("STREAM_LOG_FILE"):
+        with open(os.environ["STREAM_LOG_FILE"], encoding="utf-8") as fh:
+            return json.load(fh)
+    headers = {"Accept": "application/vnd.github.raw+json", "User-Agent": "race-stats"}
+    if os.environ.get("GITHUB_TOKEN"):
+        headers["Authorization"] = "Bearer " + os.environ["GITHUB_TOKEN"]
+    req = urllib.request.Request(
+        "https://api.github.com/repos/gremigaming/race-control-stats/contents/streams.json", headers=headers)
+    try:
+        with urllib.request.urlopen(req, timeout=20) as r:
+            return json.load(r)
+    except Exception as e:  # offline, rate limit: fall back to the race times
+        print(f"awards: stream log not read ({e})")
+        return None
+
+
+def amsterdam(t):
+    """A UTC ISO time as naive Amsterdam time, like the file names."""
+    from zoneinfo import ZoneInfo
+    u = datetime.datetime.strptime(t, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=datetime.timezone.utc)
+    return u.astimezone(ZoneInfo("Europe/Amsterdam")).replace(tzinfo=None)
+
+
+def finished(streams, log, now):
+    """Drop a stream that is still going. now: naive Amsterdam time."""
+    if not streams:
+        return streams
+    if log is not None:
+        live = [amsterdam(s["start"]) for s in log.get("streams", []) if s.get("start") and not s.get("end")]
+        if not live:
+            return streams
+        cut = min(live) - datetime.timedelta(minutes=10)
+        return [s for s in streams if stamp(s[0]) < cut]
+    if (now - stamp(streams[-1][-1])).total_seconds() < LIVE_GAP_H * 3600:
+        return streams[:-1]
+    return streams
+
+
 def main():
     files = [f for f in glob.glob(os.path.join(SESSIONS, "Race_*.json")) if stamp(f)]
-    streams = group_streams(files)[-STREAMS:]
+    now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    streams = finished(group_streams(files), stream_log(), amsterdam(now))[-STREAMS:]
     stats = {}
     for stream in streams:
         for f in stream:

@@ -60,6 +60,8 @@ jobs:
           python3 -m pip install --quiet --break-system-packages cryptography || true
           python3 scripts/telemetry/classification_ocr.py /tmp/telemetry-cache .cache/classification.json || echo "classification OCR failed, hidden cars keep the usual rules"
       - name: Turn race files into site data
+        env:
+          GITHUB_TOKEN: ${{ github.token }}   # stream log; without it the API rate limit can drop it
         run: node scripts/build-league-data.mjs
       - name: Fault engine verdicts for the safety rating
         env:
@@ -130,6 +132,8 @@ jobs:
             git pull --rebase --autostash origin main && git push origin HEAD:main || echo "sim input not saved"
           fi
       - name: Rank the Discord award roles
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: python3 scripts/awards.py
       # GreMi's Setup manager: advice from his telemetry, published only
       # encrypted (the key comes from the staff server after his Discord login)
