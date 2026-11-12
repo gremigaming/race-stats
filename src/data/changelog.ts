@@ -21,6 +21,14 @@ export interface ChangelogEntry {
 // raw commit history also contains routine uploads and staff-only corrections.
 const changelog: ChangelogEntry[] = [
   {
+    id: "safety-active-drivers",
+    date: "2026-11-12",
+    type: "feat",
+    message:
+      "The safety rating ranking now lists drivers from the last 5 streams (your own driver always stays), with a Last stream switch to see only who raced most recently.",
+    destination: "safety",
+  },
+  {
     id: "incident-race-timer",
     date: "2026-11-12",
     type: "feat",

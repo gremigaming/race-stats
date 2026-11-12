@@ -29,6 +29,7 @@ import {
 import { useTelemetry } from "../context/TelemetryContext";
 import { driverKey } from "../league/league";
 import { isoDay } from "../league/filter";
+import { formatShortDate } from "../utils/format";
 import {
   SR_START,
   signedHalf,
@@ -202,7 +203,9 @@ function howItWorksV25(s: SrSettings): Record<string, ReactNode> {
 
 type Tab = "ranking" | "personal";
 type SortKey = "pos" | "rank" | "name" | "sr" | "change" | "races";
-type RankingScope = "all" | "current-stream";
+type RankingScope = "all" | "last-stream";
+/** Drivers who raced in none of the last this many streams leave the ranking (unless picked as "me"). */
+const ACTIVE_STREAMS = 5;
 
 export function SafetyPage() {
   const { league } = useTelemetry();
@@ -214,16 +217,9 @@ export function SafetyPage() {
   const { sort, toggle } = useSort<SortKey>();
   const tab: Tab =
     !embed && params.get("tab") === "personal" ? "personal" : "ranking";
-  const today = isoDay(new Date());
-  const todayStreamIndex =
-    league?.safetyData?.streams.reduce(
-      (found, stream, index) => (stream.date === today ? index : found),
-      -1,
-    ) ?? -1;
-
-  useEffect(() => {
-    if (todayStreamIndex < 0) setRankingScope("all");
-  }, [todayStreamIndex]);
+  const lastStreamIndex = (league?.safetyData?.streams.length ?? 0) - 1;
+  const lastStreamDate = league?.safetyData?.streams[lastStreamIndex]?.date;
+  const lastStreamIsToday = lastStreamDate === isoDay(new Date());
 
   useEffect(() => {
     if (tab === "ranking" && !embed)
@@ -240,21 +236,30 @@ export function SafetyPage() {
       </div>
     );
   }
-  const rows = league.safetyData.drivers.filter((d) => !d.banned);
-  const currentStreamRows =
-    todayStreamIndex < 0
-      ? []
-      : rows.filter((d) => d.sessions.some((session) => session.stream === todayStreamIndex));
-  const currentStreamAvailable = !embed && todayStreamIndex >= 0;
-  const showingCurrentStream = rankingScope === "current-stream" && currentStreamAvailable;
-  const visibleRows = showingCurrentStream ? currentStreamRows : rows;
+  const allRows = league.safetyData.drivers.filter((d) => !d.banned);
+  // Drivers who sat out the last 5 streams are hidden, except the one this viewer picked as "me".
+  const firstActiveStream = lastStreamIndex - ACTIVE_STREAMS + 1;
+  const rows = allRows.filter(
+    (d) =>
+      (!embed && driverKey(d.name) === league.selectedDriver) ||
+      d.sessions.some((session) => session.stream >= firstActiveStream),
+  );
+  const lastStreamRows = rows.filter((d) =>
+    d.sessions.some((session) => session.stream === lastStreamIndex),
+  );
+  const lastStreamAvailable = !embed && lastStreamIndex >= 0;
+  const showingLastStream = rankingScope === "last-stream" && lastStreamAvailable;
+  const lastStreamLabel = lastStreamIsToday
+    ? "today's stream"
+    : `the last stream (${lastStreamDate ? formatShortDate(lastStreamDate) : ""})`;
+  const visibleRows = showingLastStream ? lastStreamRows : rows;
   const sortedRows = sortRows(visibleRows, sort, (d, k) =>
     k === "pos" ? rows.indexOf(d) : k === "rank" ? d.sr : d[k],
   );
   const sortProps = { sort, toggle };
   const personalKey = params.get("driver") ?? league.selectedDriver;
-  const personalIdx = rows.findIndex((d) => driverKey(d.name) === personalKey);
-  const personal = personalIdx >= 0 ? rows[personalIdx] : undefined;
+  const personal = allRows.find((d) => driverKey(d.name) === personalKey);
+  const personalIdx = personal ? rows.indexOf(personal) : -1;
   const openPersonal = (key: string) => {
     setParams({ tab: "personal", driver: key });
     window.scrollTo({ top: 0 });
@@ -320,8 +325,8 @@ export function SafetyPage() {
             <SafetyPersonal
               driver={personal}
               data={league.safetyData}
-              position={personalIdx + 1}
-              of={rows.length}
+              position={personalIdx >= 0 ? personalIdx + 1 : allRows.indexOf(personal) + 1}
+              of={personalIdx >= 0 ? rows.length : allRows.length}
             />
           ) : (
             <div className={cn(cardClass, "flex flex-wrap items-center justify-between gap-4")}>
@@ -347,12 +352,12 @@ export function SafetyPage() {
             hint={
               embed
                 ? "Live safety rating across the league"
-                : showingCurrentStream
-                  ? `${visibleRows.length} ${visibleRows.length === 1 ? "driver" : "drivers"} in today's stream · Select a driver name to open their personal page`
-                  : "Select a driver name to open their personal page"
+                : showingLastStream
+                  ? `${visibleRows.length} ${visibleRows.length === 1 ? "driver" : "drivers"} in ${lastStreamLabel} · Select a driver name to open their personal page`
+                  : `Drivers from the last ${ACTIVE_STREAMS} streams · Select a driver name to open their personal page`
             }
             action={
-              currentStreamAvailable ? (
+              lastStreamAvailable ? (
                 <SegmentedControl
                   size="sm"
                   value={rankingScope}
@@ -361,9 +366,9 @@ export function SafetyPage() {
                   options={[
                     { value: "all", label: "All drivers", meta: rows.length },
                     {
-                      value: "current-stream",
-                      label: "Current stream",
-                      meta: currentStreamRows.length,
+                      value: "last-stream",
+                      label: lastStreamIsToday ? "Today's stream" : "Last stream",
+                      meta: lastStreamRows.length,
                     },
                   ]}
                 />
@@ -406,10 +411,10 @@ export function SafetyPage() {
                 </tr>
               </thead>
               <tbody>
-                {sortedRows.length === 0 && showingCurrentStream ? (
+                {sortedRows.length === 0 && showingLastStream ? (
                   <tr>
                     <td colSpan={6} className="px-3 py-8 text-center text-sm text-zinc-500">
-                      No ranked drivers in today's stream yet.
+                      No ranked drivers in {lastStreamLabel} yet.
                     </td>
                   </tr>
                 ) : sortedRows.map((d) => {
