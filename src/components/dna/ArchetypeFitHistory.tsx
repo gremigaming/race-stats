@@ -22,6 +22,7 @@ import { cn } from "../../utils/cn";
 const ARCHETYPE_ORDER: DriverDnaArchetype[] = [
   "comeback",
   "qualifying",
+  "mrSaturday",
   "consistency",
   "openingLap",
   "overtakeArtist",
@@ -38,7 +39,8 @@ const ARCHETYPE_ORDER: DriverDnaArchetype[] = [
 
 const ARCHETYPE_COLORS: Record<DriverDnaArchetype, string> = {
   comeback: "#fb7185",
-  qualifying: "#c084fc",
+  qualifying: "#fbbf24",
+  mrSaturday: "#c084fc",
   consistency: "#a78bfa",
   openingLap: "#fb923c",
   overtakeArtist: "#f43f5e",

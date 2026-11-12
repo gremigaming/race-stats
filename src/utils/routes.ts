@@ -78,7 +78,24 @@ export function driverDnaProfilePath(
   scopeKey: string | null | undefined,
   driverKey: string,
 ): string {
-  return `${dashboardPath(scopeKey ?? ALL_FORMULA_SCOPE_KEY)}/drivers/dna?profile=${encodeURIComponent(driverKey)}`;
+  return `${driverDnaPath(scopeKey)}?profile=${encodeURIComponent(driverKey)}`;
+}
+
+export function driverDnaPath(scopeKey?: string | null): string {
+  return `${dashboardPath(scopeKey ?? ALL_FORMULA_SCOPE_KEY)}/drivers/dna`;
+}
+
+export function driverDnaLeaderboardPath(
+  scopeKey: string | null | undefined,
+  signal: string,
+): string {
+  return `${driverDnaLeaderboardIndexPath(scopeKey)}/${encodeURIComponent(signal)}`;
+}
+
+export function driverDnaLeaderboardIndexPath(
+  scopeKey: string | null | undefined,
+): string {
+  return `${driverDnaPath(scopeKey)}/leaderboard`;
 }
 
 export function sessionPath(formulaKey: string, slug: string): string {

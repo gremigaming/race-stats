@@ -1,6 +1,7 @@
 import {
   ArrowLeft,
   ArrowUpRight,
+  BarChart3,
   CloudRain,
   CircleHelp,
   Crown,
@@ -21,9 +22,15 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { useMemo, useState } from "react";
-import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import {
+  Link,
+  useLocation,
+  useNavigate,
+  useSearchParams,
+} from "react-router-dom";
 import { accentCardClass, interactiveFocusClass } from "../components/Card";
 import { ArchetypeFitHistory } from "../components/dna/ArchetypeFitHistory";
+import { DriverDnaArchetypeRadar } from "../components/dna/DriverDnaArchetypeRadar";
 import { CopyButton } from "../components/ui/CopyButton";
 import { Modal } from "../components/ui/Modal";
 import { PageFrame } from "../components/ui/PageFrame";
@@ -36,7 +43,9 @@ import {
   buildDriverDna,
   buildDriverDnaHistory,
   DRIVER_DNA_STYLES,
+  formatDriverDnaFieldPercentile,
   type DriverDnaCard,
+  type DriverDnaSignal,
   type DriverDnaStyle,
 } from "../analysis/driverDna";
 import {
@@ -47,13 +56,23 @@ import {
 } from "../league/filter";
 import { isRaceSession, raceFormulaKey } from "../league/league";
 import { cn } from "../utils/cn";
-import { dashboardPath } from "../utils/routes";
+import {
+  isLeaderboardSeries,
+  leaderboardSeriesLabel,
+  seriesForFormula,
+} from "../utils/leaderboardSeries";
+import {
+  dashboardPath,
+  driverDnaLeaderboardIndexPath,
+  driverDnaLeaderboardPath,
+} from "../utils/routes";
 
 type StyleFilter = "all" | DriverDnaStyle;
 
 const STYLE_ICONS: Record<DriverDnaStyle, LucideIcon> = {
   comeback: Rocket,
-  qualifying: Flag,
+  qualifying: Crown,
+  mrSaturday: Flag,
   consistency: Target,
   openingLap: Flame,
   overtakeArtist: Swords,
@@ -73,6 +92,7 @@ const STYLE_ICONS: Record<DriverDnaStyle, LucideIcon> = {
 const STYLE_ACCENTS: Record<DriverDnaStyle, AccentColor> = {
   comeback: "rose",
   qualifying: "amber",
+  mrSaturday: "purple",
   consistency: "cyan",
   openingLap: "orange",
   overtakeArtist: "emerald",
@@ -92,6 +112,7 @@ const STYLE_ACCENTS: Record<DriverDnaStyle, AccentColor> = {
 const SHARE_ACCENTS: Record<DriverDnaStyle, string> = {
   comeback: "#fb7185",
   qualifying: "#fbbf24",
+  mrSaturday: "#c084fc",
   consistency: "#22d3ee",
   openingLap: "#fb923c",
   overtakeArtist: "#34d399",
@@ -119,7 +140,9 @@ const SIGNATURE_STYLES = (
 
 const REAL_F1_EXAMPLES: Record<SignatureStyle, string> = {
   comeback: "Sebastian Vettel, Lewis Hamilton, Fernando Alonso",
-  qualifying: "Charles Leclerc, George Russell, Jarno Trulli",
+  qualifying: "Charles Leclerc, George Russell, Sebastian Vettel",
+  mrSaturday:
+    "Ayrton Senna, Lewis Hamilton, Michael Schumacher, Charles Leclerc",
   consistency: "Alain Prost, Lewis Hamilton, Jenson Button",
   openingLap: "Kevin Magnussen, Fernando Alonso, Max Verstappen",
   overtakeArtist: "Daniel Ricciardo, Max Verstappen, Kamui Kobayashi",
@@ -179,6 +202,15 @@ function formatPosition(value: number | null): string {
   return value == null ? "—" : `P${value.toFixed(1)}`;
 }
 
+function formatPositionWithFieldPercentile(
+  position: number | null,
+  percentile: number | null,
+): string {
+  return position == null
+    ? "—"
+    : `${formatPosition(position)} · ${formatDriverDnaFieldPercentile(percentile)}`;
+}
+
 function cardEvidence(card: DriverDnaCard): {
   primary: string;
   secondary: string;
@@ -187,17 +219,25 @@ function cardEvidence(card: DriverDnaCard): {
     case "comeback":
       return {
         primary: `${(card.averagePlacesGained ?? 0) > 0 ? "+" : ""}${(card.averagePlacesGained ?? 0).toFixed(1)} places`,
-        secondary: `Grid ${formatPosition(card.averageGrid)} → finish ${formatPosition(card.averageFinish)}`,
+        secondary: `Grid ${formatPositionWithFieldPercentile(card.averageGrid, card.averageGridFieldPercentile)} → finish ${formatPositionWithFieldPercentile(card.averageFinish, card.averageFinishFieldPercentile)}`,
       };
     case "qualifying":
       return {
-        primary: formatPosition(card.averageGrid),
+        primary: formatPositionWithFieldPercentile(
+          card.averageGrid,
+          card.averageGridFieldPercentile,
+        ),
         secondary: `${Math.round((card.gridTopThirdShare ?? 0) * 100)}% of starts in the top third`,
+      };
+    case "mrSaturday":
+      return {
+        primary: `Average qualifying position ${formatPositionWithFieldPercentile(card.averageQualifyingPosition, card.averageQualifyingFieldPercentile)}`,
+        secondary: `Top ${Math.max(1, 100 - Math.round((card.qualifyingPaceRank ?? 0) * 100))}% qualifying pace · ${plural(card.qualifyingPoleCount, "pole")} in ${plural(card.qualifyingPositionSessions, "qualifying result")}`,
       };
     case "consistency":
       return {
         primary: `±${(card.finishSwing ?? 0).toFixed(1)} spots`,
-        secondary: `${plural(card.finishedRaces, "classified finish", "classified finishes")} · average ${formatPosition(card.averageFinish)}`,
+        secondary: `${plural(card.finishedRaces, "classified finish", "classified finishes")} · average ${formatPositionWithFieldPercentile(card.averageFinish, card.averageFinishFieldPercentile)}`,
       };
     case "openingLap":
       return {
@@ -211,8 +251,8 @@ function cardEvidence(card: DriverDnaCard): {
       };
     case "podiumMagnet":
       return {
-        primary: `${Math.round((card.podiumRate ?? 0) * 100)}% podium rate`,
-        secondary: `${plural(card.podiums, "podium")} in ${plural(card.finishedRaces, "classified finish", "classified finishes")}`,
+        primary: `${Math.round((card.podiumStrength ?? 0) * 100)}% field-adjusted podium strength`,
+        secondary: `${plural(card.podiums, "podium")} · ${Math.round((card.podiumRate ?? 0) * 100)}% raw rate across ${plural(card.finishedRaces, "classified finish", "classified finishes")}`,
       };
     case "fastestLapHunter":
       return {
@@ -243,8 +283,8 @@ function cardEvidence(card: DriverDnaCard): {
     }
     case "tyreWhisperer":
       return {
-        primary: `Top ${Math.max(1, 100 - Math.round((card.tyreCareRank ?? 0) * 100))}% matched-compound wear control`,
-        secondary: `${plural(card.tyreWearStints, "measured stint")} across ${plural(card.tyreWearRaces, "race")} · same-race, same-compound comparison`,
+        primary: `${(card.tyreWearPercentPerLap ?? 0).toFixed(2)}% worst-wheel wear / lap`,
+        secondary: `Top ${Math.max(1, 100 - Math.round((card.tyreCareRank ?? 0) * 100))}% among same-race, same-compound peers · ${plural(card.tyreWearLaps, "measured lap")} over ${plural(card.tyreWearRaces, "race")}`,
       };
     case "streetCircuitSpecialist": {
       const delta = card.streetPerformanceDelta ?? 0;
@@ -539,6 +579,8 @@ export function DriverDnaPage() {
   const [params] = useSearchParams();
   const location = useLocation();
   const navigate = useNavigate();
+  const dnaSeriesParam = params.get("dnaSeries");
+  const dnaSeries = isLeaderboardSeries(dnaSeriesParam) ? dnaSeriesParam : null;
   const [styleFilter, setStyleFilter] = useState<StyleFilter>("all");
   const [query, setQuery] = useState("");
   const [fitModalCard, setFitModalCard] = useState<DriverDnaCard | null>(null);
@@ -569,8 +611,13 @@ export function DriverDnaPage() {
         ? selectedRaces.filter(
             (race) => raceFormulaKey(race.session) === activeFormulaKey,
           )
-        : selectedRaces,
-    [selectedRaces, activeFormulaKey],
+        : dnaSeries
+          ? selectedRaces.filter(
+              (race) =>
+                seriesForFormula(raceFormulaKey(race.session)) === dnaSeries,
+            )
+          : selectedRaces,
+    [selectedRaces, activeFormulaKey, dnaSeries],
   );
   const cards = useMemo(() => buildDriverDna(formulaRaces), [formulaRaces]);
   const profileKey = params.get("profile");
@@ -628,7 +675,9 @@ export function DriverDnaPage() {
 
   const formulaLabel = activeFormulaKey
     ? (activeFormula?.label ?? activeFormulaKey)
-    : "All games";
+    : dnaSeries
+      ? leaderboardSeriesLabel(dnaSeries)
+      : "All games";
   const raceCount = formulaRaces.filter((race) =>
     isRaceSession(race.session),
   ).length;
@@ -646,6 +695,21 @@ export function DriverDnaPage() {
     next.delete("embed");
     navigate(`${location.pathname}?${next.toString()}`);
   };
+  const openSignalLeaderboard = (signal: DriverDnaSignal) => {
+    const next = new URLSearchParams(location.search);
+    next.delete("profile");
+    next.delete("driver");
+    next.delete("embed");
+    if (activeFormulaKey) next.delete("dnaSeries");
+    const path = driverDnaLeaderboardPath(scopeKey, signal);
+    navigate(`${path}${next.size ? `?${next.toString()}` : ""}`);
+  };
+  const leaderboardParams = new URLSearchParams(location.search);
+  leaderboardParams.delete("profile");
+  leaderboardParams.delete("driver");
+  leaderboardParams.delete("embed");
+  if (activeFormulaKey) leaderboardParams.delete("dnaSeries");
+  const leaderboardIndexHref = `${driverDnaLeaderboardIndexPath(scopeKey)}${leaderboardParams.size ? `?${leaderboardParams.toString()}` : ""}`;
 
   return (
     <PageFrame
@@ -677,7 +741,17 @@ export function DriverDnaPage() {
             >
               <ArrowLeft className="size-3.5" /> Browse cards
             </button>
-          ) : undefined
+          ) : (
+            <Link
+              to={leaderboardIndexHref}
+              className={cn(
+                "inline-flex min-h-9 items-center gap-2 rounded-xl border border-white/[0.08] bg-black/20 px-3 text-xs font-medium text-zinc-300 transition hover:border-white/[0.16] hover:bg-white/[0.05] hover:text-white",
+                interactiveFocusClass,
+              )}
+            >
+              <BarChart3 className="size-3.5" /> Stat leaderboards
+            </Link>
+          )
         }
       />
 
@@ -719,24 +793,31 @@ export function DriverDnaPage() {
             </div>
             <p className="mt-3 border-t border-white/[0.06] pt-3 text-xs leading-relaxed text-zinc-400">
               The page compares multiple race signals with every archetype's
-              weighted profile. A signature also needs enough starts and data, a
-              meaningful defining stat, a strong peer rank, at least three
-              strong signals, and a clear lead over the next style. The highest
-              weighted style becomes the driver's archetype; weaker defining
-              stats reduce its fit score directly. Front-Runner, for example, is
-              penalized when a driver leads only a small share of recorded laps.
-              All-Rounder enters the comparison only when pace, racecraft, and
-              results are all strong, and its fit is within five points of the
-              strongest specialist. The fit breakdown lists every style and
-              which core criteria each one meets. Confidence combines fit,
-              separation, defining-stat strength, supporting signals, and sample
-              size; it is a model score, not a statistical probability. Clean
-              Combatant compares close sectors, the share of close sectors
-              without a logged collision or penalty, and clean overtakes. Rain
-              Master and Street Circuit Specialist compare a driver's race-field
-              performance with their own baseline in dry weather or on other
-              circuits. Tire Whisperer compares measured wear only with the same
-              compound in the same race.
+              weighted profile, including qualifying data for Mr. Saturday. A
+              signature also needs enough starts and data, a meaningful defining
+              stat, a strong peer rank, at least three strong signals, and a
+              clear lead over the next style. The highest weighted style becomes
+              the driver's archetype; weaker defining stats reduce its fit score
+              directly. Front-Runner, for example, is penalized when a driver
+              leads only a small share of recorded laps. All-Rounder enters the
+              comparison only when pace, racecraft, and results are all strong,
+              and its fit is within five points of the strongest specialist. The
+              fit breakdown lists every style and which core criteria each one
+              meets. Confidence combines fit, separation, defining-stat
+              strength, supporting signals, and sample size; it is a model
+              score, not a statistical probability. Clean Combatant compares
+              close sectors, the share of close sectors without a logged
+              collision or penalty, and clean overtakes. Rain Master and Street
+              Circuit Specialist compare a driver's race-field performance with
+              their own baseline in dry weather or on other circuits. Tire
+              Whisperer estimates wear per lap from the recorded wear curve,
+              then compares only drivers using the same compound in the same
+              race. Mr. Saturday combines qualifying lap pace, qualifying
+              positions, and poles, with at least five qualifying sessions
+              required. A podium earns a weight of one minus three divided by
+              field size (zero in fields of three or fewer), averaged across
+              classified finishes. Position evidence pairs the raw average with
+              its average field percentile: 100% is first and 0% is last.
             </p>
           </div>
         </details>
@@ -746,7 +827,7 @@ export function DriverDnaPage() {
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <SectionHeader
             title="Racing signatures"
-            hint={`${plural(visibleCards.length, "card")} shown · archetypes are scored from multiple race signals`}
+            hint={`${plural(visibleCards.length, "card")} shown · archetypes are scored from multiple race and qualifying signals`}
             className="mb-0"
           />
           <div className="flex flex-wrap items-center gap-2">
@@ -803,6 +884,7 @@ export function DriverDnaPage() {
               profileLayout={Boolean(profileCard)}
               onShowFits={() => setFitModalCard(card)}
               onOpenProfile={() => openDriverDnaProfile(card.key)}
+              onOpenLeaderboard={openSignalLeaderboard}
               onOpenStats={() => {
                 league.setSelectedDriver(card.key);
                 navigate(dashboardPath(scopeKey));
@@ -824,6 +906,13 @@ export function DriverDnaPage() {
               : "Driver cards appear when race results are available for this game and date range."}
           </p>
         </section>
+      )}
+
+      {profileCard && (
+        <DriverDnaArchetypeRadar
+          fits={profileCard.archetypeFits}
+          currentStyle={profileCard.style}
+        />
       )}
 
       {profileCard && (
@@ -971,6 +1060,7 @@ function DriverDnaTile({
   profileLayout = false,
   onShowFits,
   onOpenProfile,
+  onOpenLeaderboard,
   onOpenStats,
 }: {
   card: DriverDnaCard;
@@ -978,6 +1068,7 @@ function DriverDnaTile({
   profileLayout?: boolean;
   onShowFits: () => void;
   onOpenProfile: () => void;
+  onOpenLeaderboard: (signal: DriverDnaSignal) => void;
   onOpenStats: () => void;
 }) {
   const style = DRIVER_DNA_STYLES[card.style];
@@ -1055,14 +1146,20 @@ function DriverDnaTile({
               )}
             >
               {card.supportingSignals.map((signal) => (
-                <div
-                  key={signal.label}
+                <button
+                  key={signal.signal}
+                  type="button"
+                  onClick={() => onOpenLeaderboard(signal.signal)}
+                  aria-label={`Open ${signal.label} leaderboard`}
                   title={`${signal.value} · ${Math.round(signal.percentile * 100)}th percentile among drivers in this view`}
-                  className="min-w-0 rounded-lg bg-white/[0.035] px-2 py-1.5"
+                  className="group min-w-0 rounded-lg bg-white/[0.035] px-2 py-1.5 text-left transition-colors hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300"
                 >
-                  <p className="truncate text-[9px] font-semibold uppercase tracking-wide text-zinc-500">
-                    {signal.label}
-                  </p>
+                  <span className="flex items-center justify-between gap-1">
+                    <span className="truncate text-[9px] font-semibold uppercase tracking-wide text-zinc-500 transition-colors group-hover:text-zinc-300">
+                      {signal.label}
+                    </span>
+                    <ArrowUpRight className="size-3 shrink-0 text-zinc-600 opacity-0 transition group-hover:opacity-100 group-focus-visible:opacity-100" />
+                  </span>
                   <p className="truncate text-[10px] font-medium text-zinc-200">
                     {signal.value}
                   </p>
@@ -1070,7 +1167,7 @@ function DriverDnaTile({
                     Top {Math.max(1, 100 - Math.round(signal.percentile * 100))}
                     %
                   </p>
-                </div>
+                </button>
               ))}
             </div>
           )}

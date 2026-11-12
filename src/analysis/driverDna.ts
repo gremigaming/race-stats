@@ -9,11 +9,9 @@ import {
   type LeagueRace,
 } from "../league/league";
 import { getTeamName } from "../utils/colors";
-import {
-  getDriverStints,
-  getStintWearCurve,
-  stintWearRate,
-} from "../utils/stats/tyres";
+import { isQualifyingSessionType } from "../utils/sessionTypes";
+import { sessionDriverBestLapTimeMs } from "../utils/stats/drivers";
+import { getDriverStints, getStintWearCurve } from "../utils/stats/tyres";
 import { getTrackDisplayName, getTrackId } from "../utils/tracks";
 
 const STREET_CIRCUIT_IDS = new Set([
@@ -33,10 +31,16 @@ export const DRIVER_DNA_STYLES = {
       "Blends grid-to-finish recovery, lap-one gains, overtakes, finishing position, and podiums.",
   },
   qualifying: {
-    label: "One-Lap Weapon",
-    tagline: "Puts the car in the fight before the lights go out.",
+    label: "Grid Setter",
+    tagline: "Builds a strong starting spot, then backs it up with pace.",
     criterion:
-      "Blends front-of-grid starts, poles, race pace, fastest laps, and podiums.",
+      "Blends race-grid strength, race pace, fastest laps, and results.",
+  },
+  mrSaturday: {
+    label: "Mr. Saturday",
+    tagline: "Finds another gear when qualifying decides the grid.",
+    criterion:
+      "Blends qualifying lap pace, field-adjusted qualifying positions, and pole rate across multiple sessions.",
   },
   consistency: {
     label: "Race Metronome",
@@ -60,7 +64,7 @@ export const DRIVER_DNA_STYLES = {
     label: "Podium Magnet",
     tagline: "Keeps finding their way into the top three.",
     criterion:
-      "Blends podium rate, average finish, grid strength, consistency, and race pace.",
+      "Blends field-adjusted podium strength, average finish, grid strength, consistency, and race pace.",
   },
   fastestLapHunter: {
     label: "Hot-Lap Sniper",
@@ -96,7 +100,7 @@ export const DRIVER_DNA_STYLES = {
     label: "Tire Whisperer",
     tagline: "Makes the rubber last when the race starts to bite.",
     criterion:
-      "Ranks measured wear against drivers on the same compound in the same race, then checks pace, finishes, and reliability.",
+      "Uses the rate of tyre wear per lap, compared only with drivers on the same compound in the same race, then checks pace, finishes, and reliability.",
   },
   streetCircuitSpecialist: {
     label: "Street Circuit Specialist",
@@ -139,7 +143,9 @@ export interface DriverDnaCard {
   races: number;
   finishedRaces: number;
   averageGrid: number | null;
+  averageGridFieldPercentile: number | null;
   averageFinish: number | null;
+  averageFinishFieldPercentile: number | null;
   averagePlacesGained: number | null;
   gridTopThirdShare: number | null;
   finishSwing: number | null;
@@ -149,6 +155,7 @@ export interface DriverDnaCard {
   totalOvertakes: number;
   podiums: number;
   podiumRate: number | null;
+  podiumStrength: number | null;
   fastestLapCount: number;
   fastestLapRate: number | null;
   finishRate: number | null;
@@ -170,13 +177,22 @@ export interface DriverDnaCard {
   nonStreetRaces: number;
   streetTrackCount: number;
   streetPerformanceDelta: number | null;
+  qualifyingSessions: number;
+  qualifyingPositionSessions: number;
+  averageQualifyingPosition: number | null;
+  averageQualifyingFieldPercentile: number | null;
+  qualifyingPaceRank: number | null;
+  qualifyingPoleCount: number;
+  qualifyingPoleRate: number | null;
   tyreWearRaces: number;
-  tyreWearStints: number;
+  tyreWearLaps: number;
+  tyreWearPercentPerLap: number | null;
   tyreCareRank: number | null;
   signatureFit: number | null;
   signatureConfidence: number | null;
   archetypeFits: DriverDnaArchetypeFit[];
   supportingSignals: DriverDnaSignalEvidence[];
+  signalMetrics: DriverDnaLeaderboardMetric[];
   points: number;
 }
 
@@ -195,9 +211,19 @@ export interface DriverDnaArchetypeFit {
 }
 
 export interface DriverDnaSignalEvidence {
+  signal: DriverDnaSignal;
   label: string;
   value: string;
   percentile: number;
+}
+
+export interface DriverDnaLeaderboardMetric {
+  signal: DriverDnaSignal;
+  label: string;
+  value: string;
+  score: number;
+  percentile: number;
+  sample: string;
 }
 
 interface PositionSample {
@@ -231,9 +257,15 @@ interface DriverAccumulator {
   streetPerformance: number[];
   nonStreetPerformance: number[];
   streetTracks: Set<string>;
+  qualifyingPaceScores: number[];
+  qualifyingPositionScores: number[];
+  qualifyingPositions: number[];
+  qualifyingPoleCount: number;
+  qualifyingPoleSamples: number;
   tyreCareScores: number[];
+  tyreWearRates: number[];
   tyreWearRaces: Set<string>;
-  tyreWearStints: number;
+  tyreWearLaps: number;
   podiums: number;
   poles: number;
   fastestLapCount: number;
@@ -248,6 +280,10 @@ const average = (values: number[]): number | null =>
   values.length
     ? values.reduce((sum, value) => sum + value, 0) / values.length
     : null;
+
+export function formatDriverDnaFieldPercentile(value: number | null): string {
+  return value == null ? "—" : `${Math.round(value * 100)}% field percentile`;
+}
 
 function median(values: number[]): number | null {
   if (!values.length) return null;
@@ -279,16 +315,25 @@ function fieldFraction(sample: PositionSample): number {
   return (sample.position - 1) / Math.max(1, sample.field - 1);
 }
 
+function podiumFieldWeight(fieldSize: number): number {
+  return fieldSize > 3 ? (fieldSize - 3) / fieldSize : 0;
+}
+
 function isWetWeather(weather: string | undefined): boolean {
   return Boolean(weather && /rain|storm|thunder|wet/i.test(weather));
 }
 
 function raceTyreCare(race: LeagueRace): {
   scoreByDriver: Map<string, number>;
-  stintsByDriver: Map<string, number>;
+  wearRateByDriver: Map<string, number>;
+  wearLapsByDriver: Map<string, number>;
 } {
-  const ratesByCompound = new Map<string, Map<string, number[]>>();
-  const stintsByDriver = new Map<string, number>();
+  const ratesByCompound = new Map<
+    string,
+    Map<string, { rate: number; laps: number }[]>
+  >();
+  const ratesByDriver = new Map<string, { rate: number; laps: number }[]>();
+  const wearLapsByDriver = new Map<string, number>();
   for (const driver of race.session["classification-data"] ?? []) {
     if (!isNamedDriver(driver)) continue;
     const key = driverKey(driver["driver-name"]);
@@ -304,27 +349,53 @@ function raceTyreCare(race: LeagueRace): {
         continue;
       }
       const wearCurve = getStintWearCurve(stint);
-      if (wearCurve.length < 3 || wearCurve.at(-1)?.stintLap !== length) {
-        continue;
-      }
-      const wearRate = stintWearRate(stint);
+      if (wearCurve.length < 3) continue;
+      const meanLap = average(wearCurve.map((point) => point.stintLap));
+      const meanWear = average(wearCurve.map((point) => point.worstWear));
+      if (meanLap == null || meanWear == null) continue;
+      const lapVariance = wearCurve.reduce(
+        (sum, point) => sum + (point.stintLap - meanLap) ** 2,
+        0,
+      );
+      if (lapVariance <= 0) continue;
+      const wearRate =
+        wearCurve.reduce(
+          (sum, point) =>
+            sum + (point.stintLap - meanLap) * (point.worstWear - meanWear),
+          0,
+        ) / lapVariance;
       if (!Number.isFinite(wearRate) || wearRate <= 0) continue;
+      const measuredLaps = wearCurve.length;
+      const sample = { rate: wearRate, laps: measuredLaps };
 
       const byDriver = ratesByCompound.get(compound) ?? new Map();
       const driverRates = byDriver.get(key) ?? [];
-      driverRates.push(wearRate);
+      driverRates.push(sample);
       byDriver.set(key, driverRates);
       ratesByCompound.set(compound, byDriver);
-      stintsByDriver.set(key, (stintsByDriver.get(key) ?? 0) + 1);
+      const allRates = ratesByDriver.get(key) ?? [];
+      allRates.push(sample);
+      ratesByDriver.set(key, allRates);
+      wearLapsByDriver.set(
+        key,
+        (wearLapsByDriver.get(key) ?? 0) + measuredLaps,
+      );
     }
   }
 
   const scores = new Map<string, number[]>();
   for (const byDriver of ratesByCompound.values()) {
-    const averageRates = [...byDriver].map(([key, rates]) => ({
-      key,
-      rate: average(rates) ?? 0,
-    }));
+    const averageRates = [...byDriver].map(([key, rates]) => {
+      const laps = rates.reduce((sum, entry) => sum + entry.laps, 0);
+      return {
+        key,
+        rate:
+          laps > 0
+            ? rates.reduce((sum, entry) => sum + entry.rate * entry.laps, 0) /
+              laps
+            : 0,
+      };
+    });
     const peers = averageRates.map((entry) => entry.rate);
     for (const { key, rate } of averageRates) {
       const ranks = scores.get(key) ?? [];
@@ -340,7 +411,21 @@ function raceTyreCare(race: LeagueRace): {
         return score == null ? [] : [[key, score]];
       }),
     ),
-    stintsByDriver,
+    wearRateByDriver: new Map(
+      [...ratesByDriver].flatMap(([key, rates]) => {
+        const laps = rates.reduce((sum, entry) => sum + entry.laps, 0);
+        return laps > 0
+          ? [
+              [
+                key,
+                rates.reduce((sum, entry) => sum + entry.rate * entry.laps, 0) /
+                  laps,
+              ],
+            ]
+          : [];
+      }),
+    ),
+    wearLapsByDriver,
   };
 }
 
@@ -500,7 +585,7 @@ function cleanRacingByDriver(
   return stats;
 }
 
-type DriverDnaSignal =
+export type DriverDnaSignal =
   | "recovery"
   | "grid"
   | "pole"
@@ -516,6 +601,9 @@ type DriverDnaSignal =
   | "wetPerformance"
   | "tyreCare"
   | "streetPerformance"
+  | "qualifyingPace"
+  | "qualifyingPosition"
+  | "qualifyingPoleRate"
   | "finish";
 
 type SignatureStyle = Exclude<
@@ -543,6 +631,9 @@ const SIGNALS: DriverDnaSignal[] = [
   "wetPerformance",
   "tyreCare",
   "streetPerformance",
+  "qualifyingPace",
+  "qualifyingPosition",
+  "qualifyingPoleRate",
   "finish",
 ];
 
@@ -552,7 +643,16 @@ const ALL_ROUNDER_SIGNAL_GROUPS: {
 }[] = [
   {
     label: "Pace",
-    signals: ["grid", "pole", "fastestLap", "lapsLed", "racePace"],
+    signals: [
+      "grid",
+      "pole",
+      "fastestLap",
+      "lapsLed",
+      "racePace",
+      "qualifyingPace",
+      "qualifyingPosition",
+      "qualifyingPoleRate",
+    ],
   },
   {
     label: "Racecraft",
@@ -584,6 +684,14 @@ const STYLE_PROFILES: Record<
     fastestLap: 0.15,
     podium: 0.1,
     stability: 0.06,
+  },
+  mrSaturday: {
+    qualifyingPace: 0.35,
+    qualifyingPosition: 0.25,
+    qualifyingPoleRate: 0.15,
+    racePace: 0.1,
+    grid: 0.08,
+    fastestLap: 0.07,
   },
   consistency: {
     stability: 0.38,
@@ -677,6 +785,7 @@ const STYLE_PROFILES: Record<
 const STYLE_ANCHORS: Record<SignatureStyle, DriverDnaSignal> = {
   comeback: "recovery",
   qualifying: "grid",
+  mrSaturday: "qualifyingPace",
   consistency: "stability",
   openingLap: "openingLap",
   overtakeArtist: "overtaking",
@@ -693,6 +802,7 @@ const STYLE_ANCHORS: Record<SignatureStyle, DriverDnaSignal> = {
 const STYLE_ANCHOR_FLOORS: Record<SignatureStyle, number> = {
   comeback: 0.75,
   qualifying: 0.75,
+  mrSaturday: 0.75,
   consistency: 0.75,
   openingLap: 0.75,
   overtakeArtist: 0.8,
@@ -717,6 +827,7 @@ interface RawDriverDna {
     | "signatureConfidence"
     | "archetypeFits"
     | "supportingSignals"
+    | "signalMetrics"
   >;
   signals: SignalSet;
   evidence: Record<DriverDnaSignal, string>;
@@ -736,8 +847,11 @@ interface RawDriverDna {
     streetRaces: number;
     nonStreetRaces: number;
     streetTracks: number;
+    qualifyingSessions: number;
+    qualifyingPositionSessions: number;
+    qualifyingPoleSamples: number;
     tyreWearRaces: number;
-    tyreWearStints: number;
+    tyreWearLaps: number;
   };
 }
 
@@ -760,6 +874,88 @@ function peerPercentile(value: number, peers: number[]): number {
   const lower = peers.filter((peer) => peer < value).length;
   const tied = peers.filter((peer) => peer === value).length;
   return (lower + (tied - 1) / 2) / (peers.length - 1);
+}
+
+interface QualifyingDnaStats {
+  paceScores: number[];
+  positionScores: number[];
+  positions: number[];
+  poleCount: number;
+  poleSamples: number;
+}
+
+function buildQualifyingDnaStats(
+  sessions: LeagueRace[],
+): Map<string, QualifyingDnaStats> {
+  const statsByDriver = new Map<string, QualifyingDnaStats>();
+
+  for (const { session } of sessions) {
+    if (!isQualifyingSessionType(session["session-info"]?.["session-type"])) {
+      continue;
+    }
+
+    const driversByKey = new Map<string, DriverData>();
+    for (const driver of session["classification-data"] ?? []) {
+      if (!isNamedDriver(driver)) continue;
+      const key = driverKey(driver["driver-name"]);
+      if (!driversByKey.has(key)) driversByKey.set(key, driver);
+    }
+    const field = driversByKey.size;
+    if (field < 2) continue;
+
+    const drivers = [...driversByKey].map(([key, driver]) => ({
+      key,
+      driver,
+      bestLapMs: sessionDriverBestLapTimeMs(session, driver),
+    }));
+    const timedDrivers = drivers.filter((driver) => driver.bestLapMs > 0);
+    const timedField = timedDrivers.length;
+    const lapTimes = timedDrivers.map((driver) => driver.bestLapMs);
+    const paceByDriver = new Map(
+      timedDrivers.map(({ key, bestLapMs }) => [
+        key,
+        1 - peerPercentile(bestLapMs, lapTimes),
+      ]),
+    );
+    const timePositions = new Map(
+      [...timedDrivers]
+        .sort((a, b) => a.bestLapMs - b.bestLapMs)
+        .map(({ key }, index) => [key, index + 1]),
+    );
+
+    for (const { key, driver } of drivers) {
+      const paceScore = paceByDriver.get(key);
+      const officialPosition = driver["final-classification"]?.position;
+      const officialPositionIsValid = validPosition(officialPosition, field);
+      const timePosition = timePositions.get(key);
+      const position = officialPositionIsValid
+        ? officialPosition
+        : timePosition;
+      const positionField = officialPositionIsValid ? field : timedField;
+      const driverStats = statsByDriver.get(key) ?? {
+        paceScores: [],
+        positionScores: [],
+        positions: [],
+        poleCount: 0,
+        poleSamples: 0,
+      };
+
+      if (paceScore != null && timedField >= 2) {
+        driverStats.paceScores.push(paceScore);
+      }
+      if (position != null && positionField >= 2) {
+        driverStats.positionScores.push(
+          1 - fieldFraction({ position, field: positionField }),
+        );
+        driverStats.positions.push(position);
+        driverStats.poleSamples += 1;
+        if (position === 1) driverStats.poleCount += 1;
+      }
+      statsByDriver.set(key, driverStats);
+    }
+  }
+
+  return statsByDriver;
 }
 
 function percentileSignals(rows: RawDriverDna[]): Map<string, SignalSet> {
@@ -785,6 +981,11 @@ function styleMinimumMet(style: SignatureStyle, row: RawDriverDna): boolean {
       return row.samples.gain >= 3;
     case "qualifying":
       return row.samples.grid >= 3;
+    case "mrSaturday":
+      return (
+        row.samples.qualifyingSessions >= 5 &&
+        row.samples.qualifyingPositionSessions >= 3
+      );
     case "consistency":
     case "podiumMagnet":
       return row.samples.finish >= 4;
@@ -805,7 +1006,7 @@ function styleMinimumMet(style: SignatureStyle, row: RawDriverDna): boolean {
     case "rainMaster":
       return row.samples.wetRaces >= 3 && row.samples.dryRaces >= 5;
     case "tyreWhisperer":
-      return row.samples.tyreWearRaces >= 5 && row.samples.tyreWearStints >= 10;
+      return row.samples.tyreWearRaces >= 5 && row.samples.tyreWearLaps >= 20;
     case "streetCircuitSpecialist":
       return (
         row.samples.streetRaces >= 3 &&
@@ -829,6 +1030,8 @@ function absoluteAnchorStrength(
       return clamp01((card.averagePlacesGained ?? 0) / 0.75);
     case "qualifying":
       return clamp01((card.gridTopThirdShare ?? 0) / 0.45);
+    case "mrSaturday":
+      return clamp01((card.qualifyingPaceRank ?? 0) / 0.75);
     case "consistency":
       return clamp01(
         Math.min(
@@ -846,7 +1049,7 @@ function absoluteAnchorStrength(
     case "overtakeArtist":
       return clamp01((card.averageOvertakes ?? 0) / 5);
     case "podiumMagnet":
-      return clamp01((card.podiumRate ?? 0) / 0.25);
+      return clamp01((card.podiumStrength ?? 0) / 0.25);
     case "fastestLapHunter":
       return clamp01((card.fastestLapRate ?? 0) / 0.1);
     case "ironWill":
@@ -912,6 +1115,7 @@ function fitStyles(row: RawDriverDna, signalRanks: SignalSet): StyleFit[] {
           .sort((a, b) => b.contribution - a.contribution)
           .slice(0, 3)
           .map(({ signal }) => ({
+            signal,
             label: signalLabel(signal),
             value: row.evidence[signal],
             percentile: signalRanks[signal] ?? 0.5,
@@ -921,7 +1125,7 @@ function fitStyles(row: RawDriverDna, signalRanks: SignalSet): StyleFit[] {
   });
 }
 
-function signalLabel(signal: DriverDnaSignal): string {
+export function driverDnaSignalLabel(signal: DriverDnaSignal): string {
   switch (signal) {
     case "recovery":
       return "Recovery";
@@ -936,7 +1140,7 @@ function signalLabel(signal: DriverDnaSignal): string {
     case "overtaking":
       return "Overtakes";
     case "podium":
-      return "Podiums";
+      return "Podium strength";
     case "fastestLap":
       return "Fastest laps";
     case "reliability":
@@ -950,11 +1154,60 @@ function signalLabel(signal: DriverDnaSignal): string {
     case "wetPerformance":
       return "Wet-race delta";
     case "tyreCare":
-      return "Tyre preservation";
+      return "Tyre wear per lap";
     case "streetPerformance":
       return "Street-circuit delta";
+    case "qualifyingPace":
+      return "Qualifying pace";
+    case "qualifyingPosition":
+      return "Qualifying position";
+    case "qualifyingPoleRate":
+      return "Qualifying poles";
     case "finish":
       return "Finish";
+  }
+}
+
+function signalLabel(signal: DriverDnaSignal): string {
+  return driverDnaSignalLabel(signal);
+}
+
+function signalSample(signal: DriverDnaSignal, row: RawDriverDna): string {
+  switch (signal) {
+    case "recovery":
+      return `${row.samples.gain} grid-to-finish samples`;
+    case "grid":
+    case "pole":
+      return `${row.samples.grid} starts`;
+    case "stability":
+    case "podium":
+    case "finish":
+      return `${row.samples.finish} classified finishes`;
+    case "openingLap":
+      return `${row.samples.openingLap} lap-one samples`;
+    case "overtaking":
+      return `${row.samples.overtaking} races`;
+    case "fastestLap":
+    case "reliability":
+      return `${row.card.races} race starts`;
+    case "lapsLed":
+      return `${row.samples.leadHistoryRaces} races with position history`;
+    case "racePace":
+      return `${row.samples.pace} races with pace data`;
+    case "cleanRacing":
+      return `${row.samples.cleanRacingRaces} races · ${row.samples.closeSectorOpportunities} close sectors`;
+    case "wetPerformance":
+      return `${row.samples.wetRaces} wet · ${row.samples.dryRaces} dry races`;
+    case "tyreCare":
+      return `${row.samples.tyreWearLaps} measured laps across ${row.samples.tyreWearRaces} races`;
+    case "streetPerformance":
+      return `${row.samples.streetRaces} street · ${row.samples.nonStreetRaces} other races`;
+    case "qualifyingPace":
+      return `${row.samples.qualifyingSessions} qualifying sessions with a valid lap`;
+    case "qualifyingPosition":
+      return `${row.samples.qualifyingPositionSessions} qualifying position results`;
+    case "qualifyingPoleRate":
+      return `${row.samples.qualifyingPoleSamples} qualifying sessions`;
   }
 }
 
@@ -1004,6 +1257,7 @@ function fitAllRounder(
     )[0];
     if (!strongest) return null;
     return {
+      signal: strongest.signal,
       label: group.label,
       value: `${signalLabel(strongest.signal)} · ${row.evidence[strongest.signal]}`,
       percentile: strongest.percentile,
@@ -1113,6 +1367,10 @@ function chooseSignature(
         return row.samples.cleanRacingRaces;
       case "rainMaster":
         return row.samples.wetRaces;
+      case "mrSaturday":
+        return row.samples.qualifyingSessions;
+      case "podiumMagnet":
+        return row.samples.finish;
       case "tyreWhisperer":
         return row.samples.tyreWearRaces;
       case "streetCircuitSpecialist":
@@ -1227,6 +1485,7 @@ function chooseSignature(
 /** Build each named driver's strongest racecraft signature from the visible races. */
 export function buildDriverDna(races: LeagueRace[]): DriverDnaCard[] {
   const drivers = new Map<string, DriverAccumulator>();
+  const qualifyingStatsByDriver = buildQualifyingDnaStats(races);
 
   for (const race of races) {
     if (!isRaceSession(race.session)) continue;
@@ -1303,9 +1562,15 @@ export function buildDriverDna(races: LeagueRace[]): DriverDnaCard[] {
         streetPerformance: [],
         nonStreetPerformance: [],
         streetTracks: new Set<string>(),
+        qualifyingPaceScores: [],
+        qualifyingPositionScores: [],
+        qualifyingPositions: [],
+        qualifyingPoleCount: 0,
+        qualifyingPoleSamples: 0,
         tyreCareScores: [],
+        tyreWearRates: [],
         tyreWearRaces: new Set<string>(),
-        tyreWearStints: 0,
+        tyreWearLaps: 0,
         podiums: 0,
         poles: 0,
         fastestLapCount: 0,
@@ -1335,12 +1600,14 @@ export function buildDriverDna(races: LeagueRace[]): DriverDnaCard[] {
           }
         }
       }
-      const wearStints = wear.stintsByDriver.get(key) ?? 0;
       const tyreCareRank = wear.scoreByDriver.get(key);
-      if (wearStints > 0) {
+      const wearLaps = wear.wearLapsByDriver.get(key) ?? 0;
+      if (wearLaps > 0) {
         current.tyreWearRaces.add(race.file);
-        current.tyreWearStints += wearStints;
+        current.tyreWearLaps += wearLaps;
         if (tyreCareRank != null) current.tyreCareScores.push(tyreCareRank);
+        const wearRate = wear.wearRateByDriver.get(key);
+        if (wearRate != null) current.tyreWearRates.push(wearRate);
       }
       const cleanRace = cleanRacingStats.get(key);
       if (cleanRace?.validSectors) {
@@ -1405,6 +1672,16 @@ export function buildDriverDna(races: LeagueRace[]): DriverDnaCard[] {
     }
   }
 
+  for (const [key, qualifyingStats] of qualifyingStatsByDriver) {
+    const driver = drivers.get(key);
+    if (!driver) continue;
+    driver.qualifyingPaceScores.push(...qualifyingStats.paceScores);
+    driver.qualifyingPositionScores.push(...qualifyingStats.positionScores);
+    driver.qualifyingPositions.push(...qualifyingStats.positions);
+    driver.qualifyingPoleCount += qualifyingStats.poleCount;
+    driver.qualifyingPoleSamples += qualifyingStats.poleSamples;
+  }
+
   const rawRows: RawDriverDna[] = [...drivers.values()].map((driver) => {
     const averageGrid = average(driver.grids.map((sample) => sample.position));
     const averageFinish = average(
@@ -1445,6 +1722,11 @@ export function buildDriverDna(races: LeagueRace[]): DriverDnaCard[] {
     const podiumRate = driver.finishes.length
       ? driver.podiums / driver.finishes.length
       : null;
+    const podiumStrength = average(
+      driver.finishes.map((finish) =>
+        finish.position <= 3 ? podiumFieldWeight(finish.field) : 0,
+      ),
+    );
     const fastestLapRate = driver.races.size
       ? driver.fastestLapCount / driver.races.size
       : null;
@@ -1459,6 +1741,8 @@ export function buildDriverDna(races: LeagueRace[]): DriverDnaCard[] {
       : null;
     const racePaceQuality = average(driver.racePaceScores);
     const averageNormalizedFinish = average(normalizedFinishes);
+    const averageFinishFieldPercentile =
+      averageNormalizedFinish == null ? null : 1 - averageNormalizedFinish;
     const averageRacePaceRank = racePaceQuality ?? 0;
     const cleanRacingRaces = driver.cleanRacingRaces.size;
     const cleanCloseSectorsPerRace = cleanRacingRaces
@@ -1507,23 +1791,33 @@ export function buildDriverDna(races: LeagueRace[]): DriverDnaCard[] {
           (average(driver.nonStreetPerformance) ?? 0)
         : null;
     const tyreCareRank = average(driver.tyreCareScores);
+    const tyreWearPercentPerLap = average(driver.tyreWearRates);
+    const qualifyingPaceRank = average(driver.qualifyingPaceScores);
+    const qualifyingPositionStrength = average(driver.qualifyingPositionScores);
+    const averageQualifyingPosition = average(driver.qualifyingPositions);
+    const qualifyingPoleRate = driver.qualifyingPoleSamples
+      ? driver.qualifyingPoleCount / driver.qualifyingPoleSamples
+      : null;
     const evidence: Record<DriverDnaSignal, string> = {
       recovery: `${(averagePlacesGained ?? 0) > 0 ? "+" : ""}${(averagePlacesGained ?? 0).toFixed(1)} places gained / race`,
-      grid: `Average start ${averageGrid == null ? "—" : `P${averageGrid.toFixed(1)}`}`,
+      grid: `Average start ${averageGrid == null ? "—" : `P${averageGrid.toFixed(1)}`} · ${formatDriverDnaFieldPercentile(averageGridStrength)}`,
       pole: `${driver.poles} pole${driver.poles === 1 ? "" : "s"} in ${driver.grids.length} starts`,
       stability: `±${(finishSwing ?? 0).toFixed(1)} finish swing`,
       openingLap: `${(openingLapPlacesGained ?? 0) > 0 ? "+" : ""}${(openingLapPlacesGained ?? 0).toFixed(1)} places by lap one`,
       overtaking: `${(averageOvertakes ?? 0).toFixed(1)} passes / race`,
-      podium: `${Math.round((podiumRate ?? 0) * 100)}% podium rate`,
+      podium: `${Math.round((podiumStrength ?? 0) * 100)}% field-adjusted podium strength`,
       fastestLap: `${Math.round((fastestLapRate ?? 0) * 100)}% fastest-lap rate`,
       reliability: `${Math.round((finishRate ?? 0) * 100)}% finish rate`,
       lapsLed: `${Math.round((lapsLedShare ?? 0) * 100)}% of recorded laps led`,
       racePace: `Top ${Math.round((1 - averageRacePaceRank) * 100)}% race pace`,
       cleanRacing: `${(cleanCloseSectorsPerRace ?? 0).toFixed(1)} clean close sectors / race`,
       wetPerformance: `${(wetPerformanceDelta ?? 0) > 0 ? "+" : ""}${Math.round((wetPerformanceDelta ?? 0) * 100)} performance points in rain`,
-      tyreCare: `${Math.round((tyreCareRank ?? 0.5) * 100)}th-percentile matched-compound wear control`,
+      tyreCare: `${(tyreWearPercentPerLap ?? 0).toFixed(2)}% worst-wheel wear / lap`,
       streetPerformance: `${(streetPerformanceDelta ?? 0) > 0 ? "+" : ""}${Math.round((streetPerformanceDelta ?? 0) * 100)} performance points on street circuits`,
-      finish: `Average finish ${averageFinish == null ? "—" : `P${averageFinish.toFixed(1)}`}`,
+      qualifyingPace: `Top ${Math.max(1, 100 - Math.round((qualifyingPaceRank ?? 0) * 100))}% qualifying lap pace`,
+      qualifyingPosition: `Average qualifying position ${averageQualifyingPosition == null ? "—" : `P${averageQualifyingPosition.toFixed(1)}`} · ${formatDriverDnaFieldPercentile(qualifyingPositionStrength)}`,
+      qualifyingPoleRate: `${Math.round((qualifyingPoleRate ?? 0) * 100)}% qualifying pole rate`,
+      finish: `Average finish ${averageFinish == null ? "—" : `P${averageFinish.toFixed(1)}`} · ${formatDriverDnaFieldPercentile(averageFinishFieldPercentile)}`,
     };
 
     const card = {
@@ -1533,7 +1827,9 @@ export function buildDriverDna(races: LeagueRace[]): DriverDnaCard[] {
       races: driver.races.size,
       finishedRaces: driver.finishes.length,
       averageGrid,
+      averageGridFieldPercentile: averageGridStrength,
       averageFinish,
+      averageFinishFieldPercentile,
       averagePlacesGained,
       gridTopThirdShare: driver.grids.length
         ? topThirdStarts / driver.grids.length
@@ -1548,6 +1844,7 @@ export function buildDriverDna(races: LeagueRace[]): DriverDnaCard[] {
       totalOvertakes,
       podiums: driver.podiums,
       podiumRate,
+      podiumStrength,
       fastestLapCount: driver.fastestLapCount,
       fastestLapRate,
       finishRate,
@@ -1569,8 +1866,16 @@ export function buildDriverDna(races: LeagueRace[]): DriverDnaCard[] {
       nonStreetRaces: driver.nonStreetPerformance.length,
       streetTrackCount: driver.streetTracks.size,
       streetPerformanceDelta,
+      qualifyingSessions: driver.qualifyingPaceScores.length,
+      qualifyingPositionSessions: driver.qualifyingPositionScores.length,
+      averageQualifyingPosition,
+      averageQualifyingFieldPercentile: qualifyingPositionStrength,
+      qualifyingPaceRank,
+      qualifyingPoleCount: driver.qualifyingPoleCount,
+      qualifyingPoleRate,
       tyreWearRaces: driver.tyreWearRaces.size,
-      tyreWearStints: driver.tyreWearStints,
+      tyreWearLaps: driver.tyreWearLaps,
+      tyreWearPercentPerLap,
       tyreCareRank,
       points: driver.points,
     };
@@ -1591,7 +1896,7 @@ export function buildDriverDna(races: LeagueRace[]): DriverDnaCard[] {
           : null,
       overtaking:
         driver.overtakeSamples.length >= 5 ? averageNormalizedOvertakes : null,
-      podium: driver.finishes.length >= 4 ? podiumRate : null,
+      podium: driver.finishes.length >= 4 ? podiumStrength : null,
       fastestLap: driver.races.size >= 5 ? fastestLapRate : null,
       reliability: driver.races.size >= 3 ? finishRate : null,
       lapsLed:
@@ -1614,7 +1919,7 @@ export function buildDriverDna(races: LeagueRace[]): DriverDnaCard[] {
           : null,
       tyreCare:
         driver.tyreWearRaces.size >= 5 &&
-        driver.tyreWearStints >= 10 &&
+        driver.tyreWearLaps >= 20 &&
         tyreCareRank != null
           ? tyreCareRank
           : null,
@@ -1625,6 +1930,14 @@ export function buildDriverDna(races: LeagueRace[]): DriverDnaCard[] {
         streetPerformanceDelta != null
           ? streetPerformanceDelta
           : null,
+      qualifyingPace:
+        driver.qualifyingPaceScores.length >= 3 ? qualifyingPaceRank : null,
+      qualifyingPosition:
+        driver.qualifyingPositionScores.length >= 3
+          ? qualifyingPositionStrength
+          : null,
+      qualifyingPoleRate:
+        driver.qualifyingPoleSamples >= 5 ? qualifyingPoleRate : null,
       finish:
         driver.finishes.length >= 3 && averageNormalizedFinish != null
           ? 1 - averageNormalizedFinish
@@ -1640,6 +1953,7 @@ export function buildDriverDna(races: LeagueRace[]): DriverDnaCard[] {
         | "signatureConfidence"
         | "archetypeFits"
         | "supportingSignals"
+        | "signalMetrics"
       >,
       signals,
       evidence,
@@ -1659,8 +1973,11 @@ export function buildDriverDna(races: LeagueRace[]): DriverDnaCard[] {
         streetRaces: driver.streetPerformance.length,
         nonStreetRaces: driver.nonStreetPerformance.length,
         streetTracks: driver.streetTracks.size,
+        qualifyingSessions: driver.qualifyingPaceScores.length,
+        qualifyingPositionSessions: driver.qualifyingPositionScores.length,
+        qualifyingPoleSamples: driver.qualifyingPoleSamples,
         tyreWearRaces: driver.tyreWearRaces.size,
-        tyreWearStints: driver.tyreWearStints,
+        tyreWearLaps: driver.tyreWearLaps,
       },
     };
   });
@@ -1668,13 +1985,29 @@ export function buildDriverDna(races: LeagueRace[]): DriverDnaCard[] {
   const ranks = percentileSignals(rawRows);
   return rawRows
     .map((row) => {
-      const fits = fitStyles(row, ranks.get(row.card.key) ?? ({} as SignalSet));
-      const signature = chooseSignature(
-        row,
-        fits,
-        ranks.get(row.card.key) ?? ({} as SignalSet),
-      );
-      return { ...row.card, ...signature } satisfies DriverDnaCard;
+      const signalRanks = ranks.get(row.card.key) ?? ({} as SignalSet);
+      const fits = fitStyles(row, signalRanks);
+      const signature = chooseSignature(row, fits, signalRanks);
+      const signalMetrics = SIGNALS.flatMap((signal) => {
+        const score = row.signals[signal];
+        const percentile = signalRanks[signal];
+        if (score == null || percentile == null) return [];
+        return [
+          {
+            signal,
+            label: signalLabel(signal),
+            value: row.evidence[signal],
+            score,
+            percentile,
+            sample: signalSample(signal, row),
+          },
+        ];
+      });
+      return {
+        ...row.card,
+        ...signature,
+        signalMetrics,
+      } satisfies DriverDnaCard;
     })
     .sort((a, b) => b.races - a.races || a.name.localeCompare(b.name));
 }
@@ -1701,8 +2034,7 @@ export function buildDriverDnaHistory(
   races: LeagueRace[],
   targetDriverKey: string,
 ): DriverDnaHistoryPoint[] {
-  const chronologicalRaces = races
-    .filter((race) => isRaceSession(race.session))
+  const chronologicalSessions = races
     .map((race) => ({
       race,
       timestamp: raceDate(race.file)?.getTime() ?? null,
@@ -1713,7 +2045,8 @@ export function buildDriverDnaHistory(
         a.race.file.localeCompare(b.race.file),
     );
 
-  const targetRaceIndices = chronologicalRaces.flatMap(({ race }, index) => {
+  const targetRaceIndices = chronologicalSessions.flatMap(({ race }, index) => {
+    if (!isRaceSession(race.session)) return [];
     const participated = (race.session["classification-data"] ?? []).some(
       (driver) =>
         isNamedDriver(driver) &&
@@ -1738,9 +2071,9 @@ export function buildDriverDnaHistory(
         );
 
   return sampledIndices.flatMap((raceIndex) => {
-    const { race, timestamp } = chronologicalRaces[raceIndex];
+    const { race, timestamp } = chronologicalSessions[raceIndex];
     const card = buildDriverDna(
-      chronologicalRaces
+      chronologicalSessions
         .slice(0, raceIndex + 1)
         .map(({ race: historicalRace }) => historicalRace),
     ).find((candidate) => candidate.key === targetDriverKey);

@@ -35,6 +35,11 @@ const DriverDnaPage = lazy(() =>
     default: module.DriverDnaPage,
   })),
 );
+const DriverDnaLeaderboardPage = lazy(() =>
+  import("./pages/DriverDnaLeaderboardPage").then((module) => ({
+    default: module.DriverDnaLeaderboardPage,
+  })),
+);
 const DriverInsightsPage = lazy(() =>
   import("./pages/DriverInsightsPage").then((module) => ({
     default: module.DriverInsightsPage,
@@ -170,6 +175,22 @@ function AppRoutes() {
             }
           />
           <Route
+            path=":formulaKey/drivers/dna/leaderboard"
+            element={
+              <ScopedFormulaRoute>
+                <DriverDnaLeaderboardPage />
+              </ScopedFormulaRoute>
+            }
+          />
+          <Route
+            path=":formulaKey/drivers/dna/leaderboard/:signalKey"
+            element={
+              <ScopedFormulaRoute>
+                <DriverDnaLeaderboardPage />
+              </ScopedFormulaRoute>
+            }
+          />
+          <Route
             path=":formulaKey/drivers/dna"
             element={
               <ScopedFormulaRoute>
@@ -278,9 +299,7 @@ function UiDebugLoading() {
 
 function RouteLoadingFallback() {
   return (
-    <div
-      className="flex min-h-[48vh] items-center justify-center px-6"
-    >
+    <div className="flex min-h-[48vh] items-center justify-center px-6">
       <LoadingSpinner className="size-8 border-2" label="Loading view" />
     </div>
   );

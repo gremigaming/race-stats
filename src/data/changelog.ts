@@ -29,6 +29,14 @@ const changelog: ChangelogEntry[] = [
     destination: "incidents",
   },
   {
+    id: "driver-dna-updates",
+    date: "2026-11-12",
+    type: "feat",
+    message:
+      "Driver DNA now combines richer archetypes and field-aware stats with profile fit history, radar charts, and linked leaderboards.",
+    destination: "driver-dna",
+  },
+  {
     id: "stream-races-only",
     date: "2026-11-10",
     type: "fix",
@@ -37,35 +45,11 @@ const changelog: ChangelogEntry[] = [
     destination: "sessions",
   },
   {
-    id: "driver-dna-profile-history",
-    date: "2026-11-08",
-    type: "feat",
-    message:
-      "Open wide DNA profiles from cards or driver home, with archetype fit history.",
-    destination: "driver-dna",
-  },
-  {
-    id: "driver-dna-racing-archetypes",
-    date: "2026-11-08",
-    type: "feat",
-    message:
-      "Explore refreshed DNA styles, including clean racing, rain, tire care, and street circuits, with real F1 examples.",
-    destination: "driver-dna",
-  },
-  {
     id: "track-page-polish",
     date: "2026-11-06",
     type: "fix",
     message: "Track filters no longer jump the page or hide behind panels.",
     destination: "tracks",
-  },
-  {
-    id: "driver-dna-cards",
-    date: "2026-11-06",
-    type: "feat",
-    message:
-      "DNA cards compare multiple race signals, show every style fit, and copy as PNGs for Discord.",
-    destination: "driver-dna",
   },
   {
     id: "track-analysis",

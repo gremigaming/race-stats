@@ -2,6 +2,7 @@ import { Trophy } from "lucide-react";
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { cardClass, interactiveFocusClass } from "../components/Card";
+import { DriverDnaLeaderboardLinks } from "../components/dna/DriverDnaLeaderboardLinks";
 import { LeagueHighlights } from "../components/league/LeagueHighlights";
 import { SectionHeader } from "../components/ui/SectionHeader";
 import { HorizontalScrollRegion } from "../components/ui/HorizontalScrollRegion";
@@ -17,6 +18,11 @@ import {
   tableRowClass,
 } from "../components/ui/table";
 import { useTelemetry } from "../context/TelemetryContext";
+import {
+  LEADERBOARD_SERIES_OPTIONS,
+  seriesForFormula,
+  type LeaderboardSeries,
+} from "../utils/leaderboardSeries";
 import {
   isNamedDriver,
   isRaceSession,
@@ -42,21 +48,6 @@ type SortKey =
   | "bestFinish"
   | "avgGain"
   | "dnfs";
-
-type LeaderboardSeries = "f1-26" | "f1-25" | "f2";
-
-const SERIES_OPTIONS: { value: LeaderboardSeries; label: string }[] = [
-  { value: "f1-26", label: "F1 26" },
-  { value: "f1-25", label: "F1 25" },
-  { value: "f2", label: "F2" },
-];
-
-function seriesForFormula(key: string): LeaderboardSeries | null {
-  if (key === "f1-26") return "f1-26";
-  if (key === "f1-25" || key === "f1-modern") return "f1-25";
-  if (key.startsWith("f2")) return "f2";
-  return null;
-}
 
 const fmt = (n: number | null, digits = 1) =>
   n == null ? "—" : n.toFixed(digits);
@@ -96,8 +87,9 @@ export function DriversPage() {
       )
     : races;
   const formulaLabel = selectedFormulaSeries
-    ? SERIES_OPTIONS.find((option) => option.value === selectedFormulaSeries)
-        ?.label
+    ? LEADERBOARD_SERIES_OPTIONS.find(
+        (option) => option.value === selectedFormulaSeries,
+      )?.label
     : activeFormula?.label;
   const rangeLabel = league.filterLabel;
   const driverRows = leaderboard(visibleRaces);
@@ -120,6 +112,13 @@ export function DriversPage() {
         .length,
     0,
   );
+  const leaderboardSearchParams = new URLSearchParams(location.search);
+  if (!activeFormulaKey && selectedFormulaSeries) {
+    leaderboardSearchParams.set("dnaSeries", selectedFormulaSeries);
+  } else {
+    leaderboardSearchParams.delete("dnaSeries");
+  }
+  const leaderboardSearch = leaderboardSearchParams.toString();
 
   return (
     <PageFrame
@@ -170,12 +169,40 @@ export function DriversPage() {
                   ariaLabel="Leaderboard series"
                   value={selectedSeries}
                   onChange={setSelectedSeries}
-                  options={SERIES_OPTIONS}
+                  options={LEADERBOARD_SERIES_OPTIONS}
                 />
               )}
             </div>
           }
         />
+      )}
+
+      {!embed && activeMode === "drivers" && (
+        <details className="group rounded-2xl border border-white/[0.07] bg-zinc-950/35 px-4 py-3">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-3 marker:hidden">
+            <span>
+              <span className="block text-sm font-semibold text-zinc-200">
+                Stat leaderboards
+              </span>
+              <span className="mt-0.5 block text-xs text-zinc-500">
+                Explore race-data rankings for this game and date range
+              </span>
+            </span>
+            <span className="inline-flex shrink-0 items-center gap-2 text-xs text-zinc-500">
+              16 stats{" "}
+              <span className="transition-transform group-open:rotate-180">
+                ⌄
+              </span>
+            </span>
+          </summary>
+          <div className="mt-3 border-t border-white/[0.06] pt-3">
+            <DriverDnaLeaderboardLinks
+              scopeKey={scopeKey}
+              search={leaderboardSearch}
+              compact
+            />
+          </div>
+        </details>
       )}
 
       {rows.length === 0 ? (

@@ -18,4 +18,6 @@ on GitHub Pages by `.github/workflows/site.yml`.
   feature or fix, group related details of that feature together, and give
   each row a relevant in-app destination. Omit routine race uploads and
   staff-only or driver-specific corrections. Keep upstream repository and
-  author links out of the modal.
+  author links out of the modal. When several related improvements to one
+  feature area land together, combine them into one concise row instead of
+  adding a separate row for every small change or detail.
