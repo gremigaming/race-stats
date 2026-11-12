@@ -1,0 +1,319 @@
+<!doctype html>
+<!-- GreMi's combined OBS dock: activity feed (top), multi-platform chat (middle), waitlist + lobby SR (bottom).
+     Replaces the Casterlabs activity feed / multi-chat docks, the old GreMi Chat dock and the Race Control "Waitlist" dock.
+     Chat + activity: Streamer.bot (ws://127.0.0.1:8080, Twitch + YouTube) and TikFinity (ws://localhost:21213, TikTok), via chatcore.js.
+     Bots from every platform are hidden. Waitlist: Race Control dock.json (Twitch + YouTube) + TikTok interest read here
+     (answered through Streamer.bot DoAction, same as the old Waitlist dock). Lobby SR: live.gremigaming.com + league safety data.
+     ?fs=15 chat font size  ?rc=https://104-154-182-45.sslip.io  ?sbpass=  ?demo -->
+<html lang="en"><head><meta charset="utf-8"><title>GreMi Dock</title>
+<style>
+:root { --bg:#0e1116; --panel:#161b22; --line:#262d36; --text:#e9eef4; --dim:#8b949e; --fs:15px;
+        --green:#3fb950; --red:#f85149; --amber:#d29922; --blue:#58a6ff; --tw:#9146ff; --yt:#ff3b3b; --tt:#25f4ee; }
+* { box-sizing:border-box; }
+html, body { margin:0; height:100%; max-width:100vw; background:var(--bg); color:var(--text); font:13px/1.35 "Segoe UI", system-ui, sans-serif; overflow:hidden; }
+body { display:flex; flex-direction:column; }
+.bar { display:flex; flex-wrap:wrap; align-items:center; gap:6px; padding:5px 8px; border-bottom:1px solid var(--line); background:#0b0e13; flex:none; }
+.bar h2 { margin:0; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--dim); font-weight:700; cursor:pointer; user-select:none; }
+.bar h2::before { content:"▾ "; } .closed > .bar h2::before { content:"▸ "; }
+.bar .sp { margin-left:auto; display:flex; gap:5px; align-items:center; color:var(--dim); font-size:11px; }
+.btn { font:600 11px "Segoe UI"; color:var(--text); background:#1d232c; border:1px solid var(--line); border-radius:5px; padding:2px 6px; cursor:pointer; }
+.btn.off { opacity:.35; }
+.dot { display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--red); margin-right:3px; }
+.dot.on { background:var(--green); }
+.pane { display:flex; flex-direction:column; min-height:0; min-width:0; width:100%; }
+.pane.closed > .body { display:none; }
+.body { overflow-y:auto; overflow-x:hidden; scrollbar-width:thin; min-height:0; width:100%; }
+
+/* activity */
+#act { flex:none; } #act .body { max-height:24vh; padding:3px 6px; }
+.ev { display:flex; align-items:center; gap:6px; padding:3px 6px; margin:2px 0; border-radius:5px; background:var(--panel); font-size:12.5px; }
+.ev .k { font-size:15px; width:18px; text-align:center; flex:none; }
+.ev .t { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.ev .t b { color:#fff; }
+.ev .a { color:var(--dim); font-size:11px; flex:none; }
+.ev.big { background:linear-gradient(90deg, rgba(225,6,0,.35), rgba(145,70,255,.35)); }
+.ev img.g { height:18px; }
+.pf, .bd { display:inline-block; width:15px; height:15px; vertical-align:-3px; margin-right:3px; border-radius:3px; flex:none; }
+
+/* chat */
+#chat { flex:1; } #chat .body { flex:1; padding:4px 0 8px; position:relative; }
+.m { display:flex; gap:7px; padding:3px 10px 3px 7px; border-left:3px solid transparent; font-size:var(--fs); line-height:1.38; }
+.m:hover { background:#141a22; }
+.m .tm { color:#5f6873; font-size:.72em; padding-top:.32em; width:30px; flex:none; font-variant-numeric:tabular-nums; }
+.m .b { flex:1; min-width:0; overflow-wrap:anywhere; }
+.who { white-space:nowrap; margin-right:5px; }
+.who .n { color:var(--c); font-weight:700; }
+.crown { color:#ffd257; margin-right:2px; }
+.emote { height:1.5em; vertical-align:middle; margin:-.25em 1px; }
+.m.t-sub { border-left-color:#7c4dff; }
+.m.t-gifter { border-left-color:#f5b301; background:rgba(245,179,1,.06); }
+.m.t-vip { border-left-color:#ff4fd8; background:rgba(255,79,216,.06); }
+.m.t-mod { border-left-color:#00d26a; background:rgba(0,210,106,.06); }
+.m.t-gold { border-left-color:#ffcf40; background:rgba(255,207,64,.09); }
+.m.first { background:rgba(37,244,238,.08); border-left-color:var(--tt); }
+.m.first .b::before { content:"FIRST CHAT"; font-size:.62em; font-weight:800; letter-spacing:.08em; color:#000; background:var(--tt); padding:1px 5px; border-radius:4px; margin-right:6px; vertical-align:.15em; }
+.m.me { background:rgba(225,6,0,.16); }
+.m.wl .b::after { content:"WANTS TO JOIN"; font-size:.6em; font-weight:800; letter-spacing:.06em; color:#000; background:var(--amber); padding:1px 5px; border-radius:4px; margin-left:6px; vertical-align:.15em; }
+#more { position:absolute; bottom:10px; left:50%; transform:translateX(-50%); display:none; font:600 12px "Segoe UI"; color:#fff; background:#7c3aed; border:0; border-radius:14px; padding:5px 12px; cursor:pointer; }
+
+/* waitlist + lobby */
+#bottom { flex:none; border-top:1px solid var(--line); } #bottom .body { max-height:34vh; padding:4px 6px 6px; }
+.tabs { display:flex; gap:4px; }
+.tab { font:700 11px "Segoe UI"; letter-spacing:.06em; text-transform:uppercase; color:var(--dim); background:none; border:0; padding:3px 6px; border-radius:5px; cursor:pointer; }
+.tab.on { color:#fff; background:#1d232c; }
+.cnt { display:inline-block; min-width:16px; padding:0 4px; margin-left:3px; border-radius:8px; background:var(--amber); color:#000; font-size:10px; text-align:center; }
+.cnt:empty { display:none; }
+.empty { color:var(--dim); padding:8px 4px; font-size:12px; }
+.wait { display:grid; grid-template-columns:auto 1fr auto; gap:0 8px; align-items:center; cursor:pointer; background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:4px 8px; margin:3px 0; }
+.wait.done { opacity:.4; } .wait.done .name { text-decoration:line-through; }
+.wait .msg { grid-column:2 / -1; color:var(--dim); font-size:11px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.name { font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.ago { color:var(--dim); font-size:11px; }
+.row { display:grid; grid-template-columns:1fr auto auto; gap:2px 8px; align-items:center; background:var(--panel); border:1px solid var(--line); border-left:3px solid var(--line); border-radius:6px; padding:4px 8px; margin:3px 0; }
+.row.ban { border-left-color:var(--red); background:#2a1215; } .row.kick { border-left-color:var(--red); } .row.warn { border-left-color:var(--amber); } .row.ok { border-left-color:var(--green); }
+.sr { font-size:16px; font-weight:700; font-variant-numeric:tabular-nums; text-align:right; min-width:34px; }
+.chg { font-variant-numeric:tabular-nums; text-align:right; min-width:42px; font-weight:600; font-size:12px; }
+.up { color:var(--green); } .down { color:var(--red); } .flat { color:var(--dim); }
+.tags { grid-column:1 / -1; display:flex; flex-wrap:wrap; gap:4px; }
+.tag { font-size:10.5px; padding:1px 6px; border-radius:10px; background:#21262d; color:var(--dim); }
+.tag.red { background:var(--red); color:#fff; font-weight:700; } .tag.amber { background:#3b2e0a; color:var(--amber); font-weight:600; } .tag.blue { background:#0d2a4a; color:var(--blue); }
+</style></head>
+<body>
+<div class="bar">
+  <span class="sp" style="margin-left:0"><span title="Streamer.bot (Twitch + YouTube)"><span class="dot" id="d-sb"></span>SB</span><span title="TikFinity (TikTok)"><span class="dot" id="d-tt"></span>TT</span><span title="Race Control waitlist"><span class="dot" id="d-wl"></span>WL</span><span title="Lobby session data"><span class="dot" id="d-live"></span>Lobby</span></span>
+  <span class="sp"><button class="btn" data-p="twitch">TW</button><button class="btn" data-p="youtube">YT</button><button class="btn" data-p="tiktok">TT</button>
+    <button class="btn" id="fsm" title="Smaller text">A−</button><button class="btn" id="fsp" title="Bigger text">A+</button></span>
+</div>
+<div class="pane" id="act"><div class="bar"><h2>Activity</h2><span class="sp" id="act-sum"></span></div><div class="body" id="events"><div class="empty">Follows, subs, gifts and raids show up here.</div></div></div>
+<div class="pane" id="chat"><div class="bar"><h2>Chat</h2><span class="sp"><button class="btn" id="clear" title="Clear chat">Clear</button></span></div>
+  <div class="body" id="list"></div><button id="more">New messages ↓</button></div>
+<div class="pane" id="bottom"><div class="bar"><h2>Lobby</h2>
+  <div class="tabs"><button class="tab on" data-t="waitlist">Waitlist<span class="cnt" id="wl-n"></span></button><button class="tab" data-t="lobby">Drivers<span class="cnt" id="lb-n" style="background:#30363d;color:#ccc"></span></button></div>
+  <span class="sp" id="session"></span></div>
+  <div class="body"><div id="waitlist"><div class="empty">Nobody asked to join yet. Click a name once invited.</div></div><div id="lobby" style="display:none"><div class="empty">No session yet.</div></div></div></div>
+<script src="chatcore.js"></script>
+<script>
+const q = new URLSearchParams(location.search);
+const C = window.GremiChat, esc = C.esc;
+const $ = (id) => document.getElementById(id);
+const store = { get(k, d) { try { const v = localStorage.getItem("gdock:" + k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
+                set(k, v) { try { localStorage.setItem("gdock:" + k, JSON.stringify(v)); } catch (e) {} } };
+const dot = (id, on) => $(id).classList.toggle("on", !!on);
+const hhmm = (t = new Date()) => String(t.getHours()).padStart(2, "0") + ":" + String(t.getMinutes()).padStart(2, "0");
+
+// ---------- layout state (folded panes, text size, hidden platforms, tab)
+let fs = store.get("fs", +(q.get("fs") || 15));
+const setFs = (v) => { fs = Math.max(11, Math.min(26, v)); document.documentElement.style.setProperty("--fs", fs + "px"); store.set("fs", fs); };
+setFs(fs); $("fsm").onclick = () => setFs(fs - 1); $("fsp").onclick = () => setFs(fs + 1);
+const folded = store.get("folded", {});
+for (const id of ["act", "chat", "bottom"]) {
+  const p = $(id); p.classList.toggle("closed", !!folded[id]);
+  p.querySelector("h2").onclick = () => { folded[id] = !folded[id]; p.classList.toggle("closed", folded[id]); store.set("folded", folded); };
+}
+const hidden = new Set(store.get("hidden", []));
+document.querySelectorAll(".btn[data-p]").forEach((b) => {
+  const p = b.dataset.p; b.classList.toggle("off", hidden.has(p));
+  b.onclick = () => { hidden.has(p) ? hidden.delete(p) : hidden.add(p); b.classList.toggle("off", hidden.has(p)); store.set("hidden", [...hidden]);
+    document.querySelectorAll(`[data-pl="${p}"]`).forEach((m) => (m.style.display = hidden.has(p) ? "none" : "")); };
+});
+let tab = store.get("tab", "waitlist");
+const showTab = (t) => { tab = t; store.set("tab", t); document.querySelectorAll(".tab").forEach((b) => b.classList.toggle("on", b.dataset.t === t));
+  $("waitlist").style.display = t === "waitlist" ? "" : "none"; $("lobby").style.display = t === "lobby" ? "" : "none"; };
+document.querySelectorAll(".tab").forEach((b) => (b.onclick = (e) => { e.stopPropagation(); showTab(b.dataset.t); })); showTab(tab);
+
+// ---------- chat
+const list = $("list"), more = $("more"); let stick = true; const MAX = 400;
+list.onscroll = () => { stick = list.scrollTop + list.clientHeight >= list.scrollHeight - 30; if (stick) more.style.display = "none"; };
+more.onclick = () => { list.scrollTop = list.scrollHeight; };
+$("clear").onclick = () => (list.innerHTML = "");
+const ME = /\bgremi\b/i;
+function addChat(m) {
+  const wl = wantsToJoin(m);
+  const el = document.createElement("div");
+  el.className = `m ${C.tier(m)}${m.roles.has("first") ? " first" : ""}${ME.test(m.text) ? " me" : ""}${wl ? " wl" : ""}`;
+  el.dataset.pl = m.platform; if (hidden.has(m.platform)) el.style.display = "none";
+  el.innerHTML = `<span class="tm">${hhmm()}</span><div class="b">${C.who(m)}${m.html}</div>`;
+  list.appendChild(el);
+  while (list.children.length > MAX) list.firstChild.remove();
+  if (stick) list.scrollTop = list.scrollHeight; else more.style.display = "block";
+  if (m.platform === "tiktok") onTikTokChat(m.login, m.name, m.text);
+}
+
+// ---------- activity feed
+const EV = { follow: ["♥", "followed"], sub: ["★", "subscribed"], resub: ["★", "resubscribed"], gift: ["🎁", "gifted"], giftbomb: ["🎁", "gifted"],
+             raid: ["⚑", "raided"], cheer: ["◆", "cheered"], superchat: ["$", "Super Chat"], member: ["★", "became a member"], share: ["↗", "shared the stream"] };
+let evCount = 0;
+function addEvent(e) {
+  const box = $("events"); if (!evCount) box.innerHTML = "";
+  evCount++;
+  const [k, verb] = EV[e.kind] || ["•", e.kind];
+  let what = verb;
+  if (e.kind === "gift" && e.platform === "tiktok") what = `sent ${e.amount}× ${esc(e.text)}${e.coins ? ` <span class="a">(${e.coins} coins)</span>` : ""}`;
+  else if (e.kind === "gift") what = `gifted a sub ${esc(e.text || "")}`;
+  else if (e.kind === "giftbomb") what = `gifted ${e.amount ?? ""} subs`;
+  else if (e.kind === "raid") what = `raided with ${e.amount ?? "?"} viewers`;
+  else if (e.kind === "cheer") what = `cheered ${e.amount ?? ""} bits`;
+  else if (e.kind === "resub") what = `resubscribed${e.amount ? ` (${e.amount} months)` : ""}`;
+  else if (e.kind === "superchat") what = `Super Chat ${esc(e.amount ?? "")}`;
+  const el = document.createElement("div");
+  el.className = "ev" + (e.big ? " big" : ""); el.dataset.pl = e.platform; if (hidden.has(e.platform)) el.style.display = "none";
+  el.innerHTML = `<span class="k">${k}</span>${C.ICON[e.platform] || ""}<span class="t"><b>${esc(e.name)}</b> ${what}${e.text && e.kind !== "gift" && e.kind !== "sub" ? ` <span class="a">“${esc(e.text)}”</span>` : ""}</span>` +
+    (e.img ? `<img class="g" src="${esc(e.img)}" alt="">` : "") + `<span class="a">${hhmm(new Date(e.at))}</span>`;
+  box.prepend(el);
+  while (box.children.length > 60) box.lastChild.remove();
+  $("act-sum").textContent = evCount + " this session";
+}
+
+// ---------- waitlist (same rules as Race Control's /dock)
+const RC = (q.get("rc") || "https://104-154-182-45.sslip.io").replace(/\/$/, "");
+let cfg = { size: 10, keep_hours: 8, commands: ["!join", "!ea", "!lobby"], interest: {}, tiktok_action: "Join message Tiktok" };
+let cloud = [], tiktok = store.get("tiktok", []), invited = store.get("invited", {});
+async function getJson(url, ms = 10000) {
+  const c = new AbortController(); const t = setTimeout(() => c.abort(), ms);
+  try { const r = await fetch(url, { cache: "no-store", signal: c.signal }); if (!r.ok) throw new Error(r.status); return await r.json(); } finally { clearTimeout(t); }
+}
+async function pollWaitlist() {
+  try { const d = await getJson(RC + "/dock.json"); cloud = d.entries || []; cfg = Object.assign(cfg, d); dot("d-wl", true); } catch (e) { dot("d-wl", false); }
+  renderWaitlist();
+}
+function entries() { const now = Date.now() / 1000;
+  return cloud.concat(tiktok).filter((e) => now - e.at <= cfg.keep_hours * 3600).sort((a, b) => a.at - b.at).slice(-cfg.size); }
+function ago(t) { const s = Math.max(0, Date.now() / 1000 - t); return s < 60 ? "now" : s < 3600 ? Math.floor(s / 60) + "m" : Math.floor(s / 3600) + "h"; }
+function renderWaitlist() {
+  const l = entries().reverse();
+  $("wl-n").textContent = l.filter((e) => !invited[e.key + "|" + e.at]).length || "";
+  if (!l.length) { $("waitlist").innerHTML = '<div class="empty">Nobody asked to join yet. Click a name once invited.</div>'; return; }
+  $("waitlist").innerHTML = l.map((e) => { const id = e.key + "|" + e.at;
+    return `<div class="wait ${invited[id] ? "done" : ""}" data-id="${esc(id)}">${C.ICON[e.platform] || ""}<span class="name">${esc(e.name)}</span>` +
+      `<span class="ago">${ago(e.at)}</span><span class="msg">${esc(e.text)}</span></div>`; }).join("");
+}
+$("waitlist").addEventListener("click", (ev) => { const el = ev.target.closest(".wait"); if (!el) return; const id = el.dataset.id;
+  if (invited[id]) delete invited[id]; else invited[id] = true; store.set("invited", invited); renderWaitlist(); });
+const re = (src) => { try { return src ? new RegExp(src, "i") : null; } catch (e) { return null; } };
+function interested(text) { const a = cfg.interest || {}, topic = re(a.topic), cue = re(a.cue), not = re(a.not);
+  return !!topic && topic.test(text) && (!cue || cue.test(text)) && !(not && not.test(text)); }
+function wantsToJoin(m) { const low = String(m.text || "").trim().toLowerCase();
+  return cfg.commands.includes(low.split(/\s+/)[0]) || interested(low); }
+function onTikTokChat(user, name, text) {
+  if (!user || !text) return;
+  const low = text.trim().toLowerCase(), command = cfg.commands.includes(low.split(/\s+/)[0]);
+  if (!command && !interested(low)) return;
+  const key = "tiktok:" + user.toLowerCase();
+  if (entries().some((e) => e.key === key)) return;
+  tiktok.push({ key, platform: "tiktok", name: name || user, at: Date.now() / 1000, text: text.slice(0, 120) });
+  tiktok = tiktok.slice(-50); store.set("tiktok", tiktok); renderWaitlist();
+  if (!command) sbAction(cfg.tiktok_action, { user: name || user });   // !join on TikTok is answered by Streamer.bot itself
+}
+
+// ---------- lobby SR (same as Race Control's /dock)
+const LIVE = "https://live.gremigaming.com", LEAGUE_LIVE = "https://replays.gremigaming.com/league/",
+      LEAGUE_PAGES = "https://gremigaming.github.io/race-stats/league/", RAW = "https://raw.githubusercontent.com/gremigaming/race-stats/main/races/";
+const HOSTS = /^(ttv\/)?gremi[ _]?gaming$/i;
+const norm = (n) => String(n || "").replace(/[\s ]+/g, " ").trim().toLowerCase();
+let league = { drivers: new Map(), settings: {}, cur: -1, kicks: new Map(), aliases: new Map() }, session = store.get("session", null), cars = [];
+function currentStream(streams) {
+  if (!streams || !streams.length) return -1;
+  const last = streams[streams.length - 1].date, now = new Date(), day = (d) => d.toLocaleDateString("en-CA", { timeZone: "Europe/Amsterdam" });
+  const hour = +now.toLocaleString("en-GB", { timeZone: "Europe/Amsterdam", hour: "2-digit", hour12: false });
+  return last === day(now) || (last === day(new Date(now - 86400000)) && hour < 8) ? streams.length - 1 : -1;
+}
+async function loadLeague() {
+  let safety = null;
+  try { const idx = await getJson(LEAGUE_LIVE + "index.json?t=" + Date.now(), 6000); const p = idx.assetPaths && idx.assetPaths["safety.json"];
+        if (p) safety = await getJson(/^https?:/.test(p) ? p : LEAGUE_LIVE + p.replace(/^\//, "")); } catch (e) {}
+  if (!safety) { try { safety = await getJson(LEAGUE_PAGES + "safety.json?t=" + Date.now()); } catch (e) {} }
+  if (safety) { league.drivers = new Map(safety.drivers.map((d) => [norm(d.name), d]));
+    league.settings = Object.assign({ kick_race: 30, kick_stream: 60 }, safety.settings || {}); league.cur = currentStream(safety.streams); }
+  try {
+    const [al, corr] = await Promise.all([getJson(RAW + "aliases.json?t=" + Date.now()).catch(() => ({})), getJson(RAW + "corrections.json?t=" + Date.now()).catch(() => ({}))]);
+    const aliases = new Map(Object.entries(al || {}).map(([a, b]) => [norm(a), b])), kicks = new Map();
+    for (const c of (corr && corr.changes) || []) {
+      if (c.type === "alias" && c.from && c.to) aliases.set(norm(c.from), c.to);
+      if (c.type === "split" && c.from) aliases.delete(norm(c.from));
+      if (c.type === "kick") { const n = norm(String(c.driver || "").replace(/\s*\(hidden as .*\)$/, "")); if (n) kicks.set(n, (kicks.get(n) || 0) + 1); }
+    }
+    league.aliases = aliases; league.kicks = kicks;
+  } catch (e) {}
+  renderLobby();
+}
+function driverInfo(name) {
+  const key = norm(league.aliases.get(norm(name)) || name), d = league.drivers.get(key);
+  const out = { name, sr: null, change: 0, tags: [], level: "ok", kicked: league.kicks.get(key) || 0 };
+  if (/^Car #\d+$/.test(name)) { out.tags.push(["blue", "hidden name"]); out.level = "warn"; return out; }
+  if (!d) { out.tags.push(["", "new driver"]); return out; }
+  out.sr = d.sr; const s = league.settings;
+  if (league.cur >= 0) { const i = d.history.findIndex((h) => h.stream === league.cur);
+    if (i >= 0 && d.history[i].raced) out.change = d.history[i].sr - (i > 0 ? d.history[i - 1].sr : 50); }
+  let raceLoss = 0;
+  for (const se of d.sessions || []) { if (se.stream !== league.cur || !se.race) continue; const net = se.netGrav ?? se.net ?? 0; if (net < 0) raceLoss = Math.max(raceLoss, -net); }
+  const streamLoss = Math.max(0, -out.change);
+  if (d.banned || d.sr <= 0) { out.level = "ban"; out.tags.push(["red", "BANNED"]); }
+  else if (raceLoss >= s.kick_race || streamLoss >= s.kick_stream) { out.level = "kick"; out.tags.push(["red", "KICK"]);
+    out.tags.push(["", raceLoss >= s.kick_race ? `lost ${raceLoss.toFixed(1)} in one race (line ${s.kick_race})` : `lost ${streamLoss.toFixed(1)} this stream (line ${s.kick_stream})`]); }
+  else if (raceLoss >= .75 * s.kick_race || streamLoss >= .75 * s.kick_stream) { out.level = "warn";
+    out.tags.push(["amber", raceLoss >= .75 * s.kick_race ? `close to kick: −${raceLoss.toFixed(1)} in a race` : `close to kick: −${streamLoss.toFixed(1)} this stream`]); }
+  if (d.provisional) out.tags.push(["", "provisional"]);
+  return out;
+}
+async function pollLive() {
+  try {
+    const live = await getJson(LIVE + "/live.json"); dot("d-live", true);
+    const s = (live.sessions || [])[0];
+    if (s && (!session || s.uid !== session.uid)) { session = { uid: s.uid, track: s.track, session: s.session }; store.set("session", session); }
+    if (session) {
+      const hex = typeof session.uid === "number" ? BigInt(session.uid).toString(16).padStart(16, "0") : String(session.uid);
+      const m = await getJson(`${LIVE}/s/${hex}/manifest.json`).catch(() => null);
+      if (m) { cars = Object.values(m.cars || {}).filter((c) => !c.ai && c.name && !HOSTS.test(c.name)).map((c) => c.name);
+               session.track = m.track; session.session = m.session; session.live = !!s && s.uid === session.uid && !m.finished; }
+    }
+  } catch (e) { dot("d-live", false); }
+  renderLobby();
+}
+function renderLobby() {
+  if (!session || !cars.length) return;
+  $("session").textContent = `${session.track} · ${session.session}${session.live ? "" : " (last)"}`;
+  $("lb-n").textContent = cars.length;
+  const order = { ban: 0, kick: 1, warn: 2, ok: 3 };
+  const rows = cars.map(driverInfo).sort((a, b) => order[a.level] - order[b.level] || (b.sr ?? -1) - (a.sr ?? -1));
+  $("lobby").innerHTML = rows.map((r) => {
+    const chg = r.change > .05 ? `<span class="chg up">+${r.change.toFixed(1)}</span>` : r.change < -.05 ? `<span class="chg down">−${Math.abs(r.change).toFixed(1)}</span>` : `<span class="chg flat">±0</span>`;
+    const tags = r.tags.slice(); if (r.kicked) tags.push(["amber", `kicked ${r.kicked}× before`]);
+    return `<div class="row ${r.level}"><span class="name" title="${esc(r.name)}">${esc(r.name)}</span>${chg}<span class="sr">${r.sr == null ? "–" : Math.round(r.sr)}</span>` +
+      (tags.length ? `<div class="tags">${tags.map(([c, t]) => `<span class="tag ${c}">${esc(t)}</span>`).join("")}</div>` : "") + `</div>`;
+  }).join("");
+}
+
+// ---------- Streamer.bot actions (TikTok join answers)
+let sb = null, sbReady = false;
+async function sha256b64(s) { const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s)); return btoa(String.fromCharCode(...new Uint8Array(buf))); }
+function sbActions() {
+  sbReady = false;
+  try { sb = new WebSocket(`ws://${q.get("sb") || "127.0.0.1:8080"}/`); } catch (e) { return setTimeout(sbActions, 15000); }
+  sb.onmessage = async (m) => { let msg; try { msg = JSON.parse(m.data); } catch (e) { return; }
+    if (msg.request === "Hello") {
+      if (msg.authentication && q.get("sbpass")) { const secret = await sha256b64(q.get("sbpass") + msg.authentication.salt);
+        sb.send(JSON.stringify({ request: "Authenticate", id: "auth", authentication: await sha256b64(secret + msg.authentication.challenge) })); }
+      sbReady = true; } };
+  sb.onclose = () => { sbReady = false; setTimeout(sbActions, 15000); };
+}
+function sbAction(name, args) { if (name && sb && sbReady) sb.send(JSON.stringify({ request: "DoAction", id: "gdock" + Date.now(), action: { name }, args: args || {} })); }
+
+// ---------- start
+const on = { chat: addChat, event: addEvent, status: (k, v) => dot(k === "sb" ? "d-sb" : "d-tt", v) };
+if (q.has("demo")) {
+  const mk = (platform, name, color, text, roles = [], badges = []) => ({ platform, name, login: name.toLowerCase(), color, text, html: esc(text), roles: new Set(roles), badges });
+  [mk("twitch", "0verfast", "#ff7b00", "that pass into 130R was insane", ["sub"], [C.BADGE.sub]), mk("youtube", "DrewDrew Playz", null, "P4 from P9, GG", ["sub"], [C.BADGE.member]),
+   mk("tiktok", "markbonner189", null, "can i join the next race?", ["gifter"], [C.BADGE.gifter]), mk("twitch", "DDRK0", "#3ad07a", "lobby is open, check discord", ["lead", "mod"], [C.BADGE.mod]),
+   mk("twitch", "Bananensaus17", "#00c3ff", "fastest lap is mine", ["vip"]), mk("twitch", "lisa_simracing", "#ff4fa3", "first time here, is gremi always this fast?", ["first"])].forEach(addChat);
+  const now = Date.now();
+  [{ platform: "twitch", kind: "follow", name: "Lisa_SimRacing", at: now - 90000 }, { platform: "tiktok", kind: "gift", name: "markbonner189", amount: 5, text: "Rose", coins: 5, at: now - 60000 },
+   { platform: "twitch", kind: "giftbomb", name: "0verfast", amount: 5, big: true, at: now - 30000 }, { platform: "youtube", kind: "member", name: "DrewDrew Playz", at: now }].forEach(addEvent);
+  cloud = [{ key: "twitch:a", platform: "twitch", name: "speedy_sam", at: now / 1000 - 300, text: "can i join next race?" }, { key: "youtube:b", platform: "youtube", name: "Lisa Racing", at: now / 1000 - 120, text: "hoe kan ik meedoen?" }];
+  renderWaitlist();
+} else {
+  C.connectSB(on); C.connectTF(on); sbActions();
+  pollWaitlist(); setInterval(pollWaitlist, 5000); setInterval(renderWaitlist, 30000);
+  pollLive(); setInterval(pollLive, 10000); loadLeague(); setInterval(loadLeague, 120000);
+}
+</script>
+</body></html>
