@@ -1,8 +1,143 @@
 {
- "title": "Severity 7+ · every one (1)",
+ "title": "Severity 7+ · every one (3)",
  "stream": "severe",
  "rules": "v1.4",
  "incidents": [
+  {
+   "id": "sev-11112106-127",
+   "pick": "severe",
+   "track": "Monza",
+   "date": "2026-11-11",
+   "type": "Late lunge / divebomb",
+   "weather": "Light cloud",
+   "track_temp": 33,
+   "lap": 1,
+   "race_time": "0:12",
+   "replay": "https://gremigaming.github.io/race-stats/all/race/2026-11-11_21-06-49_Monza_Race?inc=12.7&car=7,8,4,2",
+   "race_file": "Race_Monza_2026_11_11_21_15_17.json",
+   "recording": "2026-11-11_21-06-49_Monza_Race.gmtel.gz",
+   "t0": 12.7,
+   "t1": 27.9,
+   "contacts": [
+    {
+     "t": 12.7,
+     "a": 7,
+     "b": 8
+    },
+    {
+     "t": 12.9,
+     "a": 7,
+     "b": 4
+    }
+   ],
+   "drivers": [
+    {
+     "car": 7,
+     "name": "#2 braaf-olifant"
+    },
+    {
+     "car": 8,
+     "name": "#88 sprintstar-1"
+    },
+    {
+     "car": 4,
+     "name": "#2 [QDR] PuckyFucky"
+    },
+    {
+     "car": 2,
+     "name": "#58 NEX"
+    }
+   ],
+   "engine": {
+    "rules": "v1.4",
+    "verdict": "braaf-olifant at fault",
+    "rule": "R3",
+    "severity": 7,
+    "why": "braaf-olifant ran into the back of sprintstar-1, closing at 62 km/h",
+    "at_fault": [
+     "#2 braaf-olifant"
+    ],
+    "contacts": 2,
+    "gray_score": 0.4
+   },
+   "claude": "In the list because it's severity 7+. My call: braaf-olifant at fault (rule R3: the car behind ran into the one ahead), severity 7, blame on #2 braaf-olifant. What I saw: braaf-olifant ran into the back of sprintstar-1, closing at 62 km/h. I'm fairly confident: its 2 contacts don't point the same way (braaf-olifant at fault; Racing incident)."
+  },
+  {
+   "id": "sev-11112106-112",
+   "pick": "severe",
+   "track": "Monza",
+   "date": "2026-11-11",
+   "type": "Late lunge / divebomb",
+   "weather": "Light cloud",
+   "track_temp": 33,
+   "lap": 1,
+   "race_time": "0:11",
+   "replay": "https://gremigaming.github.io/race-stats/all/race/2026-11-11_21-06-49_Monza_Race?inc=11.2&car=7,10,1,2,9,3,8",
+   "race_file": "Race_Monza_2026_11_11_21_15_17.json",
+   "recording": "2026-11-11_21-06-49_Monza_Race.gmtel.gz",
+   "t0": 11.2,
+   "t1": 27.2,
+   "contacts": [
+    {
+     "t": 11.2,
+     "a": 7,
+     "b": 10
+    },
+    {
+     "t": 11.4,
+     "a": 10,
+     "b": 1
+    },
+    {
+     "t": 12.1,
+     "a": 1,
+     "b": 2
+    }
+   ],
+   "drivers": [
+    {
+     "car": 7,
+     "name": "#2 braaf-olifant"
+    },
+    {
+     "car": 10,
+     "name": "#21 clish224"
+    },
+    {
+     "car": 1,
+     "name": "#8 Stepino81"
+    },
+    {
+     "car": 2,
+     "name": "#58 NEX"
+    },
+    {
+     "car": 9,
+     "name": "#21 MV_Dylano"
+    },
+    {
+     "car": 3,
+     "name": "#69 trex-Leclerc"
+    },
+    {
+     "car": 8,
+     "name": "#88 sprintstar-1"
+    }
+   ],
+   "engine": {
+    "rules": "v1.4",
+    "verdict": "clish224 at fault",
+    "rule": "R3",
+    "severity": 7,
+    "why": "clish224 ran into the back of braaf-olifant, closing at 55 km/h",
+    "at_fault": [
+     "#21 clish224"
+    ],
+    "contacts": 3,
+    "gray_score": 0.4
+   },
+   "claude": "In the list because it's severity 7+. My call: clish224 at fault (rule R3: the car behind ran into the one ahead), severity 7, blame on #21 clish224. What I saw: clish224 ran into the back of braaf-olifant, closing at 55 km/h. I'm fairly confident: its 3 contacts don't point the same way (clish224 at fault; Racing incident; Racing incident)."
+  },
   {
    "id": "sev-11041959-1166",
    "pick": "severe",
@@ -50,5 +185,5 @@
    "claude": "In the list because it's severity 7+. My call: daris_2190 at fault (rule R10: kept full throttle into a braking car), severity 10, blame on #21 daris_2190. What I saw: daris_2190 kept full throttle for 1.0 s after hitting DDRK, pushing it along. I'm fairly confident: the numbers are clear of every limit; this one is here for its severity."
   }
  ],
- "made": "2026-11-06"
+ "made": "2026-11-12"
 }

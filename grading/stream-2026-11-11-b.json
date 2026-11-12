@@ -1,0 +1,308 @@
+{
+ "title": "Stream 11 Nov · 5 picks",
+ "stream": "1111b",
+ "made": "2026-11-12",
+ "rules": "v1.4",
+ "incidents": [
+  {
+   "id": "1111b-1",
+   "pick": "low",
+   "track": "Sakhir",
+   "date": "2026-11-11",
+   "type": "Late lunge / divebomb",
+   "weather": "Light cloud",
+   "track_temp": 29,
+   "lap": 1,
+   "race_time": "0:42",
+   "replay": "https://gremigaming.github.io/race-stats/all/race/2026-11-11_20-12-52_Bahrain_Race?inc=42.6&car=1,11",
+   "race_file": "Race_Sakhir_2026_11_11_20_22_05.json",
+   "recording": "2026-11-11_20-12-52_Bahrain_Race.gmtel.gz",
+   "t0": 42.6,
+   "t1": 46.4,
+   "contacts": [
+    {
+     "t": 42.6,
+     "a": 1,
+     "b": 11
+    }
+   ],
+   "drivers": [
+    {
+     "car": 1,
+     "name": "#8 Stepino81"
+    },
+    {
+     "car": 11,
+     "name": "#13 Jakubm18_F1"
+    }
+   ],
+   "engine": {
+    "rules": "v1.4",
+    "verdict": "Stepino81 at fault",
+    "rule": "R3",
+    "severity": 2,
+    "why": "Stepino81 ran into the back of Jakubm18_F1, closing at 88 km/h",
+    "at_fault": [
+     "#8 Stepino81"
+    ],
+    "contacts": 1,
+    "gray_score": 0.0
+   },
+   "claude": "Picked as the low-severity case. My call: Stepino81 at fault (rule R3: the car behind ran into the one ahead), severity 2, blame on #8 Stepino81. What I saw: Stepino81 ran into the back of Jakubm18_F1, closing at 88 km/h. I'm fairly confident: the numbers are clear of every limit; this one is here for its severity."
+  },
+  {
+   "id": "1111b-2",
+   "pick": "high",
+   "track": "Silverstone",
+   "date": "2026-11-11",
+   "type": "Moved across alongside",
+   "weather": "Overcast",
+   "track_temp": 36,
+   "lap": 1,
+   "race_time": "0:10",
+   "replay": "https://gremigaming.github.io/race-stats/all/race/2026-11-11_20-32-10_Silverstone_Race?inc=10.6&car=18,2,1,8,15,13",
+   "race_file": "Race_Silverstone_2026_11_11_20_42_12.json",
+   "recording": "2026-11-11_20-32-10_Silverstone_Race.gmtel.gz",
+   "t0": 10.6,
+   "t1": 28.0,
+   "contacts": [
+    {
+     "t": 10.6,
+     "a": 18,
+     "b": 2
+    },
+    {
+     "t": 13.0,
+     "a": 2,
+     "b": 1
+    }
+   ],
+   "drivers": [
+    {
+     "car": 18,
+     "name": "#15 NickLx"
+    },
+    {
+     "car": 2,
+     "name": "#2 Alexowitsh77"
+    },
+    {
+     "car": 1,
+     "name": "#8 Stepino81"
+    },
+    {
+     "car": 8,
+     "name": "#9 zynwav"
+    },
+    {
+     "car": 15,
+     "name": "#2 [QDR] PuckyFucky"
+    },
+    {
+     "car": 13,
+     "name": "#2 braaf-olifant"
+    }
+   ],
+   "engine": {
+    "rules": "v1.4",
+    "verdict": "Alexowitsh77 + Stepino81 at fault",
+    "rule": "R8",
+    "severity": 8,
+    "why": "side by side; Alexowitsh77 moved 4.7 m across into the other car; Stepino81 ran into the back of Alexowitsh77, closing at 25 km/h",
+    "at_fault": [
+     "#2 Alexowitsh77",
+     "#8 Stepino81"
+    ],
+    "contacts": 2,
+    "gray_score": 0.88
+   },
+   "claude": "Picked as the high-severity case. My call: Alexowitsh77 + Stepino81 at fault (rule R8: shared fault), severity 8, blame on #2 Alexowitsh77, #8 Stepino81. What I saw: side by side; Alexowitsh77 moved 4.7 m across into the other car; Stepino81 ran into the back of Alexowitsh77, closing at 25 km/h. I'm fairly confident: more than one car gets the blame, and splitting it is a judgement call."
+  },
+  {
+   "id": "1111b-3",
+   "pick": "gray",
+   "track": "Monaco",
+   "date": "2026-11-11",
+   "type": "Moved across alongside",
+   "weather": "Clear",
+   "track_temp": 33,
+   "lap": 1,
+   "race_time": "0:16",
+   "replay": "https://gremigaming.github.io/race-stats/all/race/2026-11-11_20-51-15_Monaco_Race?inc=16.8&car=10,15,11,7,9",
+   "race_file": "Race_Monaco_2026_11_11_20_59_57.json",
+   "recording": "2026-11-11_20-51-15_Monaco_Race.gmtel.gz",
+   "t0": 16.8,
+   "t1": 44.8,
+   "contacts": [
+    {
+     "t": 16.8,
+     "a": 10,
+     "b": 15
+    },
+    {
+     "t": 18.4,
+     "a": 15,
+     "b": 11
+    },
+    {
+     "t": 20.9,
+     "a": 15,
+     "b": 10
+    },
+    {
+     "t": 29.7,
+     "a": 7,
+     "b": 15
+    }
+   ],
+   "drivers": [
+    {
+     "car": 10,
+     "name": "#2 braaf-olifant"
+    },
+    {
+     "car": 15,
+     "name": "#21 clish224"
+    },
+    {
+     "car": 11,
+     "name": "#88 sprintstar-1"
+    },
+    {
+     "car": 7,
+     "name": "#19 toni2608"
+    },
+    {
+     "car": 9,
+     "name": "#15 NickLx"
+    }
+   ],
+   "engine": {
+    "rules": "v1.4",
+    "verdict": "braaf-olifant + toni2608 at fault",
+    "rule": "R8",
+    "severity": 6,
+    "why": "side by side; braaf-olifant moved 2.9 m across into the other car; toni2608 ran into the back of clish224, closing at 17 km/h",
+    "at_fault": [
+     "#2 braaf-olifant",
+     "#19 toni2608"
+    ],
+    "contacts": 4,
+    "gray_score": 1.55
+   },
+   "claude": "Picked because it's a gray area for me. My call: braaf-olifant + toni2608 at fault (rule R8: shared fault), severity 6, blame on #2 braaf-olifant, #19 toni2608. What I saw: side by side; braaf-olifant moved 2.9 m across into the other car; toni2608 ran into the back of clish224, closing at 17 km/h. Why I'm not sure: more than one car gets the blame, and splitting it is a judgement call; the car behind was closing at only 6 km/h, near the 7 km/h where I stop calling it 'ran into the back'; its 4 contacts don't point the same way (Racing incident; Racing incident; braaf-olifant at fault)."
+  },
+  {
+   "id": "1111b-4",
+   "pick": "gray",
+   "track": "Sakhir",
+   "date": "2026-11-11",
+   "type": "Moved across alongside",
+   "weather": "Light cloud",
+   "track_temp": 29,
+   "lap": 1,
+   "race_time": "0:36",
+   "replay": "https://gremigaming.github.io/race-stats/all/race/2026-11-11_20-12-52_Bahrain_Race?inc=36.4&car=8,6,2,14",
+   "race_file": "Race_Sakhir_2026_11_11_20_22_05.json",
+   "recording": "2026-11-11_20-12-52_Bahrain_Race.gmtel.gz",
+   "t0": 36.4,
+   "t1": 56.0,
+   "contacts": [
+    {
+     "t": 36.4,
+     "a": 8,
+     "b": 6
+    },
+    {
+     "t": 41.0,
+     "a": 2,
+     "b": 6
+    }
+   ],
+   "drivers": [
+    {
+     "car": 8,
+     "name": "#9 zynwav"
+    },
+    {
+     "car": 6,
+     "name": "#36 [SSL]RYLAN"
+    },
+    {
+     "car": 2,
+     "name": "#2 Alexowitsh77"
+    },
+    {
+     "car": 14,
+     "name": "#2 braaf-olifant"
+    }
+   ],
+   "engine": {
+    "rules": "v1.4",
+    "verdict": "[SSL]RYLAN at fault",
+    "rule": "R2",
+    "severity": 5,
+    "why": "side by side; [SSL]RYLAN moved 2.4 m across into the other car",
+    "at_fault": [
+     "#36 [SSL]RYLAN"
+    ],
+    "contacts": 2,
+    "gray_score": 1.33
+   },
+   "claude": "Picked because it's a gray area for me. My call: [SSL]RYLAN at fault (rule R2: side by side, one car moved over), severity 5, blame on #36 [SSL]RYLAN. What I saw: side by side; [SSL]RYLAN moved 2.4 m across into the other car. Why I'm not sure: the cars were 3.9 m apart along the track, right at the 4 m line between 'side by side' (the car moving over is to blame) and 'one behind the other' (the car behind is to blame); the worst slide was 23°, near the 20° where I count it as harm done; its 2 contacts don't point the same way (Not an incident; [SSL]RYLAN at fault)."
+  },
+  {
+   "id": "1111b-5",
+   "pick": "gray",
+   "track": "Melbourne",
+   "date": "2026-11-11",
+   "type": "Blocking / brake-check",
+   "weather": "Clear",
+   "track_temp": 29,
+   "lap": 1,
+   "race_time": "0:22",
+   "replay": "https://gremigaming.github.io/race-stats/all/race/2026-11-11_19-19-10_Melbourne_Race?inc=22.1&car=5,6,1",
+   "race_file": "Race_Melbourne_2026_11_11_19_27_15.json",
+   "recording": "2026-11-11_19-19-10_Melbourne_Race.gmtel.gz",
+   "t0": 22.1,
+   "t1": 41.5,
+   "contacts": [
+    {
+     "t": 22.1,
+     "a": 5,
+     "b": 6
+    },
+    {
+     "t": 26.4,
+     "a": 6,
+     "b": 5
+    }
+   ],
+   "drivers": [
+    {
+     "car": 5,
+     "name": "#19 toni2608"
+    },
+    {
+     "car": 6,
+     "name": "#21 EthanMoonski"
+    },
+    {
+     "car": 1,
+     "name": "#15 vanderdeured"
+    }
+   ],
+   "engine": {
+    "rules": "v1.4",
+    "verdict": "Racing incident",
+    "rule": "P",
+    "severity": 5,
+    "why": "toni2608 was ahead but swept 6.9 m across into EthanMoonski; but GreMi called a similar one (B1-13, Shanghai 2026-10-25) a racing incident",
+    "at_fault": [],
+    "contacts": 2,
+    "gray_score": 1.15
+   },
+   "claude": "Picked because it's a gray area for me. My call: Racing incident (rule P: follows a similar graded incident), severity 5, blame on nobody. What I saw: toni2608 was ahead but swept 6.9 m across into EthanMoonski; but GreMi called a similar one (B1-13, Shanghai 2026-10-25) a racing incident. Why I'm not sure: the cars were 4.0 m apart along the track, right at the 4 m line between 'side by side' (the car moving over is to blame) and 'one behind the other' (the car behind is to blame); 3 cars are involved, so the first move is hard to pick out."
+  }
+ ]
+}
