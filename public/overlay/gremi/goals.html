@@ -1,0 +1,318 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<!-- GreMi TikTok canvas overlay (1080 x 1920, transparent). Approved design: /mnt/project-files/goals-overlay/mockup-final.html
+     - "FOLLOW = BEST F1 MEMES" strip between cam (0-592) and game (660-1268)
+     - Likes + follows goal pills stacked bottom left, "Top tappers" top 5 timing tower bottom right (wheel in the middle stays clear)
+     - Tap-speed boost: tower points = likes x 1.5 / x2 when a viewer taps fast. The likes goal counts real likes only.
+     - Goal hit: gold edge flash, rays, confetti and a GOAL SMASHED card with the MVP and the next goal.
+     Data: TikFinity (ws://localhost:21213) "like" (likeCount, totalLikeCount) and "follow" events. State survives a reload; a new stream starts
+     fresh after 3 h without likes or follows.
+     ?likes=10000 first likes goal  ?likestep=5000  ?follows=50 first follows goal  ?followstep=25
+     ?tikfinity=21213  ?strip=0 hide the memes strip  ?panel=0 hide goals + tower  ?reset start a new stream now
+     ?demo fake viewers  ?mode=hit show the celebration (screenshots)  ?bg=1 dark test background -->
+<link href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@500;600;700;800;900&family=Saira:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root { --red: #e0161e; --purple: #a64dff; --gold: #ffbf00; --cyan: #3ee6e6; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: transparent; overflow: hidden; }
+body { width: 1080px; height: 1920px; position: relative; font-family: "Saira Condensed", sans-serif; color: #fff; }
+body.bg { background: linear-gradient(#2a2430 0 592px, #14060c 592px 660px, #3b4a3a 660px 1268px, #221d27 1268px); }
+
+.card { background: linear-gradient(105deg, #5a0610 0%, #3a0a2c 40%, #4a1a78 62%, #2a0b4d 100%); border-radius: 14px; position: relative;
+        box-shadow: 0 8px 30px rgba(0,0,0,.5); }
+.card::before { content: ""; position: absolute; inset: -2px; border-radius: 16px; padding: 2px; pointer-events: none;
+        background: linear-gradient(90deg, var(--red), var(--purple));
+        -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; }
+.streak { position: absolute; inset: 0; border-radius: 14px; overflow: hidden; pointer-events: none; }
+.streak::after { content: ""; position: absolute; top: -20%; bottom: -20%; left: 62%; width: 60px; background: rgba(255,255,255,.07);
+        transform: skewX(-24deg); box-shadow: 44px 0 0 -14px rgba(255,255,255,.05); }
+
+/* memes strip */
+#memes { position: absolute; left: 0; top: 592px; width: 1080px; height: 68px; display: flex; align-items: center; justify-content: center;
+         background: linear-gradient(90deg, #14060c, #1d0920 50%, #14060c); overflow: hidden; }
+#memes::after { content: ""; position: absolute; top: 0; bottom: 0; left: -20%; width: 120px; background: rgba(255,255,255,.10);
+         transform: skewX(-24deg); filter: blur(6px); animation: shine 9s ease-in-out infinite; }
+@keyframes shine { 0%, 80% { left: -20%; } 100% { left: 120%; } }
+#memes .pill { display: flex; align-items: center; gap: 16px; padding: 4px 30px 4px 8px; height: 52px; }
+#memes .plus { width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(135deg, var(--red), var(--purple)); display: flex;
+         align-items: center; justify-content: center; font: 800 34px/1 Saira; padding-bottom: 4px; animation: pulse 3s ease-in-out infinite; }
+@keyframes pulse { 0%, 70%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(166,77,255,.6); } 80% { transform: scale(1.15); box-shadow: 0 0 0 12px rgba(166,77,255,0); } }
+#memes .txt { font: 800 38px/1 "Saira Condensed"; letter-spacing: 1.5px; text-transform: uppercase; }
+#memes .txt b { color: var(--gold); font-weight: 900; }
+#memes .txt em { font-style: normal; background: linear-gradient(90deg, #ff5a5f, #c58bff); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+/* goal pills */
+#strip { position: absolute; left: 16px; top: 1282px; width: 340px; display: flex; flex-direction: column; gap: 12px; z-index: 5; }
+.g { position: relative; height: 92px; border-radius: 12px; background: rgba(10,4,16,.55); display: flex; align-items: center; gap: 12px;
+     padding: 0 22px; overflow: hidden; transition: background .4s, box-shadow .4s; }
+.gi { font: 700 40px Saira; color: #ff6b8b; width: 40px; text-align: center; }
+.gt { font: 700 52px/1 "Saira Condensed"; white-space: nowrap; }
+.gt small { font-weight: 500; color: #ffffff80; font-size: 34px; margin-left: 2px; }
+.mb { position: absolute; left: 0; right: 0; bottom: 0; height: 8px; background: rgba(255,255,255,.08); }
+.mb i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--red), var(--purple)); transition: width .6s ease-out; }
+.mb i.hot { background: linear-gradient(90deg, var(--red), #ff6a3d, var(--gold)); box-shadow: 0 0 8px #ff8a3d; }
+.g.done { background: rgba(255,191,0,.16); box-shadow: inset 0 0 0 1.5px var(--gold); }
+.g.done .gt, .g.done .gi { color: var(--gold); }
+.g.done .gt small { color: #ffd56acc; }
+.g.done .mb i { background: var(--gold); box-shadow: 0 0 10px var(--gold); }
+.g.bump .gt { animation: bump .35s ease-out; }
+@keyframes bump { 40% { transform: scale(1.08); } }
+.pop { position: absolute; z-index: 40; font: 800 28px "Saira Condensed"; color: var(--gold); text-shadow: 0 2px 6px #000; pointer-events: none;
+       animation: popup 1.3s ease-out forwards; white-space: nowrap; }
+@keyframes popup { 0% { opacity: 0; transform: translateY(10px) scale(.8); } 15% { opacity: 1; transform: none; } 70% { opacity: 1; } 100% { opacity: 0; transform: translateY(-22px); } }
+
+/* top tappers tower */
+#tw { position: absolute; right: 16px; top: 1282px; width: 384px; padding: 12px; z-index: 5; transition: opacity .5s; }
+#tw.empty { opacity: 0; }
+.twh { font: 600 16px Saira; letter-spacing: 2px; color: #ffffffb0; margin-bottom: 4px; }
+#rows { position: relative; height: 255px; }
+.tr { position: absolute; left: 0; right: 0; display: flex; align-items: center; height: 46px; border-radius: 9px; background: rgba(10,4,16,.5);
+      padding-right: 10px; overflow: hidden; transition: top .5s cubic-bezier(.3,1.3,.5,1), opacity .4s; }
+.tr .p { width: 40px; height: 46px; flex: none; display: flex; align-items: center; justify-content: center; font: 800 24px "Saira Condensed"; background: rgba(255,255,255,.08); }
+.tr .cl { width: 4px; height: 46px; flex: none; background: linear-gradient(var(--red), var(--purple)); margin-right: 10px; }
+.tr .n { flex: 1; min-width: 0; font: 700 24px/1 "Saira Condensed"; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tr .v { min-width: 64px; text-align: right; font: 800 25px "Saira Condensed"; color: #ff8fb0; white-space: nowrap; }
+.tr .v::after { content: " ♥"; color: #ff4d6d; font-size: 18px; }
+.tr .d { width: 28px; flex: none; text-align: center; font: 700 14px Saira; color: #ffffff60; }
+.d.up { color: #3ee68a; } .d.dn { color: #ff5a5f; } .d.new { color: var(--cyan); font-size: 11px; letter-spacing: 1px; }
+.boost { font-style: normal; font: 800 14px Saira; color: #2a1600; background: linear-gradient(90deg, #ff6a3d, var(--gold)); border-radius: 5px;
+         padding: 0 4px; margin-right: 2px; white-space: nowrap; }
+.t1 { background: linear-gradient(90deg, rgba(255,191,0,.30), rgba(255,191,0,.05)); }
+.t1 .p { background: var(--gold); color: #2a1600; } .t1 .cl { background: var(--gold); } .t1 .v { color: var(--gold); }
+.t2 .p { background: #d6d6e6; color: #222; } .t2 .cl { background: #d6d6e6; }
+.t3 .p { background: #d0844a; color: #2a1000; } .t3 .cl { background: #d0844a; }
+.tr.flash { animation: rowflash .8s ease-out; }
+@keyframes rowflash { 0% { box-shadow: inset 0 0 0 2px var(--gold), 0 0 16px rgba(255,191,0,.6); } 100% { box-shadow: none; } }
+.hint { margin-top: 2px; font: 600 14px Saira; letter-spacing: 1.5px; color: var(--gold); text-align: center; }
+
+/* celebration */
+#fx { position: absolute; inset: 0; pointer-events: none; z-index: 20; opacity: 0; transition: opacity .5s; }
+#fx.on { opacity: 1; }
+#flash { position: absolute; inset: 0; box-shadow: inset 0 0 120px 30px rgba(255,191,0,.55); border: 6px solid var(--gold); }
+#fx.on #flash { animation: edge 1s ease-in-out infinite alternate; }
+@keyframes edge { from { opacity: .55; } to { opacity: 1; } }
+.rays { position: absolute; left: 540px; top: 445px; width: 1600px; height: 1600px; margin: -800px 0 0 -800px; border-radius: 50%;
+        background: repeating-conic-gradient(rgba(255,191,0,.16) 0 6deg, transparent 6deg 18deg);
+        -webkit-mask: radial-gradient(circle, #000 0 20%, transparent 60%); mask: radial-gradient(circle, #000 0 20%, transparent 60%); }
+#fx.on .rays { animation: spin 14s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+#burst { position: absolute; left: 90px; top: 300px; width: 900px; padding: 26px 30px; text-align: center; z-index: 30;
+         box-shadow: 0 0 60px rgba(255,191,0,.55), 0 10px 40px rgba(0,0,0,.6); }
+#burst.card::before { background: linear-gradient(90deg, var(--gold), #ff6a3d, var(--gold)); }
+#fx.on #burst { animation: slam .55s cubic-bezier(.2,1.6,.4,1); }
+@keyframes slam { 0% { transform: scale(.3); opacity: 0; } 100% { transform: none; opacity: 1; } }
+#burst .k { font: 700 24px Saira; letter-spacing: 6px; color: var(--gold); }
+#burst .big { font: 900 118px/1 "Saira Condensed"; letter-spacing: 2px; margin-top: 4px; white-space: nowrap;
+              background: linear-gradient(180deg, #fff 40%, #ffd56a); -webkit-background-clip: text; background-clip: text; color: transparent;
+              filter: drop-shadow(0 4px 0 #5a0610); }
+#burst .sub { font: 700 30px "Saira Condensed"; margin-top: 8px; display: flex; justify-content: center; gap: 26px; color: #ffffffd0; }
+#burst .sub b { color: var(--gold); }
+.cf { position: absolute; top: -30px; border-radius: 2px; animation: fall linear forwards; }
+@keyframes fall { to { transform: translate(var(--dx), 1400px) rotate(var(--r)); opacity: .2; } }
+.hide { display: none !important; }
+</style></head>
+<body>
+<div id="memes"><div class="pill"><div class="plus">+</div><div class="txt">Follow <b>=</b> <em>Best F1 Memes</em></div></div></div>
+
+<div id="panel">
+  <div id="strip">
+    <div class="g" id="gL"><span class="gi">❤</span><span class="gt" id="vL"></span><div class="mb"><i id="bL"></i></div></div>
+    <div class="g" id="gF"><span class="gi">＋</span><span class="gt" id="vF"></span><div class="mb"><i id="bF"></i></div></div>
+  </div>
+  <div id="tw" class="card empty"><div class="streak"></div>
+    <div class="twh">TOP TAPPERS</div>
+    <div id="rows"></div>
+    <div class="hint">TAP FAST = 🔥 BOOST</div>
+  </div>
+</div>
+
+<div id="fx"><div class="rays"></div><div id="flash"></div>
+  <div id="burst" class="card"><div class="streak"></div><div class="k">★ GOAL SMASHED ★</div>
+    <div class="big" id="bBig"></div><div class="sub"><span id="bMvp"></span><span id="bNext"></span></div></div>
+  <div id="conf"></div>
+</div>
+
+<script>
+const q = new URLSearchParams(location.search);
+const num = (k, d) => Math.max(1, +q.get(k) || d);
+const CFG = { likes: num("likes", 10000), likeStep: num("likestep", 5000), follows: num("follows", 50), followStep: num("followstep", 25) };
+const KEY = "gremi.goals.v1", NEW_STREAM_MS = 3 * 3600e3, HOLD_MS = 15000, WIN_MS = 10000;
+if (q.get("strip") === "0") document.getElementById("memes").classList.add("hide");
+if (q.get("panel") === "0") document.getElementById("panel").classList.add("hide");
+if (q.has("bg")) document.body.classList.add("bg");
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+const fmt = (n) => n >= 10000 ? (n / 1000).toFixed(n % 1000 ? 1 : 0).replace(/\.0$/, "") + "K" : n >= 1000 ? (n / 1000).toFixed(1).replace(/\.0$/, "") + "K" : String(n);
+const full = (n) => Math.round(n).toLocaleString("en-US");
+
+// ---------- state ----------
+function fresh() { return { at: Date.now(), likes: 0, follows: 0, followers: [], likeGoal: CFG.likes, followGoal: CFG.follows, users: {} }; }
+let S = fresh();
+try {
+  const old = JSON.parse(localStorage.getItem(KEY) || "null");
+  if (old && !q.has("reset") && !q.has("demo") && Date.now() - old.at < NEW_STREAM_MS) S = Object.assign(fresh(), old);
+} catch (e) {}
+let saveT = 0;
+function save() { S.at = Date.now(); if (q.has("demo")) return; clearTimeout(saveT); saveT = setTimeout(() => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }, 1000); }
+// skip goals that were already passed before this page loaded (no celebration for those)
+function catchUp() {
+  while (S.likes >= S.likeGoal) S.likeGoal += CFG.likeStep;
+  while (S.follows >= S.followGoal) S.followGoal += CFG.followStep;
+}
+catchUp();
+
+// ---------- tap-speed boost ----------
+// each user's like batches from the last 10 s give taps per second: 3+/s = x1.5, 6+/s = x2
+const taps = {};
+function mult(id, n, now) {
+  const a = (taps[id] = (taps[id] || []).filter((t) => now - t.at < WIN_MS));
+  a.push({ at: now, n });
+  const first = a[0].at, span = Math.max(2000, now - first + 1000) / 1000;
+  const rate = a.reduce((s, t) => s + t.n, 0) / span;
+  return rate >= 6 ? 2 : rate >= 3 ? 1.5 : 1;
+}
+
+// ---------- goals ----------
+// each bar shows progress from the previous goal to the next one
+const held = { L: 0, F: 0 }; // goal reached: pill stays gold until this time
+function pill(k, v, goal, step) {
+  const g = $("g" + k), b = $("b" + k), t = $("v" + k), now = Date.now();
+  if (held[k] > now) {
+    g.classList.add("done"); b.style.width = "100%"; b.classList.remove("hot");
+    t.innerHTML = `${fmt(goal - step)} ✓<small>next ${fmt(goal)}</small>`;
+    return;
+  }
+  g.classList.remove("done");
+  const base = goal - step, pct = Math.max(0, Math.min(100, (v - base) / step * 100));
+  b.style.width = pct.toFixed(1) + "%"; b.classList.toggle("hot", pct >= 80);
+  t.innerHTML = `${fmt(v)}<small>/${fmt(goal)}</small>`;
+}
+function renderGoals() {
+  pill("L", S.likes, S.likeGoal, S.likeGoal > CFG.likes ? CFG.likeStep : S.likeGoal);
+  pill("F", S.follows, S.followGoal, S.followGoal > CFG.follows ? CFG.followStep : S.followGoal);
+}
+function checkGoals() {
+  if (S.likes >= S.likeGoal) {
+    const hit = S.likeGoal; while (S.likes >= S.likeGoal) S.likeGoal += CFG.likeStep;
+    const top = board()[0];
+    celebrate(`${fmt(hit)} LIKES ❤`, top ? `MVP <b>${esc(top.name.toUpperCase())}</b> · ${fmt(Math.round(top.pts))}` : "", `NEXT GOAL <b>${fmt(S.likeGoal)}</b>`, "L");
+  }
+  if (S.follows >= S.followGoal) {
+    const hit = S.followGoal; while (S.follows >= S.followGoal) S.followGoal += CFG.followStep;
+    const last = S.followers[S.followers.length - 1];
+    celebrate(`${hit} FOLLOWS ＋`, last ? `LATEST <b>${esc(String(last).toUpperCase())}</b>` : "", `NEXT GOAL <b>${fmt(S.followGoal)}</b>`, "F");
+  }
+}
+
+// ---------- celebration (queued, about 6 s each) ----------
+const party = []; let partying = false;
+function celebrate(big, mvp, next, k) { party.push({ big, mvp, next, k }); if (!partying) nextParty(); }
+function nextParty() {
+  const p = party.shift(); if (!p) { partying = false; return; }
+  partying = true; held[p.k] = Date.now() + 6000 + HOLD_MS; renderGoals();
+  $("bBig").innerHTML = p.big; $("bMvp").innerHTML = p.mvp; $("bNext").innerHTML = p.next;
+  const fx = $("fx"); fx.classList.remove("on"); void fx.offsetWidth; fx.classList.add("on");
+  confetti();
+  setTimeout(() => { fx.classList.remove("on"); setTimeout(() => { $("conf").innerHTML = ""; nextParty(); }, 600); }, q.get("mode") === "hit" ? 9e9 : 6000);
+  setTimeout(renderGoals, 6000 + HOLD_MS + 50);
+}
+function confetti() {
+  const cols = ["#e0161e", "#a64dff", "#ffbf00", "#3ee6e6", "#ffffff", "#ff5a8a"];
+  let h = "";
+  for (let i = 0; i < 170; i++) {
+    const w = 8 + Math.random() * 14, x = Math.random() * 1080, delay = Math.random() * 2.2, dur = 2.4 + Math.random() * 2.2;
+    h += `<div class="cf" style="left:${x}px;width:${w}px;height:${w * (.4 + Math.random() * .8)}px;background:${cols[i % cols.length]};` +
+         `--dx:${(Math.random() - .5) * 300}px;--r:${(Math.random() - .5) * 1440}deg;animation-duration:${dur}s;animation-delay:${delay}s"></div>`;
+  }
+  $("conf").innerHTML = h;
+}
+
+// ---------- top tappers tower ----------
+function board() { return Object.values(S.users).sort((a, b) => b.pts - a.pts).slice(0, 5); }
+let prevRank = {}; const moves = {}; const rowEls = {};
+function renderBoard() {
+  const top = board(), now = Date.now(), rows = $("rows");
+  $("tw").classList.toggle("empty", !top.length);
+  const seen = new Set();
+  top.forEach((u, i) => {
+    seen.add(u.id);
+    const was = prevRank[u.id];
+    if (was === undefined) moves[u.id] = { t: "new", until: now + 8000 };
+    else if (was !== i) moves[u.id] = { t: was > i ? "up" : "dn", by: Math.abs(was - i), until: now + 8000 };
+    const m = moves[u.id] && moves[u.id].until > now ? moves[u.id] : null;
+    const d = !m ? '<span class="d">–</span>' : m.t === "new" ? '<span class="d new">NEW</span>' :
+      `<span class="d ${m.t}">${m.t === "up" ? "▲" : "▼"}${m.by}</span>`;
+    const boosted = u.boost > 1 && u.boostUntil > now ? `<em class="boost">🔥x${u.boost}</em>` : "";
+    let el = rowEls[u.id];
+    if (!el) { el = rowEls[u.id] = document.createElement("div"); el.style.top = "260px"; el.style.opacity = "0"; rows.appendChild(el); void el.offsetWidth; }
+    el.className = "tr" + (i < 3 ? " t" + (i + 1) : "") + (was !== undefined && was > i ? " flash" : "");
+    el.innerHTML = `<span class="p">${i + 1}</span><span class="cl"></span><span class="n">${esc(u.name)}</span>${boosted}${d}<span class="v">${full(u.pts)}</span>`;
+    el.style.top = i * 51 + "px"; el.style.opacity = "1";
+  });
+  for (const id in rowEls) if (!seen.has(id)) { const el = rowEls[id]; delete rowEls[id]; el.style.opacity = "0"; setTimeout(() => el.remove(), 500); }
+  prevRank = {}; top.forEach((u, i) => (prevRank[u.id] = i));
+}
+
+// ---------- events ----------
+let popT = 0, popN = 0, popBoost = false;
+function onLike(d) {
+  const n = Math.max(0, +d.likeCount || 0), id = String(d.uniqueId || d.userId || d.nickname || "?"), now = Date.now();
+  const before = S.likes;
+  S.likes = Math.max(S.likes + n, +d.totalLikeCount || 0); // real likes only (TikFinity stream total when present)
+  if (n) {
+    const m = mult(id, n, now);
+    const u = (S.users[id] = S.users[id] || { id, name: d.nickname || d.uniqueId || id, pts: 0 });
+    u.name = d.nickname || d.uniqueId || u.name; u.pts += n * m;
+    if (m > 1) { u.boost = m; u.boostUntil = now + 6000; popBoost = true; }
+    popN += S.likes - before;
+  }
+  if (S.likes !== before) { $("gL").classList.remove("bump"); void $("gL").offsetWidth; $("gL").classList.add("bump"); }
+  checkGoals(); renderGoals(); save();
+}
+function onFollow(d) {
+  const id = String(d.uniqueId || d.userId || d.nickname || "");
+  if (id && S.followers.includes(id)) return; // TikTok can resend a follow
+  if (id) S.followers.push(id);
+  S.follows++; checkGoals(); renderGoals(); save();
+}
+// "+N 🔥" pop next to the likes number, at most every 1.2 s
+setInterval(() => {
+  if (popN > 0 && held.L < Date.now()) {
+    const el = document.createElement("div"); el.className = "pop";
+    el.style.left = "262px"; el.style.top = "1306px"; el.textContent = `+${fmt(popN)}${popBoost ? " 🔥" : ""}`;
+    document.body.appendChild(el); setTimeout(() => el.remove(), 1400);
+  }
+  popN = 0; popBoost = false;
+}, 1200);
+setInterval(renderBoard, 700);
+
+function connectTF() {
+  let ws;
+  try { ws = new WebSocket(`ws://localhost:${q.get("tikfinity") || 21213}/`); } catch (e) { return setTimeout(connectTF, 5000); }
+  ws.onmessage = (m) => {
+    try {
+      const j = JSON.parse(m.data), d = j.data || {};
+      if (j.event === "like") onLike(d);
+      if (j.event === "follow") onFollow(d);
+    } catch (e) { console.warn(e); }
+  };
+  ws.onclose = () => setTimeout(connectTF, 5000);
+}
+
+board().forEach((u, i) => (prevRank[u.id] = i)); // no NEW tags after a reload
+renderGoals(); renderBoard();
+if (q.get("mode") === "hit") {
+  S.users = { a: { id: "a", name: "markbonner189", pts: 2140 }, b: { id: "b", name: "Overfast", pts: 1412 }, c: { id: "c", name: "DrewDrew", pts: 983 },
+              d: { id: "d", name: "KoenF1", pts: 610 }, e: { id: "e", name: "lisa.simracing", pts: 420 } };
+  S.likes = CFG.likes - 1; S.follows = 37; renderBoard(); onLike({ uniqueId: "a", nickname: "markbonner189", likeCount: 1 });
+} else if (q.has("demo")) {
+  const names = ["markbonner189", "Overfast", "DrewDrew", "KoenF1", "lisa.simracing", "Bananensaus17", "devildriver2396", "max_v_fan"];
+  S.likes = Math.round(CFG.likes * .78); S.follows = Math.round(CFG.follows * .7); catchUp(); renderGoals();
+  setInterval(() => {
+    const i = Math.floor(Math.random() ** 1.7 * names.length), fast = i < 3 && Math.random() < .5;
+    onLike({ uniqueId: names[i], nickname: names[i], likeCount: fast ? 15 + Math.floor(Math.random() * 15) : 1 + Math.floor(Math.random() * 8) });
+  }, 450);
+  setInterval(() => { if (Math.random() < .35) onFollow({ uniqueId: "fan" + Math.floor(Math.random() * 1e6), nickname: "new_fan" }); }, 2500);
+} else connectTF();
+</script>
+</body></html>
