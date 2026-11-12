@@ -136,7 +136,7 @@ function addChat(m) {
   list.appendChild(el);
   while (list.children.length > MAX) list.firstChild.remove();
   if (stick) list.scrollTop = list.scrollHeight; else more.style.display = "block";
-  if (m.platform === "tiktok") onTikTokChat(m.login, m.name, m.text);
+  if (!m.roles.has("broadcaster")) onJoinChat(m.platform, m.login, m.name, m.text);   // your own messages never go on the list
 }
 
 // ---------- activity feed
@@ -194,15 +194,16 @@ function interested(text) { const a = cfg.interest || {}, topic = re(a.topic), c
   return !!topic && topic.test(text) && (!cue || cue.test(text)) && !(not && not.test(text)); }
 function wantsToJoin(m) { const low = String(m.text || "").trim().toLowerCase();
   return cfg.commands.includes(low.split(/\s+/)[0]) || interested(low); }
-function onTikTokChat(user, name, text) {
+// Every platform is checked here (Race Control's dock.json may also send Twitch/YouTube; duplicates are merged by key).
+function onJoinChat(platform, user, name, text) {
   if (!user || !text) return;
   const low = text.trim().toLowerCase(), command = cfg.commands.includes(low.split(/\s+/)[0]);
   if (!command && !interested(low)) return;
-  const key = "tiktok:" + user.toLowerCase();
+  const key = platform + ":" + user.toLowerCase();
   if (entries().some((e) => e.key === key)) return;
-  tiktok.push({ key, platform: "tiktok", name: name || user, at: Date.now() / 1000, text: text.slice(0, 120) });
+  tiktok.push({ key, platform, name: name || user, at: Date.now() / 1000, text: text.slice(0, 120) });
   tiktok = tiktok.slice(-50); store.set("tiktok", tiktok); renderWaitlist();
-  if (!command) sbAction(cfg.tiktok_action, { user: name || user });   // !join on TikTok is answered by Streamer.bot itself
+  if (!command && platform === "tiktok") sbAction(cfg.tiktok_action, { user: name || user });   // !join on TikTok is answered by Streamer.bot itself
 }
 
 // ---------- lobby SR (same as Race Control's /dock)

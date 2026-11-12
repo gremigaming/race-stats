@@ -40,6 +40,8 @@
 
   function render(text, emotes = []) {
     if (!emotes || !emotes.length) return esc(text);
+    emotes = emotes.map((e) => ({ name: e.name ?? e.Name, imageUrl: e.imageUrl ?? e.ImageUrl,
+                                  startIndex: e.startIndex ?? e.StartIndex, endIndex: e.endIndex ?? e.EndIndex }));
     const byIndex = emotes.filter((e) => e.startIndex != null && e.imageUrl).sort((a, b) => a.startIndex - b.startIndex);
     if (byIndex.length) {
       const chars = Array.from(text); let out = "", i = 0;
@@ -53,22 +55,24 @@
   let seq = 0;
   const lower = (s) => String(s || "").toLowerCase();
 
+  // Streamer.bot 1.0 Twitch.ChatMessage: text at d.text, user{login,name,role,badges,color,subscribed}, meta.firstMessage, emotes[].
+  // Older builds had message{message,role,badges,...}; both are read.
   function twitchMsg(d) {
-    const m = d.message || {}, u = d.user || {};
-    const text = typeof m === "string" ? m : m.message ?? m.text ?? "";
+    const m = (d.message && typeof d.message === "object") ? d.message : {}, u = d.user || {}, meta = d.meta || {};
+    const text = d.text ?? (typeof d.message === "string" ? d.message : m.message ?? m.text) ?? "";
     const login = lower(u.login || m.username || u.name);
     const name = u.name || m.displayName || m.username || "";
     const roles = new Set();
-    const role = +(m.role ?? u.role ?? 0);              // 1 viewer, 2 vip, 3 mod, 4 broadcaster
+    const role = +(u.role ?? m.role ?? 0);              // 1 viewer, 2 vip, 3 mod, 4 broadcaster
     if (role === 4 || HOST.test(login)) roles.add("broadcaster");
     if (role === 3) roles.add("mod");
     if (role === 2) roles.add("vip");
-    if (m.subscriber || u.subscribed) roles.add("sub");
-    if (m.firstMessage || d.isFirstMessage) roles.add("first");
+    if (u.subscribed || m.subscriber) roles.add("sub");
+    if (meta.firstMessage || m.firstMessage || d.isFirstMessage) roles.add("first");
     if (LEAD.has(login) || LEAD.has(lower(name))) roles.add("lead");
-    const badges = (m.badges || u.badges || []).map((b) => ({ src: b.imageUrl || b.image_url, title: b.name || "" })).filter((b) => b.src);
-    return { id: "tw" + (m.msgId || ++seq), platform: "twitch", name, login, color: u.color || m.color, text,
-             html: render(text, m.emotes || []), badges, roles, bot: isBot(login) || isBot(name) };
+    const badges = (u.badges || m.badges || []).map((b) => ({ src: b.imageUrl || b.ImageUrl || b.image_url, title: b.name || b.Name || "" })).filter((b) => b.src);
+    return { id: "tw" + (d.messageId || m.msgId || ++seq), platform: "twitch", name, login, color: u.color || m.color, text,
+             html: render(text, d.emotes || m.emotes || []), badges, roles, bot: isBot(login) || isBot(name) };
   }
   function youtubeMsg(d) {
     const u = d.user || {}, text = typeof d.message === "string" ? d.message : d.message?.message ?? d.text ?? "";
@@ -175,5 +179,5 @@
            r.has("gifter") ? "t-gifter" : r.has("sub") ? "t-sub" : "";
   }
 
-  window.GremiChat = { pickName, connectSB, connectTF, who, tier, esc, ICON, BADGE, isBot, render, LEAD };
+  window.GremiChat = { twitchMsg, youtubeMsg, pickName, connectSB, connectTF, who, tier, esc, ICON, BADGE, isBot, render, LEAD };
 })();
