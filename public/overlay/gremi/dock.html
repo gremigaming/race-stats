@@ -53,7 +53,8 @@ body { display:flex; flex-direction:column; }
 .m.first { background:rgba(37,244,238,.08); border-left-color:var(--tt); }
 .m.first .b::before { content:"FIRST CHAT"; font-size:.62em; font-weight:800; letter-spacing:.08em; color:#000; background:var(--tt); padding:1px 5px; border-radius:4px; margin-right:6px; vertical-align:.15em; }
 .m.me { background:rgba(225,6,0,.16); }
-.m.wl .b::after { content:"WANTS TO JOIN"; font-size:.6em; font-weight:800; letter-spacing:.06em; color:#000; background:var(--amber); padding:1px 5px; border-radius:4px; margin-left:6px; vertical-align:.15em; }
+.jtag { display:none; font-size:.6em; font-weight:800; letter-spacing:.06em; color:#000; background:var(--amber); padding:1px 5px; border-radius:4px; margin-right:6px; vertical-align:.15em; white-space:nowrap; }
+.m.wl .jtag { display:inline-block; }
 #more { position:absolute; bottom:10px; left:50%; transform:translateX(-50%); display:none; font:600 12px "Segoe UI"; color:#fff; background:#7c3aed; border:0; border-radius:14px; padding:5px 12px; cursor:pointer; }
 
 /* waitlist + lobby */
@@ -127,16 +128,26 @@ list.onscroll = () => { stick = list.scrollTop + list.clientHeight >= list.scrol
 more.onclick = () => { list.scrollTop = list.scrollHeight; };
 $("clear").onclick = () => (list.innerHTML = "");
 const ME = /\bgremi\b/i;
+// "Wants to join": the tag sits behind the name on all of that person's messages for 2 minutes after they ask,
+// and the 2 minutes start again every time they ask. They also go on the waitlist (asking again moves them up).
+const JOIN_MS = 120000, joinUntil = new Map();
+const keyOf = (m) => m.platform + ":" + String(m.login || m.name || "").toLowerCase();
+function refreshJoinTags() {
+  const now = Date.now();
+  list.querySelectorAll(".m[data-k]").forEach((el) => el.classList.toggle("wl", (joinUntil.get(el.dataset.k) || 0) > now));
+}
+setInterval(refreshJoinTags, 5000);
 function addChat(m) {
-  const wl = wantsToJoin(m);
+  const k = keyOf(m);
+  if (wantsToJoin(m)) { joinUntil.set(k, Date.now() + JOIN_MS); onJoinChat(m.platform, m.login || m.name, m.name, m.text); }
   const el = document.createElement("div");
-  el.className = `m ${C.tier(m)}${m.roles.has("first") ? " first" : ""}${ME.test(m.text) ? " me" : ""}${wl ? " wl" : ""}`;
-  el.dataset.pl = m.platform; if (hidden.has(m.platform)) el.style.display = "none";
-  el.innerHTML = `<span class="tm">${hhmm()}</span><div class="b">${C.who(m)}${m.html}</div>`;
+  el.className = `m ${C.tier(m)}${m.roles.has("first") ? " first" : ""}${ME.test(m.text) ? " me" : ""}`;
+  el.dataset.pl = m.platform; el.dataset.k = k; if (hidden.has(m.platform)) el.style.display = "none";
+  el.innerHTML = `<span class="tm">${hhmm()}</span><div class="b">${C.who(m)}<span class="jtag">WANTS TO JOIN</span>${m.html}</div>`;
   list.appendChild(el);
   while (list.children.length > MAX) list.firstChild.remove();
+  refreshJoinTags();
   if (stick) list.scrollTop = list.scrollHeight; else more.style.display = "block";
-  if (!m.roles.has("broadcaster")) onJoinChat(m.platform, m.login, m.name, m.text);   // your own messages never go on the list
 }
 
 // ---------- activity feed
@@ -200,7 +211,9 @@ function onJoinChat(platform, user, name, text) {
   const low = text.trim().toLowerCase(), command = cfg.commands.includes(low.split(/\s+/)[0]);
   if (!command && !interested(low)) return;
   const key = platform + ":" + user.toLowerCase();
-  if (entries().some((e) => e.key === key)) return;
+  const mine = tiktok.find((e) => e.key === key);
+  if (mine) { mine.at = Date.now() / 1000; mine.text = text.slice(0, 120); store.set("tiktok", tiktok); renderWaitlist(); return; }   // asked again: move up
+  if (entries().some((e) => e.key === key)) return;                                                                                 // already there from Race Control
   tiktok.push({ key, platform, name: name || user, at: Date.now() / 1000, text: text.slice(0, 120) });
   tiktok = tiktok.slice(-50); store.set("tiktok", tiktok); renderWaitlist();
   if (!command && platform === "tiktok") sbAction(cfg.tiktok_action, { user: name || user });   // !join on TikTok is answered by Streamer.bot itself
