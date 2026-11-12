@@ -88,9 +88,10 @@ function roleOf(u = {}, d = {}) {
 function onSB(ev, d) {
   const s = ev.source, t = ev.type;
   const who = (x) => x?.name || x?.display_name || x?.displayName || x?.login || x?.userName || "";
-  const dn = d.displayName || d.userName || who(d.user) || "";
+  const dn = who(d.user) || who(d.targetUser) || d.user_name || d.displayName || d.userName || d.user_login ||
+    who((Object.entries(d).find(([k, v]) => k !== "broadcaster" && v && typeof v === "object" && who(v)) || [])[1]) || "";
   if (s === "Twitch") {
-    if (t === "Follow") return push({ platform: "twitch", kind: "follow", label: "New follower", name: d.user_name || dn });
+    if (t === "Follow") return push({ platform: "twitch", kind: "follow", label: "New follower", name: dn });
     if (t === "Sub") return push({ platform: "twitch", kind: "sub", label: "New sub", chip: tierName(d.subTier ?? d.sub_tier ?? d.tier), name: dn, msg: typeof d.message === "string" ? d.message : d.message?.text, big: true });
     if (t === "ReSub") return push({ platform: "twitch", kind: "sub", label: `Resub · ${d.cumulativeMonths || d.cumulative_months || d.cumulative || "?"} months`, chip: tierName(d.subTier ?? d.sub_tier ?? d.tier), name: dn, msg: typeof d.message === "string" ? d.message : d.text || d.message?.text, big: true });
     if (t === "GiftSub") return push({ platform: "twitch", kind: "gift", label: `Gifted a sub to ${d.recipientDisplayName || d.recipientUsername || who(d.recipient)}`, chip: tierName(d.subTier ?? d.sub_tier), name: d.isAnonymous ? "Anonymous" : dn });

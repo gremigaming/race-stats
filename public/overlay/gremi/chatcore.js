@@ -96,8 +96,18 @@
   }
 
   // ---- events (activity feed)
+  // The person behind an event. Streamer.bot 1.0 moved names around (user / targetUser / user_name / displayName),
+  // so look in every known place, then in any nested object except the broadcaster.
+  function pickName(d) {
+    const nm = (o) => o && typeof o === "object" ? (o.name || o.displayName || o.display_name || o.userName || o.login || o.user_name || o.user_login) : null;
+    const direct = nm(d.user) || nm(d.targetUser) || d.user_name || d.userName || d.displayName || d.display_name || d.user_login || d.username || nm(d.message);
+    if (direct) return direct;
+    for (const [k, v] of Object.entries(d)) if (k !== "broadcaster" && v && typeof v === "object" && nm(v)) return nm(v);
+    return "";
+  }
   function sbEvent(ev, d, on) {
-    const who = d.user?.name || d.displayName || d.user_name || d.userName || d.user?.display_name || "";
+    const who = pickName(d);
+    if (!who && ev.type !== "ChatMessage" && ev.type !== "Message") console.warn("[chatcore] no name in", ev.type, JSON.stringify(d).slice(0, 800));
     const e = (kind, extra) => on.event && on.event(Object.assign({ id: "ev" + (++seq), at: Date.now(), platform: ev.source === "YouTube" ? "youtube" : "twitch", kind, name: who }, extra));
     switch (`${ev.source}.${ev.type}`) {
       case "Twitch.ChatMessage": { const m = twitchMsg(d); if (!m.bot) on.chat && on.chat(m); return; }
@@ -165,5 +175,5 @@
            r.has("gifter") ? "t-gifter" : r.has("sub") ? "t-sub" : "";
   }
 
-  window.GremiChat = { connectSB, connectTF, who, tier, esc, ICON, BADGE, isBot, render, LEAD };
+  window.GremiChat = { pickName, connectSB, connectTF, who, tier, esc, ICON, BADGE, isBot, render, LEAD };
 })();
