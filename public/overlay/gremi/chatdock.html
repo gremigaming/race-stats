@@ -138,8 +138,8 @@ function connectSB() {
   ws.onopen = () => { dot.classList.add("on"); ws.send(JSON.stringify({ request: "Subscribe", id: "gremi-chatdock", events: {
     Twitch: ["ChatMessage", "Follow", "Sub", "ReSub", "GiftSub", "GiftBomb", "Raid", "Cheer"],
     YouTube: ["Message", "NewSubscriber", "SuperChat", "NewSponsor"] } }));
-    const getYT = () => ws.readyState === 1 && ws.send(JSON.stringify({ request: "GetMonitoredYouTubeBroadcasts", id: "gremi-yt" }));
-    getYT(); clearInterval(window.ytTimer); window.ytTimer = setInterval(getYT, 60000); };
+    // NOTE: no GetMonitoredYouTubeBroadcasts here: Streamer.bot 1.0.x drops the whole connection on that request.
+  };
   ws.onmessage = (m) => { try { const j = JSON.parse(m.data);
     if (j.id === "gremi-yt" && Array.isArray(j.broadcasts)) j.broadcasts.forEach((b) => { ytBroadcasts[b.id] = b.title; if (b.liveChatId) ytBroadcasts[b.liveChatId] = b.title; });
     if (j.event) sbEvent(j.event, j.data || {}); } catch (e) { console.warn(e); } };
