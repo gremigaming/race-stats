@@ -252,7 +252,8 @@ export function SafetyPage() {
   const lastStreamLabel = lastStreamIsToday
     ? "today's stream"
     : `the last stream (${lastStreamDate ? formatShortDate(lastStreamDate) : ""})`;
-  const visibleRows = showingLastStream ? lastStreamRows : rows;
+  // The Discord picture (embed) lists only the drivers of the last stream
+  const visibleRows = embed || showingLastStream ? lastStreamRows : rows;
   const sortedRows = sortRows(visibleRows, sort, (d, k) =>
     k === "pos" ? rows.indexOf(d) : k === "rank" ? d.sr : d[k],
   );
@@ -282,7 +283,8 @@ export function SafetyPage() {
               {league.safetyData.rules === "v2.5"
                 ? srWindowRaces(srSettings(league.safetyData))
                 : 50}{" "}
-              races · {rows.length} drivers
+              races · {lastStreamRows.length} drivers from the last stream
+              {lastStreamDate ? ` (${formatShortDate(lastStreamDate)})` : ""}
             </p>
           </div>
         </div>
@@ -351,7 +353,7 @@ export function SafetyPage() {
             title="Ranking"
             hint={
               embed
-                ? "Live safety rating across the league"
+                ? "Drivers of the last stream · # is the league position"
                 : showingLastStream
                   ? `${visibleRows.length} ${visibleRows.length === 1 ? "driver" : "drivers"} in ${lastStreamLabel} · Select a driver name to open their personal page`
                   : `Drivers from the last ${ACTIVE_STREAMS} streams · Select a driver name to open their personal page`
