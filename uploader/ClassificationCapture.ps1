@@ -462,11 +462,17 @@ $sessionUid = if ($FinishLap) { UidOf ([Convert]::FromBase64String($FinishLap)) 
               elseif ($Recorder) { UidOf $Recorder.LatestLap } else { [uint64]0 }
 $startParts = if ($Recorder -and (UidOf $Recorder.LatestParticipants) -eq $sessionUid) { $Recorder.LatestParticipants } else { $null }
 $resultsSince = $null
+$lapSeen = $null; $lapSince = Get-Date   # the game's latest lap packet and when it last changed
 $inv = [Globalization.CultureInfo]::InvariantCulture
 try {
 while ($true) {
     $t = [math]::Round(((Get-Date) - $started).TotalSeconds, 1)
     if ($Recorder -and $sessionUid -and (UidOf $Recorder.LatestLap) -ne $sessionUid) { break }   # next session started
+    # the game stopped sending (left to the menu, closed or crashed): nothing more will come
+    if ($Recorder) {
+        if (-not [object]::ReferenceEquals($Recorder.LatestLap, $lapSeen)) { $lapSeen = $Recorder.LatestLap; $lapSince = Get-Date }
+        elseif (((Get-Date) - $lapSince).TotalSeconds -ge 45) { break }
+    }
     # the live standings as the game sees them right now: the anchor for the tower rows
     $lap = if ($Recorder -and $Recorder.LatestLap) { [Convert]::ToBase64String($Recorder.LatestLap) } else { $FinishLap }
     $st = if ($Recorder -and $Recorder.LatestLap) { [BitConverter]::ToSingle($Recorder.LatestLap, 15) } else { $FinishTime }
