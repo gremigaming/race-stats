@@ -37,6 +37,18 @@ def rec_time(n):
     return datetime.datetime.strptime(n[:19], "%Y-%m-%d_%H-%M-%S")
 
 
+def track_of_save(file):
+    """Race_Las_Vegas_Just_in_case_2026_11_13_16_18_12.json -> las_vegas"""
+    t = re.sub(r"_\d{4}(_\d\d){5}\.json$", "", file)
+    t = re.sub(r"^Race_|_(Just_in_case|Manual)$", "", t)
+    return t.lower()
+
+
+def track_of_rec(n):
+    """2026-11-13_16-00-22_Las_Vegas_Race.gmtel.gz -> las_vegas"""
+    return re.sub(r"_Race\.gmtel\.gz$", "", n[20:]).lower()
+
+
 def feats(p):
     """The numbers a contact's call rests on, for the staff grading batches (scripts/telemetry/grading_batch.py)."""
     f, eff = p["features"], p.get("effects") or {}
@@ -164,7 +176,10 @@ def main():
         if not cands:
             print(file, ": no recording")
             continue
-        rec = max(cands, key=rec_time)   # the latest race recording before the save
+        # Same track first: Pits n' Giggles can save a race only when the next one starts
+        # (13 Nov: the Las Vegas backup save came at the Texas start and took its recording)
+        same = [n for n in cands if track_of_rec(n) == track_of_save(file)]
+        rec = max(same or cands, key=rec_time)   # the latest race recording before the save
         used.add(rec)
         todo.append((file, rec, cache))
     with ProcessPoolExecutor(int(os.environ.get("FAULT_JOBS", "2"))) as ex:
