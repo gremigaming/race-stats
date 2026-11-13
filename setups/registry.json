@@ -8,7 +8,7 @@
   "requested": null,
   "last": "2026-11-10"
  },
- "pending": 19,
+ "pending": 23,
  "tracks": [
   {
    "track": "Melbourne",
@@ -508,12 +508,68 @@
        },
        "text": "Rear wing 35 → 38",
        "why": "More rear grip against oversteer and wheelspin. Costs a little top speed.",
+       "sessions": [
+        {
+         "file": "2026-11-13_16-33-18_Shanghai_Race.gmtel.gz",
+         "date": "2026-11-13",
+         "session": "race",
+         "osq": false,
+         "weather": 2,
+         "pace": 94381,
+         "best": 94381,
+         "mean": 95496,
+         "run": 5,
+         "laps": 4,
+         "bb": 58
+        }
+       ],
+       "verdict": {
+        "result": "worse",
+        "delta": 0.41,
+        "text": "Worse: quali lap 1:34.381 against 1:33.996 on V1 (0.385 s slower)."
+       },
+       "slot": 3
+      },
+      {
+       "v": 3,
+       "base": 1,
+       "created": "2026-11-13",
+       "saved": null,
+       "values": {
+        "fw": 50,
+        "rw": 35,
+        "don": 100,
+        "doff": 50,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 32,
+        "farb": 1,
+        "rarb": 11,
+        "frh": 22,
+        "rrh": 40,
+        "bb": 55,
+        "bp": 100,
+        "fr": 29.5,
+        "fl": 29.5,
+        "rr": 23.0,
+        "rl": 23.0
+       },
+       "change": {
+        "rarb": [
+         9,
+         11
+        ]
+       },
+       "text": "Rear anti-roll bar 9 → 11",
+       "why": "The front wing is already at 50, so a slightly stiffer rear anti-roll bar helps the car rotate. V2's change is undone (it didn't make the car faster).",
        "sessions": [],
        "verdict": {
         "result": "untested",
         "text": "Not driven yet."
-       },
-       "slot": 3
+       }
       }
      ]
     },
@@ -605,12 +661,68 @@
        },
        "text": "Rear wing 35 → 38",
        "why": "More rear grip against oversteer and wheelspin. Costs a little top speed.",
+       "sessions": [
+        {
+         "file": "2026-11-13_16-33-18_Shanghai_Race.gmtel.gz",
+         "date": "2026-11-13",
+         "session": "race",
+         "osq": false,
+         "weather": 2,
+         "pace": 95496,
+         "best": 94381,
+         "mean": 95496,
+         "run": 5,
+         "laps": 4,
+         "bb": 58
+        }
+       ],
+       "verdict": {
+        "result": "worse",
+        "delta": 0.69,
+        "text": "Worse: average lap 1:35.496 against 1:34.838 on V1 (0.658 s slower)."
+       },
+       "slot": 4
+      },
+      {
+       "v": 3,
+       "base": 1,
+       "created": "2026-11-13",
+       "saved": null,
+       "values": {
+        "fw": 50,
+        "rw": 35,
+        "don": 100,
+        "doff": 50,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 32,
+        "farb": 1,
+        "rarb": 11,
+        "frh": 22,
+        "rrh": 40,
+        "bb": 55,
+        "bp": 100,
+        "fr": 29.5,
+        "fl": 29.5,
+        "rr": 23.0,
+        "rl": 23.0
+       },
+       "change": {
+        "rarb": [
+         9,
+         11
+        ]
+       },
+       "text": "Rear anti-roll bar 9 → 11",
+       "why": "The front wing is already at 50, so a slightly stiffer rear anti-roll bar helps the car rotate. V2's change is undone (it didn't make the car faster).",
        "sessions": [],
        "verdict": {
         "result": "untested",
         "text": "Not driven yet."
-       },
-       "slot": 4
+       }
       }
      ]
     },
@@ -4475,6 +4587,61 @@
        "change": null,
        "text": "Starting setup",
        "why": "Your last quali setup.",
+       "sessions": [
+        {
+         "file": "2026-11-13_16-18-12_Texas_Race.gmtel.gz",
+         "date": "2026-11-13",
+         "session": "race",
+         "osq": false,
+         "weather": 0,
+         "pace": 95029,
+         "best": 95029,
+         "mean": 96920,
+         "run": 5,
+         "laps": 4,
+         "bb": 58
+        }
+       ],
+       "verdict": {
+        "result": "baseline",
+        "text": "Starting point: 1:35.029 over 1 session."
+       }
+      },
+      {
+       "v": 2,
+       "base": 1,
+       "created": "2026-11-13",
+       "saved": null,
+       "values": {
+        "fw": 50,
+        "rw": 38,
+        "don": 100,
+        "doff": 40,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 35,
+        "rs": 41,
+        "farb": 13,
+        "rarb": 18,
+        "frh": 19,
+        "rrh": 44,
+        "bb": 57,
+        "bp": 100,
+        "fr": 28.0,
+        "fl": 28.0,
+        "rr": 20.5,
+        "rl": 20.5
+       },
+       "change": {
+        "rw": [
+         35,
+         38
+        ]
+       },
+       "text": "Rear wing 35 → 38",
+       "why": "More rear grip against oversteer and wheelspin. Costs a little top speed.",
        "sessions": [],
        "verdict": {
         "result": "untested",
@@ -4516,6 +4683,61 @@
        "change": null,
        "text": "Starting setup",
        "why": "Your last race setup.",
+       "sessions": [
+        {
+         "file": "2026-11-13_16-18-12_Texas_Race.gmtel.gz",
+         "date": "2026-11-13",
+         "session": "race",
+         "osq": false,
+         "weather": 0,
+         "pace": 96920,
+         "best": 95029,
+         "mean": 96920,
+         "run": 5,
+         "laps": 4,
+         "bb": 58
+        }
+       ],
+       "verdict": {
+        "result": "baseline",
+        "text": "Starting point: 1:36.920 over 1 session."
+       }
+      },
+      {
+       "v": 2,
+       "base": 1,
+       "created": "2026-11-13",
+       "saved": null,
+       "values": {
+        "fw": 50,
+        "rw": 38,
+        "don": 100,
+        "doff": 40,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 35,
+        "rs": 41,
+        "farb": 13,
+        "rarb": 18,
+        "frh": 19,
+        "rrh": 44,
+        "bb": 57,
+        "bp": 100,
+        "fr": 28.0,
+        "fl": 28.0,
+        "rr": 20.5,
+        "rl": 20.5
+       },
+       "change": {
+        "rw": [
+         35,
+         38
+        ]
+       },
+       "text": "Rear wing 35 → 38",
+       "why": "More rear grip against oversteer and wheelspin. Costs a little top speed.",
        "sessions": [],
        "verdict": {
         "result": "untested",
