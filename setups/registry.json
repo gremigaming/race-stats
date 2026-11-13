@@ -8,7 +8,7 @@
   "requested": null,
   "last": "2026-11-10"
  },
- "pending": 23,
+ "pending": 24,
  "tracks": [
   {
    "track": "Melbourne",
@@ -1348,6 +1348,61 @@
        "change": null,
        "text": "Starting setup",
        "why": "Your last race setup.",
+       "sessions": [
+        {
+         "file": "2026-11-13_16-48-39_Jeddah_Race.gmtel.gz",
+         "date": "2026-11-13",
+         "session": "race",
+         "osq": false,
+         "weather": 0,
+         "pace": 92482,
+         "best": 91930,
+         "mean": 92482,
+         "run": 5,
+         "laps": 4,
+         "bb": 56
+        }
+       ],
+       "verdict": {
+        "result": "baseline",
+        "text": "Starting point: 1:32.482 over 1 session."
+       }
+      },
+      {
+       "v": 2,
+       "base": 1,
+       "created": "2026-11-13",
+       "saved": null,
+       "values": {
+        "fw": 17,
+        "rw": 11,
+        "don": 85,
+        "doff": 35,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.02,
+        "rt": 0.12,
+        "fs": 41,
+        "rs": 10,
+        "farb": 10,
+        "rarb": 18,
+        "frh": 23,
+        "rrh": 49,
+        "bb": 58,
+        "bp": 100,
+        "fr": 23.7,
+        "fl": 23.7,
+        "rr": 22.4,
+        "rl": 22.4
+       },
+       "change": {
+        "fw": [
+         14,
+         17
+        ]
+       },
+       "text": "Front wing 14 → 17",
+       "why": "More front grip against the mid-corner understeer.",
        "sessions": [],
        "verdict": {
         "result": "untested",
