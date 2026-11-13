@@ -1,0 +1,271 @@
+{
+ "title": "Stream 13 Nov · 5 picks",
+ "stream": "1113a",
+ "made": "2026-11-13",
+ "rules": "v1.5",
+ "incidents": [
+  {
+   "id": "1113a-1",
+   "pick": "low",
+   "track": "Las Vegas",
+   "date": "2026-11-13",
+   "type": "Moved across alongside",
+   "weather": "Clear",
+   "track_temp": 15,
+   "lap": 1,
+   "race_time": "0:14",
+   "replay": "https://gremigaming.github.io/race-stats/all/race/2026-11-13_16-00-22_Las_Vegas_Race?inc=14.5&car=0,4",
+   "race_file": "Race_Las_Vegas_Just_in_case_2026_11_13_16_18_12.json",
+   "recording": "2026-11-13_16-00-22_Las_Vegas_Race.gmtel.gz",
+   "t0": 14.5,
+   "t1": 14.5,
+   "contacts": [
+    {
+     "t": 14.5,
+     "a": 0,
+     "b": 4
+    }
+   ],
+   "drivers": [
+    {
+     "car": 0,
+     "name": "#20 QDR_SHW1KS"
+    },
+    {
+     "car": 4,
+     "name": "#15 stijntjegeffie"
+    }
+   ],
+   "engine": {
+    "rules": "v1.5",
+    "verdict": "QDR_SHW1KS at fault",
+    "rule": "R2",
+    "severity": 2,
+    "why": "side by side; QDR_SHW1KS moved 4.5 m across into the other car",
+    "at_fault": [
+     "#20 QDR_SHW1KS"
+    ],
+    "contacts": 1,
+    "gray_score": 0.0
+   },
+   "claude": "Picked as the low-severity case. My call: QDR_SHW1KS at fault (rule R2: side by side, one car moved over), severity 2, blame on #20 QDR_SHW1KS. What I saw: side by side; QDR_SHW1KS moved 4.5 m across into the other car. I'm fairly confident: the numbers are clear of every limit; this one is here for its severity."
+  },
+  {
+   "id": "1113a-2",
+   "pick": "high",
+   "track": "Texas",
+   "date": "2026-11-13",
+   "type": "Rear-end",
+   "weather": "Clear",
+   "track_temp": 32,
+   "lap": 2,
+   "race_time": "1:55",
+   "replay": "https://gremigaming.github.io/race-stats/all/race/2026-11-13_16-18-12_Texas_Race?inc=115.2&car=11,10",
+   "race_file": "Race_Texas_2026_11_13_16_30_25.json",
+   "recording": "2026-11-13_16-18-12_Texas_Race.gmtel.gz",
+   "t0": 115.2,
+   "t1": 123.6,
+   "contacts": [
+    {
+     "t": 115.2,
+     "a": 11,
+     "b": 10
+    }
+   ],
+   "drivers": [
+    {
+     "car": 11,
+     "name": "Hidden #2 (Ferrari '26)"
+    },
+    {
+     "car": 10,
+     "name": "#8 Stepino81"
+    }
+   ],
+   "engine": {
+    "rules": "v1.5",
+    "verdict": "Ferrari '26 #2 at fault",
+    "rule": "R3",
+    "severity": 7,
+    "why": "Ferrari '26 #2 ran into the back of Stepino81, closing at 8 km/h",
+    "at_fault": [
+     "Hidden #2 (Ferrari '26)"
+    ],
+    "contacts": 1,
+    "gray_score": 0.8
+   },
+   "claude": "Picked as the high-severity case. My call: Hidden #2 (Ferrari '26) at fault (rule R3: the car behind ran into the one ahead), severity 7, blame on Hidden #2 (Ferrari '26). What I saw: Hidden #2 (Ferrari '26) ran into the back of Stepino81, closing at 8 km/h. I'm fairly confident: the car behind was closing at only 8 km/h, near the 7 km/h where I stop calling it 'ran into the back'."
+  },
+  {
+   "id": "1113a-3",
+   "pick": "gray",
+   "track": "Texas",
+   "date": "2026-11-13",
+   "type": "Moved across alongside",
+   "weather": "Clear",
+   "track_temp": 32,
+   "lap": 1,
+   "race_time": "0:16",
+   "replay": "https://gremigaming.github.io/race-stats/all/race/2026-11-13_16-18-12_Texas_Race?inc=16.9&car=8,1,4",
+   "race_file": "Race_Texas_2026_11_13_16_30_25.json",
+   "recording": "2026-11-13_16-18-12_Texas_Race.gmtel.gz",
+   "t0": 16.9,
+   "t1": 31.9,
+   "contacts": [
+    {
+     "t": 16.9,
+     "a": 8,
+     "b": 1
+    },
+    {
+     "t": 19.1,
+     "a": 1,
+     "b": 4
+    }
+   ],
+   "drivers": [
+    {
+     "car": 8,
+     "name": "Hidden #3 (Mercedes '26)"
+    },
+    {
+     "car": 1,
+     "name": "#58 NEX"
+    },
+    {
+     "car": 4,
+     "name": "#15 stijntjegeffie"
+    }
+   ],
+   "engine": {
+    "rules": "v1.5",
+    "verdict": "NEX + stijntjegeffie at fault",
+    "rule": "R8",
+    "severity": 4,
+    "why": "NEX ran into the back of Mercedes '26 #3, closing at 8 km/h; stijntjegeffie ran into the back of NEX, closing at 23 km/h",
+    "at_fault": [
+     "#58 NEX",
+     "#15 stijntjegeffie"
+    ],
+    "contacts": 2,
+    "gray_score": 1.55
+   },
+   "claude": "Picked because it's a gray area for me. My call: NEX + stijntjegeffie at fault (rule R8: shared fault), severity 4, blame on #58 NEX, #15 stijntjegeffie. What I saw: NEX ran into the back of Hidden #3 (Mercedes '26), closing at 8 km/h; stijntjegeffie ran into the back of NEX, closing at 23 km/h. Why I'm not sure: more than one car gets the blame, and splitting it is a judgement call; the car behind was closing at only 8 km/h, near the 7 km/h where I stop calling it 'ran into the back'; its 2 contacts don't point the same way (NEX at fault; stijntjegeffie at fault)."
+  },
+  {
+   "id": "1113a-4",
+   "pick": "gray",
+   "track": "Las Vegas",
+   "date": "2026-11-13",
+   "type": "Rear-end",
+   "weather": "Clear",
+   "track_temp": 15,
+   "lap": 1,
+   "race_time": "1:21",
+   "replay": "https://gremigaming.github.io/race-stats/all/race/2026-11-13_16-00-22_Las_Vegas_Race?inc=81.1&car=6,8,0",
+   "race_file": "Race_Las_Vegas_Just_in_case_2026_11_13_16_18_12.json",
+   "recording": "2026-11-13_16-00-22_Las_Vegas_Race.gmtel.gz",
+   "t0": 81.1,
+   "t1": 86.0,
+   "contacts": [
+    {
+     "t": 81.1,
+     "a": 6,
+     "b": 8
+    },
+    {
+     "t": 82.8,
+     "a": 8,
+     "b": 0
+    }
+   ],
+   "drivers": [
+    {
+     "car": 6,
+     "name": "#19 toni2608"
+    },
+    {
+     "car": 8,
+     "name": "Hidden #2 (Williams '26)"
+    },
+    {
+     "car": 0,
+     "name": "#20 QDR_SHW1KS"
+    }
+   ],
+   "engine": {
+    "rules": "v1.5",
+    "verdict": "toni2608 at fault",
+    "rule": "R3",
+    "severity": 3,
+    "why": "toni2608 ran into the back of Williams '26 #2, closing at 7 km/h",
+    "at_fault": [
+     "#19 toni2608"
+    ],
+    "contacts": 2,
+    "gray_score": 1.4
+   },
+   "claude": "Picked because it's a gray area for me. My call: toni2608 at fault (rule R3: the car behind ran into the one ahead), severity 3, blame on #19 toni2608. What I saw: toni2608 ran into the back of Hidden #2 (Williams '26), closing at 7 km/h. Why I'm not sure: the car behind was closing at only 7 km/h, near the 7 km/h where I stop calling it 'ran into the back'; its 2 contacts don't point the same way (toni2608 at fault; Racing incident); 3 cars are involved, so the first move is hard to pick out."
+  },
+  {
+   "id": "1113a-5",
+   "pick": "gray",
+   "track": "Texas",
+   "date": "2026-11-13",
+   "type": "Moved across alongside",
+   "weather": "Clear",
+   "track_temp": 32,
+   "lap": 3,
+   "race_time": "4:18",
+   "replay": "https://gremigaming.github.io/race-stats/all/race/2026-11-13_16-18-12_Texas_Race?inc=258.5&car=6,11,2",
+   "race_file": "Race_Texas_2026_11_13_16_30_25.json",
+   "recording": "2026-11-13_16-18-12_Texas_Race.gmtel.gz",
+   "t0": 258.5,
+   "t1": 266.9,
+   "contacts": [
+    {
+     "t": 258.5,
+     "a": 6,
+     "b": 11
+    },
+    {
+     "t": 264.4,
+     "a": 11,
+     "b": 6
+    },
+    {
+     "t": 266.8,
+     "a": 11,
+     "b": 2
+    }
+   ],
+   "drivers": [
+    {
+     "car": 6,
+     "name": "Hidden #2 (Williams '26)"
+    },
+    {
+     "car": 11,
+     "name": "Hidden #2 (Ferrari '26)"
+    },
+    {
+     "car": 2,
+     "name": "#8 niet_Lars123"
+    }
+   ],
+   "engine": {
+    "rules": "v1.5",
+    "verdict": "Williams '26 #2 at fault",
+    "rule": "R2",
+    "severity": 2,
+    "why": "side by side; Williams '26 #2 moved 3.2 m across into the other car",
+    "at_fault": [
+     "Hidden #2 (Williams '26)"
+    ],
+    "contacts": 3,
+    "gray_score": 1.2
+   },
+   "claude": "Picked because it's a gray area for me. My call: Hidden #2 (Williams '26) at fault (rule R2: side by side, one car moved over), severity 2, blame on Hidden #2 (Williams '26). What I saw: side by side; Hidden #2 (Williams '26) moved 3.2 m across into the other car. Why I'm not sure: the car behind was closing at only 8 km/h, near the 7 km/h where I stop calling it 'ran into the back'; nobody slid or lost a place, and the move (3.2 m) is close to the 3 m below which I call it a harmless squeeze, not an incident; its 3 contacts don't point the same way (Not an incident; Hidden #2 (Williams '26) at fault; Not an incident)."
+  }
+ ]
+}
