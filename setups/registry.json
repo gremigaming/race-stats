@@ -1361,11 +1361,24 @@
          "run": 5,
          "laps": 4,
          "bb": 56
+        },
+        {
+         "file": "2026-11-14_00-35-51_Jeddah_Race.gmtel.gz",
+         "date": "2026-11-14",
+         "session": "race",
+         "osq": false,
+         "weather": 0,
+         "pace": 92456,
+         "best": 91945,
+         "mean": 92456,
+         "run": 5,
+         "laps": 4,
+         "bb": 56
         }
        ],
        "verdict": {
         "result": "baseline",
-        "text": "Starting point: 1:32.482 over 1 session."
+        "text": "Starting point: 1:32.469 over 2 sessions."
        }
       },
       {
