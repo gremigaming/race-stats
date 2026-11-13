@@ -4871,6 +4871,60 @@
     }
    ]
   },
+  "s-536b57e8": {
+   "key": "db643e6184cf",
+   "by": "GreMi",
+   "track": "Shanghai",
+   "date": "2026-11-13",
+   "kind": "Moved across alongside",
+   "source": "staff change",
+   "verdict": "Racing incident",
+   "severity": 0,
+   "note": "Merc 2 is at fault for this, Sprintstar is on the racingline and leaves some space for Car 2, but car 2 turns into him",
+   "who": [
+    "319544045435224067"
+   ],
+   "changes": [
+    "Race_Shanghai_2026_11_13_16_43_00.json|9|contact|1|s1794584059.7"
+   ],
+   "race_file": "Race_Shanghai_2026_11_13_16_43_00.json",
+   "at": "2026-11-13T20:47:24Z",
+   "recording": "2026-11-13_16-33-18_Shanghai_Race.gmtel.gz",
+   "t": 9.2,
+   "cars": [
+    8,
+    9
+   ],
+   "rulebook": {
+    "verdict": "Racing incident",
+    "rule": "R2"
+   },
+   "contacts": [
+    {
+     "a": 9,
+     "b": 8,
+     "t": 9.2,
+     "x": {
+      "gap": 1.4,
+      "closing": 19,
+      "moved_front": 0.0,
+      "moved_back": 0.0,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 118,
+      "lost": 1,
+      "off": 2,
+      "cars": 2,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "none",
+     "rulebook": "none",
+     "rule": "R2",
+     "front": 8
+    }
+   ]
+  },
   "s-53705b96": {
    "key": "34742cf0a91a",
    "by": "GreMi",
@@ -5738,6 +5792,17 @@
    "contacts": 137,
    "rulebook": 72,
    "with_precedents": 72,
+   "overrides": 3,
+   "date": "2026-11-13",
+   "rules": "v1.5"
+  },
+  {
+   "incidents": 83,
+   "inc_rulebook": 33,
+   "inc_with_precedents": 34,
+   "contacts": 138,
+   "rulebook": 73,
+   "with_precedents": 73,
    "overrides": 3,
    "date": "2026-11-13",
    "rules": "v1.5"
