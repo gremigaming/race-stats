@@ -988,6 +988,41 @@
       "lap": 1,
       "text": "turn 5, with ?: staff call (Late lunge / divebomb)",
       "weather": "Clear"
+    },
+    {
+      "id": "Race_Shanghai_2026_11_13_16_43_00.json|9|contact|1|s1794584059.7",
+      "type": "incident",
+      "reason": "Merc 2 is at fault for this, Sprintstar is on the racingline and leaves some space for Car 2, but car 2 turns into him",
+      "by": "319544045435224067",
+      "at": "2026-11-13T20:47:24Z",
+      "file": "Race_Shanghai_2026_11_13_16_43_00.json",
+      "driver": "sprintstar-1",
+      "car": 9,
+      "pts": 0.0,
+      "call": {
+        "kind": "Moved across alongside",
+        "fault": "clear",
+        "severity": 7
+      },
+      "learn": true,
+      "owner": true,
+      "was": 0.0,
+      "inc": {
+        "t": 1794584059.66,
+        "te": 1794584074.66,
+        "pair": [
+          8,
+          9
+        ],
+        "names": [
+          "Mercedes '26 #2",
+          "sprintstar-1"
+        ]
+      },
+      "blame": true,
+      "lap": 1,
+      "text": "turn 1, with ?: staff call (Moved across alongside)",
+      "weather": "Overcast"
     }
   ]
 }
