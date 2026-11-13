@@ -579,4 +579,8 @@ Remove-Item -Recurse -Force $tmp -ErrorAction SilentlyContinue
 $via = if ($script:FromObs) { "OBS $($script:FromObs)x" } else { "" }
 if ($script:FromScreen) { $via = ($via + ", monitors $($script:FromScreen)x").TrimStart(", ") }
 if ($script:FromScreen -and $script:ObsNote -and $script:ObsNote -ne "ok") { $via += " (OBS: $($script:ObsNote))" }
-Write-Output ("Classification: {0} frames from {1} screenshots kept -> {2} [{3}]" -f $frames.Count, $good, (Split-Path $OutFile -Leaf), $via)
+$line = "Classification: {0} frames from {1} screenshots kept -> {2} [{3}]" -f $frames.Count, $good, (Split-Path $OutFile -Leaf), $via
+if ($KeepDir) {   # also in a log next to the pictures, in case the uploader window doesn't show it
+    try { Add-Content -Path (Join-Path $KeepDir "capture-log.txt") -Value ("[{0}] {1}" -f (Get-Date -Format "yyyy-MM-dd HH:mm:ss"), $line) } catch { }
+}
+Write-Output $line
