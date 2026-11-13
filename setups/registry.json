@@ -8,7 +8,7 @@
   "requested": null,
   "last": "2026-11-10"
  },
- "pending": 17,
+ "pending": 19,
  "tracks": [
   {
    "track": "Melbourne",
@@ -5347,12 +5347,68 @@
        },
        "text": "Rear springs 14 → 30",
        "why": "The soft rear lets the floor scrape. 30 keeps it off the ground and makes laps more consistent.",
+       "sessions": [
+        {
+         "file": "2026-11-13_16-00-22_Las_Vegas_Race.gmtel.gz",
+         "date": "2026-11-13",
+         "session": "race",
+         "osq": false,
+         "weather": 0,
+         "pace": 93882,
+         "best": 93882,
+         "mean": 94802,
+         "run": 5,
+         "laps": 4,
+         "bb": 58
+        }
+       ],
+       "verdict": {
+        "result": "better",
+        "delta": -0.78,
+        "text": "Better: quali lap 1:33.882 against 1:34.616 on V1 (0.734 s faster)."
+       },
+       "slot": 63
+      },
+      {
+       "v": 3,
+       "base": 2,
+       "created": "2026-11-13",
+       "saved": null,
+       "values": {
+        "fw": 30,
+        "rw": 7,
+        "don": 90,
+        "doff": 30,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 30,
+        "farb": 3,
+        "rarb": 4,
+        "frh": 22,
+        "rrh": 45,
+        "bb": 57,
+        "bp": 100,
+        "fr": 28.0,
+        "fl": 28.0,
+        "rr": 22.0,
+        "rl": 22.0
+       },
+       "change": {
+        "rw": [
+         5,
+         7
+        ]
+       },
+       "text": "Rear wing 5 → 7",
+       "why": "More rear wing for a calmer rear in fast corners.",
        "sessions": [],
        "verdict": {
         "result": "untested",
         "text": "Not driven yet."
-       },
-       "slot": 63
+       }
       }
      ]
     },
@@ -5444,12 +5500,68 @@
        },
        "text": "Rear springs 14 → 30",
        "why": "The soft rear lets the floor scrape. 30 keeps it off the ground and makes laps more consistent.",
+       "sessions": [
+        {
+         "file": "2026-11-13_16-00-22_Las_Vegas_Race.gmtel.gz",
+         "date": "2026-11-13",
+         "session": "race",
+         "osq": false,
+         "weather": 0,
+         "pace": 94802,
+         "best": 93882,
+         "mean": 94802,
+         "run": 5,
+         "laps": 4,
+         "bb": 58
+        }
+       ],
+       "verdict": {
+        "result": "better",
+        "delta": -0.44,
+        "text": "Better: average lap 1:34.802 against 1:35.217 on V1 (0.415 s faster)."
+       },
+       "slot": 64
+      },
+      {
+       "v": 3,
+       "base": 2,
+       "created": "2026-11-13",
+       "saved": null,
+       "values": {
+        "fw": 30,
+        "rw": 7,
+        "don": 90,
+        "doff": 30,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 30,
+        "farb": 3,
+        "rarb": 4,
+        "frh": 22,
+        "rrh": 45,
+        "bb": 57,
+        "bp": 100,
+        "fr": 28.0,
+        "fl": 28.0,
+        "rr": 22.0,
+        "rl": 22.0
+       },
+       "change": {
+        "rw": [
+         5,
+         7
+        ]
+       },
+       "text": "Rear wing 5 → 7",
+       "why": "More rear wing for a calmer rear in fast corners.",
        "sessions": [],
        "verdict": {
         "result": "untested",
         "text": "Not driven yet."
-       },
-       "slot": 64
+       }
       }
      ]
     },
