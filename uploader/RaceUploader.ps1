@@ -15,9 +15,12 @@
 # "telemetry" release of gremigaming/race-stats.
 #
 # In every race, ClassificationCapture.ps1 (also next to this script) reads the
-# standings on screen (from the moment you finish) with Windows' OCR, so the site knows who
-# drove the cars with hidden names. Only the words go out, encrypted (.gmcls);
-# the best screenshot stays in %APPDATA%\GreMiRaceUploader\classification.
+# standings (from the moment you finish) with Windows' OCR, so the site knows who
+# drove the cars with hidden names. The pictures come from OBS's game source when
+# OBS runs (so you can switch screens or scenes), else from the monitors. Only the
+# words go out, encrypted (.gmcls); the best screenshot stays in
+# %APPDATA%\GreMiRaceUploader\classification. If OBS's WebSocket server has a
+# password the uploader can't find, it asks for it once (kept encrypted, like the token).
 
 $ErrorActionPreference = "Stop"
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
@@ -74,7 +77,7 @@ function Get-Settings {
         $secure = $c.token | ConvertTo-SecureString
         $token = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
             [Runtime.InteropServices.Marshal]::SecureStringToBSTR($secure))
-        return @{ DataDir = $c.dataDir; Token = $token }
+        return @{ DataDir = $c.dataDir; Token = $token; ObsPassword = (Unprotect $c.obsPassword); ObsAsked = [bool]$c.obsAsked }
     }
     New-Item -ItemType Directory -Force -Path $ConfigDir | Out-Null
     $dataDir = Find-DataFolder
@@ -90,7 +93,55 @@ function Get-Settings {
     @{ dataDir = $dataDir; token = ($secure | ConvertFrom-SecureString) } |
         ConvertTo-Json | Set-Content $ConfigFile
     Add-Autostart
-    return @{ DataDir = $dataDir; Token = $token }
+    return @{ DataDir = $dataDir; Token = $token; ObsPassword = ""; ObsAsked = $false }
+}
+
+function Unprotect($text) {
+    if (-not $text) { return "" }
+    try {
+        $secure = $text | ConvertTo-SecureString
+        return [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($secure))
+    } catch { return "" }
+}
+
+function Save-Setting($name, $value) {
+    $c = Get-Content $ConfigFile -Raw | ConvertFrom-Json
+    $c | Add-Member -NotePropertyName $name -NotePropertyValue $value -Force
+    $c | ConvertTo-Json | Set-Content $ConfigFile
+}
+
+# OBS check at start: can the standings be read from OBS's game source? Asks once for
+# the OBS WebSocket password when OBS wants one and it isn't in OBS's settings file.
+function Test-Obs($settings) {
+    $capture = Join-Path $PSScriptRoot "ClassificationCapture.ps1"
+    if (-not (Test-Path $capture)) { return }
+    $run = {
+        try { [string](& $capture -TestObs -KeepDir $ShotsDir -ObsPassword $script:ObsPassword | Select-Object -Last 1) }
+        catch { "OBS not used: $($_.Exception.Message)" }
+    }
+    $r = & $run
+    if ($r -match 'password' -and -not $settings.ObsAsked) {
+        Say "OBS wants its WebSocket password, so the standings can be read from OBS while you're on another screen." Yellow
+        Write-Host "In OBS: Tools > WebSocket Server Settings > Show Connect Info > Server Password: copy it,"
+        Write-Host "paste it here and press Enter (Enter alone skips; the monitors are read instead)."
+        $secure = Read-Host "OBS password" -AsSecureString
+        $pw = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($secure)).Trim()
+        Save-Setting "obsAsked" $true
+        $settings.ObsAsked = $true
+        if ($pw) {
+            Save-Setting "obsPassword" ($pw | ConvertTo-SecureString -AsPlainText -Force | ConvertFrom-SecureString)
+            $script:ObsPassword = $pw
+            $r = & $run
+        }
+    }
+    if ($r -like "OBS ok*") {
+        Say "$r - standings are read from OBS after each race, so you can switch screens and scenes." Green
+    } else {
+        Say "$r. Until OBS works the standings are read from your monitors (stay on the game after the flag)." Yellow
+        if ($r -match 'password' -and $settings.ObsAsked) {
+            Say "To give the OBS password again: delete `"obsAsked`" and `"obsPassword`" in $ConfigFile and restart." Yellow
+        }
+    }
 }
 
 function Test-Token($token) {
@@ -324,9 +375,9 @@ function Start-Classification($recorder, $name, $finishLap, $finishTime, $why) {
     $ps = [powershell]::Create()
     [void]$ps.AddCommand($script).AddParameter("OutFile", (Join-Path $TelemetryDir ($name -replace '\.gmtel\.gz$', '.gmcls'))).
         AddParameter("Recorder", $recorder).AddParameter("Recording", $name).AddParameter("KeepDir", $ShotsDir).
-        AddParameter("FinishLap", $finishLap).AddParameter("FinishTime", [double]$finishTime)
+        AddParameter("FinishLap", $finishLap).AddParameter("FinishTime", [double]$finishTime).AddParameter("ObsPassword", $script:ObsPassword)
     $script:Captures += , @($ps, $ps.BeginInvoke())
-    Say "$why`: reading the standings on screen for the next few minutes (stay on the game)." Cyan
+    Say "$why`: reading the standings for the next few minutes (from OBS when it runs, else the screen)." Cyan
 }
 
 function Show-ClassificationJobs {
@@ -361,6 +412,8 @@ if (Test-Path $DoneFile) { Get-Content $DoneFile | ForEach-Object { [void]$done.
 Say "Watching $($settings.DataDir)" Cyan
 Say "Race results publish live when saved; GitHub keeps the archive and fallback."
 $recorder = Start-Recorder
+$script:ObsPassword = $settings.ObsPassword
+if ($recorder) { Test-Obs $settings }
 $recorderStatus = ""
 $live = Start-Live $recorder
 $liveStatus = ""

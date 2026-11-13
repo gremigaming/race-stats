@@ -51,7 +51,7 @@ publisher. `scripts/telemetry/gmtel.py` turns a file into laps;
 Download `ClassificationCapture.ps1` into the same folder (with the newest
 `RaceUploader.ps1` and `TelemetryRecorder.cs`) and restart the uploader. The
 moment you cross the finish line in a race (or when the results come in, if you
-didn't finish), it takes a screenshot every 3 s and reads it with Windows'
+didn't finish), it takes a picture of the game every 3 s and reads it with Windows'
 built-in OCR: first the live standings tower (the whole grid, while the others
 finish), then the final classification screen, stopping 60 s after the results.
 Every screenshot is stored with the game's live lap data of that moment, so each
@@ -61,9 +61,22 @@ publishes provisional results immediately, then updates hidden names when its
 classification decryption key is configured and analysis finishes. The best screenshot of each race stays in
 `%APPDATA%\GreMiRaceUploader\classification` for checking (kept 30 days).
 
-- Stay on the game (don't tab out) for a minute after you finish.
-- The game must show online names on your screen, and run borderless or windowed
-  (exclusive fullscreen can give black screenshots).
+**Through OBS (since 13 Nov 2026).** When OBS is running, the pictures come from
+OBS's Game Capture source instead of your monitors, so you can tab out, put
+another window on top or switch to another OBS scene while the others finish.
+If the live scene doesn't show the game, the uploader adds the game source to
+that scene far outside the canvas (nothing changes on stream) and removes it
+again when it's done.
+
+- OBS: Tools > WebSocket Server Settings > Enable WebSocket server (port 4455).
+  The uploader reads the password from OBS's settings; if it can't, it asks
+  once at start (OBS: Show Connect Info > Server Password) and keeps it encrypted.
+- At start the uploader says `OBS ok: reading 'Game Capture'` and saves a test
+  picture as `obs-test.png` in the classification folder.
+- Don't minimise the game: a minimised game gives OBS a black picture (then
+  your monitors are read instead). Borderless or windowed is safest.
+- Without OBS: stay on the game for a minute after you finish, as before.
+- The game must show online names on your screen.
 
 ## Clip uploader
 
