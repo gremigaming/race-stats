@@ -454,6 +454,7 @@ function Json-Text($s) {
 $frames = New-Object System.Collections.ArrayList
 $good = 0; $goodFinal = 0
 $best = $null; $bestScore = 0
+$first = $null   # the first picture, kept for checking when nothing could be read
 $started = Get-Date
 # Everything is tied to this race's session id: packets of the next session (the lobby moved
 # on) are never mixed in, and a new session ends the capture.
@@ -497,6 +498,7 @@ while ($true) {
             }
         }
         if ($kept) { $good++; if ($final) { $goodFinal++ } }
+        if (-not $first -and $KeepDir) { $first = $shot.Clone() }
         $shot.Dispose()
         $si++
     }
@@ -567,7 +569,12 @@ if ($best) {
     New-Item -ItemType Directory -Force -Path $KeepDir | Out-Null
     $best.Save((Join-Path $KeepDir ([IO.Path]::GetFileNameWithoutExtension($OutFile) + ".png")), [System.Drawing.Imaging.ImageFormat]::Png)
     $best.Dispose()
+} elseif ($first) {
+    # nothing readable: keep what the first picture showed, to see why
+    New-Item -ItemType Directory -Force -Path $KeepDir | Out-Null
+    $first.Save((Join-Path $KeepDir ([IO.Path]::GetFileNameWithoutExtension($OutFile) + "-nothing-read.png")), [System.Drawing.Imaging.ImageFormat]::Png)
 }
+if ($first) { $first.Dispose() }
 Remove-Item -Recurse -Force $tmp -ErrorAction SilentlyContinue
 $via = if ($script:FromObs) { "OBS $($script:FromObs)x" } else { "" }
 if ($script:FromScreen) { $via = ($via + ", monitors $($script:FromScreen)x").TrimStart(", ") }
