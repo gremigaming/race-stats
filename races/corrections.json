@@ -953,6 +953,41 @@
       "lap": 1,
       "text": "Farm Curve, with [SSL]RYLAN: staff call (Moved across alongside)",
       "weather": "Overcast"
+    },
+    {
+      "id": "Race_Las_Vegas_Just_in_case_2026_11_13_16_18_12.json|1|contact|1|s1794582102.5",
+      "type": "incident",
+      "reason": "Car 3 was never gonna make the apex and fully rammed into nex ending his race, you should compair their braking to other drivers en always check if they would have made the turn if there was noone els",
+      "by": "319544045435224067",
+      "at": "2026-11-13T20:09:00Z",
+      "file": "Race_Las_Vegas_Just_in_case_2026_11_13_16_18_12.json",
+      "driver": "NEX",
+      "car": 1,
+      "pts": 0.0,
+      "call": {
+        "kind": "Late lunge / divebomb",
+        "fault": "clear",
+        "severity": 8
+      },
+      "learn": true,
+      "owner": true,
+      "was": 0.0,
+      "inc": {
+        "t": 1794582102.47,
+        "te": 1794582117.47,
+        "pair": [
+          1,
+          10
+        ],
+        "names": [
+          "NEX",
+          "Mercedes '26 #3"
+        ]
+      },
+      "blame": true,
+      "lap": 1,
+      "text": "turn 5, with ?: staff call (Late lunge / divebomb)",
+      "weather": "Clear"
     }
   ]
 }
