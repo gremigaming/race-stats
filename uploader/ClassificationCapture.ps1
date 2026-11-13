@@ -249,11 +249,13 @@ function Obs-Cleanup {
     Obs-Disconnect
 }
 
+# A capture that has no picture is pure black; a night race (Jeddah, Vegas) is dark but
+# never all zero, so look at 1600 points and only call it blank when every one is ~black.
 function Is-Blank($bmp) {
-    for ($i = 1; $i -lt 10; $i++) {
-        for ($j = 1; $j -lt 10; $j++) {
-            $c = $bmp.GetPixel([int]($bmp.Width * $i / 10), [int]($bmp.Height * $j / 10))
-            if ($c.R + $c.G + $c.B -gt 45) { return $false }
+    for ($i = 0; $i -lt 40; $i++) {
+        for ($j = 0; $j -lt 40; $j++) {
+            $c = $bmp.GetPixel([int](($bmp.Width - 1) * ($i + 0.5) / 40), [int](($bmp.Height - 1) * ($j + 0.5) / 40))
+            if ($c.R + $c.G + $c.B -gt 12) { return $false }
         }
     }
     return $true

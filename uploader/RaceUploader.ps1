@@ -222,6 +222,9 @@ function Send-Race($file, $token) {
             try { Invoke-RestMethod -Uri ("{0}?ref=main" -f $url) -Headers (Headers $token) | Out-Null } catch { throw $err }
         }
     }
+    # the live server refuses a file it can never take (an empty or cut-off recording): that won't
+    # change by retrying, so it counts as done (GitHub has it) instead of failing every few seconds
+    if ($liveError -match 'invalid artifact size') { $liveError = $null; $liveResult = "live skipped (too small)" }
     if ($liveError) { throw "archived on GitHub; live publish will retry ($liveError)" }
     if ($liveResult) { return "$archiveResult, $liveResult" }
     return $archiveResult
@@ -341,6 +344,9 @@ function Send-Telemetry($file, $token, $type = "application/gzip") {
         if ((StatusOf $_) -ne 422) { throw }
         $result = "already there"
     }
+    # the live server refuses a file it can never take (an empty or cut-off recording): that won't
+    # change by retrying, so it counts as done (GitHub has it) instead of failing every few seconds
+    if ($liveError -match 'invalid artifact size') { $liveError = $null; $liveResult = "live skipped (too small)" }
     if ($liveError) { throw "archived on GitHub; live publish will retry ($liveError)" }
     if ($liveResult) { $result += ", $liveResult" }
     New-Item -ItemType Directory -Force -Path $TelemetrySentDir | Out-Null
