@@ -506,7 +506,25 @@ async function streamLog() {
   const r = await fetch("https://api.github.com/repos/gremigaming/race-control-stats/contents/streams.json",
     { headers, signal: AbortSignal.timeout(20000) });
   if (!r.ok) throw new Error(`HTTP ${r.status}`);
-  return r.json();
+  const log = await r.json();
+  log.checked = await streamLogChecked(headers);
+  return log;
+}
+// The log is only as fresh as the last stats run that asked Twitch. GitHub's 5-minute cron
+// often runs hours late (13 Nov 2026: no run from 10:03 to 16:04 UTC, so the whole stream went
+// unlogged and every race of it was dropped). Saves after that run are not judged yet: they stay.
+async function streamLogChecked(headers) {
+  if (process.env.STREAM_LOG_CHECKED) return process.env.STREAM_LOG_CHECKED;
+  try {
+    const r = await fetch("https://api.github.com/repos/gremigaming/race-control-stats/actions/workflows/stats.yml/runs?status=success&per_page=1",
+      { headers: { ...headers, Accept: "application/vnd.github+json" }, signal: AbortSignal.timeout(20000) });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const run = (await r.json()).workflow_runs?.[0];
+    return run?.run_started_at ?? run?.created_at ?? null;
+  } catch (e) {
+    console.warn(`stream log: last check not known (${e.message}), races after the last stream stay`);
+    return null;
+  }
 }
 function offStreamWindows(log) {
   const streams = (log?.streams ?? []).filter((x) => x.start).sort((a, b) => a.start.localeCompare(b.start));
@@ -519,7 +537,10 @@ function offStreamWindows(log) {
     if (!x.end) return out;   // live now: everything from its start on is a stream race
     from = Math.max(from, Date.parse(x.end) + 20 * 60 * 1000);
   }
-  out.push({ from: amsterdam(from), to: "9999-12-31 23:59:59", why: "No stream (Twitch stream log)" });
+  // After the last stream: off only up to the last time Twitch was asked (see streamLogChecked)
+  const checked = log.checked ? Date.parse(log.checked) : NaN;
+  const end = log.checked === undefined ? Infinity : checked;
+  if (end > from) out.push({ from: amsterdam(from), to: end === Infinity ? "9999-12-31 23:59:59" : amsterdam(end), why: "No stream (Twitch stream log)" });
   return out;
 }
 try {

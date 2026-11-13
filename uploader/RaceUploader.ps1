@@ -160,7 +160,16 @@ function Send-Race($file, $token) {
             content = [Convert]::ToBase64String([IO.File]::ReadAllBytes($file.FullName))
             branch  = "main"
         } | ConvertTo-Json
-        Invoke-RestMethod -Method Put -Uri $url -Headers (Headers $token) -Body $body -ContentType "application/json" | Out-Null
+        try {
+            Invoke-RestMethod -Method Put -Uri $url -Headers (Headers $token) -Body $body -ContentType "application/json" | Out-Null
+        } catch {
+            # GitHub sometimes answers 422 while the file did get saved (a commit landed on main at
+            # the same moment). Only call it archived when GitHub really has the file now.
+            if ((StatusOf $_) -ne 422) { throw }
+            $err = $_
+            Start-Sleep -Seconds 2
+            try { Invoke-RestMethod -Uri ("{0}?ref=main" -f $url) -Headers (Headers $token) | Out-Null } catch { throw $err }
+        }
     }
     if ($liveError) { throw "archived on GitHub; live publish will retry ($liveError)" }
     if ($liveResult) { return "$archiveResult, $liveResult" }
@@ -252,7 +261,17 @@ function Get-TelemetryRelease($token) {
     return $script:TelemetryRelease
 }
 
+$script:SentNotMoved = New-Object System.Collections.Generic.HashSet[string]
+
 function Send-Telemetry($file, $token, $type = "application/gzip") {
+    if ($script:SentNotMoved.Contains($file.Name)) {
+        # Already uploaded; only the move to 'sent' is left (stays put quietly while still locked)
+        try {
+            Move-Item -Force -Path $file.FullName -Destination (Join-Path $TelemetrySentDir $file.Name) -ErrorAction Stop
+            [void]$script:SentNotMoved.Remove($file.Name)
+        } catch { }
+        return $null
+    }
     $liveResult = $null
     $liveError = $null
     if ($script:LiveToken) {
@@ -274,7 +293,13 @@ function Send-Telemetry($file, $token, $type = "application/gzip") {
     if ($liveError) { throw "archived on GitHub; live publish will retry ($liveError)" }
     if ($liveResult) { $result += ", $liveResult" }
     New-Item -ItemType Directory -Force -Path $TelemetrySentDir | Out-Null
-    Move-Item -Force -Path $file.FullName -Destination (Join-Path $TelemetrySentDir $file.Name)
+    try {
+        Move-Item -Force -Path $file.FullName -Destination (Join-Path $TelemetrySentDir $file.Name) -ErrorAction Stop
+    } catch {
+        # Sent fine, but Windows (virus scan, the classification reader) still holds the file.
+        # Remember it so the next round only moves it instead of reporting a failed upload.
+        [void]$script:SentNotMoved.Add($file.Name)
+    }
     return $result
 }
 
@@ -374,7 +399,7 @@ while ($true) {
         foreach ($file in $sessions) {
             try {
                 $result = Send-Telemetry $file $settings.Token
-                Say "Telemetry $($file.Name) ($([math]::Round($file.Length / 1MB, 1)) MB): $result" Green
+                if ($null -ne $result) { Say "Telemetry $($file.Name) ($([math]::Round($file.Length / 1MB, 1)) MB): $result" Green }
             } catch {
                 Say "Telemetry $($file.Name): upload failed, trying again soon ($($_.Exception.Message))" Yellow
             }
@@ -383,7 +408,7 @@ while ($true) {
         foreach ($file in $captures) {
             try {
                 $result = Send-Telemetry $file $settings.Token "application/octet-stream"
-                Say "Classification $($file.Name): $result" Green
+                if ($null -ne $result) { Say "Classification $($file.Name): $result" Green }
             } catch {
                 Say "Classification $($file.Name): upload failed, trying again soon ($($_.Exception.Message))" Yellow
             }
