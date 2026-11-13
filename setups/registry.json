@@ -8,7 +8,7 @@
   "requested": null,
   "last": "2026-11-10"
  },
- "pending": 15,
+ "pending": 16,
  "tracks": [
   {
    "track": "Melbourne",
@@ -2911,12 +2911,68 @@
        },
        "text": "Front wing 24 → 27",
        "why": "More front grip against the mid-corner understeer.",
+       "sessions": [
+        {
+         "file": "2026-11-13_15-18-56_Spa_Race.gmtel.gz",
+         "date": "2026-11-13",
+         "session": "race",
+         "osq": false,
+         "weather": 1,
+         "pace": 108640,
+         "best": 107614,
+         "mean": 108640,
+         "run": 4,
+         "laps": 4,
+         "bb": 58
+        }
+       ],
+       "verdict": {
+        "result": "worse",
+        "delta": 0.72,
+        "text": "Worse: average lap 1:48.640 against 1:47.862 on V1 (0.778 s slower)."
+       },
+       "slot": 34
+      },
+      {
+       "v": 3,
+       "base": 1,
+       "created": "2026-11-13",
+       "saved": null,
+       "values": {
+        "fw": 24,
+        "rw": 2,
+        "don": 100,
+        "doff": 35,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 30,
+        "farb": 3,
+        "rarb": 8,
+        "frh": 21,
+        "rrh": 41,
+        "bb": 56,
+        "bp": 100,
+        "fr": 29.5,
+        "fl": 29.5,
+        "rr": 25.5,
+        "rl": 25.5
+       },
+       "change": {
+        "rw": [
+         0,
+         2
+        ]
+       },
+       "text": "Rear wing 0 → 2",
+       "why": "More rear grip against oversteer and wheelspin. Costs a little top speed. V2's change is undone (it didn't make the car faster).",
        "sessions": [],
        "verdict": {
         "result": "untested",
         "text": "Not driven yet."
-       },
-       "slot": 34
+       }
       }
      ]
     },
