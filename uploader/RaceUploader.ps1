@@ -39,6 +39,9 @@ $KeepSentDays = 30
 $LiveFile = Join-Path $ConfigDir "live.json"
 $LiveUrl = "wss://live.gremigaming.com/ingest"
 $ShotsDir = Join-Path $ConfigDir "classification"
+# After each race (ClassificationCapture.ps1 -PostRace): "on" = results table pictures +
+# full race replay save, "watch" = only look (no keys), "off". Override: "postRace" in config.json.
+$DefaultPostRace = "watch"
 
 function Say($text, $color = "Gray") {
     Write-Host ("[{0}] {1}" -f (Get-Date -Format "HH:mm:ss"), $text) -ForegroundColor $color
@@ -77,7 +80,8 @@ function Get-Settings {
         $secure = $c.token | ConvertTo-SecureString
         $token = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
             [Runtime.InteropServices.Marshal]::SecureStringToBSTR($secure))
-        return @{ DataDir = $c.dataDir; Token = $token; ObsPassword = (Unprotect $c.obsPassword); ObsAsked = [bool]$c.obsAsked }
+        return @{ DataDir = $c.dataDir; Token = $token; ObsPassword = (Unprotect $c.obsPassword); ObsAsked = [bool]$c.obsAsked
+            PostRace = $(if ($c.postRace) { [string]$c.postRace } else { $DefaultPostRace }) }
     }
     New-Item -ItemType Directory -Force -Path $ConfigDir | Out-Null
     $dataDir = Find-DataFolder
@@ -93,7 +97,7 @@ function Get-Settings {
     @{ dataDir = $dataDir; token = ($secure | ConvertFrom-SecureString) } |
         ConvertTo-Json | Set-Content $ConfigFile
     Add-Autostart
-    return @{ DataDir = $dataDir; Token = $token; ObsPassword = ""; ObsAsked = $false }
+    return @{ DataDir = $dataDir; Token = $token; ObsPassword = ""; ObsAsked = $false; PostRace = $DefaultPostRace }
 }
 
 function Unprotect($text) {
@@ -381,7 +385,8 @@ function Start-Classification($recorder, $name, $finishLap, $finishTime, $why) {
     $ps = [powershell]::Create()
     [void]$ps.AddCommand($script).AddParameter("OutFile", (Join-Path $TelemetryDir ($name -replace '\.gmtel\.gz$', '.gmcls'))).
         AddParameter("Recorder", $recorder).AddParameter("Recording", $name).AddParameter("KeepDir", $ShotsDir).
-        AddParameter("FinishLap", $finishLap).AddParameter("FinishTime", [double]$finishTime).AddParameter("ObsPassword", $script:ObsPassword)
+        AddParameter("FinishLap", $finishLap).AddParameter("FinishTime", [double]$finishTime).AddParameter("ObsPassword", $script:ObsPassword).
+        AddParameter("PostRace", $script:PostRace)
     $script:Captures += , @($ps, $ps.BeginInvoke())
     Say "$why`: reading the standings for the next few minutes (from OBS when it runs, else the screen)." Cyan
 }
@@ -403,7 +408,7 @@ function Show-ClassificationJobs {
 
 function Remove-OldShots {
     if (-not (Test-Path $ShotsDir)) { return }
-    Get-ChildItem -Path $ShotsDir -File |
+    Get-ChildItem -Path $ShotsDir -File -Recurse -Include *.png, *.jpg |   # pictures only (logs stay)
         Where-Object { $_.LastWriteTime -lt (Get-Date).AddDays(-$KeepSentDays) } |
         Remove-Item -Force -ErrorAction SilentlyContinue
 }
@@ -419,6 +424,9 @@ Say "Watching $($settings.DataDir)" Cyan
 Say "Race results publish live when saved; GitHub keeps the archive and fallback."
 $recorder = Start-Recorder
 $script:ObsPassword = $settings.ObsPassword
+$script:PostRace = $settings.PostRace
+if ($script:PostRace -eq "on") { Say "After each race: results table pictures + full race replay save (F1 may come to the front for a few seconds on the results page)." Cyan }
+elseif ($script:PostRace -eq "watch") { Say "After each race: watching the results screens (no key presses)." Cyan }
 if ($recorder) { Test-Obs $settings }
 $recorderStatus = ""
 $live = Start-Live $recorder

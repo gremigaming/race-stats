@@ -13,6 +13,7 @@ on:
       - uploader/ClassificationCapture.ps1
       - scripts/telemetry/classification_ocr.py
       - scripts/telemetry/test_classification_ocr.py
+      - scripts/telemetry/test_post_race.py
       - .github/workflows/recorder-check.yml
   workflow_dispatch:
 
@@ -66,6 +67,19 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit 1 }
           python scripts/telemetry/test_classification_ocr.py check-tower $dir
           if ($LASTEXITCODE -ne 0) { exit 1 }
+      # After the race: which screen is up (results table, replay menu + highlighted row, saved)
+      - name: Read made-up after-race screens
+        shell: powershell
+        run: |
+          $dir = Join-Path $env:RUNNER_TEMP "post-race"
+          python scripts/telemetry/test_post_race.py render $dir
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          foreach ($n in @("menu-save", "menu-advance", "table", "saved", "awards")) {
+            $line = & powershell -NoProfile -ExecutionPolicy Bypass -File uploader/ClassificationCapture.ps1 -PostImage (Join-Path $dir "$n.png") | Select-Object -Last 1
+            Write-Host "$n -> $line"
+            python scripts/telemetry/test_post_race.py check $n "$line"
+            if ($LASTEXITCODE -ne 0) { exit 1 }
+          }
       # The live uplink: the same made-up session through GmLiveUplink into the live
       # race server (gremigaming/race-control-stats live/), which must store it
       - uses: actions/checkout@v4

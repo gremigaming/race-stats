@@ -52,7 +52,13 @@ param(
     [string]$ObsSource = "",                              # "" = the Game Capture source
     [string]$GameProcess = '^F1_?\d\d',                  # process name pattern of the game window
     [switch]$NoObs,
-    [switch]$TestObs
+    [switch]$TestObs,
+    # After the race (see "after the race" below): off | watch (pictures only, no keys) | on
+    [string]$PostRace = "off",
+    [int]$PostSeconds = 480,                              # look for the results page this long
+    [string]$ReplaysDir = "",                             # "" = Documents\My Games\F1 25\replays
+    [string]$ScrollKey = "down",                          # key that scrolls the results table
+    [string]$PostImage = ""                               # test: which after-race screen is this picture?
 )
 
 $ErrorActionPreference = "Stop"
@@ -317,7 +323,7 @@ if ($TestObs) {
     }
     return
 }
-if (-not $OutFile) { throw "-OutFile is needed (or -TestObs)" }
+if (-not $OutFile -and -not $PostImage) { throw "-OutFile is needed (or -TestObs)" }
 
 $null = [Windows.Storage.StorageFile, Windows.Storage, ContentType = WindowsRuntime]
 $null = [Windows.Media.Ocr.OcrEngine, Windows.Foundation, ContentType = WindowsRuntime]
@@ -453,6 +459,388 @@ function Json-Text($s) {
     return $sb.ToString()
 }
 
+# ------------------------------------------------------------------ after the race
+#
+# -PostRace watch|on (RaceUploader.ps1 setting "postRace"). Once the standings are read,
+# it keeps looking at the game through OBS until the results page, through the
+# podium, XP and awards pages (their own timers move them on; it never presses
+# anything there). On the results page it:
+#   1. takes pictures of the whole results table: rows 1-14, then (more than 14
+#      cars) scrolls down and takes the rest. They stay on this PC (KeepDir) and
+#      their text joins the standings frames (best way to name hidden cars: every
+#      row has its lap time);
+#   2. saves the full race replay: Enter (past the winner / opens the menu), Down to
+#      "Save Full Race Replay", Enter, waits for "REPLAY SAVED", Okay. The new .frr
+#      in Documents\My Games\F1 25\replays goes in replays-log.jsonl with the
+#      telemetry name, so the shot tool finds each race's crash times.
+# Before every key it reads the screen again, and it only presses a key on a screen
+# it knows (one Enter too many on "Advance" leaves the results). Keys first go to the
+# game in the background (no focus change); if the game ignores them, the game is
+# brought forward for those few seconds and the window that was in front gets the
+# focus back. "watch" presses nothing and keeps a picture of every new screen with
+# its text in post-race-log.txt (to learn the online screens).
+
+if (-not ("GmKeys" -as [type])) {
+    Add-Type @"
+using System; using System.Runtime.InteropServices; using System.Threading;
+public static class GmKeys {
+    [DllImport("user32.dll")] public static extern IntPtr GetForegroundWindow();
+    [DllImport("user32.dll")] static extern bool SetForegroundWindow(IntPtr h);
+    [DllImport("user32.dll")] static extern bool BringWindowToTop(IntPtr h);
+    [DllImport("user32.dll")] static extern bool ShowWindow(IntPtr h, int cmd);
+    [DllImport("user32.dll")] public static extern bool IsIconic(IntPtr h);
+    [DllImport("user32.dll")] static extern bool IsWindow(IntPtr h);
+    [DllImport("user32.dll")] static extern uint GetWindowThreadProcessId(IntPtr h, out uint pid);
+    [DllImport("kernel32.dll")] static extern uint GetCurrentThreadId();
+    [DllImport("user32.dll")] static extern bool AttachThreadInput(uint a, uint b, bool attach);
+    [DllImport("user32.dll")] static extern void keybd_event(byte vk, byte scan, uint flags, UIntPtr extra);
+    [DllImport("user32.dll")] static extern bool PostMessage(IntPtr h, uint msg, IntPtr w, IntPtr l);
+    [DllImport("user32.dll")] static extern uint SendInput(uint n, byte[] inputs, int size);
+
+    public static bool Focus(IntPtr h) {
+        if (GetForegroundWindow() == h) return true;
+        uint pid;
+        uint fgThread = GetWindowThreadProcessId(GetForegroundWindow(), out pid);
+        uint me = GetCurrentThreadId();
+        bool attached = fgThread != 0 && fgThread != me && AttachThreadInput(me, fgThread, true);
+        try {
+            if (IsIconic(h)) ShowWindow(h, 9);
+            SetForegroundWindow(h); BringWindowToTop(h);
+            if (GetForegroundWindow() != h) {
+                // Windows only lets the app that had the last input take the focus: a tap of Alt counts
+                keybd_event(0x12, 0, 0, UIntPtr.Zero); keybd_event(0x12, 0, 2, UIntPtr.Zero);
+                SetForegroundWindow(h); BringWindowToTop(h);
+            }
+        } finally { if (attached) AttachThreadInput(me, fgThread, false); }
+        for (int i = 0; i < 20 && GetForegroundWindow() != h; i++) Thread.Sleep(25);
+        return GetForegroundWindow() == h;
+    }
+
+    public static void Restore(IntPtr h) {
+        if (h == IntPtr.Zero || !IsWindow(h) || GetForegroundWindow() == h) return;
+        Focus(h);
+    }
+
+    // A key to a window that is not in front (games often ignore this; the caller checks)
+    public static void Post(IntPtr h, ushort vk, ushort scan, bool extended) {
+        long l = 1 | ((long)scan << 16) | (extended ? 1L << 24 : 0);
+        PostMessage(h, 0x100, (IntPtr)vk, (IntPtr)l);
+        Thread.Sleep(60);
+        PostMessage(h, 0x101, (IntPtr)vk, (IntPtr)(l | (3L << 30)));
+    }
+
+    // A key as a hardware scan code to the window in front (games read scan codes)
+    public static void Key(ushort scan, bool extended) {
+        int size = IntPtr.Size == 8 ? 40 : 28, off = IntPtr.Size == 8 ? 8 : 4;
+        for (int k = 0; k < 2; k++) {
+            byte[] buf = new byte[size];
+            BitConverter.GetBytes((uint)1).CopyTo(buf, 0);                       // INPUT_KEYBOARD
+            BitConverter.GetBytes(scan).CopyTo(buf, off + 2);                    // wScan
+            uint flags = 8u | (extended ? 1u : 0u) | (k == 1 ? 2u : 0u);         // SCANCODE | EXTENDED | KEYUP
+            BitConverter.GetBytes(flags).CopyTo(buf, off + 4);
+            SendInput(1, buf, size);
+            if (k == 0) Thread.Sleep(60);
+        }
+    }
+}
+"@
+}
+
+# name -> virtual key, scan code, extended
+$Keys = @{ enter = @(0x0D, 0x1C, $false); down = @(0x28, 0x50, $true); up = @(0x26, 0x48, $true)
+           pagedown = @(0x22, 0x51, $true); pageup = @(0x21, 0x49, $true) }
+$MenuItems = @("advance", "save full race replay", "view replay", "race director")
+$script:Prev = [IntPtr]::Zero      # the window that was in front before we took the focus
+$script:PostLog = @()
+
+function Game-Handle {
+    $p = Get-Process -ErrorAction SilentlyContinue |
+        Where-Object { $_.ProcessName -match $GameProcess -and $_.MainWindowHandle -ne [IntPtr]::Zero } | Select-Object -First 1
+    if ($p) { return $p.MainWindowHandle }
+    return [IntPtr]::Zero
+}
+
+function Post-Note($text) {
+    $script:PostLog += , ("[{0}] {1}" -f (Get-Date -Format "HH:mm:ss"), $text)
+}
+
+# Lines of text: @{ text; x; y; w; h }. Menu and page titles are big, so the picture is
+# shrunk to fit Windows OCR's size limit instead of tiled.
+function Read-Lines($bmp) {
+    $scale = [math]::Min(1.0, $maxDim / [double][math]::Max($bmp.Width, $bmp.Height))
+    $src = $bmp
+    if ($scale -lt 1) {
+        $src = New-Object System.Drawing.Bitmap ([int]($bmp.Width * $scale)), ([int]($bmp.Height * $scale))
+        $g = [System.Drawing.Graphics]::FromImage($src)
+        $g.InterpolationMode = [System.Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic
+        $g.DrawImage($bmp, 0, 0, $src.Width, $src.Height)
+        $g.Dispose()
+    }
+    $path = Join-Path $tmp "look.png"
+    $src.Save($path, [System.Drawing.Imaging.ImageFormat]::Png)
+    if ($src -ne $bmp) { $src.Dispose() }
+    $file = Await ([Windows.Storage.StorageFile]::GetFileFromPathAsync($path)) ([Windows.Storage.StorageFile])
+    $stream = Await ($file.OpenAsync([Windows.Storage.FileAccessMode]::Read)) ([Windows.Storage.Streams.IRandomAccessStream])
+    try {
+        $decoder = Await ([Windows.Graphics.Imaging.BitmapDecoder]::CreateAsync($stream)) ([Windows.Graphics.Imaging.BitmapDecoder])
+        $sb = Await ($decoder.GetSoftwareBitmapAsync()) ([Windows.Graphics.Imaging.SoftwareBitmap])
+        $result = Await ($engine.RecognizeAsync($sb)) ([Windows.Media.Ocr.OcrResult])
+    } finally { $stream.Dispose() }
+    $lines = @()
+    foreach ($line in $result.Lines) {
+        $x0 = 1e9; $y0 = 1e9; $x1 = 0; $y1 = 0
+        foreach ($w in $line.Words) {
+            $r = $w.BoundingRect
+            $x0 = [math]::Min($x0, $r.X); $y0 = [math]::Min($y0, $r.Y)
+            $x1 = [math]::Max($x1, $r.X + $r.Width); $y1 = [math]::Max($y1, $r.Y + $r.Height)
+        }
+        $lines += , @{ text = $line.Text.ToLowerInvariant(); x = $x0 / $scale; y = $y0 / $scale; w = ($x1 - $x0) / $scale; h = ($y1 - $y0) / $scale }
+    }
+    return , $lines
+}
+
+# Mean brightness around a menu row (the highlighted row is a light box)
+function Row-Light($bmp, $line) {
+    $x0 = [int][math]::Max(0, $line.x - $line.h); $x1 = [int][math]::Min($bmp.Width - 1, $line.x + $line.w + $line.h)
+    $y0 = [int][math]::Max(0, $line.y - $line.h * 0.4); $y1 = [int][math]::Min($bmp.Height - 1, $line.y + $line.h * 1.4)
+    $sum = 0.0; $n = 0
+    for ($y = $y0; $y -le $y1; $y += 3) {
+        for ($x = $x0; $x -le $x1; $x += 3) {
+            $c = $bmp.GetPixel($x, $y); $sum += 0.3 * $c.R + 0.59 * $c.G + 0.11 * $c.B; $n++
+        }
+    }
+    if ($n -eq 0) { return 0 }
+    return $sum / $n
+}
+
+# What the game shows: saved | error | menu (+ highlighted row) | table | awards | xp | lobby | other
+function Screen-State($bmp) {
+    $lines = Read-Lines $bmp
+    $all = ($lines | ForEach-Object { $_.text }) -join " | "
+    $laps = @($lines | ForEach-Object { $_.text -split '\s+' } | Where-Object { $_ -match $LapLike }).Count
+    if ($all -match 'replay saved') { return @{ kind = "saved"; text = $all } }
+    if ($all -match 'replay' -and $all -match 'not enough|unable|failed|error|storage') { return @{ kind = "error"; text = $all } }
+    $rows = @{}
+    foreach ($l in $lines) {
+        for ($i = 0; $i -lt $MenuItems.Count; $i++) {
+            if ($l.text -eq $MenuItems[$i] -or ($i -eq 1 -and $l.text -match 'save full race replay')) { $rows[$i] = $l }
+        }
+    }
+    if ($rows.ContainsKey(1) -and $rows.Count -ge 3) {
+        $best = -1; $bestLight = -1.0
+        foreach ($i in $rows.Keys) { $v = Row-Light $bmp $rows[$i]; if ($v -gt $bestLight) { $bestLight = $v; $best = $i } }
+        return @{ kind = "menu"; selected = $best; text = $all; laps = $laps }
+    }
+    if ($all -match 'driver of the day|most overtakes|cleanest driver') { return @{ kind = "awards"; text = $all } }
+    if ($all -match 'podium pass|\bxp\b') { return @{ kind = "xp"; text = $all } }
+    if ($all -match 'communicating with online|lobby|loading') { return @{ kind = "lobby"; text = $all } }
+    if ($all -match 'results' -and $laps -ge 4) { return @{ kind = "table"; text = $all; laps = $laps } }
+    if ($all -match 'results') { return @{ kind = "results"; text = $all; laps = $laps } }   # e.g. the winner shown first
+    return @{ kind = "other"; text = $all; laps = $laps }
+}
+
+function Look {
+    $bmp = Obs-Shot
+    if (-not $bmp) { return $null }
+    return @{ bmp = $bmp; state = (Screen-State $bmp) }
+}
+
+function Keep-Post($bmp, $tag) {
+    if (-not $KeepDir -or -not $bmp) { return }
+    $dir = Join-Path $KeepDir "post-race"
+    New-Item -ItemType Directory -Force -Path $dir | Out-Null
+    $name = "{0}-{1}-{2}.jpg" -f ([IO.Path]::GetFileNameWithoutExtension($OutFile)), (Get-Date -Format "HHmmss"), $tag
+    try { $bmp.Save((Join-Path $dir $name), [System.Drawing.Imaging.ImageFormat]::Jpeg) } catch { }
+}
+
+# Keys reach the game in the background (no focus change) only if the game takes them,
+# which is tested once with Down/Up in the replay menu (a highlight that moves is easy
+# to check, and harmless); the answer is kept in keys-mode.txt for every next race.
+# Until then, and when it doesn't, the game comes forward for those few seconds.
+$script:KeyModeFile = if ($KeepDir) { Join-Path $KeepDir "keys-mode.txt" } else { "" }
+$script:KeyMode = "test"
+if ($script:KeyModeFile -and (Test-Path $script:KeyModeFile)) {
+    $m = (Get-Content $script:KeyModeFile -Raw).Trim()
+    if ($m -in @("background", "focus")) { $script:KeyMode = $m }
+}
+function Set-KeyMode($m) {
+    $script:KeyMode = $m
+    if ($script:KeyModeFile) { try { Set-Content -Path $script:KeyModeFile -Value $m } catch { } }
+}
+
+function Tap($name) {
+    $k = $Keys[$name]
+    $h = Game-Handle
+    if ($h -eq [IntPtr]::Zero) { throw "the game closed" }
+    if ($script:KeyMode -eq "background" -and [GmKeys]::GetForegroundWindow() -ne $h) {
+        [GmKeys]::Post($h, [uint16]$k[0], [uint16]$k[1], [bool]$k[2]); return
+    }
+    if ([GmKeys]::GetForegroundWindow() -ne $h) {
+        if ($script:Prev -eq [IntPtr]::Zero) { $script:Prev = [GmKeys]::GetForegroundWindow() }
+        if (-not [GmKeys]::Focus($h)) { throw "couldn't bring the game forward" }
+        Start-Sleep -Milliseconds 150
+    }
+    [GmKeys]::Key([uint16]$k[1], [bool]$k[2])
+}
+
+# One key, then a fresh look. $test: scriptblock on the new state that says a background
+# key worked; only given for the harmless menu moves.
+function Press($name, [scriptblock]$test = $null) {
+    $h = Game-Handle
+    if ($test -and $script:KeyMode -eq "test" -and $script:Prev -ne [IntPtr]::Zero) { Give-Focus-Back; Start-Sleep -Milliseconds 300 }
+    if ($test -and $script:KeyMode -eq "test" -and [GmKeys]::GetForegroundWindow() -ne $h) {
+        $k = $Keys[$name]
+        [GmKeys]::Post($h, [uint16]$k[0], [uint16]$k[1], [bool]$k[2])
+        Start-Sleep -Milliseconds 800
+        $l = Look
+        if ($l -and (& $test $l.state)) { Set-KeyMode "background"; Post-Note "$name in the background: works, no focus needed from now on"; return $l }
+        if ($l) { $l.bmp.Dispose() }
+        Set-KeyMode "focus"
+        Post-Note "$name in the background: the game ignored it, it comes forward for keys from now on"
+    }
+    Tap $name
+    Start-Sleep -Milliseconds 600
+    $l = Look
+    Post-Note ("{0}: {1}" -f $name, $(if ($l) { $l.state.kind } else { "no picture" }))
+    return $l
+}
+
+function Give-Focus-Back {
+    if ($script:Prev -ne [IntPtr]::Zero) { [GmKeys]::Restore($script:Prev); $script:Prev = [IntPtr]::Zero }
+}
+
+# The results table's text joins the standings frames (classification_ocr.py names cars from it)
+function Add-Table($bmp, $tag) {
+    $lapB64 = if ($Recorder.LatestLap) { [Convert]::ToBase64String($Recorder.LatestLap) } else { $FinishLap }
+    $t = [math]::Round(((Get-Date) - $started).TotalSeconds, 1)
+    foreach ($v in (Variants $bmp)) {
+        $words = Read-Bitmap $v[1] $v[2]
+        $v[1].Dispose()
+        if (@($words | Where-Object { $_[0] -match $LapLike }).Count -ge 4) {
+            [void]$frames.Add(@{ t = $t; st = 0; lap = $lapB64; screen = 0; src = "results"; variant = $v[0]; w = $bmp.Width; h = $bmp.Height; words = $words })
+        }
+    }
+    if ($KeepDir) {
+        New-Item -ItemType Directory -Force -Path $KeepDir | Out-Null
+        $bmp.Save((Join-Path $KeepDir ("{0}-results-{1}.png" -f [IO.Path]::GetFileNameWithoutExtension($OutFile), $tag)), [System.Drawing.Imaging.ImageFormat]::Png)
+    }
+    $script:TablePics++
+}
+
+function Post-Race {
+    if (-not $ReplaysDir) { $ReplaysDir = Join-Path ([Environment]::GetFolderPath("MyDocuments")) "My Games\F1 25\replays" }
+    $res = $Recorder.ResultsPacket
+    $cars = if ($res -and $res.Length -gt 29) { [int]$res[29] } else { 0 }
+    $before = @{}
+    if (Test-Path $ReplaysDir) { Get-ChildItem $ReplaysDir -Filter *.frr | ForEach-Object { $before[$_.Name] = $true } }
+    $keys = $PostRace -eq "on"
+    $deadline = (Get-Date).AddSeconds($PostSeconds)
+    $script:TablePics = 0; $scrolled = $cars -le 14; $saved = $false; $outcome = "results page not seen"
+    $last = ""; $sawAwards = $false; $enters = 0; $asked = $null
+    Post-Note "watching for the results page ($cars cars, keys: $(if ($keys) { 'on' } else { 'off' }))"
+    try {
+        while ((Get-Date) -lt $deadline -and -not $saved) {
+            $l = Look
+            if (-not $l) {
+                if ((Game-Handle) -eq [IntPtr]::Zero) { $outcome = "the game closed"; break }
+                Start-Sleep -Seconds 2; continue
+            }
+            $s = $l.state
+            if ($s.kind -ne $last) { Keep-Post $l.bmp $s.kind; Post-Note ("{0}: {1}" -f $s.kind, ($s.text -replace '\s+', ' ').Substring(0, [math]::Min(300, $s.text.Length))); $last = $s.kind }
+            if ($s.kind -eq "awards") { $sawAwards = $true }
+            if ($s.kind -eq "lobby" -and $sawAwards) { $outcome = "back in the lobby before the results page"; $l.bmp.Dispose(); break }
+            if ($s.kind -eq "table" -and $script:TablePics -eq 0) { Add-Table $l.bmp "1"; $outcome = "results table pictured" }
+            $l.bmp.Dispose()
+            if (-not $keys -or $s.kind -notin @("table", "results", "menu", "saved", "error")) { Start-Sleep -Seconds 2; continue }
+
+            # the results page: act, reading the screen before every key
+            for ($step = 0; $step -lt 40 -and -not $saved; $step++) {
+                if ($s.kind -eq "table" -and -not $scrolled) {
+                    # rows 15 and up: scroll to the bottom, picture, back up
+                    $n = $cars
+                    for ($i = 0; $i -lt $n; $i++) { Tap $ScrollKey; Start-Sleep -Milliseconds 120 }
+                    Start-Sleep -Milliseconds 500
+                    $l2 = Look
+                    if ($l2 -and $l2.state.kind -eq "table") { Add-Table $l2.bmp "2" }
+                    if ($l2) { $l2.bmp.Dispose() }
+                    $up = if ($ScrollKey -eq "pagedown") { "pageup" } else { "up" }
+                    for ($i = 0; $i -lt $n; $i++) { Tap $up; Start-Sleep -Milliseconds 120 }
+                    Start-Sleep -Milliseconds 400
+                    $scrolled = $true
+                    $l = Look; if (-not $l) { break }; $s = $l.state; $l.bmp.Dispose(); continue
+                }
+                if ($s.kind -eq "table" -or $s.kind -eq "results") {
+                    if (++$enters -gt 4) { $outcome = "Enter didn't open the menu"; break }
+                    $l = Press "enter"
+                }
+                elseif ($s.kind -eq "menu") {
+                    if ($s.selected -eq 1) {
+                        if ($asked -and ((Get-Date) - $asked).TotalSeconds -lt 8) { Start-Sleep -Milliseconds 800; $l = Look }   # still saving
+                        else { $asked = Get-Date; $l = Press "enter" }
+                    }
+                    elseif ($s.selected -lt 1) { $l = Press "down" { param($x) $x.kind -eq "menu" -and $x.selected -eq 1 } }
+                    else { $l = Press "up" { param($x) $x.kind -eq "menu" -and $x.selected -lt $s.selected } }
+                }
+                elseif ($s.kind -eq "saved") {
+                    $l = Press "enter"
+                    $saved = $true; $outcome = "saved"
+                }
+                elseif ($s.kind -eq "error") { $outcome = "the game said: " + $s.text; $deadline = Get-Date; break }
+                else { break }   # not the results page (any more)
+                if (-not $l) { break }
+                if ($l.state.kind -ne $s.kind) { Keep-Post $l.bmp $l.state.kind }
+                if ($l.state.kind -eq "table" -and $script:TablePics -eq 0) { Add-Table $l.bmp "1" }
+                $s = $l.state; $l.bmp.Dispose()
+                # saving takes ~2 s: wait for the dialog instead of pressing on
+                if ($asked -and $s.kind -ne "saved" -and $s.kind -ne "menu") {
+                    for ($w = 0; $w -lt 5; $w++) {
+                        Start-Sleep -Milliseconds 800
+                        $l = Look; if (-not $l) { break }
+                        $s = $l.state; $l.bmp.Dispose()
+                        if ($s.kind -eq "saved") { break }
+                    }
+                }
+            }
+            Give-Focus-Back
+            if (-not $saved) { Start-Sleep -Seconds 2 }
+        }
+    } catch {
+        $outcome = $_.Exception.Message
+    } finally {
+        Give-Focus-Back
+    }
+
+    $file = $null
+    if ($saved) {
+        for ($i = 0; $i -lt 20 -and -not $file; $i++) {
+            Start-Sleep -Milliseconds 500
+            $file = Get-ChildItem $ReplaysDir -Filter *.frr -ErrorAction SilentlyContinue |
+                Where-Object { -not $before.ContainsKey($_.Name) } | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+        }
+        if ($file -and $KeepDir) {
+            $row = @{ replay = $file.Name; mb = [math]::Round($file.Length / 1MB); telemetry = $Recording; saved = (Get-Date).ToString("s") } | ConvertTo-Json -Compress
+            try { Add-Content -Path (Join-Path $KeepDir "replays-log.jsonl") -Value $row -Encoding UTF8 } catch { }
+        }
+    }
+    $pics = if ($script:TablePics) { "results table: $($script:TablePics) picture(s)" } else { "results table not pictured" }
+    $rep = if ($file) { "replay saved: $($file.Name) ($([math]::Round($file.Length / 1MB)) MB)" }
+           elseif ($saved) { "replay saved (file not found in $ReplaysDir yet)" }
+           elseif ($keys) { "replay not saved: $outcome" } else { "watch only" }
+    $sum = "After the race: $pics; $rep$(if ($keys) { ' [keys: ' + $script:KeyMode + ']' })"
+    Post-Note $sum
+    if ($KeepDir) { try { Add-Content -Path (Join-Path $KeepDir "post-race-log.txt") -Value (@("", "== $Recording") + $script:PostLog) } catch { } }
+    return $sum
+}
+
+if ($PostImage) {
+    $bmp = [System.Drawing.Bitmap]::FromFile((Resolve-Path $PostImage))
+    $s = Screen-State $bmp
+    Write-Output ("{0}{1}: {2}" -f $s.kind, $(if ($s.kind -eq "menu") { " " + $MenuItems[$s.selected] } else { "" }), $s.text)
+    $bmp.Dispose()
+    Remove-Item -Recurse -Force $tmp -ErrorAction SilentlyContinue
+    return
+}
+
 $frames = New-Object System.Collections.ArrayList
 $good = 0; $goodFinal = 0
 $best = $null; $bestScore = 0
@@ -510,6 +898,12 @@ while ($true) {
     # after the results packet: a few frames of the classification screen, or 60 s, then stop
     if ($resultsSince -and ($goodFinal -ge $WantScreens -or ((Get-Date) - $resultsSince).TotalSeconds -ge 60)) { break }
     Start-Sleep -Seconds $Every
+}
+# after a race (not quali): the results page, its table and the full race replay
+$postSummary = $null
+if ($PostRace -in @("watch", "on") -and $Recorder -and $sessionUid -and -not $ImagePath -and
+    (UidOf $Recorder.ResultsPacket) -eq $sessionUid -and $Recorder.ResultsSessionType -ge 15 -and $Recorder.ResultsSessionType -le 17) {
+    $postSummary = Post-Race
 }
 } finally { Obs-Cleanup }   # take the off-canvas game source out of OBS again
 
@@ -586,3 +980,4 @@ if ($KeepDir) {   # also in a log next to the pictures, in case the uploader win
     try { Add-Content -Path (Join-Path $KeepDir "capture-log.txt") -Value ("[{0}] {1}" -f (Get-Date -Format "yyyy-MM-dd HH:mm:ss"), $line) } catch { }
 }
 Write-Output $line
+if ($postSummary) { Write-Output $postSummary }

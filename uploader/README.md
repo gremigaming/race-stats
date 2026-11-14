@@ -78,6 +78,23 @@ again when it's done.
 - Without OBS: stay on the game for a minute after you finish, as before.
 - The game must show online names on your screen.
 
+### After the race: results table + full race replay (since 14 Nov 2026)
+
+The same capture then keeps watching the game through OBS (podium, XP and awards
+pages run out on their own timers; nothing is pressed there). On the results
+page it pictures the whole results table (scrolling for rows 15 and up) and saves
+the full race replay (Enter, Down to "Save Full Race Replay", Enter, Okay),
+reading the screen before every key. Keys go to the game in the background if
+the game takes them (tested once, answer in `keys-mode.txt`); otherwise F1 comes
+to the front for those few seconds and your window gets the focus back.
+
+- Setting `"postRace"` in `%APPDATA%\GreMiRaceUploader\config.json`:
+  `"on"` (pictures + replay), `"watch"` (only looks, no keys; default for now) or `"off"`.
+- Results pictures: `<race>-results-1.png` / `-2.png` in the classification folder;
+  every screen it saw: `post-race\` + `post-race-log.txt`.
+- Saved replays: `replays-log.jsonl` (replay file + telemetry name), the replay
+  itself in `Documents\My Games\F1 25\replays`.
+
 ## Clip uploader
 
 `ClipUploader.ps1` does the same for OBS clips: every new clip in your OBS clips
