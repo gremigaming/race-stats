@@ -41,7 +41,7 @@ $LiveUrl = "wss://live.gremigaming.com/ingest"
 $ShotsDir = Join-Path $ConfigDir "classification"
 # After each race (ClassificationCapture.ps1 -PostRace): "on" = results table pictures +
 # full race replay save, "watch" = only look (no keys), "off". Override: "postRace" in config.json.
-$DefaultPostRace = "watch"
+$DefaultPostRace = "on"
 
 function Say($text, $color = "Gray") {
     Write-Host ("[{0}] {1}" -f (Get-Date -Format "HH:mm:ss"), $text) -ForegroundColor $color

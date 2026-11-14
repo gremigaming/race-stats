@@ -463,13 +463,13 @@ function Json-Text($s) {
 #
 # -PostRace watch|on (RaceUploader.ps1 setting "postRace"). Once the standings are read,
 # it keeps looking at the game through OBS until the results page, through the
-# podium, XP and awards pages (their own timers move them on; it never presses
-# anything there). On the results page it:
+# podium. The XP and awards pages wait for Enter (all under one shared countdown to
+# the lobby), so it presses Enter there right away. On the results page it:
 #   1. takes pictures of the whole results table: rows 1-14, then (more than 14
 #      cars) scrolls down and takes the rest. They stay on this PC (KeepDir) and
 #      their text joins the standings frames (best way to name hidden cars: every
 #      row has its lap time);
-#   2. saves the full race replay: Enter (past the winner / opens the menu), Down to
+#   2. saves the full race replay: Enter (past the winner popup / opens the menu), Down to
 #      "Save Full Race Replay", Enter, waits for "REPLAY SAVED", Okay. The new .frr
 #      in Documents\My Games\F1 25\replays goes in replays-log.jsonl with the
 #      telemetry name, so the shot tool finds each race's crash times.
@@ -631,11 +631,12 @@ function Screen-State($bmp) {
         foreach ($i in $rows.Keys) { $v = Row-Light $bmp $rows[$i]; if ($v -gt $bestLight) { $bestLight = $v; $best = $i } }
         return @{ kind = "menu"; selected = $best; text = $all; laps = $laps }
     }
+    if ($all -match 'results' -and $all -match '\bwinner\b' -and $all -notmatch 'driver of the day') { return @{ kind = "results"; text = $all; laps = $laps } }   # winner popup over the table
+    if ($all -match 'results' -and $laps -ge 4) { return @{ kind = "table"; text = $all; laps = $laps } }
     if ($all -match 'driver of the day|most overtakes|cleanest driver') { return @{ kind = "awards"; text = $all } }
     if ($all -match 'podium pass|\bxp\b') { return @{ kind = "xp"; text = $all } }
     if ($all -match 'communicating with online|lobby|loading') { return @{ kind = "lobby"; text = $all } }
-    if ($all -match 'results' -and $laps -ge 4) { return @{ kind = "table"; text = $all; laps = $laps } }
-    if ($all -match 'results') { return @{ kind = "results"; text = $all; laps = $laps } }   # e.g. the winner shown first
+    if ($all -match 'results|\bwinner\b') { return @{ kind = "results"; text = $all; laps = $laps } }   # the winner popup first
     return @{ kind = "other"; text = $all; laps = $laps }
 }
 
@@ -736,7 +737,7 @@ function Post-Race {
     $keys = $PostRace -eq "on"
     $deadline = (Get-Date).AddSeconds($PostSeconds)
     $script:TablePics = 0; $scrolled = $cars -le 14; $saved = $false; $outcome = "results page not seen"
-    $last = ""; $sawAwards = $false; $enters = 0; $asked = $null
+    $last = ""; $sawAwards = $false; $enters = 0; $asked = $null; $pageEnters = 0
     Post-Note "watching for the results page ($cars cars, keys: $(if ($keys) { 'on' } else { 'off' }))"
     try {
         while ((Get-Date) -lt $deadline -and -not $saved) {
@@ -751,6 +752,15 @@ function Post-Race {
             if ($s.kind -eq "lobby" -and $sawAwards) { $outcome = "back in the lobby before the results page"; $l.bmp.Dispose(); break }
             if ($s.kind -eq "table" -and $script:TablePics -eq 0) { Add-Table $l.bmp "1"; $outcome = "results table pictured" }
             $l.bmp.Dispose()
+            # XP and awards pages wait for Enter (one countdown runs for all of them, so no waiting)
+            if ($keys -and $s.kind -in @("xp", "awards")) {
+                if (++$pageEnters -gt 12) { $outcome = "the XP/awards pages didn't move on"; break }
+                $was = $s.kind
+                $l = Press "enter" { param($x) $x.kind -ne $was }
+                if ($l) { if ($l.state.kind -ne $last) { Keep-Post $l.bmp $l.state.kind; $last = $l.state.kind }; $l.bmp.Dispose() }
+                Start-Sleep -Milliseconds 300
+                continue
+            }
             if (-not $keys -or $s.kind -notin @("table", "results", "menu", "saved", "error")) { Start-Sleep -Seconds 2; continue }
 
             # the results page: act, reading the screen before every key
@@ -896,7 +906,10 @@ while ($true) {
     if ($ImagePath -or $elapsed -ge $Seconds) { break }
     if (-not $Recorder -and $good -ge $WantScreens) { break }
     # after the results packet: a few frames of the classification screen, or 60 s, then stop
-    if ($resultsSince -and ($goodFinal -ge $WantScreens -or ((Get-Date) - $resultsSince).TotalSeconds -ge 60)) { break }
+    # (online the results table only comes after the XP and awards pages: with -PostRace the
+    # after-race part takes over 10 s after the results, the countdown is already running)
+    $resultsWait = if ($PostRace -in @("watch", "on")) { 10 } else { 60 }
+    if ($resultsSince -and ($goodFinal -ge $WantScreens -or ((Get-Date) - $resultsSince).TotalSeconds -ge $resultsWait)) { break }
     Start-Sleep -Seconds $Every
 }
 # after a race (not quali): the results page, its table and the full race replay
