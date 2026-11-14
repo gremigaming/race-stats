@@ -4,46 +4,53 @@
      Chat + activity: Streamer.bot (ws://127.0.0.1:8080, Twitch + YouTube) and TikFinity (ws://localhost:21213, TikTok), via chatcore.js.
      Bots from every platform are hidden. Waitlist: Race Control dock.json (Twitch + YouTube) + TikTok interest read here
      (answered through Streamer.bot DoAction, same as the old Waitlist dock). Lobby SR: live.gremigaming.com + league safety data.
-     ?fs=15 chat font size  ?rc=https://104-154-182-45.sslip.io  ?sbpass=  ?demo -->
+     ?fs=15 size of everything (A−/A+, Ctrl+scroll, Ctrl +/−/0)  ?me=extra,own,names (kept off the waitlist)  ?rc=https://104-154-182-45.sslip.io  ?sbpass=  ?demo -->
 <html lang="en"><head><meta charset="utf-8"><title>GreMi Dock</title>
 <style>
 :root { --bg:#0e1116; --panel:#161b22; --line:#262d36; --text:#e9eef4; --dim:#8b949e; --fs:15px;
         --green:#3fb950; --red:#f85149; --amber:#d29922; --blue:#58a6ff; --tw:#9146ff; --yt:#ff3b3b; --tt:#25f4ee; }
 * { box-sizing:border-box; }
-html, body { margin:0; height:100%; max-width:100vw; background:var(--bg); color:var(--text); font:13px/1.35 "Segoe UI", system-ui, sans-serif; overflow:hidden; }
+html, body { margin:0; height:100%; max-width:100vw; background:var(--bg); color:var(--text); overflow:hidden; }
+html { font:var(--fs)/1.35 "Segoe UI", system-ui, sans-serif; }   /* every size below is in rem, so A−/A+ scales the whole dock */
+body { font-size:.867rem; }
 body { display:flex; flex-direction:column; }
-.bar { display:flex; flex-wrap:wrap; align-items:center; gap:6px; padding:5px 8px; border-bottom:1px solid var(--line); background:#0b0e13; flex:none; }
-.bar h2 { margin:0; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--dim); font-weight:700; cursor:pointer; user-select:none; }
+.bar { display:flex; flex-wrap:wrap; align-items:center; gap:.4rem; padding:.333rem .533rem; border-bottom:1px solid var(--line); background:#0b0e13; flex:none; }
+.bar h2 { margin:0; font-size:.733rem; letter-spacing:.1em; text-transform:uppercase; color:var(--dim); font-weight:700; cursor:pointer; user-select:none; }
 .bar h2::before { content:"▾ "; } .closed > .bar h2::before { content:"▸ "; }
-.bar .sp { margin-left:auto; display:flex; gap:5px; align-items:center; color:var(--dim); font-size:11px; }
-.btn { font:600 11px "Segoe UI"; color:var(--text); background:#1d232c; border:1px solid var(--line); border-radius:5px; padding:2px 6px; cursor:pointer; }
+.bar .sp { margin-left:auto; display:flex; gap:.333rem; align-items:center; color:var(--dim); font-size:.733rem; }
+.btn { font:600 .733rem "Segoe UI"; color:var(--text); background:#1d232c; border:1px solid var(--line); border-radius:.333rem; padding:.133rem .4rem; cursor:pointer; }
 .btn.off { opacity:.35; }
-.dot { display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--red); margin-right:3px; }
+.dot { display:inline-block; width:.467rem; height:.467rem; border-radius:50%; background:var(--red); margin-right:.2rem; }
 .dot.on { background:var(--green); }
 .pane { display:flex; flex-direction:column; min-height:0; min-width:0; width:100%; }
 .pane.closed > .body { display:none; }
-.body { overflow-y:auto; overflow-x:hidden; scrollbar-width:thin; min-height:0; width:100%; }
+.body { overflow-y:auto; overflow-x:hidden; min-height:0; width:100%; }
+/* scrollbars stay invisible until the mouse is over the dock */
+.body { scrollbar-width:thin; scrollbar-color:transparent transparent; }
+html:hover .body { scrollbar-color:#3a4350 transparent; }
+.body::-webkit-scrollbar { width:6px; } .body::-webkit-scrollbar-track { background:transparent; }
+.body::-webkit-scrollbar-thumb { background:transparent; border-radius:3px; } html:hover .body::-webkit-scrollbar-thumb { background:#3a4350; }
 
 /* activity */
-#act { flex:none; } #act .body { max-height:24vh; padding:3px 6px; }
-.ev { display:flex; align-items:center; gap:6px; padding:3px 6px; margin:2px 0; border-radius:5px; background:var(--panel); font-size:12.5px; }
-.ev .k { font-size:15px; width:18px; text-align:center; flex:none; }
+#act { flex:none; } #act .body { max-height:24vh; padding:.2rem .4rem; }
+.ev { display:flex; align-items:center; gap:.4rem; padding:.2rem .4rem; margin:.133rem 0; border-radius:.333rem; background:var(--panel); font-size:.833rem; }
+.ev .k { font-size:1rem; width:1.2rem; text-align:center; flex:none; }
 .ev .t { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .ev .t b { color:#fff; }
-.ev .a { color:var(--dim); font-size:11px; flex:none; }
+.ev .a { color:var(--dim); font-size:.733rem; flex:none; }
 .ev.big { background:linear-gradient(90deg, rgba(225,6,0,.35), rgba(145,70,255,.35)); }
-.ev img.g { height:18px; }
-.pf, .bd { display:inline-block; width:15px; height:15px; vertical-align:-3px; margin-right:3px; border-radius:3px; flex:none; }
+.ev img.g { height:1.2rem; }
+.pf, .bd { display:inline-block; width:1rem; height:1rem; vertical-align:-.2rem; margin-right:.2rem; border-radius:.2rem; flex:none; }
 
 /* chat */
-#chat { flex:1; } #chat .body { flex:1; padding:4px 0 8px; position:relative; }
-.m { display:flex; gap:7px; padding:3px 10px 3px 7px; border-left:3px solid transparent; font-size:var(--fs); line-height:1.38; }
+#chat { flex:1; } #chat .body { flex:1; padding:.267rem 0 .533rem; position:relative; }
+.m { display:flex; gap:.467rem; padding:.2rem .667rem .2rem .467rem; border-left:.2rem solid transparent; font-size:1rem; line-height:1.38; }
 .m:hover { background:#141a22; }
-.m .tm { color:#5f6873; font-size:.72em; padding-top:.32em; width:30px; flex:none; font-variant-numeric:tabular-nums; }
+.m .tm { color:#5f6873; font-size:.72em; padding-top:.32em; width:2rem; flex:none; font-variant-numeric:tabular-nums; }
 .m .b { flex:1; min-width:0; overflow-wrap:anywhere; }
-.who { white-space:nowrap; margin-right:5px; }
+.who { white-space:nowrap; margin-right:.333rem; }
 .who .n { color:var(--c); font-weight:700; }
-.crown { color:#ffd257; margin-right:2px; }
+.crown { color:#ffd257; margin-right:.133rem; }
 .emote { height:1.5em; vertical-align:middle; margin:-.25em 1px; }
 .m.t-sub { border-left-color:#7c4dff; }
 .m.t-gifter { border-left-color:#f5b301; background:rgba(245,179,1,.06); }
@@ -51,32 +58,36 @@ body { display:flex; flex-direction:column; }
 .m.t-mod { border-left-color:#00d26a; background:rgba(0,210,106,.06); }
 .m.t-gold { border-left-color:#ffcf40; background:rgba(255,207,64,.09); }
 .m.first { background:rgba(37,244,238,.08); border-left-color:var(--tt); }
-.m.first .b::before { content:"FIRST CHAT"; font-size:.62em; font-weight:800; letter-spacing:.08em; color:#000; background:var(--tt); padding:1px 5px; border-radius:4px; margin-right:6px; vertical-align:.15em; }
+.m.first .b::before { content:"FIRST CHAT"; font-size:.62em; font-weight:800; letter-spacing:.08em; color:#000; background:var(--tt); padding:1px .333rem; border-radius:.267rem; margin-right:.4rem; vertical-align:.15em; }
 .m.me { background:rgba(225,6,0,.16); }
-.jtag { display:none; font-size:.6em; font-weight:800; letter-spacing:.06em; color:#000; background:var(--amber); padding:1px 5px; border-radius:4px; margin-right:6px; vertical-align:.15em; white-space:nowrap; }
+.jtag { display:none; font-size:.6em; font-weight:800; letter-spacing:.06em; color:#000; background:var(--amber); padding:1px .333rem; border-radius:.267rem; margin-right:.4rem; vertical-align:.15em; white-space:nowrap; }
 .m.wl .jtag { display:inline-block; }
-#more { position:absolute; bottom:10px; left:50%; transform:translateX(-50%); display:none; font:600 12px "Segoe UI"; color:#fff; background:#7c3aed; border:0; border-radius:14px; padding:5px 12px; cursor:pointer; }
+.rp { display:block; font-size:.78em; line-height:1.3; color:var(--dim); margin:0 0 .15em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer; }
+.rp::before { content:"↪ "; } .rp b { color:var(--c); font-weight:700; } .rp i { font-style:normal; color:#6e7681; }
+.m.to-me .rp b { color:#ff6b6b; }
+.m.flash { animation:flash 1.2s ease-out; } @keyframes flash { from { background:rgba(88,166,255,.35); } to { background:transparent; } }
+#more { position:absolute; bottom:.667rem; left:50%; transform:translateX(-50%); display:none; font:600 .8rem "Segoe UI"; color:#fff; background:#7c3aed; border:0; border-radius:.933rem; padding:.333rem .8rem; cursor:pointer; }
 
 /* waitlist + lobby */
-#bottom { flex:none; border-top:1px solid var(--line); } #bottom .body { max-height:34vh; padding:4px 6px 6px; }
-.tabs { display:flex; gap:4px; }
-.tab { font:700 11px "Segoe UI"; letter-spacing:.06em; text-transform:uppercase; color:var(--dim); background:none; border:0; padding:3px 6px; border-radius:5px; cursor:pointer; }
+#bottom { flex:none; border-top:1px solid var(--line); } #bottom .body { max-height:34vh; padding:.267rem .4rem .4rem; }
+.tabs { display:flex; gap:.267rem; }
+.tab { font:700 .733rem "Segoe UI"; letter-spacing:.06em; text-transform:uppercase; color:var(--dim); background:none; border:0; padding:.2rem .4rem; border-radius:.333rem; cursor:pointer; }
 .tab.on { color:#fff; background:#1d232c; }
-.cnt { display:inline-block; min-width:16px; padding:0 4px; margin-left:3px; border-radius:8px; background:var(--amber); color:#000; font-size:10px; text-align:center; }
+.cnt { display:inline-block; min-width:1.067rem; padding:0 .267rem; margin-left:.2rem; border-radius:.533rem; background:var(--amber); color:#000; font-size:.667rem; text-align:center; }
 .cnt:empty { display:none; }
-.empty { color:var(--dim); padding:8px 4px; font-size:12px; }
-.wait { display:grid; grid-template-columns:auto 1fr auto; gap:0 8px; align-items:center; cursor:pointer; background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:4px 8px; margin:3px 0; }
+.empty { color:var(--dim); padding:.533rem .267rem; font-size:.8rem; }
+.wait { display:grid; grid-template-columns:auto 1fr auto; gap:0 .533rem; align-items:center; cursor:pointer; background:var(--panel); border:1px solid var(--line); border-radius:.4rem; padding:.267rem .533rem; margin:.2rem 0; }
 .wait.done { opacity:.4; } .wait.done .name { text-decoration:line-through; }
-.wait .msg { grid-column:2 / -1; color:var(--dim); font-size:11px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.wait .msg { grid-column:2 / -1; color:var(--dim); font-size:.733rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .name { font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.ago { color:var(--dim); font-size:11px; }
-.row { display:grid; grid-template-columns:1fr auto auto; gap:2px 8px; align-items:center; background:var(--panel); border:1px solid var(--line); border-left:3px solid var(--line); border-radius:6px; padding:4px 8px; margin:3px 0; }
+.ago { color:var(--dim); font-size:.733rem; }
+.row { display:grid; grid-template-columns:1fr auto auto; gap:.133rem .533rem; align-items:center; background:var(--panel); border:1px solid var(--line); border-left:.2rem solid var(--line); border-radius:.4rem; padding:.267rem .533rem; margin:.2rem 0; }
 .row.ban { border-left-color:var(--red); background:#2a1215; } .row.kick { border-left-color:var(--red); } .row.warn { border-left-color:var(--amber); } .row.ok { border-left-color:var(--green); }
-.sr { font-size:16px; font-weight:700; font-variant-numeric:tabular-nums; text-align:right; min-width:34px; }
-.chg { font-variant-numeric:tabular-nums; text-align:right; min-width:42px; font-weight:600; font-size:12px; }
+.sr { font-size:1.067rem; font-weight:700; font-variant-numeric:tabular-nums; text-align:right; min-width:2.267rem; }
+.chg { font-variant-numeric:tabular-nums; text-align:right; min-width:2.8rem; font-weight:600; font-size:.8rem; }
 .up { color:var(--green); } .down { color:var(--red); } .flat { color:var(--dim); }
-.tags { grid-column:1 / -1; display:flex; flex-wrap:wrap; gap:4px; }
-.tag { font-size:10.5px; padding:1px 6px; border-radius:10px; background:#21262d; color:var(--dim); }
+.tags { grid-column:1 / -1; display:flex; flex-wrap:wrap; gap:.267rem; }
+.tag { font-size:.7rem; padding:1px .4rem; border-radius:.667rem; background:#21262d; color:var(--dim); }
 .tag.red { background:var(--red); color:#fff; font-weight:700; } .tag.amber { background:#3b2e0a; color:var(--amber); font-weight:600; } .tag.blue { background:#0d2a4a; color:var(--blue); }
 </style></head>
 <body>
@@ -104,8 +115,15 @@ const hhmm = (t = new Date()) => String(t.getHours()).padStart(2, "0") + ":" + S
 
 // ---------- layout state (folded panes, text size, hidden platforms, tab)
 let fs = store.get("fs", +(q.get("fs") || 15));
-const setFs = (v) => { fs = Math.max(11, Math.min(26, v)); document.documentElement.style.setProperty("--fs", fs + "px"); store.set("fs", fs); };
+// One size drives the whole dock (bars, activity, chat, waitlist): A−/A+, Ctrl+scroll wheel, Ctrl + / − / 0.
+const setFs = (v) => { fs = Math.max(9, Math.min(30, v)); document.documentElement.style.setProperty("--fs", fs + "px"); store.set("fs", fs);
+  if (stick && list) list.scrollTop = list.scrollHeight; };
+let stick, list;
 setFs(fs); $("fsm").onclick = () => setFs(fs - 1); $("fsp").onclick = () => setFs(fs + 1);
+addEventListener("wheel", (e) => { if (!e.ctrlKey) return; e.preventDefault(); setFs(fs + (e.deltaY < 0 ? 1 : -1)); }, { passive: false });
+addEventListener("keydown", (e) => { if (!e.ctrlKey) return;
+  if (e.key === "+" || e.key === "=") { e.preventDefault(); setFs(fs + 1); } else if (e.key === "-") { e.preventDefault(); setFs(fs - 1); }
+  else if (e.key === "0") { e.preventDefault(); setFs(15); } });
 const folded = store.get("folded", {});
 for (const id of ["act", "chat", "bottom"]) {
   const p = $(id); p.classList.toggle("closed", !!folded[id]);
@@ -123,11 +141,47 @@ const showTab = (t) => { tab = t; store.set("tab", t); document.querySelectorAll
 document.querySelectorAll(".tab").forEach((b) => (b.onclick = (e) => { e.stopPropagation(); showTab(b.dataset.t); })); showTab(tab);
 
 // ---------- chat
-const list = $("list"), more = $("more"); let stick = true; const MAX = 400;
-list.onscroll = () => { stick = list.scrollTop + list.clientHeight >= list.scrollHeight - 30; if (stick) more.style.display = "none"; };
+list = $("list"); const more = $("more"); stick = true; const MAX = 400;
+// only the person scrolling up un-pins the chat (not the chat area shrinking when the dock or a pane changes size)
+let userAt = 0; for (const t of ["wheel", "pointerdown", "keydown", "touchstart"]) list.addEventListener(t, () => (userAt = Date.now()), { passive: true });
+list.onscroll = () => { const bottom = list.scrollTop + list.clientHeight >= list.scrollHeight - 30;
+  if (bottom) { stick = true; more.style.display = "none"; } else if (Date.now() - userAt < 1500) stick = false; };
 more.onclick = () => { list.scrollTop = list.scrollHeight; };
+// keep the newest message in view when the chat area changes size (dock resized, panes fold, activity grows, A−/A+)
+new ResizeObserver(() => { if (stick) list.scrollTop = list.scrollHeight; }).observe(list);
 $("clear").onclick = () => (list.innerHTML = "");
-const ME = /\bgremi\b/i;
+list.addEventListener("click", (ev) => { const rp = ev.target.closest(".rp[data-to]"); if (!rp) return; const p = document.getElementById(rp.dataset.to);
+  if (p) { p.scrollIntoView({ block: "center" }); p.classList.remove("flash"); void p.offsetWidth; p.classList.add("flash"); } });
+const ME = /\bgremi\b|@gremi/i;
+// GreMi himself: broadcaster role, gremi/gremi_gaming style names, ?me= names, and TikTok accounts learned from the
+// dock's own TikTok join answers (Streamer.bot posts them from GreMi's account, they come back through TikFinity).
+const selfNames = new Set(store.get("self", []).concat((q.get("me") || "").split(",")).map((n) => n.trim().toLowerCase()).filter(Boolean));
+const isSelfName = (n) => { n = String(n || "").trim().toLowerCase().replace(/^@/, ""); return !!n && (C.HOST.test(n) || selfNames.has(n)); };
+const isSelf = (m) => m.roles.has("broadcaster") || isSelfName(m.login) || isSelfName(m.name);
+let answered = [];   // [{ who, until }] TikTok join answers sent in the last 30 s
+function learnSelf(m) {
+  if (m.platform !== "tiktok" || isSelf(m)) return;
+  const low = String(m.text || "").toLowerCase(), now = Date.now(); answered = answered.filter((a) => a.until > now);
+  const hit = answered.find((a) => low.startsWith("@" + a.who) && m.login !== a.who && String(m.name).toLowerCase() !== a.who);
+  if (hit) { selfNames.add(String(m.login || m.name).toLowerCase()); store.set("self", [...selfNames]); }
+}
+// Replies: Twitch reply threads carry the parent; on every platform a message that starts with "@name" counts too.
+const lastBy = new Map();   // lower-case name/login -> last message element
+function replyOf(m) {
+  if (m.reply) return m.reply;
+  const t = String(m.text || "").trim(); if (t[0] !== "@") return null;
+  const low = t.slice(1).toLowerCase();   // known chatters first, so names with spaces ("@DrewDrew Playz") work
+  let known = ""; for (const n of lastBy.keys()) if (n.length > known.length && low.startsWith(n) && !/[\w]/.test(low[n.length] || "")) known = n;
+  if (known) { const el = lastBy.get(known); return { name: el.dataset.n, text: el.dataset.t, id: el.id }; }
+  const at = /^@([\w.\u00c0-\uffff-]{2,40})/u.exec(t);
+  if (!at) return null;
+  const el = lastBy.get(at[1].toLowerCase());
+  return { name: el ? el.dataset.n : at[1], text: el ? el.dataset.t : "", id: el ? el.id : null };
+}
+function stripMention(html, name) {
+  const re = new RegExp("^\\s*@" + C.esc(name).replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "[,:]?\\s*", "i");
+  return html.replace(re, "");
+}
 // "Wants to join": the tag sits behind the name on all of that person's messages for 2 minutes after they ask,
 // and the 2 minutes start again every time they ask. They also go on the waitlist (asking again moves them up).
 const JOIN_MS = 120000, joinUntil = new Map();
@@ -139,11 +193,24 @@ function refreshJoinTags() {
 setInterval(refreshJoinTags, 5000);
 function addChat(m) {
   const k = keyOf(m);
-  if (wantsToJoin(m)) { joinUntil.set(k, Date.now() + JOIN_MS); onJoinChat(m.platform, m.login || m.name, m.name, m.text); }
+  learnSelf(m);
+  const self = isSelf(m);
+  if (!self && wantsToJoin(m)) { joinUntil.set(k, Date.now() + JOIN_MS); onJoinChat(m.platform, m.login || m.name, m.name, m.text); }
+  const r = replyOf(m), toMe = !!r && isSelfName(r.name);
   const el = document.createElement("div");
-  el.className = `m ${C.tier(m)}${m.roles.has("first") ? " first" : ""}${ME.test(m.text) ? " me" : ""}`;
+  el.className = `m ${C.tier(m)}${m.roles.has("first") ? " first" : ""}${!self && (ME.test(m.text) || toMe) ? " me to-me" : ""}`;
   el.dataset.pl = m.platform; el.dataset.k = k; if (hidden.has(m.platform)) el.style.display = "none";
-  el.innerHTML = `<span class="tm">${hhmm()}</span><div class="b">${C.who(m)}<span class="jtag">WANTS TO JOIN</span>${m.html}</div>`;
+  el.id = "m-" + m.id; el.dataset.n = m.name; el.dataset.t = String(m.text || "").slice(0, 140);
+  let rp = "", html = m.html;
+  if (r) {
+    const parent = r.id && document.getElementById(r.id.startsWith("m-") ? r.id : "m-" + r.id);
+    const ptext = r.text || (parent ? parent.dataset.t : "");
+    const color = parent ? (parent.querySelector(".who .n") || {}).style?.getPropertyValue("--c") : "";
+    rp = `<span class="rp" title="${C.esc(r.name + (ptext ? ": " + ptext : ""))}"${parent ? ` data-to="${parent.id}"` : ""}${color ? ` style="--c:${C.esc(color)}"` : ""}>replying to <b>${C.esc(r.name)}</b>${ptext ? ` <i>${C.esc(ptext)}</i>` : ""}</span>`;
+    html = stripMention(html, r.name);
+  }
+  el.innerHTML = `<span class="tm">${hhmm()}</span><div class="b">${rp}${C.who(m)}${self ? "" : '<span class="jtag">WANTS TO JOIN</span>'}${html}</div>`;
+  for (const n of [m.name, m.login]) if (n) lastBy.set(String(n).toLowerCase(), el);
   list.appendChild(el);
   while (list.children.length > MAX) list.firstChild.remove();
   refreshJoinTags();
@@ -171,7 +238,7 @@ function addEvent(e) {
   el.innerHTML = `<span class="k">${k}</span>${C.ICON[e.platform] || ""}<span class="t"><b>${esc(e.name)}</b> ${what}${e.text && e.kind !== "gift" && e.kind !== "sub" ? ` <span class="a">“${esc(e.text)}”</span>` : ""}</span>` +
     (e.img ? `<img class="g" src="${esc(e.img)}" alt="">` : "") + `<span class="a">${hhmm(new Date(e.at))}</span>`;
   box.prepend(el);
-  while (box.children.length > 60) box.lastChild.remove();
+  while (box.children.length > 10) box.lastChild.remove();   // last 10 only
   $("act-sum").textContent = evCount + " this session";
 }
 
@@ -187,8 +254,16 @@ async function pollWaitlist() {
   try { const d = await getJson(RC + "/dock.json"); cloud = d.entries || []; cfg = Object.assign(cfg, d); dot("d-wl", true); } catch (e) { dot("d-wl", false); }
   renderWaitlist();
 }
-function entries() { const now = Date.now() / 1000;
-  return cloud.concat(tiktok).filter((e) => now - e.at <= cfg.keep_hours * 3600).sort((a, b) => a.at - b.at).slice(-cfg.size); }
+// One row per person (the newest ask wins, even when Race Control and the dock both have them, or they asked on two
+// platforms under the same name), never GreMi himself, and only the 5 most recent.
+const WL_SHOW = 5;
+const personOf = (e) => String(e.name || e.key.split(":").slice(1).join(":")).toLowerCase().replace(/[\s_.\-]+/g, "");
+function entries() { const now = Date.now() / 1000, best = new Map();
+  for (const e of cloud.concat(tiktok)) {
+    if (now - e.at > cfg.keep_hours * 3600 || isSelfName(e.name) || isSelfName(e.key.split(":").slice(1).join(":"))) continue;
+    const p = personOf(e), o = best.get(p); if (!o || e.at > o.at) best.set(p, e);
+  }
+  return [...best.values()].sort((a, b) => a.at - b.at).slice(-Math.min(cfg.size, WL_SHOW)); }
 function ago(t) { const s = Math.max(0, Date.now() / 1000 - t); return s < 60 ? "now" : s < 3600 ? Math.floor(s / 60) + "m" : Math.floor(s / 3600) + "h"; }
 function renderWaitlist() {
   const l = entries().reverse();
@@ -213,10 +288,12 @@ function onJoinChat(platform, user, name, text) {
   const key = platform + ":" + user.toLowerCase();
   const mine = tiktok.find((e) => e.key === key);
   if (mine) { mine.at = Date.now() / 1000; mine.text = text.slice(0, 120); store.set("tiktok", tiktok); renderWaitlist(); return; }   // asked again: move up
-  if (entries().some((e) => e.key === key)) return;                                                                                 // already there from Race Control
+  if (isSelfName(user) || isSelfName(name)) return;
+  if (entries().some((e) => e.key === key || personOf(e) === personOf({ name: name || user, key }))) return;                       // already there from Race Control
   tiktok.push({ key, platform, name: name || user, at: Date.now() / 1000, text: text.slice(0, 120) });
   tiktok = tiktok.slice(-50); store.set("tiktok", tiktok); renderWaitlist();
-  if (!command && platform === "tiktok") sbAction(cfg.tiktok_action, { user: name || user });   // !join on TikTok is answered by Streamer.bot itself
+  if (platform === "tiktok") { if (!command) sbAction(cfg.tiktok_action, { user: name || user });
+    for (const w of new Set([user, name].filter(Boolean).map((x) => String(x).toLowerCase()))) answered.push({ who: w, until: Date.now() + 30000 }); }   // !join on TikTok is answered by Streamer.bot itself
 }
 
 // ---------- lobby SR (same as Race Control's /dock)
@@ -315,14 +392,28 @@ function sbAction(name, args) { if (name && sb && sbReady) sb.send(JSON.stringif
 // ---------- start
 const on = { chat: addChat, event: addEvent, status: (k, v) => dot(k === "sb" ? "d-sb" : "d-tt", v) };
 if (q.has("demo")) {
-  const mk = (platform, name, color, text, roles = [], badges = []) => ({ platform, name, login: name.toLowerCase(), color, text, html: esc(text), roles: new Set(roles), badges });
-  [mk("twitch", "0verfast", "#ff7b00", "that pass into 130R was insane", ["sub"], [C.BADGE.sub]), mk("youtube", "DrewDrew Playz", null, "P4 from P9, GG", ["sub"], [C.BADGE.member]),
-   mk("tiktok", "markbonner189", null, "can i join the next race?", ["gifter"], [C.BADGE.gifter]), mk("twitch", "DDRK0", "#3ad07a", "lobby is open, check discord", ["lead", "mod"], [C.BADGE.mod]),
-   mk("twitch", "Bananensaus17", "#00c3ff", "fastest lap is mine", ["vip"]), mk("twitch", "lisa_simracing", "#ff4fa3", "first time here, is gremi always this fast?", ["first"])].forEach(addChat);
+  const mk = (platform, name, color, text, roles = [], badges = [], reply = null) => ({ id: "d" + Math.random().toString(36).slice(2), platform, name,
+    login: name.toLowerCase(), color, text, html: esc(text), roles: new Set(roles), badges, reply });
   const now = Date.now();
-  [{ platform: "twitch", kind: "follow", name: "Lisa_SimRacing", at: now - 90000 }, { platform: "tiktok", kind: "gift", name: "markbonner189", amount: 5, text: "Rose", coins: 5, at: now - 60000 },
-   { platform: "twitch", kind: "giftbomb", name: "0verfast", amount: 5, big: true, at: now - 30000 }, { platform: "youtube", kind: "member", name: "DrewDrew Playz", at: now }].forEach(addEvent);
-  cloud = [{ key: "twitch:a", platform: "twitch", name: "speedy_sam", at: now / 1000 - 300, text: "can i join next race?" }, { key: "youtube:b", platform: "youtube", name: "Lisa Racing", at: now / 1000 - 120, text: "hoe kan ik meedoen?" }];
+  cfg.interest = { topic: "join|meedoen|race", cue: "\\?|can|how|hoe|join" };
+  cloud = [{ key: "twitch:a", platform: "twitch", name: "speedy_sam", at: now / 1000 - 600, text: "can i join next race?" },
+           { key: "youtube:b", platform: "youtube", name: "Lisa Racing", at: now / 1000 - 540, text: "hoe kan ik meedoen?" },
+           { key: "twitch:c", platform: "twitch", name: "kimi_fan77", at: now / 1000 - 480, text: "!join" },
+           { key: "twitch:d", platform: "twitch", name: "Bananensaus17", at: now / 1000 - 420, text: "!join pls" },
+           { key: "twitch:a2", platform: "twitch", name: "speedy_sam", at: now / 1000 - 360, text: "!join" }];
+  [mk("twitch", "0verfast", "#ff7b00", "that pass into 130R was insane", ["sub"], [C.BADGE.sub]), mk("youtube", "DrewDrew Playz", null, "P4 from P9, GG", ["sub"], [C.BADGE.member]),
+   mk("twitch", "DDRK0", "#3ad07a", "@0verfast he sent it so late lol", ["lead", "mod"], [C.BADGE.mod], { name: "0verfast", text: "that pass into 130R was insane", id: null }),
+   mk("tiktok", "markbonner189", null, "can i join the next race?", ["gifter"], [C.BADGE.gifter]),
+   mk("tiktok", "GreMi", null, "@markbonner189 join the Discord, link in bio, lobby opens after this race!", ["broadcaster"]),
+   mk("twitch", "Bananensaus17", "#00c3ff", "@GreMi_Gaming fastest lap is mine tonight", ["vip"], [], { name: "GreMi_Gaming", text: "who wants the fastest lap?", id: null }),
+   mk("tiktok", "nina.drives", null, "@DrewDrew Playz same, what a race"),
+   mk("twitch", "lisa_simracing", "#ff4fa3", "first time here, is gremi always this fast?", ["first"])].forEach(addChat);
+  const ev = [["twitch", "follow", "Lisa_SimRacing"], ["tiktok", "follow", "nina.drives"], ["tiktok", "share", "markbonner189"], ["twitch", "follow", "kimi_fan77"],
+              ["youtube", "follow", "DrewDrew Playz"], ["twitch", "sub", "speedy_sam"], ["tiktok", "follow", "carlos_p"], ["twitch", "cheer", "0verfast", 100],
+              ["tiktok", "follow", "fia_steward"], ["twitch", "follow", "monza_max"], ["youtube", "member", "DrewDrew Playz"]];
+  ev.forEach(([platform, kind, name, amount], i) => addEvent({ platform, kind, name, amount, at: now - (ev.length - i) * 30000 }));
+  addEvent({ platform: "tiktok", kind: "gift", name: "markbonner189", amount: 5, text: "Rose", coins: 5, at: now - 20000 });
+  addEvent({ platform: "twitch", kind: "giftbomb", name: "0verfast", amount: 5, big: true, at: now });
   renderWaitlist();
 } else {
   C.connectSB(on); C.connectTF(on); sbActions();

@@ -9,7 +9,7 @@
 (function () {
   const q = new URLSearchParams(location.search);
   const LEAD = new Set((q.get("lead") || "ddrk0,littleegend").toLowerCase().split(","));
-  const HOST = /^gremi[_ ]?gaming$/i;
+  const HOST = /^(ttv[_ .]?)?gremi([_ .]?gaming)?([_ .]?(ttv|live|official))?$/i;
   // bots: every platform, any bot. Names plus a "...bot" ending.
   const BOTS = new Set(("streamelements,streamlabs,nightbot,moobot,fossabot,wizebot,sery_bot,botrix,botrixoficial,kofistreambot," +
     "soundalerts,streamstickers,commanderroot,frostytoolsdotcom,pokemoncommunitygame,tangiabot,blerp,own3d,lumiastream,mixitupbot," +
@@ -72,7 +72,21 @@
     if (LEAD.has(login) || LEAD.has(lower(name))) roles.add("lead");
     const badges = (u.badges || m.badges || []).map((b) => ({ src: b.imageUrl || b.ImageUrl || b.image_url, title: b.name || b.Name || "" })).filter((b) => b.src);
     return { id: "tw" + (d.messageId || m.msgId || ++seq), platform: "twitch", name, login, color: u.color || m.color, text,
-             html: render(text, d.emotes || m.emotes || []), badges, roles, bot: isBot(login) || isBot(name) };
+             html: render(text, d.emotes || m.emotes || []), badges, roles, bot: isBot(login) || isBot(name), reply: twitchReply(d, m) };
+  }
+  // Twitch reply threads. Streamer.bot 1.0 / EventSub: reply{parent_user_name, parent_message_body, ...}; older builds and IRC
+  // tags use other spellings, so every known one is read. null when the message is not a reply.
+  function twitchReply(d, m) {
+    const r = [d.reply, m.reply, d.parent, d.replyParent, d.message && d.message.reply].find((x) => x && typeof x === "object");
+    const t = d.tags || m.tags || {};
+    const name = r ? (r.parent_user_name || r.parentUserName || r.userName || r.user_name || r.displayName || r.display_name || r.name ||
+                      r.parent_user_login || r.parentUserLogin || r.userLogin || r.login || (r.user && (r.user.name || r.user.login)))
+                   : (t["reply-parent-display-name"] || t["reply-parent-user-login"] || d.replyParentDisplayName || d.replyParentUserLogin);
+    if (!name) return null;
+    const text = r ? (r.parent_message_body || r.parentMessageBody || r.msgBody || r.msg_body || r.body || r.text ||
+                      (typeof r.message === "string" ? r.message : "")) : (t["reply-parent-msg-body"] || d.replyParentMsgBody || "");
+    const id = r ? (r.parent_message_id || r.parentMessageId || r.msgId || r.msg_id || r.messageId || r.id) : t["reply-parent-msg-id"];
+    return { name: String(name), text: String(text || "").replace(/\\s/g, " "), id: id ? "tw" + id : null };
   }
   function youtubeMsg(d) {
     const u = d.user || {}, text = typeof d.message === "string" ? d.message : d.message?.message ?? d.text ?? "";
@@ -94,7 +108,7 @@
     if (+d.followRole === 2) badges.push(BADGE.friend);
     for (const b of d.userBadges || []) { const src = b.url || b.image?.url || b.imageUrl; if (src) badges.push({ src, title: b.name || b.type || "" }); }
     if (LEAD.has(login) || LEAD.has(lower(name))) roles.add("lead");
-    if (HOST.test(login)) roles.add("broadcaster");
+    if (HOST.test(login) || HOST.test(name) || d.isAnchor || (d.userIdentity && d.userIdentity.isAnchor)) roles.add("broadcaster");
     return { id: "tt" + (d.msgId || ++seq), platform: "tiktok", name, login, color: null, text: d.comment || "", html: esc(d.comment || ""),
              badges, roles, bot: isBot(login) || isBot(name) };
   }
@@ -179,5 +193,5 @@
            r.has("gifter") ? "t-gifter" : r.has("sub") ? "t-sub" : "";
   }
 
-  window.GremiChat = { twitchMsg, youtubeMsg, pickName, connectSB, connectTF, who, tier, esc, ICON, BADGE, isBot, render, LEAD };
+  window.GremiChat = { twitchMsg, youtubeMsg, pickName, connectSB, connectTF, who, tier, esc, ICON, BADGE, isBot, render, LEAD, HOST };
 })();
