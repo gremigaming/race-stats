@@ -640,8 +640,33 @@ function Screen-State($bmp) {
     return @{ kind = "other"; text = $all; laps = $laps }
 }
 
+if (-not ("GmGameRect" -as [type])) {
+    Add-Type -ReferencedAssemblies System.Drawing @"
+using System; using System.Drawing; using System.Runtime.InteropServices;
+public static class GmGameRect {
+    [DllImport("user32.dll")] static extern bool GetClientRect(IntPtr h, out RECT r);
+    [DllImport("user32.dll")] static extern bool ClientToScreen(IntPtr h, ref POINT p);
+    [StructLayout(LayoutKind.Sequential)] public struct RECT { public int L, T, R, B; }
+    [StructLayout(LayoutKind.Sequential)] public struct POINT { public int X, Y; }
+    // the game's client area from the screen (only right while it is in front)
+    public static Bitmap Shot(IntPtr h) {
+        RECT r; if (!GetClientRect(h, out r) || r.R < 320 || r.B < 200) return null;
+        POINT p = new POINT(); ClientToScreen(h, ref p);
+        Bitmap bmp = new Bitmap(r.R, r.B);
+        using (Graphics g = Graphics.FromImage(bmp)) g.CopyFromScreen(p.X, p.Y, 0, 0, new Size(r.R, r.B));
+        return bmp;
+    }
+}
+"@
+}
+
+# The game's picture: OBS (works in the background), else the screen while F1 is in front
 function Look {
     $bmp = Obs-Shot
+    if (-not $bmp) {
+        $h = Game-Handle
+        if ($h -ne [IntPtr]::Zero -and [GmKeys]::GetForegroundWindow() -eq $h) { $bmp = [GmGameRect]::Shot($h) }
+    }
     if (-not $bmp) { return $null }
     return @{ bmp = $bmp; state = (Screen-State $bmp) }
 }
