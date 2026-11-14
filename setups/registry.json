@@ -4780,11 +4780,24 @@
          "run": 5,
          "laps": 4,
          "bb": 58
+        },
+        {
+         "file": "2026-11-14_23-43-24_Texas_Race.gmtel.gz",
+         "date": "2026-11-14",
+         "session": "race",
+         "osq": false,
+         "weather": 0,
+         "pace": 96329,
+         "best": 96329,
+         "mean": 97527,
+         "run": 5,
+         "laps": 4,
+         "bb": 58
         }
        ],
        "verdict": {
         "result": "baseline",
-        "text": "Starting point: 1:35.029 over 1 session."
+        "text": "Starting point: 1:35.679 over 2 sessions."
        }
       },
       {
@@ -4876,11 +4889,24 @@
          "run": 5,
          "laps": 4,
          "bb": 58
+        },
+        {
+         "file": "2026-11-14_23-43-24_Texas_Race.gmtel.gz",
+         "date": "2026-11-14",
+         "session": "race",
+         "osq": false,
+         "weather": 0,
+         "pace": 97527,
+         "best": 96329,
+         "mean": 97527,
+         "run": 5,
+         "laps": 4,
+         "bb": 58
         }
        ],
        "verdict": {
         "result": "baseline",
-        "text": "Starting point: 1:36.920 over 1 session."
+        "text": "Starting point: 1:37.224 over 2 sessions."
        }
       },
       {
