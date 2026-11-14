@@ -74,7 +74,7 @@ jobs:
           $dir = Join-Path $env:RUNNER_TEMP "post-race"
           python scripts/telemetry/test_post_race.py render $dir
           if ($LASTEXITCODE -ne 0) { exit 1 }
-          foreach ($n in @("menu-save", "menu-advance", "table", "saved", "awards")) {
+          foreach ($n in @("menu-save", "menu-advance", "table", "saved", "awards", "xp")) {
             $line = & powershell -NoProfile -ExecutionPolicy Bypass -File uploader/ClassificationCapture.ps1 -PostImage (Join-Path $dir "$n.png") | Select-Object -Last 1
             Write-Host "$n -> $line"
             python scripts/telemetry/test_post_race.py check $n "$line"

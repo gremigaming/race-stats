@@ -9,7 +9,7 @@ import sys
 from PIL import Image, ImageDraw, ImageFont
 
 EXPECT = {"menu-save": "menu save full race replay", "menu-advance": "menu advance",
-          "table": "table", "saved": "saved", "awards": "awards"}
+          "table": "table", "saved": "saved", "awards": "awards", "xp": "xp"}
 
 
 def font(size):
@@ -59,6 +59,13 @@ def render(folder):
     for i, t in enumerate(["RACE WINNER", "FASTEST LAP", "DRIVER OF THE DAY", "MOST OVERTAKES", "CLEANEST DRIVER"]):
         d.text((120 + i * 350, 400), t, fill=(255, 255, 255), font=font(32))
     im.save(os.path.join(folder, "awards.png"))
+    im = Image.new("RGB", (1920, 1080), (18, 18, 28))
+    d = ImageDraw.Draw(im)
+    d.text((120, 120), "PODIUM PASS", fill=(255, 255, 255), font=font(56))
+    d.text((120, 260), "+1,250 XP", fill=(255, 255, 255), font=font(40))
+    d.text((1500, 1000), "Advance", fill=(255, 255, 255), font=big)
+    d.text((120, 1000), "Ends 0:28", fill=(255, 255, 255), font=big)
+    im.save(os.path.join(folder, "xp.png"))
 
 
 def check(name, line):

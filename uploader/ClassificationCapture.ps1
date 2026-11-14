@@ -634,7 +634,7 @@ function Screen-State($bmp) {
     if ($all -match 'results' -and $all -match '\bwinner\b' -and $all -notmatch 'driver of the day') { return @{ kind = "results"; text = $all; laps = $laps } }   # winner popup over the table
     if ($all -match 'results' -and $laps -ge 4) { return @{ kind = "table"; text = $all; laps = $laps } }
     if ($all -match 'driver of the day|most overtakes|cleanest driver') { return @{ kind = "awards"; text = $all } }
-    if ($all -match 'podium pass|\bxp\b') { return @{ kind = "xp"; text = $all } }
+    if ($all -match 'podium pass' -or ($all -match '\bxp\b' -and $all -match 'advance')) { return @{ kind = "xp"; text = $all } }
     if ($all -match 'communicating with online|lobby|loading') { return @{ kind = "lobby"; text = $all } }
     if ($all -match 'results|\bwinner\b') { return @{ kind = "results"; text = $all; laps = $laps } }   # the winner popup first
     return @{ kind = "other"; text = $all; laps = $laps }
@@ -755,8 +755,9 @@ function Add-Table($bmp, $tag) {
 
 function Post-Race {
     if (-not $ReplaysDir) { $ReplaysDir = Join-Path ([Environment]::GetFolderPath("MyDocuments")) "My Games\F1 25\replays" }
-    $res = $Recorder.ResultsPacket
-    $cars = if ($res -and $res.Length -gt 29) { [int]$res[29] } else { 0 }
+    # cars in the race: results packet when in, else the participants packet (both: count at byte 29)
+    $res = if ((UidOf $Recorder.ResultsPacket) -eq $sessionUid) { $Recorder.ResultsPacket } else { $Recorder.LatestParticipants }
+    $cars = if ($res -and $res.Length -gt 29) { [int]$res[29] } else { 22 }
     $before = @{}
     if (Test-Path $ReplaysDir) { Get-ChildItem $ReplaysDir -Filter *.frr | ForEach-Object { $before[$_.Name] = $true } }
     $keys = $PostRace -eq "on"
@@ -770,6 +771,7 @@ function Post-Race {
     Post-Note "watching for the results page ($cars cars, keys: $(if ($keys) { 'on' } else { 'off' }))"
     try {
         while ((Get-Date) -lt $deadline -and -not $saved) {
+            if ((UidOf $Recorder.LatestLap) -ne $sessionUid) { $outcome = "the next session started"; break }
             $l = Look
             if (-not $l) {
                 if ((Game-Handle) -eq [IntPtr]::Zero) { $outcome = "the game closed"; break }
@@ -892,6 +894,7 @@ $sessionUid = if ($FinishLap) { UidOf ([Convert]::FromBase64String($FinishLap)) 
               elseif ($Recorder) { UidOf $Recorder.LatestLap } else { [uint64]0 }
 $startParts = if ($Recorder -and (UidOf $Recorder.LatestParticipants) -eq $sessionUid) { $Recorder.LatestParticipants } else { $null }
 $resultsSince = $null
+$postNow = $null
 $lapSeen = $null; $lapSince = Get-Date   # the game's latest lap packet and when it last changed
 $inv = [Globalization.CultureInfo]::InvariantCulture
 try {
@@ -928,29 +931,28 @@ while ($true) {
         }
         if ($kept) { $good++; if ($final) { $goodFinal++ } }
         if (-not $first -and $KeepDir) { $first = $shot.Clone() }
+        # the post-race pages are up (podium over): the after-race part takes over now. Online the
+        # results packet only comes when the lobby is back, after the countdown (14 Nov 2026).
+        if ($PostRace -in @("watch", "on") -and $script:ShotSrc -eq "obs" -and -not $kept -and $Recorder) {
+            $k = (Screen-State $shot).kind
+            if ($k -in @("xp", "awards", "results", "table", "menu")) { $postNow = $k }
+        }
         $shot.Dispose()
         $si++
     }
+    if ($postNow) { break }
     $elapsed = ((Get-Date) - $started).TotalSeconds
     if ($ImagePath -or $elapsed -ge $Seconds) { break }
     if (-not $Recorder -and $good -ge $WantScreens) { break }
     # after the results packet: a few frames of the classification screen, or 60 s, then stop
-    # (online the results table only comes after the XP and awards pages: with -PostRace the
-    # after-race part takes over 10 s after the results, the countdown is already running)
-    $resultsWait = if ($PostRace -in @("watch", "on")) { 10 } else { 60 }
-    if ($resultsSince -and ($goodFinal -ge $WantScreens -or ((Get-Date) - $resultsSince).TotalSeconds -ge $resultsWait)) { break }
+    if ($resultsSince -and ($goodFinal -ge $WantScreens -or ((Get-Date) - $resultsSince).TotalSeconds -ge 60)) { break }
     Start-Sleep -Seconds $Every
 }
 # after a race (not quali): the results page, its table and the full race replay
 $postSummary = $null
-if ($PostRace -in @("watch", "on") -and $Recorder -and $sessionUid -and -not $ImagePath) {
-    # the standings part can end before the results come in (the game went quiet): wait for them
-    $until = (Get-Date).AddSeconds(240)
-    while ((UidOf $Recorder.ResultsPacket) -ne $sessionUid -and (Get-Date) -lt $until -and
-           (UidOf $Recorder.LatestLap) -eq $sessionUid) { Start-Sleep -Seconds 1 }
-}
+# GreMi finished this race (or its results are in), and the after-race pages are up or still to come
 if ($PostRace -in @("watch", "on") -and $Recorder -and $sessionUid -and -not $ImagePath -and
-    (UidOf $Recorder.ResultsPacket) -eq $sessionUid -and $Recorder.ResultsSessionType -ge 15 -and $Recorder.ResultsSessionType -le 17) {
+    ($FinishLap -or (UidOf $Recorder.ResultsPacket) -eq $sessionUid) -and (UidOf $Recorder.LatestLap) -eq $sessionUid) {
     $postSummary = Post-Race
 }
 } finally { Obs-Cleanup }   # take the off-canvas game source out of OBS again
