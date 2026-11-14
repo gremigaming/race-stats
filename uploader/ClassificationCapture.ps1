@@ -939,6 +939,12 @@ while ($true) {
 }
 # after a race (not quali): the results page, its table and the full race replay
 $postSummary = $null
+if ($PostRace -in @("watch", "on") -and $Recorder -and $sessionUid -and -not $ImagePath) {
+    # the standings part can end before the results come in (the game went quiet): wait for them
+    $until = (Get-Date).AddSeconds(240)
+    while ((UidOf $Recorder.ResultsPacket) -ne $sessionUid -and (Get-Date) -lt $until -and
+           (UidOf $Recorder.LatestLap) -eq $sessionUid) { Start-Sleep -Seconds 1 }
+}
 if ($PostRace -in @("watch", "on") -and $Recorder -and $sessionUid -and -not $ImagePath -and
     (UidOf $Recorder.ResultsPacket) -eq $sessionUid -and $Recorder.ResultsSessionType -ge 15 -and $Recorder.ResultsSessionType -le 17) {
     $postSummary = Post-Race
