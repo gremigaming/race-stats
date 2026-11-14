@@ -760,6 +760,10 @@ function Post-Race {
     $before = @{}
     if (Test-Path $ReplaysDir) { Get-ChildItem $ReplaysDir -Filter *.frr | ForEach-Object { $before[$_.Name] = $true } }
     $keys = $PostRace -eq "on"
+    # only with OBS running (GreMi: no OBS = no stream = nothing needed)
+    $probe = Obs-Shot
+    if ($probe) { $probe.Dispose() }
+    elseif ($script:ObsNote -match "OBS isn.t running") { return "After the race: skipped (OBS is closed)" }
     $deadline = (Get-Date).AddSeconds($PostSeconds)
     $script:TablePics = 0; $scrolled = $cars -le 14; $saved = $false; $outcome = "results page not seen"
     $last = ""; $sawAwards = $false; $enters = 0; $asked = $null; $pageEnters = 0
