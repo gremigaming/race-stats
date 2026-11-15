@@ -8,7 +8,7 @@
   "requested": null,
   "last": "2026-11-10"
  },
- "pending": 30,
+ "pending": 31,
  "tracks": [
   {
    "track": "Melbourne",
@@ -5755,12 +5755,25 @@
          "run": 1,
          "laps": 1,
          "bb": 60
+        },
+        {
+         "file": "2026-11-15_16-27-27_Brazil_Race.gmtel.gz",
+         "date": "2026-11-15",
+         "session": "race",
+         "osq": false,
+         "weather": 0,
+         "pace": 70036,
+         "best": 70036,
+         "mean": 70670,
+         "run": 5,
+         "laps": 4,
+         "bb": 59
         }
        ],
        "verdict": {
         "result": "better",
-        "delta": -0.92,
-        "text": "Better: quali lap 1:09.921 against 1:10.574 on V1 (0.652 s faster)."
+        "delta": -0.88,
+        "text": "Better: quali lap 1:09.950 against 1:10.574 on V1 (0.624 s faster)."
        },
        "slot": 60
       },
@@ -5934,12 +5947,25 @@
          "run": 5,
          "laps": 3,
          "bb": 58
+        },
+        {
+         "file": "2026-11-15_16-27-27_Brazil_Race.gmtel.gz",
+         "date": "2026-11-15",
+         "session": "race",
+         "osq": false,
+         "weather": 0,
+         "pace": 70670,
+         "best": 70036,
+         "mean": 70670,
+         "run": 5,
+         "laps": 4,
+         "bb": 59
         }
        ],
        "verdict": {
         "result": "worse",
-        "delta": 1.01,
-        "text": "Worse: average lap 1:11.648 against 1:10.935 on V1 (0.713 s slower)."
+        "delta": 0.32,
+        "text": "Worse: average lap 1:11.159 against 1:10.935 on V1 (0.224 s slower)."
        },
        "slot": 61
       },
@@ -6513,12 +6539,68 @@
        },
        "text": "Front wing 48 → 50",
        "why": "More front grip against the mid-corner understeer.",
+       "sessions": [
+        {
+         "file": "2026-11-15_16-41-19_Losail_OSQ.gmtel.gz",
+         "date": "2026-11-15",
+         "session": "quali",
+         "osq": true,
+         "weather": 0,
+         "pace": 83260,
+         "best": 83260,
+         "mean": 83260,
+         "run": 1,
+         "laps": 1,
+         "bb": 57
+        }
+       ],
+       "verdict": {
+        "result": "better",
+        "delta": -2.52,
+        "text": "Better: quali lap 1:23.260 against 1:25.412 on V1 (2.152 s faster)."
+       },
+       "slot": 66
+      },
+      {
+       "v": 3,
+       "base": 2,
+       "created": "2026-11-15",
+       "saved": null,
+       "values": {
+        "fw": 50,
+        "rw": 26,
+        "don": 100,
+        "doff": 40,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 39,
+        "rs": 41,
+        "farb": 3,
+        "rarb": 12,
+        "frh": 22,
+        "rrh": 45,
+        "bb": 57,
+        "bp": 100,
+        "fr": 29.2,
+        "fl": 29.2,
+        "rr": 20.5,
+        "rl": 20.5
+       },
+       "change": {
+        "rarb": [
+         10,
+         12
+        ]
+       },
+       "text": "Rear anti-roll bar 10 → 12",
+       "why": "The front wing is already at 50, so a slightly stiffer rear anti-roll bar helps the car rotate.",
        "sessions": [],
        "verdict": {
         "result": "untested",
         "text": "Not driven yet."
-       },
-       "slot": 66
+       }
       }
      ]
     },
