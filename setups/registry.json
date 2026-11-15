@@ -5742,12 +5742,25 @@
          "run": 5,
          "laps": 3,
          "bb": 58
+        },
+        {
+         "file": "2026-11-15_16-24-17_Brazil_OSQ.gmtel.gz",
+         "date": "2026-11-15",
+         "session": "quali",
+         "osq": true,
+         "weather": 1,
+         "pace": 69446,
+         "best": 69446,
+         "mean": 69446,
+         "run": 1,
+         "laps": 1,
+         "bb": 60
         }
        ],
        "verdict": {
         "result": "better",
-        "delta": -0.59,
-        "text": "Better: quali lap 1:10.159 against 1:10.574 on V1 (0.415 s faster)."
+        "delta": -0.92,
+        "text": "Better: quali lap 1:09.921 against 1:10.574 on V1 (0.652 s faster)."
        },
        "slot": 60
       },
