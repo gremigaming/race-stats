@@ -64,6 +64,69 @@
         "gray_score": 0.0
       }
     },
+    "1113a-1": {
+      "verdict": "#20 QDR_SHW1KS at fault",
+      "by": "GreMi",
+      "real": true,
+      "at_fault": [
+        "#20 QDR_SHW1KS"
+      ],
+      "severity": 2,
+      "note": "",
+      "at": 1794707918,
+      "parts": [
+        {
+          "t0": 14.5,
+          "t1": 14.5,
+          "real": true,
+          "verdict": "#20 QDR_SHW1KS at fault",
+          "tags": [],
+          "kind": "Moved across alongside",
+          "note": "",
+          "drivers": [
+            {
+              "car": 0,
+              "name": "#20 QDR_SHW1KS",
+              "call": "fault",
+              "severity": 2
+            },
+            {
+              "car": 4,
+              "name": "#15 stijntjegeffie",
+              "call": "clear"
+            }
+          ]
+        }
+      ],
+      "kind": "Moved across alongside",
+      "drivers": [
+        {
+          "car": 0,
+          "name": "#20 QDR_SHW1KS"
+        },
+        {
+          "car": 4,
+          "name": "#15 stijntjegeffie"
+        }
+      ],
+      "track": "Las Vegas",
+      "date": "2026-11-13",
+      "race_file": "Race_Las_Vegas_Just_in_case_2026_11_13_16_18_12.json",
+      "recording": "2026-11-13_16-00-22_Las_Vegas_Race.gmtel.gz",
+      "replay": "https://gremigaming.github.io/race-stats/all/race/2026-11-13_16-00-22_Las_Vegas_Race?inc=14.5&car=0,4",
+      "engine": {
+        "rules": "v1.5",
+        "verdict": "QDR_SHW1KS at fault",
+        "rule": "R2",
+        "severity": 2,
+        "why": "side by side; QDR_SHW1KS moved 4.5 m across into the other car",
+        "at_fault": [
+          "#20 QDR_SHW1KS"
+        ],
+        "contacts": 1,
+        "gray_score": 0.0
+      }
+    },
     "1104b-1": {
       "verdict": "Not an incident",
       "by": "GreMi",
