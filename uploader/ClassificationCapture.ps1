@@ -900,6 +900,16 @@ $good = 0; $goodFinal = 0
 $best = $null; $bestScore = 0
 $first = $null   # the first picture, kept for checking when nothing could be read
 $started = Get-Date
+# Everything is tied to this race's session id: packets of the next session (the lobby moved
+# on) are never mixed in, and a new session ends the capture.
+function UidOf($b) { if ($b -and $b.Length -ge 15) { [BitConverter]::ToUInt64($b, 7) } else { [uint64]0 } }
+$sessionUid = if ($FinishLap) { UidOf ([Convert]::FromBase64String($FinishLap)) }
+              elseif ($Recorder) { UidOf $Recorder.LatestLap } else { [uint64]0 }
+$startParts = if ($Recorder -and (UidOf $Recorder.LatestParticipants) -eq $sessionUid) { $Recorder.LatestParticipants } else { $null }
+$resultsSince = $null
+$postNow = $null
+$lapSeen = $null; $lapSince = Get-Date   # the game's latest lap packet and when it last changed
+$inv = [Globalization.CultureInfo]::InvariantCulture
 if ($PostDryRun) {
     $script:DryShots = @(Get-ChildItem $PostDryRun -File | Where-Object { $_.Extension -match '^\.(png|jpg)$' } | Sort-Object Name | ForEach-Object { $_.FullName })
     if (-not $KeepDir) { $KeepDir = Join-Path $tmp "keep" }
@@ -911,16 +921,6 @@ if ($PostDryRun) {
     Remove-Item -Recurse -Force $tmp -ErrorAction SilentlyContinue
     return
 }
-# Everything is tied to this race's session id: packets of the next session (the lobby moved
-# on) are never mixed in, and a new session ends the capture.
-function UidOf($b) { if ($b -and $b.Length -ge 15) { [BitConverter]::ToUInt64($b, 7) } else { [uint64]0 } }
-$sessionUid = if ($FinishLap) { UidOf ([Convert]::FromBase64String($FinishLap)) }
-              elseif ($Recorder) { UidOf $Recorder.LatestLap } else { [uint64]0 }
-$startParts = if ($Recorder -and (UidOf $Recorder.LatestParticipants) -eq $sessionUid) { $Recorder.LatestParticipants } else { $null }
-$resultsSince = $null
-$postNow = $null
-$lapSeen = $null; $lapSince = Get-Date   # the game's latest lap packet and when it last changed
-$inv = [Globalization.CultureInfo]::InvariantCulture
 try {
 while ($true) {
     $t = [math]::Round(((Get-Date) - $started).TotalSeconds, 1)
