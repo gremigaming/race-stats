@@ -8,7 +8,7 @@
   "requested": null,
   "last": "2026-11-10"
  },
- "pending": 26,
+ "pending": 28,
  "tracks": [
   {
    "track": "Melbourne",
@@ -2232,6 +2232,61 @@
        "change": null,
        "text": "Starting setup",
        "why": "Your last quali setup.",
+       "sessions": [
+        {
+         "file": "2026-11-15_02-43-37_Catalunya_Race.gmtel.gz",
+         "date": "2026-11-15",
+         "session": "race",
+         "osq": false,
+         "weather": 1,
+         "pace": 75108,
+         "best": 75108,
+         "mean": 75461,
+         "run": 5,
+         "laps": 4,
+         "bb": 59
+        }
+       ],
+       "verdict": {
+        "result": "baseline",
+        "text": "Starting point: 1:15.108 over 1 session."
+       }
+      },
+      {
+       "v": 2,
+       "base": 1,
+       "created": "2026-11-15",
+       "saved": null,
+       "values": {
+        "fw": 50,
+        "rw": 35,
+        "don": 100,
+        "doff": 30,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 34,
+        "farb": 4,
+        "rarb": 11,
+        "frh": 21,
+        "rrh": 43,
+        "bb": 55,
+        "bp": 100,
+        "fr": 28.5,
+        "fl": 28.5,
+        "rr": 22.0,
+        "rl": 22.0
+       },
+       "change": {
+        "rarb": [
+         9,
+         11
+        ]
+       },
+       "text": "Rear anti-roll bar 9 → 11",
+       "why": "The front wing is already at 50, so a slightly stiffer rear anti-roll bar helps the car rotate.",
        "sessions": [],
        "verdict": {
         "result": "untested",
@@ -2273,6 +2328,61 @@
        "change": null,
        "text": "Starting setup",
        "why": "Your last race setup.",
+       "sessions": [
+        {
+         "file": "2026-11-15_02-43-37_Catalunya_Race.gmtel.gz",
+         "date": "2026-11-15",
+         "session": "race",
+         "osq": false,
+         "weather": 1,
+         "pace": 75461,
+         "best": 75108,
+         "mean": 75461,
+         "run": 5,
+         "laps": 4,
+         "bb": 59
+        }
+       ],
+       "verdict": {
+        "result": "baseline",
+        "text": "Starting point: 1:15.461 over 1 session."
+       }
+      },
+      {
+       "v": 2,
+       "base": 1,
+       "created": "2026-11-15",
+       "saved": null,
+       "values": {
+        "fw": 50,
+        "rw": 35,
+        "don": 100,
+        "doff": 30,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 34,
+        "farb": 4,
+        "rarb": 11,
+        "frh": 21,
+        "rrh": 43,
+        "bb": 55,
+        "bp": 100,
+        "fr": 28.5,
+        "fl": 28.5,
+        "rr": 22.0,
+        "rl": 22.0
+       },
+       "change": {
+        "rarb": [
+         9,
+         11
+        ]
+       },
+       "text": "Rear anti-roll bar 9 → 11",
+       "why": "The front wing is already at 50, so a slightly stiffer rear anti-roll bar helps the car rotate.",
        "sessions": [],
        "verdict": {
         "result": "untested",
