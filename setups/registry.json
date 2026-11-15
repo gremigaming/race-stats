@@ -8,7 +8,7 @@
   "requested": null,
   "last": "2026-11-10"
  },
- "pending": 33,
+ "pending": 35,
  "tracks": [
   {
    "track": "Melbourne",
@@ -3966,12 +3966,25 @@
          "run": 1,
          "laps": 1,
          "bb": 59
+        },
+        {
+         "file": "2026-11-15_17-25-15_Zandvoort_Race.gmtel.gz",
+         "date": "2026-11-15",
+         "session": "race",
+         "osq": false,
+         "weather": 2,
+         "pace": 71927,
+         "best": 71927,
+         "mean": 72473,
+         "run": 5,
+         "laps": 4,
+         "bb": 59
         }
        ],
        "verdict": {
         "result": "worse",
-        "delta": 12.51,
-        "text": "Worse: quali lap 1:22.827 against 1:13.615 on V1 (9.212 s slower)."
+        "delta": 5.11,
+        "text": "Worse: quali lap 1:17.377 against 1:13.615 on V1 (3.762 s slower)."
        },
        "slot": 39
       },
@@ -4106,12 +4119,68 @@
        },
        "text": "Rear anti-roll bar 9 → 11",
        "why": "The front wing is already at 50, so a slightly stiffer rear anti-roll bar helps the car rotate.",
+       "sessions": [
+        {
+         "file": "2026-11-15_17-25-15_Zandvoort_Race.gmtel.gz",
+         "date": "2026-11-15",
+         "session": "race",
+         "osq": false,
+         "weather": 2,
+         "pace": 72473,
+         "best": 71927,
+         "mean": 72473,
+         "run": 5,
+         "laps": 4,
+         "bb": 59
+        }
+       ],
+       "verdict": {
+        "result": "better",
+        "delta": -3.66,
+        "text": "Better: average lap 1:12.473 against 1:15.229 on V1 (2.756 s faster)."
+       },
+       "slot": 40
+      },
+      {
+       "v": 3,
+       "base": 2,
+       "created": "2026-11-15",
+       "saved": null,
+       "values": {
+        "fw": 50,
+        "rw": 34,
+        "don": 100,
+        "doff": 30,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 39,
+        "farb": 4,
+        "rarb": 11,
+        "frh": 22,
+        "rrh": 45,
+        "bb": 55,
+        "bp": 100,
+        "fr": 28.0,
+        "fl": 28.0,
+        "rr": 22.0,
+        "rl": 22.0
+       },
+       "change": {
+        "rrh": [
+         44,
+         45
+        ]
+       },
+       "text": "Rear ride height 44 → 45",
+       "why": "The rear floor still scrapes; a little higher.",
        "sessions": [],
        "verdict": {
         "result": "untested",
         "text": "Not driven yet."
-       },
-       "slot": 40
+       }
       }
      ]
     },
@@ -7006,12 +7075,68 @@
        },
        "text": "Rear springs 13 → 30",
        "why": "The soft rear lets the floor scrape. 30 keeps it off the ground and makes laps more consistent.",
+       "sessions": [
+        {
+         "file": "2026-11-15_17-38-45_Abu_Dhabi_OSQ.gmtel.gz",
+         "date": "2026-11-15",
+         "session": "quali",
+         "osq": true,
+         "weather": 0,
+         "pace": 83989,
+         "best": 83989,
+         "mean": 83989,
+         "run": 1,
+         "laps": 1,
+         "bb": 60
+        }
+       ],
+       "verdict": {
+        "result": "better",
+        "delta": -2.49,
+        "text": "Better: quali lap 1:23.989 against 1:26.134 on V1 (2.145 s faster)."
+       },
+       "slot": 69
+      },
+      {
+       "v": 3,
+       "base": 2,
+       "created": "2026-11-15",
+       "saved": null,
+       "values": {
+        "fw": 50,
+        "rw": 23,
+        "don": 100,
+        "doff": 20,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 30,
+        "farb": 18,
+        "rarb": 1,
+        "frh": 22,
+        "rrh": 44,
+        "bb": 54,
+        "bp": 100,
+        "fr": 27.5,
+        "fl": 27.5,
+        "rr": 20.5,
+        "rl": 20.5
+       },
+       "change": {
+        "frh": [
+         21,
+         22
+        ]
+       },
+       "text": "Front ride height 21 → 22",
+       "why": "The front hits the ground under hard braking.",
        "sessions": [],
        "verdict": {
         "result": "untested",
         "text": "Not driven yet."
-       },
-       "slot": 69
+       }
       }
      ]
     },
