@@ -285,7 +285,9 @@ function showSent(items) {
     if (!(s.id > sentSeen)) continue;
     sentSeen = s.id;
     if (s.where !== "twitch") continue;   // GreMi: only Race Control's Twitch chat messages (YouTube repeats the same text)
-    sysLine("rc", s.where, "🤖", `${C.ICON[s.where] || ""}<b>Race Control</b> ${esc(s.text)}`, s.at * 1000, s.text);
+    // GreMi knows the texts; the line only says which one went out ("Simgasm message sent"). Hover shows the text.
+    const label = s.label && s.label !== "Race Control" ? s.label + " message" : "Race Control message";
+    sysLine("rc", s.where, "🤖", `${C.ICON[s.where] || ""}<b>${esc(label)}</b> sent`, s.at * 1000, s.text);
   }
 }
 
@@ -463,8 +465,8 @@ if (q.has("demo")) {
   addEvent({ platform: "twitch", kind: "giftbomb", name: "0verfast", amount: 5, big: true, at: now });
   addEvent({ platform: "twitch", kind: "reward", name: "kimi_fan77", text: "Pick my next track", amount: 2500, input: "Monza please, I want to see the T1 chaos", at: now });
   sentSeen = 0;
-  showSent([{ id: 1, at: now / 1000, where: "twitch", text: "Want to race with GreMi? Join the Discord, the lobby opens after every race: discord.gg/gremi" },
-            { id: 2, at: now / 1000, where: "twitch", text: "Use code GREMI10 for 10% off at Simgasm: simgasm.com/gremi_gaming" }]);
+  showSent([{ id: 1, at: now / 1000, where: "twitch", label: "Join", text: "Want to race with GreMi? Join the Discord, the lobby opens after every race: discord.gg/gremi" },
+            { id: 2, at: now / 1000, where: "twitch", label: "Simgasm", text: "Use code GREMI10 for 10% off at Simgasm: simgasm.com/gremi_gaming" }]);
   renderWaitlist();
 } else {
   C.connectSB(on); C.connectTF(on); sbActions();
