@@ -960,7 +960,10 @@ while ($true) {
     $si = 0
     foreach ($shot in (Shots)) {
         $kept = $false
-        foreach ($v in (Variants $shot)) {
+        # GreMi 15 Nov 2026: with the after-race part on and OBS running, names come from the
+        # results table only (every row with its lap time); the tower isn't read any more
+        $towerOff = $PostRace -eq "on" -and $script:ShotSrc -eq "obs" -and $Recorder
+        foreach ($v in $(if ($towerOff) { @() } else { Variants $shot })) {
             $words = Read-Bitmap $v[1] $v[2]
             $v[1].Dispose()
             # classification screen: lap times; standings tower: gaps (+1.234) and DNFs
@@ -1002,6 +1005,10 @@ $postSummary = $null
 if ($PostRace -in @("watch", "on") -and $Recorder -and $sessionUid -and -not $ImagePath -and
     ($FinishLap -or (UidOf $Recorder.ResultsPacket) -eq $sessionUid) -and (UidOf $Recorder.LatestLap) -eq $sessionUid) {
     $postSummary = Post-Race
+    # online the results packet (what the table rows are matched to) only comes once the lobby
+    # is back: wait for it so it goes into this capture
+    $until = (Get-Date).AddSeconds(150)
+    while ($script:TablePics -and (UidOf $Recorder.ResultsPacket) -ne $sessionUid -and (Get-Date) -lt $until) { Start-Sleep -Seconds 1 }
 }
 } finally { Obs-Cleanup }   # take the off-canvas game source out of OBS again
 
