@@ -8,7 +8,7 @@
   "requested": null,
   "last": "2026-11-10"
  },
- "pending": 31,
+ "pending": 32,
  "tracks": [
   {
    "track": "Melbourne",
@@ -6552,12 +6552,25 @@
          "run": 1,
          "laps": 1,
          "bb": 57
+        },
+        {
+         "file": "2026-11-15_16-44-36_Losail_Race.gmtel.gz",
+         "date": "2026-11-15",
+         "session": "race",
+         "osq": false,
+         "weather": 0,
+         "pace": 83886,
+         "best": 83886,
+         "mean": 84646,
+         "run": 5,
+         "laps": 4,
+         "bb": 57
         }
        ],
        "verdict": {
         "result": "better",
-        "delta": -2.52,
-        "text": "Better: quali lap 1:23.260 against 1:25.412 on V1 (2.152 s faster)."
+        "delta": -2.15,
+        "text": "Better: quali lap 1:23.573 against 1:25.412 on V1 (1.839 s faster)."
        },
        "slot": 66
       },
@@ -6692,12 +6705,68 @@
        },
        "text": "Front wing 48 → 50",
        "why": "More front grip against the mid-corner understeer.",
+       "sessions": [
+        {
+         "file": "2026-11-15_16-44-36_Losail_Race.gmtel.gz",
+         "date": "2026-11-15",
+         "session": "race",
+         "osq": false,
+         "weather": 0,
+         "pace": 84646,
+         "best": 83886,
+         "mean": 84646,
+         "run": 5,
+         "laps": 4,
+         "bb": 57
+        }
+       ],
+       "verdict": {
+        "result": "better",
+        "delta": -2.71,
+        "text": "Better: average lap 1:24.646 against 1:27.006 on V1 (2.360 s faster)."
+       },
+       "slot": 67
+      },
+      {
+       "v": 3,
+       "base": 2,
+       "created": "2026-11-15",
+       "saved": null,
+       "values": {
+        "fw": 50,
+        "rw": 26,
+        "don": 100,
+        "doff": 40,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 39,
+        "rs": 41,
+        "farb": 3,
+        "rarb": 12,
+        "frh": 22,
+        "rrh": 45,
+        "bb": 57,
+        "bp": 100,
+        "fr": 29.2,
+        "fl": 29.2,
+        "rr": 20.5,
+        "rl": 20.5
+       },
+       "change": {
+        "rarb": [
+         10,
+         12
+        ]
+       },
+       "text": "Rear anti-roll bar 10 → 12",
+       "why": "The front wing is already at 50, so a slightly stiffer rear anti-roll bar helps the car rotate.",
        "sessions": [],
        "verdict": {
         "result": "untested",
         "text": "Not driven yet."
-       },
-       "slot": 67
+       }
       }
      ]
     },
