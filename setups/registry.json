@@ -1139,11 +1139,24 @@
          "run": 5,
          "laps": 4,
          "bb": 58
+        },
+        {
+         "file": "2026-11-15_17-02-51_Bahrain_OSQ.gmtel.gz",
+         "date": "2026-11-15",
+         "session": "quali",
+         "osq": true,
+         "weather": 0,
+         "pace": 88180,
+         "best": 88180,
+         "mean": 88180,
+         "run": 1,
+         "laps": 1,
+         "bb": 58
         }
        ],
        "verdict": {
         "result": "baseline",
-        "text": "Starting point: 1:30.215 over 1 session."
+        "text": "Starting point: 1:29.198 over 2 sessions."
        }
       },
       {
