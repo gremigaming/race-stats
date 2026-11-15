@@ -8,7 +8,7 @@
   "requested": null,
   "last": "2026-11-10"
  },
- "pending": 28,
+ "pending": 29,
  "tracks": [
   {
    "track": "Melbourne",
@@ -3599,12 +3599,68 @@
        },
        "text": "Rear anti-roll bar 7 → 9",
        "why": "The front wing is already at 50, so a slightly stiffer rear anti-roll bar helps the car rotate.",
+       "sessions": [
+        {
+         "file": "2026-11-15_15-14-26_Hungaroring_Race.gmtel.gz",
+         "date": "2026-11-15",
+         "session": "race",
+         "osq": false,
+         "weather": 1,
+         "pace": 79211,
+         "best": 78794,
+         "mean": 79211,
+         "run": 5,
+         "laps": 4,
+         "bb": 58
+        }
+       ],
+       "verdict": {
+        "result": "better",
+        "delta": -0.47,
+        "text": "Better: average lap 1:19.211 against 1:19.583 on V1 (0.372 s faster)."
+       },
+       "slot": 37
+      },
+      {
+       "v": 3,
+       "base": 2,
+       "created": "2026-11-15",
+       "saved": null,
+       "values": {
+        "fw": 50,
+        "rw": 38,
+        "don": 100,
+        "doff": 35,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 28,
+        "farb": 2,
+        "rarb": 9,
+        "frh": 21,
+        "rrh": 42,
+        "bb": 57,
+        "bp": 100,
+        "fr": 28.2,
+        "fl": 28.2,
+        "rr": 21.0,
+        "rl": 21.0
+       },
+       "change": {
+        "rw": [
+         36,
+         38
+        ]
+       },
+       "text": "Rear wing 36 → 38",
+       "why": "More rear wing for a calmer rear in fast corners.",
        "sessions": [],
        "verdict": {
         "result": "untested",
         "text": "Not driven yet."
-       },
-       "slot": 37
+       }
       }
      ]
     },
