@@ -161,12 +161,25 @@
          "run": 5,
          "laps": 4,
          "bb": 57
+        },
+        {
+         "file": "2026-11-15_15-27-11_Melbourne_OSQ.gmtel.gz",
+         "date": "2026-11-15",
+         "session": "quali",
+         "osq": true,
+         "weather": 1,
+         "pace": 77403,
+         "best": 77403,
+         "mean": 77403,
+         "run": 1,
+         "laps": 1,
+         "bb": 56
         }
        ],
        "verdict": {
         "result": "better",
-        "delta": -4.51,
-        "text": "Better: quali lap 1:18.476 against 1:22.179 on V1 (3.703 s faster)."
+        "delta": -4.77,
+        "text": "Better: quali lap 1:18.262 against 1:22.179 on V1 (3.917 s faster)."
        },
        "slot": 0
       },
