@@ -56,8 +56,11 @@ def render(folder):
     im.save(os.path.join(folder, "saved.png"))
     im = Image.new("RGB", (1920, 1080), (18, 18, 28))
     d = ImageDraw.Draw(im)
-    for i, t in enumerate(["RACE WINNER", "FASTEST LAP", "DRIVER OF THE DAY", "MOST OVERTAKES", "CLEANEST DRIVER"]):
-        d.text((120 + i * 350, 400), t, fill=(255, 255, 255), font=font(32))
+    # like F1 25 online (14 Nov 2026): only the buttons and "FASTEST LAP" read reliably
+    for i, t in enumerate(["RACE WINNER", "FASTEST LAP"]):
+        d.text((320 + i * 350, 220), t, fill=(255, 255, 255), font=font(40))
+    d.text((330, 680), "ADD AS EA FRIEND", fill=(255, 255, 255), font=font(28))
+    d.text((1700, 1030), "Continue", fill=(255, 255, 255), font=font(28))
     im.save(os.path.join(folder, "awards.png"))
     im = Image.new("RGB", (1920, 1080), (18, 18, 28))
     d = ImageDraw.Draw(im)

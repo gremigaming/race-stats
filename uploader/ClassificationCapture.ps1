@@ -633,7 +633,9 @@ function Screen-State($bmp) {
     }
     if ($all -match 'results' -and $all -match '\bwinner\b' -and $all -notmatch 'driver of the day') { return @{ kind = "results"; text = $all; laps = $laps } }   # winner popup over the table
     if ($all -match 'results' -and $laps -ge 4) { return @{ kind = "table"; text = $all; laps = $laps } }
-    if ($all -match 'driver of the day|most overtakes|cleanest driver') { return @{ kind = "awards"; text = $all } }
+    # awards: the big outlined titles read badly ("fastest lap mnost", "cleanest"), the buttons well
+    if ($all -match 'driver of the day|most overtakes|cleanest|add as ea friend' -or ($all -match 'fastest lap' -and $all -match 'continue')) {
+        return @{ kind = "awards"; text = $all } }
     if ($all -match 'podium pass' -or ($all -match '\bxp\b' -and $all -match 'advance')) { return @{ kind = "xp"; text = $all } }
     if ($all -match 'communicating with online|lobby|loading') { return @{ kind = "lobby"; text = $all } }
     if ($all -match 'results|\bwinner\b') { return @{ kind = "results"; text = $all; laps = $laps } }   # the winner popup first
@@ -760,7 +762,7 @@ function Post-Race {
     $cars = if ($res -and $res.Length -gt 29) { [int]$res[29] } else { 22 }
     $before = @{}
     if (Test-Path $ReplaysDir) { Get-ChildItem $ReplaysDir -Filter *.frr | ForEach-Object { $before[$_.Name] = $true } }
-    $keys = $PostRace -eq "on"
+    $doKeys = $PostRace -eq "on"
     # only with OBS running (GreMi: no OBS = no stream = nothing needed)
     $probe = Obs-Shot
     if ($probe) { $probe.Dispose() }
@@ -768,7 +770,7 @@ function Post-Race {
     $deadline = (Get-Date).AddSeconds($PostSeconds)
     $script:TablePics = 0; $scrolled = $cars -le 14; $saved = $false; $outcome = "results page not seen"
     $last = ""; $sawAwards = $false; $enters = 0; $asked = $null; $pageEnters = 0
-    Post-Note "watching for the results page ($cars cars, keys: $(if ($keys) { 'on' } else { 'off' }))"
+    Post-Note "watching for the results page ($cars cars, keys: $(if ($doKeys) { 'on' } else { 'off' }))"
     try {
         while ((Get-Date) -lt $deadline -and -not $saved) {
             if ((UidOf $Recorder.LatestLap) -ne $sessionUid) { $outcome = "the next session started"; break }
@@ -784,7 +786,7 @@ function Post-Race {
             if ($s.kind -eq "table" -and $script:TablePics -eq 0) { Add-Table $l.bmp "1"; $outcome = "results table pictured" }
             $l.bmp.Dispose()
             # XP and awards pages wait for Enter (one countdown runs for all of them, so no waiting)
-            if ($keys -and $s.kind -in @("xp", "awards")) {
+            if ($doKeys -and $s.kind -in @("xp", "awards")) {
                 if (++$pageEnters -gt 12) { $outcome = "the XP/awards pages didn't move on"; break }
                 $was = $s.kind
                 $l = Press "enter" { param($x) $x.kind -ne $was }
@@ -792,7 +794,7 @@ function Post-Race {
                 Start-Sleep -Milliseconds 300
                 continue
             }
-            if (-not $keys -or $s.kind -notin @("table", "results", "menu", "saved", "error")) { Start-Sleep -Seconds 2; continue }
+            if (-not $doKeys -or $s.kind -notin @("table", "results", "menu", "saved", "error")) { Start-Sleep -Seconds 2; continue }
 
             # the results page: act, reading the screen before every key
             for ($step = 0; $step -lt 40 -and -not $saved; $step++) {
@@ -866,8 +868,8 @@ function Post-Race {
     $pics = if ($script:TablePics) { "results table: $($script:TablePics) picture(s)" } else { "results table not pictured" }
     $rep = if ($file) { "replay saved: $($file.Name) ($([math]::Round($file.Length / 1MB)) MB)" }
            elseif ($saved) { "replay saved (file not found in $ReplaysDir yet)" }
-           elseif ($keys) { "replay not saved: $outcome" } else { "watch only" }
-    $sum = "After the race: $pics; $rep$(if ($keys) { ' [keys: ' + $script:KeyMode + ']' })"
+           elseif ($doKeys) { "replay not saved: $outcome" } else { "watch only" }
+    $sum = "After the race: $pics; $rep$(if ($doKeys) { ' [keys: ' + $script:KeyMode + ']' })"
     Post-Note $sum
     if ($KeepDir) { try { Add-Content -Path (Join-Path $KeepDir "post-race-log.txt") -Value (@("", "== $Recording") + $script:PostLog) } catch { } }
     return $sum
