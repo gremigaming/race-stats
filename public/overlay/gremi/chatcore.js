@@ -4,7 +4,7 @@
 //   { id, platform: twitch|youtube|tiktok, name, color, text, html, badges: [{src|svg, title}],
 //     roles: Set(broadcaster, lead, mod, vip, sub, first, gifter, follower), event: false }
 // and one event shape for the activity feed:
-//   { id, platform, kind: follow|sub|resub|gift|giftbomb|raid|cheer|superchat|member|like|share, name, amount, text, big: bool }
+//   { id, platform, kind: follow|sub|resub|gift|giftbomb|raid|cheer|superchat|member|like|share|reward, name, amount, text, input, big: bool }
 // NOTE: never send GetMonitoredYouTubeBroadcasts: Streamer.bot 1.0.x drops the whole connection on it.
 (function () {
   const q = new URLSearchParams(location.search);
@@ -137,6 +137,11 @@
       case "Twitch.GiftBomb": return e("giftbomb", { amount: d.gifts ?? d.total, big: true });
       case "Twitch.Raid": return e("raid", { name: d.from_broadcaster_user_name || who, amount: d.viewers, big: true });
       case "Twitch.Cheer": return e("cheer", { amount: d.bits ?? d.message?.bits, text: d.message?.message || "", big: (d.bits ?? 0) >= 500 });
+      case "Twitch.RewardRedemption": {   // channel points. 1.0: reward{title,cost}, user_input; 0.2: rewardTitle, userInput
+        const r = (d.reward && typeof d.reward === "object") ? d.reward : {};
+        return e("reward", { text: r.title || r.name || d.rewardTitle || d.title || "a reward", amount: r.cost ?? d.cost ?? d.rewardCost,
+                             input: d.user_input ?? d.userInput ?? d.input ?? d.rawInput ?? "" });
+      }
       case "YouTube.SuperChat": return e("superchat", { amount: d.amount, text: d.message || "", big: true });
       case "YouTube.SuperSticker": return e("superchat", { amount: d.amount, text: "Super Sticker", big: true });
       case "YouTube.NewSponsor": return e("member");
@@ -150,7 +155,7 @@
     ws.onopen = () => {
       on.status && on.status("sb", true);
       ws.send(JSON.stringify({ request: "Subscribe", id: "gremi-chat", events: {
-        Twitch: ["ChatMessage", "Follow", "Sub", "ReSub", "GiftSub", "GiftBomb", "Raid", "Cheer"],
+        Twitch: ["ChatMessage", "Follow", "Sub", "ReSub", "GiftSub", "GiftBomb", "Raid", "Cheer", "RewardRedemption"],
         YouTube: ["Message", "SuperChat", "SuperSticker", "NewSponsor", "MembershipGift", "NewSubscriber"] } }));
     };
     ws.onmessage = (m) => { try { const j = JSON.parse(m.data); if (j.event) sbEvent(j.event, j.data || {}, on); } catch (e) { console.warn(e); } };

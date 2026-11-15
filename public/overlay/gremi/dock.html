@@ -38,6 +38,7 @@ html:hover .body { scrollbar-color:#3a4350 transparent; }
 .ev .t { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .ev .t b { color:#fff; }
 .ev .a { color:var(--dim); font-size:.733rem; flex:none; }
+.ev.rw .t { white-space:normal; overflow-wrap:anywhere; }   /* channel points: reward and the viewer's text stay readable */
 .ev.big { background:linear-gradient(90deg, rgba(225,6,0,.35), rgba(145,70,255,.35)); }
 .ev img.g { height:1.2rem; }
 .pf, .bd { display:inline-block; width:1rem; height:1rem; vertical-align:-.2rem; margin-right:.2rem; border-radius:.2rem; flex:none; }
@@ -66,6 +67,17 @@ html:hover .body { scrollbar-color:#3a4350 transparent; }
 .rp::before { content:"↪ "; } .rp b { color:var(--c); font-weight:700; } .rp i { font-style:normal; color:#6e7681; }
 .m.to-me .rp b { color:#ff6b6b; }
 .m.flash { animation:flash 1.2s ease-out; } @keyframes flash { from { background:rgba(88,166,255,.35); } to { background:transparent; } }
+/* small system lines in the chat: activity (follows, gifts, rewards...) and what Race Control sent */
+.sys { display:flex; gap:.467rem; align-items:baseline; padding:.1rem .667rem .1rem .467rem; border-left:.2rem solid transparent; font-size:.8rem; line-height:1.35; color:#b8c2cc; }
+.sys .tm { color:#5f6873; font-size:.9em; width:2.5rem; flex:none; font-variant-numeric:tabular-nums; }
+.sys .b { flex:1; min-width:0; overflow-wrap:anywhere; }
+.sys .k { display:inline-block; width:1.1em; text-align:center; margin-right:.2rem; }
+.sys b { color:#fff; } .sys .x { color:var(--dim); } .sys .pf { width:.9rem; height:.9rem; }
+.sys.act { background:rgba(124,58,237,.12); border-left-color:#7c3aed; }
+.sys.act.big { background:linear-gradient(90deg, rgba(225,6,0,.28), rgba(145,70,255,.28)); border-left-color:#e10600; }
+.sys.rc { color:var(--dim); font-size:.75rem; }
+.sys.rc .b { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.sys.rc b { color:#ff8a80; font-weight:700; }
 #more { position:absolute; bottom:.667rem; left:50%; transform:translateX(-50%); display:none; font:600 .8rem "Segoe UI"; color:#fff; background:#7c3aed; border:0; border-radius:.933rem; padding:.333rem .8rem; cursor:pointer; }
 
 /* waitlist + lobby */
@@ -96,7 +108,7 @@ html:hover .body { scrollbar-color:#3a4350 transparent; }
   <span class="sp"><button class="btn" data-p="twitch">TW</button><button class="btn" data-p="youtube">YT</button><button class="btn" data-p="tiktok">TT</button>
     <button class="btn" id="fsm" title="Smaller text">A−</button><button class="btn" id="fsp" title="Bigger text">A+</button></span>
 </div>
-<div class="pane" id="act"><div class="bar"><h2>Activity</h2><span class="sp" id="act-sum"></span></div><div class="body" id="events"><div class="empty">Follows, subs, gifts and raids show up here.</div></div></div>
+<div class="pane" id="act"><div class="bar"><h2>Activity</h2><span class="sp" id="act-sum"></span></div><div class="body" id="events"><div class="empty">Follows, subs, gifts, raids and channel point rewards show up here.</div></div></div>
 <div class="pane" id="chat"><div class="bar"><h2>Chat</h2><span class="sp"><button class="btn" id="clear" title="Clear chat">Clear</button></span></div>
   <div class="body" id="list"></div><button id="more">New messages ↓</button></div>
 <div class="pane" id="bottom"><div class="bar"><h2>Lobby</h2>
@@ -218,13 +230,12 @@ function addChat(m) {
 }
 
 // ---------- activity feed
-const EV = { follow: ["♥", "followed"], sub: ["★", "subscribed"], resub: ["★", "resubscribed"], gift: ["🎁", "gifted"], giftbomb: ["🎁", "gifted"],
+const EV = { reward: ["🎟", "redeemed"], follow: ["♥", "followed"], sub: ["★", "subscribed"], resub: ["★", "resubscribed"], gift: ["🎁", "gifted"], giftbomb: ["🎁", "gifted"],
              raid: ["⚑", "raided"], cheer: ["◆", "cheered"], superchat: ["$", "Super Chat"], member: ["★", "became a member"], share: ["↗", "shared the stream"] };
 let evCount = 0;
-function addEvent(e) {
-  const box = $("events"); if (!evCount) box.innerHTML = "";
-  evCount++;
-  const [k, verb] = EV[e.kind] || ["•", e.kind];
+// what happened, as HTML (the name comes in front of it); the same words go in the activity list and in the chat
+function eventWhat(e) {
+  const [, verb] = EV[e.kind] || ["•", e.kind];
   let what = verb;
   if (e.kind === "gift" && e.platform === "tiktok") what = `sent ${e.amount}× ${esc(e.text)}${e.coins ? ` <span class="a">(${e.coins} coins)</span>` : ""}`;
   else if (e.kind === "gift") what = `gifted a sub ${esc(e.text || "")}`;
@@ -233,13 +244,49 @@ function addEvent(e) {
   else if (e.kind === "cheer") what = `cheered ${e.amount ?? ""} bits`;
   else if (e.kind === "resub") what = `resubscribed${e.amount ? ` (${e.amount} months)` : ""}`;
   else if (e.kind === "superchat") what = `Super Chat ${esc(e.amount ?? "")}`;
+  else if (e.kind === "reward") what = `redeemed <b>${esc(e.text)}</b>${e.amount ? ` <span class="a">(${esc(e.amount)} pts)</span>` : ""}`;
+  return what;
+}
+// the viewer's own words with the event: resub/cheer/Super Chat messages and channel point text
+const eventSaid = (e) => e.kind === "reward" ? e.input || "" : e.text && e.kind !== "gift" && e.kind !== "sub" ? e.text : "";
+function addEvent(e) {
+  const box = $("events"); if (!evCount) box.innerHTML = "";
+  evCount++;
+  const [k] = EV[e.kind] || ["•"], what = eventWhat(e), said = eventSaid(e);
   const el = document.createElement("div");
-  el.className = "ev" + (e.big ? " big" : ""); el.dataset.pl = e.platform; if (hidden.has(e.platform)) el.style.display = "none";
-  el.innerHTML = `<span class="k">${k}</span>${C.ICON[e.platform] || ""}<span class="t"><b>${esc(e.name)}</b> ${what}${e.text && e.kind !== "gift" && e.kind !== "sub" ? ` <span class="a">“${esc(e.text)}”</span>` : ""}</span>` +
+  el.className = "ev" + (e.big ? " big" : "") + (e.kind === "reward" ? " rw" : ""); el.dataset.pl = e.platform; if (hidden.has(e.platform)) el.style.display = "none";
+  const plain = (h) => { const t = document.createElement("div"); t.innerHTML = h; return t.textContent; };
+  el.title = `${e.name} ${plain(what)}${said ? ` “${said}”` : ""}`;
+  el.innerHTML = `<span class="k">${k}</span>${C.ICON[e.platform] || ""}<span class="t"><b>${esc(e.name)}</b> ${what}${said ? ` <span class="a">“${esc(said)}”</span>` : ""}</span>` +
     (e.img ? `<img class="g" src="${esc(e.img)}" alt="">` : "") + `<span class="a">${hhmm(new Date(e.at))}</span>`;
   box.prepend(el);
   while (box.children.length > 10) box.lastChild.remove();   // last 10 only
   $("act-sum").textContent = evCount + " this session";
+  sysLine(`act${e.big ? " big" : ""}`, e.platform, k, `${C.ICON[e.platform] || ""}<b>${esc(e.name)}</b> ${what}${said ? ` <span class="x">“${esc(said)}”</span>` : ""}`, e.at);
+}
+
+// ---------- small lines in the chat: every activity, and every message Race Control sends
+function sysLine(cls, platform, icon, html, at, title) {
+  const el = document.createElement("div");
+  el.className = "sys " + cls; if (platform) { el.dataset.pl = platform; if (hidden.has(platform)) el.style.display = "none"; }
+  if (title) el.title = title;
+  el.innerHTML = `<span class="tm">${hhmm(at ? new Date(at) : new Date())}</span><div class="b"><span class="k">${icon}</span>${html}</div>`;
+  list.appendChild(el);
+  while (list.children.length > MAX) list.firstChild.remove();
+  if (stick) list.scrollTop = list.scrollHeight; else more.style.display = "block";
+}
+// Race Control's posts come from /dock.json "sent": chat text for Twitch/YouTube, only "message sent" for Discord.
+// The first poll only marks what is there as seen, so a dock refresh doesn't repeat old lines.
+let sentSeen = null;
+function showSent(items) {
+  if (!Array.isArray(items)) return;
+  if (sentSeen === null) { sentSeen = Math.max(0, ...items.map((s) => s.id || 0)); return; }
+  for (const s of items) {
+    if (!(s.id > sentSeen)) continue;
+    sentSeen = s.id;
+    if (s.where === "discord") sysLine("rc", null, "📣", `<b>Race Control</b> Discord message sent${s.channel ? ` <span class="x">${esc(s.channel)}</span>` : ""}`, s.at * 1000);
+    else sysLine("rc", s.where, "🤖", `${C.ICON[s.where] || ""}<b>Race Control</b> ${esc(s.text)}`, s.at * 1000, s.text);
+  }
 }
 
 // ---------- waitlist (same rules as Race Control's /dock)
@@ -251,7 +298,7 @@ async function getJson(url, ms = 10000) {
   try { const r = await fetch(url, { cache: "no-store", signal: c.signal }); if (!r.ok) throw new Error(r.status); return await r.json(); } finally { clearTimeout(t); }
 }
 async function pollWaitlist() {
-  try { const d = await getJson(RC + "/dock.json"); cloud = d.entries || []; cfg = Object.assign(cfg, d); dot("d-wl", true); } catch (e) { dot("d-wl", false); }
+  try { const d = await getJson(RC + "/dock.json"); cloud = d.entries || []; cfg = Object.assign(cfg, d); dot("d-wl", true); showSent(d.sent); } catch (e) { dot("d-wl", false); }
   renderWaitlist();
 }
 // One row per person (the newest ask wins, even when Race Control and the dock both have them, or they asked on two
@@ -414,6 +461,10 @@ if (q.has("demo")) {
   ev.forEach(([platform, kind, name, amount], i) => addEvent({ platform, kind, name, amount, at: now - (ev.length - i) * 30000 }));
   addEvent({ platform: "tiktok", kind: "gift", name: "markbonner189", amount: 5, text: "Rose", coins: 5, at: now - 20000 });
   addEvent({ platform: "twitch", kind: "giftbomb", name: "0verfast", amount: 5, big: true, at: now });
+  addEvent({ platform: "twitch", kind: "reward", name: "kimi_fan77", text: "Pick my next track", amount: 2500, input: "Monza please, I want to see the T1 chaos", at: now });
+  sentSeen = 0;
+  showSent([{ id: 1, at: now / 1000, where: "twitch", text: "Want to race with GreMi? Join the Discord, the lobby opens after every race: discord.gg/gremi" },
+            { id: 2, at: now / 1000, where: "discord", channel: "#giveaways" }]);
   renderWaitlist();
 } else {
   C.connectSB(on); C.connectTF(on); sbActions();
