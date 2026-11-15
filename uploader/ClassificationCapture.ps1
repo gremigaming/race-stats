@@ -548,9 +548,9 @@ public static class GmKeys {
 }
 
 # name -> virtual key, scan code, extended
-$Keys = @{ enter = @(0x0D, 0x1C, $false); down = @(0x28, 0x50, $true); up = @(0x26, 0x48, $true)
+$script:KeyCodes = @{ enter = @(0x0D, 0x1C, $false); down = @(0x28, 0x50, $true); up = @(0x26, 0x48, $true)
            pagedown = @(0x22, 0x51, $true); pageup = @(0x21, 0x49, $true) }
-$MenuItems = @("advance", "save full race replay", "view replay", "race director")
+$script:MenuItems = @("advance", "save full race replay", "view replay", "race director")
 $script:Prev = [IntPtr]::Zero      # the window that was in front before we took the focus
 $script:PostLog = @()
 
@@ -625,8 +625,8 @@ function Screen-State($bmp) {
     if ($all -match 'replay' -and $all -match 'not enough|unable|failed|error|storage') { return @{ kind = "error"; text = $all } }
     $rows = @{}
     foreach ($l in $lines) {
-        for ($i = 0; $i -lt $MenuItems.Count; $i++) {
-            if ($l.text -eq $MenuItems[$i] -or ($i -eq 1 -and $l.text -match 'save full race replay')) { $rows[$i] = $l }
+        for ($i = 0; $i -lt $script:MenuItems.Count; $i++) {
+            if ($l.text -eq $script:MenuItems[$i] -or ($i -eq 1 -and $l.text -match 'save full race replay')) { $rows[$i] = $l }
         }
     }
     if ($rows.ContainsKey(1) -and $rows.Count -ge 3) {
@@ -705,7 +705,8 @@ function Set-KeyMode($m) {
 }
 
 function Tap($name) {
-    $k = $Keys[$name]
+    $k = $script:KeyCodes[$name]
+    if ($null -eq $k -or $k.Count -ne 3) { throw "no key code for $name" }
     if ($PostDryRun) { $script:DryKeys += $name; $script:DryAt++; return }
     $h = Game-Handle
     if ($h -eq [IntPtr]::Zero) { throw "the game closed" }
@@ -726,7 +727,8 @@ function Press($name, [scriptblock]$test = $null) {
     $h = Game-Handle
     if ($test -and $script:KeyMode -eq "test" -and $script:Prev -ne [IntPtr]::Zero) { Give-Focus-Back; Start-Sleep -Milliseconds 300 }
     if ($test -and $script:KeyMode -eq "test" -and [GmKeys]::GetForegroundWindow() -ne $h) {
-        $k = $Keys[$name]
+        $k = $script:KeyCodes[$name]
+    if ($null -eq $k -or $k.Count -ne 3) { throw "no key code for $name" }
         if ($PostDryRun) { $script:DryKeys += "$name (background)"; $script:DryAt++ }
         else { [GmKeys]::Post($h, [uint16]$k[0], [uint16]$k[1], [bool]$k[2]) }
         Start-Sleep -Milliseconds 800
@@ -889,7 +891,7 @@ function Post-Race {
 if ($PostImage) {
     $bmp = [System.Drawing.Bitmap]::FromFile((Resolve-Path $PostImage))
     $s = Screen-State $bmp
-    Write-Output ("{0}{1}: {2}" -f $s.kind, $(if ($s.kind -eq "menu") { " " + $MenuItems[$s.selected] } else { "" }), $s.text)
+    Write-Output ("{0}{1}: {2}" -f $s.kind, $(if ($s.kind -eq "menu") { " " + $script:MenuItems[$s.selected] } else { "" }), $s.text)
     $bmp.Dispose()
     Remove-Item -Recurse -Force $tmp -ErrorAction SilentlyContinue
     return
