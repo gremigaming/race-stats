@@ -8,7 +8,7 @@
   "requested": null,
   "last": "2026-11-10"
  },
- "pending": 35,
+ "pending": 36,
  "tracks": [
   {
    "track": "Melbourne",
@@ -7088,12 +7088,25 @@
          "run": 1,
          "laps": 1,
          "bb": 60
+        },
+        {
+         "file": "2026-11-15_17-41-38_Abu_Dhabi_Race.gmtel.gz",
+         "date": "2026-11-15",
+         "session": "race",
+         "osq": false,
+         "weather": 1,
+         "pace": 85232,
+         "best": 85232,
+         "mean": 85963,
+         "run": 5,
+         "laps": 4,
+         "bb": 60
         }
        ],
        "verdict": {
         "result": "better",
-        "delta": -2.49,
-        "text": "Better: quali lap 1:23.989 against 1:26.134 on V1 (2.145 s faster)."
+        "delta": -1.77,
+        "text": "Better: quali lap 1:24.610 against 1:26.134 on V1 (1.524 s faster)."
        },
        "slot": 69
       },
@@ -7228,12 +7241,68 @@
        },
        "text": "Rear springs 13 → 30",
        "why": "The soft rear lets the floor scrape. 30 keeps it off the ground and makes laps more consistent.",
+       "sessions": [
+        {
+         "file": "2026-11-15_17-41-38_Abu_Dhabi_Race.gmtel.gz",
+         "date": "2026-11-15",
+         "session": "race",
+         "osq": false,
+         "weather": 1,
+         "pace": 85963,
+         "best": 85232,
+         "mean": 85963,
+         "run": 5,
+         "laps": 4,
+         "bb": 60
+        }
+       ],
+       "verdict": {
+        "result": "better",
+        "delta": -0.91,
+        "text": "Better: average lap 1:25.963 against 1:26.752 on V1 (0.789 s faster)."
+       },
+       "slot": 70
+      },
+      {
+       "v": 3,
+       "base": 2,
+       "created": "2026-11-15",
+       "saved": null,
+       "values": {
+        "fw": 50,
+        "rw": 25,
+        "don": 100,
+        "doff": 20,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 30,
+        "farb": 18,
+        "rarb": 1,
+        "frh": 21,
+        "rrh": 44,
+        "bb": 54,
+        "bp": 100,
+        "fr": 27.5,
+        "fl": 27.5,
+        "rr": 20.5,
+        "rl": 20.5
+       },
+       "change": {
+        "rw": [
+         23,
+         25
+        ]
+       },
+       "text": "Rear wing 23 → 25",
+       "why": "More rear wing for a calmer rear in fast corners.",
        "sessions": [],
        "verdict": {
         "result": "untested",
         "text": "Not driven yet."
-       },
-       "slot": 70
+       }
       }
      ]
     },
