@@ -5295,11 +5295,24 @@
          "run": 5,
          "laps": 4,
          "bb": 59
+        },
+        {
+         "file": "2026-11-15_15-47-42_Mexico_OSQ.gmtel.gz",
+         "date": "2026-11-15",
+         "session": "quali",
+         "osq": true,
+         "weather": 0,
+         "pace": 76289,
+         "best": 76289,
+         "mean": 76289,
+         "run": 1,
+         "laps": 1,
+         "bb": 59
         }
        ],
        "verdict": {
         "result": "baseline",
-        "text": "Starting point: 1:17.414 over 2 sessions."
+        "text": "Starting point: 1:17.039 over 3 sessions."
        }
       },
       {
