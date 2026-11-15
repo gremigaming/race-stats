@@ -8,7 +8,7 @@
   "requested": null,
   "last": "2026-11-10"
  },
- "pending": 32,
+ "pending": 33,
  "tracks": [
   {
    "track": "Melbourne",
@@ -3953,12 +3953,68 @@
        },
        "text": "Rear anti-roll bar 9 → 11",
        "why": "The front wing is already at 50, so a slightly stiffer rear anti-roll bar helps the car rotate.",
+       "sessions": [
+        {
+         "file": "2026-11-15_17-21-50_Zandvoort_OSQ.gmtel.gz",
+         "date": "2026-11-15",
+         "session": "quali",
+         "osq": true,
+         "weather": 3,
+         "pace": 82827,
+         "best": 82827,
+         "mean": 82827,
+         "run": 1,
+         "laps": 1,
+         "bb": 59
+        }
+       ],
+       "verdict": {
+        "result": "worse",
+        "delta": 12.51,
+        "text": "Worse: quali lap 1:22.827 against 1:13.615 on V1 (9.212 s slower)."
+       },
+       "slot": 39
+      },
+      {
+       "v": 3,
+       "base": 1,
+       "created": "2026-11-15",
+       "saved": null,
+       "values": {
+        "fw": 50,
+        "rw": 37,
+        "don": 100,
+        "doff": 30,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 39,
+        "farb": 4,
+        "rarb": 9,
+        "frh": 22,
+        "rrh": 44,
+        "bb": 55,
+        "bp": 100,
+        "fr": 28.0,
+        "fl": 28.0,
+        "rr": 22.0,
+        "rl": 22.0
+       },
+       "change": {
+        "rw": [
+         34,
+         37
+        ]
+       },
+       "text": "Rear wing 34 → 37",
+       "why": "More rear grip against oversteer and wheelspin. Costs a little top speed. V2's change is undone (it didn't make the car faster).",
        "sessions": [],
        "verdict": {
         "result": "untested",
         "text": "Not driven yet."
-       },
-       "slot": 39
+       }
       }
      ]
     },
