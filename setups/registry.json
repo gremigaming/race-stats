@@ -5308,11 +5308,24 @@
          "run": 1,
          "laps": 1,
          "bb": 59
+        },
+        {
+         "file": "2026-11-15_15-50-35_Mexico_Race.gmtel.gz",
+         "date": "2026-11-15",
+         "session": "race",
+         "osq": false,
+         "weather": 0,
+         "pace": 76769,
+         "best": 76769,
+         "mean": 77393,
+         "run": 5,
+         "laps": 4,
+         "bb": 59
         }
        ],
        "verdict": {
         "result": "baseline",
-        "text": "Starting point: 1:17.039 over 3 sessions."
+        "text": "Starting point: 1:16.971 over 4 sessions."
        }
       },
       {
@@ -5404,11 +5417,24 @@
          "run": 5,
          "laps": 4,
          "bb": 59
+        },
+        {
+         "file": "2026-11-15_15-50-35_Mexico_Race.gmtel.gz",
+         "date": "2026-11-15",
+         "session": "race",
+         "osq": false,
+         "weather": 0,
+         "pace": 77393,
+         "best": 76769,
+         "mean": 77393,
+         "run": 5,
+         "laps": 4,
+         "bb": 59
         }
        ],
        "verdict": {
         "result": "baseline",
-        "text": "Starting point: 1:18.174 over 1 session."
+        "text": "Starting point: 1:17.784 over 2 sessions."
        }
       },
       {
