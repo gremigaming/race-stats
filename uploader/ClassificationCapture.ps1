@@ -58,7 +58,8 @@ param(
     [int]$PostSeconds = 480,                              # look for the results page this long
     [string]$ReplaysDir = "",                             # "" = Documents\My Games\F1 25\replays
     [string]$ScrollKey = "down",                          # key that scrolls the results table
-    [string]$PostImage = ""                               # test: which after-race screen is this picture?
+    [string]$PostImage = "",                              # test: which after-race screen is this picture?
+    [string]$PostDryRun = ""                              # test: the whole after-race part on the pictures in this folder (in name order, one per key), no game, no keys
 )
 
 $ErrorActionPreference = "Stop"
@@ -553,7 +554,9 @@ $MenuItems = @("advance", "save full race replay", "view replay", "race director
 $script:Prev = [IntPtr]::Zero      # the window that was in front before we took the focus
 $script:PostLog = @()
 
+$script:DryShots = @(); $script:DryAt = 0; $script:DryKeys = @()
 function Game-Handle {
+    if ($PostDryRun) { return [IntPtr]1 }
     $p = Get-Process -ErrorAction SilentlyContinue |
         Where-Object { $_.ProcessName -match $GameProcess -and $_.MainWindowHandle -ne [IntPtr]::Zero } | Select-Object -First 1
     if ($p) { return $p.MainWindowHandle }
@@ -664,6 +667,11 @@ public static class GmGameRect {
 
 # The game's picture: OBS (works in the background), else the screen while F1 is in front
 function Look {
+    if ($PostDryRun) {
+        if ($script:DryAt -ge $script:DryShots.Count) { return $null }
+        $bmp = [System.Drawing.Bitmap]::FromFile($script:DryShots[$script:DryAt])
+        return @{ bmp = $bmp; state = (Screen-State $bmp) }
+    }
     $bmp = Obs-Shot
     if (-not $bmp) {
         $h = Game-Handle
@@ -698,6 +706,7 @@ function Set-KeyMode($m) {
 
 function Tap($name) {
     $k = $Keys[$name]
+    if ($PostDryRun) { $script:DryKeys += $name; $script:DryAt++; return }
     $h = Game-Handle
     if ($h -eq [IntPtr]::Zero) { throw "the game closed" }
     if ($script:KeyMode -eq "background" -and [GmKeys]::GetForegroundWindow() -ne $h) {
@@ -718,7 +727,8 @@ function Press($name, [scriptblock]$test = $null) {
     if ($test -and $script:KeyMode -eq "test" -and $script:Prev -ne [IntPtr]::Zero) { Give-Focus-Back; Start-Sleep -Milliseconds 300 }
     if ($test -and $script:KeyMode -eq "test" -and [GmKeys]::GetForegroundWindow() -ne $h) {
         $k = $Keys[$name]
-        [GmKeys]::Post($h, [uint16]$k[0], [uint16]$k[1], [bool]$k[2])
+        if ($PostDryRun) { $script:DryKeys += "$name (background)"; $script:DryAt++ }
+        else { [GmKeys]::Post($h, [uint16]$k[0], [uint16]$k[1], [bool]$k[2]) }
         Start-Sleep -Milliseconds 800
         $l = Look
         if ($l -and (& $test $l.state)) { Set-KeyMode "background"; Post-Note "$name in the background: works, no focus needed from now on"; return $l }
@@ -759,23 +769,24 @@ function Post-Race {
     if (-not $ReplaysDir) { $ReplaysDir = Join-Path ([Environment]::GetFolderPath("MyDocuments")) "My Games\F1 25\replays" }
     # cars in the race: results packet when in, else the participants packet (both: count at byte 29)
     $res = if ((UidOf $Recorder.ResultsPacket) -eq $sessionUid) { $Recorder.ResultsPacket } else { $Recorder.LatestParticipants }
-    $cars = if ($res -and $res.Length -gt 29) { [int]$res[29] } else { 22 }
+    $cars = if ($PostDryRun) { 10 } elseif ($res -and $res.Length -gt 29) { [int]$res[29] } else { 22 }
     $before = @{}
     if (Test-Path $ReplaysDir) { Get-ChildItem $ReplaysDir -Filter *.frr | ForEach-Object { $before[$_.Name] = $true } }
     $doKeys = $PostRace -eq "on"
     # only with OBS running (GreMi: no OBS = no stream = nothing needed)
-    $probe = Obs-Shot
+    $probe = if ($PostDryRun) { $null } else { Obs-Shot }
     if ($probe) { $probe.Dispose() }
-    elseif ($script:ObsNote -match "OBS isn.t running") { return "After the race: skipped (OBS is closed)" }
+    elseif (-not $PostDryRun -and $script:ObsNote -match "OBS isn.t running") { return "After the race: skipped (OBS is closed)" }
     $deadline = (Get-Date).AddSeconds($PostSeconds)
     $script:TablePics = 0; $scrolled = $cars -le 14; $saved = $false; $outcome = "results page not seen"
     $last = ""; $sawAwards = $false; $enters = 0; $asked = $null; $pageEnters = 0
     Post-Note "watching for the results page ($cars cars, keys: $(if ($doKeys) { 'on' } else { 'off' }))"
     try {
         while ((Get-Date) -lt $deadline -and -not $saved) {
-            if ((UidOf $Recorder.LatestLap) -ne $sessionUid) { $outcome = "the next session started"; break }
+            if (-not $PostDryRun -and (UidOf $Recorder.LatestLap) -ne $sessionUid) { $outcome = "the next session started"; break }
             $l = Look
             if (-not $l) {
+                if ($PostDryRun) { $outcome = "dry run: out of pictures"; break }
                 if ((Game-Handle) -eq [IntPtr]::Zero) { $outcome = "the game closed"; break }
                 Start-Sleep -Seconds 2; continue
             }
@@ -848,7 +859,7 @@ function Post-Race {
             if (-not $saved) { Start-Sleep -Seconds 2 }
         }
     } catch {
-        $outcome = $_.Exception.Message
+        $outcome = "{0} (line {1}: {2})" -f $_.Exception.Message, $_.InvocationInfo.ScriptLineNumber, $_.InvocationInfo.Line.Trim()
     } finally {
         Give-Focus-Back
     }
@@ -889,6 +900,17 @@ $good = 0; $goodFinal = 0
 $best = $null; $bestScore = 0
 $first = $null   # the first picture, kept for checking when nothing could be read
 $started = Get-Date
+if ($PostDryRun) {
+    $script:DryShots = @(Get-ChildItem $PostDryRun -File | Where-Object { $_.Extension -match '^\.(png|jpg)$' } | Sort-Object Name | ForEach-Object { $_.FullName })
+    if (-not $KeepDir) { $KeepDir = Join-Path $tmp "keep" }
+    $script:KeyModeFile = ""; $script:KeyMode = "test"
+    $sum = Post-Race
+    $script:PostLog | ForEach-Object { Write-Output $_ }
+    Write-Output ("keys: " + ($script:DryKeys -join ", "))
+    Write-Output $sum
+    Remove-Item -Recurse -Force $tmp -ErrorAction SilentlyContinue
+    return
+}
 # Everything is tied to this race's session id: packets of the next session (the lobby moved
 # on) are never mixed in, and a new session ends the capture.
 function UidOf($b) { if ($b -and $b.Length -ge 15) { [BitConverter]::ToUInt64($b, 7) } else { [uint64]0 } }

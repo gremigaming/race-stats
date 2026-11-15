@@ -71,6 +71,28 @@ def render(folder):
     im.save(os.path.join(folder, "xp.png"))
 
 
+def dryrun(folder):
+    """The online after-race flow as a picture per key press, for -PostDryRun."""
+    tmp = os.path.join(folder, "_src")
+    render(tmp)
+    im = Image.open(os.path.join(tmp, "table.png")).copy()
+    d = ImageDraw.Draw(im)
+    d.rectangle((560, 300, 1360, 700), fill=(10, 10, 60))
+    d.text((760, 360), "WINNER", fill=(255, 255, 255), font=font(64))
+    d.text((700, 480), "DRIVER 1", fill=(255, 255, 255), font=font(48))
+    im.save(os.path.join(tmp, "popup.png"))
+    order = ["xp", "awards", "popup", "table", "menu-advance", "menu-save", "saved"]
+    for i, n in enumerate(order):
+        Image.open(os.path.join(tmp, f"{n}.png")).save(os.path.join(folder, f"{i + 1:02d}-{n}.png"))
+
+
+def check_dry(text):
+    want = "keys: enter (background), enter, enter, enter, down, enter, enter"
+    if want not in text or "replay saved" not in text:
+        sys.exit(f"dry run: expected '{want}' and 'replay saved', got:\n{text}")
+    print("dry run: ok")
+
+
 def check(name, line):
     want = EXPECT[name]
     got = line.split(":")[0].strip().lower()
@@ -82,5 +104,9 @@ def check(name, line):
 if __name__ == "__main__":
     if sys.argv[1] == "render":
         render(sys.argv[2])
+    elif sys.argv[1] == "dryrun":
+        dryrun(sys.argv[2])
+    elif sys.argv[1] == "check-dry":
+        check_dry(open(sys.argv[2], encoding="utf-8-sig", errors="replace").read())
     else:
         check(sys.argv[2], sys.argv[3])
