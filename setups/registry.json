@@ -1152,11 +1152,24 @@
          "run": 1,
          "laps": 1,
          "bb": 58
+        },
+        {
+         "file": "2026-11-15_17-06-30_Bahrain_Race.gmtel.gz",
+         "date": "2026-11-15",
+         "session": "race",
+         "osq": false,
+         "weather": 0,
+         "pace": 89930,
+         "best": 89930,
+         "mean": 90481,
+         "run": 5,
+         "laps": 4,
+         "bb": 58
         }
        ],
        "verdict": {
         "result": "baseline",
-        "text": "Starting point: 1:29.198 over 2 sessions."
+        "text": "Starting point: 1:29.442 over 3 sessions."
        }
       },
       {
@@ -1248,11 +1261,24 @@
          "run": 5,
          "laps": 4,
          "bb": 58
+        },
+        {
+         "file": "2026-11-15_17-06-30_Bahrain_Race.gmtel.gz",
+         "date": "2026-11-15",
+         "session": "race",
+         "osq": false,
+         "weather": 0,
+         "pace": 90481,
+         "best": 89930,
+         "mean": 90481,
+         "run": 5,
+         "laps": 4,
+         "bb": 58
         }
        ],
        "verdict": {
         "result": "baseline",
-        "text": "Starting point: 1:31.633 over 1 session."
+        "text": "Starting point: 1:31.057 over 2 sessions."
        }
       },
       {
