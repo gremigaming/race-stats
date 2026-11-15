@@ -845,7 +845,8 @@ function Post-Race {
                 else { break }   # not the results page (any more)
                 if (-not $l) { break }
                 if ($l.state.kind -ne $s.kind) { Keep-Post $l.bmp $l.state.kind }
-                if ($l.state.kind -eq "table" -and $script:TablePics -eq 0) { Add-Table $l.bmp "1" }
+                # online the winner popup goes straight to the side menu, with the table beside it
+                if ($l.state.kind -in @("table", "menu") -and $l.state.laps -ge 4 -and $script:TablePics -eq 0) { Add-Table $l.bmp "1" }
                 $s = $l.state; $l.bmp.Dispose()
                 # saving takes ~2 s: wait for the dialog instead of pressing on
                 if ($asked -and $s.kind -ne "saved" -and $s.kind -ne "menu") {
