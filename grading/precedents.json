@@ -4763,6 +4763,61 @@
     }
    ]
   },
+  "s-43c539bb": {
+   "key": "ac7a5148a507",
+   "by": "GreMi",
+   "track": "Mexico",
+   "date": "2026-11-11",
+   "kind": "Moved across alongside",
+   "source": "staff change",
+   "verdict": "toni2608 at fault",
+   "severity": 3,
+   "note": "Toni takes a bad line and drives against gremi who leaves enough space.; Toni takes a bad line and drives against gremi who leaves enough space.",
+   "who": [
+    "319544045435224067"
+   ],
+   "changes": [
+    "Race_Mexico_2026_11_11_20_03_13.json|0|contact|5|0",
+    "Race_Mexico_2026_11_11_20_03_13.json|5|contact|5|0"
+   ],
+   "race_file": "Race_Mexico_2026_11_11_20_03_13.json",
+   "at": "2026-11-15T01:56:14Z",
+   "recording": "2026-11-11_19-55-20_Mexico_Race.gmtel.gz",
+   "t": 337.3,
+   "cars": [
+    0,
+    5
+   ],
+   "rulebook": {
+    "verdict": "0 + 5 at fault",
+    "rule": "R8"
+   },
+   "contacts": [
+    {
+     "a": 0,
+     "b": 5,
+     "t": 337.3,
+     "x": {
+      "gap": 1.6,
+      "closing": -27,
+      "moved_front": 2.48,
+      "moved_back": 2.47,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 27,
+      "lost": 2,
+      "off": 1,
+      "cars": 2,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "back",
+     "rulebook": "both",
+     "rule": "R8",
+     "front": 0
+    }
+   ]
+  },
   "s-4beb167e": {
    "key": "88dc27c19007",
    "by": "GreMi",
@@ -5805,6 +5860,17 @@
    "with_precedents": 73,
    "overrides": 3,
    "date": "2026-11-13",
+   "rules": "v1.5"
+  },
+  {
+   "incidents": 84,
+   "inc_rulebook": 33,
+   "inc_with_precedents": 34,
+   "contacts": 139,
+   "rulebook": 73,
+   "with_precedents": 73,
+   "overrides": 3,
+   "date": "2026-11-15",
    "rules": "v1.5"
   }
  ]
