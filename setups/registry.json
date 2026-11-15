@@ -2818,11 +2818,24 @@
          "run": 5,
          "laps": 4,
          "bb": 58
+        },
+        {
+         "file": "2026-11-15_16-08-36_Austria_Race.gmtel.gz",
+         "date": "2026-11-15",
+         "session": "race",
+         "osq": false,
+         "weather": 3,
+         "pace": 75847,
+         "best": 75522,
+         "mean": 75847,
+         "run": 5,
+         "laps": 4,
+         "bb": 57
         }
        ],
        "verdict": {
         "result": "baseline",
-        "text": "Starting point: 1:14.189 over 1 session."
+        "text": "Starting point: 1:15.018 over 2 sessions."
        }
       },
       {
