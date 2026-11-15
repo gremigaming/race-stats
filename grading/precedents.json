@@ -1054,6 +1054,93 @@
     }
    ]
   },
+  "1113a-4a": {
+   "key": "f42a6defd19e",
+   "race_file": "Race_Las_Vegas_Just_in_case_2026_11_13_16_18_12.json",
+   "at": "2026-11-15T02:01:47Z",
+   "parent": "1113a-4",
+   "part": 1,
+   "of": 1,
+   "by": "GreMi",
+   "track": "Las Vegas",
+   "date": "2026-11-13",
+   "verdict": "Not an incident",
+   "severity": 0,
+   "note": "",
+   "tags": [],
+   "kind": "Rear-end",
+   "source": "grade",
+   "calls": {
+    "6": {
+     "name": "#19 toni2608",
+     "call": "clear"
+    },
+    "8": {
+     "name": "Hidden #2 (Williams '26)",
+     "call": "clear"
+    },
+    "0": {
+     "name": "#20 QDR_SHW1KS",
+     "call": "clear"
+    }
+   },
+   "recording": "2026-11-13_16-00-22_Las_Vegas_Race.gmtel.gz",
+   "t": 81.1,
+   "t1": 86.0,
+   "cars": [
+    0,
+    6,
+    8
+   ],
+   "contacts": [
+    {
+     "a": 6,
+     "b": 8,
+     "t": 81.1,
+     "x": {
+      "gap": 6.0,
+      "closing": 7,
+      "moved_front": 0.0,
+      "moved_back": 0.0,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 4,
+      "lost": 1,
+      "off": 0,
+      "cars": 3,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "no",
+     "rulebook": "back",
+     "rule": "R3",
+     "front": 8
+    },
+    {
+     "a": 8,
+     "b": 0,
+     "t": 82.8,
+     "x": {
+      "gap": 9.0,
+      "closing": 22,
+      "moved_front": 0.36,
+      "moved_back": -0.51,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 4,
+      "lost": 1,
+      "off": 0,
+      "cars": 3,
+      "reaction": 0.0,
+      "aftermath": 1.0
+     },
+     "label": "no",
+     "rulebook": "none",
+     "rule": "R7",
+     "front": 0
+    }
+   ]
+  },
   "b1-01": {
    "key": "f236a7775b10",
    "by": "GreMi",
@@ -6000,6 +6087,17 @@
    "contacts": 141,
    "rulebook": 75,
    "with_precedents": 75,
+   "overrides": 3,
+   "date": "2026-11-15",
+   "rules": "v1.5"
+  },
+  {
+   "incidents": 87,
+   "inc_rulebook": 35,
+   "inc_with_precedents": 36,
+   "contacts": 143,
+   "rulebook": 76,
+   "with_precedents": 76,
    "overrides": 3,
    "date": "2026-11-15",
    "rules": "v1.5"
