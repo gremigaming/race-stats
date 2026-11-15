@@ -847,7 +847,8 @@ function Post-Race {
                 if (-not $l) { break }
                 if ($l.state.kind -ne $s.kind) { Keep-Post $l.bmp $l.state.kind }
                 # online the winner popup goes straight to the side menu, with the table beside it
-                if ($l.state.kind -in @("table", "menu") -and $l.state.laps -ge 4 -and $script:TablePics -eq 0) { Add-Table $l.bmp "1" }
+                # (the small menu-reading OCR misses the lap times; Add-Table reads it at full size)
+                if (($l.state.kind -eq "menu" -or ($l.state.kind -eq "table" -and $l.state.laps -ge 4)) -and $script:TablePics -eq 0) { Add-Table $l.bmp "1" }
                 $s = $l.state; $l.bmp.Dispose()
                 # saving takes ~2 s: wait for the dialog instead of pressing on
                 if ($asked -and $s.kind -ne "saved" -and $s.kind -ne "menu") {
@@ -928,7 +929,7 @@ $sessionUid = if ($FinishLap) { UidOf ([Convert]::FromBase64String($FinishLap)) 
               elseif ($Recorder) { UidOf $Recorder.LatestLap } else { [uint64]0 }
 $startParts = if ($Recorder -and (UidOf $Recorder.LatestParticipants) -eq $sessionUid) { $Recorder.LatestParticipants } else { $null }
 $resultsSince = $null
-$postNow = $null
+$postNow = $null; $postSeen = 0
 $lapSeen = $null; $lapSince = Get-Date   # the game's latest lap packet and when it last changed
 $inv = [Globalization.CultureInfo]::InvariantCulture
 if ($PostDryRun) {
@@ -979,13 +980,15 @@ while ($true) {
         # the post-race pages are up (podium over): the after-race part takes over now. Online the
         # results packet only comes when the lobby is back, after the countdown (14 Nov 2026).
         if ($PostRace -in @("watch", "on") -and $script:ShotSrc -eq "obs" -and -not $kept -and $Recorder) {
+            # only the XP and awards pages count (the race HUD can read like "results"), seen twice
+            # in a row, so the standings tower keeps being read until the podium is over
             $k = (Screen-State $shot).kind
-            if ($k -in @("xp", "awards", "results", "table", "menu")) { $postNow = $k }
+            if ($k -in @("xp", "awards")) { $postSeen++; if ($postSeen -ge 2) { $postNow = $k } } else { $postSeen = 0 }
         }
         $shot.Dispose()
         $si++
     }
-    if ($postNow) { break }
+    if ($postNow) { Post-Note "standings: stopped after $good screenshots, the $postNow page is up"; break }
     $elapsed = ((Get-Date) - $started).TotalSeconds
     if ($ImagePath -or $elapsed -ge $Seconds) { break }
     if (-not $Recorder -and $good -ge $WantScreens) { break }
