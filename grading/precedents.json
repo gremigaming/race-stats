@@ -934,6 +934,126 @@
     }
    ]
   },
+  "1113a-1a": {
+   "key": "8b92d53a10e7",
+   "race_file": "Race_Las_Vegas_Just_in_case_2026_11_13_16_18_12.json",
+   "at": "2026-11-15T01:58:38Z",
+   "parent": "1113a-1",
+   "part": 1,
+   "of": 1,
+   "by": "GreMi",
+   "track": "Las Vegas",
+   "date": "2026-11-13",
+   "verdict": "#20 QDR_SHW1KS at fault",
+   "severity": 2,
+   "note": "",
+   "tags": [],
+   "kind": "Moved across alongside",
+   "source": "grade",
+   "calls": {
+    "0": {
+     "name": "#20 QDR_SHW1KS",
+     "call": "fault",
+     "severity": 2
+    },
+    "4": {
+     "name": "#15 stijntjegeffie",
+     "call": "clear"
+    }
+   },
+   "recording": "2026-11-13_16-00-22_Las_Vegas_Race.gmtel.gz",
+   "t": 14.5,
+   "t1": 14.5,
+   "cars": [
+    0,
+    4
+   ],
+   "contacts": [
+    {
+     "a": 0,
+     "b": 4,
+     "t": 14.5,
+     "x": {
+      "gap": 0.7,
+      "closing": 13,
+      "moved_front": 4.49,
+      "moved_back": -1.93,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 5,
+      "lost": 1,
+      "off": 0,
+      "cars": 2,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "front",
+     "rulebook": "front",
+     "rule": "R2",
+     "front": 0
+    }
+   ]
+  },
+  "1113a-2a": {
+   "key": "e31d7f176f65",
+   "race_file": "Race_Texas_2026_11_13_16_30_25.json",
+   "at": "2026-11-15T01:59:22Z",
+   "parent": "1113a-2",
+   "part": 1,
+   "of": 1,
+   "by": "GreMi",
+   "track": "Texas",
+   "date": "2026-11-13",
+   "verdict": "Hidden #2 (Ferrari '26) at fault",
+   "severity": 7,
+   "note": "",
+   "tags": [],
+   "kind": "Rear-end",
+   "source": "grade",
+   "calls": {
+    "11": {
+     "name": "Hidden #2 (Ferrari '26)",
+     "call": "fault",
+     "severity": 7
+    },
+    "10": {
+     "name": "#8 Stepino81",
+     "call": "clear"
+    }
+   },
+   "recording": "2026-11-13_16-18-12_Texas_Race.gmtel.gz",
+   "t": 115.2,
+   "t1": 123.6,
+   "cars": [
+    10,
+    11
+   ],
+   "contacts": [
+    {
+     "a": 11,
+     "b": 10,
+     "t": 115.2,
+     "x": {
+      "gap": 5.7,
+      "closing": 8,
+      "moved_front": 2.53,
+      "moved_back": -2.16,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 92,
+      "lost": 6,
+      "off": 1,
+      "cars": 2,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "back",
+     "rulebook": "back",
+     "rule": "R3",
+     "front": 10
+    }
+   ]
+  },
   "b1-01": {
    "key": "f236a7775b10",
    "by": "GreMi",
@@ -5869,6 +5989,17 @@
    "contacts": 139,
    "rulebook": 73,
    "with_precedents": 73,
+   "overrides": 3,
+   "date": "2026-11-15",
+   "rules": "v1.5"
+  },
+  {
+   "incidents": 86,
+   "inc_rulebook": 35,
+   "inc_with_precedents": 36,
+   "contacts": 141,
+   "rulebook": 75,
+   "with_precedents": 75,
    "overrides": 3,
    "date": "2026-11-15",
    "rules": "v1.5"
