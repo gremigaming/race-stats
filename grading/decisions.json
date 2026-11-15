@@ -190,6 +190,75 @@
         "gray_score": 0.8
       }
     },
+    "1113a-4": {
+      "verdict": "Not an incident",
+      "by": "GreMi",
+      "real": false,
+      "at_fault": [],
+      "severity": 0,
+      "note": "",
+      "at": 1794708107,
+      "parts": [
+        {
+          "t0": 81.1,
+          "t1": 86.0,
+          "real": false,
+          "verdict": "Not an incident",
+          "tags": [],
+          "kind": "Rear-end",
+          "note": "",
+          "drivers": [
+            {
+              "car": 6,
+              "name": "#19 toni2608",
+              "call": "clear"
+            },
+            {
+              "car": 8,
+              "name": "Hidden #2 (Williams '26)",
+              "call": "clear"
+            },
+            {
+              "car": 0,
+              "name": "#20 QDR_SHW1KS",
+              "call": "clear"
+            }
+          ]
+        }
+      ],
+      "kind": "Rear-end",
+      "drivers": [
+        {
+          "car": 6,
+          "name": "#19 toni2608"
+        },
+        {
+          "car": 8,
+          "name": "Hidden #2 (Williams '26)"
+        },
+        {
+          "car": 0,
+          "name": "#20 QDR_SHW1KS"
+        }
+      ],
+      "track": "Las Vegas",
+      "date": "2026-11-13",
+      "race_file": "Race_Las_Vegas_Just_in_case_2026_11_13_16_18_12.json",
+      "recording": "2026-11-13_16-00-22_Las_Vegas_Race.gmtel.gz",
+      "replay": "https://gremigaming.github.io/race-stats/all/race/2026-11-13_16-00-22_Las_Vegas_Race?inc=81.1&car=6,8,0",
+      "engine": {
+        "rules": "v1.5",
+        "verdict": "toni2608 at fault",
+        "rule": "R3",
+        "severity": 3,
+        "why": "toni2608 ran into the back of Williams '26 #2, closing at 7 km/h",
+        "at_fault": [
+          "#19 toni2608"
+        ],
+        "contacts": 2,
+        "gray_score": 1.4
+      }
+    },
     "1104b-1": {
       "verdict": "Not an incident",
       "by": "GreMi",
