@@ -466,7 +466,7 @@ function Json-Text($s) {
 # it keeps looking at the game through OBS until the results page, through the
 # podium. The XP and awards pages wait for Enter (all under one shared countdown to
 # the lobby), so it presses Enter there right away. On the results page it:
-#   1. takes pictures of the whole results table: rows 1-14, then (more than 14
+#   1. takes pictures of the whole results table: rows 1-14, then (more than 14, after the save: Right into the table
 #      cars) scrolls down and takes the rest. They stay on this PC (KeepDir) and
 #      their text joins the standings frames (best way to name hidden cars: every
 #      row has its lap time);
@@ -549,7 +549,8 @@ public static class GmKeys {
 
 # name -> virtual key, scan code, extended
 $script:KeyCodes = @{ enter = @(0x0D, 0x1C, $false); down = @(0x28, 0x50, $true); up = @(0x26, 0x48, $true)
-           pagedown = @(0x22, 0x51, $true); pageup = @(0x21, 0x49, $true) }
+           pagedown = @(0x22, 0x51, $true); pageup = @(0x21, 0x49, $true)
+           right = @(0x27, 0x4D, $true); left = @(0x25, 0x4B, $true) }
 $script:MenuItems = @("advance", "save full race replay", "view replay", "race director")
 $script:Prev = [IntPtr]::Zero      # the window that was in front before we took the focus
 $script:PostLog = @()
@@ -780,7 +781,7 @@ function Post-Race {
     if ($probe) { $probe.Dispose() }
     elseif (-not $PostDryRun -and $script:ObsNote -match "OBS isn.t running") { return "After the race: skipped (OBS is closed)" }
     $deadline = (Get-Date).AddSeconds($PostSeconds)
-    $script:TablePics = 0; $scrolled = $cars -le 14; $saved = $false; $outcome = "results page not seen"
+    $script:TablePics = 0; $scrolled = $true; $saved = $false; $outcome = "results page not seen"
     $last = ""; $sawAwards = $false; $enters = 0; $asked = $null; $pageEnters = 0
     Post-Note "watching for the results page ($cars cars, keys: $(if ($doKeys) { 'on' } else { 'off' }))"
     try {
@@ -857,6 +858,23 @@ function Post-Race {
                         if ($s.kind -eq "saved") { break }
                     }
                 }
+            }
+            # more than 14 cars: Right moves from the side menu into the table, then Down scrolls
+            # it row by row (GreMi, 15 Nov 2026); a second picture of the bottom rows
+            if ($saved -and $cars -gt 14 -and -not $PostDryRun) {
+                try {
+                    Start-Sleep -Milliseconds 500
+                    Tap "right"; Start-Sleep -Milliseconds 400
+                    for ($i = 0; $i -lt $cars; $i++) { Tap "down"; Start-Sleep -Milliseconds 150 }
+                    Start-Sleep -Milliseconds 600
+                    $l2 = Look
+                    if ($l2) {
+                        Keep-Post $l2.bmp "scrolled"
+                        if ($l2.state.laps -ge 4) { Add-Table $l2.bmp "2" }
+                        $l2.bmp.Dispose()
+                    }
+                    Post-Note "scrolled the table: right, down x$cars"
+                } catch { Post-Note ("scroll failed: " + $_.Exception.Message) }
             }
             Give-Focus-Back
             if (-not $saved) { Start-Sleep -Seconds 2 }
