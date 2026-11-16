@@ -87,6 +87,24 @@
   "rule_now": "R3"
  },
  {
+  "file": "Race_Baku_2026_10_20_19_56_34.json",
+  "t": 1792518387.62,
+  "lap": 1,
+  "cars": [
+   4,
+   3,
+   10,
+   1
+  ],
+  "frozen": "Racing incident",
+  "frozen_fault": [],
+  "now": "Outdoorflame83 at fault",
+  "now_fault": [
+   3
+  ],
+  "rule_now": "R3"
+ },
+ {
   "file": "Race_Brazil_2026_10_25_17_04_22.json",
   "t": 1792943935.92,
   "lap": 1,
@@ -101,6 +119,20 @@
   "now": "Racing incident",
   "now_fault": [],
   "rule_now": "R2"
+ },
+ {
+  "file": "Race_Brazil_2026_11_04_20_24_42.json",
+  "t": 1793819881.7,
+  "lap": 1,
+  "cars": [
+   10,
+   7
+  ],
+  "frozen": "Not an incident",
+  "frozen_fault": [],
+  "now": "Racing incident",
+  "now_fault": [],
+  "rule_now": "R3"
  },
  {
   "file": "Race_Brazil_2026_11_04_20_24_42.json",
@@ -409,6 +441,22 @@
   "now": "fajeckaaa at fault",
   "now_fault": [
    6
+  ],
+  "rule_now": "R3"
+ },
+ {
+  "file": "Race_Texas_2026_11_13_16_30_25.json",
+  "t": 1794583190.56,
+  "lap": 1,
+  "cars": [
+   9,
+   11
+  ],
+  "frozen": "Not an incident",
+  "frozen_fault": [],
+  "now": "toni2608 at fault",
+  "now_fault": [
+   9
   ],
   "rule_now": "R3"
  }
