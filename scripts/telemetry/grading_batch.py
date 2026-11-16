@@ -10,7 +10,8 @@ GreMi sees on the staff page; staff grade blind.
 
 Every incident of severity SEVERE+ (GreMi, 5 Nov 2026: the most important ones to grade) goes into
 one more batch, grading/severe.json, that only grows: new ones are added after every build, ones
-already in a stream's picks are left out.
+already in a stream's picks are left out. The staff page shows them inside their own stream's group
+(GreMi, 16 Nov 2026), and only batches of stream races are shown.
 
 Each incident carries the engine's guess of its type (verdicts.kind_of, the staff page fills the
 picker with it) and the weather at the incident.
@@ -21,6 +22,7 @@ public/league/grading.json, which the staff page reads.
 
     python3 scripts/telemetry/grading_batch.py /tmp/telemetry-cache
 """
+import collections
 import datetime
 import glob
 import json
@@ -300,6 +302,52 @@ def severe_batch(races, cache, streams_):
     return b
 
 
+def stream_key(first):
+    """mmdd + a (day), b (evening, 17:00+) or n (night, before 06:00): a night of test races after
+    midnight no longer takes the afternoon stream's file (15 Nov 2026)."""
+    return first.strftime("%m%d") + ("n" if first.hour < 6 else "a" if first.hour < 17 else "b")
+
+
+def by_day(stream_out, severe, races):
+    """The batches the staff page shows, newest stream first (GreMi, 16 Nov 2026).
+
+    Only stream races count: a batch whose races are all off the site now (test races, races removed
+    on the staff page, races outside the Twitch stream log) is left out. Severity 7+ incidents go into
+    their own stream's group, after its five picks, instead of one list at the top."""
+    if not races:   # no sessions (build trouble): show everything as it was
+        return ([{"title": f"Severity {SEVERE}+ · every one", "stream": "severe", "incidents": severe}] if severe else []) + stream_out
+    live = set(races)
+    group = {f: n for n, files in enumerate(streams(races)) for f in files}
+    firsts = {n: stamp(files[0]) for n, files in enumerate(streams(races))}
+    shown = {}
+    for b in stream_out:
+        ns = {group[i["race_file"]] for i in b["incidents"] if i.get("race_file") in live}
+        if not ns:
+            print("grading: batch", b.get("stream"), "left out: its races are not stream races")
+            continue
+        n = min(ns)
+        if n in shown:   # two files for one stream: keep both, one after the other
+            shown[n]["incidents"] += b["incidents"]
+        else:
+            shown[n] = dict(b, incidents=list(b["incidents"]))
+    extra = collections.Counter()
+    for i in sorted(severe, key=lambda i: (i["recording"], i["t0"])):
+        n = group.get(i.get("race_file"))
+        if n is None:
+            continue
+        if n in shown and any(p["recording"] == i["recording"] and round(p.get("t0") or -1) == round(i["t0"])
+                              for p in shown[n]["incidents"]):
+            continue   # already one of the stream's picks
+        if n not in shown:
+            shown[n] = {"title": f"Stream {firsts[n].strftime('%-d %b')}", "stream": stream_key(firsts[n]),
+                        "rules": V.RULES, "incidents": []}
+        shown[n]["incidents"].append(i)
+        extra[n] += 1
+    for n, k in extra.items():
+        shown[n]["title"] += f" + {k} severity {SEVERE}+"
+    return [shown[n] for n in sorted(shown, key=lambda n: firsts[n], reverse=True)]
+
+
 def main():
     cache = sys.argv[1] if len(sys.argv) > 1 else "/tmp/telemetry-cache"
     now = datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
@@ -308,7 +356,7 @@ def main():
              if stamp(f) and stamp(f).strftime("%Y_%m_%d") >= FROM_DAY]
     for files in streams(races):
         first = stamp(files[0])
-        key = first.strftime("%m%d") + ("a" if first.hour < 17 else "b")
+        key = stream_key(first)
         path = os.path.join(OUT_DIR, f"stream-{first.strftime('%Y-%m-%d')}-{key[-1]}.json")
         if os.path.exists(path):
             continue
@@ -323,8 +371,7 @@ def main():
         print("grading: new batch", path, [i["pick"] for i in b["incidents"]])
     out = [json.load(open(p)) for p in sorted(glob.glob(os.path.join(OUT_DIR, "stream-*.json")), reverse=True)]
     severe = severe_batch(races, cache, out)
-    if severe:
-        out.insert(0, severe)
+    out = by_day(out, severe["incidents"] if severe else [], races)
     os.makedirs(os.path.dirname(PUBLISHED), exist_ok=True)
     json.dump(out, open(PUBLISHED, "w"), ensure_ascii=False)
     print("grading:", len(out), "stream batches published")
