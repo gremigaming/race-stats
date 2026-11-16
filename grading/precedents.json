@@ -5025,6 +5025,84 @@
     }
    ]
   },
+  "s-492ee4a7": {
+   "key": "c3df39d452ee",
+   "by": "GreMi",
+   "track": "Brazil",
+   "date": "2026-11-15",
+   "kind": "Moved across alongside",
+   "source": "staff change",
+   "verdict": "Stepino81 at fault",
+   "severity": 6,
+   "note": "This is a valid incident; This is a valid incident",
+   "who": [
+    "319544045435224067"
+   ],
+   "changes": [
+    "Race_Brazil_2026_11_15_16_35_22.json|0|contact|1|1",
+    "Race_Brazil_2026_11_15_16_35_22.json|7|contact|1|s1794756559.0"
+   ],
+   "race_file": "Race_Brazil_2026_11_15_16_35_22.json",
+   "at": "2026-11-16T10:53:30Z",
+   "recording": "2026-11-15_16-27-27_Brazil_Race.gmtel.gz",
+   "t": 73.1,
+   "cars": [
+    0,
+    7
+   ],
+   "rulebook": {
+    "verdict": "0 at fault",
+    "rule": "R2"
+   },
+   "contacts": [
+    {
+     "a": 7,
+     "b": 0,
+     "t": 73.1,
+     "x": {
+      "gap": 5.1,
+      "closing": 5,
+      "moved_front": 0.0,
+      "moved_back": 0.0,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 65,
+      "lost": 4,
+      "off": 1,
+      "cars": 2,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "front",
+     "rulebook": "none",
+     "rule": "R3",
+     "front": 0
+    },
+    {
+     "a": 0,
+     "b": 7,
+     "t": 83.9,
+     "x": {
+      "gap": 2.3,
+      "closing": -12,
+      "moved_front": -2.83,
+      "moved_back": 5.35,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 65,
+      "lost": 4,
+      "off": 1,
+      "cars": 2,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "back",
+     "rulebook": "back",
+     "rule": "R2",
+     "front": 7
+    }
+   ]
+  },
   "s-4beb167e": {
    "key": "88dc27c19007",
    "by": "GreMi",
@@ -6100,6 +6178,17 @@
    "with_precedents": 76,
    "overrides": 3,
    "date": "2026-11-15",
+   "rules": "v1.5"
+  },
+  {
+   "incidents": 88,
+   "inc_rulebook": 35,
+   "inc_with_precedents": 36,
+   "contacts": 145,
+   "rulebook": 77,
+   "with_precedents": 77,
+   "overrides": 3,
+   "date": "2026-11-16",
    "rules": "v1.5"
   }
  ]
