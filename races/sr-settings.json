@@ -8,11 +8,11 @@
     "contact_other": 1.0,
     "penalty_track": 1.0,
     "penalty_dnf": 1.0,
-    "bonus_scale": 1.0,
+    "bonus_scale": 1.5,
     "bonus_finish": 1.0,
-    "bonus_clean": 1.5,
-    "bonus_close": 1.5,
-    "bonus_overtakes": 2.0,
+    "bonus_clean": 1.0,
+    "bonus_close": 1.0,
+    "bonus_overtakes": 1.0,
     "bonus_quali": 1.0,
     "bonus_stream": 1.0,
     "bonus_cut": 0.1,
@@ -28,9 +28,9 @@
     "streak_first": 1.5,
     "streak_step": 0.5,
     "streak_max": 4.0,
-    "gravity_joined": 0.04,
-    "gravity_skipped": 0.02,
-    "window_step": 6,
+    "gravity_joined": 0.03,
+    "gravity_skipped": 0.01,
+    "window_step": 8,
     "window_weights": [
       1.0,
       0.8,
@@ -41,10 +41,45 @@
     "kick_race": 20.0,
     "kick_stream": 40.0
   },
-  "updated": "2026-11-04T13:44:03Z",
+  "updated": "2026-11-16T09:21:39Z",
   "by": "GreMi_Gaming",
-  "reason": "Change 2",
+  "reason": "S and S+ were too hard to reach, made it a little easier",
   "history": [
+    {
+      "at": "2026-11-16T09:21:39Z",
+      "by": "GreMi_Gaming",
+      "reason": "S and S+ were too hard to reach, made it a little easier",
+      "changed": {
+        "bonus_scale": [
+          1.0,
+          1.5
+        ],
+        "bonus_clean": [
+          1.5,
+          1.0
+        ],
+        "bonus_close": [
+          1.5,
+          1.0
+        ],
+        "bonus_overtakes": [
+          2.0,
+          1.0
+        ],
+        "gravity_joined": [
+          0.04,
+          0.03
+        ],
+        "gravity_skipped": [
+          0.02,
+          0.01
+        ],
+        "window_step": [
+          6,
+          8
+        ]
+      }
+    },
     {
       "at": "2026-11-04T13:44:03Z",
       "by": "GreMi_Gaming",
