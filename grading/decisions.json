@@ -1,67 +1,68 @@
 {
   "about": "Final calls on graded incidents (GreMi's grade, else the staff majority). Written by the staff page; the fault engine uses them as precedents.",
   "decisions": {
-    "sev-11041959-1166": {
-      "verdict": "#21 daris_2190 at fault",
+    "1115a-1": {
+      "verdict": "#19 toni2608 at fault",
       "by": "GreMi",
       "real": true,
       "at_fault": [
-        "#21 daris_2190"
+        "#19 toni2608"
       ],
-      "severity": 10,
+      "severity": 2,
       "note": "",
-      "at": 1794431671,
+      "at": 1794839476,
       "parts": [
         {
-          "t0": 116.7,
-          "t1": 126.1,
+          "t0": 203.9,
+          "t1": 211.0,
           "real": true,
-          "verdict": "#21 daris_2190 at fault",
+          "verdict": "#19 toni2608 at fault",
           "tags": [],
-          "kind": "Rear-end",
+          "kind": "Late lunge / divebomb",
           "note": "",
           "drivers": [
             {
-              "car": 10,
-              "name": "#21 daris_2190",
-              "call": "fault",
-              "severity": 10
+              "car": 3,
+              "name": "#69 Ayrton_Senna109",
+              "call": "clear"
             },
             {
-              "car": 3,
-              "name": "#19 DDRK",
-              "call": "clear"
+              "car": 7,
+              "name": "#19 toni2608",
+              "call": "fault",
+              "severity": 2,
+              "note": "Late dive, wasnt far enough along side him"
             }
           ]
         }
       ],
-      "kind": "Rear-end",
+      "kind": "Late lunge / divebomb",
       "drivers": [
         {
-          "car": 10,
-          "name": "#21 daris_2190"
+          "car": 3,
+          "name": "#69 Ayrton_Senna109"
         },
         {
-          "car": 3,
-          "name": "#19 DDRK"
+          "car": 7,
+          "name": "#19 toni2608"
         }
       ],
-      "track": "Singapore",
-      "date": "2026-11-04",
-      "race_file": "Race_Singapore_2026_11_04_20_09_05.json",
-      "recording": "2026-11-04_19-59-27_Singapore_Race.gmtel.gz",
-      "replay": "https://gremigaming.github.io/race-stats/f1/race/2026-11-04_19-59-27_Singapore_Race?inc=116.7&car=10,3",
+      "track": "Hungaroring",
+      "date": "2026-11-15",
+      "race_file": "Race_Hungaroring_2026_11_15_15_22_44.json",
+      "recording": "2026-11-15_15-14-26_Hungaroring_Race.gmtel.gz",
+      "replay": "https://gremigaming.github.io/race-stats/all/race/2026-11-15_15-14-26_Hungaroring_Race?inc=203.9&car=3,7",
       "engine": {
-        "rules": "v1.4",
-        "verdict": "daris_2190 at fault",
-        "rule": "R10",
-        "severity": 10,
-        "why": "daris_2190 kept full throttle for 1.0 s after hitting DDRK, pushing it along",
+        "rules": "v1.5",
+        "verdict": "toni2608 at fault",
+        "rule": "R3",
+        "severity": 2,
+        "why": "toni2608 ran into the back of Ayrton_Senna109, closing at 18 km/h",
         "at_fault": [
-          "#21 daris_2190"
+          "#19 toni2608"
         ],
         "contacts": 1,
-        "gray_score": 0.0
+        "gray_score": -0.5
       }
     },
     "1113a-1": {
@@ -684,6 +685,69 @@
         ],
         "contacts": 2,
         "gray_score": 1.0
+      }
+    },
+    "sev-11041959-1166": {
+      "verdict": "#21 daris_2190 at fault",
+      "by": "GreMi",
+      "real": true,
+      "at_fault": [
+        "#21 daris_2190"
+      ],
+      "severity": 10,
+      "note": "",
+      "at": 1794431671,
+      "parts": [
+        {
+          "t0": 116.7,
+          "t1": 126.1,
+          "real": true,
+          "verdict": "#21 daris_2190 at fault",
+          "tags": [],
+          "kind": "Rear-end",
+          "note": "",
+          "drivers": [
+            {
+              "car": 10,
+              "name": "#21 daris_2190",
+              "call": "fault",
+              "severity": 10
+            },
+            {
+              "car": 3,
+              "name": "#19 DDRK",
+              "call": "clear"
+            }
+          ]
+        }
+      ],
+      "kind": "Rear-end",
+      "drivers": [
+        {
+          "car": 10,
+          "name": "#21 daris_2190"
+        },
+        {
+          "car": 3,
+          "name": "#19 DDRK"
+        }
+      ],
+      "track": "Singapore",
+      "date": "2026-11-04",
+      "race_file": "Race_Singapore_2026_11_04_20_09_05.json",
+      "recording": "2026-11-04_19-59-27_Singapore_Race.gmtel.gz",
+      "replay": "https://gremigaming.github.io/race-stats/f1/race/2026-11-04_19-59-27_Singapore_Race?inc=116.7&car=10,3",
+      "engine": {
+        "rules": "v1.4",
+        "verdict": "daris_2190 at fault",
+        "rule": "R10",
+        "severity": 10,
+        "why": "daris_2190 kept full throttle for 1.0 s after hitting DDRK, pushing it along",
+        "at_fault": [
+          "#21 daris_2190"
+        ],
+        "contacts": 1,
+        "gray_score": 0.0
       }
     },
     "1102b-1": {
