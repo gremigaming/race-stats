@@ -546,6 +546,41 @@ def incref(r):
     """Where a contact happened, for scripts/telemetry/incident_replays.py (which swaps it for a replay id)."""
     return {"t": r["t"], "te": r["t_end"], "pair": list(r["pair"]), "names": r["pn"]}
 
+SEV_PART = re.compile(r"^severity \d+/10, [^;]*")
+
+def staff_call_part(fx, pts):
+    """'severity 4/10, to blame (staff call) 3' for a staff-page call with a severity, else None.
+    GreMi, 16 Nov 2026: a severity changed on the staff page must show everywhere (SR page badge,
+    incident viewer), not only in the points."""
+    call = fx.get("call") or {}
+    sev = call.get("severity")
+    if not sev:
+        return None
+    f = call.get("fault")
+    word = "shared blame" if f == "shared" else "to blame" if f == "fault" or pts < 0 else "not to blame"
+    return f"severity {int(sev)}/10, {word} (staff call) {abs(pts):g}"
+
+def restate(text, part):
+    """Swap the engine's 'severity N/10, ... P' for the staff call's (keeps 'where, with X: ' and the why)."""
+    head, sep, rest = text.partition(": ") if ": " in text and not text.startswith("severity") else ("", "", text)
+    rest = SEV_PART.sub(part, rest, count=1) if SEV_PART.match(rest) else f"{part}; {rest}"
+    return head + sep + rest
+
+def staff_lines(name, entry, car):
+    """The staff page's calls on the incidents.json lines of one incident (the incident viewer's severity and blame)."""
+    t = round(entry["inc"]["t"], 1)
+    for n, line in entry["lines"].items():
+        fx = FIX_INC.get((name, car.get(n), t))
+        if not fx:
+            continue
+        pts = half(float(fx["pts"]))
+        line[0] = pts
+        part = staff_call_part(fx, pts)
+        if part:
+            line[1] = SEV_PART.sub(part, line[1], count=1) if SEV_PART.match(line[1]) else f"{part}; {line[1]}"
+        if (fx.get("call") or {}).get("kind"):
+            entry["type"] = fx["call"]["kind"]
+
 def apply_staff(name, items, car, is_race, would):
     """Gives every item its id and applies the staff corrections for this file."""
     here = {(name, car.get(n), round(it["inc"]["t"], 1)) for n, its in items.items() for it in its if it.get("inc")}
@@ -561,6 +596,9 @@ def apply_staff(name, items, car, is_race, would):
                     fx = None
             if fx:
                 it["orig"] = it["pts"]; it["pts"] = half(float(fx["pts"])); it["staff"] = fx.get("reason") or "changed by staff"
+                part = staff_call_part(fx, it["pts"])
+                if part and it.get("cat") == "contact":
+                    it["text"] = restate(it["text"], part)
     by_car = {v: n for n, v in car.items()}
     # the staff page's incident editor (GreMi 2026-11-06) can blame a driver the engine cleared, or one
     # the telemetry left out of the contact: that change has no item yet, so it becomes one
@@ -798,6 +836,7 @@ for si, stream in enumerate(streams):
             cat = ("finish" if what.startswith("finished") else "close" if "close racing" in what else "overtakes" if "overtakes" in what
                    else "quali" if "qualifying" in what else "clean")
             items[n].append({"pts": v, "text": what[0].upper() + what[1:], "lap": None, "cat": cat})
+        first_inc = len(all_incs)
         for r in rows:
             # every collision, also the ones that cost nobody points, for the Incidents tab
             all_incs.append({"file": name, "lap": r["lap"], "where": r["where"], "sev": r["sev"], "names": r["pn"],
@@ -838,6 +877,8 @@ for si, stream in enumerate(streams):
                 for n in kicked:
                     items[n].append({"pts": 0, "text": "Kicked from the lobby by staff: removed from this session's results", "lap": None, "cat": "staff"})
                 car.update(kicked); present += list(kicked)
+        for e in all_incs[first_inc:]:
+            if e.get("inc"): staff_lines(name, e, car)
         apply_staff(name, items, car, is_race, would)
         for n in set(present) | set(items):
             loss = -sum((sr_v24.v25_pts(i["pts"], i["cat"], P25) if V25 else i["pts"]) for i in items[n] if i["pts"] < 0)
