@@ -1562,6 +1562,105 @@
       "lap": 1,
       "text": "Clark, with QDR_SHW1KS: staff call (Wheelbanging)",
       "weather": "Light cloud"
+    },
+    {
+      "id": "Race_Mexico_2026_11_15_15_59_28.json|10|contact|1|0",
+      "type": "incident",
+      "reason": "Everyone of them could avoid it",
+      "by": "319544045435224067",
+      "at": "2026-11-16T14:46:41Z",
+      "file": "Race_Mexico_2026_11_15_15_59_28.json",
+      "driver": "lars.mudde",
+      "car": 10,
+      "pts": -3.0,
+      "call": {
+        "kind": "Moved across alongside",
+        "fault": "shared",
+        "severity": 6
+      },
+      "learn": false,
+      "owner": true,
+      "was": -1.0,
+      "inc": {
+        "t": 1794754278.26,
+        "pair": [
+          8,
+          10
+        ]
+      },
+      "text": "Recta Principal, with niet_Lars123, trex-Leclerc: severity 3/10, to blame (R2) 1; side by side; lars.mudde moved 2.7 m across into the other car"
+    },
+    {
+      "id": "Race_Mexico_2026_11_15_15_59_28.json|5|contact|1|s1794754278.3",
+      "type": "incident",
+      "reason": "Everyone of them could avoid it",
+      "by": "319544045435224067",
+      "at": "2026-11-16T14:46:41Z",
+      "file": "Race_Mexico_2026_11_15_15_59_28.json",
+      "driver": "niet_Lars123",
+      "car": 5,
+      "pts": -1.0,
+      "call": {
+        "kind": "Moved across alongside",
+        "fault": "shared",
+        "severity": 6,
+        "override": true
+      },
+      "learn": false,
+      "owner": true,
+      "was": 0.0,
+      "inc": {
+        "t": 1794754278.26,
+        "te": 1794754293.26,
+        "pair": [
+          8,
+          10
+        ],
+        "names": [
+          "trex-Leclerc",
+          "lars.mudde"
+        ]
+      },
+      "blame": true,
+      "lap": 1,
+      "text": "Recta Principal, with lars.mudde, trex-Leclerc: staff call (Moved across alongside)",
+      "weather": "Clear"
+    },
+    {
+      "id": "Race_Mexico_2026_11_15_15_59_28.json|8|contact|1|s1794754278.3",
+      "type": "incident",
+      "reason": "Everyone of them could avoid it",
+      "by": "319544045435224067",
+      "at": "2026-11-16T14:46:41Z",
+      "file": "Race_Mexico_2026_11_15_15_59_28.json",
+      "driver": "trex-Leclerc",
+      "car": 8,
+      "pts": -1.0,
+      "call": {
+        "kind": "Moved across alongside",
+        "fault": "shared",
+        "severity": 6,
+        "override": true
+      },
+      "learn": false,
+      "owner": true,
+      "was": 0.0,
+      "inc": {
+        "t": 1794754278.26,
+        "te": 1794754293.26,
+        "pair": [
+          8,
+          10
+        ],
+        "names": [
+          "trex-Leclerc",
+          "lars.mudde"
+        ]
+      },
+      "blame": true,
+      "lap": 1,
+      "text": "Recta Principal, with lars.mudde, niet_Lars123: staff call (Moved across alongside)",
+      "weather": "Clear"
     }
   ]
 }
