@@ -1,0 +1,80 @@
+<!doctype html>
+<!-- OBS browser source (invisible, any size, e.g. 10x10): tells Streamer.bot about the race results
+     so it can switch scenes (GreMi 2026-11-16): after the race "Between races", as soon as the
+     results are in the results scene for ~30 s, then back to "Between races".
+     Keep it running all stream: put it in a nested block that every scene uses, or leave
+     "Shutdown source when not visible" off on the source.
+     Sends Streamer.bot DoAction (WebSocket server, default 127.0.0.1:8080):
+       "Race Finished"  once per race, at the chequered flag (live race server). Args: track.
+       "Results In"     once per race, when that race's result is published. Args: track, file, seconds.
+     ?sb=127.0.0.1:8080 Streamer.bot address, ?sbpass=... when it has authentication on,
+     ?seconds=30 how long Streamer.bot should show the results (passed on as an arg),
+     ?test=finished|results sends that action once right away (to try the Streamer.bot action). -->
+<html><head><meta charset="utf-8"><title>Results signal</title>
+<style>html, body { margin: 0; background: transparent; }</style></head>
+<body>
+<script type="module">
+import { pollRace } from "./league.js";
+const q = new URLSearchParams(location.search);
+const SECONDS = +(q.get("seconds") || 30);
+const store = {
+  get(k) { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* private mode */ } },
+};
+
+// ---- Streamer.bot WebSocket (same handshake as the dock and the steward signal)
+let ws = null, ready = false, queue = [];
+async function sha256b64(s) { const b = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s)); return btoa(String.fromCharCode(...new Uint8Array(b))); }
+function connect() {
+  ready = false;
+  try { ws = new WebSocket(`ws://${q.get("sb") || "127.0.0.1:8080"}/`); } catch { setTimeout(connect, 10000); return; }
+  const sock = ws;
+  const go = () => { if (ready) return; ready = true; for (const m of queue.splice(0)) sock.send(m); };
+  let hello = 0;
+  sock.onopen = () => { hello = setTimeout(go, 600); };
+  sock.onmessage = async (e) => {
+    let msg; try { msg = JSON.parse(e.data); } catch { return; }
+    if (msg.request === "Hello") {
+      clearTimeout(hello);
+      const key = q.get("sbpass");
+      if (msg.authentication && key) {
+        const secret = await sha256b64(key + msg.authentication.salt);
+        sock.send(JSON.stringify({ request: "Authenticate", id: "rs-auth", authentication: await sha256b64(secret + msg.authentication.challenge) }));
+      } else go();
+    } else if (msg.id === "rs-auth" && msg.status === "ok") go();
+  };
+  sock.onclose = () => { clearTimeout(hello); ready = false; setTimeout(connect, 10000); };
+}
+function action(name, args) {
+  const m = JSON.stringify({ request: "DoAction", id: `rs-${Date.now()}`, action: { name }, args: { source: "race-stats results", ...args } });
+  console.log("Streamer.bot:", name, JSON.stringify(args));
+  if (ws && ready) ws.send(m); else queue = [...queue.slice(-3), m];
+}
+connect();
+
+const RK = "gremi.signal.results", FK = "gremi.signal.finished";
+if (q.get("test") === "finished") action("Race Finished", { track: "Test" });
+else if (q.get("test") === "results") action("Results In", { track: "Test", file: "", seconds: SECONDS });
+else {
+  // "Results In": once per race file, and only for a fresh result: the race we were waiting for,
+  // or (live server not seen) a file saved in the last 10 minutes. Never on a reload for an old race.
+  let waited = false;
+  pollRace(async (src, race) => {
+    const done = store.get(RK);
+    const fresh = waited || Date.now() - race.date.getTime() < 10 * 60e3;
+    waited = false;
+    store.set(RK, race.file);
+    if (done == null || done === race.file || !fresh) return;   // first run ever: nothing to catch up on
+    action("Results In", { track: race.track, file: race.file, seconds: SECONDS });
+  }, (live) => {
+    waited = true;
+    if (store.get(RK) == null) store.set(RK, "");
+    // "Race Finished": once per race, within 2 minutes of the flag.
+    if (live.finished && live.finishedAt && Date.now() - live.finishedAt < 120e3 && live.uid && store.get(FK) !== live.uid) {
+      store.set(FK, live.uid);
+      action("Race Finished", { track: live.track || "" });
+    }
+  }, 10);
+}
+</script>
+</body></html>
