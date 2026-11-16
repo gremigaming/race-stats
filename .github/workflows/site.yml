@@ -176,6 +176,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: python3 scripts/telemetry/race_bundles.py /tmp/telemetry-cache || echo "race bundles failed, the race viewer only shows races from the live server"
+      - name: Check that every incident opens in the incident viewer
+        # same matching as the site (pickIncident); writes league/link-check.json, warnings in the run summary
+        run: python3 scripts/telemetry/check_incident_links.py || echo "incident link check failed to run"
       - name: Build
         env:
           VITE_BASE_PATH: /race-stats/

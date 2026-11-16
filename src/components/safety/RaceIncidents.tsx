@@ -21,7 +21,7 @@ import {
   type SafetyScale,
 } from "../../league/safety";
 import { loadLeagueJson } from "../../league/liveData";
-import { watchTime } from "../incidents/data";
+import { viewerQuery, watchTime } from "../incidents/data";
 import { cn } from "../../utils/cn";
 
 /**
@@ -47,6 +47,8 @@ export interface RaceIncident {
   replay?: string;
   /** ?inc= of the race viewer link (league data `watch`): which contact this is, for exact incident viewer links. */
   at?: number;
+  /** The race viewer link itself: its recording names the race, its &car= the cars (slots) of the contact. */
+  watch?: string;
   /** Game severity: LOW, MEDIUM or HIGH (only used when no call names a 1-10 severity). */
   sev?: string;
 }
@@ -134,6 +136,7 @@ export function raceIncidents(
           byKey.set(k, inc);
         }
         inc.at ??= watchTime(it.watch) ?? undefined;
+        inc.watch ??= it.watch;
         const me = inc.sides.find((x) => x.name === d.name);
         if (me) me.item = it;
         else inc.sides.push({ name: d.name, item: it });
@@ -149,6 +152,7 @@ export function raceIncidents(
     if (known) {
       known.sev = c.sev;
       known.at ??= watchTime(c.watch) ?? undefined;
+      known.watch ??= c.watch;
       // a side without its own SR item (AI or hidden-name car) still shows its part of the call
       for (const side of known.sides) {
         const line = !side.item && c.lines[side.name];
@@ -167,6 +171,7 @@ export function raceIncidents(
       sev: c.sev,
       replay: c.replay,
       at: watchTime(c.watch) ?? undefined,
+      watch: c.watch,
       sides: c.names.map((name, i) => {
         const line = c.lines[name];
         return {
@@ -249,7 +254,7 @@ function IncidentCard({ inc, driver }: { inc: RaceIncident; driver: string }) {
   }, [focused]); // eslint-disable-line react-hooks/exhaustive-deps
   const { formulaKey } = useParams<{ formulaKey: string }>();
   const { scopeKey } = useTelemetry();
-  const viewer = `/${formulaKey ?? scopeKey ?? "all"}/incidents?file=${encodeURIComponent(base(inc.file))}${inc.lap != null ? `&lap=${inc.lap}` : ""}&with=${encodeURIComponent(inc.sides.map((s) => s.name).join("|"))}${inc.at != null ? `&at=${inc.at.toFixed(1)}` : ""}`;
+  const viewer = `/${formulaKey ?? scopeKey ?? "all"}/incidents?${viewerQuery(inc.file, inc.lap, inc.sides.map((s) => s.name), inc.watch)}`;
   const mine = inc.sides.find((s) => driverKey(s.name) === driver)?.item?.pts ?? 0;
   const others = inc.sides.filter((s) => driverKey(s.name) !== driver).map((s) => s.name);
   const { league } = useTelemetry();

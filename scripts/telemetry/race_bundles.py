@@ -38,6 +38,9 @@ DOWNLOAD = "https://github.com/gremigaming/race-stats/releases/download/telemetr
 
 VERSION = 12         # bump to rebuild every bundle (10: fault engine verdicts per incident, 11: names by showOnlineNames, 12: smaller incidents)
 KEEP = 40            # newest races published on the site (R2 keeps everything later)
+# R2 (the live server) only has races from the 4 Nov 2026 stream on: every race before it stays on the site,
+# so each safety rating incident of those races can still be watched (GreMi, 16 Nov 2026)
+LIVE_FROM = "2026-11-04"
 CHUNK_SECONDS = 10
 CHUNK_HEAD = struct.Struct("<4sBBHd")
 ON_TRACK = (0, 1)    # surface: tarmac, rumble strip
@@ -677,8 +680,8 @@ def main():
     windows = test_windows()
     index = []
     for n in names:
-        if len(index) >= KEEP:
-            break
+        if len(index) >= KEEP and os.path.basename(n)[:10] >= LIVE_FROM:
+            continue
         if is_test(n, windows):
             print("  skipped (test or personal session)", n)
             continue

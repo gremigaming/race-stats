@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { useBackNavigation } from "../hooks/useBackNavigation";
 import { useStewardSignal } from "../hooks/useStewardSignal";
-import { atDistance, callsOfRace, chronological, biggestFirst, chunkStart, raceTime, replayClock, rowsOf, streamOf, streamsOf, useLeagueCalls, useManifests, useRaceIndex, type RaceRef, type Row } from "../components/incidents/data";
+import { callsOfRace, pickIncident, raceOfCall, raceOfFile, chronological, biggestFirst, chunkStart, raceTime, replayClock, rowsOf, streamOf, streamsOf, useLeagueCalls, useManifests, useRaceIndex, type RaceRef, type Row } from "../components/incidents/data";
 import { IncidentStrip } from "../components/incidents/IncidentStrip";
 import { CAR_COLORS, IncidentMap, type Clock, type IncidentSeries } from "../components/incidents/IncidentMap";
 import { KIND_META, KIND_ORDER, type IncidentKind } from "../viewer/incidentKinds";
@@ -246,53 +246,38 @@ export function IncidentsPage() {
     };
   }, [open, rangeRows]);
 
-  // ---- a link from a safety rating incident (?file=Race_<track>_<date>.json&lap=&with=a|b): find the race, then the incident
+  // ---- a link from a safety rating / staff incident (?rec=<recording>&file=Race_<track>_<date>.json&at=&car=&with=):
+  // find the race (by its recording; the race file only for old links), then the incident at that contact
   const fileParam = params.get("file");
+  const recParam = params.get("rec");
   const withParam = params.get("with");
+  const [lostLink, setLostLink] = useState<string | null>(null);
   useEffect(() => {
-    if (!fileParam || !races.length) return;
-    const m = /^Race_(.+)_(\d{4})_(\d\d)_(\d\d)_(\d\d)_(\d\d)_(\d\d)\.json$/.exec(fileParam);
-    const norm = (x: string) => x.toLowerCase().replace(/[^a-z0-9]/g, "");
-    let best: RaceRef | null = null;
-    let bestD = Infinity;
-    if (m) {
-      const ft = Date.UTC(+m[2], +m[3] - 1, +m[4], +m[5], +m[6], +m[7]);
-      for (const r of races) {
-        if (!norm(m[1]).startsWith(norm(r.track))) continue;
-        const d = ft - raceTime(r);
-        if (d < -10 * 60_000 || d > 4 * 3600_000 || Math.abs(d) >= bestD) continue;
-        best = r;
-        bestD = Math.abs(d);
-      }
-    }
-    if (best) set({ race: best.uid, file: null, inc: null });
-    else set({ file: null, with: null, lap: null, at: null });
+    if ((!fileParam && !recParam) || !races.length) return;
+    const best = recParam ? raceOfCall(races, fileParam ?? "", `/race/${encodeURIComponent(recParam)}`) : raceOfFile(races, fileParam ?? "");
+    // GreMi, 16 Nov 2026: never show another race instead; say this one is not in the viewer
+    setLostLink(best ? null : `${(fileParam ?? recParam ?? "").replace(/\.json$/, "").replace(/_/g, " ")} has no replay in the incident viewer.`);
+    if (best) set({ race: best.uid, file: null, rec: null, inc: null });
+    else set({ file: null, rec: null, with: null, lap: null, at: null, car: null });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fileParam, races]);
+  }, [fileParam, recParam, races]);
   useEffect(() => {
-    if (fileParam || !withParam || !rowsByRace.has(raceUid)) return;
+    if (fileParam || recParam || !withParam || !rowsByRace.has(raceUid)) return;
     const want = withParam.split("|").map(driverKey);
+    const slots = (params.get("car") ?? "").split(",").filter(Boolean).map(Number);
     const lap = Number(params.get("lap"));
     const atRaw = params.get("at");
     const at = atRaw == null || atRaw === "" ? NaN : Number(atRaw);
-    const overlapOf = (r: Row) => r.keys.filter((k) => want.includes(k)).length;
+    const overlapOf = (r: Row) => (slots.length ? r.cars.filter((c) => slots.includes(c)).length : r.keys.filter((k) => want.includes(k)).length);
     let best: Row | null = null;
     // GreMi, 16 Nov 2026: a link with ?at= (the contact's time) opens exactly that incident, never another one
-    // of the same lap with the same drivers (Stepino vs Shwiks, lap 1: turn 15 opened turn 1)
-    if (Number.isFinite(at)) {
-      let bestD = 3;
-      for (const r of raceRows) {
-        const d = atDistance(r.inc, at, r.clock0) - overlapOf(r) * 0.01;
-        if (d < bestD) {
-          best = r;
-          bestD = d;
-        }
-      }
-    }
+    // of the same lap with the same drivers (Stepino vs Shwiks, lap 1: turn 15 opened turn 1); the car slots
+    // (?car=) tell two incidents at the same moment apart, also for hidden-name cars
+    if (Number.isFinite(at)) best = pickIncident(raceRows, (r) => r.inc, at, raceRows[0]?.clock0 ?? 0, overlapOf);
     if (!best) {
       let bestScore = 0;
       for (const r of raceRows) {
-        const overlap = overlapOf(r);
+        const overlap = r.keys.filter((k) => want.includes(k)).length;
         if (!overlap) continue;
         const score = overlap * 10 - (Number.isFinite(lap) && r.inc.lap ? Math.abs(r.inc.lap - lap) * 3 : 0) + r.sev * 0.1;
         if (score > bestScore) {
@@ -302,9 +287,10 @@ export function IncidentsPage() {
       }
     }
     clockRef.current.run++;
-    set({ with: null, lap: null, at: null, inc: best?.id ?? null, scope: null });
+    setLostLink(best || !Number.isFinite(at) ? null : "That incident is not in this race's replay, so it can't be played here.");
+    set({ with: null, lap: null, at: null, car: null, inc: best?.id ?? null, scope: null });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fileParam, withParam, rowsByRace, raceUid]);
+  }, [fileParam, recParam, withParam, rowsByRace, raceUid]);
 
   const tracks = useMemo(() => [...new Set(races.map((r) => r.track))].sort(), [races]);
   const kindsHere = KIND_ORDER.filter((k) => k !== "tap" && (rangeRows.some((r) => r.kind === k) || raceRows.some((r) => r.kind === k)));
@@ -425,6 +411,15 @@ export function IncidentsPage() {
 
   const list = (
     <div className="flex min-h-0 flex-1 flex-col">
+      {lostLink && (
+        <div className="flex items-start gap-2 border-b border-amber-500/30 bg-amber-500/10 px-3 py-2 text-[12px] text-amber-200">
+          <TriangleAlert className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+          <span className="flex-1">{lostLink}</span>
+          <button type="button" aria-label="Close" onClick={() => setLostLink(null)} className="text-amber-200/70 hover:text-amber-100">
+            <X className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      )}
       <div className="flex items-center gap-2 border-b border-white/10 p-2">
         <Seg
           value={scope}

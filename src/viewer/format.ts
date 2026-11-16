@@ -97,6 +97,9 @@ export interface RaceManifest {
 
 export interface RaceIndexEntry {
   uid: string;
+  /** Other ids of the same race (set when the index merges sources): the site bundle's recording id
+   * next to the live server's uid, so links by either open it. */
+  ids?: string[];
   started: string;
   track: string;
   session: string;
@@ -320,6 +323,7 @@ export async function loadRaceIndexDetailed(): Promise<RaceIndexLoadResult> {
               Object.entries(had).filter(([, v]) => v !== undefined),
             ),
             base: had.base,
+            ids: [...new Set([...(had.ids ?? []), r.uid, ...(r.ids ?? [])])].filter((x) => x !== had.uid),
           }
         : r,
     );

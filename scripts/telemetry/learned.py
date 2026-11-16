@@ -216,12 +216,16 @@ def why_text(p, sk, name):
     return out
 
 
-def _incident_link(file, lap, names, at=None):
-    """at = the contact's recording time (the race viewer's ?inc=): the viewer then opens exactly that incident."""
+def _incident_link(file, lap, names, at=None, rec=None, cars=()):
+    """at = the contact's recording time (the race viewer's ?inc=), rec = the recording (which race), cars = the
+    game's car slots: the viewer then opens exactly that incident (same query as the SR page's viewerQuery)."""
     if not file:
         return None
-    return (f"{SITE}incidents?file={file}" + (f"&lap={lap}" if lap else "")
-            + "&with=" + "|".join(_short(n) for n in names if n) + (f"&at={at:.1f}" if at is not None else ""))
+    rec = (rec or "").replace(".gmtel.gz", "")
+    cars = [str(c) for c in cars if c is not None]
+    return ((f"{SITE}incidents?rec={rec}&file={file}" if rec else f"{SITE}incidents?file={file}") + (f"&lap={lap}" if lap else "")
+            + "&with=" + "|".join(_short(n) for n in names if n) + (f"&at={at:.1f}" if at is not None else "")
+            + (f"&car={','.join(cars)}" if cars else ""))
 
 
 def _verdict_files(cache):
@@ -266,7 +270,8 @@ def followers(vfiles):
             out[pr["id"]].append({"track": track, "date": date, "lap": inc.get("lap"), "file": file,
                                   "what": "cleared" if before and not after else "blamed" if after and not before else "moved",
                                   "before": rb.get("verdict"), "after": inc.get("verdict"), "d": pr.get("d"),
-                                  "watch": _incident_link(file, inc.get("lap"), who, inc["t0"] - off if inc.get("t0") is not None else None)})
+                                  "watch": _incident_link(file, inc.get("lap"), who, inc["t0"] - off if inc.get("t0") is not None else None,
+                                                          data.get("recording"), [d.get("car") for d in inc.get("drivers") or []])})
     return out
 
 
@@ -324,7 +329,7 @@ def lesson_log(store, cache, sketches=None):
                     "part": p.get("part"), "of": p.get("of"), "kind": p.get("kind"), "call": p.get("verdict"),
                     "severity": p.get("severity"), "rulebook": (p.get("rulebook") or {}).get("verdict"), "differs": differs,
                     "cars": cars, "why": why_text(p, sk, name), "sketch": sk, "changed": changed[:40], "followers": len(changed),
-                    "watch": _incident_link(file, lap, [c["name"] for c in cars], p.get("t")), "state": state, "outdated": why_old})
+                    "watch": _incident_link(file, lap, [c["name"] for c in cars], p.get("t"), p.get("recording"), [c.get("car") for c in cars]), "state": state, "outdated": why_old})
     out.sort(key=lambda e: (e["at"] or e["day"] or "", e["id"]), reverse=True)
     return out
 

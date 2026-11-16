@@ -33,7 +33,7 @@ const changelog: ChangelogEntry[] = [
     date: "2026-11-16",
     type: "fix",
     message:
-      "Watch links from your safety rating now open exactly that incident in the incident viewer, not another one from the same lap. Calls on past races also stay as they were: only a staff decision (a protest or a corrected incident) can still change one, and its severity now shows everywhere: on the safety rating page and in the incident viewer.",
+      "Watch links from your safety rating and the staff page now open exactly that incident in the incident viewer, in every race (Bahrain races used to open another race), and older races from October can be watched too. Calls on past races also stay as they were: only a staff decision (a protest or a corrected incident) can still change one, and its severity now shows everywhere: on the safety rating page and in the incident viewer.",
     destination: "incidents",
   },
   {

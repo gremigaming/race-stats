@@ -138,20 +138,122 @@ export function watchTime(link?: string | null): number | null {
   return Number.isFinite(t) ? t : null;
 }
 
-/** How far a link's ?inc= / ?at= time is from this incident's start (it is either on the recording's clock or the replay clock). */
-export function atDistance(inc: RaceIncident, t: number, cs: number) {
-  return Math.min(Math.abs(t - inc.t0), Math.abs(t + cs - inc.t0));
+/** The recording a race viewer link plays (/race/<recording>?inc=..): the race's one fixed id.
+ * GreMi, 16 Nov 2026: the league data names races by their race file (Race_Sakhir_...), the viewer by
+ * its recording (..._Bahrain_Race); guessing one from the other by track name lost Bahrain. */
+export function watchRec(link?: string | null): string | null {
+  const m = /\/race\/([^/?#]+)/.exec(link ?? "");
+  return m ? decodeURIComponent(m[1]) : null;
 }
 
-/** The calls of one race: same track, race file saved up to 4 h after the race started. */
+/** The game's car slots of a race viewer link (&car=4,5,8): the same numbers the viewer's incidents use. */
+export function watchCars(link?: string | null): number[] {
+  return (/[?&]car=([\d,]+)/.exec(link ?? "")?.[1] ?? "").split(",").filter(Boolean).map(Number);
+}
+
+/** Every id this race is known by (live server uid, site bundle id, game session uid). */
+export const raceIds = (r: RaceIndexEntry): string[] => [r.uid, ...(r.ids ?? []), ...(r.session_uid ? [r.session_uid] : [])];
+
+/** How far a link's ?inc= / ?at= time is from this incident (it is either on the recording's clock or the
+ * replay clock). Inside the incident = 0: a contact in the middle of a long incident is still that incident. */
+export function atDistance(inc: RaceIncident, t: number, cs: number) {
+  const off = (x: number) => Math.max(0, inc.t0 - x, x - (inc.t1 ?? inc.t0));
+  return Math.min(off(t), off(t + cs));
+}
+
+/**
+ * The one incident a link means: within 3 s of its contact time, the most of its cars (slots) or
+ * drivers taking part first, then the closest start. The SR page, staff page and incident viewer all
+ * resolve links through this, and scripts/telemetry/check_incident_links.py does the same at build time.
+ */
+export function pickIncident<T>(
+  items: T[],
+  incOf: (x: T) => RaceIncident,
+  t: number,
+  cs: number,
+  overlap: (x: T) => number,
+): T | null {
+  let best: T | null = null;
+  let bestS = Infinity;
+  for (const x of items) {
+    const inc = incOf(x);
+    const d = atDistance(inc, t, cs);
+    if (d >= 3) continue;
+    const near = Math.min(Math.abs(t - inc.t0), Math.abs(t + cs - inc.t0));
+    const s = d - overlap(x) * 10 + near * 0.01;
+    if (s < bestS) {
+      best = x;
+      bestS = s;
+    }
+  }
+  return best;
+}
+
+/** Race file track names the viewer knows by another name (the game's recording uses the country). */
+const TRACK_ALIAS: Record<string, string> = { sakhir: "bahrain" };
+const trackKey = (x: string) => {
+  const k = norm(x).replace(/justincase|manual/g, "");
+  return TRACK_ALIAS[k] ?? k;
+};
+/** A race file's track (Sakhir, Silverstone_Reverse, Brazil_Just_in_case) is this viewer track. */
+export function sameTrack(fileTrack: string, viewerTrack: string) {
+  const f = trackKey(fileTrack);
+  const v = trackKey(viewerTrack);
+  return f === v || (f.endsWith("reverse") && !v.endsWith("reverse") && f.slice(0, -7) === v);
+}
+
+/** The race of a race file, by time (only for league data that has no race viewer link). */
+export function raceOfFile<R extends RaceIndexEntry>(races: R[], file: string): R | null {
+  const m = FILE_RE.exec(file.split("/").pop() ?? file);
+  if (!m) return null;
+  const ft = Date.UTC(+m[2], +m[3] - 1, +m[4], +m[5], +m[6], +m[7]);
+  let best: R | null = null;
+  let bestD = Infinity;
+  for (const r of races) {
+    if (!sameTrack(m[1], r.track)) continue;
+    const d = ft - raceTime(r);
+    if (d < -10 * 60_000 || d > 4 * 3600_000 || Math.abs(d) >= bestD) continue;
+    best = r;
+    bestD = Math.abs(d);
+  }
+  return best;
+}
+
+/** The race a league call / SR item belongs to: its race viewer link's recording, else its race file. */
+export function raceOfCall<R extends RaceIndexEntry>(races: R[], file: string, watch?: string | null): R | null {
+  const rec = watchRec(watch);
+  if (rec) {
+    const r = races.find((x) => raceIds(x).includes(rec));
+    if (r) return r;
+  }
+  return raceOfFile(races, file);
+}
+
+/** The incident viewer's query for one incident (SR page, What I learned; the staff page builds the same in
+ * race-control-stats staff/races.py viewer_url): the recording (which race), contact time and car slots
+ * (which incident), race file, lap and drivers only as fallback for links without a race viewer link. */
+export function viewerQuery(file: string, lap: number | null | undefined, names: string[], watch?: string | null) {
+  const q = new URLSearchParams();
+  const rec = watchRec(watch);
+  if (rec) q.set("rec", rec);
+  q.set("file", file.split("/").pop() ?? file);
+  if (lap != null) q.set("lap", String(lap));
+  q.set("with", names.join("|"));
+  const at = watchTime(watch);
+  if (at != null) q.set("at", at.toFixed(1));
+  const cars = watchCars(watch);
+  if (cars.length) q.set("car", cars.join(","));
+  return q.toString();
+}
+
+/** The calls of one race: the ones whose race viewer link plays this race (race file + time without one). */
 export function callsOfRace(race: RaceRef, calls: LeagueCall[] | undefined): LeagueCall[] {
   if (!calls?.length) return [];
-  const rt = raceTime(race);
+  const ids = raceIds(race);
   return calls.filter((c) => {
-    const m = FILE_RE.exec(c.file);
-    if (!m || !norm(m[1]).startsWith(norm(race.track))) return false;
-    const d = Date.UTC(+m[2], +m[3] - 1, +m[4], +m[5], +m[6], +m[7]) - rt;
-    return d > -10 * 60_000 && d < 4 * 3600_000;
+    const rec = watchRec(c.watch);
+    if (rec) return ids.includes(rec);
+    return raceOfFile([race], c.file) != null;
   });
 }
 
@@ -162,17 +264,24 @@ const TYPE_KIND: Record<string, IncidentKind> = {
 };
 
 /** The final call on this incident (staff call, grade or precedent over the rulebook), when the league data has it. */
-function finalCall(inc: RaceIncident, names: string[], calls: LeagueCall[], cs: number) {
+function finalCall(inc: RaceIncident, cars: number[], names: string[], calls: LeagueCall[], cs: number) {
   const keys = new Set(names.map(driverKey));
+  // the other way round from a link: which call's contact belongs to this incident (its slots, then names)
   let best: LeagueCall | null = null;
-  let bestD = 3;
+  let bestS = Infinity;
   for (const c of calls) {
     const t = watchTime(c.watch);
     if (t == null) continue;
     const d = atDistance(inc, t, cs);
-    if (d >= bestD || !c.names.some((n) => keys.has(driverKey(n)))) continue;
-    best = c;
-    bestD = d;
+    if (d >= 3) continue;
+    const slots = watchCars(c.watch);
+    const ov = slots.length ? slots.filter((x) => cars.includes(x)).length : c.names.filter((n) => keys.has(driverKey(n))).length;
+    if (!ov) continue;
+    const s = d - ov * 10 + Math.min(Math.abs(t - inc.t0), Math.abs(t + cs - inc.t0)) * 0.01;
+    if (s < bestS) {
+      best = c;
+      bestS = s;
+    }
   }
   if (!best) return null;
   const lines = Object.entries(best.lines);
@@ -191,7 +300,7 @@ export function rowsOf(race: RaceRef, m: RaceManifest, calls: LeagueCall[] = [])
     const cars = carsOf(inc0);
     const names = cars.map(name);
     // GreMi, 6 Nov 2026: the viewer shows the same call as the safety rating and the staff page
-    const fc = calls.length ? finalCall(inc0, names, calls, chunkStart(m)) : null;
+    const fc = calls.length ? finalCall(inc0, cars, names, calls, chunkStart(m)) : null;
     let inc = inc0;
     if (fc && inc0.verdict) {
       const carOf = (n: string) => cars[names.findIndex((x) => driverKey(x) === driverKey(n))];
