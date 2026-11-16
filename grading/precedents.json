@@ -4893,6 +4893,86 @@
     }
    ]
   },
+  "s-256fca0f": {
+   "key": "518c856c48f2",
+   "by": "GreMi",
+   "track": "Brazil",
+   "date": "2026-11-15",
+   "kind": "Racing incident",
+   "source": "staff change",
+   "verdict": "Racing incident",
+   "severity": 0,
+   "note": "This is just hard racing, Shwiks could have left some more space, F7edd1e could have backed out.; This is just hard racing, Shwiks could have left some more space, F7edd1e could have backed out.; This is just hard racing, Shwiks could have left some more space, F7edd1e could have backed out.",
+   "who": [
+    "319544045435224067"
+   ],
+   "changes": [
+    "Race_Brazil_2026_11_15_16_35_22.json|2|contact|2|2",
+    "Race_Brazil_2026_11_15_16_35_22.json|7|contact|2|s1794756604.4",
+    "Race_Brazil_2026_11_15_16_35_22.json|8|contact|2|0"
+   ],
+   "race_file": "Race_Brazil_2026_11_15_16_35_22.json",
+   "at": "2026-11-16T12:19:30Z",
+   "recording": "2026-11-15_16-27-27_Brazil_Race.gmtel.gz",
+   "t": 118.5,
+   "cars": [
+    2,
+    7,
+    8
+   ],
+   "rulebook": {
+    "verdict": "8 + 2 at fault",
+    "rule": "R8"
+   },
+   "contacts": [
+    {
+     "a": 7,
+     "b": 8,
+     "t": 118.5,
+     "x": {
+      "gap": 2.0,
+      "closing": -11,
+      "moved_front": -0.24,
+      "moved_back": 3.34,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 118,
+      "lost": 4,
+      "off": 1,
+      "cars": 3,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "none",
+     "rulebook": "back",
+     "rule": "R2",
+     "front": 7
+    },
+    {
+     "a": 8,
+     "b": 2,
+     "t": 120.5,
+     "x": {
+      "gap": 3.7,
+      "closing": 23,
+      "moved_front": -0.77,
+      "moved_back": 1.3,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 118,
+      "lost": 4,
+      "off": 1,
+      "cars": 3,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "none",
+     "rulebook": "back",
+     "rule": "R2",
+     "front": 8
+    }
+   ]
+  },
   "s-41ea2248": {
    "key": "8cc59576827e",
    "by": "GreMi",
@@ -6440,6 +6520,17 @@
    "inc_rulebook": 35,
    "inc_with_precedents": 35,
    "contacts": 152,
+   "rulebook": 80,
+   "with_precedents": 79,
+   "overrides": 2,
+   "date": "2026-11-16",
+   "rules": "v1.5"
+  },
+  {
+   "incidents": 91,
+   "inc_rulebook": 35,
+   "inc_with_precedents": 35,
+   "contacts": 154,
    "rulebook": 80,
    "with_precedents": 79,
    "overrides": 2,
