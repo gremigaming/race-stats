@@ -138,6 +138,85 @@
         "gray_score": -0.1
       }
     },
+    "1115a-5": {
+      "verdict": "#69 trex-Leclerc + #8 lars.mudde + #8 niet_Lars123 shared",
+      "by": "GreMi",
+      "real": true,
+      "at_fault": [
+        "#69 trex-Leclerc",
+        "#8 lars.mudde",
+        "#8 niet_Lars123"
+      ],
+      "severity": 6,
+      "note": "",
+      "at": 1794840019,
+      "parts": [
+        {
+          "t0": 6.2,
+          "t1": 21.2,
+          "real": true,
+          "verdict": "#69 trex-Leclerc + #8 lars.mudde + #8 niet_Lars123 shared",
+          "tags": [],
+          "kind": "Chain reaction",
+          "note": "",
+          "drivers": [
+            {
+              "car": 10,
+              "name": "#8 lars.mudde",
+              "call": "shared",
+              "severity": 6,
+              "note": "Goes for a gap that was closing, keep the trottle pinned, should have backed out"
+            },
+            {
+              "car": 8,
+              "name": "#69 trex-Leclerc",
+              "call": "shared",
+              "severity": 5,
+              "note": "Should keep their line, not paying attention to drivers around"
+            },
+            {
+              "car": 5,
+              "name": "#8 niet_Lars123",
+              "call": "shared",
+              "severity": 5,
+              "note": "Should keep their line, not paying attention to drivers around"
+            }
+          ]
+        }
+      ],
+      "kind": "Chain reaction",
+      "drivers": [
+        {
+          "car": 10,
+          "name": "#8 lars.mudde"
+        },
+        {
+          "car": 8,
+          "name": "#69 trex-Leclerc"
+        },
+        {
+          "car": 5,
+          "name": "#8 niet_Lars123"
+        }
+      ],
+      "track": "Mexico",
+      "date": "2026-11-15",
+      "race_file": "Race_Mexico_2026_11_15_15_59_28.json",
+      "recording": "2026-11-15_15-50-35_Mexico_Race.gmtel.gz",
+      "replay": "https://gremigaming.github.io/race-stats/all/race/2026-11-15_15-50-35_Mexico_Race?inc=6.2&car=10,8,5",
+      "engine": {
+        "rules": "v1.5",
+        "verdict": "lars.mudde at fault",
+        "rule": "R2",
+        "severity": 3,
+        "why": "side by side; lars.mudde moved 2.7 m across into the other car",
+        "at_fault": [
+          "#8 lars.mudde"
+        ],
+        "contacts": 2,
+        "gray_score": -0.1
+      }
+    },
     "1113a-1": {
       "verdict": "#20 QDR_SHW1KS at fault",
       "by": "GreMi",
