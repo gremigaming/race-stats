@@ -4973,6 +4973,61 @@
     }
    ]
   },
+  "s-3d9566e1": {
+   "key": "ab7725ced824",
+   "by": "GreMi",
+   "track": "Melbourne",
+   "date": "2026-11-15",
+   "kind": "Wheelbanging",
+   "source": "staff change",
+   "verdict": "QDR_SHW1KS + gone-wildcat63 at fault",
+   "severity": 5,
+   "note": "Both should have left a bit more space; Both should have left a bit more space",
+   "who": [
+    "319544045435224067"
+   ],
+   "changes": [
+    "Race_Melbourne_2026_11_15_15_39_21.json|8|contact|1|s1794753103.7",
+    "Race_Melbourne_2026_11_15_15_39_21.json|9|contact|1|s1794753103.7"
+   ],
+   "race_file": "Race_Melbourne_2026_11_15_15_39_21.json",
+   "at": "2026-11-16T12:21:03Z",
+   "recording": "2026-11-15_15-30-36_Melbourne_Race.gmtel.gz",
+   "t": 43.0,
+   "cars": [
+    8,
+    9
+   ],
+   "rulebook": {
+    "verdict": "Racing incident",
+    "rule": "R2"
+   },
+   "contacts": [
+    {
+     "a": 8,
+     "b": 9,
+     "t": 43.0,
+     "x": {
+      "gap": 1.5,
+      "closing": -9,
+      "moved_front": 0.31,
+      "moved_back": 0.47,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 120,
+      "lost": 4,
+      "off": 2,
+      "cars": 2,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "both",
+     "rulebook": "none",
+     "rule": "R2",
+     "front": 8
+    }
+   ]
+  },
   "s-41ea2248": {
    "key": "8cc59576827e",
    "by": "GreMi",
@@ -6531,6 +6586,17 @@
    "inc_rulebook": 35,
    "inc_with_precedents": 35,
    "contacts": 154,
+   "rulebook": 80,
+   "with_precedents": 79,
+   "overrides": 2,
+   "date": "2026-11-16",
+   "rules": "v1.5"
+  },
+  {
+   "incidents": 92,
+   "inc_rulebook": 35,
+   "inc_with_precedents": 35,
+   "contacts": 155,
    "rulebook": 80,
    "with_precedents": 79,
    "overrides": 2,
