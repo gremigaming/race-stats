@@ -1141,6 +1141,67 @@
     }
    ]
   },
+  "1115a-1a": {
+   "key": "5281dfcee992",
+   "race_file": "Race_Hungaroring_2026_11_15_15_22_44.json",
+   "at": "2026-11-16T14:31:16Z",
+   "parent": "1115a-1",
+   "part": 1,
+   "of": 1,
+   "by": "GreMi",
+   "track": "Hungaroring",
+   "date": "2026-11-15",
+   "verdict": "#19 toni2608 at fault",
+   "severity": 2,
+   "note": "",
+   "tags": [],
+   "kind": "Late lunge / divebomb",
+   "source": "grade",
+   "calls": {
+    "3": {
+     "name": "#69 Ayrton_Senna109",
+     "call": "clear"
+    },
+    "7": {
+     "name": "#19 toni2608",
+     "call": "fault",
+     "severity": 2,
+     "note": "Late dive, wasnt far enough along side him"
+    }
+   },
+   "recording": "2026-11-15_15-14-26_Hungaroring_Race.gmtel.gz",
+   "t": 203.9,
+   "t1": 211.0,
+   "cars": [
+    3,
+    7
+   ],
+   "contacts": [
+    {
+     "a": 3,
+     "b": 7,
+     "t": 203.9,
+     "x": {
+      "gap": 4.6,
+      "closing": 18,
+      "moved_front": -0.35,
+      "moved_back": 0.89,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 42,
+      "lost": 2,
+      "off": 1,
+      "cars": 2,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "back",
+     "rulebook": "back",
+     "rule": "R3",
+     "front": 3
+    }
+   ]
+  },
   "b1-01": {
    "key": "f236a7775b10",
    "by": "GreMi",
@@ -6599,6 +6660,17 @@
    "contacts": 155,
    "rulebook": 80,
    "with_precedents": 79,
+   "overrides": 2,
+   "date": "2026-11-16",
+   "rules": "v1.5"
+  },
+  {
+   "incidents": 93,
+   "inc_rulebook": 36,
+   "inc_with_precedents": 36,
+   "contacts": 156,
+   "rulebook": 81,
+   "with_precedents": 80,
    "overrides": 2,
    "date": "2026-11-16",
    "rules": "v1.5"
