@@ -1271,6 +1271,138 @@
       "lap": 1,
       "text": "‘S’ do Senna, with lars.mudde, [ET8] Hamish, [KEI PLUM: staff call (Rear-end)",
       "weather": "Clear"
+    },
+    {
+      "id": "Race_Brazil_2026_11_15_16_35_22.json|0|contact|1|s1794756495.3",
+      "type": "incident",
+      "reason": "Jason didnt leave the track in the incident, so it cant be an unsafe rejoin",
+      "by": "319544045435224067",
+      "at": "2026-11-16T10:59:47Z",
+      "file": "Race_Brazil_2026_11_15_16_35_22.json",
+      "driver": "Stepino81",
+      "car": 0,
+      "pts": 0.0,
+      "call": {
+        "kind": "Late lunge / divebomb",
+        "fault": "clear",
+        "severity": 7
+      },
+      "learn": true,
+      "owner": true,
+      "was": 0.0,
+      "inc": {
+        "t": 1794756495.35,
+        "te": 1794756499.07,
+        "pair": [
+          0,
+          12
+        ],
+        "names": [
+          "Stepino81",
+          "jasonri12"
+        ]
+      },
+      "blame": true,
+      "lap": 1,
+      "text": "‘S’ do Senna, with TTV/GreMi_Gaming, jasonri12, f7edd1e: staff call (Late lunge / divebomb)",
+      "weather": "Clear"
+    },
+    {
+      "id": "Race_Brazil_2026_11_15_16_35_22.json|1|contact|1|s1794756495.3",
+      "type": "incident",
+      "reason": "Jason didnt leave the track in the incident, so it cant be an unsafe rejoin",
+      "by": "319544045435224067",
+      "at": "2026-11-16T10:59:47Z",
+      "file": "Race_Brazil_2026_11_15_16_35_22.json",
+      "driver": "TTV/GreMi_Gaming",
+      "car": 1,
+      "pts": 0.0,
+      "call": {
+        "kind": "Late lunge / divebomb",
+        "fault": "clear",
+        "severity": 7
+      },
+      "learn": true,
+      "owner": true,
+      "was": 0.0,
+      "inc": {
+        "t": 1794756495.35,
+        "te": 1794756499.07,
+        "pair": [
+          0,
+          12
+        ],
+        "names": [
+          "Stepino81",
+          "jasonri12"
+        ]
+      },
+      "blame": true,
+      "lap": 1,
+      "text": "‘S’ do Senna, with Stepino81, jasonri12, f7edd1e: staff call (Late lunge / divebomb)",
+      "weather": "Clear"
+    },
+    {
+      "id": "Race_Brazil_2026_11_15_16_35_22.json|12|contact|1|0",
+      "type": "incident",
+      "reason": "Jason didnt leave the track in the incident, so it cant be an unsafe rejoin",
+      "by": "319544045435224067",
+      "at": "2026-11-16T10:59:47Z",
+      "file": "Race_Brazil_2026_11_15_16_35_22.json",
+      "driver": "jasonri12",
+      "car": 12,
+      "pts": -6.0,
+      "call": {
+        "kind": "Late lunge / divebomb",
+        "fault": "fault",
+        "severity": 7
+      },
+      "learn": true,
+      "owner": true,
+      "was": -6.0,
+      "inc": {
+        "t": 1794756495.35,
+        "pair": [
+          0,
+          12
+        ]
+      },
+      "text": "‘S’ do Senna, with Stepino81, TTV/GreMi_Gaming, f7edd1e: severity 7/10, to blame (R5) 6; jasonri12 came back onto the track and moved 5.5 m across into Stepino81"
+    },
+    {
+      "id": "Race_Brazil_2026_11_15_16_35_22.json|8|contact|1|s1794756495.3",
+      "type": "incident",
+      "reason": "Jason didnt leave the track in the incident, so it cant be an unsafe rejoin",
+      "by": "319544045435224067",
+      "at": "2026-11-16T10:59:47Z",
+      "file": "Race_Brazil_2026_11_15_16_35_22.json",
+      "driver": "f7edd1e",
+      "car": 8,
+      "pts": 0.0,
+      "call": {
+        "kind": "Late lunge / divebomb",
+        "fault": "clear",
+        "severity": 7
+      },
+      "learn": true,
+      "owner": true,
+      "was": 0.0,
+      "inc": {
+        "t": 1794756495.35,
+        "te": 1794756499.07,
+        "pair": [
+          0,
+          12
+        ],
+        "names": [
+          "Stepino81",
+          "jasonri12"
+        ]
+      },
+      "blame": true,
+      "lap": 1,
+      "text": "‘S’ do Senna, with Stepino81, TTV/GreMi_Gaming, jasonri12: staff call (Late lunge / divebomb)",
+      "weather": "Clear"
     }
   ]
 }
