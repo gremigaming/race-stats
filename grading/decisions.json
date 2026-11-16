@@ -65,6 +65,79 @@
         "gray_score": -0.5
       }
     },
+    "1115a-4": {
+      "verdict": "#69 Ayrton_Senna109 at fault",
+      "by": "GreMi",
+      "real": true,
+      "at_fault": [
+        "#69 Ayrton_Senna109"
+      ],
+      "severity": 3,
+      "note": "",
+      "at": 1794839656,
+      "parts": [
+        {
+          "t0": 22.5,
+          "t1": 28.6,
+          "real": true,
+          "verdict": "#69 Ayrton_Senna109 at fault",
+          "tags": [],
+          "kind": "Rear-end",
+          "note": "",
+          "drivers": [
+            {
+              "car": 4,
+              "name": "#86 Overfast-_",
+              "call": "clear"
+            },
+            {
+              "car": 3,
+              "name": "#69 Ayrton_Senna109",
+              "call": "fault",
+              "severity": 3,
+              "note": "Slight touch but was close to a big crash"
+            },
+            {
+              "car": 7,
+              "name": "#19 toni2608",
+              "call": "clear"
+            }
+          ]
+        }
+      ],
+      "kind": "Rear-end",
+      "drivers": [
+        {
+          "car": 4,
+          "name": "#86 Overfast-_"
+        },
+        {
+          "car": 3,
+          "name": "#69 Ayrton_Senna109"
+        },
+        {
+          "car": 7,
+          "name": "#19 toni2608"
+        }
+      ],
+      "track": "Hungaroring",
+      "date": "2026-11-15",
+      "race_file": "Race_Hungaroring_2026_11_15_15_22_44.json",
+      "recording": "2026-11-15_15-14-26_Hungaroring_Race.gmtel.gz",
+      "replay": "https://gremigaming.github.io/race-stats/all/race/2026-11-15_15-14-26_Hungaroring_Race?inc=22.5&car=4,3,7",
+      "engine": {
+        "rules": "v1.5",
+        "verdict": "Ayrton_Senna109 at fault",
+        "rule": "R3",
+        "severity": 2,
+        "why": "Ayrton_Senna109 ran into the back of Overfast-_, closing at 39 km/h",
+        "at_fault": [
+          "#69 Ayrton_Senna109"
+        ],
+        "contacts": 2,
+        "gray_score": -0.1
+      }
+    },
     "1113a-1": {
       "verdict": "#20 QDR_SHW1KS at fault",
       "by": "GreMi",
