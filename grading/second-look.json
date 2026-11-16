@@ -106,6 +106,25 @@
  },
  {
   "file": "Race_Brazil_2026_10_25_17_04_22.json",
+  "t": 1792943884.28,
+  "lap": 1,
+  "cars": [
+   14,
+   7
+  ],
+  "frozen": "Ferrari '26 #2 at fault",
+  "frozen_fault": [
+   14
+  ],
+  "now": "Mercedes '26 #54 + Ferrari '26 #2 at fault",
+  "now_fault": [
+   7,
+   14
+  ],
+  "rule_now": "R8"
+ },
+ {
+  "file": "Race_Brazil_2026_10_25_17_04_22.json",
   "t": 1792943935.92,
   "lap": 1,
   "cars": [
