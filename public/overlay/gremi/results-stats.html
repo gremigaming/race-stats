@@ -3,7 +3,8 @@
      Cycles four pages: race awards, more awards (both for the other drivers), GreMi's race (with a position chart) and tonight's leaderboard.
      Source size 668x338 for the default 620x290 card (the card has a 24px margin).
      ?w=620 ?h=290 card size (w >= 1000 lays the awards out in one row of six, e.g. ?w=1536&h=310),, ?every=12 seconds per page, ?page=awards|awards2|me|tonight, ?me=1 lets GreMi win awards too, shows one page,
-     ?race=<file> show one race (testing). -->
+     ?race=<file> show one race, ?wait=<track> the waiting card (testing).
+     Right after the flag it shows "crunching the numbers" until that race's file is in, never the race before. -->
 <html><head><meta charset="utf-8"><title>Race stats</title>
 <link rel="stylesheet" href="brand.css">
 <style>
@@ -31,6 +32,10 @@
   .lbr { display: grid; grid-template-columns: 34px 1fr auto auto; gap: 12px; align-items: center; font-weight: 600; font-size: 24px; padding: 2px 8px; border-radius: 6px; }
   .lbr.me { background: rgba(190,40,120,.32); box-shadow: inset 4px 0 0 #ff3b30; }
   .lbr .w { color: var(--dim); font-size: 17px; } .lbr .p { font-weight: 800; font-variant-numeric: tabular-nums; }
+  .waiting { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 8px; }
+  .waiting b { font-weight: 800; font-size: 34px; letter-spacing: .04em; text-transform: uppercase; }
+  .waiting i { font-style: normal; animation: blink 1.2s ease-in-out infinite; } .waiting i:nth-child(2) { animation-delay: .2s; } .waiting i:nth-child(3) { animation-delay: .4s; }
+  @keyframes blink { 50% { opacity: .35; } }
   .pips { display: flex; gap: 5px; margin-top: 10px; flex-wrap: wrap; }
   .pip { min-width: 32px; height: 21px; padding: 0 5px; border-radius: 4px; font: 800 15px/21px "Saira Condensed"; text-align: center; background: rgba(255,255,255,.14); }
   .pip.p1 { background: linear-gradient(90deg,#d4464a,#c4509f,#8a6cd0); } .pip.pod { background: rgba(197,139,255,.45); }
@@ -54,7 +59,7 @@
   <div class="page" id="page"></div>
 </div>
 <script type="module">
-import { poll, races, loadSession, raceStats, classification, isMe, teamColor, fmtLap, fmtMs, shortName } from "./league.js";
+import { pollRace, races, loadSession, raceStats, classification, isMe, teamColor, fmtLap, fmtMs, shortName } from "./league.js";
 const q = new URLSearchParams(location.search);
 const card = document.getElementById("card");
 card.style.width = (q.get("w") || 620) + "px";
@@ -174,10 +179,7 @@ function show() {
   el.innerHTML = p.html;
 }
 
-poll(async (src) => {
-  const all = races(src.index);
-  const last = all.find((r) => r.file === q.get("race")) || all[0];
-  if (!last) return;
+pollRace(async (src, last, all) => {
   const st = raceStats(await loadSession(src, last.file));
   const next = [{ key: "awards", html: awards(st) }, { key: "awards2", html: awards2(st) }];
   const m = mine(st);
@@ -187,6 +189,13 @@ poll(async (src) => {
   at = 0; show();
   clearInterval(timer);
   timer = setInterval(() => { at++; show(); }, +(q.get("every") || 12) * 1000);
+  card.classList.remove("out");
+  card.classList.remove("sweep"); void card.offsetWidth; card.classList.add("sweep");
+}, (live) => {
+  clearInterval(timer);
+  pages = [{ title: `${live.track || "Race"} · race awards`, html: `<div class="waiting"><b>${live.finished ? "Crunching the numbers" : "Race in progress"}<i>.</i><i>.</i><i>.</i></b>
+    <div class="label">${live.finished ? "Awards for this race in a moment" : "Awards after the flag"}</div></div>` }];
+  at = 0; show();
   card.classList.remove("out");
   card.classList.remove("sweep"); void card.offsetWidth; card.classList.add("sweep");
 });

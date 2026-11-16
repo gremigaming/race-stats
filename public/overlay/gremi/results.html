@@ -1,9 +1,11 @@
 <!doctype html>
 <!-- OBS browser source: result of the last GreMi Gang race, read from the live league data.
-     Updates by itself a few seconds after a race file is uploaded.
-     Per driver: places gained from the grid, tyre stints, penalties, best lap and gap to the winner.
+     Updates by itself a few seconds after a race file is uploaded. Right after the flag (live race
+     server) it shows "results coming in" until that race's file is in, never the race before.
+     Per driver: places gained from the grid, tyre stints, penalties, best lap, gap to the winner and
+     safety rating (SR after the race + this race's SR score; "…" while the SR is still being worked out).
      ?rows=8 rows to show (default 8), ?w=1100 card width, ?fs=27 row font size,
-     ?title=Final%20classification heading, ?race=<file> show one race (testing). -->
+     ?title=Final%20classification heading, ?race=<file> show one race, ?wait=<track> the waiting card (testing), ?sr=0 hides the SR column. -->
 <html><head><meta charset="utf-8"><title>Race result</title>
 <link rel="stylesheet" href="brand.css">
 <style>
@@ -30,6 +32,21 @@
   .tyre b { position: absolute; inset: 0; font: 800 .5em/1 "Saira Condensed"; display: flex; align-items: center; justify-content: center; color: #fff; }
   .pen { display: inline-block; margin-left: 6px; padding: 0 5px; border-radius: 4px; background: rgba(255,170,0,.85); color: #000; font-size: .62em; font-weight: 800; vertical-align: .15em; }
   .dnf { color: var(--dim); }
+  td.sr { width: 5.2em; }
+  .rk { display: inline-block; min-width: 1.7em; padding: 0 .25em; margin-right: .3em; border-radius: 4px; text-align: center;
+        font-size: .62em; font-weight: 800; vertical-align: .18em; color: #000; }
+  .srd { display: inline-block; min-width: 2.6em; margin-left: .3em; font-size: .66em; font-weight: 800; vertical-align: .14em; text-align: right; }
+  .srd.up { color: #3ee08f; } .srd.down { color: #ff5a52; } .srd.flat { color: var(--dim); }
+  .busy { color: var(--dim); animation: blink 1.2s ease-in-out infinite; }
+  @keyframes blink { 50% { opacity: .35; } }
+  tbody.still tr { animation: none; }
+  .wait .sk { display: inline-block; vertical-align: middle; height: .5em; border-radius: 4px; background: linear-gradient(90deg, rgba(255,255,255,.06), rgba(255,255,255,.16), rgba(255,255,255,.06));
+              background-size: 200% 100%; animation: shimmer 1.4s linear infinite; }
+  @keyframes shimmer { from { background-position: 100% 0; } to { background-position: -100% 0; } }
+  .waitmsg { position: absolute; left: 0; right: 0; bottom: 34%; text-align: center; font-weight: 800; font-size: 30px; letter-spacing: .06em; text-transform: uppercase; }
+  .waitmsg small { display: block; font-weight: 600; font-size: 17px; letter-spacing: .14em; color: var(--dim); margin-top: 6px; }
+  .waitmsg i { display: inline-block; animation: blink 1.2s ease-in-out infinite; font-style: normal; }
+  .waitmsg i:nth-child(2) { animation-delay: .2s; } .waitmsg i:nth-child(3) { animation-delay: .4s; }
   tbody tr { animation: rowin .5s ease both; }
   @keyframes rowin { from { opacity: 0; transform: translateX(-12px); } }
 </style></head>
@@ -37,33 +54,47 @@
 <div class="card fade out" id="card"><div class="streaks"><i></i><i></i><i></i><i></i></div>
   <div class="head"><div><div class="label" id="sub">Last race</div><div class="big" id="title" style="font-size:38px;margin-top:4px">—</div></div>
   <div class="label side" id="side">GreMi Gang lobby<br><span class="fl">◆ Fastest lap</span></div></div>
-  <table><thead><tr><th>Pos</th><th>+/-</th><th>Driver</th><th>Team</th><th>Tyres</th><th class="r">Best lap</th><th class="r">Gap</th></tr></thead><tbody id="rows"></tbody></table>
+  <table><thead><tr><th>Pos</th><th>+/-</th><th>Driver</th><th>Team</th><th>Tyres</th><th class="r">Best lap</th><th class="r">Gap</th><th class="r sr" id="srh">SR</th></tr></thead><tbody id="rows"></tbody></table>
+  <div class="waitmsg" id="waitmsg" hidden></div>
 </div>
 <script type="module">
-import { poll, races, loadSession, raceStats, isMe, teamColor, TYRE } from "./league.js";
+import { pollRace, loadSession, raceStats, isMe, teamColor, TYRE, loadSafety, raceSafety, srRank, normName } from "./league.js";
 const q = new URLSearchParams(location.search);
-const rows = +(q.get("rows") || 8), fs = +(q.get("fs") || 27);
+const rows = +(q.get("rows") || 8), fs = +(q.get("fs") || 27), SR = q.get("sr") !== "0";
 const card = document.getElementById("card");
 card.style.width = (q.get("w") || 1100) + "px";
 document.getElementById("rows").style.fontSize = fs + "px";
+if (!SR) document.getElementById("srh").remove();
+const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const gain = (g) => g == null ? "" : g > 0 ? `<span class="up">▲${g}</span>` : g < 0 ? `<span class="down">▼${-g}</span>` : `<span class="same">–</span>`;
 const tyres = (list) => list.map((t) => `<span class="tyre" style="border-color:${TYRE[t] || "#888"}"><b>${esc(t[0])}</b></span>`).join("");
+const srCell = (sr, name) => {
+  if (!SR) return "";
+  if (!sr) return `<td class="sr r"><span class="busy">…</span></td>`;
+  const x = sr.get(normName(name));
+  if (!x) return `<td class="sr r dnf">–</td>`;
+  const r = srRank(x.sr), d = Math.round(x.race * 10) / 10;
+  const delta = d > 0 ? `<span class="srd up">+${d.toFixed(1)}</span>` : d < 0 ? `<span class="srd down">−${(-d).toFixed(1)}</span>` : `<span class="srd flat">±0</span>`;
+  return `<td class="sr r"><span class="rk" style="background:${r.color}">${r.rank}</span>${Math.round(x.sr)}${delta}</td>`;
+};
+const sweep = () => { card.classList.remove("out"); card.classList.remove("sweep"); void card.offsetWidth; card.classList.add("sweep"); };
 
-poll(async (src) => {
-  const all = races(src.index);
-  const last = all.find((r) => r.file === q.get("race")) || all[0];
-  if (!last) return;
-  const st = raceStats(await loadSession(src, last.file));
+let shown = null, srTimer = 0;
+function draw(again) {
+  const { st, race, sr } = shown;
   const list = st.rows;
   const me = list.find((c) => isMe(c.name));
-  let shown = list.slice(0, rows);
-  if (me && !shown.includes(me)) shown = [...list.slice(0, rows - 1), me];
-  const day = last.date.toLocaleDateString("en-GB", { day: "2-digit", month: "short" });
-  document.getElementById("sub").textContent = `Last race · ${day} · ${st.laps} laps${st.weather ? " · " + st.weather : ""}`;
-  document.getElementById("title").textContent = `${last.track} · ${q.get("title") || "Race result"}`;
-  document.getElementById("side").innerHTML = `GreMi Gang lobby · ${list.length} drivers<br><span class="fl">◆ Fastest lap</span>`;
-  document.getElementById("rows").innerHTML = shown.map((c, i) => {
+  let pick = list.slice(0, rows);
+  if (me && !pick.includes(me)) pick = [...list.slice(0, rows - 1), me];
+  const day = race.date.toLocaleDateString("en-GB", { day: "2-digit", month: "short" });
+  $("waitmsg").hidden = true;
+  $("sub").textContent = `Last race · ${day} · ${st.laps} laps${st.weather ? " · " + st.weather : ""}`;
+  $("title").textContent = `${race.track} · ${q.get("title") || "Race result"}`;
+  $("side").innerHTML = `GreMi Gang lobby · ${list.length} drivers<br><span class="fl">◆ Fastest lap</span>`;
+  $("rows").classList.toggle("still", again);
+  $("rows").classList.remove("wait");
+  $("rows").innerHTML = pick.map((c, i) => {
     const out = c.status && !/FINISHED/i.test(c.status);
     const fl = c.name === st.fastest?.name;
     return `<tr class="${isMe(c.name) ? "me" : ""}" style="animation-delay:${i * 60}ms"><td class="pos">${c.pos}</td>
@@ -72,10 +103,41 @@ poll(async (src) => {
       <td class="team">${esc(c.team)}</td>
       <td>${tyres(c.stints)}</td>
       <td class="best r ${fl ? "fl" : ""}">${fl ? "◆ " : ""}${esc(c.best.replace(/^0(\d:)/, "$1").replace(/^00:/, ""))}</td>
-      <td class="gap r ${out ? "dnf" : ""}">${esc(c.gap)}${c.pen ? `<span class="pen">+${c.pen}s</span>` : ""}</td></tr>`;
+      <td class="gap r ${out ? "dnf" : ""}">${esc(c.gap)}${c.pen ? `<span class="pen">+${c.pen}s</span>` : ""}</td>${srCell(sr, c.name)}</tr>`;
   }).join("");
-  card.classList.remove("out");
-  card.classList.remove("sweep"); void card.offsetWidth; card.classList.add("sweep");
+  if (!again) sweep();
+}
+
+// The SR is worked out after the result is in: check again every 20 s (for up to 20 min) and fill it in.
+async function fillSafety(src, file, tries = 60) {
+  clearTimeout(srTimer);
+  if (!SR) return;
+  const sr = raceSafety(await loadSafety(src), file);
+  if (!shown || shown.race.file !== file) return;
+  if (sr) { const had = shown.sr; shown.sr = sr; if (!had || had.size !== sr.size || [...sr].some(([k, v]) => had.get(k)?.race !== v.race)) draw(true); return; }
+  if (tries > 0) srTimer = setTimeout(() => fillSafety(src, file, tries - 1), 20000);
+}
+
+pollRace(async (src, race) => {
+  const st = raceStats(await loadSession(src, race.file));
+  const again = shown?.race.file === race.file;
+  shown = { st, race, sr: again ? shown.sr : null };
+  draw(again);
+  fillSafety(src, race.file);
+}, (live) => {
+  shown = null; clearTimeout(srTimer);
+  $("sub").textContent = live.finished ? "Chequered flag · results coming in" : "Race in progress · results after the flag";
+  $("title").textContent = `${live.track || "Race"} · ${q.get("title") || "Race result"}`;
+  $("side").innerHTML = `GreMi Gang lobby<br><span class="fl">◆ Fastest lap</span>`;
+  const cols = 7 + (SR ? 1 : 0);
+  $("rows").classList.remove("still");
+  $("rows").classList.add("wait");
+  $("rows").innerHTML = Array.from({ length: rows }, (_, i) =>
+    `<tr style="animation-delay:${i * 60}ms">${Array.from({ length: cols }, (_, j) => `<td><span class="sk" style="width:${j === 2 ? 70 - (i * 7) % 30 : 70}%;opacity:${1 - i * .07}"></span>&#8203;<span class="tyre" style="visibility:hidden;width:0;border-width:0;margin:0"></span></td>`).join("")}</tr>`).join("");
+  $("waitmsg").innerHTML = live.finished ? `Results coming in<i>.</i><i>.</i><i>.</i><small>Final classification and safety ratings</small>`
+    : `Race in progress<small>Results show here after the flag</small>`;
+  $("waitmsg").hidden = false;
+  sweep();
 });
 </script>
 </body></html>

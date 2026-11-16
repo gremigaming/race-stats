@@ -82,6 +82,108 @@ export function poll(fn, sec = 15) {
   tick();
 }
 
+// ---- Results overlays: wait for the race that just finished (GreMi 2026-11-16).
+// OBS switches to the results scene seconds after the flag, while the race file is still on its
+// way (Pits n' Giggles save, uploader, live publish). The live race server knows a race is on or
+// has just finished, so until a race file saved after that race's start is in, the overlays show
+// "results coming in" instead of the race before. Gives up 5 min after the flag (no save, offline race).
+const LIVE_SERVER = "https://live.gremigaming.com";
+const WAIT_AFTER_FLAG = 5 * 60e3;
+async function getJson(url, ms = 6000) {
+  const c = new AbortController(), t = setTimeout(() => c.abort(), ms);
+  try { const r = await fetch(url, { cache: "no-store", signal: c.signal }); if (!r.ok) throw new Error(r.status); return await r.json(); }
+  finally { clearTimeout(t); }
+}
+const store = {
+  get(k) { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* private mode */ } },
+};
+// Live server times carry a zone ("...Z"); recordings write UTC without one.
+const startedMs = (s) => { const v = String(s || "").trim().replace(" ", "T"); return Date.parse(/(Z|[+-]\d\d:?\d\d)$/i.test(v) ? v : `${v}Z`); };
+const uidHex = (u) => typeof u === "number" ? BigInt(u).toString(16).padStart(16, "0") : String(u);
+const isRaceSession = (s) => /race/i.test(s?.session || "") && !/quali/i.test(s?.session || "");
+
+/** The newest race on the live server: { track, session, started, finished, waiting }, or null. */
+export async function liveRace(newest) {
+  const KEY = "gremi.results.liveRace";
+  let rem = store.get(KEY);
+  let list = null;
+  try { list = (await getJson(`${LIVE_SERVER}/live.json?t=${Date.now()}`)).sessions || []; } catch { /* server down: use what we know */ }
+  const cur = (list || []).filter(isRaceSession).map((s) => ({ uid: uidHex(s.uid), started: startedMs(s.started), track: s.track || "", session: s.session, finishedAt: 0 }))
+    .filter((s) => s.started).sort((a, b) => b.started - a.started)[0];
+  if (cur && (!rem || rem.uid !== cur.uid)) rem = cur;
+  if (!rem) return null;
+  if (!rem.finishedAt) {
+    let fin = list !== null && !list.some((s) => uidHex(s.uid) === rem.uid);   // left the live list: over
+    if (!fin) { try { fin = !!(await getJson(`${LIVE_SERVER}/s/${rem.uid}/manifest.json`)).finished; } catch { /* keep waiting */ } }
+    if (fin) rem.finishedAt = Date.now();
+  }
+  store.set(KEY, rem);
+  const now = Date.now();
+  // In: a race file named after this race started (the name carries the save time; 45 s slack for
+  // clocks). A "Just_in_case" backup often gets its real save a minute later, so that one only
+  // counts once it is 2 minutes old.
+  const at = newest?.date?.getTime() || 0;
+  const have = at >= rem.started - 45e3 && (!/_Just_in_case_/.test(newest.file) || now - at > 120e3);
+  const waiting = !have && (rem.finishedAt ? now - rem.finishedAt < WAIT_AFTER_FLAG : now - rem.started < 3 * 3600e3);
+  return { ...rem, finished: !!rem.finishedAt, waiting };
+}
+
+/**
+ * poll() for the results overlays: onRace(src, race, all) with the newest race (or ?race=), and
+ * onWait(live) while the race that just finished isn't in yet (checked every 3 s then).
+ * Runs again at once when OBS shows the source. ?wait=<track> shows the waiting card (testing).
+ */
+export function pollRace(onRace, onWait, sec = 10) {
+  const q = new URLSearchParams(location.search);
+  let last = "", timer = 0;
+  const tick = async () => {
+    clearTimeout(timer);
+    let wait = false;
+    try {
+      if (q.has("wait")) { wait = true; if (last !== "test") { last = "test"; await onWait({ track: q.get("wait") || "Monza", session: "Race", finished: true, waiting: true }); } return; }
+      const src = await loadIndex();
+      const all = races(src.index);
+      const live = q.get("race") ? null : await liveRace(all[0]);
+      if (live?.waiting) {
+        wait = true;
+        const key = `wait|${live.uid}|${live.finished}`;
+        if (key !== last) { last = key; await onWait(live); }
+      } else {
+        const race = all.find((r) => r.file === q.get("race")) || all[0];
+        const key = `${src.index.generation || src.index.files[0]}|${race?.file}`;
+        if (race && key !== last) { last = key; await onRace(src, race, all); }
+      }
+    } catch (e) { console.warn(e); }
+    finally { if (!q.has("wait")) timer = setTimeout(tick, (wait ? 3 : sec) * 1000); }
+  };
+  window.addEventListener("obsSourceActiveChanged", (e) => { if (e.detail?.active) tick(); });
+  tick();
+}
+
+// ---- Safety rating for one race (league safety.json, same data as the site's SR page).
+export async function loadSafety(src) {
+  const p = src.base === LIVE ? src.index.assetPaths?.["safety.json"] : null;
+  const url = p ? (/^https?:/.test(p) ? p : LIVE + enc(p.replace(/^\//, ""))) : `${PAGES}safety.json?t=${Date.now()}`;
+  try { return await getJson(url, 12000); } catch { return p ? getJson(`${PAGES}safety.json?t=${Date.now()}`, 12000).catch(() => null) : null; }
+}
+const SR_RANKS = [[100, "S+", "#fcd34d"], [90, "S", "#c084fc"], [70, "A", "#4ade80"], [50, "B", "#facc15"], [40, "C", "#fbbf24"],
+  [30, "D", "#fb923c"], [20, "E", "#f87171"], [-Infinity, "F", "#dc2626"]];
+export const srRank = (sr) => { const r = SR_RANKS.find(([min]) => sr >= min); return { rank: r[1], color: r[2] }; };
+/** Per driver (normalised name): { sr after that stream, race = this race's SR score, dirty }; null when the race isn't rated yet. */
+export function raceSafety(safety, file) {
+  if (!safety?.drivers) return null;
+  const out = new Map();
+  for (const d of safety.drivers) {
+    const s = (d.sessions || []).find((x) => x.file === file);
+    if (!s) continue;
+    const h = (d.history || []).find((x) => x.stream === s.stream);
+    out.set(normName(d.name), { sr: h?.sr ?? d.sr, race: s.netGrav ?? s.net ?? s.total ?? 0, dirty: !!s.dirty, provisional: !!d.provisional });
+  }
+  return out.size ? out : null;
+}
+export const normName = (n) => String(n || "").replace(/[\s\u00a0]+/g, " ").trim().toLowerCase();
+
 // Everything the results overlays show about one race, from a session file.
 export function raceStats(s) {
   const cls = s["classification-data"] || [];
