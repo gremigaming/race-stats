@@ -1403,6 +1403,95 @@
       "lap": 1,
       "text": "‘S’ do Senna, with Stepino81, TTV/GreMi_Gaming, jasonri12: staff call (Late lunge / divebomb)",
       "weather": "Clear"
+    },
+    {
+      "id": "Race_Brazil_2026_11_15_16_35_22.json|2|contact|2|2",
+      "type": "incident",
+      "reason": "This is just hard racing, Shwiks could have left some more space, F7edd1e could have backed out.",
+      "by": "319544045435224067",
+      "at": "2026-11-16T12:19:30Z",
+      "file": "Race_Brazil_2026_11_15_16_35_22.json",
+      "driver": "vanderdeured",
+      "car": 2,
+      "pts": 0.0,
+      "call": {
+        "kind": "Racing incident",
+        "fault": "clear",
+        "severity": 4
+      },
+      "learn": true,
+      "owner": true,
+      "was": -6.0,
+      "inc": {
+        "t": 1794756604.41,
+        "pair": [
+          7,
+          8
+        ]
+      },
+      "text": "Pinheirinho, with QDR_SHW1KS, f7edd1e: severity 7/10, to blame (R2) 6; side by side; vanderdeured moved 1.3 m across into the other car"
+    },
+    {
+      "id": "Race_Brazil_2026_11_15_16_35_22.json|7|contact|2|s1794756604.4",
+      "type": "incident",
+      "reason": "This is just hard racing, Shwiks could have left some more space, F7edd1e could have backed out.",
+      "by": "319544045435224067",
+      "at": "2026-11-16T12:19:30Z",
+      "file": "Race_Brazil_2026_11_15_16_35_22.json",
+      "driver": "QDR_SHW1KS",
+      "car": 7,
+      "pts": 0.0,
+      "call": {
+        "kind": "Racing incident",
+        "fault": "clear",
+        "severity": 4
+      },
+      "learn": true,
+      "owner": true,
+      "was": 0.0,
+      "inc": {
+        "t": 1794756604.41,
+        "te": 1794756619.41,
+        "pair": [
+          7,
+          8
+        ],
+        "names": [
+          "QDR_SHW1KS",
+          "f7edd1e"
+        ]
+      },
+      "blame": true,
+      "lap": 2,
+      "text": "Pinheirinho, with vanderdeured, f7edd1e: staff call (Racing incident)",
+      "weather": "Clear"
+    },
+    {
+      "id": "Race_Brazil_2026_11_15_16_35_22.json|8|contact|2|0",
+      "type": "incident",
+      "reason": "This is just hard racing, Shwiks could have left some more space, F7edd1e could have backed out.",
+      "by": "319544045435224067",
+      "at": "2026-11-16T12:19:30Z",
+      "file": "Race_Brazil_2026_11_15_16_35_22.json",
+      "driver": "f7edd1e",
+      "car": 8,
+      "pts": 0.0,
+      "call": {
+        "kind": "Racing incident",
+        "fault": "clear",
+        "severity": 4
+      },
+      "learn": true,
+      "owner": true,
+      "was": -1.0,
+      "inc": {
+        "t": 1794756604.41,
+        "pair": [
+          7,
+          8
+        ]
+      },
+      "text": "Pinheirinho, with vanderdeured, QDR_SHW1KS: severity 2/10, to blame (R2) 1; side by side; f7edd1e moved 3.3 m across into the other car"
     }
   ]
 }
