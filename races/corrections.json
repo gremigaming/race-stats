@@ -1077,6 +1077,68 @@
         ]
       },
       "text": "Ese Moisés Solana, with TTV/GreMi_Gaming: severity 5/10, to blame (R8) 3; side by side, both moved across into each other (2.5 m / 2.5 m)"
+    },
+    {
+      "id": "Race_Brazil_2026_11_15_16_35_22.json|0|contact|1|1",
+      "type": "incident",
+      "reason": "This is a valid incident",
+      "by": "319544045435224067",
+      "at": "2026-11-16T10:53:30Z",
+      "file": "Race_Brazil_2026_11_15_16_35_22.json",
+      "driver": "Stepino81",
+      "car": 0,
+      "pts": -6.0,
+      "call": {
+        "kind": "Moved across alongside",
+        "fault": "fault",
+        "severity": 6
+      },
+      "learn": true,
+      "owner": true,
+      "was": -6.0,
+      "inc": {
+        "t": 1794756559.03,
+        "pair": [
+          0,
+          7
+        ]
+      },
+      "text": "Arquibancadas, with QDR_SHW1KS: severity 6/10, to blame (R2) 6; side by side; Stepino81 moved 5.3 m across into the other car"
+    },
+    {
+      "id": "Race_Brazil_2026_11_15_16_35_22.json|7|contact|1|s1794756559.0",
+      "type": "incident",
+      "reason": "This is a valid incident",
+      "by": "319544045435224067",
+      "at": "2026-11-16T10:53:30Z",
+      "file": "Race_Brazil_2026_11_15_16_35_22.json",
+      "driver": "QDR_SHW1KS",
+      "car": 7,
+      "pts": 0.0,
+      "call": {
+        "kind": "Moved across alongside",
+        "fault": "clear",
+        "severity": 6
+      },
+      "learn": true,
+      "owner": true,
+      "was": 0.0,
+      "inc": {
+        "t": 1794756559.03,
+        "te": 1794756574.03,
+        "pair": [
+          0,
+          7
+        ],
+        "names": [
+          "Stepino81",
+          "QDR_SHW1KS"
+        ]
+      },
+      "blame": true,
+      "lap": 1,
+      "text": "Arquibancadas, with Stepino81: staff call (Moved across alongside)",
+      "weather": "Clear"
     }
   ]
 }
