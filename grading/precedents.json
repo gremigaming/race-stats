@@ -1291,6 +1291,99 @@
     }
    ]
   },
+  "1115a-5a": {
+   "key": "379d02429a01",
+   "race_file": "Race_Mexico_2026_11_15_15_59_28.json",
+   "at": "2026-11-16T14:40:19Z",
+   "parent": "1115a-5",
+   "part": 1,
+   "of": 1,
+   "by": "GreMi",
+   "track": "Mexico",
+   "date": "2026-11-15",
+   "verdict": "#69 trex-Leclerc + #8 lars.mudde + #8 niet_Lars123 shared",
+   "severity": 6,
+   "note": "",
+   "tags": [],
+   "kind": "Chain reaction",
+   "source": "grade",
+   "calls": {
+    "10": {
+     "name": "#8 lars.mudde",
+     "call": "shared",
+     "severity": 6,
+     "note": "Goes for a gap that was closing, keep the trottle pinned, should have backed out"
+    },
+    "8": {
+     "name": "#69 trex-Leclerc",
+     "call": "shared",
+     "severity": 5,
+     "note": "Should keep their line, not paying attention to drivers around"
+    },
+    "5": {
+     "name": "#8 niet_Lars123",
+     "call": "shared",
+     "severity": 5,
+     "note": "Should keep their line, not paying attention to drivers around"
+    }
+   },
+   "recording": "2026-11-15_15-50-35_Mexico_Race.gmtel.gz",
+   "t": 6.2,
+   "t1": 21.2,
+   "cars": [
+    5,
+    8,
+    10
+   ],
+   "contacts": [
+    {
+     "a": 10,
+     "b": 8,
+     "t": 6.2,
+     "x": {
+      "gap": 3.6,
+      "closing": 6,
+      "moved_front": -0.61,
+      "moved_back": 2.7,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 55,
+      "lost": 5,
+      "off": 2,
+      "cars": 3,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "both",
+     "rulebook": "back",
+     "rule": "R2",
+     "front": 8
+    },
+    {
+     "a": 10,
+     "b": 5,
+     "t": 7.3,
+     "x": {
+      "gap": 4.5,
+      "closing": 7,
+      "moved_front": -6.0,
+      "moved_back": 5.34,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 55,
+      "lost": 6,
+      "off": 2,
+      "cars": 3,
+      "reaction": 0.0,
+      "aftermath": 1.0
+     },
+     "label": "both",
+     "rulebook": "none",
+     "rule": "R7",
+     "front": 5
+    }
+   ]
+  },
   "b1-01": {
    "key": "f236a7775b10",
    "by": "GreMi",
@@ -6769,6 +6862,17 @@
    "inc_rulebook": 37,
    "inc_with_precedents": 37,
    "contacts": 158,
+   "rulebook": 83,
+   "with_precedents": 82,
+   "overrides": 2,
+   "date": "2026-11-16",
+   "rules": "v1.5"
+  },
+  {
+   "incidents": 95,
+   "inc_rulebook": 37,
+   "inc_with_precedents": 37,
+   "contacts": 160,
    "rulebook": 83,
    "with_precedents": 82,
    "overrides": 2,
