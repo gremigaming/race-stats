@@ -85,6 +85,24 @@
   "rule_now": "R2"
  },
  {
+  "file": "Race_Brazil_2026_11_04_20_24_42.json",
+  "t": 1793819930.68,
+  "lap": 1,
+  "cars": [
+   10,
+   7
+  ],
+  "frozen": "ItzH1ddegam1ng at fault",
+  "frozen_fault": [
+   10
+  ],
+  "now": "Jakubm18_F1 at fault",
+  "now_fault": [
+   7
+  ],
+  "rule_now": "R5"
+ },
+ {
   "file": "Race_Brazil_2026_11_15_16_35_22.json",
   "t": 1794756494.76,
   "lap": 1,
@@ -140,6 +158,22 @@
   "now": "Not an incident",
   "now_fault": [],
   "rule_now": "R1"
+ },
+ {
+  "file": "Race_Hungaroring_2026_11_15_15_22_44.json",
+  "t": 1794752189.9,
+  "lap": 2,
+  "cars": [
+   1,
+   3
+  ],
+  "frozen": "Not an incident",
+  "frozen_fault": [],
+  "now": "Ayrton_Senna109 at fault",
+  "now_fault": [
+   3
+  ],
+  "rule_now": "R5"
  },
  {
   "file": "Race_Mexico_2026_10_20_20_13_46.json",
