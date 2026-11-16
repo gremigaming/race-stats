@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { useBackNavigation } from "../hooks/useBackNavigation";
 import { useStewardSignal } from "../hooks/useStewardSignal";
-import { callsOfRace, chronological, biggestFirst, chunkStart, raceTime, replayClock, rowsOf, streamOf, streamsOf, useLeagueCalls, useManifests, useRaceIndex, type RaceRef, type Row } from "../components/incidents/data";
+import { atDistance, callsOfRace, chronological, biggestFirst, chunkStart, raceTime, replayClock, rowsOf, streamOf, streamsOf, useLeagueCalls, useManifests, useRaceIndex, type RaceRef, type Row } from "../components/incidents/data";
 import { IncidentStrip } from "../components/incidents/IncidentStrip";
 import { CAR_COLORS, IncidentMap, type Clock, type IncidentSeries } from "../components/incidents/IncidentMap";
 import { KIND_META, KIND_ORDER, type IncidentKind } from "../viewer/incidentKinds";
@@ -266,26 +266,43 @@ export function IncidentsPage() {
       }
     }
     if (best) set({ race: best.uid, file: null, inc: null });
-    else set({ file: null, with: null, lap: null });
+    else set({ file: null, with: null, lap: null, at: null });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fileParam, races]);
   useEffect(() => {
     if (fileParam || !withParam || !rowsByRace.has(raceUid)) return;
     const want = withParam.split("|").map(driverKey);
     const lap = Number(params.get("lap"));
+    const atRaw = params.get("at");
+    const at = atRaw == null || atRaw === "" ? NaN : Number(atRaw);
+    const overlapOf = (r: Row) => r.keys.filter((k) => want.includes(k)).length;
     let best: Row | null = null;
-    let bestScore = 0;
-    for (const r of raceRows) {
-      const overlap = r.keys.filter((k) => want.includes(k)).length;
-      if (!overlap) continue;
-      const score = overlap * 10 - (Number.isFinite(lap) && r.inc.lap ? Math.abs(r.inc.lap - lap) * 3 : 0) + r.sev * 0.1;
-      if (score > bestScore) {
-        best = r;
-        bestScore = score;
+    // GreMi, 16 Nov 2026: a link with ?at= (the contact's time) opens exactly that incident, never another one
+    // of the same lap with the same drivers (Stepino vs Shwiks, lap 1: turn 15 opened turn 1)
+    if (Number.isFinite(at)) {
+      let bestD = 3;
+      for (const r of raceRows) {
+        const d = atDistance(r.inc, at, r.clock0) - overlapOf(r) * 0.01;
+        if (d < bestD) {
+          best = r;
+          bestD = d;
+        }
+      }
+    }
+    if (!best) {
+      let bestScore = 0;
+      for (const r of raceRows) {
+        const overlap = overlapOf(r);
+        if (!overlap) continue;
+        const score = overlap * 10 - (Number.isFinite(lap) && r.inc.lap ? Math.abs(r.inc.lap - lap) * 3 : 0) + r.sev * 0.1;
+        if (score > bestScore) {
+          best = r;
+          bestScore = score;
+        }
       }
     }
     clockRef.current.run++;
-    set({ with: null, lap: null, inc: best?.id ?? null, scope: null });
+    set({ with: null, lap: null, at: null, inc: best?.id ?? null, scope: null });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fileParam, withParam, rowsByRace, raceUid]);
 
@@ -354,6 +371,7 @@ export function IncidentsPage() {
       q.set("file", row.file);
       if (row.inc.lap) q.set("lap", String(row.inc.lap));
       q.set("with", row.names.join("|"));
+      if (row.watchAt != null) q.set("at", row.watchAt.toFixed(1));
     }
     return `/${formulaKey ?? "all"}/safety?${q.toString()}`;
   };

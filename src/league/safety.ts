@@ -33,6 +33,8 @@ export interface SafetyItem {
   orig?: number;
   /** Overhead replay of this contact: league/replays/<id>.json (scripts/telemetry/incident_replays.py). */
   replay?: string;
+  /** Race viewer link at this contact (?inc= on the recording's clock). */
+  watch?: string;
 }
 
 export interface SafetySession {

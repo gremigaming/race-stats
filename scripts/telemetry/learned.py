@@ -216,11 +216,12 @@ def why_text(p, sk, name):
     return out
 
 
-def _incident_link(file, lap, names):
+def _incident_link(file, lap, names, at=None):
+    """at = the contact's recording time (the race viewer's ?inc=): the viewer then opens exactly that incident."""
     if not file:
         return None
     return (f"{SITE}incidents?file={file}" + (f"&lap={lap}" if lap else "")
-            + "&with=" + "|".join(_short(n) for n in names if n))
+            + "&with=" + "|".join(_short(n) for n in names if n) + (f"&at={at:.1f}" if at is not None else ""))
 
 
 def _verdict_files(cache):
@@ -250,6 +251,7 @@ def followers(vfiles):
     """{precedent id: [incident calls changed because they look like it]} (after precedents.py apply)."""
     out = collections.defaultdict(list)
     for file, data in vfiles:
+        off = data.get("offset") or 0
         track = re.sub(r"^Race_|_\d{4}_.*$", "", file).replace("_", " ")
         date = "-".join(re.search(r"(\d{4})_(\d\d)_(\d\d)", file).groups())
         names = {}
@@ -264,7 +266,7 @@ def followers(vfiles):
             out[pr["id"]].append({"track": track, "date": date, "lap": inc.get("lap"), "file": file,
                                   "what": "cleared" if before and not after else "blamed" if after and not before else "moved",
                                   "before": rb.get("verdict"), "after": inc.get("verdict"), "d": pr.get("d"),
-                                  "watch": _incident_link(file, inc.get("lap"), who)})
+                                  "watch": _incident_link(file, inc.get("lap"), who, inc["t0"] - off if inc.get("t0") is not None else None)})
     return out
 
 
@@ -322,7 +324,7 @@ def lesson_log(store, cache, sketches=None):
                     "part": p.get("part"), "of": p.get("of"), "kind": p.get("kind"), "call": p.get("verdict"),
                     "severity": p.get("severity"), "rulebook": (p.get("rulebook") or {}).get("verdict"), "differs": differs,
                     "cars": cars, "why": why_text(p, sk, name), "sketch": sk, "changed": changed[:40], "followers": len(changed),
-                    "watch": _incident_link(file, lap, [c["name"] for c in cars]), "state": state, "outdated": why_old})
+                    "watch": _incident_link(file, lap, [c["name"] for c in cars], p.get("t")), "state": state, "outdated": why_old})
     out.sort(key=lambda e: (e["at"] or e["day"] or "", e["id"]), reverse=True)
     return out
 

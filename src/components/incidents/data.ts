@@ -30,6 +30,8 @@ export interface Row {
   at: number;
   /** The race file of the league data (for links to the safety rating), when the league call was found. */
   file?: string;
+  /** ?inc= of the league call's race viewer link: the one number the safety rating and staff links share with this incident. */
+  watchAt?: number;
 }
 
 export const raceTime = (r: RaceIndexEntry) => startedMs(r.started);
@@ -117,6 +119,17 @@ export function useLeagueCalls() {
 const norm = (x: string) => x.toLowerCase().replace(/[^a-z0-9]/g, "");
 const FILE_RE = /^Race_(.+)_(\d{4})_(\d\d)_(\d\d)_(\d\d)_(\d\d)_(\d\d)\.json$/;
 
+/** The ?inc= time of a race viewer link (league data `watch` / grading `replay`), or null. */
+export function watchTime(link?: string | null): number | null {
+  const t = Number(/[?&]inc=([\d.]+)/.exec(link ?? "")?.[1]);
+  return Number.isFinite(t) ? t : null;
+}
+
+/** How far a link's ?inc= / ?at= time is from this incident's start (it is either on the recording's clock or the replay clock). */
+export function atDistance(inc: RaceIncident, t: number, cs: number) {
+  return Math.min(Math.abs(t - inc.t0), Math.abs(t + cs - inc.t0));
+}
+
 /** The calls of one race: same track, race file saved up to 4 h after the race started. */
 export function callsOfRace(race: RaceRef, calls: LeagueCall[] | undefined): LeagueCall[] {
   if (!calls?.length) return [];
@@ -141,9 +154,9 @@ function finalCall(inc: RaceIncident, names: string[], calls: LeagueCall[], cs: 
   let best: LeagueCall | null = null;
   let bestD = 3;
   for (const c of calls) {
-    const t = Number(/[?&]inc=([\d.]+)/.exec(c.watch ?? "")?.[1]);
-    if (!Number.isFinite(t)) continue;
-    const d = Math.min(Math.abs(t - inc.t0), Math.abs(t + cs - inc.t0));
+    const t = watchTime(c.watch);
+    if (t == null) continue;
+    const d = atDistance(inc, t, cs);
     if (d >= bestD || !c.names.some((n) => keys.has(driverKey(n)))) continue;
     best = c;
     bestD = d;
@@ -200,6 +213,7 @@ export function rowsOf(race: RaceRef, m: RaceManifest, calls: LeagueCall[] = [])
       clock0: chunkStart(m),
       at,
       file: fc?.call.file,
+      watchAt: watchTime(fc?.call.watch) ?? undefined,
     };
   });
 }

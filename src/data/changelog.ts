@@ -21,6 +21,14 @@ export interface ChangelogEntry {
 // raw commit history also contains routine uploads and staff-only corrections.
 const changelog: ChangelogEntry[] = [
   {
+    id: "exact-incident-links-frozen-calls",
+    date: "2026-11-16",
+    type: "fix",
+    message:
+      "Watch links from your safety rating now open exactly that incident in the incident viewer, not another one from the same lap. Calls on past races also stay as they were: only a staff decision (a protest or a corrected incident) can still change one.",
+    destination: "incidents",
+  },
+  {
     id: "award-roles-per-stream",
     date: "2026-11-12",
     type: "fix",
