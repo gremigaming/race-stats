@@ -5481,6 +5481,111 @@
     }
    ]
   },
+  "s-64c4081a": {
+   "key": "06047b288e4d",
+   "by": "GreMi",
+   "track": "Brazil",
+   "date": "2026-11-15",
+   "kind": "Late lunge / divebomb",
+   "source": "staff change",
+   "verdict": "jasonri12 at fault",
+   "severity": 7,
+   "note": "Jason didnt leave the track in the incident, so it cant be an unsafe rejoin; Jason didnt leave the track in the incident, so it cant be an unsafe rejoin; Jason didnt leave the track in the incident, so it cant be an unsafe rejoin; Jason didnt leave the track in the incident, so it cant be an unsafe ",
+   "who": [
+    "319544045435224067"
+   ],
+   "changes": [
+    "Race_Brazil_2026_11_15_16_35_22.json|0|contact|1|s1794756495.3",
+    "Race_Brazil_2026_11_15_16_35_22.json|1|contact|1|s1794756495.3",
+    "Race_Brazil_2026_11_15_16_35_22.json|12|contact|1|0",
+    "Race_Brazil_2026_11_15_16_35_22.json|8|contact|1|s1794756495.3"
+   ],
+   "race_file": "Race_Brazil_2026_11_15_16_35_22.json",
+   "at": "2026-11-16T10:59:47Z",
+   "recording": "2026-11-15_16-27-27_Brazil_Race.gmtel.gz",
+   "t": 9.4,
+   "cars": [
+    0,
+    1,
+    8,
+    12
+   ],
+   "rulebook": {
+    "verdict": "12 at fault",
+    "rule": "R5"
+   },
+   "contacts": [
+    {
+     "a": 0,
+     "b": 12,
+     "t": 9.4,
+     "x": {
+      "gap": 7.1,
+      "closing": 24,
+      "moved_front": -1.4,
+      "moved_back": 5.54,
+      "rejoin_front": 0.0,
+      "rejoin_back": 1.0,
+      "slide": 46,
+      "lost": 4,
+      "off": 0,
+      "cars": 4,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "back",
+     "rulebook": "back",
+     "rule": "R5",
+     "front": 0
+    },
+    {
+     "a": 12,
+     "b": 1,
+     "t": 9.8,
+     "x": {
+      "gap": 3.5,
+      "closing": -15,
+      "moved_front": 6.0,
+      "moved_back": -4.51,
+      "rejoin_front": 1.0,
+      "rejoin_back": 0.0,
+      "slide": 26,
+      "lost": 0,
+      "off": 0,
+      "cars": 4,
+      "reaction": 0.0,
+      "aftermath": 1.0
+     },
+     "label": "front",
+     "rulebook": "none",
+     "rule": "R7",
+     "front": 12
+    },
+    {
+     "a": 12,
+     "b": 8,
+     "t": 10.3,
+     "x": {
+      "gap": 10.3,
+      "closing": 39,
+      "moved_front": -3.88,
+      "moved_back": 2.56,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 26,
+      "lost": 0,
+      "off": 0,
+      "cars": 4,
+      "reaction": 0.0,
+      "aftermath": 1.0
+     },
+     "label": "front",
+     "rulebook": "none",
+     "rule": "R7",
+     "front": 12
+    }
+   ]
+  },
   "s-6b97f913": {
    "key": "389fac26761b",
    "by": "GreMi",
@@ -6326,6 +6431,17 @@
    "contacts": 149,
    "rulebook": 79,
    "with_precedents": 78,
+   "overrides": 2,
+   "date": "2026-11-16",
+   "rules": "v1.5"
+  },
+  {
+   "incidents": 90,
+   "inc_rulebook": 35,
+   "inc_with_precedents": 35,
+   "contacts": 152,
+   "rulebook": 80,
+   "with_precedents": 79,
    "overrides": 2,
    "date": "2026-11-16",
    "rules": "v1.5"
