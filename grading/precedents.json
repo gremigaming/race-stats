@@ -1202,6 +1202,95 @@
     }
    ]
   },
+  "1115a-4a": {
+   "key": "e676a8afb515",
+   "race_file": "Race_Hungaroring_2026_11_15_15_22_44.json",
+   "at": "2026-11-16T14:34:16Z",
+   "parent": "1115a-4",
+   "part": 1,
+   "of": 1,
+   "by": "GreMi",
+   "track": "Hungaroring",
+   "date": "2026-11-15",
+   "verdict": "#69 Ayrton_Senna109 at fault",
+   "severity": 3,
+   "note": "",
+   "tags": [],
+   "kind": "Rear-end",
+   "source": "grade",
+   "calls": {
+    "4": {
+     "name": "#86 Overfast-_",
+     "call": "clear"
+    },
+    "3": {
+     "name": "#69 Ayrton_Senna109",
+     "call": "fault",
+     "severity": 3,
+     "note": "Slight touch but was close to a big crash"
+    },
+    "7": {
+     "name": "#19 toni2608",
+     "call": "clear"
+    }
+   },
+   "recording": "2026-11-15_15-14-26_Hungaroring_Race.gmtel.gz",
+   "t": 22.5,
+   "t1": 28.6,
+   "cars": [
+    3,
+    4,
+    7
+   ],
+   "contacts": [
+    {
+     "a": 4,
+     "b": 3,
+     "t": 22.4,
+     "x": {
+      "gap": 7.3,
+      "closing": 39,
+      "moved_front": -0.76,
+      "moved_back": 0.69,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 11,
+      "lost": 2,
+      "off": 1,
+      "cars": 3,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "back",
+     "rulebook": "back",
+     "rule": "R3",
+     "front": 4
+    },
+    {
+     "a": 4,
+     "b": 7,
+     "t": 22.8,
+     "x": {
+      "gap": 6.2,
+      "closing": -20,
+      "moved_front": -4.18,
+      "moved_back": 0.18,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 7,
+      "lost": 1,
+      "off": 0,
+      "cars": 3,
+      "reaction": 0.0,
+      "aftermath": 1.0
+     },
+     "label": "none",
+     "rulebook": "none",
+     "rule": "R7",
+     "front": 7
+    }
+   ]
+  },
   "b1-01": {
    "key": "f236a7775b10",
    "by": "GreMi",
@@ -6671,6 +6760,17 @@
    "contacts": 156,
    "rulebook": 81,
    "with_precedents": 80,
+   "overrides": 2,
+   "date": "2026-11-16",
+   "rules": "v1.5"
+  },
+  {
+   "incidents": 94,
+   "inc_rulebook": 37,
+   "inc_with_precedents": 37,
+   "contacts": 158,
+   "rulebook": 83,
+   "with_precedents": 82,
    "overrides": 2,
    "date": "2026-11-16",
    "rules": "v1.5"
