@@ -1492,6 +1492,76 @@
         ]
       },
       "text": "Pinheirinho, with vanderdeured, QDR_SHW1KS: severity 2/10, to blame (R2) 1; side by side; f7edd1e moved 3.3 m across into the other car"
+    },
+    {
+      "id": "Race_Melbourne_2026_11_15_15_39_21.json|8|contact|1|s1794753103.7",
+      "type": "incident",
+      "reason": "Both should have left a bit more space",
+      "by": "319544045435224067",
+      "at": "2026-11-16T12:21:03Z",
+      "file": "Race_Melbourne_2026_11_15_15_39_21.json",
+      "driver": "QDR_SHW1KS",
+      "car": 8,
+      "pts": -1.5,
+      "call": {
+        "kind": "Wheelbanging",
+        "fault": "shared",
+        "severity": 5
+      },
+      "learn": true,
+      "owner": true,
+      "was": 0.0,
+      "inc": {
+        "t": 1794753103.73,
+        "te": 1794753118.73,
+        "pair": [
+          8,
+          9
+        ],
+        "names": [
+          "QDR_SHW1KS",
+          "gone-wildcat63"
+        ]
+      },
+      "blame": true,
+      "lap": 1,
+      "text": "Clark, with gone-wildcat63: staff call (Wheelbanging)",
+      "weather": "Light cloud"
+    },
+    {
+      "id": "Race_Melbourne_2026_11_15_15_39_21.json|9|contact|1|s1794753103.7",
+      "type": "incident",
+      "reason": "Both should have left a bit more space",
+      "by": "319544045435224067",
+      "at": "2026-11-16T12:21:03Z",
+      "file": "Race_Melbourne_2026_11_15_15_39_21.json",
+      "driver": "gone-wildcat63",
+      "car": 9,
+      "pts": -1.5,
+      "call": {
+        "kind": "Wheelbanging",
+        "fault": "shared",
+        "severity": 5
+      },
+      "learn": true,
+      "owner": true,
+      "was": 0.0,
+      "inc": {
+        "t": 1794753103.73,
+        "te": 1794753118.73,
+        "pair": [
+          8,
+          9
+        ],
+        "names": [
+          "QDR_SHW1KS",
+          "gone-wildcat63"
+        ]
+      },
+      "blame": true,
+      "lap": 1,
+      "text": "Clark, with QDR_SHW1KS: staff call (Wheelbanging)",
+      "weather": "Light cloud"
     }
   ]
 }
