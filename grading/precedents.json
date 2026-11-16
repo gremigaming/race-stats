@@ -5908,6 +5908,134 @@
     }
    ]
   },
+  "s-e0a25945": {
+   "key": "fbdc417b6746",
+   "by": "GreMi",
+   "track": "Brazil",
+   "date": "2026-11-15",
+   "kind": "Rear-end",
+   "source": "staff change",
+   "verdict": "[ET8] Hamish at fault",
+   "severity": 4,
+   "note": "8/10 severity is way to high for this, he outbraked him self a little but not a big hit and the crash after is just a result of 3 wide where there is not alot of space; 8/10 severity is way to high for this, he outbraked him self a little but not a big hit and the crash after is just a result of 3 w",
+   "who": [
+    "319544045435224067"
+   ],
+   "changes": [
+    "Race_Brazil_2026_11_15_16_35_22.json|10|contact|1|s1794756494.9",
+    "Race_Brazil_2026_11_15_16_35_22.json|13|contact|1|0",
+    "Race_Brazil_2026_11_15_16_35_22.json|14|contact|1|s1794756494.9",
+    "Race_Brazil_2026_11_15_16_35_22.json|15|contact|1|s1794756494.9"
+   ],
+   "race_file": "Race_Brazil_2026_11_15_16_35_22.json",
+   "at": "2026-11-16T10:57:58Z",
+   "recording": "2026-11-15_16-27-27_Brazil_Race.gmtel.gz",
+   "t": 9.0,
+   "cars": [
+    10,
+    13,
+    14,
+    15
+   ],
+   "rulebook": {
+    "verdict": "13 at fault",
+    "rule": "R3"
+   },
+   "contacts": [
+    {
+     "a": 15,
+     "b": 13,
+     "t": 9.0,
+     "x": {
+      "gap": 7.9,
+      "closing": 30,
+      "moved_front": -1.47,
+      "moved_back": 1.68,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 74,
+      "lost": 5,
+      "off": 2,
+      "cars": 4,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "back",
+     "rulebook": "back",
+     "rule": "R3",
+     "front": 15
+    },
+    {
+     "a": 15,
+     "b": 14,
+     "t": 9.3,
+     "x": {
+      "gap": 6.5,
+      "closing": 30,
+      "moved_front": 2.26,
+      "moved_back": -1.72,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 74,
+      "lost": 5,
+      "off": 2,
+      "cars": 4,
+      "reaction": 0.0,
+      "aftermath": 1.0
+     },
+     "label": "none",
+     "rulebook": "none",
+     "rule": "R7",
+     "front": 15
+    },
+    {
+     "a": 13,
+     "b": 10,
+     "t": 10.3,
+     "x": {
+      "gap": 0.9,
+      "closing": 33,
+      "moved_front": 6.0,
+      "moved_back": -5.16,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 37,
+      "lost": 2,
+      "off": 2,
+      "cars": 4,
+      "reaction": 0.0,
+      "aftermath": 1.0
+     },
+     "label": "back",
+     "rulebook": "none",
+     "rule": "R7",
+     "front": 10
+    },
+    {
+     "a": 13,
+     "b": 10,
+     "t": 14.4,
+     "x": {
+      "gap": 6.4,
+      "closing": 4,
+      "moved_front": 0.0,
+      "moved_back": 0.0,
+      "rejoin_front": 1.0,
+      "rejoin_back": 1.0,
+      "slide": 37,
+      "lost": 2,
+      "off": 2,
+      "cars": 4,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "back",
+     "rulebook": "none",
+     "rule": "R3",
+     "front": 10
+    }
+   ]
+  },
   "sev-11041959-1166a": {
    "key": "5173fd7005f7",
    "race_file": "Race_Singapore_2026_11_04_20_09_05.json",
@@ -6188,6 +6316,17 @@
    "rulebook": 77,
    "with_precedents": 77,
    "overrides": 3,
+   "date": "2026-11-16",
+   "rules": "v1.5"
+  },
+  {
+   "incidents": 89,
+   "inc_rulebook": 35,
+   "inc_with_precedents": 35,
+   "contacts": 149,
+   "rulebook": 79,
+   "with_precedents": 78,
+   "overrides": 2,
    "date": "2026-11-16",
    "rules": "v1.5"
   }
