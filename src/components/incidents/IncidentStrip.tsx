@@ -4,8 +4,8 @@ import { CAR_COLORS, type IncidentSeries } from "./IncidentMap";
 /**
  * What the drivers did, at a glance (GreMi, 5 Nov 2026, replaces the per-car charts): live
  * throttle, brake, steering, gear and speed for the two main cars, and one slim timeline with
- * both speeds and the gap between them. The amber line is the first contact; click or drag the
- * timeline to scrub.
+ * both speeds and the gap between them. Every contact is a line (red: the one that got the call,
+ * amber: the others); click or drag the timeline to scrub.
  */
 
 const H = 40;
@@ -66,11 +66,24 @@ function Driver(props: { name: string; color: string; speed: number; gear: numbe
   );
 }
 
-export function IncidentStrip(props: { series: IncidentSeries; names: (car: number) => string; t: number; contact: number; onSeek: (t: number) => void }) {
+/** A contact on the timeline: its time, and whether the incident's call comes from it. */
+export interface StripMark {
+  t: number;
+  fault?: boolean;
+}
+
+export function IncidentStrip(props: {
+  series: IncidentSeries;
+  names: (car: number) => string;
+  t: number;
+  contact: number;
+  /** Every contact of the incident (GreMi, 16 Nov 2026): the one that got the call in red, the others amber. */
+  marks?: StripMark[];
+  onSeek: (t: number) => void;
+}) {
   const s = props.series;
   const span = Math.max(s.to - s.from, 0.1);
   const f = (props.t - s.from) / span;
-  const contact = (props.contact - s.from) / span;
   const drag = useRef(false);
   const seekAt = (e: PointerEvent<SVGSVGElement>) => {
     const r = e.currentTarget.getBoundingClientRect();
@@ -142,7 +155,12 @@ export function IncidentStrip(props: { series: IncidentSeries; names: (car: numb
           {two.map((car, i) => (
             <path key={car} d={path(s.speed[i], 0, top)} fill="none" stroke={CAR_COLORS[i]} strokeWidth="1.6" vectorEffect="non-scaling-stroke" />
           ))}
-          <line x1={contact * 100} y1="0" x2={contact * 100} y2={H} stroke="#fbbf24" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
+          {(props.marks?.length ? props.marks : [{ t: props.contact }]).map((m, i) => {
+            const x = ((m.t - s.from) / span) * 100;
+            return x < 0 || x > 100 ? null : (
+              <line key={i} x1={x} y1="0" x2={x} y2={H} stroke={m.fault ? "#f87171" : "#fbbf24"} strokeWidth={m.fault ? 2 : 1.5} vectorEffect="non-scaling-stroke" />
+            );
+          })}
           {f >= 0 && f <= 1 && <line x1={f * 100} y1="0" x2={f * 100} y2={H} stroke="#ffffff" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />}
         </svg>
       </div>

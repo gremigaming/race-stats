@@ -135,7 +135,21 @@ def v1_rows(path, names, cols, game_incs):
                 lines[x] = (pts, [f"severity {s_}/10, to blame ({RULE_LABEL.get(rule, rule)}) {pts:g}", why])
             else:
                 lines[x] = (0, [f"severity {sev}/10, not to blame ({RULE_LABEL.get(inc['rule'], inc['rule'])}) 0", inc["why"]])
-        rows.append({"file": path.split("/")[-1].rsplit("_2026", 1)[0], "pair": pair, "t": inc["t0"], "t_end": inc["t1"], "sev": word,
+        # every contact of the incident, in order (GreMi, 16 Nov 2026: the viewer's timeline shows them
+        # all, so a small tap before the real crash is not taken for the incident): seconds after t0,
+        # the two drivers, the call and why; touches of the same pair with the same call within 2 s = one
+        steps = []
+        for c in counted:
+            nm = lambda i: names.get(i, f"car {i}")  # noqa: E731
+            fault = [nm(x) for x in (c.get("at_fault") or []) if x in (c["a"], c["b"])]
+            call = ("not an incident" if c["rule"] == "R1" else " + ".join(fault) + " at fault" if fault else "racing incident")
+            dt = round(c["t"] - inc["t0"], 1)
+            last = steps[-1] if steps else None
+            if last and set(last["cars"]) == {nm(c["a"]), nm(c["b"])} and last["call"] == call and dt - last["dt"] < 2:
+                continue
+            steps.append({"dt": dt, "cars": [nm(c["a"]), nm(c["b"])], "call": call, "why": c.get("why") or "",
+                          **({"fault": 1} if fault else {})})
+        rows.append({"file": path.split("/")[-1].rsplit("_2026", 1)[0], "pair": pair, "steps": steps[:8], "t": inc["t0"], "t_end": inc["t1"], "sev": word,
                      "weather": weather_name(inc.get("weather")), "type": kind_of(inc),
                      # the race viewer at this incident, for the staff page (protests, penalty changes)
                      "watch": f"{VIEWER}{data['recording'].replace('.gmtel.gz', '')}?inc={inc['t0'] - (data.get('offset') or 0):.1f}&car="
@@ -787,7 +801,7 @@ for si, stream in enumerate(streams):
         for r in rows:
             # every collision, also the ones that cost nobody points, for the Incidents tab
             all_incs.append({"file": name, "lap": r["lap"], "where": r["where"], "sev": r["sev"], "names": r["pn"],
-                             **{k: r[k] for k in ("weather", "type", "watch") if r.get(k)},
+                             **{k: r[k] for k in ("weather", "type", "watch", "steps") if r.get(k)},
                              "lines": {n: [-half(pts) or 0, "; ".join(parts)] for n, (pts, parts) in r["lines"].items()},
                              "inc": incref(r)})
             for n, (pts, parts) in r["lines"].items():

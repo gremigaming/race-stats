@@ -32,6 +32,8 @@ export interface Row {
   file?: string;
   /** ?inc= of the league call's race viewer link: the one number the safety rating and staff links share with this incident. */
   watchAt?: number;
+  /** Every contact of the incident with its own call (league data), so a tap before the crash is not taken for the incident. */
+  steps?: IncidentStep[];
 }
 
 export const raceTime = (r: RaceIndexEntry) => startedMs(r.started);
@@ -105,6 +107,17 @@ export interface LeagueCall {
   lines: Record<string, [number, string]>;
   /** Race viewer link: ?inc= is the contact on the recording's clock (the manifests' clock). */
   watch?: string;
+  /** Every contact of the incident in order: seconds after its first contact, the two drivers and the call on it. */
+  steps?: IncidentStep[];
+}
+
+export interface IncidentStep {
+  dt: number;
+  cars: string[];
+  call: string;
+  why: string;
+  /** Set when this contact blames someone: the one the incident's call comes from. */
+  fault?: 1;
 }
 
 /** league/incidents.json: the calls the safety rating uses, so the viewer shows the same severity and blame. */
@@ -214,6 +227,7 @@ export function rowsOf(race: RaceRef, m: RaceManifest, calls: LeagueCall[] = [])
       at,
       file: fc?.call.file,
       watchAt: watchTime(fc?.call.watch) ?? undefined,
+      steps: fc?.call.steps,
     };
   });
 }

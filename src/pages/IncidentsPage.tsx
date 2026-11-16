@@ -364,6 +364,17 @@ export function IncidentsPage() {
         return `/${formulaKey}/race/${encodeURIComponent(open.uid)}?inc=${at}${open.cars.length ? `&car=${open.cars.slice(0, 4).join(",")}` : ""}`;
       })()
     : "";
+  /** Every contact of the open incident on the timeline: from the league call's steps, else the bundle's contacts. */
+  const marks = open
+    ? open.steps?.length
+      ? open.steps.map((st) => ({ t: open.inc.t0 + st.dt, fault: !!st.fault }))
+      : open.inc.contacts.filter((c, i, all) => i === 0 || c.t - all[i - 1].t >= 1).map((c) => ({ t: c.t }))
+    : [];
+  const seekTo = (t: number) => {
+    clockRef.current.t = t;
+    clockRef.current.playing = false;
+    setTick((x) => ({ ...x, t, playing: false }));
+  };
   /** A driver's safety rating page, opened at this incident (its stream and race open, the incident in view). */
   const srLink = (row: Row, name: string) => {
     const q = new URLSearchParams({ tab: "personal", driver: driverKey(name) });
@@ -829,6 +840,30 @@ export function IncidentsPage() {
                   )}
                 </div>
               )}
+              {/* GreMi, 16 Nov 2026: an incident with more than one contact lists them all, so a small tap
+                  before the real crash is not taken for the incident; click one to jump to it */}
+              {cardOpen && open.steps && open.steps.length > 1 && (
+                <div className="mt-1.5 space-y-0.5">
+                  <div className="px-1 text-[10px] uppercase tracking-wide text-zinc-500">{open.steps.length} contacts in this incident</div>
+                  {open.steps.map((st, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => open.uid === raceUid && seekTo(open.inc.t0 + st.dt)}
+                      title="Jump to this contact"
+                      className={`flex w-full items-baseline gap-2 rounded-md px-2 py-1 text-left text-xs hover:bg-white/[0.06] ${st.fault ? "bg-red-500/[0.08]" : ""}`}
+                    >
+                      <span className={`h-2 w-2 shrink-0 self-center rounded-full ${st.fault ? "bg-red-400" : "bg-amber-400"}`} />
+                      <span className="w-12 shrink-0 font-mono tabular-nums text-zinc-400">{replayClock(open.inc.t0 + st.dt - open.clock0)}</span>
+                      <span className="min-w-0 flex-1">
+                        <span className={st.fault ? "font-semibold text-red-200" : "text-zinc-200"}>{st.call.charAt(0).toUpperCase() + st.call.slice(1)}</span>
+                        <span className="text-zinc-500"> · {st.cars.join(" & ")}</span>
+                        {st.why && <span className="block truncate text-[11px] text-zinc-500">{st.why}</span>}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
               {open.uid === raceUid ? (
                 <>
                   <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -891,11 +926,8 @@ export function IncidentsPage() {
                           names={(car) => mapRace?.manifest.cars[String(car)]?.name ?? `Car ${car}`}
                           t={tick.t}
                           contact={open.inc.t0}
-                          onSeek={(t) => {
-                            clockRef.current.t = t;
-                            clockRef.current.playing = false;
-                            setTick((x) => ({ ...x, t, playing: false }));
-                          }}
+                          marks={marks}
+                          onSeek={seekTo}
                         />
                       ) : (
                         <p className="text-xs text-zinc-500">Loading the cars around this incident…</p>

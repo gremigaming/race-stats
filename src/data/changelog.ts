@@ -21,6 +21,14 @@ export interface ChangelogEntry {
 // raw commit history also contains routine uploads and staff-only corrections.
 const changelog: ChangelogEntry[] = [
   {
+    id: "incident-all-contacts",
+    date: "2026-11-16",
+    type: "feat",
+    message:
+      "When an incident has more than one contact, the incident viewer now lists each one with its own call, and marks them all on the timeline. The contact the call comes from is shown in red. Click a contact to jump to it.",
+    destination: "incidents",
+  },
+  {
     id: "exact-incident-links-frozen-calls",
     date: "2026-11-16",
     type: "fix",
