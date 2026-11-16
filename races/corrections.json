@@ -1139,6 +1139,138 @@
       "lap": 1,
       "text": "Arquibancadas, with Stepino81: staff call (Moved across alongside)",
       "weather": "Clear"
+    },
+    {
+      "id": "Race_Brazil_2026_11_15_16_35_22.json|10|contact|1|s1794756494.9",
+      "type": "incident",
+      "reason": "8/10 severity is way to high for this, he outbraked him self a little but not a big hit and the crash after is just a result of 3 wide where there is not alot of space",
+      "by": "319544045435224067",
+      "at": "2026-11-16T10:57:58Z",
+      "file": "Race_Brazil_2026_11_15_16_35_22.json",
+      "driver": "lars.mudde",
+      "car": 10,
+      "pts": 0.0,
+      "call": {
+        "kind": "Rear-end",
+        "fault": "clear",
+        "severity": 4
+      },
+      "learn": true,
+      "owner": true,
+      "was": 0.0,
+      "inc": {
+        "t": 1794756494.9,
+        "te": 1794756509.9,
+        "pair": [
+          13,
+          15
+        ],
+        "names": [
+          "[ET8] Hamish",
+          "Jessey_ll"
+        ]
+      },
+      "blame": true,
+      "lap": 1,
+      "text": "‘S’ do Senna, with [ET8] Hamish, [KEI PLUM, Jessey_ll: staff call (Rear-end)",
+      "weather": "Clear"
+    },
+    {
+      "id": "Race_Brazil_2026_11_15_16_35_22.json|13|contact|1|0",
+      "type": "incident",
+      "reason": "8/10 severity is way to high for this, he outbraked him self a little but not a big hit and the crash after is just a result of 3 wide where there is not alot of space",
+      "by": "319544045435224067",
+      "at": "2026-11-16T10:57:58Z",
+      "file": "Race_Brazil_2026_11_15_16_35_22.json",
+      "driver": "[ET8] Hamish",
+      "car": 13,
+      "pts": -3.0,
+      "call": {
+        "kind": "Rear-end",
+        "fault": "fault",
+        "severity": 4
+      },
+      "learn": true,
+      "owner": true,
+      "was": -10.0,
+      "inc": {
+        "t": 1794756494.9,
+        "pair": [
+          13,
+          15
+        ]
+      },
+      "text": "‘S’ do Senna, with lars.mudde, [KEI PLUM, Jessey_ll: severity 8/10, to blame (R3) 10; [ET8] Hamish ran into the back of Jessey_ll, closing at 30 km/h"
+    },
+    {
+      "id": "Race_Brazil_2026_11_15_16_35_22.json|14|contact|1|s1794756494.9",
+      "type": "incident",
+      "reason": "8/10 severity is way to high for this, he outbraked him self a little but not a big hit and the crash after is just a result of 3 wide where there is not alot of space",
+      "by": "319544045435224067",
+      "at": "2026-11-16T10:57:58Z",
+      "file": "Race_Brazil_2026_11_15_16_35_22.json",
+      "driver": "[KEI PLUM",
+      "car": 14,
+      "pts": 0.0,
+      "call": {
+        "kind": "Rear-end",
+        "fault": "clear",
+        "severity": 4
+      },
+      "learn": true,
+      "owner": true,
+      "was": 0.0,
+      "inc": {
+        "t": 1794756494.9,
+        "te": 1794756509.9,
+        "pair": [
+          13,
+          15
+        ],
+        "names": [
+          "[ET8] Hamish",
+          "Jessey_ll"
+        ]
+      },
+      "blame": true,
+      "lap": 1,
+      "text": "‘S’ do Senna, with lars.mudde, [ET8] Hamish, Jessey_ll: staff call (Rear-end)",
+      "weather": "Clear"
+    },
+    {
+      "id": "Race_Brazil_2026_11_15_16_35_22.json|15|contact|1|s1794756494.9",
+      "type": "incident",
+      "reason": "8/10 severity is way to high for this, he outbraked him self a little but not a big hit and the crash after is just a result of 3 wide where there is not alot of space",
+      "by": "319544045435224067",
+      "at": "2026-11-16T10:57:58Z",
+      "file": "Race_Brazil_2026_11_15_16_35_22.json",
+      "driver": "Jessey_ll",
+      "car": 15,
+      "pts": 0.0,
+      "call": {
+        "kind": "Rear-end",
+        "fault": "clear",
+        "severity": 4
+      },
+      "learn": true,
+      "owner": true,
+      "was": 0.0,
+      "inc": {
+        "t": 1794756494.9,
+        "te": 1794756509.9,
+        "pair": [
+          13,
+          15
+        ],
+        "names": [
+          "[ET8] Hamish",
+          "Jessey_ll"
+        ]
+      },
+      "blame": true,
+      "lap": 1,
+      "text": "‘S’ do Senna, with lars.mudde, [ET8] Hamish, [KEI PLUM: staff call (Rear-end)",
+      "weather": "Clear"
     }
   ]
 }
