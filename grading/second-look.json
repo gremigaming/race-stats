@@ -1,5 +1,23 @@
 [
  {
+  "file": "Race_Abu_Dhabi_2026_11_02_20_29_58.json",
+  "t": 1793647694.74,
+  "lap": 5,
+  "cars": [
+   0,
+   8
+  ],
+  "frozen": "GodRichardfalamo at fault",
+  "frozen_fault": [
+   8
+  ],
+  "now": "[SSL]RYLAN at fault",
+  "now_fault": [
+   0
+  ],
+  "rule_now": "R2"
+ },
+ {
   "file": "Race_Austria_2026_11_15_16_18_11.json",
   "t": 1794755399.75,
   "lap": 1,
@@ -143,6 +161,44 @@
   "rule_now": "R2"
  },
  {
+  "file": "Race_Brazil_2026_11_15_16_35_22.json",
+  "t": 1794756604.41,
+  "lap": 2,
+  "cars": [
+   7,
+   8,
+   2
+  ],
+  "frozen": "f7edd1e + vanderdeured at fault",
+  "frozen_fault": [
+   2,
+   8
+  ],
+  "now": "f7edd1e at fault",
+  "now_fault": [
+   8
+  ],
+  "rule_now": "R2"
+ },
+ {
+  "file": "Race_Catalunya_2026_10_25_16_07_58.json",
+  "t": 1792940611.33,
+  "lap": 3,
+  "cars": [
+   10,
+   16
+  ],
+  "frozen": "davie1898 at fault",
+  "frozen_fault": [
+   16
+  ],
+  "now": "Overfast-_ at fault",
+  "now_fault": [
+   10
+  ],
+  "rule_now": "R2"
+ },
+ {
   "file": "Race_Catalunya_2026_10_30_16_38_55.json",
   "t": 1793374297.34,
   "lap": 1,
@@ -174,6 +230,24 @@
    3
   ],
   "rule_now": "R5"
+ },
+ {
+  "file": "Race_Losail_2026_11_15_16_53_26.json",
+  "t": 1794757539.23,
+  "lap": 1,
+  "cars": [
+   10,
+   3
+  ],
+  "frozen": "[KEI PLUM at fault",
+  "frozen_fault": [
+   10
+  ],
+  "now": "Overfast-_ at fault",
+  "now_fault": [
+   3
+  ],
+  "rule_now": "R2"
  },
  {
   "file": "Race_Mexico_2026_10_20_20_13_46.json",
@@ -281,6 +355,24 @@
   "now": "braaf-olifant at fault",
   "now_fault": [
    10
+  ],
+  "rule_now": "R2"
+ },
+ {
+  "file": "Race_Montreal_2026_10_28_20_29_49.json",
+  "t": 1793215386.89,
+  "lap": 1,
+  "cars": [
+   3,
+   2
+  ],
+  "frozen": "Stepino81 at fault",
+  "frozen_fault": [
+   2
+  ],
+  "now": "DevilDriver2396 at fault",
+  "now_fault": [
+   3
   ],
   "rule_now": "R2"
  },
