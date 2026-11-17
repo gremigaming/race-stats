@@ -6150,6 +6150,117 @@
     }
    ]
   },
+  "s-80925abb": {
+   "key": "b859c2621cde",
+   "by": "GreMi",
+   "track": "Mexico",
+   "date": "2026-11-15",
+   "kind": "Rear-end",
+   "source": "staff change",
+   "verdict": "QDR_SHW1KS at fault",
+   "severity": 5,
+   "note": "Severity 6 is a bit high for this, shwiks just sent it in too quick; Severity 6 is a bit high for this, shwiks just sent it in too quick",
+   "who": [
+    "319544045435224067"
+   ],
+   "changes": [
+    "Race_Mexico_2026_11_15_15_59_28.json|3|contact|2|s1794754397.9",
+    "Race_Mexico_2026_11_15_15_59_28.json|7|contact|2|1"
+   ],
+   "race_file": "Race_Mexico_2026_11_15_15_59_28.json",
+   "at": "2026-11-17T07:58:14Z",
+   "recording": "2026-11-15_15-50-35_Mexico_Race.gmtel.gz",
+   "t": 125.8,
+   "cars": [
+    3,
+    7
+   ],
+   "rulebook": {
+    "verdict": "7 at fault",
+    "rule": "R3"
+   },
+   "contacts": [
+    {
+     "a": 7,
+     "b": 3,
+     "t": 125.8,
+     "x": {
+      "gap": 9.8,
+      "closing": 37,
+      "moved_front": 0.98,
+      "moved_back": -0.23,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 48,
+      "lost": 6,
+      "off": 2,
+      "cars": 2,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "back",
+     "rulebook": "back",
+     "rule": "R3",
+     "front": 3
+    }
+   ]
+  },
+  "s-894dd0ba": {
+   "key": "3b907cac1e1d",
+   "by": "GreMi",
+   "track": "Brazil",
+   "date": "2026-11-15",
+   "kind": "Moved across alongside",
+   "source": "staff change",
+   "verdict": "QDR_SHW1KS + DevilDriver2396 at fault",
+   "severity": 6,
+   "note": "Both a little stupid there; Both a little stupid there",
+   "who": [
+    "319544045435224067"
+   ],
+   "changes": [
+    "Race_Brazil_2026_11_15_16_35_22.json|11|contact|1|0",
+    "Race_Brazil_2026_11_15_16_35_22.json|7|contact|1|0"
+   ],
+   "race_file": "Race_Brazil_2026_11_15_16_35_22.json",
+   "at": "2026-11-17T07:56:41Z",
+   "recording": "2026-11-15_16-27-27_Brazil_Race.gmtel.gz",
+   "t": 8.8,
+   "cars": [
+    0,
+    7,
+    11
+   ],
+   "rulebook": {
+    "verdict": "11 at fault",
+    "rule": "R2"
+   },
+   "contacts": [
+    {
+     "a": 7,
+     "b": 11,
+     "t": 8.8,
+     "x": {
+      "gap": 0.8,
+      "closing": -12,
+      "moved_front": 6.0,
+      "moved_back": -4.7,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 77,
+      "lost": 6,
+      "off": 0,
+      "cars": 3,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "both",
+     "rulebook": "front",
+     "rule": "R2",
+     "front": 11
+    }
+   ]
+  },
   "s-8c8720d3": {
    "key": "7bd72130b7ec",
    "by": "GreMi",
@@ -6877,6 +6988,17 @@
    "with_precedents": 82,
    "overrides": 2,
    "date": "2026-11-16",
+   "rules": "v1.5"
+  },
+  {
+   "incidents": 97,
+   "inc_rulebook": 38,
+   "inc_with_precedents": 38,
+   "contacts": 162,
+   "rulebook": 84,
+   "with_precedents": 83,
+   "overrides": 2,
+   "date": "2026-11-17",
    "rules": "v1.5"
   }
  ]
