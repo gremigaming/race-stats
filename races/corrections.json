@@ -1715,6 +1715,68 @@
         ]
       },
       "text": "‘S’ do Senna, with DevilDriver2396: severity 6/10, to blame (like a graded one) 6; side by side; DevilDriver2396 moved 6.0 m across into the other car; but GreMi called a similar one (B2-03, Texas 202"
+    },
+    {
+      "id": "Race_Mexico_2026_11_15_15_59_28.json|3|contact|2|s1794754397.9",
+      "type": "incident",
+      "reason": "Severity 6 is a bit high for this, shwiks just sent it in too quick",
+      "by": "319544045435224067",
+      "at": "2026-11-17T07:58:14Z",
+      "file": "Race_Mexico_2026_11_15_15_59_28.json",
+      "driver": "Ayrton_Senna109",
+      "car": 3,
+      "pts": 0.0,
+      "call": {
+        "kind": "Rear-end",
+        "fault": "clear",
+        "severity": 5
+      },
+      "learn": true,
+      "owner": true,
+      "was": 0.0,
+      "inc": {
+        "t": 1794754397.86,
+        "te": 1794754408.21,
+        "pair": [
+          3,
+          7
+        ],
+        "names": [
+          "Ayrton_Senna109",
+          "QDR_SHW1KS"
+        ]
+      },
+      "blame": true,
+      "lap": 2,
+      "text": "Esses, with QDR_SHW1KS: staff call (Rear-end)",
+      "weather": "Clear"
+    },
+    {
+      "id": "Race_Mexico_2026_11_15_15_59_28.json|7|contact|2|1",
+      "type": "incident",
+      "reason": "Severity 6 is a bit high for this, shwiks just sent it in too quick",
+      "by": "319544045435224067",
+      "at": "2026-11-17T07:58:14Z",
+      "file": "Race_Mexico_2026_11_15_15_59_28.json",
+      "driver": "QDR_SHW1KS",
+      "car": 7,
+      "pts": -3.0,
+      "call": {
+        "kind": "Rear-end",
+        "fault": "fault",
+        "severity": 5
+      },
+      "learn": true,
+      "owner": true,
+      "was": -6.0,
+      "inc": {
+        "t": 1794754397.86,
+        "pair": [
+          3,
+          7
+        ]
+      },
+      "text": "Esses, with Ayrton_Senna109: severity 6/10, to blame (R3) 6; QDR_SHW1KS ran into the back of Ayrton_Senna109, closing at 37 km/h"
     }
   ]
 }
