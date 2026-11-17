@@ -1661,6 +1661,60 @@
       "lap": 1,
       "text": "Recta Principal, with lars.mudde, niet_Lars123: staff call (Moved across alongside)",
       "weather": "Clear"
+    },
+    {
+      "id": "Race_Brazil_2026_11_15_16_35_22.json|11|contact|1|0",
+      "type": "incident",
+      "reason": "Both a little stupid there",
+      "by": "319544045435224067",
+      "at": "2026-11-17T07:56:41Z",
+      "file": "Race_Brazil_2026_11_15_16_35_22.json",
+      "driver": "DevilDriver2396",
+      "car": 11,
+      "pts": -3.0,
+      "call": {
+        "kind": "Moved across alongside",
+        "fault": "shared",
+        "severity": 6
+      },
+      "learn": true,
+      "owner": true,
+      "was": -6.0,
+      "inc": {
+        "t": 1794756494.76,
+        "pair": [
+          7,
+          11
+        ]
+      },
+      "text": "‘S’ do Senna, with QDR_SHW1KS: severity 6/10, to blame (like a graded one) 6; side by side; DevilDriver2396 moved 6.0 m across into the other car; but GreMi called a similar one (B2-03, Texas 2026-10-"
+    },
+    {
+      "id": "Race_Brazil_2026_11_15_16_35_22.json|7|contact|1|0",
+      "type": "incident",
+      "reason": "Both a little stupid there",
+      "by": "319544045435224067",
+      "at": "2026-11-17T07:56:41Z",
+      "file": "Race_Brazil_2026_11_15_16_35_22.json",
+      "driver": "QDR_SHW1KS",
+      "car": 7,
+      "pts": -3.0,
+      "call": {
+        "kind": "Moved across alongside",
+        "fault": "shared",
+        "severity": 6
+      },
+      "learn": true,
+      "owner": true,
+      "was": -6.0,
+      "inc": {
+        "t": 1794756494.76,
+        "pair": [
+          7,
+          11
+        ]
+      },
+      "text": "‘S’ do Senna, with DevilDriver2396: severity 6/10, to blame (like a graded one) 6; side by side; DevilDriver2396 moved 6.0 m across into the other car; but GreMi called a similar one (B2-03, Texas 202"
     }
   ]
 }
