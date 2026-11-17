@@ -37,6 +37,27 @@
  },
  {
   "file": "Race_Austria_Just_in_case_2026_11_07_00_07_11.json",
+  "t": 1794003187.96,
+  "lap": 1,
+  "cars": [
+   4,
+   1,
+   8,
+   2
+  ],
+  "frozen": "Bananensaus17 at fault",
+  "frozen_fault": [
+   1
+  ],
+  "now": "car 1 + car 4 at fault",
+  "now_fault": [
+   1,
+   4
+  ],
+  "rule_now": "R8"
+ },
+ {
+  "file": "Race_Austria_Just_in_case_2026_11_07_00_07_11.json",
   "t": 1794003188.61,
   "lap": 1,
   "cars": [
@@ -48,11 +69,12 @@
   "frozen_fault": [
    7
   ],
-  "now": "Bananensaus17 at fault",
+  "now": "car 1 + car 4 at fault",
   "now_fault": [
-   1
+   1,
+   4
   ],
-  "rule_now": "R2"
+  "rule_now": "R8"
  },
  {
   "file": "Race_Austria_Just_in_case_2026_11_07_00_07_11.json",
@@ -173,26 +195,6 @@
  },
  {
   "file": "Race_Brazil_2026_11_15_16_35_22.json",
-  "t": 1794756494.76,
-  "lap": 1,
-  "cars": [
-   7,
-   11,
-   0
-  ],
-  "frozen": "DevilDriver2396 + QDR_SHW1KS at fault",
-  "frozen_fault": [
-   7,
-   11
-  ],
-  "now": "DevilDriver2396 at fault",
-  "now_fault": [
-   11
-  ],
-  "rule_now": "R2"
- },
- {
-  "file": "Race_Brazil_2026_11_15_16_35_22.json",
   "t": 1794756495.35,
   "lap": 1,
   "cars": [
@@ -205,11 +207,12 @@
   "frozen_fault": [
    12
   ],
-  "now": "DevilDriver2396 at fault",
+  "now": "DevilDriver2396 + QDR_SHW1KS at fault",
   "now_fault": [
+   7,
    11
   ],
-  "rule_now": "R2"
+  "rule_now": "R8"
  },
  {
   "file": "Race_Brazil_2026_11_15_16_35_22.json",
@@ -299,6 +302,26 @@
    3
   ],
   "rule_now": "R2"
+ },
+ {
+  "file": "Race_Madrid_2026_11_02_19_41_15.json",
+  "t": 1793644312.82,
+  "lap": 1,
+  "cars": [
+   6,
+   0,
+   2
+  ],
+  "frozen": "Damian at fault",
+  "frozen_fault": [
+   0
+  ],
+  "now": "thunder-of_war21 + Damian at fault",
+  "now_fault": [
+   0,
+   6
+  ],
+  "rule_now": "R8"
  },
  {
   "file": "Race_Mexico_2026_10_20_20_13_46.json",
