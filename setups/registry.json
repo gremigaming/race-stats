@@ -3138,11 +3138,24 @@
          "run": 5,
          "laps": 4,
          "bb": 58
+        },
+        {
+         "file": "2026-11-18_20-47-46_Silverstone_OSQ.gmtel.gz",
+         "date": "2026-11-18",
+         "session": "quali",
+         "osq": true,
+         "weather": 1,
+         "pace": 88317,
+         "best": 88317,
+         "mean": 88317,
+         "run": 1,
+         "laps": 1,
+         "bb": 58
         }
        ],
        "verdict": {
         "result": "baseline",
-        "text": "Starting point: 1:17.620 over 3 sessions."
+        "text": "Starting point: 1:20.294 over 4 sessions."
        }
       },
       {
@@ -6516,12 +6529,25 @@
          "run": 1,
          "laps": 1,
          "bb": 57
+        },
+        {
+         "file": "2026-11-18_20-32-44_Las_Vegas_Race.gmtel.gz",
+         "date": "2026-11-18",
+         "session": "race",
+         "osq": false,
+         "weather": 1,
+         "pace": 94756,
+         "best": 94756,
+         "mean": 95661,
+         "run": 5,
+         "laps": 4,
+         "bb": 57
         }
        ],
        "verdict": {
         "result": "better",
-        "delta": -0.92,
-        "text": "Better: quali lap 1:33.744 against 1:34.616 on V1 (0.872 s faster)."
+        "delta": -0.65,
+        "text": "Better: quali lap 1:33.997 against 1:34.616 on V1 (0.619 s faster)."
        },
        "slot": 63
       },
@@ -6682,12 +6708,25 @@
          "run": 5,
          "laps": 4,
          "bb": 57
+        },
+        {
+         "file": "2026-11-18_20-32-44_Las_Vegas_Race.gmtel.gz",
+         "date": "2026-11-18",
+         "session": "race",
+         "osq": false,
+         "weather": 1,
+         "pace": 95661,
+         "best": 94756,
+         "mean": 95661,
+         "run": 5,
+         "laps": 4,
+         "bb": 57
         }
        ],
        "verdict": {
-        "result": "better",
-        "delta": -0.16,
-        "text": "Better: average lap 1:35.064 against 1:35.217 on V1 (0.153 s faster)."
+        "result": "same",
+        "delta": 0.05,
+        "text": "No clear difference: average lap 1:35.263 against 1:35.217 on V1."
        },
        "slot": 64
       },
