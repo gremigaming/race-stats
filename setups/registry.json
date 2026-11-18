@@ -2336,11 +2336,24 @@
          "run": 1,
          "laps": 1,
          "bb": 59
+        },
+        {
+         "file": "2026-11-18_19-13-04_Catalunya_Race.gmtel.gz",
+         "date": "2026-11-18",
+         "session": "race",
+         "osq": false,
+         "weather": 1,
+         "pace": 74880,
+         "best": 74880,
+         "mean": 75519,
+         "run": 5,
+         "laps": 4,
+         "bb": 59
         }
        ],
        "verdict": {
         "result": "baseline",
-        "text": "Starting point: 1:18.761 over 2 sessions."
+        "text": "Starting point: 1:17.467 over 3 sessions."
        }
       },
       {
@@ -2432,11 +2445,24 @@
          "run": 5,
          "laps": 4,
          "bb": 59
+        },
+        {
+         "file": "2026-11-18_19-13-04_Catalunya_Race.gmtel.gz",
+         "date": "2026-11-18",
+         "session": "race",
+         "osq": false,
+         "weather": 1,
+         "pace": 75519,
+         "best": 74880,
+         "mean": 75519,
+         "run": 5,
+         "laps": 4,
+         "bb": 59
         }
        ],
        "verdict": {
         "result": "baseline",
-        "text": "Starting point: 1:15.461 over 1 session."
+        "text": "Starting point: 1:15.490 over 2 sessions."
        }
       },
       {
