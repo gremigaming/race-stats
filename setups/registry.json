@@ -3550,12 +3550,25 @@
          "run": 4,
          "laps": 4,
          "bb": 58
+        },
+        {
+         "file": "2026-11-18_19-51-49_Spa_Race.gmtel.gz",
+         "date": "2026-11-18",
+         "session": "race",
+         "osq": false,
+         "weather": 2,
+         "pace": 106801,
+         "best": 106400,
+         "mean": 106801,
+         "run": 5,
+         "laps": 4,
+         "bb": 59
         }
        ],
        "verdict": {
-        "result": "worse",
-        "delta": 0.72,
-        "text": "Worse: average lap 1:48.640 against 1:47.862 on V1 (0.778 s slower)."
+        "result": "same",
+        "delta": -0.13,
+        "text": "No clear difference: average lap 1:47.721 against 1:47.862 on V1."
        },
        "slot": 34
       },
