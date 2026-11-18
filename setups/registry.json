@@ -8,7 +8,7 @@
   "requested": null,
   "last": "2026-11-10"
  },
- "pending": 36,
+ "pending": 37,
  "tracks": [
   {
    "track": "Melbourne",
@@ -1072,6 +1072,61 @@
        "change": null,
        "text": "Starting setup",
        "why": "Your last wet setup.",
+       "sessions": [
+        {
+         "file": "2026-11-18_19-29-35_Suzuka_Race.gmtel.gz",
+         "date": "2026-11-18",
+         "session": "race",
+         "osq": false,
+         "weather": 5,
+         "pace": 107044,
+         "best": 106210,
+         "mean": 107044,
+         "run": 5,
+         "laps": 4,
+         "bb": 57
+        }
+       ],
+       "verdict": {
+        "result": "baseline",
+        "text": "Starting point: 1:47.044 over 1 session."
+       }
+      },
+      {
+       "v": 2,
+       "base": 1,
+       "created": "2026-11-18",
+       "saved": null,
+       "values": {
+        "fw": 50,
+        "rw": 28,
+        "don": 100,
+        "doff": 35,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 13,
+        "farb": 2,
+        "rarb": 10,
+        "frh": 21,
+        "rrh": 42,
+        "bb": 56,
+        "bp": 100,
+        "fr": 29.5,
+        "fl": 29.5,
+        "rr": 26.0,
+        "rl": 26.0
+       },
+       "change": {
+        "rw": [
+         25,
+         28
+        ]
+       },
+       "text": "Rear wing 25 → 28",
+       "why": "More rear grip against oversteer and wheelspin. Costs a little top speed.",
        "sessions": [],
        "verdict": {
         "result": "untested",
@@ -3371,10 +3426,24 @@
        },
        "text": "Fix: Spa race values (wings 24-0)",
        "why": "V1 was copied from Mexico by mistake (wings 48-32). V2 uses your Spa race setup, like most tracks where quali and race start the same.",
-       "sessions": [],
+       "sessions": [
+        {
+         "file": "2026-11-18_19-48-11_Spa_OSQ.gmtel.gz",
+         "date": "2026-11-18",
+         "session": "quali",
+         "osq": true,
+         "weather": 0,
+         "pace": 105193,
+         "best": 105193,
+         "mean": 105193,
+         "run": 1,
+         "laps": 1,
+         "bb": 59
+        }
+       ],
        "verdict": {
         "result": "untested",
-        "text": "Not driven yet."
+        "text": "V1 has no laps to compare with."
        },
        "slot": 33
       }
