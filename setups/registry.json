@@ -586,12 +586,25 @@
          "run": 5,
          "laps": 4,
          "bb": 58
+        },
+        {
+         "file": "2026-11-18_20-10-32_Shanghai_OSQ.gmtel.gz",
+         "date": "2026-11-18",
+         "session": "quali",
+         "osq": true,
+         "weather": 2,
+         "pace": 92791,
+         "best": 92791,
+         "mean": 92791,
+         "run": 1,
+         "laps": 1,
+         "bb": 59
         }
        ],
        "verdict": {
-        "result": "worse",
-        "delta": 0.41,
-        "text": "Worse: quali lap 1:34.381 against 1:33.996 on V1 (0.385 s slower)."
+        "result": "better",
+        "delta": -0.44,
+        "text": "Better: quali lap 1:33.586 against 1:33.996 on V1 (0.410 s faster)."
        },
        "slot": 3
       },
