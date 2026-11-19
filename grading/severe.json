@@ -1,8 +1,121 @@
 {
- "title": "Severity 7+ · every one (5)",
+ "title": "Severity 7+ · every one (7)",
  "stream": "severe",
  "rules": "v1.4",
  "incidents": [
+  {
+   "id": "sev-11182013-1131",
+   "pick": "severe",
+   "track": "Shanghai",
+   "date": "2026-11-18",
+   "type": "Moved across alongside",
+   "weather": "Overcast",
+   "track_temp": 26,
+   "lap": 2,
+   "race_time": "1:53",
+   "replay": "https://gremigaming.github.io/race-stats/all/race/2026-11-18_20-13-58_Shanghai_Race?inc=113.1&car=8,14",
+   "race_file": "Race_Shanghai_2026_11_18_20_24_34.json",
+   "recording": "2026-11-18_20-13-58_Shanghai_Race.gmtel.gz",
+   "t0": 113.1,
+   "t1": 128.1,
+   "contacts": [
+    {
+     "t": 113.1,
+     "a": 8,
+     "b": 14
+    },
+    {
+     "t": 117.8,
+     "a": 14,
+     "b": 8
+    }
+   ],
+   "drivers": [
+    {
+     "car": 8,
+     "name": "#8 ItzH1ddegam1ng"
+    },
+    {
+     "car": 14,
+     "name": "#88 sprintstar-1"
+    }
+   ],
+   "engine": {
+    "rules": "v1.5",
+    "verdict": "sprintstar-1 + ItzH1ddegam1ng at fault",
+    "rule": "R8",
+    "severity": 7,
+    "why": "side by side; sprintstar-1 moved 1.7 m across into the other car; side by side; ItzH1ddegam1ng moved 1.2 m across into the other car",
+    "at_fault": [
+     "#88 sprintstar-1",
+     "#8 ItzH1ddegam1ng"
+    ],
+    "contacts": 2,
+    "gray_score": 0.6
+   },
+   "claude": "In the list because it's severity 7+. My call: sprintstar-1 + ItzH1ddegam1ng at fault (rule R8: shared fault), severity 7, blame on #88 sprintstar-1, #8 ItzH1ddegam1ng. What I saw: side by side; sprintstar-1 moved 1.7 m across into the other car; side by side; ItzH1ddegam1ng moved 1.2 m across into the other car. I'm fairly confident: more than one car gets the blame, and splitting it is a judgement call."
+  },
+  {
+   "id": "sev-11182013-506",
+   "pick": "severe",
+   "track": "Shanghai",
+   "date": "2026-11-18",
+   "type": "Moved across alongside",
+   "weather": "Overcast",
+   "track_temp": 26,
+   "lap": 1,
+   "race_time": "0:50",
+   "replay": "https://gremigaming.github.io/race-stats/all/race/2026-11-18_20-13-58_Shanghai_Race?inc=50.7&car=1,4,16",
+   "race_file": "Race_Shanghai_2026_11_18_20_24_34.json",
+   "recording": "2026-11-18_20-13-58_Shanghai_Race.gmtel.gz",
+   "t0": 50.7,
+   "t1": 65.7,
+   "contacts": [
+    {
+     "t": 50.7,
+     "a": 1,
+     "b": 4
+    },
+    {
+     "t": 55.5,
+     "a": 4,
+     "b": 1
+    },
+    {
+     "t": 62.5,
+     "a": 4,
+     "b": 1
+    }
+   ],
+   "drivers": [
+    {
+     "car": 1,
+     "name": "#8 Stepino81"
+    },
+    {
+     "car": 4,
+     "name": "#19 toni2608"
+    },
+    {
+     "car": 16,
+     "name": "#2 Lucas_ostepoppen"
+    }
+   ],
+   "engine": {
+    "rules": "v1.5",
+    "verdict": "Stepino81 + toni2608 at fault",
+    "rule": "R8",
+    "severity": 7,
+    "why": "side by side; Stepino81 moved 1.7 m across into the other car; side by side; toni2608 moved 1.1 m across into the other car; side by side; Stepino81 moved 2.2 m across into the other car",
+    "at_fault": [
+     "#8 Stepino81",
+     "#19 toni2608"
+    ],
+    "contacts": 3,
+    "gray_score": 1.07
+   },
+   "claude": "In the list because it's severity 7+. My call: Stepino81 + toni2608 at fault (rule R8: shared fault), severity 7, blame on #8 Stepino81, #19 toni2608. What I saw: side by side; Stepino81 moved 1.7 m across into the other car; side by side; toni2608 moved 1.1 m across into the other car; side by side; Stepino81 moved 2.2 m across into the other car. I'm fairly confident: more than one car gets the blame, and splitting it is a judgement call."
+  },
   {
    "id": "sev-11151627-1184",
    "pick": "severe",
@@ -310,5 +423,5 @@
    "claude": "In the list because it's severity 7+. My call: daris_2190 at fault (rule R10: kept full throttle into a braking car), severity 10, blame on #21 daris_2190. What I saw: daris_2190 kept full throttle for 1.0 s after hitting DDRK, pushing it along. I'm fairly confident: the numbers are clear of every limit; this one is here for its severity."
   }
  ],
- "made": "2026-11-16"
+ "made": "2026-11-19"
 }
