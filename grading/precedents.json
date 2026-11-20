@@ -4717,6 +4717,60 @@
     }
    ]
   },
+  "s-41ea2248": {
+   "key": "43ced542cd87",
+   "by": "GreMi",
+   "track": "Singapore",
+   "date": "2026-11-04",
+   "kind": "Rear-end",
+   "source": "staff change",
+   "verdict": "daris_2190 at fault",
+   "severity": 10,
+   "note": "Keeps full trottle long after the corner, that was on purpose.",
+   "who": [
+    "319544045435224067"
+   ],
+   "changes": [
+    "Race_Singapore_2026_11_04_20_09_05.json|10|contact|2|0"
+   ],
+   "race_file": "Race_Singapore_2026_11_04_20_09_05.json",
+   "at": "2026-11-05T11:26:13Z",
+   "recording": "2026-11-04_19-59-27_Singapore_Race.gmtel.gz",
+   "t": 116.7,
+   "cars": [
+    3,
+    10
+   ],
+   "rulebook": {
+    "verdict": "10 at fault",
+    "rule": "V16"
+   },
+   "contacts": [
+    {
+     "a": 3,
+     "b": 10,
+     "t": 108.9,
+     "x": {
+      "gap": 9.0,
+      "closing": 24,
+      "moved_front": -0.71,
+      "moved_back": 0.16,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 95,
+      "lost": 2,
+      "off": 0,
+      "cars": 2,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "front",
+     "rulebook": "front",
+     "rule": "V16",
+     "front": 10
+    }
+   ]
+  },
   "s-43c539bb": {
    "key": "b89c82f45c59",
    "by": "GreMi",
@@ -4882,14 +4936,14 @@
    ]
   },
   "s-50eef53f": {
-   "key": "e2996ae261cf",
+   "key": "436b0f0cdbce",
    "by": "staff",
    "track": "Imola",
    "date": "2026-10-25",
    "kind": null,
    "source": "protest accepted",
-   "verdict": "DABBINMAN123 at fault",
-   "severity": 4,
+   "verdict": "Racing incident",
+   "severity": 0,
    "note": "Protest accepted: Agreed",
    "who": [
     "452166434588590080"
@@ -4928,7 +4982,7 @@
       "reaction": 0.0,
       "aftermath": 0.0
      },
-     "label": "back",
+     "label": "none",
      "rulebook": "back",
      "rule": "V16",
      "front": 4
@@ -5044,13 +5098,13 @@
    ]
   },
   "s-60c3b341": {
-   "key": "3e28b04099ae",
+   "key": "e1fa8921b8d4",
    "by": "GreMi",
    "track": "Singapore",
    "date": "2026-11-04",
    "kind": "Moved across alongside",
    "source": "staff change",
-   "verdict": "TTV/GreMi_Gaming + EthanMoonski at fault",
+   "verdict": "EthanMoonski at fault",
    "severity": 4,
    "note": "Ethan brakes at his normal braking point, hitting gremi trying to battle devildriver, he didnt brake too late but he should have braked a bit earlier because of a battle in front.",
    "who": [
@@ -5090,7 +5144,7 @@
       "reaction": 0.0,
       "aftermath": 0.0
      },
-     "label": "both",
+     "label": "back",
      "rulebook": "front",
      "rule": "V16",
      "front": 0
@@ -5365,14 +5419,14 @@
    ]
   },
   "s-74265590": {
-   "key": "86f384b0961e",
+   "key": "9addf316d737",
    "by": "GreMi",
    "track": "Imola",
    "date": "2026-10-30",
    "kind": "Reckless driving",
    "source": "staff change",
-   "verdict": "Racing incident",
-   "severity": 0,
+   "verdict": "RB #2 at fault",
+   "severity": 9,
    "note": "Car 2 brakes too late in the rain, and releasing his brake twice so goes too quick into the corner",
    "who": [
     "319544045435224067"
@@ -5412,7 +5466,7 @@
       "reaction": 0.0,
       "aftermath": 0.0
      },
-     "label": "none",
+     "label": "back",
      "rulebook": "front",
      "rule": "V16",
      "front": 6
@@ -6308,6 +6362,17 @@
    "rulebook": 57,
    "with_precedents": 60,
    "overrides": 8,
+   "date": "2026-11-20",
+   "rules": "v1.6"
+  },
+  {
+   "incidents": 94,
+   "inc_rulebook": 35,
+   "inc_with_precedents": 35,
+   "contacts": 134,
+   "rulebook": 57,
+   "with_precedents": 60,
+   "overrides": 7,
    "date": "2026-11-20",
    "rules": "v1.6"
   }
