@@ -21,6 +21,14 @@ export interface ChangelogEntry {
 // raw commit history also contains routine uploads and staff-only corrections.
 const changelog: ChangelogEntry[] = [
   {
+    id: "rulebook-v16",
+    date: "2026-11-20",
+    type: "feat",
+    message:
+      "New incident rules (v1.6) for safety rating, made with GreMi over five rounds of real incidents. Calls now compare each car with the rest of the field: braking later or softer than everyone else, moving towards a car that held its line, and rejoining into someone. Bigger moves get a higher severity, and a touch where nobody lost time is no longer an incident. Races from 11 Nov onwards have been judged again with these rules; older races keep their calls. Two hidden-name cars with the same number now show their team too, so calls land on the right car.",
+    destination: "safety",
+  },
+  {
     id: "incident-all-contacts",
     date: "2026-11-16",
     type: "feat",

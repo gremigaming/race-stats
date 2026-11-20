@@ -36,7 +36,7 @@ import gmtel  # noqa: E402
 RELEASE = "https://api.github.com/repos/gremigaming/race-stats/releases/tags/telemetry"
 DOWNLOAD = "https://github.com/gremigaming/race-stats/releases/download/telemetry/"
 
-VERSION = 12         # bump to rebuild every bundle (10: fault engine verdicts per incident, 11: names by showOnlineNames, 12: smaller incidents)
+VERSION = 13         # bump to rebuild every bundle (10: fault engine verdicts per incident, 11: names by showOnlineNames, 12: smaller incidents, 13: team on duplicate hidden names + v1.6)
 KEEP = 40            # newest races published on the site (R2 keeps everything later)
 # R2 (the live server) only has races from the 4 Nov 2026 stream on: every race before it stays on the site,
 # so each safety rating incident of those races can still be watched (GreMi, 16 Nov 2026)
@@ -123,6 +123,16 @@ def shown_name(p):
     if (p.get("ai") or shown) and p.get("name") not in (None, "", "Player"):
         return p["name"]
     return f"Car #{p.get('race_number', 0)}"
+
+
+def dedupe_names(cars):
+    """Two hidden cars with the same race number (Texas 13 Nov: two "Car #2") get their team added,
+    "Car #2 (Ferrari '26)", so verdict texts and the classification-screen names land on the right car."""
+    count = collections.Counter(c["name"] for c in cars.values())
+    for c in cars.values():
+        if count[c["name"]] > 1 and c.get("team_name"):
+            c["name"] = f"{c['name']} ({c['team_name']})"
+    return cars
 
 
 def encode_chunk(t0, frames):
@@ -636,6 +646,7 @@ def bundle(path, rid, outdir):
     cars = {str(i): {"name": shown_name(p), "team": p.get("team"), "team_name": team_name(p.get("team")),
                      "number": p.get("race_number"), "ai": bool(p.get("ai"))}
             for i, p in sess.drivers.items() if i in seen}
+    dedupe_names(cars)
     events = [{"t": round(c["t"], 3), "code": "COLL", "a": c["a"], "b": c["b"]} for c in sess.collisions]
     events += [{"t": t, "code": code} for t, code in sess.events if code not in ("COLL", "STLG", "RTMT")]
     events += sess.event_detail

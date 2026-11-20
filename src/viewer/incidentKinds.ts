@@ -43,6 +43,14 @@ export function kindOf(inc: RaceIncident): IncidentKind {
       return /lost the car|slid or went off/.test(why) ? "control" : /aftermath/.test(why) ? "control" : "racing";
     case "R8":
       return "side";
+    case "V16": {
+      // v1.6 rulebook (20 Nov 2026): typed from its explanation
+      if (v.at_fault === null || v.at_fault === undefined) return "racing";
+      if (/rejoined/.test(why)) return "rejoin";
+      if (/% later/.test(why)) return (v.severity ?? 0) >= 5 ? "lunge" : "rear";
+      if (/moved .* towards/.test(why)) return "side";
+      return "rear";
+    }
     case "R2":
       return /swept/.test(why) ? "block" : v.at_fault === null || v.at_fault === undefined ? "racing" : "side";
     case "R3": {

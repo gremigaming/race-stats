@@ -62,7 +62,7 @@ import gmtel  # noqa: E402
 import incident_replays  # noqa: E402
 import race_bundles as rb  # noqa: E402
 
-RULES = "v1.5"       # bump when a rule changes: fault_engine.py judges every race again
+RULES = "v1.6"       # bump when a rule changes: fault_engine.py judges every race again (v1.6: rulebook_v16.py, 20 Nov 2026)
 ALONGSIDE_M = 4.0    # less than this apart along the track = alongside (a car is ~5.6 m long)
 MOVE_M = 1.0         # moving across this much in the last 1.2 s counts as moving into the other car
 MOVE_MORE_M = 0.7    # ... and this much more than the other car did
@@ -367,6 +367,19 @@ def judge_all(j, incs, name=str):
                     v.update(at_fault=v["at_fault_all"][0], rule="R9", severity=10, why=p["why"],
                              verdict=" + ".join(name(c) for c in v["at_fault_all"]) + " at fault")
                     break
+    # v1.6 (GreMi, 20 Nov 2026): rulebook_v16.py makes every call; the v1.5 calls above stay only
+    # for incidents that are contacts with AI cars alone (R6), and lend their contact numbers
+    # ("features", for the grading batches) to the v1.6 contacts of the same car pair
+    import rulebook_v16
+    for k, (v, n) in enumerate(zip(out, rulebook_v16.judge_incidents(j, incs, name))):
+        if all(p["rule"] == "R6" for p in v["contacts"]):
+            continue
+        feats = {frozenset((p["a"], p["b"])): p for p in v["contacts"] if p.get("features")}
+        for p in n["contacts"]:
+            o = feats.get(frozenset((p["a"], p["b"])))
+            if o:
+                p.update(features=o["features"], effects=o.get("effects"))
+        out[k] = n
     return out
 
 

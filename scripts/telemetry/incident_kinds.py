@@ -43,6 +43,16 @@ def kind_of(inc):
         return "Rear-end"   # kept full throttle into a braking car (GreMi graded daris into DDRK as a rear-end)
     if rule == "R4":
         return "Chain reaction"
+    if rule == "V16":   # v1.6 rulebook (20 Nov 2026): typed from its explanation
+        if not inc.get("at_fault") and not (rb and rb.get("at_fault")):
+            return "Racing incident"
+        if "rejoined" in why:
+            return "Unsafe rejoin"
+        if "% later" in why:
+            return "Late lunge / divebomb" if (inc.get("severity") or 0) >= 5 else "Rear-end"
+        if "moved" in why and "towards" in why:
+            return "Moved across alongside"
+        return "Rear-end"
     if rule == "R7":
         return "Chain reaction" if "aftermath" in why else "Lost control" if "lost the car" in why else "Racing incident"
     if rule == "R2" and "swept" in why:
