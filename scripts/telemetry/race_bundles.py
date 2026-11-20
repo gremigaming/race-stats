@@ -700,7 +700,10 @@ def main():
         kept = os.path.join(keep, rid)
         try:
             m = json.load(open(os.path.join(kept, "manifest.json")))
-            if m.get("bundle") != VERSION:
+            names = [c.get("name") for c in m.get("cars", {}).values()]
+            # v12 bundles stay (a full rebuild takes too long during a stream); only those with two
+            # hidden cars sharing a name are redone (v13 adds the team)
+            if m.get("bundle") != VERSION and not (m.get("bundle") == 12 and len(names) == len(set(names))):
                 raise ValueError
             shutil.copytree(kept, os.path.join(a.out, rid), dirs_exist_ok=True)
         except (OSError, ValueError):
