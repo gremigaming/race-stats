@@ -1,7 +1,7 @@
 {
  "precedents": {
   "1102b-1": {
-   "key": "dd17621b08e6",
+   "key": "82c5f21abb9c",
    "by": "GreMi",
    "track": "Brazil",
    "date": "2026-11-02",
@@ -19,8 +19,8 @@
     9
    ],
    "rulebook": {
-    "verdict": "Not an incident",
-    "rule": "R1"
+    "verdict": "9 at fault",
+    "rule": "V16"
    },
    "contacts": [
     {
@@ -42,14 +42,14 @@
       "aftermath": 0.0
      },
      "label": "no",
-     "rulebook": "no",
-     "rule": "R1",
+     "rulebook": "front",
+     "rule": "V16",
      "front": 9
     }
    ]
   },
   "1102b-2a": {
-   "key": "a431a6582c86",
+   "key": "c5ba0dfafb7a",
    "race_file": "Race_Brazil_2026_11_02_19_22_19.json",
    "at": "2026-11-03T07:48:40Z",
    "parent": "1102b-2",
@@ -91,14 +91,14 @@
    ],
    "contacts": [
     {
-     "a": 7,
-     "b": 2,
+     "a": 2,
+     "b": 7,
      "t": 88.9,
      "x": {
       "gap": 0.3,
       "closing": -18,
-      "moved_front": 3.26,
-      "moved_back": -0.7,
+      "moved_front": -0.7,
+      "moved_back": 3.26,
       "rejoin_front": 0.0,
       "rejoin_back": 0.0,
       "slide": 63,
@@ -108,15 +108,15 @@
       "reaction": 0.0,
       "aftermath": 0.0
      },
-     "label": "front",
-     "rulebook": "front",
-     "rule": "R2",
-     "front": 7
+     "label": "back",
+     "rulebook": "back",
+     "rule": "V16",
+     "front": 2
     }
    ]
   },
   "1102b-3": {
-   "key": "08378f0fd048",
+   "key": "2b6dab61f7da",
    "by": "GreMi",
    "track": "Abu Dhabi",
    "date": "2026-11-02",
@@ -135,19 +135,19 @@
     9
    ],
    "rulebook": {
-    "verdict": "7 + 8 at fault",
-    "rule": "R8"
+    "verdict": "Not an incident",
+    "rule": "R1"
    },
    "contacts": [
     {
-     "a": 8,
-     "b": 7,
+     "a": 7,
+     "b": 8,
      "t": 84.6,
      "x": {
-      "gap": 2.7,
-      "closing": 5,
-      "moved_front": 3.41,
-      "moved_back": -0.19,
+      "gap": 4.0,
+      "closing": 16,
+      "moved_front": 2.69,
+      "moved_back": 0.7,
       "rejoin_front": 0.0,
       "rejoin_back": 0.0,
       "slide": 6,
@@ -158,8 +158,8 @@
       "aftermath": 0.0
      },
      "label": "no",
-     "rulebook": "front",
-     "rule": "R2",
+     "rulebook": "no",
+     "rule": "R1",
      "front": 7
     },
     {
@@ -178,40 +178,17 @@
       "off": 0,
       "cars": 3,
       "reaction": 0.0,
-      "aftermath": 1.0
-     },
-     "label": "no",
-     "rulebook": "none",
-     "rule": "R7",
-     "front": 7
-    },
-    {
-     "a": 7,
-     "b": 8,
-     "t": 89.6,
-     "x": {
-      "gap": 4.0,
-      "closing": 16,
-      "moved_front": 2.69,
-      "moved_back": 0.7,
-      "rejoin_front": 0.0,
-      "rejoin_back": 0.0,
-      "slide": 6,
-      "lost": 1,
-      "off": 0,
-      "cars": 3,
-      "reaction": 0.0,
       "aftermath": 0.0
      },
      "label": "no",
-     "rulebook": "back",
-     "rule": "R3",
+     "rulebook": "no",
+     "rule": "R1",
      "front": 7
     }
    ]
   },
   "1102b-4": {
-   "key": "ed2d0d049a25",
+   "key": "0c82532a7302",
    "by": "GreMi",
    "track": "Las Vegas",
    "date": "2026-11-02",
@@ -230,19 +207,19 @@
     14
    ],
    "rulebook": {
-    "verdict": "Not an incident",
-    "rule": "R1"
+    "verdict": "14 + 13 at fault",
+    "rule": "V16"
    },
    "contacts": [
     {
-     "a": 14,
-     "b": 8,
+     "a": 8,
+     "b": 14,
      "t": 129.6,
      "x": {
       "gap": 9.8,
       "closing": 24,
-      "moved_front": 2.13,
-      "moved_back": 0.86,
+      "moved_front": 0.86,
+      "moved_back": 2.13,
       "rejoin_front": 0.0,
       "rejoin_back": 0.0,
       "slide": 12,
@@ -252,20 +229,20 @@
       "reaction": 0.0,
       "aftermath": 0.0
      },
-     "label": "front",
-     "rulebook": "no",
-     "rule": "R1",
-     "front": 8
+     "label": "back",
+     "rulebook": "front",
+     "rule": "V16",
+     "front": 14
     },
     {
-     "a": 14,
-     "b": 13,
+     "a": 13,
+     "b": 14,
      "t": 130.0,
      "x": {
       "gap": 8.8,
       "closing": 26,
-      "moved_front": -0.36,
-      "moved_back": -2.64,
+      "moved_front": -2.64,
+      "moved_back": -0.36,
       "rejoin_front": 0.0,
       "rejoin_back": 0.0,
       "slide": 120,
@@ -273,17 +250,17 @@
       "off": 0,
       "cars": 3,
       "reaction": 0.0,
-      "aftermath": 1.0
+      "aftermath": 0.0
      },
      "label": "none",
-     "rulebook": "none",
-     "rule": "R7",
-     "front": 14
+     "rulebook": "front",
+     "rule": "V16",
+     "front": 13
     }
    ]
   },
   "1102b-5": {
-   "key": "1431916e7464",
+   "key": "5b6d6648abe9",
    "by": "GreMi",
    "track": "Las Vegas",
    "date": "2026-11-02",
@@ -303,7 +280,7 @@
    ],
    "rulebook": {
     "verdict": "9 at fault",
-    "rule": "R3"
+    "rule": "V16"
    },
    "contacts": [
     {
@@ -326,36 +303,13 @@
      },
      "label": "front",
      "rulebook": "back",
-     "rule": "R3",
+     "rule": "V16",
      "front": 16
-    },
-    {
-     "a": 9,
-     "b": 0,
-     "t": 223.7,
-     "x": {
-      "gap": 3.0,
-      "closing": -22,
-      "moved_front": 2.56,
-      "moved_back": 1.16,
-      "rejoin_front": 0.0,
-      "rejoin_back": 0.0,
-      "slide": 24,
-      "lost": 1,
-      "off": 0,
-      "cars": 3,
-      "reaction": 0.0,
-      "aftermath": 1.0
-     },
-     "label": "none",
-     "rulebook": "none",
-     "rule": "R7",
-     "front": 9
     },
     {
      "a": 0,
      "b": 9,
-     "t": 236.4,
+     "t": 223.7,
      "x": {
       "gap": 6.1,
       "closing": -19,
@@ -371,14 +325,14 @@
       "aftermath": 0.0
      },
      "label": "none",
-     "rulebook": "none",
-     "rule": "R3",
+     "rulebook": "front",
+     "rule": "V16",
      "front": 9
     }
    ]
   },
   "1104b-1a": {
-   "key": "4306d5b8d239",
+   "key": "f9659808ca9a",
    "race_file": "Race_Singapore_2026_11_04_20_09_05.json",
    "at": "2026-11-05T07:59:58Z",
    "parent": "1104b-1",
@@ -430,14 +384,14 @@
       "aftermath": 0.0
      },
      "label": "no",
-     "rulebook": "front",
-     "rule": "R2",
+     "rulebook": "no",
+     "rule": "R1",
      "front": 1
     }
    ]
   },
   "1104b-2a": {
-   "key": "c8500287b044",
+   "key": "cad6fc679fbf",
    "race_file": "Race_Monza_2026_11_04_19_49_57.json",
    "at": "2026-11-05T08:02:19Z",
    "parent": "1104b-2",
@@ -492,13 +446,13 @@
      },
      "label": "front",
      "rulebook": "front",
-     "rule": "R5",
+     "rule": "V16",
      "front": 2
     }
    ]
   },
   "1104b-3a": {
-   "key": "43e1b9e67f45",
+   "key": "0f8560df5158",
    "race_file": "Race_Monza_2026_11_04_19_49_57.json",
    "at": "2026-11-05T08:05:46Z",
    "parent": "1104b-3",
@@ -539,14 +493,14 @@
    ],
    "contacts": [
     {
-     "a": 11,
-     "b": 8,
+     "a": 8,
+     "b": 11,
      "t": 181.4,
      "x": {
-      "gap": 3.8,
-      "closing": 17,
-      "moved_front": 3.63,
-      "moved_back": -2.76,
+      "gap": 2.5,
+      "closing": 4,
+      "moved_front": -2.09,
+      "moved_back": 2.12,
       "rejoin_front": 0.0,
       "rejoin_back": 0.0,
       "slide": 16,
@@ -558,41 +512,41 @@
      },
      "label": "both",
      "rulebook": "front",
-     "rule": "R2",
-     "front": 11
+     "rule": "V16",
+     "front": 8
     },
     {
-     "a": 11,
-     "b": 6,
+     "a": 8,
+     "b": 11,
+     "t": 181.4,
+     "x": {
+      "gap": 2.5,
+      "closing": 4,
+      "moved_front": -2.09,
+      "moved_back": 2.12,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 16,
+      "lost": 1,
+      "off": 0,
+      "cars": 3,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "both",
+     "rulebook": "back",
+     "rule": "V16",
+     "front": 8
+    },
+    {
+     "a": 6,
+     "b": 11,
      "t": 182.5,
      "x": {
       "gap": 8.0,
       "closing": 17,
-      "moved_front": 2.18,
-      "moved_back": -0.85,
-      "rejoin_front": 0.0,
-      "rejoin_back": 0.0,
-      "slide": 16,
-      "lost": 1,
-      "off": 0,
-      "cars": 3,
-      "reaction": 0.0,
-      "aftermath": 1.0
-     },
-     "label": "back",
-     "rulebook": "none",
-     "rule": "R7",
-     "front": 6
-    },
-    {
-     "a": 11,
-     "b": 8,
-     "t": 185.4,
-     "x": {
-      "gap": 2.5,
-      "closing": 4,
-      "moved_front": 2.12,
-      "moved_back": -2.09,
+      "moved_front": -0.85,
+      "moved_back": 2.18,
       "rejoin_front": 0.0,
       "rejoin_back": 0.0,
       "slide": 16,
@@ -602,15 +556,15 @@
       "reaction": 0.0,
       "aftermath": 0.0
      },
-     "label": "both",
-     "rulebook": "front",
-     "rule": "R2",
+     "label": "front",
+     "rulebook": "no",
+     "rule": "R1",
      "front": 11
     }
    ]
   },
   "1104b-4-touches": {
-   "key": "f877433e172a",
+   "key": "4ce7f05078e0",
    "race_file": "Race_Monza_2026_11_04_19_49_57.json",
    "at": "2026-11-05T08:10:37Z",
    "parent": "1104b-4",
@@ -651,8 +605,8 @@
       "aftermath": 0.0
      },
      "label": "no",
-     "rulebook": "back",
-     "rule": "R3",
+     "rulebook": "none",
+     "rule": "V16",
      "front": 8
     },
     {
@@ -671,17 +625,17 @@
       "off": 1,
       "cars": 6,
       "reaction": 0.0,
-      "aftermath": 1.0
+      "aftermath": 0.0
      },
      "label": "no",
-     "rulebook": "none",
-     "rule": "R7",
+     "rulebook": "back",
+     "rule": "V16",
      "front": 10
     }
    ]
   },
   "1104b-4a": {
-   "key": "f877433e172a",
+   "key": "4ce7f05078e0",
    "race_file": "Race_Monza_2026_11_04_19_49_57.json",
    "at": "2026-11-05T08:10:37Z",
    "parent": "1104b-4",
@@ -751,14 +705,14 @@
       "aftermath": 0.0
      },
      "label": "front",
-     "rulebook": "back",
-     "rule": "R3",
+     "rulebook": "front",
+     "rule": "V16",
      "front": 8
     }
    ]
   },
   "1104b-4b": {
-   "key": "f877433e172a",
+   "key": "4ce7f05078e0",
    "race_file": "Race_Monza_2026_11_04_19_49_57.json",
    "at": "2026-11-05T08:10:37Z",
    "parent": "1104b-4",
@@ -813,7 +767,7 @@
    "contacts": []
   },
   "1104b-5a": {
-   "key": "89a06bb7cde7",
+   "key": "2a4f68b557dc",
    "race_file": "Race_Spa_2026_11_04_19_32_23.json",
    "at": "2026-11-05T08:17:30Z",
    "parent": "1104b-5",
@@ -849,14 +803,14 @@
    ],
    "contacts": [
     {
-     "a": 7,
-     "b": 6,
+     "a": 6,
+     "b": 7,
      "t": 341.0,
      "x": {
-      "gap": 8.1,
-      "closing": 50,
-      "moved_front": 4.1,
-      "moved_back": -6.0,
+      "gap": 4.0,
+      "closing": 40,
+      "moved_front": 6.0,
+      "moved_back": -5.7,
       "rejoin_front": 0.0,
       "rejoin_back": 0.0,
       "slide": 74,
@@ -868,13 +822,13 @@
      },
      "label": "back",
      "rulebook": "back",
-     "rule": "R3",
+     "rule": "V16",
      "front": 7
     }
    ]
   },
   "1104b-5b": {
-   "key": "89a06bb7cde7",
+   "key": "2a4f68b557dc",
    "race_file": "Race_Spa_2026_11_04_19_32_23.json",
    "at": "2026-11-05T08:17:30Z",
    "parent": "1104b-5",
@@ -908,34 +862,10 @@
     6,
     7
    ],
-   "contacts": [
-    {
-     "a": 7,
-     "b": 6,
-     "t": 345.4,
-     "x": {
-      "gap": 4.0,
-      "closing": 40,
-      "moved_front": -5.7,
-      "moved_back": 6.0,
-      "rejoin_front": 0.0,
-      "rejoin_back": 0.0,
-      "slide": 74,
-      "lost": 0,
-      "off": 0,
-      "cars": 2,
-      "reaction": 0.0,
-      "aftermath": 0.0
-     },
-     "label": "back",
-     "rulebook": "back",
-     "rule": "R3",
-     "front": 6
-    }
-   ]
+   "contacts": []
   },
   "1113a-1a": {
-   "key": "8b92d53a10e7",
+   "key": "b19f652bc4ac",
    "race_file": "Race_Las_Vegas_Just_in_case_2026_11_13_16_18_12.json",
    "at": "2026-11-15T01:58:38Z",
    "parent": "1113a-1",
@@ -988,14 +918,14 @@
       "aftermath": 0.0
      },
      "label": "front",
-     "rulebook": "front",
-     "rule": "R2",
+     "rulebook": "no",
+     "rule": "R1",
      "front": 0
     }
    ]
   },
   "1113a-2a": {
-   "key": "e31d7f176f65",
+   "key": "b737d63cdefc",
    "race_file": "Race_Texas_2026_11_13_16_30_25.json",
    "at": "2026-11-15T01:59:22Z",
    "parent": "1113a-2",
@@ -1030,14 +960,14 @@
    ],
    "contacts": [
     {
-     "a": 11,
-     "b": 10,
+     "a": 10,
+     "b": 11,
      "t": 115.2,
      "x": {
       "gap": 5.7,
       "closing": 8,
-      "moved_front": 2.53,
-      "moved_back": -2.16,
+      "moved_front": -2.16,
+      "moved_back": 2.53,
       "rejoin_front": 0.0,
       "rejoin_back": 0.0,
       "slide": 92,
@@ -1047,15 +977,15 @@
       "reaction": 0.0,
       "aftermath": 0.0
      },
-     "label": "back",
+     "label": "front",
      "rulebook": "back",
-     "rule": "R3",
-     "front": 10
+     "rule": "V16",
+     "front": 11
     }
    ]
   },
   "1113a-4a": {
-   "key": "f42a6defd19e",
+   "key": "fb03cb1b6bc7",
    "race_file": "Race_Las_Vegas_Just_in_case_2026_11_13_16_18_12.json",
    "at": "2026-11-15T02:01:47Z",
    "parent": "1113a-4",
@@ -1112,19 +1042,19 @@
       "aftermath": 0.0
      },
      "label": "no",
-     "rulebook": "back",
-     "rule": "R3",
+     "rulebook": "no",
+     "rule": "R1",
      "front": 8
     },
     {
-     "a": 8,
-     "b": 0,
+     "a": 0,
+     "b": 8,
      "t": 82.8,
      "x": {
       "gap": 9.0,
       "closing": 22,
-      "moved_front": 0.36,
-      "moved_back": -0.51,
+      "moved_front": -0.51,
+      "moved_back": 0.36,
       "rejoin_front": 0.0,
       "rejoin_back": 0.0,
       "slide": 4,
@@ -1132,17 +1062,17 @@
       "off": 0,
       "cars": 3,
       "reaction": 0.0,
-      "aftermath": 1.0
+      "aftermath": 0.0
      },
      "label": "no",
-     "rulebook": "none",
-     "rule": "R7",
-     "front": 0
+     "rulebook": "no",
+     "rule": "R1",
+     "front": 8
     }
    ]
   },
   "1115a-1a": {
-   "key": "5281dfcee992",
+   "key": "742bd1010cfc",
    "race_file": "Race_Hungaroring_2026_11_15_15_22_44.json",
    "at": "2026-11-16T14:31:16Z",
    "parent": "1115a-1",
@@ -1196,14 +1126,14 @@
       "aftermath": 0.0
      },
      "label": "back",
-     "rulebook": "back",
-     "rule": "R3",
+     "rulebook": "none",
+     "rule": "V16",
      "front": 3
     }
    ]
   },
   "1115a-4a": {
-   "key": "e676a8afb515",
+   "key": "083b97b78624",
    "race_file": "Race_Hungaroring_2026_11_15_15_22_44.json",
    "at": "2026-11-16T14:34:16Z",
    "parent": "1115a-4",
@@ -1244,14 +1174,14 @@
    ],
    "contacts": [
     {
-     "a": 4,
-     "b": 3,
+     "a": 3,
+     "b": 4,
      "t": 22.4,
      "x": {
       "gap": 7.3,
       "closing": 39,
-      "moved_front": -0.76,
-      "moved_back": 0.69,
+      "moved_front": 0.69,
+      "moved_back": -0.76,
       "rejoin_front": 0.0,
       "rejoin_back": 0.0,
       "slide": 11,
@@ -1261,10 +1191,10 @@
       "reaction": 0.0,
       "aftermath": 0.0
      },
-     "label": "back",
+     "label": "front",
      "rulebook": "back",
-     "rule": "R3",
-     "front": 4
+     "rule": "V16",
+     "front": 3
     },
     {
      "a": 4,
@@ -1282,17 +1212,17 @@
       "off": 0,
       "cars": 3,
       "reaction": 0.0,
-      "aftermath": 1.0
+      "aftermath": 0.0
      },
      "label": "none",
-     "rulebook": "none",
-     "rule": "R7",
+     "rulebook": "no",
+     "rule": "R1",
      "front": 7
     }
    ]
   },
   "1115a-5a": {
-   "key": "379d02429a01",
+   "key": "fbfd6e39df30",
    "race_file": "Race_Mexico_2026_11_15_15_59_28.json",
    "at": "2026-11-16T14:40:19Z",
    "parent": "1115a-5",
@@ -1337,14 +1267,14 @@
    ],
    "contacts": [
     {
-     "a": 10,
-     "b": 8,
+     "a": 8,
+     "b": 10,
      "t": 6.2,
      "x": {
       "gap": 3.6,
       "closing": 6,
-      "moved_front": -0.61,
-      "moved_back": 2.7,
+      "moved_front": 2.7,
+      "moved_back": -0.61,
       "rejoin_front": 0.0,
       "rejoin_back": 0.0,
       "slide": 55,
@@ -1355,19 +1285,19 @@
       "aftermath": 0.0
      },
      "label": "both",
-     "rulebook": "back",
-     "rule": "R2",
-     "front": 8
+     "rulebook": "none",
+     "rule": "V16",
+     "front": 10
     },
     {
-     "a": 10,
-     "b": 5,
+     "a": 5,
+     "b": 10,
      "t": 7.3,
      "x": {
       "gap": 4.5,
       "closing": 7,
-      "moved_front": -6.0,
-      "moved_back": 5.34,
+      "moved_front": 5.34,
+      "moved_back": -6.0,
       "rejoin_front": 0.0,
       "rejoin_back": 0.0,
       "slide": 55,
@@ -1375,17 +1305,17 @@
       "off": 2,
       "cars": 3,
       "reaction": 0.0,
-      "aftermath": 1.0
+      "aftermath": 0.0
      },
      "label": "both",
-     "rulebook": "none",
-     "rule": "R7",
-     "front": 5
+     "rulebook": "front",
+     "rule": "V16",
+     "front": 10
     }
    ]
   },
   "b1-01": {
-   "key": "f236a7775b10",
+   "key": "663789894ba2",
    "by": "GreMi",
    "track": "Melbourne",
    "date": "2026-10-20",
@@ -1403,18 +1333,18 @@
    ],
    "rulebook": {
     "verdict": "Racing incident",
-    "rule": "R2"
+    "rule": "V16"
    },
    "contacts": [
     {
-     "a": 2,
-     "b": 1,
+     "a": 1,
+     "b": 2,
      "t": 391.8,
      "x": {
       "gap": 3.6,
       "closing": 9,
-      "moved_front": 0.72,
-      "moved_back": 0.38,
+      "moved_front": 0.38,
+      "moved_back": 0.72,
       "rejoin_front": 0.0,
       "rejoin_back": 0.0,
       "slide": 23,
@@ -1424,15 +1354,15 @@
       "reaction": 0.0,
       "aftermath": 0.0
      },
-     "label": "front",
+     "label": "back",
      "rulebook": "none",
-     "rule": "R2",
-     "front": 2
+     "rule": "V16",
+     "front": 1
     }
    ]
   },
   "b1-02": {
-   "key": "ef76d5a12a12",
+   "key": "e79fb5599cd9",
    "by": "GreMi",
    "track": "Madrid",
    "date": "2026-10-20",
@@ -1458,33 +1388,10 @@
      "b": 7,
      "t": 93.4,
      "x": {
-      "gap": 5.8,
-      "closing": 15,
-      "moved_front": 4.82,
-      "moved_back": -3.93,
-      "rejoin_front": 0.0,
-      "rejoin_back": 0.0,
-      "slide": 4,
-      "lost": 0,
-      "off": 0,
-      "cars": 2,
-      "reaction": 0.0,
-      "aftermath": 0.0
-     },
-     "label": "no",
-     "rulebook": "no",
-     "rule": "R1",
-     "front": 6
-    },
-    {
-     "a": 7,
-     "b": 6,
-     "t": 98.8,
-     "x": {
       "gap": 0.1,
       "closing": -8,
-      "moved_front": 0.3,
-      "moved_back": 1.3,
+      "moved_front": 1.3,
+      "moved_back": 0.3,
       "rejoin_front": 0.0,
       "rejoin_back": 0.0,
       "slide": 4,
@@ -1497,12 +1404,12 @@
      "label": "no",
      "rulebook": "no",
      "rule": "R1",
-     "front": 6
+     "front": 7
     }
    ]
   },
   "b1-03": {
-   "key": "37060c996a42",
+   "key": "3f343ef712be",
    "by": "GreMi",
    "track": "Baku",
    "date": "2026-10-20",
@@ -1520,7 +1427,7 @@
    ],
    "rulebook": {
     "verdict": "2 at fault",
-    "rule": "R2"
+    "rule": "V16"
    },
    "contacts": [
     {
@@ -1528,33 +1435,10 @@
      "b": 5,
      "t": 345.4,
      "x": {
-      "gap": 0.7,
-      "closing": 14,
-      "moved_front": 2.61,
-      "moved_back": -1.09,
-      "rejoin_front": 0.0,
-      "rejoin_back": 0.0,
-      "slide": 105,
-      "lost": 3,
-      "off": 0,
-      "cars": 2,
-      "reaction": 0.0,
-      "aftermath": 0.0
-     },
-     "label": "back",
-     "rulebook": "front",
-     "rule": "R2",
-     "front": 2
-    },
-    {
-     "a": 5,
-     "b": 2,
-     "t": 349.4,
-     "x": {
       "gap": 2.5,
       "closing": -7,
-      "moved_front": 2.43,
-      "moved_back": -1.58,
+      "moved_front": -1.58,
+      "moved_back": 2.43,
       "rejoin_front": 0.0,
       "rejoin_back": 0.0,
       "slide": 105,
@@ -1564,15 +1448,15 @@
       "reaction": 0.0,
       "aftermath": 0.0
      },
-     "label": "back",
-     "rulebook": "front",
-     "rule": "R2",
-     "front": 2
+     "label": "front",
+     "rulebook": "back",
+     "rule": "V16",
+     "front": 5
     }
    ]
   },
   "b1-04": {
-   "key": "45cea02d25aa",
+   "key": "bad3654d28fa",
    "by": "GreMi",
    "track": "Mexico",
    "date": "2026-10-20",
@@ -1590,7 +1474,7 @@
    ],
    "rulebook": {
     "verdict": "1 at fault",
-    "rule": "R2"
+    "rule": "V16"
    },
    "contacts": [
     {
@@ -1613,13 +1497,13 @@
      },
      "label": "none",
      "rulebook": "front",
-     "rule": "R2",
+     "rule": "V16",
      "front": 1
     }
    ]
   },
   "b1-05": {
-   "key": "dbccc8367e3d",
+   "key": "218d6f4572a5",
    "by": "GreMi",
    "track": "Abu Dhabi",
    "date": "2026-10-20",
@@ -1639,21 +1523,67 @@
    ],
    "rulebook": {
     "verdict": "6 at fault",
-    "rule": "R2"
+    "rule": "V16"
    },
    "contacts": [
     {
-     "a": 7,
-     "b": 6,
+     "a": 6,
+     "b": 7,
      "t": 108.0,
      "x": {
       "gap": 1.0,
       "closing": -16,
-      "moved_front": -0.4,
-      "moved_back": 1.71,
+      "moved_front": 1.71,
+      "moved_back": -0.4,
       "rejoin_front": 0.0,
       "rejoin_back": 0.0,
       "slide": 6,
+      "lost": 2,
+      "off": 0,
+      "cars": 4,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "front",
+     "rulebook": "no",
+     "rule": "R1",
+     "front": 6
+    },
+    {
+     "a": 1,
+     "b": 7,
+     "t": 108.4,
+     "x": {
+      "gap": 6.1,
+      "closing": -15,
+      "moved_front": 3.15,
+      "moved_back": -2.0,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 6,
+      "lost": 1,
+      "off": 0,
+      "cars": 4,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "none",
+     "rulebook": "no",
+     "rule": "R1",
+     "front": 1
+    },
+    {
+     "a": 4,
+     "b": 6,
+     "t": 110.0,
+     "x": {
+      "gap": 2.5,
+      "closing": 19,
+      "moved_front": 2.83,
+      "moved_back": -0.58,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 10,
       "lost": 2,
       "off": 0,
       "cars": 4,
@@ -1662,82 +1592,13 @@
      },
      "label": "back",
      "rulebook": "back",
-     "rule": "R2",
-     "front": 7
-    },
-    {
-     "a": 7,
-     "b": 1,
-     "t": 108.4,
-     "x": {
-      "gap": 7.3,
-      "closing": 18,
-      "moved_front": 3.34,
-      "moved_back": -0.35,
-      "rejoin_front": 0.0,
-      "rejoin_back": 0.0,
-      "slide": 6,
-      "lost": 1,
-      "off": 0,
-      "cars": 4,
-      "reaction": 0.0,
-      "aftermath": 1.0
-     },
-     "label": "none",
-     "rulebook": "none",
-     "rule": "R7",
-     "front": 1
-    },
-    {
-     "a": 6,
-     "b": 4,
-     "t": 110.0,
-     "x": {
-      "gap": 2.5,
-      "closing": 19,
-      "moved_front": -0.58,
-      "moved_back": 2.83,
-      "rejoin_front": 0.0,
-      "rejoin_back": 0.0,
-      "slide": 10,
-      "lost": 2,
-      "off": 0,
-      "cars": 4,
-      "reaction": 0.0,
-      "aftermath": 1.0
-     },
-     "label": "front",
-     "rulebook": "none",
-     "rule": "R7",
-     "front": 6
-    },
-    {
-     "a": 7,
-     "b": 1,
-     "t": 114.8,
-     "x": {
-      "gap": 6.1,
-      "closing": -15,
-      "moved_front": -2.0,
-      "moved_back": 3.15,
-      "rejoin_front": 0.0,
-      "rejoin_back": 0.0,
-      "slide": 6,
-      "lost": 1,
-      "off": 0,
-      "cars": 4,
-      "reaction": 0.0,
-      "aftermath": 0.0
-     },
-     "label": "none",
-     "rulebook": "none",
-     "rule": "R3",
-     "front": 7
+     "rule": "V16",
+     "front": 4
     }
    ]
   },
   "b1-06": {
-   "key": "e7d6b535a5f7",
+   "key": "7a3d900f72a7",
    "by": "GreMi",
    "track": "Monaco",
    "date": "2026-10-23",
@@ -1754,13 +1615,13 @@
     7
    ],
    "rulebook": {
-    "verdict": "6 at fault",
-    "rule": "R3"
+    "verdict": "Not an incident",
+    "rule": "R1"
    },
    "contacts": [
     {
-     "a": 7,
-     "b": 6,
+     "a": 6,
+     "b": 7,
      "t": 52.8,
      "x": {
       "gap": 8.6,
@@ -1776,15 +1637,15 @@
       "reaction": 0.0,
       "aftermath": 0.0
      },
-     "label": "front",
-     "rulebook": "back",
-     "rule": "R3",
-     "front": 7
+     "label": "back",
+     "rulebook": "no",
+     "rule": "R1",
+     "front": 6
     }
    ]
   },
   "b1-07": {
-   "key": "c42fa4a09e32",
+   "key": "81f038b5c343",
    "by": "GreMi",
    "track": "Jeddah",
    "date": "2026-10-23",
@@ -1807,7 +1668,7 @@
    "contacts": []
   },
   "b1-08": {
-   "key": "482653aeee58",
+   "key": "6d36012ff549",
    "by": "GreMi",
    "track": "Imola",
    "date": "2026-10-25",
@@ -1824,37 +1685,14 @@
     10
    ],
    "rulebook": {
-    "verdict": "Not an incident",
-    "rule": "R1"
+    "verdict": "10 at fault",
+    "rule": "V16"
    },
    "contacts": [
     {
      "a": 7,
      "b": 10,
      "t": 176.4,
-     "x": {
-      "gap": 7.8,
-      "closing": 31,
-      "moved_front": 0.02,
-      "moved_back": -0.86,
-      "rejoin_front": 1.0,
-      "rejoin_back": 0.0,
-      "slide": 5,
-      "lost": 0,
-      "off": 1,
-      "cars": 2,
-      "reaction": 0.0,
-      "aftermath": 0.0
-     },
-     "label": "back",
-     "rulebook": "no",
-     "rule": "R1",
-     "front": 7
-    },
-    {
-     "a": 7,
-     "b": 10,
-     "t": 186.0,
      "x": {
       "gap": 6.4,
       "closing": 15,
@@ -1870,14 +1708,14 @@
       "aftermath": 0.0
      },
      "label": "back",
-     "rulebook": "no",
-     "rule": "R1",
+     "rulebook": "back",
+     "rule": "V16",
      "front": 7
     }
    ]
   },
   "b1-09": {
-   "key": "ff4bc8db50c8",
+   "key": "e5ed79f8cf79",
    "by": "GreMi",
    "track": "Spa",
    "date": "2026-10-25",
@@ -1894,37 +1732,14 @@
     9
    ],
    "rulebook": {
-    "verdict": "Racing incident",
-    "rule": "R2"
+    "verdict": "0 at fault",
+    "rule": "V16"
    },
    "contacts": [
     {
-     "a": 9,
-     "b": 0,
-     "t": 397.8,
-     "x": {
-      "gap": 0.4,
-      "closing": -13,
-      "moved_front": -0.38,
-      "moved_back": 0.7,
-      "rejoin_front": 0.0,
-      "rejoin_back": 0.0,
-      "slide": 4,
-      "lost": 1,
-      "off": 0,
-      "cars": 2,
-      "reaction": 0.0,
-      "aftermath": 0.0
-     },
-     "label": "no",
-     "rulebook": "none",
-     "rule": "R2",
-     "front": 0
-    },
-    {
      "a": 0,
      "b": 9,
-     "t": 402.7,
+     "t": 397.8,
      "x": {
       "gap": 0.8,
       "closing": -5,
@@ -1940,14 +1755,14 @@
       "aftermath": 0.0
      },
      "label": "no",
-     "rulebook": "none",
-     "rule": "R2",
+     "rulebook": "front",
+     "rule": "V16",
      "front": 0
     }
    ]
   },
   "b1-10": {
-   "key": "e3976800face",
+   "key": "a1feccc5d002",
    "by": "GreMi",
    "track": "Catalunya",
    "date": "2026-10-25",
@@ -1965,19 +1780,19 @@
     12
    ],
    "rulebook": {
-    "verdict": "Not an incident",
-    "rule": "R1"
+    "verdict": "Racing incident",
+    "rule": "V16"
    },
    "contacts": [
     {
-     "a": 12,
-     "b": 10,
+     "a": 10,
+     "b": 12,
      "t": 7.2,
      "x": {
       "gap": 4.1,
       "closing": 7,
-      "moved_front": 0.01,
-      "moved_back": 0.91,
+      "moved_front": 0.91,
+      "moved_back": 0.01,
       "rejoin_front": 0.0,
       "rejoin_back": 0.0,
       "slide": 8,
@@ -1987,20 +1802,20 @@
       "reaction": 0.0,
       "aftermath": 0.0
      },
-     "label": "back",
-     "rulebook": "no",
-     "rule": "R1",
-     "front": 12
+     "label": "front",
+     "rulebook": "none",
+     "rule": "V16",
+     "front": 10
     },
     {
-     "a": 12,
-     "b": 11,
+     "a": 11,
+     "b": 12,
      "t": 7.9,
      "x": {
       "gap": 2.2,
       "closing": 5,
-      "moved_front": -0.46,
-      "moved_back": 2.14,
+      "moved_front": 2.14,
+      "moved_back": -0.46,
       "rejoin_front": 0.0,
       "rejoin_back": 0.0,
       "slide": 8,
@@ -2008,17 +1823,17 @@
       "off": 0,
       "cars": 3,
       "reaction": 0.0,
-      "aftermath": 1.0
+      "aftermath": 0.0
      },
      "label": "none",
-     "rulebook": "none",
-     "rule": "R7",
-     "front": 11
+     "rulebook": "no",
+     "rule": "R1",
+     "front": 12
     }
    ]
   },
   "b1-11": {
-   "key": "63e16f28f827",
+   "key": "d7124a6b2db4",
    "by": "GreMi",
    "track": "Sakhir",
    "date": "2026-10-25",
@@ -2035,37 +1850,14 @@
     4
    ],
    "rulebook": {
-    "verdict": "1 at fault",
-    "rule": "R2"
+    "verdict": "Racing incident",
+    "rule": "V16"
    },
    "contacts": [
     {
-     "a": 4,
-     "b": 1,
-     "t": 197.3,
-     "x": {
-      "gap": 0.2,
-      "closing": 15,
-      "moved_front": 1.06,
-      "moved_back": -0.05,
-      "rejoin_front": 0.0,
-      "rejoin_back": 0.0,
-      "slide": 11,
-      "lost": 1,
-      "off": 0,
-      "cars": 2,
-      "reaction": 0.0,
-      "aftermath": 0.0
-     },
-     "label": "front",
-     "rulebook": "front",
-     "rule": "R2",
-     "front": 1
-    },
-    {
      "a": 1,
      "b": 4,
-     "t": 209.4,
+     "t": 197.3,
      "x": {
       "gap": 0.6,
       "closing": 16,
@@ -2081,14 +1873,14 @@
       "aftermath": 0.0
      },
      "label": "back",
-     "rulebook": "back",
-     "rule": "R2",
+     "rulebook": "none",
+     "rule": "V16",
      "front": 4
     }
    ]
   },
   "b1-12": {
-   "key": "ad6959c054d5",
+   "key": "fec718666a13",
    "by": "GreMi",
    "track": "Jeddah",
    "date": "2026-10-25",
@@ -2105,19 +1897,19 @@
     5
    ],
    "rulebook": {
-    "verdict": "5 at fault",
-    "rule": "R2"
+    "verdict": "Not an incident",
+    "rule": "R1"
    },
    "contacts": [
     {
-     "a": 5,
-     "b": 1,
+     "a": 1,
+     "b": 5,
      "t": 270.0,
      "x": {
       "gap": 0.6,
       "closing": 31,
-      "moved_front": 1.6,
-      "moved_back": 0.0,
+      "moved_front": 0.0,
+      "moved_back": 1.6,
       "rejoin_front": 0.0,
       "rejoin_back": 0.0,
       "slide": 18,
@@ -2128,14 +1920,14 @@
       "aftermath": 0.0
      },
      "label": "no",
-     "rulebook": "front",
-     "rule": "R2",
-     "front": 5
+     "rulebook": "no",
+     "rule": "R1",
+     "front": 1
     }
    ]
   },
   "b1-13": {
-   "key": "8d10bb02368f",
+   "key": "1118f39ece7a",
    "by": "GreMi",
    "track": "Shanghai",
    "date": "2026-10-25",
@@ -2153,8 +1945,8 @@
     17
    ],
    "rulebook": {
-    "verdict": "17 at fault",
-    "rule": "R3"
+    "verdict": "11 + 3 at fault",
+    "rule": "V16"
    },
    "contacts": [
     {
@@ -2176,19 +1968,19 @@
       "aftermath": 0.0
      },
      "label": "none",
-     "rulebook": "back",
-     "rule": "R3",
+     "rulebook": "front",
+     "rule": "V16",
      "front": 11
     },
     {
-     "a": 17,
-     "b": 3,
+     "a": 3,
+     "b": 17,
      "t": 51.5,
      "x": {
       "gap": 1.5,
       "closing": 60.0,
-      "moved_front": 1.4,
-      "moved_back": -0.04,
+      "moved_front": -0.04,
+      "moved_back": 1.4,
       "rejoin_front": 0.0,
       "rejoin_back": 0.0,
       "slide": 24,
@@ -2196,17 +1988,17 @@
       "off": 2,
       "cars": 3,
       "reaction": 0.0,
-      "aftermath": 1.0
+      "aftermath": 0.0
      },
      "label": "none",
-     "rulebook": "none",
-     "rule": "R7",
-     "front": 3
+     "rulebook": "back",
+     "rule": "V16",
+     "front": 17
     }
    ]
   },
   "b1-14": {
-   "key": "3a8a4e3bb207",
+   "key": "9fb403bc817b",
    "by": "GreMi",
    "track": "Brazil",
    "date": "2026-10-25",
@@ -2223,42 +2015,19 @@
     11
    ],
    "rulebook": {
-    "verdict": "7 at fault",
-    "rule": "R3"
+    "verdict": "11 at fault",
+    "rule": "V16"
    },
    "contacts": [
     {
-     "a": 11,
-     "b": 7,
+     "a": 7,
+     "b": 11,
      "t": 234.2,
-     "x": {
-      "gap": 5.1,
-      "closing": 20,
-      "moved_front": 3.11,
-      "moved_back": -1.99,
-      "rejoin_front": 0.0,
-      "rejoin_back": 0.0,
-      "slide": 4,
-      "lost": 1,
-      "off": 0,
-      "cars": 2,
-      "reaction": 0.0,
-      "aftermath": 0.0
-     },
-     "label": "no",
-     "rulebook": "back",
-     "rule": "R3",
-     "front": 11
-    },
-    {
-     "a": 11,
-     "b": 7,
-     "t": 239.3,
      "x": {
       "gap": 1.6,
       "closing": -25,
-      "moved_front": 1.25,
-      "moved_back": 1.15,
+      "moved_front": 1.15,
+      "moved_back": 1.25,
       "rejoin_front": 0.0,
       "rejoin_back": 0.0,
       "slide": 4,
@@ -2269,14 +2038,14 @@
       "aftermath": 0.0
      },
      "label": "no",
-     "rulebook": "none",
-     "rule": "R2",
-     "front": 7
+     "rulebook": "front",
+     "rule": "V16",
+     "front": 11
     }
    ]
   },
   "b1-15": {
-   "key": "5cb2a9456f2a",
+   "key": "db4d48dddadb",
    "by": "GreMi",
    "track": "Mexico",
    "date": "2026-10-28",
@@ -2293,8 +2062,8 @@
     4
    ],
    "rulebook": {
-    "verdict": "Racing incident",
-    "rule": "R2"
+    "verdict": "2 at fault",
+    "rule": "V16"
    },
    "contacts": [
     {
@@ -2316,14 +2085,14 @@
       "aftermath": 0.0
      },
      "label": "back",
-     "rulebook": "none",
-     "rule": "R2",
+     "rulebook": "back",
+     "rule": "V16",
      "front": 4
     }
    ]
   },
   "b1-16": {
-   "key": "0325cc9dc07f",
+   "key": "0cd6efe9b865",
    "by": "GreMi",
    "track": "Losail",
    "date": "2026-10-28",
@@ -2340,37 +2109,14 @@
     5
    ],
    "rulebook": {
-    "verdict": "Not an incident",
-    "rule": "R1"
+    "verdict": "5 at fault",
+    "rule": "V16"
    },
    "contacts": [
     {
      "a": 3,
      "b": 5,
      "t": 192.3,
-     "x": {
-      "gap": 2.7,
-      "closing": -17,
-      "moved_front": 2.82,
-      "moved_back": -0.78,
-      "rejoin_front": 0.0,
-      "rejoin_back": 0.0,
-      "slide": 6,
-      "lost": 0,
-      "off": 0,
-      "cars": 2,
-      "reaction": 0.0,
-      "aftermath": 0.0
-     },
-     "label": "back",
-     "rulebook": "no",
-     "rule": "R1",
-     "front": 5
-    },
-    {
-     "a": 3,
-     "b": 5,
-     "t": 199.8,
      "x": {
       "gap": 8.6,
       "closing": 25,
@@ -2386,14 +2132,14 @@
       "aftermath": 0.0
      },
      "label": "back",
-     "rulebook": "no",
-     "rule": "R1",
+     "rulebook": "front",
+     "rule": "V16",
      "front": 5
     }
    ]
   },
   "b1-17": {
-   "key": "959761911a87",
+   "key": "0948c5751250",
    "by": "GreMi",
    "track": "Singapore",
    "date": "2026-10-28",
@@ -2410,37 +2156,14 @@
     2
    ],
    "rulebook": {
-    "verdict": "1 at fault",
-    "rule": "R2"
+    "verdict": "Not an incident",
+    "rule": "R1"
    },
    "contacts": [
     {
-     "a": 2,
-     "b": 1,
-     "t": 58.9,
-     "x": {
-      "gap": 2.3,
-      "closing": 15,
-      "moved_front": 2.27,
-      "moved_back": -1.24,
-      "rejoin_front": 0.0,
-      "rejoin_back": 0.0,
-      "slide": 5,
-      "lost": 0,
-      "off": 0,
-      "cars": 2,
-      "reaction": 0.0,
-      "aftermath": 0.0
-     },
-     "label": "no",
-     "rulebook": "no",
-     "rule": "R1",
-     "front": 2
-    },
-    {
      "a": 1,
      "b": 2,
-     "t": 65.1,
+     "t": 58.9,
      "x": {
       "gap": 1.4,
       "closing": 7,
@@ -2456,14 +2179,14 @@
       "aftermath": 0.0
      },
      "label": "no",
-     "rulebook": "back",
-     "rule": "R2",
+     "rulebook": "no",
+     "rule": "R1",
      "front": 2
     }
    ]
   },
   "b1-18": {
-   "key": "89f177fd27ac",
+   "key": "1f6c5127cc4a",
    "by": "GreMi",
    "track": "Monza",
    "date": "2026-10-28",
@@ -2483,19 +2206,19 @@
     10
    ],
    "rulebook": {
-    "verdict": "Not an incident",
-    "rule": "R1"
+    "verdict": "10 + 7 at fault",
+    "rule": "V16"
    },
    "contacts": [
     {
-     "a": 10,
-     "b": 6,
+     "a": 6,
+     "b": 10,
      "t": 115.3,
      "x": {
       "gap": 8.6,
       "closing": 32,
-      "moved_front": -0.03,
-      "moved_back": 0.18,
+      "moved_front": 0.18,
+      "moved_back": -0.03,
       "rejoin_front": 0.0,
       "rejoin_back": 0.0,
       "slide": 6,
@@ -2506,9 +2229,9 @@
       "aftermath": 0.0
      },
      "label": "no",
-     "rulebook": "no",
-     "rule": "R1",
-     "front": 6
+     "rulebook": "front",
+     "rule": "V16",
+     "front": 10
     },
     {
      "a": 6,
@@ -2526,22 +2249,22 @@
       "off": 2,
       "cars": 5,
       "reaction": 0.0,
-      "aftermath": 1.0
+      "aftermath": 0.0
      },
      "label": "no",
      "rulebook": "none",
-     "rule": "R7",
+     "rule": "V16",
      "front": 8
     },
     {
-     "a": 10,
-     "b": 7,
+     "a": 7,
+     "b": 10,
      "t": 117.6,
      "x": {
       "gap": 9.3,
       "closing": 44,
-      "moved_front": 1.0,
-      "moved_back": 4.15,
+      "moved_front": 4.15,
+      "moved_back": 1.0,
       "rejoin_front": 0.0,
       "rejoin_back": 0.0,
       "slide": 7,
@@ -2549,12 +2272,12 @@
       "off": 0,
       "cars": 5,
       "reaction": 0.0,
-      "aftermath": 1.0
+      "aftermath": 0.0
      },
      "label": "no",
-     "rulebook": "none",
-     "rule": "R7",
-     "front": 10
+     "rulebook": "front",
+     "rule": "V16",
+     "front": 7
     },
     {
      "a": 7,
@@ -2572,17 +2295,17 @@
       "off": 1,
       "cars": 5,
       "reaction": 0.0,
-      "aftermath": 1.0
+      "aftermath": 0.0
      },
      "label": "no",
      "rulebook": "none",
-     "rule": "R7",
+     "rule": "V16",
      "front": 7
     }
    ]
   },
   "b1-19": {
-   "key": "46539e47d0bf",
+   "key": "4d8511af8cdc",
    "by": "GreMi",
    "track": "Montreal",
    "date": "2026-10-28",
@@ -2600,8 +2323,8 @@
     5
    ],
    "rulebook": {
-    "verdict": "1 at fault",
-    "rule": "R3"
+    "verdict": "2 at fault",
+    "rule": "V16"
    },
    "contacts": [
     {
@@ -2623,8 +2346,8 @@
       "aftermath": 0.0
      },
      "label": "back",
-     "rulebook": "back",
-     "rule": "R3",
+     "rulebook": "front",
+     "rule": "V16",
      "front": 2
     },
     {
@@ -2643,17 +2366,17 @@
       "off": 0,
       "cars": 3,
       "reaction": 0.0,
-      "aftermath": 1.0
+      "aftermath": 0.0
      },
      "label": "none",
-     "rulebook": "none",
-     "rule": "R7",
+     "rulebook": "no",
+     "rule": "R1",
      "front": 5
     }
    ]
   },
   "b1-20": {
-   "key": "8d84bf1b9a38",
+   "key": "fa6f0128d789",
    "by": "GreMi",
    "track": "Suzuka",
    "date": "2026-10-28",
@@ -2671,18 +2394,18 @@
    ],
    "rulebook": {
     "verdict": "0 at fault",
-    "rule": "R2"
+    "rule": "V16"
    },
    "contacts": [
     {
-     "a": 8,
-     "b": 0,
+     "a": 0,
+     "b": 8,
      "t": 183.6,
      "x": {
       "gap": 2.8,
       "closing": 16,
-      "moved_front": 4.32,
-      "moved_back": 1.6,
+      "moved_front": 1.6,
+      "moved_back": 4.32,
       "rejoin_front": 0.0,
       "rejoin_back": 0.0,
       "slide": 3,
@@ -2692,15 +2415,15 @@
       "reaction": 0.0,
       "aftermath": 0.0
      },
-     "label": "front",
-     "rulebook": "front",
-     "rule": "R2",
-     "front": 0
+     "label": "back",
+     "rulebook": "back",
+     "rule": "V16",
+     "front": 8
     }
    ]
   },
   "b2-01": {
-   "key": "90c636d567a4",
+   "key": "2b26d34f5e91",
    "by": "GreMi",
    "track": "Monza",
    "date": "2026-10-28",
@@ -2719,42 +2442,42 @@
     10
    ],
    "rulebook": {
-    "verdict": "Racing incident",
-    "rule": "R7"
+    "verdict": "10 + 7 at fault",
+    "rule": "V16"
    },
    "contacts": [
     {
-     "a": 10,
-     "b": 0,
+     "a": 0,
+     "b": 10,
      "t": 161.7,
      "x": {
       "gap": 12.6,
       "closing": 60.0,
-      "moved_front": 1.97,
-      "moved_back": 1.67,
+      "moved_front": 1.67,
+      "moved_back": 1.97,
       "rejoin_front": 0.0,
       "rejoin_back": 0.0,
       "slide": 53,
       "lost": 6,
       "off": 2,
       "cars": 4,
-      "reaction": 1.0,
+      "reaction": 0.0,
       "aftermath": 0.0
      },
      "label": "none",
-     "rulebook": "none",
-     "rule": "R7",
-     "front": 0
+     "rulebook": "front",
+     "rule": "V16",
+     "front": 10
     },
     {
-     "a": 10,
-     "b": 7,
+     "a": 7,
+     "b": 10,
      "t": 162.1,
      "x": {
       "gap": 13.7,
       "closing": 40,
-      "moved_front": 2.23,
-      "moved_back": -0.64,
+      "moved_front": -0.64,
+      "moved_back": 2.23,
       "rejoin_front": 0.0,
       "rejoin_back": 0.0,
       "slide": 53,
@@ -2762,12 +2485,35 @@
       "off": 1,
       "cars": 4,
       "reaction": 0.0,
-      "aftermath": 1.0
+      "aftermath": 0.0
      },
      "label": "none",
-     "rulebook": "none",
-     "rule": "R7",
-     "front": 10
+     "rulebook": "front",
+     "rule": "V16",
+     "front": 7
+    },
+    {
+     "a": 7,
+     "b": 10,
+     "t": 162.1,
+     "x": {
+      "gap": 13.7,
+      "closing": 40,
+      "moved_front": -0.64,
+      "moved_back": 2.23,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 53,
+      "lost": 4,
+      "off": 1,
+      "cars": 4,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "none",
+     "rulebook": "back",
+     "rule": "V16",
+     "front": 7
     },
     {
      "a": 7,
@@ -2785,17 +2531,17 @@
       "off": 0,
       "cars": 4,
       "reaction": 0.0,
-      "aftermath": 1.0
+      "aftermath": 0.0
      },
      "label": "none",
      "rulebook": "none",
-     "rule": "R7",
+     "rule": "V16",
      "front": 7
     }
    ]
   },
   "b2-02": {
-   "key": "c4d5da35c741",
+   "key": "3ad15339723d",
    "by": "GreMi",
    "track": "Brazil",
    "date": "2026-10-25",
@@ -2813,18 +2559,18 @@
    ],
    "rulebook": {
     "verdict": "2 at fault",
-    "rule": "R9"
+    "rule": "V16"
    },
    "contacts": [
     {
-     "a": 14,
-     "b": 2,
+     "a": 2,
+     "b": 14,
      "t": 194.4,
      "x": {
-      "gap": 7.6,
-      "closing": 60.0,
-      "moved_front": 6.0,
-      "moved_back": 2.26,
+      "gap": 1.2,
+      "closing": -28,
+      "moved_front": 0.0,
+      "moved_back": 0.37,
       "rejoin_front": 1.0,
       "rejoin_back": 0.0,
       "slide": 19,
@@ -2836,36 +2582,13 @@
      },
      "label": "front",
      "rulebook": "front",
-     "rule": "R5",
+     "rule": "V16",
      "front": 2
-    },
-    {
-     "a": 14,
-     "b": 2,
-     "t": 201.3,
-     "x": {
-      "gap": 1.2,
-      "closing": -28,
-      "moved_front": 0.37,
-      "moved_back": 0.0,
-      "rejoin_front": 0.0,
-      "rejoin_back": 1.0,
-      "slide": 19,
-      "lost": 5,
-      "off": 2,
-      "cars": 2,
-      "reaction": 0.0,
-      "aftermath": 0.0
-     },
-     "label": "back",
-     "rulebook": "back",
-     "rule": "R9",
-     "front": 14
     }
    ]
   },
   "b2-03": {
-   "key": "2dafa0830098",
+   "key": "1c8c54ebd15b",
    "by": "GreMi",
    "track": "Texas",
    "date": "2026-10-28",
@@ -2883,8 +2606,8 @@
     9
    ],
    "rulebook": {
-    "verdict": "8 + 2 at fault",
-    "rule": "R8"
+    "verdict": "8 at fault",
+    "rule": "V16"
    },
    "contacts": [
     {
@@ -2892,35 +2615,12 @@
      "b": 8,
      "t": 27.9,
      "x": {
-      "gap": 2.3,
-      "closing": -19,
-      "moved_front": 6.0,
-      "moved_back": -3.66,
-      "rejoin_front": 0.0,
-      "rejoin_back": 0.0,
-      "slide": 111,
-      "lost": 6,
-      "off": 1,
-      "cars": 3,
-      "reaction": 0.0,
-      "aftermath": 0.0
-     },
-     "label": "both",
-     "rulebook": "front",
-     "rule": "R2",
-     "front": 8
-    },
-    {
-     "a": 8,
-     "b": 2,
-     "t": 34.4,
-     "x": {
       "gap": 6.8,
       "closing": 45,
-      "moved_front": -5.35,
-      "moved_back": -2.37,
-      "rejoin_front": 1.0,
-      "rejoin_back": 0.0,
+      "moved_front": -2.37,
+      "moved_back": -5.35,
+      "rejoin_front": 0.0,
+      "rejoin_back": 1.0,
       "slide": 111,
       "lost": 6,
       "off": 1,
@@ -2930,13 +2630,13 @@
      },
      "label": "both",
      "rulebook": "front",
-     "rule": "R5",
-     "front": 2
+     "rule": "V16",
+     "front": 8
     }
    ]
   },
   "b2-04": {
-   "key": "b8e4d5e41fba",
+   "key": "672e3243b1aa",
    "by": "GreMi",
    "track": "Zandvoort",
    "date": "2026-10-23",
@@ -2962,56 +2662,10 @@
      "b": 11,
      "t": 153.6,
      "x": {
-      "gap": 8.6,
-      "closing": 28,
-      "moved_front": -0.29,
-      "moved_back": -0.55,
-      "rejoin_front": 0.0,
-      "rejoin_back": 0.0,
-      "slide": 4,
-      "lost": 0,
-      "off": 0,
-      "cars": 2,
-      "reaction": 0.0,
-      "aftermath": 0.0
-     },
-     "label": "back",
-     "rulebook": "no",
-     "rule": "R1",
-     "front": 11
-    },
-    {
-     "a": 11,
-     "b": 7,
-     "t": 160.1,
-     "x": {
-      "gap": 6.5,
-      "closing": 11,
-      "moved_front": -0.58,
-      "moved_back": 1.21,
-      "rejoin_front": 0.0,
-      "rejoin_back": 0.0,
-      "slide": 4,
-      "lost": 0,
-      "off": 0,
-      "cars": 2,
-      "reaction": 0.0,
-      "aftermath": 0.0
-     },
-     "label": "back",
-     "rulebook": "no",
-     "rule": "R1",
-     "front": 11
-    },
-    {
-     "a": 11,
-     "b": 7,
-     "t": 168.1,
-     "x": {
       "gap": 5.9,
       "closing": 11,
-      "moved_front": 0.48,
-      "moved_back": -1.15,
+      "moved_front": -1.15,
+      "moved_back": 0.48,
       "rejoin_front": 0.0,
       "rejoin_back": 0.0,
       "slide": 4,
@@ -3021,15 +2675,15 @@
       "reaction": 0.0,
       "aftermath": 0.0
      },
-     "label": "back",
+     "label": "front",
      "rulebook": "no",
      "rule": "R1",
-     "front": 11
+     "front": 7
     }
    ]
   },
   "b2-05": {
-   "key": "09fbdc42ce68",
+   "key": "d1a57c10106d",
    "by": "GreMi",
    "track": "Montreal",
    "date": "2026-10-28",
@@ -3055,29 +2709,6 @@
      "b": 11,
      "t": 14.7,
      "x": {
-      "gap": 2.4,
-      "closing": -8,
-      "moved_front": 2.83,
-      "moved_back": -2.31,
-      "rejoin_front": 0.0,
-      "rejoin_back": 0.0,
-      "slide": 4,
-      "lost": 0,
-      "off": 0,
-      "cars": 2,
-      "reaction": 0.0,
-      "aftermath": 0.0
-     },
-     "label": "no",
-     "rulebook": "no",
-     "rule": "R1",
-     "front": 7
-    },
-    {
-     "a": 7,
-     "b": 11,
-     "t": 19.5,
-     "x": {
       "gap": 8.1,
       "closing": 23,
       "moved_front": 0.78,
@@ -3099,7 +2730,7 @@
    ]
   },
   "b3-01": {
-   "key": "243dce525795",
+   "key": "012df57e4751",
    "by": "GreMi",
    "track": "Miami",
    "date": "2026-10-30",
@@ -3115,37 +2746,14 @@
     9
    ],
    "rulebook": {
-    "verdict": "Racing incident",
-    "rule": "R7"
+    "verdict": "7 at fault",
+    "rule": "V16"
    },
    "contacts": [
     {
-     "a": 9,
-     "b": 7,
-     "t": 293.1,
-     "x": {
-      "gap": 4.0,
-      "closing": 13,
-      "moved_front": -0.67,
-      "moved_back": 1.25,
-      "rejoin_front": 0.0,
-      "rejoin_back": 0.0,
-      "slide": 16,
-      "lost": 1,
-      "off": 2,
-      "cars": 2,
-      "reaction": 1.0,
-      "aftermath": 0.0
-     },
-     "label": "no",
-     "rulebook": "none",
-     "rule": "R7",
-     "front": 7
-    },
-    {
      "a": 7,
      "b": 9,
-     "t": 298.2,
+     "t": 293.1,
      "x": {
       "gap": 4.7,
       "closing": -11,
@@ -3161,14 +2769,14 @@
       "aftermath": 0.0
      },
      "label": "no",
-     "rulebook": "none",
-     "rule": "R3",
+     "rulebook": "front",
+     "rule": "V16",
      "front": 7
     }
    ]
   },
   "b3-02": {
-   "key": "dc2ccd654987",
+   "key": "f69612b9dbd9",
    "by": "GreMi",
    "track": "Miami",
    "date": "2026-10-30",
@@ -3184,13 +2792,13 @@
     2
    ],
    "rulebook": {
-    "verdict": "Racing incident",
-    "rule": "R3"
+    "verdict": "Not an incident",
+    "rule": "R1"
    },
    "contacts": [
     {
-     "a": 2,
-     "b": 1,
+     "a": 1,
+     "b": 2,
      "t": 322.1,
      "x": {
       "gap": 5.6,
@@ -3207,14 +2815,14 @@
       "aftermath": 0.0
      },
      "label": "no",
-     "rulebook": "none",
-     "rule": "R3",
-     "front": 2
+     "rulebook": "no",
+     "rule": "R1",
+     "front": 1
     }
    ]
   },
   "b3-03": {
-   "key": "7ac0e9902a5e",
+   "key": "3e636c6f6221",
    "by": "GreMi",
    "track": "Miami",
    "date": "2026-10-30",
@@ -3231,18 +2839,18 @@
    ],
    "rulebook": {
     "verdict": "4 at fault",
-    "rule": "R2"
+    "rule": "V16"
    },
    "contacts": [
     {
-     "a": 6,
-     "b": 4,
+     "a": 4,
+     "b": 6,
      "t": 429.0,
      "x": {
       "gap": 1.1,
       "closing": -6,
-      "moved_front": 0.43,
-      "moved_back": 3.45,
+      "moved_front": 3.45,
+      "moved_back": 0.43,
       "rejoin_front": 0.0,
       "rejoin_back": 0.0,
       "slide": 50,
@@ -3252,15 +2860,15 @@
       "reaction": 0.0,
       "aftermath": 0.0
      },
-     "label": "back",
-     "rulebook": "back",
-     "rule": "R2",
-     "front": 6
+     "label": "front",
+     "rulebook": "front",
+     "rule": "V16",
+     "front": 4
     }
    ]
   },
   "b3-04": {
-   "key": "e3af0679e6b1",
+   "key": "ae8cb372e133",
    "by": "GreMi",
    "track": "Miami",
    "date": "2026-10-30",
@@ -3276,8 +2884,8 @@
     10
    ],
    "rulebook": {
-    "verdict": "10 at fault",
-    "rule": "R5"
+    "verdict": "Not an incident",
+    "rule": "R1"
    },
    "contacts": [
     {
@@ -3299,14 +2907,14 @@
       "aftermath": 0.0
      },
      "label": "no",
-     "rulebook": "back",
-     "rule": "R5",
+     "rulebook": "no",
+     "rule": "R1",
      "front": 0
     }
    ]
   },
   "b3-05": {
-   "key": "1d2562ef3e5a",
+   "key": "503da5e9197c",
    "by": "GreMi",
    "track": "Baku",
    "date": "2026-10-30",
@@ -3322,8 +2930,8 @@
     17
    ],
    "rulebook": {
-    "verdict": "7 + 17 at fault",
-    "rule": "R8"
+    "verdict": "Not an incident",
+    "rule": "R1"
    },
    "contacts": [
     {
@@ -3331,33 +2939,10 @@
      "b": 17,
      "t": 9.8,
      "x": {
-      "gap": 0.2,
-      "closing": 7,
-      "moved_front": 4.28,
-      "moved_back": 2.14,
-      "rejoin_front": 0.0,
-      "rejoin_back": 0.0,
-      "slide": 11,
-      "lost": 0,
-      "off": 0,
-      "cars": 2,
-      "reaction": 0.0,
-      "aftermath": 0.0
-     },
-     "label": "no",
-     "rulebook": "both",
-     "rule": "R8",
-     "front": 7
-    },
-    {
-     "a": 17,
-     "b": 7,
-     "t": 14.4,
-     "x": {
       "gap": 3.3,
       "closing": -5,
-      "moved_front": -0.53,
-      "moved_back": 1.86,
+      "moved_front": 1.86,
+      "moved_back": -0.53,
       "rejoin_front": 0.0,
       "rejoin_back": 0.0,
       "slide": 11,
@@ -3370,12 +2955,12 @@
      "label": "no",
      "rulebook": "no",
      "rule": "R1",
-     "front": 17
+     "front": 7
     }
    ]
   },
   "b3-06": {
-   "key": "ea4abc23d5bd",
+   "key": "874f59d25bcf",
    "by": "GreMi",
    "track": "Baku",
    "date": "2026-10-30",
@@ -3392,18 +2977,18 @@
    ],
    "rulebook": {
     "verdict": "17 at fault",
-    "rule": "R3"
+    "rule": "V16"
    },
    "contacts": [
     {
-     "a": 17,
-     "b": 3,
+     "a": 3,
+     "b": 17,
      "t": 322.3,
      "x": {
       "gap": 13.7,
       "closing": 56,
-      "moved_front": 5.93,
-      "moved_back": -5.9,
+      "moved_front": -5.9,
+      "moved_back": 5.93,
       "rejoin_front": 0.0,
       "rejoin_back": 0.0,
       "slide": 117,
@@ -3413,15 +2998,15 @@
       "reaction": 0.0,
       "aftermath": 0.0
      },
-     "label": "back",
-     "rulebook": "back",
-     "rule": "R3",
-     "front": 3
+     "label": "front",
+     "rulebook": "front",
+     "rule": "V16",
+     "front": 17
     }
    ]
   },
   "b3-07": {
-   "key": "b943f3ed925b",
+   "key": "338e564f8677",
    "by": "GreMi",
    "track": "Catalunya",
    "date": "2026-10-30",
@@ -3438,8 +3023,8 @@
     15
    ],
    "rulebook": {
-    "verdict": "Racing incident",
-    "rule": "R3"
+    "verdict": "15 + 2 + 5 at fault",
+    "rule": "V16"
    },
    "contacts": [
     {
@@ -3447,33 +3032,10 @@
      "b": 15,
      "t": 6.5,
      "x": {
-      "gap": 5.2,
-      "closing": 2,
-      "moved_front": 0.38,
-      "moved_back": 0.63,
-      "rejoin_front": 0.0,
-      "rejoin_back": 0.0,
-      "slide": 120,
-      "lost": 6,
-      "off": 1,
-      "cars": 3,
-      "reaction": 0.0,
-      "aftermath": 0.0
-     },
-     "label": "none",
-     "rulebook": "none",
-     "rule": "R3",
-     "front": 15
-    },
-    {
-     "a": 15,
-     "b": 2,
-     "t": 12.1,
-     "x": {
       "gap": 3.9,
       "closing": -9,
-      "moved_front": 1.07,
-      "moved_back": 0.98,
+      "moved_front": 0.98,
+      "moved_back": 1.07,
       "rejoin_front": 0.0,
       "rejoin_back": 0.0,
       "slide": 120,
@@ -3484,9 +3046,9 @@
       "aftermath": 0.0
      },
      "label": "none",
-     "rulebook": "none",
-     "rule": "R2",
-     "front": 15
+     "rulebook": "back",
+     "rule": "V16",
+     "front": 2
     },
     {
      "a": 2,
@@ -3504,17 +3066,40 @@
       "off": 2,
       "cars": 3,
       "reaction": 0.0,
-      "aftermath": 1.0
+      "aftermath": 0.0
      },
      "label": "none",
-     "rulebook": "none",
-     "rule": "R7",
+     "rulebook": "back",
+     "rule": "V16",
+     "front": 5
+    },
+    {
+     "a": 2,
+     "b": 5,
+     "t": 12.5,
+     "x": {
+      "gap": 13.1,
+      "closing": 55,
+      "moved_front": -0.83,
+      "moved_back": 0.13,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 120,
+      "lost": 6,
+      "off": 2,
+      "cars": 3,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "none",
+     "rulebook": "front",
+     "rule": "V16",
      "front": 5
     }
    ]
   },
   "b3-08": {
-   "key": "7581db8e3e00",
+   "key": "bee5ff1d4e1e",
    "by": "GreMi",
    "track": "Catalunya",
    "date": "2026-10-30",
@@ -3531,7 +3116,7 @@
    ],
    "rulebook": {
     "verdict": "11 at fault",
-    "rule": "R2"
+    "rule": "V16"
    },
    "contacts": [
     {
@@ -3554,13 +3139,13 @@
      },
      "label": "front",
      "rulebook": "back",
-     "rule": "R2",
+     "rule": "V16",
      "front": 7
     }
    ]
   },
   "b3-09": {
-   "key": "6698699dcea3",
+   "key": "fb8b3381a056",
    "by": "GreMi",
    "track": "Catalunya",
    "date": "2026-10-30",
@@ -3576,8 +3161,8 @@
     7
    ],
    "rulebook": {
-    "verdict": "4 at fault",
-    "rule": "R3"
+    "verdict": "7 at fault",
+    "rule": "V16"
    },
    "contacts": [
     {
@@ -3599,14 +3184,14 @@
       "aftermath": 0.0
      },
      "label": "both",
-     "rulebook": "back",
-     "rule": "R3",
+     "rulebook": "front",
+     "rule": "V16",
      "front": 7
     }
    ]
   },
   "b3-10": {
-   "key": "cd12485cdc48",
+   "key": "3d7d92abba6d",
    "by": "GreMi",
    "track": "Imola",
    "date": "2026-10-30",
@@ -3623,8 +3208,8 @@
     13
    ],
    "rulebook": {
-    "verdict": "13 at fault",
-    "rule": "R5"
+    "verdict": "12 + 10 at fault",
+    "rule": "V16"
    },
    "contacts": [
     {
@@ -3646,19 +3231,19 @@
       "aftermath": 0.0
      },
      "label": "back",
-     "rulebook": "front",
-     "rule": "R5",
+     "rulebook": "back",
+     "rule": "V16",
      "front": 13
     },
     {
-     "a": 13,
-     "b": 10,
+     "a": 10,
+     "b": 13,
      "t": 19.0,
      "x": {
       "gap": 5.8,
       "closing": 40,
-      "moved_front": 6.0,
-      "moved_back": -5.59,
+      "moved_front": -5.59,
+      "moved_back": 6.0,
       "rejoin_front": 0.0,
       "rejoin_back": 0.0,
       "slide": 36,
@@ -3666,17 +3251,17 @@
       "off": 2,
       "cars": 3,
       "reaction": 0.0,
-      "aftermath": 1.0
+      "aftermath": 0.0
      },
      "label": "none",
-     "rulebook": "none",
-     "rule": "R7",
-     "front": 13
+     "rulebook": "front",
+     "rule": "V16",
+     "front": 10
     }
    ]
   },
   "b3-11": {
-   "key": "75f72563bde2",
+   "key": "556d2bb2795c",
    "by": "GreMi",
    "track": "Imola",
    "date": "2026-10-30",
@@ -3692,8 +3277,8 @@
     14
    ],
    "rulebook": {
-    "verdict": "9 at fault",
-    "rule": "R5"
+    "verdict": "14 at fault",
+    "rule": "V16"
    },
    "contacts": [
     {
@@ -3715,14 +3300,14 @@
       "aftermath": 0.0
      },
      "label": "front",
-     "rulebook": "front",
-     "rule": "R5",
+     "rulebook": "back",
+     "rule": "V16",
      "front": 9
     }
    ]
   },
   "b3-12": {
-   "key": "869b98a86819",
+   "key": "ca51024db22f",
    "by": "GreMi",
    "track": "Imola",
    "date": "2026-10-30",
@@ -3740,7 +3325,7 @@
    ],
    "rulebook": {
     "verdict": "6 at fault",
-    "rule": "R2"
+    "rule": "V16"
    },
    "contacts": [
     {
@@ -3763,7 +3348,7 @@
      },
      "label": "back",
      "rulebook": "front",
-     "rule": "R2",
+     "rule": "V16",
      "front": 6
     },
     {
@@ -3782,17 +3367,17 @@
       "off": 1,
       "cars": 3,
       "reaction": 0.0,
-      "aftermath": 1.0
+      "aftermath": 0.0
      },
      "label": "none",
-     "rulebook": "none",
-     "rule": "R7",
+     "rulebook": "front",
+     "rule": "V16",
      "front": 6
     }
    ]
   },
   "b4-01": {
-   "key": "9b9700f2fa67",
+   "key": "2813e62e1006",
    "by": "GreMi",
    "track": "Mexico",
    "date": "2026-10-20",
@@ -3810,8 +3395,8 @@
     9
    ],
    "rulebook": {
-    "verdict": "Not an incident",
-    "rule": "R1"
+    "verdict": "9 at fault",
+    "rule": "V16"
    },
    "contacts": [
     {
@@ -3833,14 +3418,14 @@
       "aftermath": 0.0
      },
      "label": "no",
-     "rulebook": "no",
-     "rule": "R1",
+     "rulebook": "back",
+     "rule": "V16",
      "front": 1
     }
    ]
   },
   "b4-02": {
-   "key": "f9a907277a25",
+   "key": "20a940ef4c95",
    "by": "GreMi",
    "track": "Abu Dhabi",
    "date": "2026-10-20",
@@ -3858,8 +3443,8 @@
     9
    ],
    "rulebook": {
-    "verdict": "6 at fault",
-    "rule": "R3"
+    "verdict": "9 at fault",
+    "rule": "V16"
    },
    "contacts": [
     {
@@ -3881,14 +3466,14 @@
       "aftermath": 0.0
      },
      "label": "front",
-     "rulebook": "back",
-     "rule": "R3",
+     "rulebook": "front",
+     "rule": "V16",
      "front": 9
     }
    ]
   },
   "b4-03": {
-   "key": "0e675924cc21",
+   "key": "9f704a84ca67",
    "by": "GreMi",
    "track": "Brazil",
    "date": "2026-10-23",
@@ -3906,19 +3491,19 @@
     7
    ],
    "rulebook": {
-    "verdict": "6 at fault",
-    "rule": "R3"
+    "verdict": "Racing incident",
+    "rule": "V16"
    },
    "contacts": [
     {
-     "a": 7,
-     "b": 6,
+     "a": 6,
+     "b": 7,
      "t": 52.3,
      "x": {
       "gap": 4.3,
       "closing": 14,
-      "moved_front": 3.0,
-      "moved_back": -2.31,
+      "moved_front": -2.31,
+      "moved_back": 3.0,
       "rejoin_front": 0.0,
       "rejoin_back": 0.0,
       "slide": 110,
@@ -3928,15 +3513,15 @@
       "reaction": 0.0,
       "aftermath": 0.0
      },
-     "label": "front",
-     "rulebook": "back",
-     "rule": "R3",
-     "front": 7
+     "label": "back",
+     "rulebook": "none",
+     "rule": "V16",
+     "front": 6
     }
    ]
   },
   "b4-04": {
-   "key": "bd1507c0ed12",
+   "key": "0a1ea9dd41b9",
    "by": "GreMi",
    "track": "Qatar",
    "date": "2026-10-23",
@@ -3954,8 +3539,8 @@
     8
    ],
    "rulebook": {
-    "verdict": "2 at fault",
-    "rule": "R2"
+    "verdict": "Not an incident",
+    "rule": "R1"
    },
    "contacts": [
     {
@@ -3977,14 +3562,14 @@
       "aftermath": 0.0
      },
      "label": "back",
-     "rulebook": "front",
-     "rule": "R2",
+     "rulebook": "no",
+     "rule": "R1",
      "front": 2
     }
    ]
   },
   "b4-05": {
-   "key": "a4a9e0e49031",
+   "key": "6153afc1d0c0",
    "by": "GreMi",
    "track": "Austin",
    "date": "2026-10-25",
@@ -4003,36 +3588,13 @@
    ],
    "rulebook": {
     "verdict": "4 at fault",
-    "rule": "R5"
+    "rule": "V16"
    },
    "contacts": [
     {
-     "a": 5,
-     "b": 4,
-     "t": 166.0,
-     "x": {
-      "gap": 4.7,
-      "closing": 12,
-      "moved_front": -2.1,
-      "moved_back": 5.88,
-      "rejoin_front": 0.0,
-      "rejoin_back": 0.0,
-      "slide": 7,
-      "lost": 0,
-      "off": 0,
-      "cars": 2,
-      "reaction": 0.0,
-      "aftermath": 0.0
-     },
-     "label": "no",
-     "rulebook": "no",
-     "rule": "R1",
-     "front": 5
-    },
-    {
      "a": 4,
      "b": 5,
-     "t": 173.6,
+     "t": 166.0,
      "x": {
       "gap": 4.6,
       "closing": -12,
@@ -4049,13 +3611,13 @@
      },
      "label": "no",
      "rulebook": "back",
-     "rule": "R5",
+     "rule": "V16",
      "front": 5
     }
    ]
   },
   "b4-06": {
-   "key": "a7fad03013d0",
+   "key": "5aaa3b528f02",
    "by": "GreMi",
    "track": "Catalunya",
    "date": "2026-10-25",
@@ -4074,18 +3636,18 @@
    ],
    "rulebook": {
     "verdict": "11 at fault",
-    "rule": "R2"
+    "rule": "V16"
    },
    "contacts": [
     {
-     "a": 11,
-     "b": 1,
+     "a": 1,
+     "b": 11,
      "t": 58.6,
      "x": {
       "gap": 3.8,
       "closing": -15,
-      "moved_front": -3.17,
-      "moved_back": 3.97,
+      "moved_front": 3.97,
+      "moved_back": -3.17,
       "rejoin_front": 0.0,
       "rejoin_back": 0.0,
       "slide": 57,
@@ -4095,15 +3657,15 @@
       "reaction": 0.0,
       "aftermath": 0.0
      },
-     "label": "front",
-     "rulebook": "back",
-     "rule": "R2",
-     "front": 1
+     "label": "back",
+     "rulebook": "front",
+     "rule": "V16",
+     "front": 11
     }
    ]
   },
   "b4-07": {
-   "key": "76895d1a9753",
+   "key": "508a0229a9ba",
    "by": "GreMi",
    "track": "Bahrain",
    "date": "2026-10-25",
@@ -4124,8 +3686,8 @@
     16
    ],
    "rulebook": {
-    "verdict": "9 + 14 at fault",
-    "rule": "R8"
+    "verdict": "14 + 16 at fault",
+    "rule": "V16"
    },
    "contacts": [
     {
@@ -4147,8 +3709,8 @@
       "aftermath": 0.0
      },
      "label": "none",
-     "rulebook": "front",
-     "rule": "R2",
+     "rulebook": "no",
+     "rule": "R1",
      "front": 9
     },
     {
@@ -4156,10 +3718,10 @@
      "b": 14,
      "t": 43.9,
      "x": {
-      "gap": 5.3,
-      "closing": 34,
-      "moved_front": -2.74,
-      "moved_back": 3.45,
+      "gap": 1.7,
+      "closing": -30.0,
+      "moved_front": -1.73,
+      "moved_back": 6.0,
       "rejoin_front": 0.0,
       "rejoin_back": 0.0,
       "slide": 16,
@@ -4167,11 +3729,11 @@
       "off": 0,
       "cars": 5,
       "reaction": 0.0,
-      "aftermath": 1.0
+      "aftermath": 0.0
      },
      "label": "back",
-     "rulebook": "none",
-     "rule": "R7",
+     "rulebook": "back",
+     "rule": "V16",
      "front": 9
     },
     {
@@ -4190,22 +3752,22 @@
       "off": 0,
       "cars": 5,
       "reaction": 0.0,
-      "aftermath": 1.0
+      "aftermath": 0.0
      },
      "label": "none",
-     "rulebook": "none",
-     "rule": "R7",
+     "rulebook": "back",
+     "rule": "V16",
      "front": 8
     },
     {
-     "a": 14,
-     "b": 11,
+     "a": 11,
+     "b": 14,
      "t": 45.7,
      "x": {
       "gap": 5.5,
       "closing": 5,
-      "moved_front": -0.85,
-      "moved_back": -0.55,
+      "moved_front": -0.55,
+      "moved_back": -0.85,
       "rejoin_front": 0.0,
       "rejoin_back": 0.0,
       "slide": 16,
@@ -4213,22 +3775,22 @@
       "off": 0,
       "cars": 5,
       "reaction": 0.0,
-      "aftermath": 1.0
+      "aftermath": 0.0
      },
-     "label": "front",
-     "rulebook": "none",
-     "rule": "R7",
-     "front": 14
+     "label": "back",
+     "rulebook": "back",
+     "rule": "V16",
+     "front": 11
     },
     {
-     "a": 16,
-     "b": 14,
+     "a": 14,
+     "b": 16,
      "t": 55.4,
      "x": {
       "gap": 12.6,
       "closing": 60.0,
-      "moved_front": -1.04,
-      "moved_back": 4.2,
+      "moved_front": 4.2,
+      "moved_back": -1.04,
       "rejoin_front": 0.0,
       "rejoin_back": 0.0,
       "slide": 26,
@@ -4238,38 +3800,15 @@
       "reaction": 0.0,
       "aftermath": 0.0
      },
-     "label": "back",
-     "rulebook": "back",
-     "rule": "R3",
-     "front": 16
-    },
-    {
-     "a": 14,
-     "b": 9,
-     "t": 55.6,
-     "x": {
-      "gap": 1.7,
-      "closing": -30.0,
-      "moved_front": 6.0,
-      "moved_back": -1.73,
-      "rejoin_front": 0.0,
-      "rejoin_back": 0.0,
-      "slide": 16,
-      "lost": 6,
-      "off": 0,
-      "cars": 5,
-      "reaction": 0.0,
-      "aftermath": 1.0
-     },
      "label": "front",
-     "rulebook": "none",
-     "rule": "R7",
+     "rulebook": "front",
+     "rule": "V16",
      "front": 14
     }
    ]
   },
   "b4-08": {
-   "key": "df28a993a148",
+   "key": "422b2233eae2",
    "by": "GreMi",
    "track": "Jeddah",
    "date": "2026-10-25",
@@ -4287,60 +3826,14 @@
     12
    ],
    "rulebook": {
-    "verdict": "12 + 9 at fault",
-    "rule": "R8"
+    "verdict": "12 at fault",
+    "rule": "V16"
    },
    "contacts": [
     {
-     "a": 12,
-     "b": 9,
-     "t": 138.6,
-     "x": {
-      "gap": 2.9,
-      "closing": 16,
-      "moved_front": 4.45,
-      "moved_back": -1.23,
-      "rejoin_front": 0.0,
-      "rejoin_back": 0.0,
-      "slide": 120,
-      "lost": 6,
-      "off": 0,
-      "cars": 2,
-      "reaction": 0.0,
-      "aftermath": 0.0
-     },
-     "label": "back",
-     "rulebook": "front",
-     "rule": "R2",
-     "front": 12
-    },
-    {
-     "a": 12,
-     "b": 9,
-     "t": 145.1,
-     "x": {
-      "gap": 6.4,
-      "closing": 14,
-      "moved_front": -1.14,
-      "moved_back": -2.13,
-      "rejoin_front": 0.0,
-      "rejoin_back": 0.0,
-      "slide": 120,
-      "lost": 6,
-      "off": 0,
-      "cars": 2,
-      "reaction": 0.0,
-      "aftermath": 0.0
-     },
-     "label": "front",
-     "rulebook": "back",
-     "rule": "R3",
-     "front": 9
-    },
-    {
      "a": 9,
      "b": 12,
-     "t": 149.8,
+     "t": 138.6,
      "x": {
       "gap": 3.6,
       "closing": -25,
@@ -4356,14 +3849,14 @@
       "aftermath": 0.0
      },
      "label": "front",
-     "rulebook": "front",
-     "rule": "R2",
+     "rulebook": "back",
+     "rule": "V16",
      "front": 9
     }
    ]
   },
   "b4-09a": {
-   "key": "0ef12a7ec0a4",
+   "key": "007ac922ab78",
    "race_file": "Race_Shanghai_2026_10_25_16_53_29.json",
    "at": "2026-11-02T15:48:51Z",
    "parent": "b4-09",
@@ -4402,14 +3895,14 @@
    ],
    "contacts": [
     {
-     "a": 21,
-     "b": 1,
+     "a": 1,
+     "b": 21,
      "t": 32.4,
      "x": {
       "gap": 1.3,
       "closing": -29,
-      "moved_front": 3.68,
-      "moved_back": -1.82,
+      "moved_front": -1.82,
+      "moved_back": 3.68,
       "rejoin_front": 0.0,
       "rejoin_back": 0.0,
       "slide": 4,
@@ -4420,14 +3913,14 @@
       "aftermath": 0.0
      },
      "label": "no",
-     "rulebook": "front",
-     "rule": "R2",
-     "front": 1
+     "rulebook": "back",
+     "rule": "V16",
+     "front": 21
     }
    ]
   },
   "b4-10": {
-   "key": "fc50b3e1cd3c",
+   "key": "f2c409a19851",
    "by": "GreMi",
    "track": "Suzuka",
    "date": "2026-10-28",
@@ -4445,8 +3938,8 @@
     9
    ],
    "rulebook": {
-    "verdict": "9 at fault",
-    "rule": "R2"
+    "verdict": "3 at fault",
+    "rule": "V16"
    },
    "contacts": [
     {
@@ -4468,14 +3961,14 @@
       "aftermath": 0.0
      },
      "label": "front",
-     "rulebook": "back",
-     "rule": "R2",
+     "rulebook": "front",
+     "rule": "V16",
      "front": 3
     }
    ]
   },
   "b4-11": {
-   "key": "a936d72c45d9",
+   "key": "368b614bfb36",
    "by": "GreMi",
    "track": "Silverstone (reverse)",
    "date": "2026-10-30",
@@ -4494,7 +3987,7 @@
    ],
    "rulebook": {
     "verdict": "3 at fault",
-    "rule": "R2"
+    "rule": "V16"
    },
    "contacts": [
     {
@@ -4502,33 +3995,10 @@
      "b": 3,
      "t": 123.2,
      "x": {
-      "gap": 1.4,
-      "closing": -30.0,
-      "moved_front": 0.54,
-      "moved_back": 2.19,
-      "rejoin_front": 0.0,
-      "rejoin_back": 0.0,
-      "slide": 6,
-      "lost": 1,
-      "off": 1,
-      "cars": 2,
-      "reaction": 0.0,
-      "aftermath": 0.0
-     },
-     "label": "no",
-     "rulebook": "back",
-     "rule": "R2",
-     "front": 1
-    },
-    {
-     "a": 3,
-     "b": 1,
-     "t": 131.5,
-     "x": {
       "gap": 7.2,
       "closing": 18,
-      "moved_front": -1.09,
-      "moved_back": 2.5,
+      "moved_front": 2.5,
+      "moved_back": -1.09,
       "rejoin_front": 0.0,
       "rejoin_back": 0.0,
       "slide": 6,
@@ -4539,14 +4009,14 @@
       "aftermath": 0.0
      },
      "label": "no",
-     "rulebook": "back",
-     "rule": "R3",
-     "front": 1
+     "rulebook": "front",
+     "rule": "V16",
+     "front": 3
     }
    ]
   },
   "b4-12-touches": {
-   "key": "ef0f18b8e1fa",
+   "key": "dc9581a5bd0c",
    "race_file": "Race_Las_Vegas_Just_in_case_2026_10_30_15_47_45.json",
    "at": "2026-11-02T15:58:00Z",
    "parent": "b4-12",
@@ -4567,14 +4037,14 @@
    ],
    "contacts": [
     {
-     "a": 9,
-     "b": 8,
+     "a": 8,
+     "b": 9,
      "t": 35.6,
      "x": {
       "gap": 6.3,
       "closing": 60.0,
-      "moved_front": 1.25,
-      "moved_back": 0.04,
+      "moved_front": 0.04,
+      "moved_back": 1.25,
       "rejoin_front": 0.0,
       "rejoin_back": 0.0,
       "slide": 11,
@@ -4585,13 +4055,13 @@
       "aftermath": 0.0
      },
      "label": "no",
-     "rulebook": "back",
-     "rule": "R3",
-     "front": 9
+     "rulebook": "no",
+     "rule": "R1",
+     "front": 8
     },
     {
-     "a": 8,
-     "b": 2,
+     "a": 2,
+     "b": 8,
      "t": 38.9,
      "x": {
       "gap": 1.8,
@@ -4608,14 +4078,14 @@
       "aftermath": 0.0
      },
      "label": "no",
-     "rulebook": "none",
-     "rule": "R2",
-     "front": 2
+     "rulebook": "no",
+     "rule": "R1",
+     "front": 8
     }
    ]
   },
   "b4-12a": {
-   "key": "ef0f18b8e1fa",
+   "key": "dc9581a5bd0c",
    "race_file": "Race_Las_Vegas_Just_in_case_2026_10_30_15_47_45.json",
    "at": "2026-11-02T15:58:00Z",
    "parent": "b4-12",
@@ -4684,13 +4154,13 @@
      },
      "label": "front",
      "rulebook": "front",
-     "rule": "R2",
+     "rule": "V16",
      "front": 2
     }
    ]
   },
   "b4-12b": {
-   "key": "ef0f18b8e1fa",
+   "key": "dc9581a5bd0c",
    "race_file": "Race_Las_Vegas_Just_in_case_2026_10_30_15_47_45.json",
    "at": "2026-11-02T15:58:00Z",
    "parent": "b4-12",
@@ -4738,34 +4208,10 @@
     9,
     14
    ],
-   "contacts": [
-    {
-     "a": 9,
-     "b": 14,
-     "t": 46.5,
-     "x": {
-      "gap": 5.2,
-      "closing": 14,
-      "moved_front": 1.55,
-      "moved_back": 0.24,
-      "rejoin_front": 0.0,
-      "rejoin_back": 0.0,
-      "slide": 12,
-      "lost": 0,
-      "off": 0,
-      "cars": 2,
-      "reaction": 0.0,
-      "aftermath": 0.0
-     },
-     "label": "back",
-     "rulebook": "no",
-     "rule": "R1",
-     "front": 9
-    }
-   ]
+   "contacts": []
   },
   "b4-12c": {
-   "key": "ef0f18b8e1fa",
+   "key": "dc9581a5bd0c",
    "race_file": "Race_Las_Vegas_Just_in_case_2026_10_30_15_47_45.json",
    "at": "2026-11-02T15:58:00Z",
    "parent": "b4-12",
@@ -4815,29 +4261,6 @@
    ],
    "contacts": [
     {
-     "a": 2,
-     "b": 8,
-     "t": 52.6,
-     "x": {
-      "gap": 1.8,
-      "closing": 9,
-      "moved_front": 0.0,
-      "moved_back": 0.0,
-      "rejoin_front": 0.0,
-      "rejoin_back": 0.0,
-      "slide": 59,
-      "lost": 0,
-      "off": 0,
-      "cars": 3,
-      "reaction": 0.0,
-      "aftermath": 0.0
-     },
-     "label": "both",
-     "rulebook": "no",
-     "rule": "R1",
-     "front": 2
-    },
-    {
      "a": 8,
      "b": 9,
      "t": 52.9,
@@ -4853,17 +4276,17 @@
       "off": 0,
       "cars": 3,
       "reaction": 0.0,
-      "aftermath": 1.0
+      "aftermath": 0.0
      },
      "label": "both",
-     "rulebook": "none",
-     "rule": "R7",
+     "rulebook": "no",
+     "rule": "R1",
      "front": 9
     }
    ]
   },
   "b4-13": {
-   "key": "a40e6a3b3395",
+   "key": "777de1ba6045",
    "by": "GreMi",
    "track": "Miami",
    "date": "2026-10-30",
@@ -4881,8 +4304,8 @@
     13
    ],
    "rulebook": {
-    "verdict": "1 at fault",
-    "rule": "R2"
+    "verdict": "Racing incident",
+    "rule": "V16"
    },
    "contacts": [
     {
@@ -4904,14 +4327,14 @@
       "aftermath": 0.0
      },
      "label": "none",
-     "rulebook": "back",
-     "rule": "R2",
+     "rulebook": "none",
+     "rule": "V16",
      "front": 13
     }
    ]
   },
   "b4-14": {
-   "key": "05ac4779d219",
+   "key": "168588e1d20c",
    "by": "GreMi",
    "track": "Baku",
    "date": "2026-10-30",
@@ -4929,37 +4352,37 @@
     17
    ],
    "rulebook": {
-    "verdict": "Racing incident",
-    "rule": "R7"
+    "verdict": "10 at fault",
+    "rule": "V16"
    },
    "contacts": [
     {
-     "a": 17,
-     "b": 10,
+     "a": 10,
+     "b": 17,
      "t": 379.4,
      "x": {
       "gap": 10.1,
       "closing": 51,
-      "moved_front": 4.5,
-      "moved_back": 0.27,
+      "moved_front": 0.27,
+      "moved_back": 4.5,
       "rejoin_front": 0.0,
       "rejoin_back": 0.0,
       "slide": 28,
       "lost": 1,
       "off": 0,
       "cars": 2,
-      "reaction": 1.0,
+      "reaction": 0.0,
       "aftermath": 0.0
      },
-     "label": "front",
-     "rulebook": "none",
-     "rule": "R7",
-     "front": 17
+     "label": "back",
+     "rulebook": "front",
+     "rule": "V16",
+     "front": 10
     }
    ]
   },
   "b4-15": {
-   "key": "6204239cc0ce",
+   "key": "8977070ca4c6",
    "by": "GreMi",
    "track": "Imola",
    "date": "2026-10-30",
@@ -4978,7 +4401,7 @@
    ],
    "rulebook": {
     "verdict": "9 at fault",
-    "rule": "R5"
+    "rule": "V16"
    },
    "contacts": [
     {
@@ -5001,13 +4424,13 @@
      },
      "label": "no",
      "rulebook": "front",
-     "rule": "R5",
+     "rule": "V16",
      "front": 9
     }
    ]
   },
   "s-0b2f143f": {
-   "key": "1bc6a7b5f960",
+   "key": "5845a9d3b0ac",
    "by": "GreMi",
    "track": "Mexico",
    "date": "2026-11-11",
@@ -5038,19 +4461,19 @@
     16
    ],
    "rulebook": {
-    "verdict": "1 + 0 at fault",
-    "rule": "R8"
+    "verdict": "1 + 15 + 16 at fault",
+    "rule": "V16"
    },
    "contacts": [
     {
-     "a": 15,
-     "b": 1,
+     "a": 1,
+     "b": 15,
      "t": 18.7,
      "x": {
       "gap": 10.4,
       "closing": 60.0,
-      "moved_front": -4.76,
-      "moved_back": 2.87,
+      "moved_front": 2.87,
+      "moved_back": -4.76,
       "rejoin_front": 1.0,
       "rejoin_back": 1.0,
       "slide": 5,
@@ -5060,10 +4483,10 @@
       "reaction": 0.0,
       "aftermath": 0.0
      },
-     "label": "back",
-     "rulebook": "back",
-     "rule": "R5",
-     "front": 15
+     "label": "front",
+     "rulebook": "front",
+     "rule": "V16",
+     "front": 1
     },
     {
      "a": 15,
@@ -5081,22 +4504,22 @@
       "off": 0,
       "cars": 5,
       "reaction": 0.0,
-      "aftermath": 1.0
+      "aftermath": 0.0
      },
      "label": "none",
-     "rulebook": "none",
-     "rule": "R7",
+     "rulebook": "back",
+     "rule": "V16",
      "front": 16
     },
     {
-     "a": 16,
-     "b": 14,
+     "a": 14,
+     "b": 16,
      "t": 19.5,
      "x": {
       "gap": 2.7,
       "closing": -30.0,
-      "moved_front": 2.08,
-      "moved_back": -1.07,
+      "moved_front": -1.07,
+      "moved_back": 2.08,
       "rejoin_front": 0.0,
       "rejoin_back": 0.0,
       "slide": 39,
@@ -5104,22 +4527,22 @@
       "off": 0,
       "cars": 5,
       "reaction": 0.0,
-      "aftermath": 1.0
+      "aftermath": 0.0
      },
      "label": "none",
-     "rulebook": "none",
-     "rule": "R7",
-     "front": 14
+     "rulebook": "front",
+     "rule": "V16",
+     "front": 16
     },
     {
-     "a": 16,
-     "b": 0,
+     "a": 0,
+     "b": 16,
      "t": 22.5,
      "x": {
       "gap": 6.2,
       "closing": 23,
-      "moved_front": -1.05,
-      "moved_back": 0.86,
+      "moved_front": 0.86,
+      "moved_back": -1.05,
       "rejoin_front": 0.0,
       "rejoin_back": 0.0,
       "slide": 39,
@@ -5131,13 +4554,13 @@
      },
      "label": "none",
      "rulebook": "back",
-     "rule": "R3",
-     "front": 16
+     "rule": "V16",
+     "front": 0
     }
    ]
   },
   "s-256fca0f": {
-   "key": "518c856c48f2",
+   "key": "3a8f946662b5",
    "by": "GreMi",
    "track": "Brazil",
    "date": "2026-11-15",
@@ -5164,8 +4587,8 @@
     8
    ],
    "rulebook": {
-    "verdict": "8 + 2 at fault",
-    "rule": "R8"
+    "verdict": "7 + 8 at fault",
+    "rule": "V16"
    },
    "contacts": [
     {
@@ -5187,19 +4610,19 @@
       "aftermath": 0.0
      },
      "label": "none",
-     "rulebook": "back",
-     "rule": "R2",
+     "rulebook": "front",
+     "rule": "V16",
      "front": 7
     },
     {
-     "a": 8,
-     "b": 2,
-     "t": 120.5,
+     "a": 7,
+     "b": 8,
+     "t": 118.5,
      "x": {
-      "gap": 3.7,
-      "closing": 23,
-      "moved_front": -0.77,
-      "moved_back": 1.3,
+      "gap": 2.0,
+      "closing": -11,
+      "moved_front": -0.24,
+      "moved_back": 3.34,
       "rejoin_front": 0.0,
       "rejoin_back": 0.0,
       "slide": 118,
@@ -5211,13 +4634,36 @@
      },
      "label": "none",
      "rulebook": "back",
-     "rule": "R2",
-     "front": 8
+     "rule": "V16",
+     "front": 7
+    },
+    {
+     "a": 2,
+     "b": 8,
+     "t": 120.5,
+     "x": {
+      "gap": 3.7,
+      "closing": 23,
+      "moved_front": 1.3,
+      "moved_back": -0.77,
+      "rejoin_front": 0.0,
+      "rejoin_back": 0.0,
+      "slide": 118,
+      "lost": 4,
+      "off": 1,
+      "cars": 3,
+      "reaction": 0.0,
+      "aftermath": 0.0
+     },
+     "label": "none",
+     "rulebook": "back",
+     "rule": "V16",
+     "front": 2
     }
    ]
   },
   "s-3d9566e1": {
-   "key": "ab7725ced824",
+   "key": "cba602321d3c",
    "by": "GreMi",
    "track": "Melbourne",
    "date": "2026-11-15",
@@ -5242,8 +4688,8 @@
     9
    ],
    "rulebook": {
-    "verdict": "Racing incident",
-    "rule": "R2"
+    "verdict": "Not an incident",
+    "rule": "R1"
    },
    "contacts": [
     {
@@ -5265,91 +4711,14 @@
       "aftermath": 0.0
      },
      "label": "both",
-     "rulebook": "none",
-     "rule": "R2",
+     "rulebook": "no",
+     "rule": "R1",
      "front": 8
     }
    ]
   },
-  "s-41ea2248": {
-   "key": "8cc59576827e",
-   "by": "GreMi",
-   "track": "Singapore",
-   "date": "2026-11-04",
-   "kind": "Rear-end",
-   "source": "staff change",
-   "verdict": "daris_2190 at fault",
-   "severity": 10,
-   "note": "Keeps full trottle long after the corner, that was on purpose.",
-   "who": [
-    "319544045435224067"
-   ],
-   "changes": [
-    "Race_Singapore_2026_11_04_20_09_05.json|10|contact|2|0"
-   ],
-   "race_file": "Race_Singapore_2026_11_04_20_09_05.json",
-   "at": "2026-11-05T11:26:13Z",
-   "recording": "2026-11-04_19-59-27_Singapore_Race.gmtel.gz",
-   "t": 116.7,
-   "cars": [
-    3,
-    10
-   ],
-   "rulebook": {
-    "verdict": "10 at fault",
-    "rule": "R10"
-   },
-   "contacts": [
-    {
-     "a": 10,
-     "b": 3,
-     "t": 108.9,
-     "x": {
-      "gap": 8.9,
-      "closing": 32,
-      "moved_front": 3.1,
-      "moved_back": -2.63,
-      "rejoin_front": 0.0,
-      "rejoin_back": 0.0,
-      "slide": 95,
-      "lost": 2,
-      "off": 0,
-      "cars": 2,
-      "reaction": 0.0,
-      "aftermath": 0.0
-     },
-     "label": "back",
-     "rulebook": "back",
-     "rule": "R3",
-     "front": 3
-    },
-    {
-     "a": 10,
-     "b": 3,
-     "t": 116.7,
-     "x": {
-      "gap": 9.0,
-      "closing": 24,
-      "moved_front": 0.16,
-      "moved_back": -0.71,
-      "rejoin_front": 0.0,
-      "rejoin_back": 0.0,
-      "slide": 95,
-      "lost": 2,
-      "off": 0,
-      "cars": 2,
-      "reaction": 0.0,
-      "aftermath": 0.0
-     },
-     "label": "back",
-     "rulebook": "back",
-     "rule": "R10",
-     "front": 3
-    }
-   ]
-  },
   "s-43c539bb": {
-   "key": "ac7a5148a507",
+   "key": "b89c82f45c59",
    "by": "GreMi",
    "track": "Mexico",
    "date": "2026-11-11",
@@ -5374,8 +4743,8 @@
     5
    ],
    "rulebook": {
-    "verdict": "0 + 5 at fault",
-    "rule": "R8"
+    "verdict": "5 at fault",
+    "rule": "V16"
    },
    "contacts": [
     {
@@ -5397,14 +4766,14 @@
       "aftermath": 0.0
      },
      "label": "back",
-     "rulebook": "both",
-     "rule": "R8",
+     "rulebook": "back",
+     "rule": "V16",
      "front": 0
     }
    ]
   },
   "s-492ee4a7": {
-   "key": "c3df39d452ee",
+   "key": "9ca0198cfcd9",
    "by": "GreMi",
    "track": "Brazil",
    "date": "2026-11-15",
@@ -5430,36 +4799,13 @@
    ],
    "rulebook": {
     "verdict": "0 at fault",
-    "rule": "R2"
+    "rule": "V16"
    },
    "contacts": [
     {
-     "a": 7,
-     "b": 0,
-     "t": 73.1,
-     "x": {
-      "gap": 5.1,
-      "closing": 5,
-      "moved_front": 0.0,
-      "moved_back": 0.0,
-      "rejoin_front": 0.0,
-      "rejoin_back": 0.0,
-      "slide": 65,
-      "lost": 4,
-      "off": 1,
-      "cars": 2,
-      "reaction": 0.0,
-      "aftermath": 0.0
-     },
-     "label": "front",
-     "rulebook": "none",
-     "rule": "R3",
-     "front": 0
-    },
-    {
      "a": 0,
      "b": 7,
-     "t": 83.9,
+     "t": 73.1,
      "x": {
       "gap": 2.3,
       "closing": -12,
@@ -5476,13 +4822,13 @@
      },
      "label": "back",
      "rulebook": "back",
-     "rule": "R2",
+     "rule": "V16",
      "front": 7
     }
    ]
   },
   "s-4beb167e": {
-   "key": "88dc27c19007",
+   "key": "13e937c44910",
    "by": "GreMi",
    "track": "Brazil",
    "date": "2026-11-04",
@@ -5506,19 +4852,19 @@
     14
    ],
    "rulebook": {
-    "verdict": "4 at fault",
-    "rule": "R2"
+    "verdict": "Racing incident",
+    "rule": "V16"
    },
    "contacts": [
     {
-     "a": 14,
-     "b": 4,
+     "a": 4,
+     "b": 14,
      "t": 99.1,
      "x": {
       "gap": 2.9,
       "closing": -9,
-      "moved_front": -0.2,
-      "moved_back": 3.14,
+      "moved_front": 3.14,
+      "moved_back": -0.2,
       "rejoin_front": 0.0,
       "rejoin_back": 0.0,
       "slide": 8,
@@ -5529,21 +4875,21 @@
       "aftermath": 0.0
      },
      "label": "none",
-     "rulebook": "back",
-     "rule": "R2",
-     "front": 14
+     "rulebook": "none",
+     "rule": "V16",
+     "front": 4
     }
    ]
   },
   "s-50eef53f": {
-   "key": "f9089428ada4",
+   "key": "e2996ae261cf",
    "by": "staff",
    "track": "Imola",
    "date": "2026-10-25",
    "kind": null,
    "source": "protest accepted",
-   "verdict": "Racing incident",
-   "severity": 0,
+   "verdict": "DABBINMAN123 at fault",
+   "severity": 4,
    "note": "Protest accepted: Agreed",
    "who": [
     "452166434588590080"
@@ -5560,19 +4906,19 @@
     7
    ],
    "rulebook": {
-    "verdict": "4 at fault",
-    "rule": "R3"
+    "verdict": "7 at fault",
+    "rule": "V16"
    },
    "contacts": [
     {
-     "a": 7,
-     "b": 4,
+     "a": 4,
+     "b": 7,
      "t": 43.5,
      "x": {
       "gap": 7.1,
       "closing": 24,
-      "moved_front": 2.09,
-      "moved_back": -2.26,
+      "moved_front": -2.26,
+      "moved_back": 2.09,
       "rejoin_front": 0.0,
       "rejoin_back": 0.0,
       "slide": 48,
@@ -5582,22 +4928,22 @@
       "reaction": 0.0,
       "aftermath": 0.0
      },
-     "label": "none",
+     "label": "back",
      "rulebook": "back",
-     "rule": "R3",
-     "front": 7
+     "rule": "V16",
+     "front": 4
     }
    ]
   },
   "s-536b57e8": {
-   "key": "db643e6184cf",
+   "key": "402a30f4fdf1",
    "by": "GreMi",
    "track": "Shanghai",
    "date": "2026-11-13",
    "kind": "Moved across alongside",
    "source": "staff change",
-   "verdict": "Racing incident",
-   "severity": 0,
+   "verdict": "Mercedes '26 #2 at fault",
+   "severity": 5,
    "note": "Merc 2 is at fault for this, Sprintstar is on the racingline and leaves some space for Car 2, but car 2 turns into him",
    "who": [
     "319544045435224067"
@@ -5614,13 +4960,13 @@
     9
    ],
    "rulebook": {
-    "verdict": "Racing incident",
-    "rule": "R2"
+    "verdict": "8 at fault",
+    "rule": "V16"
    },
    "contacts": [
     {
-     "a": 9,
-     "b": 8,
+     "a": 8,
+     "b": 9,
      "t": 9.2,
      "x": {
       "gap": 1.4,
@@ -5636,15 +4982,15 @@
       "reaction": 0.0,
       "aftermath": 0.0
      },
-     "label": "none",
-     "rulebook": "none",
-     "rule": "R2",
-     "front": 8
+     "label": "back",
+     "rulebook": "back",
+     "rule": "V16",
+     "front": 9
     }
    ]
   },
   "s-53705b96": {
-   "key": "34742cf0a91a",
+   "key": "a336bcf1a3f9",
    "by": "GreMi",
    "track": "Austria",
    "date": "2026-11-04",
@@ -5669,18 +5015,18 @@
    ],
    "rulebook": {
     "verdict": "3 at fault",
-    "rule": "R3"
+    "rule": "V16"
    },
    "contacts": [
     {
-     "a": 4,
-     "b": 3,
+     "a": 3,
+     "b": 4,
      "t": 92.9,
      "x": {
       "gap": 9.6,
       "closing": 21,
-      "moved_front": -0.48,
-      "moved_back": -3.41,
+      "moved_front": -3.41,
+      "moved_back": -0.48,
       "rejoin_front": 0.0,
       "rejoin_back": 0.0,
       "slide": 5,
@@ -5691,20 +5037,20 @@
       "aftermath": 0.0
      },
      "label": "none",
-     "rulebook": "back",
-     "rule": "R3",
-     "front": 4
+     "rulebook": "front",
+     "rule": "V16",
+     "front": 3
     }
    ]
   },
   "s-60c3b341": {
-   "key": "5dd6fe365035",
+   "key": "3e28b04099ae",
    "by": "GreMi",
    "track": "Singapore",
    "date": "2026-11-04",
    "kind": "Moved across alongside",
    "source": "staff change",
-   "verdict": "EthanMoonski at fault",
+   "verdict": "TTV/GreMi_Gaming + EthanMoonski at fault",
    "severity": 4,
    "note": "Ethan brakes at his normal braking point, hitting gremi trying to battle devildriver, he didnt brake too late but he should have braked a bit earlier because of a battle in front.",
    "who": [
@@ -5722,8 +5068,8 @@
     5
    ],
    "rulebook": {
-    "verdict": "5 at fault",
-    "rule": "R3"
+    "verdict": "0 at fault",
+    "rule": "V16"
    },
    "contacts": [
     {
@@ -5744,15 +5090,15 @@
       "reaction": 0.0,
       "aftermath": 0.0
      },
-     "label": "back",
-     "rulebook": "back",
-     "rule": "R3",
+     "label": "both",
+     "rulebook": "front",
+     "rule": "V16",
      "front": 0
     }
    ]
   },
   "s-60e294d4": {
-   "key": "dfee9180fd87",
+   "key": "e978acd404e7",
    "by": "GreMi",
    "track": "Miami",
    "date": "2026-10-30",
@@ -5776,19 +5122,19 @@
     13
    ],
    "rulebook": {
-    "verdict": "4 at fault",
-    "rule": "R2"
+    "verdict": "Not an incident",
+    "rule": "R1"
    },
    "contacts": [
     {
-     "a": 13,
-     "b": 4,
+     "a": 4,
+     "b": 13,
      "t": 255.5,
      "x": {
       "gap": 2.2,
       "closing": 26,
-      "moved_front": 1.59,
-      "moved_back": -0.14,
+      "moved_front": -0.14,
+      "moved_back": 1.59,
       "rejoin_front": 0.0,
       "rejoin_back": 0.0,
       "slide": 40,
@@ -5798,22 +5144,22 @@
       "reaction": 0.0,
       "aftermath": 0.0
      },
-     "label": "front",
-     "rulebook": "front",
-     "rule": "R2",
-     "front": 4
+     "label": "back",
+     "rulebook": "no",
+     "rule": "R1",
+     "front": 13
     }
    ]
   },
   "s-61a54bfd": {
-   "key": "3d3c6ef187c8",
+   "key": "d33d28016aaa",
    "by": "GreMi",
    "track": "Las Vegas Just in case",
    "date": "2026-11-13",
    "kind": "Late lunge / divebomb",
    "source": "staff change",
-   "verdict": "Mercedes '26 #3 at fault",
-   "severity": 2,
+   "verdict": "Racing incident",
+   "severity": 0,
    "note": "Car 3 was never gonna make the apex and fully rammed into nex ending his race, you should compair their braking to other drivers en always check if they would have made the turn if there was noone els",
    "who": [
     "319544045435224067"
@@ -5830,8 +5176,8 @@
     10
    ],
    "rulebook": {
-    "verdict": "10 at fault",
-    "rule": "R3"
+    "verdict": "Not an incident",
+    "rule": "R1"
    },
    "contacts": [
     {
@@ -5852,15 +5198,15 @@
       "reaction": 0.0,
       "aftermath": 0.0
      },
-     "label": "back",
-     "rulebook": "back",
-     "rule": "R3",
+     "label": "none",
+     "rulebook": "no",
+     "rule": "R1",
      "front": 1
     }
    ]
   },
   "s-64c4081a": {
-   "key": "06047b288e4d",
+   "key": "4082ea0b0900",
    "by": "GreMi",
    "track": "Brazil",
    "date": "2026-11-15",
@@ -5889,8 +5235,8 @@
     12
    ],
    "rulebook": {
-    "verdict": "12 at fault",
-    "rule": "R5"
+    "verdict": "12 + 8 at fault",
+    "rule": "V16"
    },
    "contacts": [
     {
@@ -5913,41 +5259,41 @@
      },
      "label": "back",
      "rulebook": "back",
-     "rule": "R5",
+     "rule": "V16",
      "front": 0
     },
     {
-     "a": 12,
-     "b": 1,
+     "a": 1,
+     "b": 12,
      "t": 9.8,
      "x": {
       "gap": 3.5,
       "closing": -15,
-      "moved_front": 6.0,
-      "moved_back": -4.51,
-      "rejoin_front": 1.0,
-      "rejoin_back": 0.0,
+      "moved_front": -4.51,
+      "moved_back": 6.0,
+      "rejoin_front": 0.0,
+      "rejoin_back": 1.0,
       "slide": 26,
       "lost": 0,
       "off": 0,
       "cars": 4,
       "reaction": 0.0,
-      "aftermath": 1.0
+      "aftermath": 0.0
      },
-     "label": "front",
-     "rulebook": "none",
-     "rule": "R7",
-     "front": 12
+     "label": "back",
+     "rulebook": "no",
+     "rule": "R1",
+     "front": 1
     },
     {
-     "a": 12,
-     "b": 8,
+     "a": 8,
+     "b": 12,
      "t": 10.3,
      "x": {
       "gap": 10.3,
       "closing": 39,
-      "moved_front": -3.88,
-      "moved_back": 2.56,
+      "moved_front": 2.56,
+      "moved_back": -3.88,
       "rejoin_front": 0.0,
       "rejoin_back": 0.0,
       "slide": 26,
@@ -5955,17 +5301,17 @@
       "off": 0,
       "cars": 4,
       "reaction": 0.0,
-      "aftermath": 1.0
+      "aftermath": 0.0
      },
-     "label": "front",
-     "rulebook": "none",
-     "rule": "R7",
-     "front": 12
+     "label": "back",
+     "rulebook": "front",
+     "rule": "V16",
+     "front": 8
     }
    ]
   },
   "s-6b97f913": {
-   "key": "389fac26761b",
+   "key": "8c3f13587d92",
    "by": "GreMi",
    "track": "Imola",
    "date": "2026-10-30",
@@ -5990,18 +5336,18 @@
    ],
    "rulebook": {
     "verdict": "15 at fault",
-    "rule": "R2"
+    "rule": "V16"
    },
    "contacts": [
     {
-     "a": 15,
-     "b": 3,
+     "a": 3,
+     "b": 15,
      "t": 17.8,
      "x": {
       "gap": 1.1,
       "closing": 10,
-      "moved_front": 5.48,
-      "moved_back": -2.5,
+      "moved_front": -2.5,
+      "moved_back": 5.48,
       "rejoin_front": 0.0,
       "rejoin_back": 0.0,
       "slide": 16,
@@ -6011,22 +5357,22 @@
       "reaction": 0.0,
       "aftermath": 0.0
      },
-     "label": "front",
-     "rulebook": "front",
-     "rule": "R2",
-     "front": 15
+     "label": "back",
+     "rulebook": "back",
+     "rule": "V16",
+     "front": 3
     }
    ]
   },
   "s-74265590": {
-   "key": "da41a47bfd9b",
+   "key": "86f384b0961e",
    "by": "GreMi",
    "track": "Imola",
    "date": "2026-10-30",
    "kind": "Reckless driving",
    "source": "staff change",
-   "verdict": "RB #2 at fault",
-   "severity": 9,
+   "verdict": "Racing incident",
+   "severity": 0,
    "note": "Car 2 brakes too late in the rain, and releasing his brake twice so goes too quick into the corner",
    "who": [
     "319544045435224067"
@@ -6045,7 +5391,7 @@
    ],
    "rulebook": {
     "verdict": "6 at fault",
-    "rule": "R2"
+    "rule": "V16"
    },
    "contacts": [
     {
@@ -6066,9 +5412,9 @@
       "reaction": 0.0,
       "aftermath": 0.0
      },
-     "label": "back",
+     "label": "none",
      "rulebook": "front",
-     "rule": "R2",
+     "rule": "V16",
      "front": 6
     },
     {
@@ -6087,17 +5433,17 @@
       "off": 1,
       "cars": 3,
       "reaction": 0.0,
-      "aftermath": 1.0
+      "aftermath": 0.0
      },
      "label": "none",
-     "rulebook": "none",
-     "rule": "R7",
+     "rulebook": "front",
+     "rule": "V16",
      "front": 6
     }
    ]
   },
   "s-7b69444a": {
-   "key": "a15de0ce089f",
+   "key": "10391a5ff704",
    "by": "GreMi",
    "track": "Silverstone Reverse",
    "date": "2026-10-30",
@@ -6122,7 +5468,7 @@
    ],
    "rulebook": {
     "verdict": "13 at fault",
-    "rule": "R3"
+    "rule": "V16"
    },
    "contacts": [
     {
@@ -6145,13 +5491,13 @@
      },
      "label": "back",
      "rulebook": "back",
-     "rule": "R3",
+     "rule": "V16",
      "front": 12
     }
    ]
   },
   "s-80925abb": {
-   "key": "b859c2621cde",
+   "key": "0de10a0559f5",
    "by": "GreMi",
    "track": "Mexico",
    "date": "2026-11-15",
@@ -6177,18 +5523,18 @@
    ],
    "rulebook": {
     "verdict": "7 at fault",
-    "rule": "R3"
+    "rule": "V16"
    },
    "contacts": [
     {
-     "a": 7,
-     "b": 3,
+     "a": 3,
+     "b": 7,
      "t": 125.8,
      "x": {
       "gap": 9.8,
       "closing": 37,
-      "moved_front": 0.98,
-      "moved_back": -0.23,
+      "moved_front": -0.23,
+      "moved_back": 0.98,
       "rejoin_front": 0.0,
       "rejoin_back": 0.0,
       "slide": 48,
@@ -6198,15 +5544,15 @@
       "reaction": 0.0,
       "aftermath": 0.0
      },
-     "label": "back",
-     "rulebook": "back",
-     "rule": "R3",
-     "front": 3
+     "label": "front",
+     "rulebook": "front",
+     "rule": "V16",
+     "front": 7
     }
    ]
   },
   "s-894dd0ba": {
-   "key": "3b907cac1e1d",
+   "key": "aec4eab2794e",
    "by": "GreMi",
    "track": "Brazil",
    "date": "2026-11-15",
@@ -6233,7 +5579,7 @@
    ],
    "rulebook": {
     "verdict": "11 at fault",
-    "rule": "R2"
+    "rule": "V16"
    },
    "contacts": [
     {
@@ -6256,13 +5602,13 @@
      },
      "label": "both",
      "rulebook": "front",
-     "rule": "R2",
+     "rule": "V16",
      "front": 11
     }
    ]
   },
   "s-8c8720d3": {
-   "key": "7bd72130b7ec",
+   "key": "36e6ac63e3d6",
    "by": "GreMi",
    "track": "Brazil",
    "date": "2026-11-02",
@@ -6288,7 +5634,7 @@
    ],
    "rulebook": {
     "verdict": "2 at fault",
-    "rule": "R3"
+    "rule": "V16"
    },
    "contacts": [
     {
@@ -6311,18 +5657,18 @@
      },
      "label": "back",
      "rulebook": "back",
-     "rule": "R3",
+     "rule": "V16",
      "front": 7
     },
     {
-     "a": 2,
-     "b": 0,
+     "a": 0,
+     "b": 2,
      "t": 9.6,
      "x": {
       "gap": 1.8,
       "closing": -16,
-      "moved_front": -0.05,
-      "moved_back": 3.73,
+      "moved_front": 3.73,
+      "moved_back": -0.05,
       "rejoin_front": 0.0,
       "rejoin_back": 0.0,
       "slide": 10,
@@ -6332,15 +5678,15 @@
       "reaction": 0.0,
       "aftermath": 0.0
      },
-     "label": "back",
-     "rulebook": "back",
-     "rule": "R2",
-     "front": 0
+     "label": "front",
+     "rulebook": "no",
+     "rule": "R1",
+     "front": 2
     }
    ]
   },
   "s-9675d8d4": {
-   "key": "c6dffd97ed48",
+   "key": "5ab034eb15e1",
    "by": "GreMi",
    "track": "Monza",
    "date": "2026-11-04",
@@ -6365,7 +5711,7 @@
    ],
    "rulebook": {
     "verdict": "3 at fault",
-    "rule": "R3"
+    "rule": "V16"
    },
    "contacts": [
     {
@@ -6388,13 +5734,13 @@
      },
      "label": "none",
      "rulebook": "back",
-     "rule": "R3",
+     "rule": "V16",
      "front": 2
     }
    ]
   },
   "s-b5285abb": {
-   "key": "4991aff7ab71",
+   "key": "3c5d3a3b329c",
    "by": "GreMi",
    "track": "Miami",
    "date": "2026-10-30",
@@ -6419,18 +5765,18 @@
    ],
    "rulebook": {
     "verdict": "4 at fault",
-    "rule": "R2"
+    "rule": "V16"
    },
    "contacts": [
     {
-     "a": 6,
-     "b": 4,
+     "a": 4,
+     "b": 6,
      "t": 429.0,
      "x": {
       "gap": 1.1,
       "closing": -6,
-      "moved_front": 0.43,
-      "moved_back": 3.45,
+      "moved_front": 3.45,
+      "moved_back": 0.43,
       "rejoin_front": 0.0,
       "rejoin_back": 0.0,
       "slide": 50,
@@ -6440,15 +5786,15 @@
       "reaction": 0.0,
       "aftermath": 0.0
      },
-     "label": "back",
-     "rulebook": "back",
-     "rule": "R2",
-     "front": 6
+     "label": "front",
+     "rulebook": "front",
+     "rule": "V16",
+     "front": 4
     }
    ]
   },
   "s-de56b5a5": {
-   "key": "543c50458626",
+   "key": "2606b90cc9e7",
    "by": "GreMi",
    "track": "Silverstone",
    "date": "2026-11-11",
@@ -6473,8 +5819,8 @@
     7
    ],
    "rulebook": {
-    "verdict": "6 at fault",
-    "rule": "R2"
+    "verdict": "Not an incident",
+    "rule": "R1"
    },
    "contacts": [
     {
@@ -6496,14 +5842,14 @@
       "aftermath": 0.0
      },
      "label": "front",
-     "rulebook": "front",
-     "rule": "R2",
+     "rulebook": "no",
+     "rule": "R1",
      "front": 6
     }
    ]
   },
   "s-e0a25945": {
-   "key": "fbdc417b6746",
+   "key": "7d9e3c9e0ef2",
    "by": "GreMi",
    "track": "Brazil",
    "date": "2026-11-15",
@@ -6532,19 +5878,19 @@
     15
    ],
    "rulebook": {
-    "verdict": "13 at fault",
-    "rule": "R3"
+    "verdict": "13 + 14 at fault",
+    "rule": "V16"
    },
    "contacts": [
     {
-     "a": 15,
-     "b": 13,
+     "a": 13,
+     "b": 15,
      "t": 9.0,
      "x": {
       "gap": 7.9,
       "closing": 30,
-      "moved_front": -1.47,
-      "moved_back": 1.68,
+      "moved_front": 1.68,
+      "moved_back": -1.47,
       "rejoin_front": 0.0,
       "rejoin_back": 0.0,
       "slide": 74,
@@ -6554,20 +5900,20 @@
       "reaction": 0.0,
       "aftermath": 0.0
      },
-     "label": "back",
-     "rulebook": "back",
-     "rule": "R3",
-     "front": 15
+     "label": "front",
+     "rulebook": "front",
+     "rule": "V16",
+     "front": 13
     },
     {
-     "a": 15,
-     "b": 14,
+     "a": 14,
+     "b": 15,
      "t": 9.3,
      "x": {
       "gap": 6.5,
       "closing": 30,
-      "moved_front": 2.26,
-      "moved_back": -1.72,
+      "moved_front": -1.72,
+      "moved_back": 2.26,
       "rejoin_front": 0.0,
       "rejoin_back": 0.0,
       "slide": 74,
@@ -6575,40 +5921,17 @@
       "off": 2,
       "cars": 4,
       "reaction": 0.0,
-      "aftermath": 1.0
+      "aftermath": 0.0
      },
      "label": "none",
-     "rulebook": "none",
-     "rule": "R7",
-     "front": 15
+     "rulebook": "front",
+     "rule": "V16",
+     "front": 14
     },
     {
-     "a": 13,
-     "b": 10,
+     "a": 10,
+     "b": 13,
      "t": 10.3,
-     "x": {
-      "gap": 0.9,
-      "closing": 33,
-      "moved_front": 6.0,
-      "moved_back": -5.16,
-      "rejoin_front": 0.0,
-      "rejoin_back": 0.0,
-      "slide": 37,
-      "lost": 2,
-      "off": 2,
-      "cars": 4,
-      "reaction": 0.0,
-      "aftermath": 1.0
-     },
-     "label": "back",
-     "rulebook": "none",
-     "rule": "R7",
-     "front": 10
-    },
-    {
-     "a": 13,
-     "b": 10,
-     "t": 14.4,
      "x": {
       "gap": 6.4,
       "closing": 4,
@@ -6623,15 +5946,15 @@
       "reaction": 0.0,
       "aftermath": 0.0
      },
-     "label": "back",
-     "rulebook": "none",
-     "rule": "R3",
-     "front": 10
+     "label": "front",
+     "rulebook": "front",
+     "rule": "V16",
+     "front": 13
     }
    ]
   },
   "sev-11041959-1166a": {
-   "key": "5173fd7005f7",
+   "key": "f36335972672",
    "race_file": "Race_Singapore_2026_11_04_20_09_05.json",
    "at": "2026-11-11T21:14:31Z",
    "parent": "sev-11041959-1166",
@@ -6664,31 +5987,7 @@
     3,
     10
    ],
-   "contacts": [
-    {
-     "a": 10,
-     "b": 3,
-     "t": 116.7,
-     "x": {
-      "gap": 9.0,
-      "closing": 24,
-      "moved_front": 0.16,
-      "moved_back": -0.71,
-      "rejoin_front": 0.0,
-      "rejoin_back": 0.0,
-      "slide": 95,
-      "lost": 2,
-      "off": 0,
-      "cars": 2,
-      "reaction": 0.0,
-      "aftermath": 0.0
-     },
-     "label": "back",
-     "rulebook": "back",
-     "rule": "R10",
-     "front": 3
-    }
-   ]
+   "contacts": []
   }
  },
  "about": "Numbers of every graded incident's contacts and the final call (scripts/telemetry/precedents.py).",
@@ -7000,6 +6299,17 @@
    "overrides": 2,
    "date": "2026-11-17",
    "rules": "v1.5"
+  },
+  {
+   "incidents": 93,
+   "inc_rulebook": 35,
+   "inc_with_precedents": 35,
+   "contacts": 133,
+   "rulebook": 57,
+   "with_precedents": 60,
+   "overrides": 8,
+   "date": "2026-11-20",
+   "rules": "v1.6"
   }
  ]
 }
