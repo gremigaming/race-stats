@@ -468,6 +468,22 @@
   "rule_now": "R2"
  },
  {
+  "file": "Race_Spa_2026_11_18_20_02_41.json",
+  "t": 1795028286.66,
+  "lap": 4,
+  "cars": [
+   4,
+   8
+  ],
+  "frozen": "Not an incident",
+  "frozen_fault": [],
+  "now": "toni2608 at fault",
+  "now_fault": [
+   5
+  ],
+  "rule_now": "R3"
+ },
+ {
   "file": "Race_Suzuka_Just_in_case_2026_10_28_20_53_25.json",
   "t": 1793216597.71,
   "lap": 2,
