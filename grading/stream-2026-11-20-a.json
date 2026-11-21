@@ -1,0 +1,265 @@
+{
+ "title": "Stream 20 Nov · 5 picks",
+ "stream": "1120a",
+ "made": "2026-11-21",
+ "rules": "v1.6",
+ "incidents": [
+  {
+   "id": "1120a-1",
+   "pick": "low",
+   "track": "Singapore",
+   "date": "2026-11-20",
+   "type": "Rear-end",
+   "weather": "Light rain",
+   "track_temp": 27,
+   "lap": 1,
+   "race_time": "1:48",
+   "replay": "https://gremigaming.github.io/race-stats/all/race/2026-11-20_15-40-29_Singapore_Race?inc=108.2&car=5,6",
+   "race_file": "Race_Singapore_2026_11_20_15_51_28.json",
+   "recording": "2026-11-20_15-40-29_Singapore_Race.gmtel.gz",
+   "t0": 108.2,
+   "t1": 123.2,
+   "contacts": [
+    {
+     "t": 108.2,
+     "a": 5,
+     "b": 6
+    }
+   ],
+   "drivers": [
+    {
+     "car": 5,
+     "name": "#20 QDR_SHW1KS"
+    },
+    {
+     "car": 6,
+     "name": "#69 Ayrton_Senna109"
+    }
+   ],
+   "engine": {
+    "rules": "v1.6",
+    "verdict": "Ayrton_Senna109 at fault",
+    "rule": "V16",
+    "severity": 1,
+    "why": "Ayrton_Senna109 ran into the car ahead",
+    "at_fault": [
+     "#69 Ayrton_Senna109"
+    ],
+    "contacts": 1,
+    "gray_score": 0.0
+   },
+   "claude": "Picked as the low-severity case. My call: Ayrton_Senna109 at fault (rule V16: V16), severity 1, blame on #69 Ayrton_Senna109. What I saw: Ayrton_Senna109 ran into the car ahead. I'm fairly confident: the numbers are clear of every limit; this one is here for its severity."
+  },
+  {
+   "id": "1120a-2",
+   "pick": "high",
+   "track": "Jeddah",
+   "date": "2026-11-20",
+   "type": "Moved across alongside",
+   "weather": "Light cloud",
+   "track_temp": 30,
+   "lap": 4,
+   "race_time": "6:10",
+   "replay": "https://gremigaming.github.io/race-stats/all/race/2026-11-20_15-59-31_Jeddah_Race?inc=370.1&car=5,4",
+   "race_file": "Race_Jeddah_2026_11_20_16_09_42.json",
+   "recording": "2026-11-20_15-59-31_Jeddah_Race.gmtel.gz",
+   "t0": 370.1,
+   "t1": 370.1,
+   "contacts": [
+    {
+     "t": 370.1,
+     "a": 4,
+     "b": 5
+    }
+   ],
+   "drivers": [
+    {
+     "car": 5,
+     "name": "#20 QDR_SHW1KS"
+    },
+    {
+     "car": 4,
+     "name": "#58 NEX"
+    }
+   ],
+   "engine": {
+    "rules": "v1.6",
+    "verdict": "NEX at fault",
+    "rule": "V16",
+    "severity": 8,
+    "why": "NEX moved 8.5 m towards the other car",
+    "at_fault": [
+     "#58 NEX"
+    ],
+    "contacts": 1,
+    "gray_score": 0.0
+   },
+   "claude": "Picked as the high-severity case. My call: NEX at fault (rule V16: V16), severity 8, blame on #58 NEX. What I saw: NEX moved 8.5 m towards the other car. I'm fairly confident: the numbers are clear of every limit; this one is here for its severity."
+  },
+  {
+   "id": "1120a-3",
+   "pick": "gray",
+   "track": "Singapore",
+   "date": "2026-11-20",
+   "type": "Moved across alongside",
+   "weather": "Light rain",
+   "track_temp": 27,
+   "lap": 1,
+   "race_time": "0:46",
+   "replay": "https://gremigaming.github.io/race-stats/all/race/2026-11-20_15-40-29_Singapore_Race?inc=46.5&car=15,5,7",
+   "race_file": "Race_Singapore_2026_11_20_15_51_28.json",
+   "recording": "2026-11-20_15-40-29_Singapore_Race.gmtel.gz",
+   "t0": 46.5,
+   "t1": 52.8,
+   "contacts": [
+    {
+     "t": 46.5,
+     "a": 5,
+     "b": 15
+    },
+    {
+     "t": 52.5,
+     "a": 7,
+     "b": 15
+    }
+   ],
+   "drivers": [
+    {
+     "car": 15,
+     "name": "#2 Lilleludde2012"
+    },
+    {
+     "car": 5,
+     "name": "#20 QDR_SHW1KS"
+    },
+    {
+     "car": 7,
+     "name": "#21 EthanMoonski"
+    }
+   ],
+   "engine": {
+    "rules": "v1.6",
+    "verdict": "QDR_SHW1KS at fault",
+    "rule": "V16",
+    "severity": 2,
+    "why": "QDR_SHW1KS moved 4.3 m towards the other car",
+    "at_fault": [
+     "#20 QDR_SHW1KS"
+    ],
+    "contacts": 2,
+    "gray_score": 1.27
+   },
+   "claude": "Picked because it's a gray area for me. My call: QDR_SHW1KS at fault (rule V16: V16), severity 2, blame on #20 QDR_SHW1KS. What I saw: QDR_SHW1KS moved 4.3 m towards the other car. Why I'm not sure: nobody slid or lost a place and the closing speed (23 km/h) is near the 22 km/h line between a harmless tap and an incident; the worst slide was 16°, near the 20° where I count it as harm done; its 2 contacts don't point the same way (QDR_SHW1KS at fault; Not an incident)."
+  },
+  {
+   "id": "1120a-4",
+   "pick": "gray",
+   "track": "Montreal",
+   "date": "2026-11-20",
+   "type": "Not an incident",
+   "weather": "Light rain",
+   "track_temp": 27,
+   "lap": 2,
+   "race_time": "1:53",
+   "replay": "https://gremigaming.github.io/race-stats/all/race/2026-11-20_16-33-05_Montreal_Race?inc=113.9&car=18,10,8",
+   "race_file": "Race_Montreal_2026_11_20_16_41_59.json",
+   "recording": "2026-11-20_16-33-05_Montreal_Race.gmtel.gz",
+   "t0": 113.9,
+   "t1": 128.9,
+   "contacts": [
+    {
+     "t": 113.9,
+     "a": 10,
+     "b": 18
+    }
+   ],
+   "drivers": [
+    {
+     "car": 18,
+     "name": "#99 jasonri12"
+    },
+    {
+     "car": 10,
+     "name": "#15 vanderdeured"
+    },
+    {
+     "car": 8,
+     "name": "#2 jayferr1269"
+    }
+   ],
+   "engine": {
+    "rules": "v1.6",
+    "verdict": "Not an incident",
+    "rule": "R1",
+    "severity": 1,
+    "why": "nothing: nobody lost 0.5 s or was pushed off",
+    "at_fault": [],
+    "contacts": 1,
+    "gray_score": 1.15
+   },
+   "claude": "Picked because it's a gray area for me. My call: not an incident (rule R1: no incident (light tap or squeeze)), severity 1, blame on nobody. What I saw: nothing: nobody lost 0.5 s or was pushed off. Why I'm not sure: the car behind was closing at only 7 km/h, near the 7 km/h where I stop calling it 'ran into the back'; 3 cars are involved, so the first move is hard to pick out."
+  },
+  {
+   "id": "1120a-5",
+   "pick": "gray",
+   "track": "Singapore",
+   "date": "2026-11-20",
+   "type": "Not an incident",
+   "weather": "Light rain",
+   "track_temp": 27,
+   "lap": 1,
+   "race_time": "0:40",
+   "replay": "https://gremigaming.github.io/race-stats/all/race/2026-11-20_15-40-29_Singapore_Race?inc=40.1&car=7,11,1,17",
+   "race_file": "Race_Singapore_2026_11_20_15_51_28.json",
+   "recording": "2026-11-20_15-40-29_Singapore_Race.gmtel.gz",
+   "t0": 40.1,
+   "t1": 55.1,
+   "contacts": [
+    {
+     "t": 40.1,
+     "a": 7,
+     "b": 11
+    },
+    {
+     "t": 40.7,
+     "a": 1,
+     "b": 11
+    },
+    {
+     "t": 41.5,
+     "a": 1,
+     "b": 17
+    }
+   ],
+   "drivers": [
+    {
+     "car": 7,
+     "name": "#21 EthanMoonski"
+    },
+    {
+     "car": 11,
+     "name": "#3 Jessey__11"
+    },
+    {
+     "car": 1,
+     "name": "#19 toni2608"
+    },
+    {
+     "car": 17,
+     "name": "#21 egeatlas2012"
+    }
+   ],
+   "engine": {
+    "rules": "v1.6",
+    "verdict": "Racing incident",
+    "rule": "P",
+    "severity": 1,
+    "why": "nothing: nobody lost 1.0 s or was pushed off; but GreMi called a similar one (B1-05, Abu Dhabi 2026-10-20) a racing incident",
+    "at_fault": [],
+    "contacts": 3,
+    "gray_score": 0.95
+   },
+   "claude": "Picked because it's a gray area for me. My call: Racing incident (rule P: follows a similar graded incident), severity 1, blame on nobody. What I saw: nothing: nobody lost 1.0 s or was pushed off; but GreMi called a similar one (B1-05, Abu Dhabi 2026-10-20) a racing incident. Why I'm not sure: the cars were 4.3 m apart along the track, right at the 4 m line between 'side by side' (the car moving over is to blame) and 'one behind the other' (the car behind is to blame); the worst slide was 17°, near the 20° where I count it as harm done; 4 cars are involved, so the first move is hard to pick out."
+  }
+ ]
+}

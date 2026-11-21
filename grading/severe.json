@@ -1,8 +1,192 @@
 {
- "title": "Severity 7+ · every one (23)",
+ "title": "Severity 7+ · every one (28)",
  "stream": "severe",
  "rules": "v1.4",
  "incidents": [
+  {
+   "id": "sev-11201707-1407",
+   "pick": "severe",
+   "track": "Losail",
+   "date": "2026-11-20",
+   "type": "Moved across alongside",
+   "weather": "Clear",
+   "track_temp": 25,
+   "lap": 2,
+   "race_time": "2:20",
+   "replay": "https://gremigaming.github.io/race-stats/all/race/2026-11-20_17-07-11_Losail_Race?inc=140.8&car=4,9",
+   "race_file": "Race_Losail_2026_11_20_17_16_10.json",
+   "recording": "2026-11-20_17-07-11_Losail_Race.gmtel.gz",
+   "t0": 140.8,
+   "t1": 155.8,
+   "contacts": [
+    {
+     "t": 140.8,
+     "a": 4,
+     "b": 9
+    }
+   ],
+   "drivers": [
+    {
+     "car": 4,
+     "name": "#2 [QDR] PuckyFucky"
+    },
+    {
+     "car": 9,
+     "name": "#13 Jakubm18_F1"
+    }
+   ],
+   "engine": {
+    "rules": "v1.6",
+    "verdict": "Jakubm18_F1 at fault",
+    "rule": "V16",
+    "severity": 7,
+    "why": "Jakubm18_F1 moved 7.3 m towards the other car; braked hard to avoid it",
+    "at_fault": [
+     "#13 Jakubm18_F1"
+    ],
+    "contacts": 1,
+    "gray_score": 0.0
+   },
+   "claude": "In the list because it's severity 7+. My call: Jakubm18_F1 at fault (rule V16: V16), severity 7, blame on #13 Jakubm18_F1. What I saw: Jakubm18_F1 moved 7.3 m towards the other car; braked hard to avoid it. I'm fairly confident: the numbers are clear of every limit; this one is here for its severity."
+  },
+  {
+   "id": "sev-11201707-86",
+   "pick": "severe",
+   "track": "Losail",
+   "date": "2026-11-20",
+   "type": "Moved across alongside",
+   "weather": "Clear",
+   "track_temp": 25,
+   "lap": 1,
+   "race_time": "0:08",
+   "replay": "https://gremigaming.github.io/race-stats/all/race/2026-11-20_17-07-11_Losail_Race?inc=8.6&car=10,7",
+   "race_file": "Race_Losail_2026_11_20_17_16_10.json",
+   "recording": "2026-11-20_17-07-11_Losail_Race.gmtel.gz",
+   "t0": 8.6,
+   "t1": 21.1,
+   "contacts": [
+    {
+     "t": 8.6,
+     "a": 7,
+     "b": 10
+    }
+   ],
+   "drivers": [
+    {
+     "car": 10,
+     "name": "#25 EliasHIF2010"
+    },
+    {
+     "car": 7,
+     "name": "#23 K7HYRAX"
+    }
+   ],
+   "engine": {
+    "rules": "v1.6",
+    "verdict": "K7HYRAX at fault",
+    "rule": "V16",
+    "severity": 8,
+    "why": "K7HYRAX moved 17.1 m towards the other car",
+    "at_fault": [
+     "#23 K7HYRAX"
+    ],
+    "contacts": 1,
+    "gray_score": 0.0
+   },
+   "claude": "In the list because it's severity 7+. My call: K7HYRAX at fault (rule V16: V16), severity 8, blame on #23 K7HYRAX. What I saw: K7HYRAX moved 17.1 m towards the other car. I'm fairly confident: the numbers are clear of every limit; this one is here for its severity."
+  },
+  {
+   "id": "sev-11201633-3386",
+   "pick": "severe",
+   "track": "Montreal",
+   "date": "2026-11-20",
+   "type": "Moved across alongside",
+   "weather": "Light rain",
+   "track_temp": 27,
+   "lap": 4,
+   "race_time": "5:38",
+   "replay": "https://gremigaming.github.io/race-stats/all/race/2026-11-20_16-33-05_Montreal_Race?inc=338.6&car=14,10",
+   "race_file": "Race_Montreal_2026_11_20_16_41_59.json",
+   "recording": "2026-11-20_16-33-05_Montreal_Race.gmtel.gz",
+   "t0": 338.6,
+   "t1": 346.1,
+   "contacts": [
+    {
+     "t": 338.6,
+     "a": 10,
+     "b": 14
+    }
+   ],
+   "drivers": [
+    {
+     "car": 14,
+     "name": "#8 Stepino81"
+    },
+    {
+     "car": 10,
+     "name": "#15 vanderdeured"
+    }
+   ],
+   "engine": {
+    "rules": "v1.6",
+    "verdict": "vanderdeured at fault",
+    "rule": "V16",
+    "severity": 7,
+    "why": "vanderdeured moved 5.7 m towards the other car",
+    "at_fault": [
+     "#15 vanderdeured"
+    ],
+    "contacts": 1,
+    "gray_score": 0.0
+   },
+   "claude": "In the list because it's severity 7+. My call: vanderdeured at fault (rule V16: V16), severity 7, blame on #15 vanderdeured. What I saw: vanderdeured moved 5.7 m towards the other car. I'm fairly confident: the numbers are clear of every limit; this one is here for its severity."
+  },
+  {
+   "id": "sev-11201540-520",
+   "pick": "severe",
+   "track": "Singapore",
+   "date": "2026-11-20",
+   "type": "Moved across alongside",
+   "weather": "Light rain",
+   "track_temp": 27,
+   "lap": 1,
+   "race_time": "0:52",
+   "replay": "https://gremigaming.github.io/race-stats/all/race/2026-11-20_15-40-29_Singapore_Race?inc=52.0&car=6,18",
+   "race_file": "Race_Singapore_2026_11_20_15_51_28.json",
+   "recording": "2026-11-20_15-40-29_Singapore_Race.gmtel.gz",
+   "t0": 52.0,
+   "t1": 61.7,
+   "contacts": [
+    {
+     "t": 52.0,
+     "a": 6,
+     "b": 18
+    }
+   ],
+   "drivers": [
+    {
+     "car": 6,
+     "name": "#69 Ayrton_Senna109"
+    },
+    {
+     "car": 18,
+     "name": "#91 K7HYRAX"
+    }
+   ],
+   "engine": {
+    "rules": "v1.6",
+    "verdict": "K7HYRAX at fault",
+    "rule": "V16",
+    "severity": 7,
+    "why": "K7HYRAX moved 6.1 m towards the other car",
+    "at_fault": [
+     "#91 K7HYRAX"
+    ],
+    "contacts": 1,
+    "gray_score": 0.32
+   },
+   "claude": "In the list because it's severity 7+. My call: K7HYRAX at fault (rule V16: V16), severity 7, blame on #91 K7HYRAX. What I saw: K7HYRAX moved 6.1 m towards the other car. I'm fairly confident: the numbers are clear of every limit; this one is here for its severity."
+  },
   {
    "id": "sev-11182051-1390",
    "pick": "severe",
@@ -803,6 +987,52 @@
    "claude": "In the list because it's severity 7+. My call: Stepino81 at fault (rule V16: V16), severity 8, blame on #8 Stepino81. What I saw: Stepino81 moved 8.5 m towards the other car. I'm fairly confident: the numbers are clear of every limit; this one is here for its severity."
   },
   {
+   "id": "sev-11131618-214",
+   "pick": "severe",
+   "track": "Texas",
+   "date": "2026-11-13",
+   "type": "Moved across alongside",
+   "weather": "Clear",
+   "track_temp": 32,
+   "lap": 1,
+   "race_time": "0:21",
+   "replay": "https://gremigaming.github.io/race-stats/all/race/2026-11-13_16-18-12_Texas_Race?inc=21.5&car=10,11",
+   "race_file": "Race_Texas_2026_11_13_16_30_25.json",
+   "recording": "2026-11-13_16-18-12_Texas_Race.gmtel.gz",
+   "t0": 21.5,
+   "t1": 21.5,
+   "contacts": [
+    {
+     "t": 21.5,
+     "a": 10,
+     "b": 11
+    }
+   ],
+   "drivers": [
+    {
+     "car": 10,
+     "name": "#8 Stepino81"
+    },
+    {
+     "car": 11,
+     "name": "Hidden #2 (Ferrari '26)"
+    }
+   ],
+   "engine": {
+    "rules": "v1.6",
+    "verdict": "Stepino81 at fault",
+    "rule": "V16",
+    "severity": 8,
+    "why": "Stepino81 moved 8.5 m towards the other car",
+    "at_fault": [
+     "#8 Stepino81"
+    ],
+    "contacts": 1,
+    "gray_score": -0.5
+   },
+   "claude": "In the list because it's severity 7+. My call: Stepino81 at fault (rule V16: V16), severity 8, blame on #8 Stepino81. What I saw: Stepino81 moved 8.5 m towards the other car. I'm fairly confident: the numbers are clear of every limit; this one is here for its severity."
+  },
+  {
    "id": "sev-11131618-81",
    "pick": "severe",
    "track": "Texas",
@@ -1187,5 +1417,5 @@
    "claude": "In the list because it's severity 7+. My call: daris_2190 at fault (rule R10: kept full throttle into a braking car), severity 10, blame on #21 daris_2190. What I saw: daris_2190 kept full throttle for 1.0 s after hitting DDRK, pushing it along. I'm fairly confident: the numbers are clear of every limit; this one is here for its severity."
   }
  ],
- "made": "2026-11-20"
+ "made": "2026-11-21"
 }
