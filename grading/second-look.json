@@ -3680,6 +3680,23 @@
   "rule_now": "V16"
  },
  {
+  "file": "Race_Hungaroring_2026_11_20_16_59_29.json",
+  "t": 1795189821.36,
+  "lap": 1,
+  "cars": [
+   4,
+   10,
+   12
+  ],
+  "frozen": "EthanMoonski at fault",
+  "frozen_fault": [
+   4
+  ],
+  "now": "Racing incident",
+  "now_fault": [],
+  "rule_now": "V16"
+ },
+ {
   "file": "Race_Imola_2026_10_25_15_20_36.json",
   "t": 1792937642.14,
   "lap": 1,
@@ -8917,6 +8934,24 @@
   "now": "Not an incident",
   "now_fault": [],
   "rule_now": "R1"
+ },
+ {
+  "file": "Race_Montreal_2026_11_20_16_41_59.json",
+  "t": 1795188874.64,
+  "lap": 1,
+  "cars": [
+   14,
+   2
+  ],
+  "frozen": "TTV/GreMi_Gaming at fault",
+  "frozen_fault": [
+   2
+  ],
+  "now": "EthanMoonski at fault",
+  "now_fault": [
+   6
+  ],
+  "rule_now": "V16"
  },
  {
   "file": "Race_Monza_2026_10_28_20_14_22.json",
