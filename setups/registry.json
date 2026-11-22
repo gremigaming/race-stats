@@ -8,7 +8,7 @@
   "requested": null,
   "last": "2026-11-10"
  },
- "pending": 46,
+ "pending": 47,
  "tracks": [
   {
    "track": "Melbourne",
@@ -972,12 +972,68 @@
        },
        "text": "Off-throttle diff 35% → 30%",
        "why": "The car is reluctant to turn in; a slightly more open diff helps the nose into the corner.",
+       "sessions": [
+        {
+         "file": "2026-11-22_16-20-25_Suzuka_OSQ.gmtel.gz",
+         "date": "2026-11-22",
+         "session": "quali",
+         "osq": true,
+         "weather": 0,
+         "pace": 91991,
+         "best": 91991,
+         "mean": 91991,
+         "run": 1,
+         "laps": 1,
+         "bb": 58
+        }
+       ],
+       "verdict": {
+        "result": "worse",
+        "delta": 1.47,
+        "text": "Worse: quali lap 1:31.991 against 1:30.662 on V1 (1.329 s slower)."
+       },
+       "slot": 6
+      },
+      {
+       "v": 3,
+       "base": 1,
+       "created": "2026-11-22",
+       "saved": null,
+       "values": {
+        "fw": 50,
+        "rw": 25,
+        "don": 100,
+        "doff": 35,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 13,
+        "farb": 2,
+        "rarb": 10,
+        "frh": 21,
+        "rrh": 42,
+        "bb": 56,
+        "bp": 100,
+        "fr": 29.5,
+        "fl": 29.5,
+        "rr": 26.0,
+        "rl": 26.0
+       },
+       "change": {
+        "rw": [
+         22,
+         25
+        ]
+       },
+       "text": "Rear wing 22 → 25",
+       "why": "More rear grip against oversteer and wheelspin. Costs a little top speed. V2's change is undone (it didn't make the car faster).",
        "sessions": [],
        "verdict": {
         "result": "untested",
         "text": "Not driven yet."
-       },
-       "slot": 6
+       }
       }
      ]
     },
