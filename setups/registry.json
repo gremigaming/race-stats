@@ -8,7 +8,7 @@
   "requested": null,
   "last": "2026-11-10"
  },
- "pending": 47,
+ "pending": 48,
  "tracks": [
   {
    "track": "Melbourne",
@@ -985,12 +985,25 @@
          "run": 1,
          "laps": 1,
          "bb": 58
+        },
+        {
+         "file": "2026-11-22_16-24-23_Suzuka_Race.gmtel.gz",
+         "date": "2026-11-22",
+         "session": "race",
+         "osq": false,
+         "weather": 2,
+         "pace": 91188,
+         "best": 91188,
+         "mean": 92210,
+         "run": 5,
+         "laps": 4,
+         "bb": 58
         }
        ],
        "verdict": {
         "result": "worse",
-        "delta": 1.47,
-        "text": "Worse: quali lap 1:31.991 against 1:30.662 on V1 (1.329 s slower)."
+        "delta": 1.02,
+        "text": "Worse: quali lap 1:31.590 against 1:30.662 on V1 (0.927 s slower)."
        },
        "slot": 6
       },
@@ -1125,12 +1138,68 @@
        },
        "text": "Off-throttle diff 35% → 30%",
        "why": "The car is reluctant to turn in; a slightly more open diff helps the nose into the corner.",
+       "sessions": [
+        {
+         "file": "2026-11-22_16-24-23_Suzuka_Race.gmtel.gz",
+         "date": "2026-11-22",
+         "session": "race",
+         "osq": false,
+         "weather": 2,
+         "pace": 92210,
+         "best": 91188,
+         "mean": 92210,
+         "run": 5,
+         "laps": 4,
+         "bb": 58
+        }
+       ],
+       "verdict": {
+        "result": "worse",
+        "delta": 1.09,
+        "text": "Worse: average lap 1:32.210 against 1:31.219 on V1 (0.991 s slower)."
+       },
+       "slot": 7
+      },
+      {
+       "v": 3,
+       "base": 1,
+       "created": "2026-11-22",
+       "saved": null,
+       "values": {
+        "fw": 50,
+        "rw": 22,
+        "don": 100,
+        "doff": 35,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 30,
+        "farb": 2,
+        "rarb": 10,
+        "frh": 21,
+        "rrh": 42,
+        "bb": 56,
+        "bp": 100,
+        "fr": 29.5,
+        "fl": 29.5,
+        "rr": 26.0,
+        "rl": 26.0
+       },
+       "change": {
+        "rs": [
+         13,
+         30
+        ]
+       },
+       "text": "Rear springs 13 → 30",
+       "why": "The soft rear lets the floor scrape. 30 keeps it off the ground and makes laps more consistent. V2's change is undone (it didn't make the car faster).",
        "sessions": [],
        "verdict": {
         "result": "untested",
         "text": "Not driven yet."
-       },
-       "slot": 7
+       }
       }
      ]
     },
