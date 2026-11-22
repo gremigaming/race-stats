@@ -3012,6 +3012,19 @@
          "run": 25,
          "laps": 21,
          "bb": 57
+        },
+        {
+         "file": "2026-11-22_15-46-29_Austria_Race.gmtel.gz",
+         "date": "2026-11-22",
+         "session": "race",
+         "osq": false,
+         "weather": 1,
+         "pace": 68265,
+         "best": 68265,
+         "mean": 68532,
+         "run": 5,
+         "laps": 4,
+         "bb": 57
         }
        ],
        "verdict": {
@@ -3191,12 +3204,25 @@
          "run": 25,
          "laps": 21,
          "bb": 57
+        },
+        {
+         "file": "2026-11-22_15-46-29_Austria_Race.gmtel.gz",
+         "date": "2026-11-22",
+         "session": "race",
+         "osq": false,
+         "weather": 1,
+         "pace": 68532,
+         "best": 68265,
+         "mean": 68532,
+         "run": 5,
+         "laps": 4,
+         "bb": 57
         }
        ],
        "verdict": {
         "result": "worse",
-        "delta": 2.5,
-        "text": "Worse: average lap 1:08.361 against 1:06.692 on V1 (1.669 s slower)."
+        "delta": 2.59,
+        "text": "Worse: average lap 1:08.418 against 1:06.692 on V1 (1.726 s slower)."
        },
        "slot": 28
       },
@@ -7026,12 +7052,25 @@
          "run": 5,
          "laps": 4,
          "bb": 57
+        },
+        {
+         "file": "2026-11-22_15-31-26_Las_Vegas_Race.gmtel.gz",
+         "date": "2026-11-22",
+         "session": "race",
+         "osq": false,
+         "weather": 0,
+         "pace": 94418,
+         "best": 94418,
+         "mean": 95121,
+         "run": 5,
+         "laps": 4,
+         "bb": 58
         }
        ],
        "verdict": {
         "result": "better",
-        "delta": -0.65,
-        "text": "Better: quali lap 1:33.997 against 1:34.616 on V1 (0.619 s faster)."
+        "delta": -0.57,
+        "text": "Better: quali lap 1:34.081 against 1:34.616 on V1 (0.535 s faster)."
        },
        "slot": 63
       },
@@ -7205,12 +7244,25 @@
          "run": 5,
          "laps": 4,
          "bb": 57
+        },
+        {
+         "file": "2026-11-22_15-31-26_Las_Vegas_Race.gmtel.gz",
+         "date": "2026-11-22",
+         "session": "race",
+         "osq": false,
+         "weather": 0,
+         "pace": 95121,
+         "best": 94418,
+         "mean": 95121,
+         "run": 5,
+         "laps": 4,
+         "bb": 58
         }
        ],
        "verdict": {
         "result": "same",
-        "delta": 0.05,
-        "text": "No clear difference: average lap 1:35.263 against 1:35.217 on V1."
+        "delta": 0.01,
+        "text": "No clear difference: average lap 1:35.227 against 1:35.217 on V1."
        },
        "slot": 64
       },
