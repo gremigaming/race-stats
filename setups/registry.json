@@ -3627,11 +3627,24 @@
          "run": 1,
          "laps": 1,
          "bb": 58
+        },
+        {
+         "file": "2026-11-22_17-25-59_Silverstone_Race.gmtel.gz",
+         "date": "2026-11-22",
+         "session": "race",
+         "osq": false,
+         "weather": 1,
+         "pace": 91540,
+         "best": 91540,
+         "mean": 91785,
+         "run": 5,
+         "laps": 4,
+         "bb": 58
         }
        ],
        "verdict": {
         "result": "baseline",
-        "text": "Starting point: 1:23.287 over 6 sessions."
+        "text": "Starting point: 1:24.466 over 7 sessions."
        }
       },
       {
@@ -3749,11 +3762,24 @@
          "run": 5,
          "laps": 4,
          "bb": 58
+        },
+        {
+         "file": "2026-11-22_17-25-59_Silverstone_Race.gmtel.gz",
+         "date": "2026-11-22",
+         "session": "race",
+         "osq": false,
+         "weather": 1,
+         "pace": 91785,
+         "best": 91540,
+         "mean": 91785,
+         "run": 5,
+         "laps": 4,
+         "bb": 58
         }
        ],
        "verdict": {
         "result": "baseline",
-        "text": "Starting point: 1:28.087 over 3 sessions."
+        "text": "Starting point: 1:29.012 over 4 sessions."
        }
       },
       {
