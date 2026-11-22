@@ -86,9 +86,10 @@ export function poll(fn, sec = 15) {
 // OBS switches to the results scene seconds after the flag, while the race file is still on its
 // way (Pits n' Giggles save, uploader, live publish). The live race server knows a race is on or
 // has just finished, so until a race file saved after that race's start is in, the overlays show
-// "results coming in" instead of the race before. Gives up 5 min after the flag (no save, offline race).
+// "results coming in" instead of the race before. Gives up 8 min after the flag (no save, offline race;
+// online the game only sends the final classification after the post-race countdown).
 const LIVE_SERVER = "https://live.gremigaming.com";
-const WAIT_AFTER_FLAG = 5 * 60e3;
+const WAIT_AFTER_FLAG = 8 * 60e3;
 async function getJson(url, ms = 6000) {
   const c = new AbortController(), t = setTimeout(() => c.abort(), ms);
   try { const r = await fetch(url, { cache: "no-store", signal: c.signal }); if (!r.ok) throw new Error(r.status); return await r.json(); }

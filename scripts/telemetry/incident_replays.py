@@ -44,6 +44,14 @@ def http_json(url):
         return json.load(r)
 
 
+def save_json(value, path, **kw):
+    """Write a whole file or nothing: the live server may stop this script for a new race save,
+    and it publishes whatever files are there (race-control-stats live/league.py)."""
+    with open(path + ".tmp", "w") as fh:
+        json.dump(value, fh, **kw)
+    os.replace(path + ".tmp", path)
+
+
 def download(name, cache):
     path = os.path.join(cache, name)
     if not os.path.exists(path):
@@ -414,7 +422,7 @@ def main():
             del sess
         for file in scan:
             matches[file] = [best[file][1], best[file][2]] if file in best else {"none": cands}
-        json.dump(index, open(idx_path, "w"))   # keep the scan even if a later day is cut off
+        save_json(index, idx_path)   # keep the scan even if a later day is cut off
         for n in sorted({b[1] for b in best.values()}):
             race = Race(gmtel.Session(download(n, cache)))
             for file, (share, bn, off) in best.items():
@@ -434,18 +442,19 @@ def main():
                     r["teams"] = {str(c["index"]): (c.get("participant-data") or {}).get("team-id") or c.get("team")
                                   for c in pngs[file].get("classification-data") or []}
                     out_path = os.path.join(outdir, rid + ".json")
-                    json.dump(r, open(out_path, "w"), separators=(",", ":"))
-                    shutil.copy(out_path, os.path.join(cache, "replays", rid + ".json"))
+                    save_json(r, out_path, separators=(",", ":"))
+                    shutil.copy(out_path, os.path.join(cache, "replays", rid + ".json.tmp"))
+                    os.replace(os.path.join(cache, "replays", rid + ".json.tmp"), os.path.join(cache, "replays", rid + ".json"))
                     it["replay"] = rid
                     made += 1
             del race
             index["_failed"] = sorted(failed)
-            json.dump(index, open(idx_path, "w"))
+            save_json(index, idx_path)
         for file in files:
             if file not in best:
                 print(file, ": no recording with every car")
     index["_failed"] = sorted(failed)
-    json.dump(index, open(idx_path, "w"))
+    save_json(index, idx_path)
     # keep which contact an item is (time + pair, no names): the staff page saves it with a change so
     # the fault engine can learn from it (precedents.load_lessons); without it staff lessons were lost
     for d in data["drivers"]:
@@ -453,11 +462,11 @@ def main():
             for it in s["items"]:
                 if it.get("inc"):
                     it["inc"] = {k: it["inc"][k] for k in ("t", "pair") if k in it["inc"]}
-    json.dump(data, open(path, "w"), separators=(",", ":"))
+    save_json(data, path, separators=(",", ":"))
     for it in incs["incidents"]:   # same for the staff page's incident editor (staff/races.py incident_rows)
         if it.get("inc"):
             it["inc"] = {k: it["inc"][k] for k in ("t", "te", "pair", "names") if k in it["inc"]}
-    json.dump(incs, open(ipath, "w"), separators=(",", ":"))
+    save_json(incs, ipath, separators=(",", ":"))
     print("replays written:", made)
 
 
