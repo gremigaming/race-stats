@@ -1,5 +1,5 @@
 {
- "title": "Severity 7+ · every one (43)",
+ "title": "Severity 7+ · every one (44)",
  "stream": "severe",
  "rules": "v1.4",
  "incidents": [
@@ -571,6 +571,52 @@
     "gray_score": 0.8
    },
    "claude": "In the list because it's severity 7+. My call: [ET8] Hamish at fault (rule R3: the car behind ran into the one ahead), severity 8, blame on #21 [ET8] Hamish. What I saw: [ET8] Hamish ran into the back of Jessey_ll, closing at 30 km/h. I'm fairly confident: the car behind was closing at only 4 km/h, near the 7 km/h where I stop calling it 'ran into the back'."
+  },
+  {
+   "id": "sev-11131618-214",
+   "pick": "severe",
+   "track": "Texas",
+   "date": "2026-11-13",
+   "type": "Moved across alongside",
+   "weather": "Clear",
+   "track_temp": 32,
+   "lap": 1,
+   "race_time": "0:21",
+   "replay": "https://gremigaming.github.io/race-stats/all/race/2026-11-13_16-18-12_Texas_Race?inc=21.5&car=10,11",
+   "race_file": "Race_Texas_2026_11_13_16_30_25.json",
+   "recording": "2026-11-13_16-18-12_Texas_Race.gmtel.gz",
+   "t0": 21.5,
+   "t1": 21.5,
+   "contacts": [
+    {
+     "t": 21.5,
+     "a": 10,
+     "b": 11
+    }
+   ],
+   "drivers": [
+    {
+     "car": 10,
+     "name": "#8 Stepino81"
+    },
+    {
+     "car": 11,
+     "name": "Hidden #2 (Ferrari '26)"
+    }
+   ],
+   "engine": {
+    "rules": "v1.6",
+    "verdict": "Stepino81 at fault",
+    "rule": "V16",
+    "severity": 8,
+    "why": "Stepino81 moved 8.5 m towards the other car",
+    "at_fault": [
+     "#8 Stepino81"
+    ],
+    "contacts": 1,
+    "gray_score": -0.5
+   },
+   "claude": "In the list because it's severity 7+. My call: Stepino81 at fault (rule V16: V16), severity 8, blame on #8 Stepino81. What I saw: Stepino81 moved 8.5 m towards the other car. I'm fairly confident: the numbers are clear of every limit; this one is here for its severity."
   },
   {
    "id": "sev-11131618-214",
