@@ -1,0 +1,294 @@
+{
+ "title": "Stream 22 Nov · 5 picks",
+ "stream": "1122a",
+ "made": "2026-11-23",
+ "rules": "v1.6",
+ "incidents": [
+  {
+   "id": "1122a-1",
+   "pick": "low",
+   "track": "Imola",
+   "date": "2026-11-22",
+   "type": "Rear-end",
+   "weather": "Light rain",
+   "track_temp": 30,
+   "lap": 1,
+   "race_time": "1:12",
+   "replay": "https://gremigaming.github.io/race-stats/all/race/2026-11-22_16-42-53_Imola_Race?inc=72.7&car=7,11",
+   "race_file": "Race_Imola_2026_11_22_16_52_30.json",
+   "recording": "2026-11-22_16-42-53_Imola_Race.gmtel.gz",
+   "t0": 72.7,
+   "t1": 87.7,
+   "contacts": [
+    {
+     "t": 72.7,
+     "a": 7,
+     "b": 11
+    }
+   ],
+   "drivers": [
+    {
+     "car": 7,
+     "name": "#91 K7HYRAX"
+    },
+    {
+     "car": 11,
+     "name": "#13 Jakubm18_F1"
+    }
+   ],
+   "engine": {
+    "rules": "v1.6",
+    "verdict": "K7HYRAX at fault",
+    "rule": "V16",
+    "severity": 1,
+    "why": "K7HYRAX ran into the car ahead",
+    "at_fault": [
+     "#91 K7HYRAX"
+    ],
+    "contacts": 1,
+    "gray_score": -0.5
+   },
+   "claude": "Picked as the low-severity case. My call: K7HYRAX at fault (rule V16: V16), severity 1, blame on #91 K7HYRAX. What I saw: K7HYRAX ran into the car ahead. I'm fairly confident: the numbers are clear of every limit; this one is here for its severity."
+  },
+  {
+   "id": "1122a-2",
+   "pick": "high",
+   "track": "Baku",
+   "date": "2026-11-22",
+   "type": "Moved across alongside",
+   "weather": "Clear",
+   "track_temp": 31,
+   "lap": 3,
+   "race_time": "5:00",
+   "replay": "https://gremigaming.github.io/race-stats/all/race/2026-11-22_16-00-09_Baku_Race?inc=300.8&car=15,4",
+   "race_file": "Race_Baku_2026_11_22_16_11_36.json",
+   "recording": "2026-11-22_16-00-09_Baku_Race.gmtel.gz",
+   "t0": 300.8,
+   "t1": 306.2,
+   "contacts": [
+    {
+     "t": 300.8,
+     "a": 4,
+     "b": 15
+    }
+   ],
+   "drivers": [
+    {
+     "car": 15,
+     "name": "#8 Lenny_SVW"
+    },
+    {
+     "car": 4,
+     "name": "#15 vanderdeured"
+    }
+   ],
+   "engine": {
+    "rules": "v1.6",
+    "verdict": "vanderdeured at fault",
+    "rule": "V16",
+    "severity": 8,
+    "why": "vanderdeured moved 5.2 m towards the other car",
+    "at_fault": [
+     "#15 vanderdeured"
+    ],
+    "contacts": 1,
+    "gray_score": -0.5
+   },
+   "claude": "Picked as the high-severity case. My call: vanderdeured at fault (rule V16: V16), severity 8, blame on #15 vanderdeured. What I saw: vanderdeured moved 5.2 m towards the other car. I'm fairly confident: the numbers are clear of every limit; this one is here for its severity."
+  },
+  {
+   "id": "1122a-3",
+   "pick": "gray",
+   "track": "Imola",
+   "date": "2026-11-22",
+   "type": "Moved across alongside",
+   "weather": "Light rain",
+   "track_temp": 30,
+   "lap": 3,
+   "race_time": "4:11",
+   "replay": "https://gremigaming.github.io/race-stats/all/race/2026-11-22_16-42-53_Imola_Race?inc=251.5&car=13,9,7",
+   "race_file": "Race_Imola_2026_11_22_16_52_30.json",
+   "recording": "2026-11-22_16-42-53_Imola_Race.gmtel.gz",
+   "t0": 251.5,
+   "t1": 260.1,
+   "contacts": [
+    {
+     "t": 251.5,
+     "a": 9,
+     "b": 13
+    },
+    {
+     "t": 256.5,
+     "a": 7,
+     "b": 13
+    }
+   ],
+   "drivers": [
+    {
+     "car": 13,
+     "name": "#21 RobinGames21"
+    },
+    {
+     "car": 9,
+     "name": "#8 tm swung u"
+    },
+    {
+     "car": 7,
+     "name": "#91 K7HYRAX"
+    }
+   ],
+   "engine": {
+    "rules": "v1.6",
+    "verdict": "tm swung u + RobinGames21 + K7HYRAX at fault",
+    "rule": "R8",
+    "severity": 4,
+    "why": "RobinGames21 moved 4.5 m towards the other car; but GreMi called a similar one (S-894DD0BA, Brazil 2026-11-15) both at fault; K7HYRAX moved 3.0 m towards the other car",
+    "at_fault": [
+     "#8 tm swung u",
+     "#21 RobinGames21",
+     "#91 K7HYRAX"
+    ],
+    "contacts": 2,
+    "gray_score": 0.25
+   },
+   "claude": "Picked because it's a gray area for me. My call: tm swung u + RobinGames21 + K7HYRAX at fault (rule R8: shared fault), severity 4, blame on #8 tm swung u, #21 RobinGames21, #91 K7HYRAX. What I saw: RobinGames21 moved 4.5 m towards the other car; but GreMi called a similar one (S-894DD0BA, Brazil 2026-11-15) both at fault; K7HYRAX moved 3.0 m towards the other car. Why I'm not sure: more than one car gets the blame, and splitting it is a judgement call; its 2 contacts don't point the same way (tm swung u + RobinGames21 at fault; K7HYRAX at fault); 3 cars are involved, so the first move is hard to pick out."
+  },
+  {
+   "id": "1122a-4",
+   "pick": "gray",
+   "track": "Las Vegas",
+   "date": "2026-11-22",
+   "type": "Moved across alongside",
+   "weather": "Clear",
+   "track_temp": 16,
+   "lap": 1,
+   "race_time": "0:30",
+   "replay": "https://gremigaming.github.io/race-stats/all/race/2026-11-22_15-31-26_Las_Vegas_Race?inc=31.0&car=3,13,2,1,0,4",
+   "race_file": "Race_Las_Vegas_2026_11_22_15_41_51.json",
+   "recording": "2026-11-22_15-31-26_Las_Vegas_Race.gmtel.gz",
+   "t0": 31.0,
+   "t1": 46.0,
+   "contacts": [
+    {
+     "t": 31.0,
+     "a": 3,
+     "b": 13
+    },
+    {
+     "t": 31.1,
+     "a": 2,
+     "b": 3
+    },
+    {
+     "t": 31.2,
+     "a": 1,
+     "b": 13
+    },
+    {
+     "t": 33.2,
+     "a": 0,
+     "b": 1
+    },
+    {
+     "t": 33.6,
+     "a": 1,
+     "b": 4
+    }
+   ],
+   "drivers": [
+    {
+     "car": 3,
+     "name": "#8 Stepino81"
+    },
+    {
+     "car": 13,
+     "name": "#13 Jakubm18_F1"
+    },
+    {
+     "car": 2,
+     "name": "#20 QDR_SHW1KS"
+    },
+    {
+     "car": 1,
+     "name": "#86 Overfast-_"
+    },
+    {
+     "car": 0,
+     "name": "#8 niet_Lars123"
+    },
+    {
+     "car": 4,
+     "name": "#15 vanderdeured"
+    }
+   ],
+   "engine": {
+    "rules": "v1.6",
+    "verdict": "Jakubm18_F1 + QDR_SHW1KS + vanderdeured at fault",
+    "rule": "V16",
+    "severity": 5,
+    "why": "Jakubm18_F1 moved 4.6 m towards the other car; QDR_SHW1KS moved 4.9 m towards the other car; vanderdeured moved 5.0 m towards the other car",
+    "at_fault": [
+     "#20 QDR_SHW1KS",
+     "#15 vanderdeured",
+     "#13 Jakubm18_F1"
+    ],
+    "contacts": 5,
+    "gray_score": -0.1
+   },
+   "claude": "Picked because it's a gray area for me. My call: Jakubm18_F1 + QDR_SHW1KS + vanderdeured at fault (rule V16: V16), severity 5, blame on #20 QDR_SHW1KS, #15 vanderdeured, #13 Jakubm18_F1. What I saw: Jakubm18_F1 moved 4.6 m towards the other car; QDR_SHW1KS moved 4.9 m towards the other car; vanderdeured moved 5.0 m towards the other car. Why I'm not sure: its 5 contacts don't point the same way (Jakubm18_F1 at fault; QDR_SHW1KS at fault; Not an incident); 6 cars are involved, so the first move is hard to pick out."
+  },
+  {
+   "id": "1122a-5",
+   "pick": "gray",
+   "track": "Baku",
+   "date": "2026-11-22",
+   "type": "Not an incident",
+   "weather": "Clear",
+   "track_temp": 31,
+   "lap": 1,
+   "race_time": "0:07",
+   "replay": "https://gremigaming.github.io/race-stats/all/race/2026-11-22_16-00-09_Baku_Race?inc=7.5&car=20,6,11",
+   "race_file": "Race_Baku_2026_11_22_16_11_36.json",
+   "recording": "2026-11-22_16-00-09_Baku_Race.gmtel.gz",
+   "t0": 7.5,
+   "t1": 16.2,
+   "contacts": [
+    {
+     "t": 7.5,
+     "a": 6,
+     "b": 20
+    },
+    {
+     "t": 7.7,
+     "a": 11,
+     "b": 20
+    }
+   ],
+   "drivers": [
+    {
+     "car": 20,
+     "name": "#2 Prijo_1926"
+    },
+    {
+     "car": 6,
+     "name": "#13 SRSRawer"
+    },
+    {
+     "car": 11,
+     "name": "#13 Jakubm18_F1"
+    }
+   ],
+   "engine": {
+    "rules": "v1.6",
+    "verdict": "Not an incident",
+    "rule": "R1",
+    "severity": 1,
+    "why": "nothing: nobody lost 1.0 s or was pushed off",
+    "at_fault": [],
+    "contacts": 2,
+    "gray_score": -0.35
+   },
+   "claude": "Picked because it's a gray area for me. My call: not an incident (rule R1: no incident (light tap or squeeze)), severity 1, blame on nobody. What I saw: nothing: nobody lost 1.0 s or was pushed off. Why I'm not sure: 3 cars are involved, so the first move is hard to pick out."
+  }
+ ]
+}
