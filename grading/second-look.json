@@ -12288,6 +12288,25 @@
   "rule_now": "V16"
  },
  {
+  "file": "Race_Suzuka_2026_11_22_16_34_26.json",
+  "t": 1795361102.55,
+  "lap": 1,
+  "cars": [
+   3,
+   16,
+   7
+  ],
+  "frozen": "TTV/GreMi_Gaming at fault",
+  "frozen_fault": [
+   7
+  ],
+  "now": "Ayrton_Senna109 at fault",
+  "now_fault": [
+   4
+  ],
+  "rule_now": "V16"
+ },
+ {
   "file": "Race_Suzuka_Just_in_case_2026_10_28_20_53_25.json",
   "t": 1793216467.43,
   "lap": 1,
