@@ -36,7 +36,7 @@ import gmtel  # noqa: E402
 RELEASE = "https://api.github.com/repos/gremigaming/race-stats/releases/tags/telemetry"
 DOWNLOAD = "https://github.com/gremigaming/race-stats/releases/download/telemetry/"
 
-VERSION = 13         # bump to rebuild every bundle (10: fault engine verdicts per incident, 11: names by showOnlineNames, 12: smaller incidents, 13: team on duplicate hidden names + v1.6)
+VERSION = 14         # bump to rebuild every bundle (10: fault engine verdicts per incident, 11: names by showOnlineNames, 12: smaller incidents, 13: team on duplicate hidden names + v1.6, 14: wrecked cars stop holding incidents open)
 KEEP = 40            # newest races published on the site (R2 keeps everything later)
 # R2 (the live server) only has races from the 4 Nov 2026 stream on: every race before it stays on the site,
 # so each safety rating incident of those races can still be watched (GreMi, 16 Nov 2026)
@@ -51,6 +51,7 @@ SLIP_DEG = 20        # heading this far off the direction of travel = sliding or
 AVOID_M = 60         # a non-contact car joins only from this close behind an upset car
 # How big one incident can get (GreMi, 12 Nov 2026: "bundled incidents are way harder to judge")
 MAX_S = 15           # seconds from its first contact to its end, at most
+STUCK_S, STUCK_RATIO = 5.0, 0.5   # a car still under half its normal speed 5 s after its last contact (wrecked, stopped) stops holding the incident open
 MAX_CORNERS = 2      # corners it covers: the same drivers touching after that = a new incident
 MAX_CARS = 3         # drivers in it (avoiders included), unless it is clearly one pile-up:
 PILEUP_S, PILEUP_CARS = 4, 6   # more cars only in a chain at the first corner, this soon, this many
@@ -500,10 +501,18 @@ def ending(inc, frames, times, normal, slip, t1, cars=None):
     """When every car of the incident has been back to normal for 2 s (MAX_S after its first contact at most)."""
     cars = cars or inc["cars"]
     calm_since = None
+    # GreMi 24 Nov: a car that has not got going again (half its normal speed) STUCK_S after its last
+    # contact no longer holds the incident open (Texas T1: Overfast-_ wrecked kept the video running to the 15 s cap)
+    stuck = {}
+    for i in cars:
+        last = inc.get("last", {}).get(i, t1)
+        rows = [row[i] for _, row in frames[bisect.bisect_left(times, last + STUCK_S):bisect.bisect_right(times, last + STUCK_S + 0.3)] if i in row]
+        if rows and normal.ratio(i, rows[0]) < STUCK_RATIO:
+            stuck[i] = last + STUCK_S
     for t, row in frames[bisect.bisect_left(times, t1):]:
         if t - inc["t0"] > MAX_S:
             return inc["t0"] + MAX_S
-        ok = all(i not in row or (normal.ratio(i, row[i]) >= NORMAL and slip.get((i, t), 0) <= SLIP_DEG
+        ok = all(i not in row or (i in stuck and t >= stuck[i]) or (normal.ratio(i, row[i]) >= NORMAL and slip.get((i, t), 0) <= SLIP_DEG
                                   and bin(row[i][9]).count("1") < 2) for i in cars)
         if not ok:
             calm_since = None
