@@ -8,7 +8,7 @@
   "requested": null,
   "last": "2026-11-10"
  },
- "pending": 50,
+ "pending": 52,
  "tracks": [
   {
    "track": "Melbourne",
@@ -5144,12 +5144,68 @@
        },
        "text": "Rear ride height 42 → 43",
        "why": "The rear floor still scrapes; a little higher.",
+       "sessions": [
+        {
+         "file": "2026-11-25_20-01-53_Monza_Race.gmtel.gz",
+         "date": "2026-11-25",
+         "session": "race",
+         "osq": false,
+         "weather": 1,
+         "pace": 82277,
+         "best": 82277,
+         "mean": 82993,
+         "run": 5,
+         "laps": 4,
+         "bb": 58
+        }
+       ],
+       "verdict": {
+        "result": "worse",
+        "delta": 1.46,
+        "text": "Worse: quali lap 1:22.277 against 1:21.090 on V1 (1.187 s slower)."
+       },
+       "slot": 42
+      },
+      {
+       "v": 3,
+       "base": 1,
+       "created": "2026-11-25",
+       "saved": null,
+       "values": {
+        "fw": 18,
+        "rw": 2,
+        "don": 100,
+        "doff": 35,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 30,
+        "farb": 2,
+        "rarb": 6,
+        "frh": 21,
+        "rrh": 42,
+        "bb": 58,
+        "bp": 100,
+        "fr": 29.5,
+        "fl": 29.5,
+        "rr": 25.5,
+        "rl": 25.5
+       },
+       "change": {
+        "rw": [
+         0,
+         2
+        ]
+       },
+       "text": "Rear wing 0 → 2",
+       "why": "More rear grip against oversteer and wheelspin. Costs a little top speed. V2's change is undone (it didn't make the car faster).",
        "sessions": [],
        "verdict": {
         "result": "untested",
         "text": "Not driven yet."
-       },
-       "slot": 42
+       }
       }
      ]
     },
@@ -5241,12 +5297,68 @@
        },
        "text": "Rear ride height 42 → 43",
        "why": "The rear floor still scrapes; a little higher.",
+       "sessions": [
+        {
+         "file": "2026-11-25_20-01-53_Monza_Race.gmtel.gz",
+         "date": "2026-11-25",
+         "session": "race",
+         "osq": false,
+         "weather": 1,
+         "pace": 82993,
+         "best": 82277,
+         "mean": 82993,
+         "run": 5,
+         "laps": 4,
+         "bb": 58
+        }
+       ],
+       "verdict": {
+        "result": "worse",
+        "delta": 0.6,
+        "text": "Worse: average lap 1:22.993 against 1:22.496 on V1 (0.497 s slower)."
+       },
+       "slot": 43
+      },
+      {
+       "v": 3,
+       "base": 1,
+       "created": "2026-11-25",
+       "saved": null,
+       "values": {
+        "fw": 18,
+        "rw": 2,
+        "don": 100,
+        "doff": 35,
+        "fc": -3.5,
+        "rc": -2.0,
+        "ft": 0.0,
+        "rt": 0.1,
+        "fs": 41,
+        "rs": 30,
+        "farb": 2,
+        "rarb": 6,
+        "frh": 21,
+        "rrh": 42,
+        "bb": 58,
+        "bp": 100,
+        "fr": 29.5,
+        "fl": 29.5,
+        "rr": 25.5,
+        "rl": 25.5
+       },
+       "change": {
+        "rw": [
+         0,
+         2
+        ]
+       },
+       "text": "Rear wing 0 → 2",
+       "why": "More rear grip against oversteer and wheelspin. Costs a little top speed. V2's change is undone (it didn't make the car faster).",
        "sessions": [],
        "verdict": {
         "result": "untested",
         "text": "Not driven yet."
-       },
-       "slot": 43
+       }
       }
      ]
     },
