@@ -21,6 +21,14 @@ export interface ChangelogEntry {
 // raw commit history also contains routine uploads and staff-only corrections.
 const changelog: ChangelogEntry[] = [
   {
+    id: "faster-race-publish",
+    date: "2026-11-25",
+    type: "fix",
+    message:
+      "New races show up on the site much sooner after the race is saved, usually within a minute, even while the previous race is still being analysed.",
+    destination: "sessions",
+  },
+  {
     id: "renamed-gridmi",
     date: "2026-11-25",
     type: "feat",
