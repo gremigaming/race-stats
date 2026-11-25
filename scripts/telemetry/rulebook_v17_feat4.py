@@ -14,7 +14,7 @@ import numpy as np
 import gmtel, race_bundles as rb, track_map
 
 rec = os.path.basename(path).replace('.gmtel.gz', '')   # path, H: given by rulebook_v17 (this file is exec'd, not imported)
-s = gmtel.Session(path); frames = rb.frames_of(s)
+s = (SESS if globals().get("SESS") is not None else gmtel.Session(path)); frames = (FRAMES if globals().get("FRAMES") is not None else rb.frames_of(s))
 tm = track_map.load(s.info.get('track'))
 L = s.info.get('track_length', 0) or 5000
 HALF_W, HALF_L = 1.0, 2.8

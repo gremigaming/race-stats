@@ -54,8 +54,9 @@ def _judge_pair():
     return ns["judge_pair"]
 
 
-def _run(fname, path, H):
-    ns = {"path": path, "H": H, "__name__": "rulebook_v17_" + fname}
+def _run(fname, path, H, sess=None, frames=None):
+    # the race's parsed session and frames are passed in (25 Nov 2026): parsing them again per file took 3 GB on Monaco
+    ns = {"path": path, "H": H, "SESS": sess, "FRAMES": frames, "__name__": "rulebook_v17_" + fname}
     exec(compile(_src(fname), fname, "exec"), ns)
     return ns["out"]
 
@@ -79,13 +80,14 @@ def judge_incidents(j, incs, name=str, path=None, sess=None):
                   "wet": (j.weather_at(inc["t0"]) or 0) >= 3,
                   "contacts": [(c["a"], c["b"], c["t"]) for c in inc["contacts"]]})
     H = json.loads(json.dumps(H, default=str))
+    frames = getattr(j, "frames", None)
     try:
-        HM = _run("rulebook_v17_harm.py", path, H)
+        HM = _run("rulebook_v17_harm.py", path, H, sess, frames)
     except Exception as ex:   # noqa: BLE001  (no harm data: judge without it)
         print("rulebook_v17: harm measures failed:", ex)
         HM = None
     try:
-        F4 = _run("rulebook_v17_feat4.py", path, H)
+        F4 = _run("rulebook_v17_feat4.py", path, H, sess, frames)
     except Exception as ex:   # noqa: BLE001
         print("rulebook_v17: extra measures failed:", ex)
         F4 = None

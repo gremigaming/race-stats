@@ -2,7 +2,7 @@
 import sys,json,os,bisect,collections
 import gmtel, race_bundles as rb
 rec=os.path.basename(path).replace('.gmtel.gz','')   # path, H: given by rulebook_v17 (this file is exec'd, not imported)
-s=gmtel.Session(path); frames=rb.frames_of(s)
+s=(SESS if globals().get("SESS") is not None else gmtel.Session(path)); frames=(FRAMES if globals().get("FRAMES") is not None else rb.frames_of(s))
 L=s.info.get('track_length',0) or 5000
 TS=collections.defaultdict(list)
 for t,cars in frames:

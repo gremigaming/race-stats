@@ -11,6 +11,7 @@ kerbs from where their wheels touched one. Everything is code, no manual work.
 
     python3 scripts/telemetry/incident_replays.py /tmp/telemetry-cache
 """
+import copy
 import collections
 import hashlib
 import json
@@ -135,6 +136,15 @@ class Race:
         self.arr = {i: np.array(v) for i, v in self.pos.items() if len(v) > 20}
 
     def track(self, a, t0, t1, c, rad):
+        """track_edges, kept per call: verdicts.contact, rulebook v1.6 and v1.7 ask the same one for every contact
+        (25 Nov 2026: it was 2/3 of a v1.7 race's judging time; Monaco took 15 min and the live server timed out)."""
+        key = (a, round(t0, 3), round(t1, 3), round(c[0], 3), round(c[1], 3), rad)
+        memo = self.__dict__.setdefault("_track_memo", {})
+        if key not in memo:
+            memo[key] = self.track_edges(a, t0, t1, c, rad)
+        return copy.deepcopy(memo[key])
+
+    def track_edges(self, a, t0, t1, c, rad):
         """Track edges around point c: the reference is car a's path on another lap, the width comes from where every car drove."""
         P = self.arr[a]
         near = (np.hypot(P[:, 1] - c[0], P[:, 2] - c[1]) < rad * 1.3) & ((P[:, 0] < t0 - 15) | (P[:, 0] > t1 + 15))

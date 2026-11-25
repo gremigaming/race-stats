@@ -193,7 +193,9 @@ def main():
         rec = max(same or cands, key=rec_time)   # the latest race recording before the save
         used.add(rec)
         todo.append((file, rec, cache))
-    with ProcessPoolExecutor(int(os.environ.get("FAULT_JOBS", "2"))) as ex:
+    # one race at a time on the live server: a v1.7 race can take 3 GB (Monaco 25 Nov), two at once ran it out of memory
+    jobs = os.environ.get("FAULT_JOBS") or ("1" if os.environ.get("LEAGUE_EXTRA_RACES_DIR") else "2")
+    with ProcessPoolExecutor(int(jobs)) as ex:
         for file, rec, share in ex.map(judge, todo):
             print(file, "<-", rec, f"({share:.0%} of contacts matched)" if share is not None else ": contacts did not match, not judged")
 
