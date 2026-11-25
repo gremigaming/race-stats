@@ -25,6 +25,7 @@ import verdicts  # noqa: E402
 
 FIRST_DAY = "2026_10_19"   # races before this have no telemetry for every car: no SR (GreMi, 31 Oct)
 SESSIONS = os.environ.get("LEAGUE_SESSIONS_DIR", os.path.join("public", "league", "sessions"))
+ROOT_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 WINDOW_MIN = 60            # the recording started at most this long before the race file was saved
 
 
@@ -160,6 +161,16 @@ def main():
         print("telemetry release not reachable, using the kept recordings:", ex)
     assets = sorted(assets)
     todo, used = [], set()
+    # Live server (it sets LEAGUE_EXTRA_RACES_DIR): a frozen race keeps its frozen calls whatever the
+    # rulebook says now (freeze_calls.py --read), so judging it again there only costs time. A rulebook
+    # change (v1.7, 25 Nov 2026) rejudged every race on the 2-core server for hours and kept the new SR
+    # off the website. The Pages build still judges them again (fresh calls for grading/second-look.json).
+    frozen = {}
+    if os.environ.get("LEAGUE_EXTRA_RACES_DIR"):
+        try:
+            frozen = json.load(open(os.path.join(ROOT_DIR, "grading", "frozen-calls.json"), encoding="utf-8"))["races"]
+        except (OSError, ValueError, KeyError):
+            frozen = {}
     for f in sorted(glob.glob(os.path.join(SESSIONS, "Race_*.json")), key=lambda f: stamp(f)):
         file = os.path.basename(f)
         if stamp(f).strftime("%Y_%m_%d") < FIRST_DAY:
@@ -167,7 +178,7 @@ def main():
         out = os.path.join(cache, "verdicts", file)
         if os.path.exists(out):
             try:
-                if json.load(open(out)).get("rules") == verdicts.rules_for(stamp(f).strftime("%Y-%m-%d")):
+                if file in frozen or json.load(open(out)).get("rules") == verdicts.rules_for(stamp(f).strftime("%Y-%m-%d")):
                     used.add(json.load(open(out))["recording"]); continue
             except Exception:
                 pass

@@ -118,7 +118,8 @@ def main(cache, write=True):
                     review.append({"file": file, "t": f["t0"], "lap": f.get("lap"), "cars": f.get("cars"),
                                    "frozen": f.get("verdict"), "frozen_fault": blame(f)[0],
                                    "now": now_inc.get("verdict"), "now_fault": blame(now_inc)[0], "rule_now": now_inc.get("rule")})
-        mark = [FREEZE_V, data.get("precedents"), entry.get("v")]
+        # the entry's freeze day is in the mark: a race frozen again (v1.7 regrade, 25 Nov 2026) keeps "v": 1
+        mark = [FREEZE_V, data.get("precedents"), entry.get("v"), entry.get("frozen")]
         if data.get("frozen") == mark:
             kept += 1
             continue
