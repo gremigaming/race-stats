@@ -1765,11 +1765,24 @@
          "run": 5,
          "laps": 4,
          "bb": 56
+        },
+        {
+         "file": "2026-11-25_20-33-07_Jeddah_Race.gmtel.gz",
+         "date": "2026-11-25",
+         "session": "race",
+         "osq": false,
+         "weather": 2,
+         "pace": 93268,
+         "best": 92925,
+         "mean": 93268,
+         "run": 5,
+         "laps": 3,
+         "bb": 56
         }
        ],
        "verdict": {
         "result": "baseline",
-        "text": "Starting point: 1:33.174 over 3 sessions."
+        "text": "Starting point: 1:33.197 over 4 sessions."
        }
       },
       {
@@ -6704,11 +6717,24 @@
          "run": 5,
          "laps": 4,
          "bb": 59
+        },
+        {
+         "file": "2026-11-25_20-17-45_Mexico_Race.gmtel.gz",
+         "date": "2026-11-25",
+         "session": "race",
+         "osq": false,
+         "weather": 1,
+         "pace": 77524,
+         "best": 77524,
+         "mean": 78044,
+         "run": 5,
+         "laps": 4,
+         "bb": 58
         }
        ],
        "verdict": {
         "result": "baseline",
-        "text": "Starting point: 1:16.971 over 4 sessions."
+        "text": "Starting point: 1:17.082 over 5 sessions."
        }
       },
       {
@@ -6813,11 +6839,24 @@
          "run": 5,
          "laps": 4,
          "bb": 59
+        },
+        {
+         "file": "2026-11-25_20-17-45_Mexico_Race.gmtel.gz",
+         "date": "2026-11-25",
+         "session": "race",
+         "osq": false,
+         "weather": 1,
+         "pace": 78044,
+         "best": 77524,
+         "mean": 78044,
+         "run": 5,
+         "laps": 4,
+         "bb": 58
         }
        ],
        "verdict": {
         "result": "baseline",
-        "text": "Starting point: 1:17.784 over 2 sessions."
+        "text": "Starting point: 1:17.870 over 3 sessions."
        }
       },
       {
