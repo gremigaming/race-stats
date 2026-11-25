@@ -29,3 +29,4 @@ dist-ssr
 # built by scripts/build-league-data.mjs
 public/league/
 __pycache__/
+tsconfig.tsbuildinfo
