@@ -2525,11 +2525,24 @@
          "run": 5,
          "laps": 4,
          "bb": 58
+        },
+        {
+         "file": "2026-11-25_20-48-52_Monaco_Race.gmtel.gz",
+         "date": "2026-11-25",
+         "session": "race",
+         "osq": false,
+         "weather": 5,
+         "pace": 81719,
+         "best": 81719,
+         "mean": 86549,
+         "run": 5,
+         "laps": 3,
+         "bb": 57
         }
        ],
        "verdict": {
         "result": "baseline",
-        "text": "Starting point: 1:12.160 over 2 sessions."
+        "text": "Starting point: 1:15.346 over 3 sessions."
        }
       },
       {
