@@ -1,8 +1,54 @@
 {
- "title": "Severity 7+ · every one (64)",
+ "title": "Severity 7+ · every one (65)",
  "stream": "severe",
  "rules": "v1.4",
  "incidents": [
+  {
+   "id": "sev-11221704-4491",
+   "pick": "severe",
+   "track": "Madrid",
+   "date": "2026-11-22",
+   "type": "Racing incident",
+   "weather": "Light rain",
+   "track_temp": 29,
+   "lap": 5,
+   "race_time": "7:29",
+   "replay": "https://gremigaming.github.io/race-stats/all/race/2026-11-22_17-04-05_Madrid_Race?inc=449.2&car=6,3",
+   "race_file": "Race_Madrid_2026_11_22_17_15_40.json",
+   "recording": "2026-11-22_17-04-05_Madrid_Race.gmtel.gz",
+   "t0": 449.2,
+   "t1": 464.2,
+   "contacts": [
+    {
+     "t": 449.2,
+     "a": 3,
+     "b": 6
+    }
+   ],
+   "drivers": [
+    {
+     "car": 6,
+     "name": "#91 K7HYRAX"
+    },
+    {
+     "car": 3,
+     "name": "#69 Ayrton_Senna109"
+    }
+   ],
+   "engine": {
+    "rules": "v1.6",
+    "verdict": "Ayrton_Senna109 at fault",
+    "rule": "V17",
+    "severity": 9,
+    "why": "Ayrton_Senna109 stayed on the throttle (no brake) into a braking car he had hit 10 s earlier: on purpose",
+    "at_fault": [
+     "#69 Ayrton_Senna109"
+    ],
+    "contacts": 1,
+    "gray_score": -0.5
+   },
+   "claude": "In the list because it's severity 7+. My call: Ayrton_Senna109 at fault (rule V17: V17), severity 9, blame on #69 Ayrton_Senna109. What I saw: Ayrton_Senna109 stayed on the throttle (no brake) into a braking car he had hit 10 s earlier: on purpose. I'm fairly confident: the numbers are clear of every limit; this one is here for its severity."
+  },
   {
    "id": "sev-11221642-2667",
    "pick": "severe",
