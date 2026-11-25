@@ -162,12 +162,16 @@ export function pollRace(onRace, onWait, sec = 10) {
   tick();
 }
 
-// ---- Safety rating for one race (league safety.json, same data as the site's SR page).
-export async function loadSafety(src) {
-  const p = src.base === LIVE ? src.index.assetPaths?.["safety.json"] : null;
-  const url = p ? (/^https?:/.test(p) ? p : LIVE + enc(p.replace(/^\//, ""))) : `${PAGES}safety.json?t=${Date.now()}`;
-  try { return await getJson(url, 12000); } catch { return p ? getJson(`${PAGES}safety.json?t=${Date.now()}`, 12000).catch(() => null) : null; }
+// ---- League rating files (safety.json, performance.json): live copy first, the site's own copy as fallback.
+export async function loadLeagueAsset(src, name) {
+  const p = src.base === LIVE ? src.index.assetPaths?.[name] : null;
+  const url = p ? (/^https?:/.test(p) ? p : LIVE + enc(p.replace(/^\//, ""))) : `${PAGES}${name}?t=${Date.now()}`;
+  try { return await getJson(url, 12000); } catch { return p ? getJson(`${PAGES}${name}?t=${Date.now()}`, 12000).catch(() => null) : null; }
 }
+// Safety rating for one race (league safety.json, same data as the site's SR page).
+export const loadSafety = (src) => loadLeagueAsset(src, "safety.json");
+// Performance Rating (league performance.json, same data as the site's Performance page).
+export const loadPerformance = (src) => loadLeagueAsset(src, "performance.json");
 const SR_RANKS = [[100, "S+", "#fcd34d"], [90, "S", "#c084fc"], [70, "A", "#4ade80"], [50, "B", "#facc15"], [40, "C", "#fbbf24"],
   [30, "D", "#fb923c"], [20, "E", "#f87171"], [-Infinity, "F", "#dc2626"]];
 export const srRank = (sr) => { const r = SR_RANKS.find(([min]) => sr >= min); return { rank: r[1], color: r[2] }; };

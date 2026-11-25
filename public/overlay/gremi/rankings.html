@@ -1,0 +1,116 @@
+<!doctype html>
+<!-- OBS browser source: league rankings of the drivers in the last race, alternating between the
+     Performance Rating and the Safety Rating (GreMi 2026-11-25, Between races scene).
+     Same data as the site's Performance and Safety pages. Fills the whole browser source.
+     ?secs=20 time per rating, ?rows=4 rows per column, ?fs=19 font size, ?only=pr|sr one rating,
+     ?race=<file> a fixed race (testing). -->
+<html><head><meta charset="utf-8"><title>Last race rankings</title>
+<link rel="stylesheet" href="brand.css">
+<style>
+  html, body { width: 100%; height: 100%; }
+  .card { position: absolute; inset: 8px 10px; padding: 12px 20px 14px; display: flex; flex-direction: column; gap: 8px; }
+  .head { display: flex; align-items: baseline; gap: 14px; }
+  .head .big { font-size: calc(var(--fs) * 1.45); }
+  .head .label { font-size: calc(var(--fs) * .85); }
+  .head .spacer { flex: 1; }
+  .dots { display: flex; gap: 6px; align-self: center; }
+  .dots i { width: 22px; height: 5px; border-radius: 3px; background: rgba(255,255,255,.22); }
+  .dots i.on { background: linear-gradient(90deg, var(--red), var(--purple)); }
+  .grid { flex: 1; display: grid; grid-auto-flow: column; grid-template-rows: repeat(var(--rows), 1fr); column-gap: 14px; row-gap: 3px; min-height: 0; }
+  .row { display: flex; align-items: center; gap: 8px; min-width: 0; padding: 0 8px 0 0; border-radius: 6px;
+         font: 600 var(--fs)/1 "Saira Condensed", sans-serif; background: rgba(0,0,0,.22); overflow: hidden; }
+  .row.me { background: linear-gradient(90deg, rgba(225,6,0,.45), rgba(145,70,255,.45)); }
+  .pos { flex: none; width: calc(var(--fs) * 1.7); align-self: stretch; display: grid; place-items: center; font-weight: 800;
+         background: rgba(255,255,255,.1); font-variant-numeric: tabular-nums; }
+  .name { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tag { flex: none; font-size: calc(var(--fs) * .7); font-weight: 800; letter-spacing: .06em; padding: 2px 5px; border-radius: 4px; color: #111; }
+  .val { flex: none; font-weight: 800; font-variant-numeric: tabular-nums; min-width: calc(var(--fs) * 1.9); text-align: right; }
+  .chg { flex: none; font-size: calc(var(--fs) * .72); font-weight: 600; min-width: calc(var(--fs) * 1.6); text-align: right; color: var(--dim); }
+  .chg.up { color: #4ade80; } .chg.down { color: #f87171; }
+  .none .val, .none .name { color: var(--dim); }
+  .pane { transition: opacity .6s; }
+  .pane.hide { opacity: 0; }
+</style></head>
+<body>
+<div class="card fade out" id="card"><div class="streaks"><i></i><i></i><i></i><i></i></div>
+  <div class="head pane" id="head"><div class="big grad" id="title">—</div><div class="label" id="sub"></div><div class="spacer"></div><div class="dots" id="dots"></div></div>
+  <div class="grid pane" id="grid"></div>
+</div>
+<script type="module">
+import { poll, races, loadSession, classification, loadSafety, loadPerformance, normName, srRank, isMe } from "./league.js";
+const q = new URLSearchParams(location.search);
+const card = document.getElementById("card"), grid = document.getElementById("grid");
+document.body.style.setProperty("--fs", (+q.get("fs") || 19) + "px");
+document.body.style.setProperty("--rows", +q.get("rows") || 4);
+const SECS = Math.max(5, +q.get("secs") || 20);
+const ONLY = (q.get("only") || "").toLowerCase();
+
+// Performance Rating emblem metal (src/league/performance.ts PR_RANKS / METAL).
+const prRank = (pr) => {
+  const metal = pr >= 7 ? "Gold" : pr >= 4 ? "Silver" : "Bronze";
+  const numeral = ["I", "II", "III"][Math.min(2, Math.max(0, Math.floor(pr) - (metal === "Gold" ? 7 : metal === "Silver" ? 4 : 1)))];
+  return { metal, numeral, color: { Gold: "#fbbf24", Silver: "#d4dbe5", Bronze: "#e0894f" }[metal] };
+};
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+
+let panels = [], at = 0, timer = 0;
+
+function render(p) {
+  document.getElementById("title").textContent = p.title;
+  document.getElementById("sub").textContent = p.sub;
+  document.getElementById("dots").innerHTML = panels.length > 1 ? panels.map((x) => `<i class="${x === p ? "on" : ""}"></i>`).join("") : "";
+  grid.innerHTML = p.rows.map((r, i) => `<div class="row ${r.me ? "me" : ""} ${r.value == null ? "none" : ""}">
+      <span class="pos">${r.value == null ? "–" : i + 1}</span><span class="name">${esc(r.name)}</span>
+      ${r.tag ? `<span class="tag" style="background:${r.color}">${r.tag}</span>` : ""}
+      <span class="val" style="color:${r.value == null ? "" : r.color}">${r.value == null ? "NEW" : r.text}</span>
+      ${r.chg != null ? `<span class="chg ${r.chg > 0.05 ? "up" : r.chg < -0.05 ? "down" : ""}">${r.chg > 0.05 ? "▲" : r.chg < -0.05 ? "▼" : ""}${r.chg ? Math.abs(r.chg).toFixed(1) : ""}</span>` : ""}
+    </div>`).join("");
+}
+
+function show(i) {
+  clearTimeout(timer);
+  if (!panels.length) return;
+  at = i % panels.length;
+  const panes = document.querySelectorAll(".pane");
+  panes.forEach((e) => e.classList.add("hide"));
+  setTimeout(() => {
+    render(panels[at]);
+    panes.forEach((e) => e.classList.remove("hide"));
+    card.classList.remove("sweep"); void card.offsetWidth; card.classList.add("sweep");
+  }, card.classList.contains("out") ? 0 : 600);
+  card.classList.remove("out");
+  if (panels.length > 1) timer = setTimeout(() => show(at + 1), SECS * 1000);
+}
+
+const sortRows = (rows) => rows.sort((a, b) => (b.value ?? -1e9) - (a.value ?? -1e9) || a.name.localeCompare(b.name));
+
+poll(async (src) => {
+  const all = races(src.index);
+  const race = all.find((r) => r.file === q.get("race")) || all[0];
+  if (!race) return;
+  const [session, perf, safety] = await Promise.all([loadSession(src, race.file), loadPerformance(src), loadSafety(src)]);
+  const drivers = classification(session).map((c) => c.name);
+  if (!drivers.length) return;
+  const sub = `Drivers of the last race · ${race.track}`;
+  const pk = new Map((perf?.drivers || []).map((d) => [normName(d.name), d]));
+  const sk = new Map((safety?.drivers || []).map((d) => [normName(d.name), d]));
+  const next = [];
+  if (ONLY !== "sr" && perf) next.push({ key: "pr", title: "Performance Rating", sub, rows: sortRows(drivers.map((n) => {
+    const d = pk.get(normName(n)), r = d ? prRank(d.pr) : null;
+    return { name: n, me: isMe(n), value: d ? d.pr : null, text: d ? d.pr.toFixed(1) : "", color: r?.color, tag: r ? `${r.metal[0]}${r.numeral}` : "" };
+  })) });
+  if (ONLY !== "pr" && safety) next.push({ key: "sr", title: "Safety Rating", sub, rows: sortRows(drivers.map((n) => {
+    const d = sk.get(normName(n)), r = d && !d.banned ? srRank(d.sr) : null;
+    return { name: n, me: isMe(n), value: r ? d.sr : null, text: r ? String(+d.sr.toFixed(1)) : "", color: r?.color, tag: r?.rank, chg: r ? d.change : null };
+  })) });
+  if (!next.length) return;
+  const cur = panels[at]?.key;
+  panels = next;
+  const keep = panels.findIndex((p) => p.key === cur);
+  if (keep >= 0) { render(panels[keep]); at = keep; if (!timer && panels.length > 1) show(keep); }
+  else show(0);
+}, 30);
+// Start on the Performance Rating each time OBS shows the source.
+window.addEventListener("obsSourceActiveChanged", (e) => { if (e.detail?.active && panels.length) show(0); });
+</script>
+</body></html>
