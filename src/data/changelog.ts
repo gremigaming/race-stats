@@ -22,6 +22,15 @@ export interface ChangelogEntry {
 // raw commit history also contains routine uploads and staff-only corrections.
 const changelog: ChangelogEntry[] = [
   {
+    id: "incident-rules-v17",
+    date: "2026-11-25",
+    type: "feat",
+    title: "New incident rules (v1.7)",
+    message:
+      "Incidents are now judged by rulebook v1.7: more light taps and battle touches count as racing incidents, while clear moves into another car still get the blame. Every race from 11 Nov has been judged again with it, so many Safety Ratings went up. Staff grades stay as they were.",
+    destination: "safety",
+  },
+  {
     id: "performance-rating",
     date: "2026-11-25",
     type: "feat",

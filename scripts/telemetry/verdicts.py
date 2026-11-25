@@ -63,6 +63,12 @@ import incident_replays  # noqa: E402
 import race_bundles as rb  # noqa: E402
 
 RULES = "v1.6"       # bump when a rule changes: fault_engine.py judges every race again (v1.6: rulebook_v16.py, 20 Nov 2026)
+V17_FROM = os.environ.get("V17_FROM", "2026-11-11")   # races recorded on/after this date: rulebook_v17.py (GreMi 25 Nov 2026: live, regrade from 11 Nov); "" = off
+
+
+def rules_for(day):
+    """The rulebook version a race recorded on `day` (YYYY-MM-DD) is judged with: fault_engine redoes a race when it changes."""
+    return "v1.7" if V17_FROM and day >= V17_FROM else RULES
 ALONGSIDE_M = 4.0    # less than this apart along the track = alongside (a car is ~5.6 m long)
 MOVE_M = 1.0         # moving across this much in the last 1.2 s counts as moving into the other car
 MOVE_MORE_M = 0.7    # ... and this much more than the other car did
@@ -99,6 +105,7 @@ def ai_at_start(path):
 class Judge:
     def __init__(self, sess, frames, path):
         self.frames, self.times = frames, [t for t, _ in frames]
+        self.path, self.sess = path, sess
         self.track_len = sess.info.get("track_length", 0)
         self.race = incident_replays.Race(sess)
         self.ai = ai_at_start(path)
@@ -380,6 +387,19 @@ def judge_all(j, incs, name=str):
             if o:
                 p.update(features=o["features"], effects=o.get("effects"))
         out[k] = n
+    # v1.7 (rulebook thread, 25 Nov 2026): races recorded from V17_FROM on are judged by rulebook_v17.py
+    # (incidents it does not judge, such as AI-only ones, keep the calls above). Older races keep v1.6.
+    if V17_FROM and os.path.basename(getattr(j, "path", "") or "")[:10] >= V17_FROM:
+        import rulebook_v17
+        for k, n in enumerate(rulebook_v17.judge_incidents(j, incs, name, path=j.path, sess=getattr(j, "sess", None))):
+            if n is None or all(p["rule"] == "R6" for p in out[k]["contacts"]):
+                continue
+            feats = {frozenset((p["a"], p["b"])): p for p in out[k]["contacts"] if p.get("features")}
+            for p in n["contacts"]:
+                o = feats.get(frozenset((p["a"], p["b"])))
+                if o:
+                    p.update(features=o["features"], effects=o.get("effects"))
+            out[k] = n
     return out
 
 

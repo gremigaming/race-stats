@@ -134,7 +134,7 @@ def judge(args):
     except Exception as ex:   # the summaries can do without it; the verdicts can't
         print(file, ": battles not counted:", ex)
         wheel = {}
-    data = {"rules": verdicts.RULES, "recording": rec, "offset": round(off, 2), "matched": round(share, 2),
+    data = {"rules": verdicts.rules_for(rec[:10]), "recording": rec, "offset": round(off, 2), "matched": round(share, 2),
             "weather": [[round(t + off, 1), w] for t, w in j.weather], "track_temp": sess.info.get("track_temp"),
             "battles": wheel,
             "incidents": [{"t0": round(inc["t0"] + off, 2), "t1": round(inc["t1"] + off, 2), "lap": inc["lap"],
@@ -167,7 +167,7 @@ def main():
         out = os.path.join(cache, "verdicts", file)
         if os.path.exists(out):
             try:
-                if json.load(open(out)).get("rules") == verdicts.RULES:
+                if json.load(open(out)).get("rules") == verdicts.rules_for(stamp(f).strftime("%Y-%m-%d")):
                     used.add(json.load(open(out))["recording"]); continue
             except Exception:
                 pass
