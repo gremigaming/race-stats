@@ -24,7 +24,7 @@ jobs:
       - name: Build
         env:
           VITE_BASE_PATH: /race-stats/
-          VITE_APP_NAME: GreMi Gang Race Stats
+          VITE_APP_NAME: GridMi
           VITE_DISABLE_ANALYTICS: "true"
           VITE_SKIP_API: "true"
         run: pnpm exec vite build

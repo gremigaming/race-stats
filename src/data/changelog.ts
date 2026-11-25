@@ -21,6 +21,16 @@ export interface ChangelogEntry {
 // raw commit history also contains routine uploads and staff-only corrections.
 const changelog: ChangelogEntry[] = [
   {
+    id: "renamed-gridmi",
+    date: "2026-11-25",
+    type: "feat",
+    title: "GreMi Gang Race Stats is now GridMi",
+    message:
+      "Same races, stats, safety ratings and links, with a new name in the header, browser tab and link previews.",
+    milestone: true,
+    destination: "home",
+  },
+  {
     id: "rulebook-v16",
     date: "2026-11-20",
     type: "feat",

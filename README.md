@@ -1,4 +1,4 @@
-# GreMi Gaming F1 Lobby Manager
+# GridMi
 
 Every race from the GreMi Gang lobbies, for every driver: results, lap times,
 tyre stints, position charts, a drivers leaderboard and head-to-head.
