@@ -104,6 +104,36 @@ export const prRankName = (pr: number) => {
   return `${r.metal} ${r.numeral}`;
 };
 
+/**
+ * Score colour on one scale (GreMi, 25 Nov 2026, "scale 1"): red and orange up to 6,
+ * a long yellow middle, soft green from about 9.
+ */
+const SCORE_STOPS: [number, [number, number, number]][] = [
+  [1, [217, 72, 59]],
+  [4.5, [232, 116, 47]],
+  [6, [233, 181, 42]],
+  [7.5, [217, 207, 58]],
+  [8.7, [143, 191, 74]],
+  [10, [79, 157, 92]],
+];
+
+export function scoreColor(v: number): string {
+  const x = Math.max(1, Math.min(10, v));
+  for (let i = 1; i < SCORE_STOPS.length; i++) {
+    const [a, ca] = SCORE_STOPS[i - 1];
+    const [b, cb] = SCORE_STOPS[i];
+    if (x <= b) {
+      const t = (x - a) / (b - a);
+      return `rgb(${ca.map((c, k) => Math.round(c + (cb[k] - c) * t)).join(",")})`;
+    }
+  }
+  return "rgb(79,157,92)";
+}
+
+export const SCORE_GRADIENT = `linear-gradient(90deg,${SCORE_STOPS.map(
+  ([v, c]) => `rgb(${c.join(",")}) ${(((v - 1) / 9) * 100).toFixed(1)}%`,
+).join(",")})`;
+
 /** Bar colour for a 1.0 to 10.0 score (its rank's metal). */
 export const prColor = (v: number) => METAL[prRankOf(v).metal].bar;
 

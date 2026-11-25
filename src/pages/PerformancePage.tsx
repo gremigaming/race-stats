@@ -5,24 +5,17 @@ import { cardClass, interactiveFocusClass } from "../components/Card";
 import { DriverSearchSelect } from "../components/DriverSearchSelect";
 import { PrBadge, PrRankLegend } from "../components/performance/PrBadge";
 import { RankTile } from "../components/safety/RankTile";
-import { HorizontalScrollRegion } from "../components/ui/HorizontalScrollRegion";
 import { PageFrame } from "../components/ui/PageFrame";
 import { PageHeader } from "../components/ui/PageHeader";
 import { SectionHeader } from "../components/ui/SectionHeader";
 import { SegmentedControl } from "../components/ui/SegmentedControl";
-import { SortHeader, sortRows, useSort } from "../components/ui/SortHeader";
-import {
-  tableCellClass,
-  tableClassLoose,
-  tableHeadClass,
-  tableRowClass,
-  tableStickyHeadClass,
-} from "../components/ui/table";
+import { sortRows, useSort, type SortDir } from "../components/ui/SortHeader";
 import { useTelemetry } from "../context/TelemetryContext";
 import { driverKey } from "../league/league";
 import {
   PR_CATEGORIES,
-  prColor,
+  scoreColor,
+  SCORE_GRADIENT,
   prRankName,
   TELL_KIND,
   type PerfCategory,
@@ -45,32 +38,70 @@ const median = (a: number[]) => {
 const trendOf = (d: PerfDriver) =>
   d.older == null || d.recent == null ? null : d.older - d.recent;
 
-function Trend({ d }: { d: PerfDriver }) {
-  const x = trendOf(d);
-  if (x == null) return <span className="text-zinc-500">new</span>;
-  if (Math.abs(x) < 0.25) return <span className="text-zinc-500">steady</span>;
-  return x > 0 ? (
-    <span className="text-emerald-300" title="Closer to the fastest car in the last 6 races">
-      ▲ {x.toFixed(1)}%
-    </span>
-  ) : (
-    <span className="text-red-300" title="Further from the fastest car in the last 6 races">
-      ▼ {(-x).toFixed(1)}%
+/** Ranking columns: # | PR + SR | driver | six scores | PR. On phones the scores go on a second line. */
+const RANK_GRID =
+  "grid items-center gap-x-2 px-1 grid-cols-[1.5rem_3.25rem_minmax(0,1fr)_3rem] md:grid-cols-[1.75rem_3.5rem_minmax(0,1fr)_repeat(6,minmax(0,4.25rem))_3.25rem]";
+
+const CAT_SHORT: Record<PerfCategory, string> = {
+  pace: "Pace",
+  onelap: "1 lap",
+  consistency: "Consist.",
+  overtaking: "Overtake",
+  defending: "Defend",
+  awareness: "Discipline",
+};
+
+/** One score: the number in white with a coloured line under it (GreMi, 25 Nov 2026: version 11b, scale 1). */
+function ScoreCell({ v, label, dim, title }: { v: number; label: string; dim?: boolean; title: string }) {
+  return (
+    <span role="cell" className={cn("min-w-0 text-center", dim && "opacity-50")} title={title}>
+      <span className="block truncate text-[9.5px] text-zinc-500 md:hidden">{label}</span>
+      <span className="font-mono text-[15px] font-bold tabular-nums text-zinc-50">
+        {dim ? "~" : ""}
+        {v.toFixed(1)}
+      </span>
+      <span className="mx-1 mt-1 block h-1.5 overflow-hidden rounded-full bg-white/[0.07]">
+        <span className="block h-full rounded-full" style={{ width: `${v * 10}%`, background: scoreColor(v) }} />
+      </span>
     </span>
   );
 }
 
-function Mini({ v, dim, title }: { v: number; dim?: boolean; title?: string }) {
+function SortButton({
+  k,
+  first = "desc",
+  sort,
+  toggle,
+  className,
+  title,
+  children,
+}: {
+  k: SortKey;
+  first?: SortDir;
+  sort: { key: SortKey; dir: SortDir } | null;
+  toggle: (key: SortKey, firstDir: SortDir) => void;
+  className?: string;
+  title?: string;
+  children: ReactNode;
+}) {
+  const active = sort?.key === k;
   return (
-    <span className={cn("inline-flex items-center gap-1.5", dim && "opacity-45")} title={title}>
-      <i className="block h-1.5 w-12 overflow-hidden rounded-full bg-white/[0.07]">
-        <b className="block h-full rounded-full" style={{ width: `${v * 10}%`, background: prColor(v) }} />
-      </i>
-      <span className="w-7 text-right font-mono text-xs tabular-nums text-zinc-300">
-        {dim ? "~" : ""}
-        {v.toFixed(1)}
-      </span>
-    </span>
+    <button
+      type="button"
+      role="columnheader"
+      title={title}
+      aria-sort={active ? (sort?.dir === "asc" ? "ascending" : "descending") : "none"}
+      onClick={() => toggle(k, first)}
+      className={cn(
+        "flex items-center gap-0.5 whitespace-nowrap rounded-sm hover:text-zinc-300",
+        active && "text-zinc-200",
+        interactiveFocusClass,
+        className,
+      )}
+    >
+      {children}
+      {active && <span aria-hidden="true">{sort?.dir === "asc" ? "▲" : "▼"}</span>}
+    </button>
   );
 }
 
@@ -113,7 +144,6 @@ export function PerformancePage() {
     setParams(next);
     window.scrollTo({ top: 0 });
   };
-  const sortProps = { sort, toggle };
   const sorted = sortRows(drivers, sort, (d, k) =>
     k === "pos" ? drivers.indexOf(d) : k === "name" ? d.name : k === "pr" ? d.pr : k === "trend" ? trendOf(d) : k === "races" ? d.races : d.cat[k],
   );
@@ -156,102 +186,84 @@ export function PerformancePage() {
 
       {tab === "ranking" && (
         <section className={cardClass}>
-          <SectionHeader title="Ranking" hint="Select a driver to open their profile and battle tells" />
-          <HorizontalScrollRegion label="Performance rating ranking" hint="Swipe to see every category" stickyHeader>
-            <table className={tableClassLoose}>
-              <thead className={cn(tableHeadClass, tableStickyHeadClass)}>
-                <tr>
-                  <SortHeader column="pos" firstDir="asc" {...sortProps}>
-                    #
-                  </SortHeader>
-                  <th className={tableCellClass()}>Rank</th>
-                  <SortHeader column="name" firstDir="asc" align="left" {...sortProps}>
-                    Driver
-                  </SortHeader>
-                  <SortHeader column="pr" {...sortProps}>
-                    PR
-                  </SortHeader>
-                  {PR_CATEGORIES.map((c) => (
-                    <SortHeader<SortKey> key={c.key} column={c.key} align="left" {...sortProps}>
-                      {c.label}
-                    </SortHeader>
-                  ))}
-                  <SortHeader column="trend" align="left" {...sortProps}>
-                    Pace trend
-                  </SortHeader>
-                  <SortHeader column="races" {...sortProps}>
-                    Races
-                  </SortHeader>
-                </tr>
-              </thead>
-              <tbody>
-                {sorted.map((d) => {
-                  const key = driverKey(d.name);
-                  const isMe = key === me;
-                  const sr = league.safety.get(key);
-                  const open = () => go({ tab: "driver", driver: key });
-                  return (
-                    <tr
-                      key={key}
-                      ref={isMe ? highlightRef : undefined}
-                      onClick={open}
-                      className={cn(
-                        tableRowClass,
-                        "cursor-pointer transition-colors hover:bg-white/[0.03]",
-                        isMe && "bg-red-500/[0.09] shadow-[inset_3px_0_0_#f87171]",
-                      )}
-                    >
-                      <td className={tableCellClass({ align: "right", mono: true, className: "text-zinc-500" })}>
-                        {drivers.indexOf(d) + 1}
-                      </td>
-                      <td className={tableCellClass()}>
-                        <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
-                          <PrBadge pr={d.pr} size={28} />
-                          {sr && !sr.banned && <RankTile sr={sr.sr} size={22} />}
-                          <span className="text-xs text-zinc-400">{prRankName(d.pr)}</span>
-                        </span>
-                      </td>
-                      <td className={tableCellClass({ className: cn("font-medium", isMe ? "text-red-300" : "text-zinc-100") })}>
-                        <button
-                          type="button"
-                          aria-label={`Open the performance profile of ${d.name}`}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            open();
-                          }}
-                          className={cn("whitespace-nowrap rounded-sm text-left text-inherit hover:underline", interactiveFocusClass)}
-                        >
-                          {d.name}
-                          {isMe && (
-                            <span className="ml-2 rounded-full bg-red-500/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-red-300">
-                              you
-                            </span>
-                          )}
-                        </button>
-                      </td>
-                      <td className={tableCellClass({ align: "right", mono: true, className: "font-semibold text-zinc-100" })}>
-                        {d.pr.toFixed(1)}
-                      </td>
-                      {PR_CATEGORIES.map((c) => {
-                        const low = c.key === "defending" && d.def_n < 15;
-                        return (
-                          <td key={c.key} className={tableCellClass()}>
-                            <Mini v={d.cat[c.key]} dim={low} title={low ? "Not enough battles yet" : c.raw(d)} />
-                          </td>
-                        );
-                      })}
-                      <td className={tableCellClass({ mono: true, className: "whitespace-nowrap text-xs" })}>
-                        <Trend d={d} />
-                      </td>
-                      <td className={tableCellClass({ align: "right", mono: true, className: "text-zinc-300" })}>
-                        {d.races}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </HorizontalScrollRegion>
+          <SectionHeader
+            title="Ranking"
+            hint="Select a driver to open their profile and battle tells · select a column name to sort"
+          />
+          <div role="table" aria-label="Performance rating ranking" className="text-sm">
+            <div role="row" className={cn(RANK_GRID, "border-b border-white/[0.06] pb-2 text-[11px] text-zinc-500")}>
+              <SortButton k="pos" first="asc" sort={sort} toggle={toggle} className="justify-end">#</SortButton>
+              <span role="columnheader" />
+              <SortButton k="name" first="asc" sort={sort} toggle={toggle}>Driver</SortButton>
+              {PR_CATEGORIES.map((c) => (
+                <SortButton key={c.key} k={c.key} sort={sort} toggle={toggle} className="hidden justify-center md:flex" title={c.label}>
+                  {CAT_SHORT[c.key]}
+                </SortButton>
+              ))}
+              <SortButton k="pr" sort={sort} toggle={toggle} className="justify-end">PR</SortButton>
+            </div>
+            {sorted.map((d) => {
+              const key = driverKey(d.name);
+              const isMe = key === me;
+              const sr = league.safety.get(key);
+              const open = () => go({ tab: "driver", driver: key });
+              return (
+                <div
+                  role="row"
+                  key={key}
+                  ref={isMe ? highlightRef : undefined}
+                  tabIndex={0}
+                  onClick={open}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") open();
+                  }}
+                  className={cn(
+                    RANK_GRID,
+                    "cursor-pointer border-b border-white/[0.04] py-2 transition-colors hover:bg-white/[0.03]",
+                    interactiveFocusClass,
+                    isMe && "bg-red-500/[0.09] shadow-[inset_3px_0_0_#f87171]",
+                  )}
+                >
+                  <span role="cell" className="text-right font-mono text-zinc-500">
+                    {drivers.indexOf(d) + 1}
+                  </span>
+                  <span role="cell" className="flex items-center gap-1">
+                    <PrBadge pr={d.pr} size={26} />
+                    {sr && !sr.banned && <RankTile sr={sr.sr} size={20} />}
+                  </span>
+                  <span role="cell" className={cn("min-w-0 truncate font-medium", isMe ? "text-red-300" : "text-zinc-100")} title={`${d.name} · ${prRankName(d.pr)} · ${d.races} races`}>
+                    {d.name}
+                    {isMe && (
+                      <span className="ml-2 rounded-full bg-red-500/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-red-300">
+                        you
+                      </span>
+                    )}
+                  </span>
+                  <div className="col-span-full row-start-2 grid grid-cols-6 gap-1 md:contents">
+                    {PR_CATEGORIES.map((c) => (
+                      <ScoreCell
+                        key={c.key}
+                        v={d.cat[c.key]}
+                        label={CAT_SHORT[c.key]}
+                        dim={c.key === "defending" && d.def_n < 15}
+                        title={`${c.label}: ${d.cat[c.key].toFixed(1)} · ${c.raw(d)}`}
+                      />
+                    ))}
+                  </div>
+                  <span role="cell" className="row-start-1 col-start-4 text-right font-mono text-base font-bold tabular-nums text-zinc-50 md:col-start-10">
+                    {d.pr.toFixed(1)}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+          <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-zinc-500">
+            <span
+              className="inline-block h-2 w-40 rounded-full"
+              style={{ background: SCORE_GRADIENT }}
+            />
+            <span>Line colour and length: the score from 1.0 (red) to 10.0 (green)</span>
+          </div>
           <PrRankLegend className="mt-4" />
         </section>
       )}
@@ -297,7 +309,7 @@ function CategoryBars({ d, data }: { d: PerfDriver; data: PerfData }) {
               <small className="block truncate text-[11px] text-zinc-500">{c.raw(d)}</small>
             </div>
             <div className="relative h-2.5 rounded-full bg-white/[0.07]">
-              <b className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${v * 10}%`, background: prColor(v) }} />
+              <b className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${v * 10}%`, background: scoreColor(v) }} />
               <span
                 className="absolute -top-1 h-[18px] w-0.5 rounded bg-zinc-300/70"
                 style={{ left: `${catMed[c.key] * 10}%` }}
@@ -490,11 +502,11 @@ function BattleView({
             <div key={c.key} className="grid grid-cols-[2.5rem_1fr_7.5rem_1fr_2.5rem] items-center gap-2 text-sm">
               <span className={cn("text-right font-mono tabular-nums", x >= y ? "font-semibold text-zinc-100" : "text-zinc-500")}>{x.toFixed(1)}</span>
               <div className="flex h-2 justify-end rounded-full bg-white/[0.06]">
-                <b className="h-full rounded-full" style={{ width: `${x * 10}%`, background: x >= y ? prColor(x) : "#52525b" }} />
+                <b className="h-full rounded-full" style={{ width: `${x * 10}%`, background: x >= y ? scoreColor(x) : "#52525b" }} />
               </div>
               <span className="text-center text-xs text-zinc-400">{c.label}</span>
               <div className="h-2 rounded-full bg-white/[0.06]">
-                <b className="block h-full rounded-full" style={{ width: `${y * 10}%`, background: y >= x ? prColor(y) : "#52525b" }} />
+                <b className="block h-full rounded-full" style={{ width: `${y * 10}%`, background: y >= x ? scoreColor(y) : "#52525b" }} />
               </div>
               <span className={cn("font-mono tabular-nums", y >= x ? "font-semibold text-zinc-100" : "text-zinc-500")}>{y.toFixed(1)}</span>
             </div>
