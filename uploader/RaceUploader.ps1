@@ -30,7 +30,7 @@ $Api = "https://api.github.com/repos/$Repo"
 $ConfigDir = Join-Path $env:APPDATA "GreMiRaceUploader"
 $ConfigFile = Join-Path $ConfigDir "config.json"
 $DoneFile = Join-Path $ConfigDir "uploaded.txt"
-$CheckEverySeconds = 5
+$CheckEverySeconds = 2   # a new race save goes out within ~5 s (GreMi: on the site within 2 minutes)
 $TelemetryPort = 20778
 $TelemetryDir = Join-Path $ConfigDir "telemetry"
 $TelemetrySentDir = Join-Path $TelemetryDir "sent"
@@ -190,7 +190,11 @@ function Headers($token) {
 function Send-Race($file, $token) {
     # Only multiplayer sessions go to the site; career and Grand Prix saves stay on this PC
     $data = $null
-    try { $data = Get-Content -Raw -Path $file.FullName | ConvertFrom-Json } catch { }
+    try { $data = Get-Content -Raw -Path $file.FullName | ConvertFrom-Json } catch {
+        # Pits n' Giggles is still writing it (doesn't parse yet): try again next round. After a
+        # minute it goes as it is, so a save that never parses can't hold up the uploads forever.
+        if ($file.LastWriteTime -gt (Get-Date).AddSeconds(-60)) { return $null }
+    }
     if ($data -and $data.'session-info' -and $data.'session-info'.'network-game' -ne 1) {
         return "skipped (not multiplayer)"
     }
@@ -440,11 +444,13 @@ while ($true) {
     $files = Get-ChildItem -Path $settings.DataDir -Recurse -Filter "*.json" -ErrorAction SilentlyContinue |
         Where-Object { $_.Directory.Name -eq "race-info" -and -not $done.Contains($_.Name) } |
         Sort-Object LastWriteTime
+    $racePending = $false
     foreach ($file in $files) {
-        # Pits n' Giggles may still be writing it
-        if ($file.LastWriteTime -gt (Get-Date).AddSeconds(-15)) { continue }
+        # Pits n' Giggles may still be writing it (Send-Race also waits until the save parses)
+        if ($file.LastWriteTime -gt (Get-Date).AddSeconds(-2)) { $racePending = $true; continue }
         try {
             $result = Send-Race $file $settings.Token
+            if ($null -eq $result) { $racePending = $true; continue }
             [void]$done.Add($file.Name)
             Add-Content -Path $DoneFile -Value $file.Name
             Say "$($file.Name): $result" Green
@@ -457,7 +463,9 @@ while ($true) {
         }
     }
 
-    if ($recorder) {
+    # A race save waiting for its next round goes first: a recording upload (20+ MB, twice)
+    # started now would keep it off the site for a minute or more.
+    if ($recorder -and -not $racePending) {
         if ($recorder.Status -ne $recorderStatus) {
             $recorderStatus = $recorder.Status
             Say "Telemetry: $recorderStatus"

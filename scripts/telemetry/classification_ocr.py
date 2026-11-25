@@ -524,6 +524,13 @@ def http_json(url):
         return json.load(r)
 
 
+def write_json(path, value):
+    """Whole files only: the live server may stop this step for a new race save (live/league.py)."""
+    with open(path + ".tmp", "w") as fh:
+        json.dump(value, fh)
+    os.replace(path + ".tmp", path)
+
+
 def main():
     args = sys.argv[1:]
     key_pem = os.environ.get("CLASSIFICATION_KEY", "").encode()
@@ -558,10 +565,11 @@ def main():
                 if not os.path.exists(done):
                     path = os.path.join(folder, name)
                     if not os.path.exists(path):
-                        urllib.request.urlretrieve(DOWNLOAD + name, path)
+                        urllib.request.urlretrieve(DOWNLOAD + name, path + ".part")
+                        os.replace(path + ".part", path)
                     cap = read_capture(decrypt(open(path, "rb").read(), key_pem))
                     cap["asset"] = name
-                    json.dump(cap, open(done, "w"))
+                    write_json(done, cap)
                 cap = json.load(open(done))
                 captures.append(cap)
                 ck = cap["check"]
@@ -570,7 +578,7 @@ def main():
                       f" named cars correct {ck['ocr_correct']}/{ck['named_cars']}")
             except Exception as ex:
                 print(f"classification OCR {name}: skipped ({ex})")
-    json.dump({"version": VERSION, "captures": captures}, open(out, "w"))
+    write_json(out, {"version": VERSION, "captures": captures})
 
 
 if __name__ == "__main__":
