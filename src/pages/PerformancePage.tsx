@@ -1,10 +1,9 @@
 import { Gauge, ListOrdered, Swords, UserRound } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { cardClass, interactiveFocusClass } from "../components/Card";
 import { DriverSearchSelect } from "../components/DriverSearchSelect";
 import { PrBadge, PrRankLegend } from "../components/performance/PrBadge";
-import { RankTile } from "../components/safety/RankTile";
 import { PageFrame } from "../components/ui/PageFrame";
 import { PageHeader } from "../components/ui/PageHeader";
 import { SectionHeader } from "../components/ui/SectionHeader";
@@ -251,7 +250,6 @@ export function PerformancePage() {
             {sorted.map((d) => {
               const key = driverKey(d.name);
               const isMe = key === me;
-              const sr = league.safety.get(key);
               const open = () => go({ tab: "driver", driver: key });
               return (
                 <div
@@ -273,9 +271,8 @@ export function PerformancePage() {
                   <span role="cell" className="text-right font-mono text-zinc-500">
                     {drivers.indexOf(d) + 1}
                   </span>
-                  <span role="cell" className="flex items-center gap-1">
+                  <span role="cell" className="flex items-center">
                     <PrBadge pr={d.pr} size={26} />
-                    {sr && !sr.banned && <RankTile sr={sr.sr} size={20} />}
                   </span>
                   <span role="cell" className={cn("min-w-0 truncate font-medium", isMe ? "text-red-300" : "text-zinc-100")} title={`${d.name} · ${prRankName(d.pr)} · ${d.races} races`}>
                     {d.name}
@@ -384,9 +381,7 @@ function DriverView({
   onPick: (key: string) => void;
   onBattle: () => void;
 }) {
-  const { league, scopeKey } = useTelemetry();
   const key = driverKey(d.name);
-  const sr = league?.safety.get(key);
   const pos = data.drivers.indexOf(d) + 1;
   const f = data.field;
   const bits: string[] = [];
@@ -400,16 +395,10 @@ function DriverView({
         <DriverSearchSelect drivers={pickList} value={key} onChange={onPick} ariaLabel="Driver" className="max-w-xs" />
         <div className="mt-5 flex items-center gap-4">
           <PrBadge pr={d.pr} size={64} />
-          {sr && !sr.banned && (
-            <Link to={`/${scopeKey ?? "all"}/safety?tab=personal&driver=${encodeURIComponent(key)}`} title="Safety rating">
-              <RankTile sr={sr.sr} size={40} />
-            </Link>
-          )}
           <div className="min-w-0">
             <div className="font-mono text-3xl font-bold tabular-nums text-zinc-50">{d.pr.toFixed(1)}</div>
             <div className="text-xs text-zinc-400">
               {prRankName(d.pr)} · #{pos} of {data.drivers.length} · {d.races} races
-              {sr && !sr.banned ? ` · SR ${sr.sr.toFixed(1)}` : ""}
             </div>
           </div>
         </div>

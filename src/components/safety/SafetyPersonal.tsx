@@ -41,8 +41,6 @@ import { sessionPath } from "../../utils/routes";
 import { driverKey } from "../../league/league";
 import { RaceIncidentList, useRaceIncidents } from "./RaceIncidents";
 import { RankTile } from "./RankTile";
-import { PrBadge } from "../performance/PrBadge";
-import { prRankName } from "../../league/performance";
 
 const half = (n: number) => Math.floor(n * 2 + 0.5) / 2;
 
@@ -160,8 +158,6 @@ function Hero({ driver, position, of }: { driver: SafetyDriver; position: number
   const next = idx > 0 ? SR_RANKS[idx - 1] : null;
   const floor = Number.isFinite(rank.min) ? rank.min : 0;
   const progress = next ? Math.max(0, Math.min(1, (driver.sr - floor) / (next.min - floor))) : 1;
-  const { league, scopeKey } = useTelemetry();
-  const perf = league?.performance.get(driverKey(driver.name));
   return (
     <section
       className={cn("relative overflow-hidden rounded-2xl p-5 sm:p-6", cardHighlight)}
@@ -170,17 +166,7 @@ function Hero({ driver, position, of }: { driver: SafetyDriver; position: number
       }}
     >
       <div className="flex flex-wrap items-center gap-5">
-        <div className="flex items-center gap-3">
-          {perf && (
-            <Link
-              to={`/${scopeKey ?? "all"}/performance?tab=driver&driver=${encodeURIComponent(driverKey(driver.name))}`}
-              title={`Performance rating ${perf.pr.toFixed(1)} · ${prRankName(perf.pr)}`}
-            >
-              <PrBadge pr={perf.pr} size={64} />
-            </Link>
-          )}
-          <RankTile rank={rank} size={64} />
-        </div>
+        <RankTile rank={rank} size={64} />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="truncate text-xl font-bold text-zinc-100">{driver.name}</h3>
@@ -193,7 +179,6 @@ function Hero({ driver, position, of }: { driver: SafetyDriver; position: number
           <p className="mt-0.5 text-sm text-zinc-400">
             <Trophy className="mr-1 inline h-3.5 w-3.5 -translate-y-px text-zinc-500" />#{position} of {of}{" "}
             · rank {rank.rank} · {driver.races} {driver.races === 1 ? "race" : "races"} counted
-            {perf ? ` · PR ${perf.pr.toFixed(1)} ${prRankName(perf.pr)}` : ""}
           </p>
         </div>
         <div className="text-right">
