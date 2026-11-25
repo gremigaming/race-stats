@@ -1,6 +1,9 @@
 import { Check, ChevronDown, Search, User } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useTelemetry } from "../context/TelemetryContext";
 import type { LeagueDriver } from "../league/league";
+import { PrBadge } from "./performance/PrBadge";
+import { RankTile } from "./safety/RankTile";
 import { cn } from "../utils/cn";
 import {
   DROPDOWN_OPTION_STYLES,
@@ -33,6 +36,19 @@ export function DriverSearchSelect({
   const root = useRef<HTMLDivElement>(null);
   const input = useRef<HTMLInputElement>(null);
   const current = drivers.find((d) => d.key === value);
+  // Each driver's ranks, PR first then SR (not filtered by date)
+  const { league } = useTelemetry();
+  const ranks = (key: string) => {
+    const pr = league?.performance.get(key);
+    const sr = league?.safety.get(key);
+    if (!pr && (!sr || sr.banned)) return null;
+    return (
+      <span className="flex shrink-0 items-center gap-1">
+        {pr && <PrBadge pr={pr.pr} size={18} />}
+        {sr && !sr.banned && <RankTile sr={sr.sr} size={16} />}
+      </span>
+    );
+  };
 
   const matches = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -83,6 +99,7 @@ export function DriverSearchSelect({
         <span className="min-w-0 flex-1 truncate">
           {current?.name ?? "Pick a driver"}
         </span>
+        {current && ranks(current.key)}
         <ChevronDown className="h-3.5 w-3.5 shrink-0 text-zinc-500" />
       </button>
       {open && (
@@ -143,6 +160,7 @@ export function DriverSearchSelect({
                 )}
               >
                 <span className="min-w-0 flex-1 truncate">{d.name}</span>
+                {ranks(d.key)}
                 {d.key === value && (
                   <Check className="h-3.5 w-3.5 shrink-0 text-rose-200" />
                 )}

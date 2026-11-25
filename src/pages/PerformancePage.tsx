@@ -1,0 +1,544 @@
+import { Gauge, ListOrdered, Swords, UserRound } from "lucide-react";
+import { useEffect, useMemo, useRef, type ReactNode } from "react";
+import { Link, useSearchParams } from "react-router-dom";
+import { cardClass, interactiveFocusClass } from "../components/Card";
+import { DriverSearchSelect } from "../components/DriverSearchSelect";
+import { PrBadge, PrRankLegend } from "../components/performance/PrBadge";
+import { RankTile } from "../components/safety/RankTile";
+import { HorizontalScrollRegion } from "../components/ui/HorizontalScrollRegion";
+import { PageFrame } from "../components/ui/PageFrame";
+import { PageHeader } from "../components/ui/PageHeader";
+import { SectionHeader } from "../components/ui/SectionHeader";
+import { SegmentedControl } from "../components/ui/SegmentedControl";
+import { SortHeader, sortRows, useSort } from "../components/ui/SortHeader";
+import {
+  tableCellClass,
+  tableClassLoose,
+  tableHeadClass,
+  tableRowClass,
+  tableStickyHeadClass,
+} from "../components/ui/table";
+import { useTelemetry } from "../context/TelemetryContext";
+import { driverKey } from "../league/league";
+import {
+  PR_CATEGORIES,
+  prColor,
+  prRankName,
+  TELL_KIND,
+  type PerfCategory,
+  type PerfData,
+  type PerfDriver,
+} from "../league/performance";
+import { formatShortDate } from "../utils/format";
+import { cn } from "../utils/cn";
+
+type Tab = "ranking" | "driver" | "battle";
+type SortKey = "pos" | "name" | "pr" | PerfCategory | "trend" | "races";
+
+const median = (a: number[]) => {
+  const s = [...a].sort((x, y) => x - y);
+  const m = s.length >> 1;
+  return s.length === 0 ? 0 : s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+};
+
+/** Pace trend: the last 6 races against the ones before (gap to the fastest, in %). */
+const trendOf = (d: PerfDriver) =>
+  d.older == null || d.recent == null ? null : d.older - d.recent;
+
+function Trend({ d }: { d: PerfDriver }) {
+  const x = trendOf(d);
+  if (x == null) return <span className="text-zinc-500">new</span>;
+  if (Math.abs(x) < 0.25) return <span className="text-zinc-500">steady</span>;
+  return x > 0 ? (
+    <span className="text-emerald-300" title="Closer to the fastest car in the last 6 races">
+      ▲ {x.toFixed(1)}%
+    </span>
+  ) : (
+    <span className="text-red-300" title="Further from the fastest car in the last 6 races">
+      ▼ {(-x).toFixed(1)}%
+    </span>
+  );
+}
+
+function Mini({ v, dim, title }: { v: number; dim?: boolean; title?: string }) {
+  return (
+    <span className={cn("inline-flex items-center gap-1.5", dim && "opacity-45")} title={title}>
+      <i className="block h-1.5 w-12 overflow-hidden rounded-full bg-white/[0.07]">
+        <b className="block h-full rounded-full" style={{ width: `${v * 10}%`, background: prColor(v) }} />
+      </i>
+      <span className="w-7 text-right font-mono text-xs tabular-nums text-zinc-300">
+        {dim ? "~" : ""}
+        {v.toFixed(1)}
+      </span>
+    </span>
+  );
+}
+
+export function PerformancePage() {
+  const { league } = useTelemetry();
+  const [params, setParams] = useSearchParams();
+  const { sort, toggle } = useSort<SortKey>();
+  const highlightRef = useRef<HTMLTableRowElement>(null);
+  const data = league?.performanceData ?? null;
+  const tabParam = params.get("tab");
+  const tab: Tab = tabParam === "driver" || tabParam === "battle" ? tabParam : "ranking";
+
+  useEffect(() => {
+    if (tab === "ranking") highlightRef.current?.scrollIntoView({ block: "center", behavior: "smooth" });
+  }, [tab]);
+
+  const drivers = data?.drivers ?? [];
+  const pickList = useMemo(() => drivers.map((d) => ({ key: driverKey(d.name), name: d.name })), [drivers]);
+  const byKey = useMemo(() => new Map(drivers.map((d) => [driverKey(d.name), d])), [drivers]);
+
+  if (!league) return null;
+  if (!data || drivers.length === 0) {
+    return (
+      <div className="flex h-full items-center justify-center text-zinc-500">
+        The performance rating isn&apos;t available yet.
+      </div>
+    );
+  }
+
+  const me = league.selectedDriver;
+  const fallback = byKey.has(me) ? me : driverKey(drivers[0].name);
+  const driverParam = params.get("driver") ?? fallback;
+  const current = byKey.get(driverParam) ?? byKey.get(fallback)!;
+  const vsParam = params.get("vs");
+  const opponent =
+    (vsParam && byKey.get(vsParam)) ||
+    drivers[drivers.indexOf(current) > 0 ? drivers.indexOf(current) - 1 : 1] ||
+    drivers[0];
+  const go = (next: Record<string, string>) => {
+    setParams(next);
+    window.scrollTo({ top: 0 });
+  };
+  const sortProps = { sort, toggle };
+  const sorted = sortRows(drivers, sort, (d, k) =>
+    k === "pos" ? drivers.indexOf(d) : k === "name" ? d.name : k === "pr" ? d.pr : k === "trend" ? trendOf(d) : k === "races" ? d.races : d.cat[k],
+  );
+
+  return (
+    <PageFrame className="space-y-6">
+      <PageHeader
+        icon={Gauge}
+        eyebrow="Drivers"
+        title="Performance rating"
+        description={
+          tab === "battle"
+            ? "Pick yourself and the car ahead or behind to see what to expect in the fight."
+            : tab === "driver"
+              ? "One driver's pace and racecraft, and the battle tells that make them stand out."
+              : "Pace and racecraft for every league driver, from Bronze I to Gold III."
+        }
+        meta={`Not filtered by date · Races since ${formatShortDate(data.since)} · ${drivers.length} drivers with ${data.min_races}+ races`}
+        action={
+          <SegmentedControl
+            value={tab}
+            onChange={(t) =>
+              go(
+                t === "ranking"
+                  ? {}
+                  : t === "driver"
+                    ? { tab: "driver", driver: driverKey(current.name) }
+                    : { tab: "battle", driver: driverKey(current.name), vs: driverKey(opponent.name) },
+              )
+            }
+            ariaLabel="Performance rating view"
+            options={[
+              { value: "ranking", label: "Ranking", icon: ListOrdered },
+              { value: "driver", label: "Driver", icon: UserRound },
+              { value: "battle", label: "Battle preview", mobileLabel: "Battle", icon: Swords },
+            ]}
+          />
+        }
+      />
+
+      {tab === "ranking" && (
+        <section className={cardClass}>
+          <SectionHeader title="Ranking" hint="Select a driver to open their profile and battle tells" />
+          <HorizontalScrollRegion label="Performance rating ranking" hint="Swipe to see every category" stickyHeader>
+            <table className={tableClassLoose}>
+              <thead className={cn(tableHeadClass, tableStickyHeadClass)}>
+                <tr>
+                  <SortHeader column="pos" firstDir="asc" {...sortProps}>
+                    #
+                  </SortHeader>
+                  <th className={tableCellClass()}>Rank</th>
+                  <SortHeader column="name" firstDir="asc" align="left" {...sortProps}>
+                    Driver
+                  </SortHeader>
+                  <SortHeader column="pr" {...sortProps}>
+                    PR
+                  </SortHeader>
+                  {PR_CATEGORIES.map((c) => (
+                    <SortHeader<SortKey> key={c.key} column={c.key} align="left" {...sortProps}>
+                      {c.label}
+                    </SortHeader>
+                  ))}
+                  <SortHeader column="trend" align="left" {...sortProps}>
+                    Pace trend
+                  </SortHeader>
+                  <SortHeader column="races" {...sortProps}>
+                    Races
+                  </SortHeader>
+                </tr>
+              </thead>
+              <tbody>
+                {sorted.map((d) => {
+                  const key = driverKey(d.name);
+                  const isMe = key === me;
+                  const sr = league.safety.get(key);
+                  const open = () => go({ tab: "driver", driver: key });
+                  return (
+                    <tr
+                      key={key}
+                      ref={isMe ? highlightRef : undefined}
+                      onClick={open}
+                      className={cn(
+                        tableRowClass,
+                        "cursor-pointer transition-colors hover:bg-white/[0.03]",
+                        isMe && "bg-red-500/[0.09] shadow-[inset_3px_0_0_#f87171]",
+                      )}
+                    >
+                      <td className={tableCellClass({ align: "right", mono: true, className: "text-zinc-500" })}>
+                        {drivers.indexOf(d) + 1}
+                      </td>
+                      <td className={tableCellClass()}>
+                        <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
+                          <PrBadge pr={d.pr} size={28} />
+                          {sr && !sr.banned && <RankTile sr={sr.sr} size={22} />}
+                          <span className="text-xs text-zinc-400">{prRankName(d.pr)}</span>
+                        </span>
+                      </td>
+                      <td className={tableCellClass({ className: cn("font-medium", isMe ? "text-red-300" : "text-zinc-100") })}>
+                        <button
+                          type="button"
+                          aria-label={`Open the performance profile of ${d.name}`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            open();
+                          }}
+                          className={cn("whitespace-nowrap rounded-sm text-left text-inherit hover:underline", interactiveFocusClass)}
+                        >
+                          {d.name}
+                          {isMe && (
+                            <span className="ml-2 rounded-full bg-red-500/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-red-300">
+                              you
+                            </span>
+                          )}
+                        </button>
+                      </td>
+                      <td className={tableCellClass({ align: "right", mono: true, className: "font-semibold text-zinc-100" })}>
+                        {d.pr.toFixed(1)}
+                      </td>
+                      {PR_CATEGORIES.map((c) => {
+                        const low = c.key === "defending" && d.def_n < 15;
+                        return (
+                          <td key={c.key} className={tableCellClass()}>
+                            <Mini v={d.cat[c.key]} dim={low} title={low ? "Not enough battles yet" : c.raw(d)} />
+                          </td>
+                        );
+                      })}
+                      <td className={tableCellClass({ mono: true, className: "whitespace-nowrap text-xs" })}>
+                        <Trend d={d} />
+                      </td>
+                      <td className={tableCellClass({ align: "right", mono: true, className: "text-zinc-300" })}>
+                        {d.races}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </HorizontalScrollRegion>
+          <PrRankLegend className="mt-4" />
+        </section>
+      )}
+
+      {tab === "driver" && (
+        <DriverView
+          d={current}
+          data={data}
+          pickList={pickList}
+          onPick={(key) => go({ tab: "driver", driver: key })}
+          onBattle={() => go({ tab: "battle", driver: me && byKey.has(me) && me !== driverKey(current.name) ? me : driverKey(current.name), vs: me && byKey.has(me) && me !== driverKey(current.name) ? driverKey(current.name) : driverKey(opponent.name) })}
+        />
+      )}
+
+      {tab === "battle" && (
+        <BattleView
+          a={current}
+          o={opponent}
+          data={data}
+          pickList={pickList}
+          onPick={(a, o) => setParams({ tab: "battle", driver: a, vs: o })}
+        />
+      )}
+
+      <HowItWorks />
+    </PageFrame>
+  );
+}
+
+function CategoryBars({ d, data }: { d: PerfDriver; data: PerfData }) {
+  const catMed = useMemo(
+    () => Object.fromEntries(PR_CATEGORIES.map((c) => [c.key, median(data.drivers.map((x) => x.cat[c.key]))])),
+    [data],
+  );
+  return (
+    <div className="mt-4 space-y-3">
+      {PR_CATEGORIES.map((c) => {
+        const v = d.cat[c.key];
+        return (
+          <div key={c.key} className="grid grid-cols-[minmax(0,9rem)_1fr_2.5rem] items-center gap-3">
+            <div className="min-w-0 text-sm text-zinc-200">
+              {c.label}
+              <small className="block truncate text-[11px] text-zinc-500">{c.raw(d)}</small>
+            </div>
+            <div className="relative h-2.5 rounded-full bg-white/[0.07]">
+              <b className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${v * 10}%`, background: prColor(v) }} />
+              <span
+                className="absolute -top-1 h-[18px] w-0.5 rounded bg-zinc-300/70"
+                style={{ left: `${catMed[c.key] * 10}%` }}
+                title={`League middle ${catMed[c.key].toFixed(1)}`}
+              />
+            </div>
+            <div className="text-right font-mono text-sm font-semibold tabular-nums text-zinc-100">{v.toFixed(1)}</div>
+          </div>
+        );
+      })}
+      <p className="text-[11px] text-zinc-500">The white mark is the league middle.</p>
+    </div>
+  );
+}
+
+function DriverView({
+  d,
+  data,
+  pickList,
+  onPick,
+  onBattle,
+}: {
+  d: PerfDriver;
+  data: PerfData;
+  pickList: { key: string; name: string }[];
+  onPick: (key: string) => void;
+  onBattle: () => void;
+}) {
+  const { league, scopeKey } = useTelemetry();
+  const key = driverKey(d.name);
+  const sr = league?.safety.get(key);
+  const pos = data.drivers.indexOf(d) + 1;
+  const f = data.field;
+  const bits: string[] = [];
+  if (d.brake != null) bits.push(`brake point ${d.brake > 0 ? `${d.brake.toFixed(0)} m earlier` : `${(-d.brake).toFixed(0)} m later`} than the field`);
+  if (d.steer != null && f.steer_rev_km != null) bits.push(`${d.steer.toFixed(1)} steering corrections per km (field ${f.steer_rev_km.toFixed(1)})`);
+  if (d.offs != null && f.offs_per_10km != null) bits.push(`${d.offs.toFixed(2)} off-tracks per 10 km (field ${f.offs_per_10km.toFixed(2)})`);
+  bits.push(`speed trap ${d.trap >= 0 ? "+" : ""}${d.trap.toFixed(1)} km/h against the race middle`);
+  return (
+    <div className="grid gap-6 lg:grid-cols-2">
+      <section className={cardClass}>
+        <DriverSearchSelect drivers={pickList} value={key} onChange={onPick} ariaLabel="Driver" className="max-w-xs" />
+        <div className="mt-5 flex items-center gap-4">
+          <PrBadge pr={d.pr} size={64} />
+          {sr && !sr.banned && (
+            <Link to={`/${scopeKey ?? "all"}/safety?tab=personal&driver=${encodeURIComponent(key)}`} title="Safety rating">
+              <RankTile sr={sr.sr} size={40} />
+            </Link>
+          )}
+          <div className="min-w-0">
+            <div className="font-mono text-3xl font-bold tabular-nums text-zinc-50">{d.pr.toFixed(1)}</div>
+            <div className="text-xs text-zinc-400">
+              {prRankName(d.pr)} · #{pos} of {data.drivers.length} · {d.races} races
+              {sr && !sr.banned ? ` · SR ${sr.sr.toFixed(1)}` : ""}
+            </div>
+          </div>
+        </div>
+        <CategoryBars d={d} data={data} />
+        <button
+          type="button"
+          onClick={onBattle}
+          className="mt-5 inline-flex items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.04] px-3 py-2 text-sm font-medium text-zinc-200 transition-colors hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-red/70"
+        >
+          <Swords className="size-4" />
+          Battle preview
+        </button>
+      </section>
+      <section className={cardClass}>
+        <SectionHeader title="Battle tells" hint="What makes this driver stand out from the rest of the league" />
+        {d.tells.length ? (
+          <div className="space-y-3">
+            {d.tells.map((t) => (
+              <div key={t.title} className="rounded-xl border border-white/[0.06] bg-zinc-950/50 p-3">
+                <div className="font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-rose-200/70">
+                  {TELL_KIND[t.kind] ?? t.kind}
+                </div>
+                <div className="mt-0.5 text-sm font-semibold text-zinc-100">{t.title}</div>
+                <p className="mt-1 text-sm text-zinc-300">
+                  <b className="font-medium text-zinc-200">What it means for you:</b> {t.means}
+                </p>
+                <p className="mt-1 text-xs text-zinc-500">How we know: {t.how}</p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-sm text-zinc-400">
+            Nothing stands out from the rest of the league yet. Expect an all-round, middle-of-the-field driver.
+          </p>
+        )}
+        <p className="mt-4 text-xs text-zinc-500">
+          <b className="font-medium text-zinc-400">Raw numbers:</b> {bits.join(" · ")}.
+          {d.tel_km < 80 ? " Fewer than 80 km of telemetry so far, so the braking and steering tells are held back." : ` Telemetry from ${d.tel_races} races.`}
+        </p>
+      </section>
+    </div>
+  );
+}
+
+function BattleView({
+  a,
+  o,
+  data,
+  pickList,
+  onPick,
+}: {
+  a: PerfDriver;
+  o: PerfDriver;
+  data: PerfData;
+  pickList: { key: string; name: string }[];
+  onPick: (a: string, o: string) => void;
+}) {
+  const ka = driverKey(a.name);
+  const ko = driverKey(o.name);
+  const side = (d: PerfDriver, right: boolean) => (
+    <div className={cn("flex min-w-0 items-center gap-3", right && "flex-row-reverse text-right")}>
+      <PrBadge pr={d.pr} size={44} />
+      <div className="min-w-0">
+        <div className="truncate font-semibold text-zinc-100">{d.name}</div>
+        <div className="text-xs text-zinc-400">
+          PR {d.pr.toFixed(1)} · {prRankName(d.pr)}
+        </div>
+      </div>
+    </div>
+  );
+  // Pace: median lap-time gap in races both finished; fewer than 2 shared races = the usual gap to the leader
+  const pair = data.pairs[[a.name, o.name].sort().join("|")];
+  let gapS: number;
+  let src: string;
+  if (pair && pair[1] >= 2) {
+    gapS = (a.name < o.name ? pair[0] : -pair[0]) / 1000;
+    src = `median of ${pair[1]} races you both finished`;
+  } else {
+    gapS = ((o.pace_gap - a.pace_gap) / 100) * 90;
+    src = "fewer than 2 shared races, so this is an estimate from both drivers' usual gap to the race leader on a 1:30 lap";
+  }
+  const expect: { h: string; body: ReactNode }[] = [];
+  if (a.name === o.name) expect.push({ h: "Pick", body: "Pick a different opponent to compare." });
+  else if (Math.abs(gapS) < 0.25)
+    expect.push({ h: "Pace", body: `You're on the same pace (within 0.25 s a lap; ${src}). The battle will come down to racecraft.` });
+  else if (gapS > 0)
+    expect.push({
+      h: "Pace",
+      body: (
+        <>
+          You're about <b>{gapS.toFixed(1)} s a lap quicker</b> ({src}). If they're ahead, be patient: the pass should come.
+        </>
+      ),
+    });
+  else
+    expect.push({
+      h: "Pace",
+      body: (
+        <>
+          {o.name} is about <b>{(-gapS).toFixed(1)} s a lap quicker</b> ({src}). If they're behind you, defend where it counts and don't lose time fighting every corner.
+        </>
+      ),
+    });
+  const att: string[] = [];
+  const def: string[] = [];
+  if (a.name !== o.name) {
+    if (o.cat.overtaking >= 8) att.push(`They pass a lot (${o.made.toFixed(1)} passes a race). Once they're within a second, cover the inside.`);
+    if (o.cat.defending <= 3.6 && o.def_n >= 15) def.push("Slower cars often get past them, so keep the pressure on.");
+    if (o.cat.defending >= 7.4 && o.def_n >= 15) def.push("They rarely lose places to slower cars. You'll need a clear pace edge or a clean move.");
+    for (const t of o.tells) {
+      if ((t.kind === "brake" && t.title.includes("later")) || (t.kind === "start" && t.title.startsWith("Strong"))) att.push(t.means);
+      else def.push(t.means);
+    }
+    if (att.length) expect.push({ h: "When they're behind you", body: <ul className="mt-1 list-disc space-y-1 pl-5">{att.map((x) => <li key={x}>{x}</li>)}</ul> });
+    if (def.length) expect.push({ h: "When you're behind them", body: <ul className="mt-1 list-disc space-y-1 pl-5">{def.map((x) => <li key={x}>{x}</li>)}</ul> });
+    if (!att.length && !def.length) expect.push({ h: "Style", body: "Nothing stands out from the rest of the league. Expect a straightforward, middle-of-the-field fight." });
+  }
+  return (
+    <section className={cardClass}>
+      <SectionHeader title="Battle preview" hint="Pick yourself and the car ahead or behind" />
+      <div className="flex flex-wrap items-center gap-2">
+        <DriverSearchSelect drivers={pickList} value={ka} onChange={(k) => onPick(k, ko)} ariaLabel="You" className="w-56" />
+        <span className="text-xs font-semibold uppercase text-zinc-500">vs</span>
+        <DriverSearchSelect drivers={pickList} value={ko} onChange={(k) => onPick(ka, k)} ariaLabel="Opponent" className="w-56" />
+      </div>
+      <div className="mt-5 grid grid-cols-[1fr_auto_1fr] items-center gap-3">
+        {side(a, false)}
+        <span className="text-xs font-semibold uppercase text-zinc-500">vs</span>
+        {side(o, true)}
+      </div>
+      <div className="mt-5 space-y-2.5">
+        {PR_CATEGORIES.map((c) => {
+          const x = a.cat[c.key];
+          const y = o.cat[c.key];
+          return (
+            <div key={c.key} className="grid grid-cols-[2.5rem_1fr_7.5rem_1fr_2.5rem] items-center gap-2 text-sm">
+              <span className={cn("text-right font-mono tabular-nums", x >= y ? "font-semibold text-zinc-100" : "text-zinc-500")}>{x.toFixed(1)}</span>
+              <div className="flex h-2 justify-end rounded-full bg-white/[0.06]">
+                <b className="h-full rounded-full" style={{ width: `${x * 10}%`, background: x >= y ? prColor(x) : "#52525b" }} />
+              </div>
+              <span className="text-center text-xs text-zinc-400">{c.label}</span>
+              <div className="h-2 rounded-full bg-white/[0.06]">
+                <b className="block h-full rounded-full" style={{ width: `${y * 10}%`, background: y >= x ? prColor(y) : "#52525b" }} />
+              </div>
+              <span className={cn("font-mono tabular-nums", y >= x ? "font-semibold text-zinc-100" : "text-zinc-500")}>{y.toFixed(1)}</span>
+            </div>
+          );
+        })}
+      </div>
+      <div className="mt-6 rounded-xl border border-white/[0.06] bg-zinc-950/50 p-4">
+        <h4 className="text-sm font-semibold text-zinc-100">What to expect</h4>
+        <ul className="mt-2 space-y-2 text-sm text-zinc-300">
+          {expect.map((e) => (
+            <li key={e.h}>
+              <b className="font-medium text-zinc-100">{e.h}:</b> {e.body}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  );
+}
+
+function HowItWorks() {
+  return (
+    <section className={cardClass}>
+      <SectionHeader title="How it works" />
+      <div className="space-y-2 text-sm text-zinc-400">
+        <p>
+          <b className="font-medium text-zinc-200">PR</b> = race pace 35% + one lap 15% + consistency 15% + overtaking 15% +
+          defending 10% + track discipline 10%. Every part is a score from 1.0 to 10.0.
+        </p>
+        <p>
+          <b className="font-medium text-zinc-200">Ranks</b> run Bronze I (under 2), Bronze II (2+), Bronze III (3+), Silver I (4+),
+          Silver II (5+), Silver III (6+), Gold I (7+), Gold II (8+) up to Gold III (9+).
+        </p>
+        <p>
+          Race pace is your typical clean lap against the fastest car in the same race. One lap is your qualifying gap to pole
+          (your best race lap when you have fewer than 2 qualifying sessions). Consistency is how much your clean laps differ.
+          Overtaking counts passes from lap 2 on plus places won on lap 1. Defending is how often slower cars get past you on
+          track. Track discipline counts corner-cutting warnings, penalties and trips over the white line.
+        </p>
+        <p>
+          Stream races since 19 Oct 2026, drivers with 5 or more races who raced in the last 30 days. Battle tells from
+          telemetry (braking, steering, off-tracks) need at least 80 km of recorded laps.
+        </p>
+      </div>
+    </section>
+  );
+}

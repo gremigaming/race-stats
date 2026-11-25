@@ -28,6 +28,7 @@ const DESTINATION_PATHS: Record<
   drivers: "/drivers",
   "driver-dna": "/drivers/dna",
   safety: "/safety",
+  performance: "/performance",
   "personal-safety": "/safety?tab=personal",
   race: "/race",
   incidents: "/incidents",

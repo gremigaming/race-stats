@@ -5,6 +5,7 @@
  */
 import { BarChart3, ChevronRight, ShieldCheck, Sparkles, Trophy, User } from "lucide-react";
 import type { ReactNode } from "react";
+import { PrBadge } from "../components/performance/PrBadge";
 import { rankOf } from "../league/safety";
 import type { Livery } from "./cars";
 import { lapTime } from "./DriverCard";
@@ -85,13 +86,15 @@ export interface SafetyRow {
   pts: number | null;
   /** Their safety rating now (null: no rating). */
   sr: number | null;
+  /** Their performance rating now (null: no rating); shown before the SR. */
+  pr?: number | null;
 }
 
 export function SafetyPanel({ rows, matched, onPick }: { rows: SafetyRow[]; matched: boolean; onPick: (car: number) => void }) {
   const sorted = [...rows].sort((a, b) => (a.pts ?? 0) - (b.pts ?? 0) || (b.sr ?? 0) - (a.sr ?? 0));
   return (
     <>
-      <Head title="Safety" sub={matched ? "Safety points this race so far, and each driver's rating now" : "No safety points for this race yet; ratings are today's"} />
+      <Head title="Safety" sub={matched ? "Safety points this race so far, and each driver's rating now (performance rank first)" : "No safety points for this race yet; ratings are today's"} />
       <ul>
         {sorted.map((r) => {
           const rank = r.sr === null ? null : rankOf(r.sr);
@@ -105,6 +108,7 @@ export function SafetyPanel({ rows, matched, onPick }: { rows: SafetyRow[]; matc
                     {r.pts === null ? "–" : r.pts > 0 ? `+${r.pts.toFixed(1)}` : r.pts.toFixed(1)}
                   </span>
                 )}
+                <span className="flex w-4 justify-center">{r.pr != null && <PrBadge pr={r.pr} size={16} />}</span>
                 <span className="flex w-16 items-center justify-end gap-1">
                   {rank ? (
                     <>

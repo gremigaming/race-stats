@@ -794,7 +794,8 @@ function Viewer({
     const done = raceOver || statusAt(r.car) >= 3;
     const lap = byCar.get(r.car)?.lap ?? 0;
     const pts = mine ? mine.items.filter((i) => (i.lap !== null ? i.lap < lap || done : done)).reduce((n, i) => n + i.pts, 0) : null;
-    return { car: r.car, name: r.name, livery: r.livery, pts, sr: d && !d.banned ? d.sr : null };
+    const pr = league?.performance.get(driverKey(r.name))?.pr ?? null;
+    return { car: r.car, name: r.name, livery: r.livery, pts, sr: d && !d.banned ? d.sr : null, pr };
   });
   const statsRows: StatsRow[] = rows.map((r) => {
     const tm = timing(r.car);

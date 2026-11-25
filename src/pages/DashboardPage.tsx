@@ -4,6 +4,7 @@ import {
   CalendarDays,
   Clapperboard,
   Flag,
+  Gauge,
   ShieldCheck,
   TriangleAlert,
   Trophy,
@@ -14,6 +15,7 @@ import { buildDashboardActivity } from "../analysis/dashboardActivity";
 import { getDashboardResultStats } from "../analysis/dashboardResultStats";
 import { ActivityRow } from "../components/dashboard/ActivityRow";
 import { DriverDnaSummary } from "../components/dashboard/DriverDnaSummary";
+import { PerformanceSummary } from "../components/performance/PerformanceSummary";
 import { SafetySummary } from "../components/safety/SafetySummary";
 import { LoadingState } from "../components/ui/LoadingState";
 import { PageFrame } from "../components/ui/PageFrame";
@@ -35,6 +37,14 @@ const SHORTCUTS = [
     icon: Trophy,
     path: "drivers",
     tone: "from-rose-500/15 to-fuchsia-500/5 text-rose-200",
+  },
+  {
+    key: "performance",
+    label: "Performance rating",
+    detail: "Your PR, battle tells and rival previews",
+    icon: Gauge,
+    path: "performance",
+    tone: "from-amber-400/15 to-yellow-500/5 text-amber-200",
   },
   {
     key: "safety",
@@ -137,6 +147,7 @@ export function DashboardPage() {
           </div>
           <div className="relative flex flex-wrap items-center gap-2">
             <DriverDnaSummary />
+            <PerformanceSummary />
             <SafetySummary />
           </div>
         </div>

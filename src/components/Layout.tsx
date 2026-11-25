@@ -13,6 +13,7 @@ import {
   Route,
   Settings2,
   ShieldCheck,
+  Gauge,
   Swords,
   Trophy,
   TriangleAlert,
@@ -113,6 +114,7 @@ export function Layout() {
     section === "drivers" ||
     section === "head-to-head" ||
     section === "safety" ||
+    section === "performance" ||
     section === "insights";
   const isRacesActive =
     section === "sessions" ||
@@ -245,6 +247,9 @@ export function Layout() {
                 </DropdownLink>
                 <DropdownLink to={`/${pageScope}/head-to-head`} icon={Swords}>
                   Head to head
+                </DropdownLink>
+                <DropdownLink to={`/${pageScope}/performance`} icon={Gauge}>
+                  Performance rating
                 </DropdownLink>
                 <DropdownLink to={`/${pageScope}/safety`} icon={ShieldCheck}>
                   Safety rating
@@ -400,6 +405,9 @@ export function Layout() {
                 </MobileNavLink>
                 <MobileNavLink to={`/${pageScope}/head-to-head`} icon={Swords}>
                   Head to head
+                </MobileNavLink>
+                <MobileNavLink to={`/${pageScope}/performance`} icon={Gauge}>
+                  Performance rating
                 </MobileNavLink>
                 <MobileNavLink to={`/${pageScope}/safety`} icon={ShieldCheck}>
                   Safety rating

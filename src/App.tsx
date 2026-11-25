@@ -50,6 +50,11 @@ const IncidentsPage = lazy(() =>
     default: module.IncidentsPage,
   })),
 );
+const PerformancePage = lazy(() =>
+  import("./pages/PerformancePage").then((module) => ({
+    default: module.PerformancePage,
+  })),
+);
 const SafetyPage = lazy(() =>
   import("./pages/SafetyPage").then((module) => ({
     default: module.SafetyPage,
@@ -203,6 +208,14 @@ function AppRoutes() {
             element={
               <ScopedFormulaRoute>
                 <DriverInsightsPage />
+              </ScopedFormulaRoute>
+            }
+          />
+          <Route
+            path=":formulaKey/performance"
+            element={
+              <ScopedFormulaRoute>
+                <PerformancePage />
               </ScopedFormulaRoute>
             }
           />

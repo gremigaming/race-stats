@@ -42,6 +42,7 @@ import {
   type LeagueRace,
 } from "../league/league";
 import { applySafetyScale, safetyByKey, type SafetyData, type SafetyDriver } from "../league/safety";
+import { performanceByKey, type PerfData, type PerfDriver } from "../league/performance";
 import { leagueRevision, loadLeagueJson, loadLeagueSource } from "../league/liveData";
 import {
   allowedFiles,
@@ -68,6 +69,9 @@ export interface LeagueState {
   /** Safety rating per driver key. Never date-filtered. */
   safety: Map<string, SafetyDriver>;
   safetyData: SafetyData | null;
+  /** Performance Rating per driver key. Never date-filtered. */
+  performance: Map<string, PerfDriver>;
+  performanceData: PerfData | null;
   /** Race results are visible while telemetry analysis is still finishing. */
   analysisPending: boolean;
 }
@@ -75,12 +79,18 @@ export interface LeagueState {
 // Session content is cached by its published hash; corrections and late
 // classification reads replace only the affected sessions.
 const leagueSessionCache = new Map<string, { revision: string; session: TelemetrySession }>();
-let lastLeague: { index: LeagueIndex; races: LeagueRace[]; safety: SafetyData | null } | null = null;
+let lastLeague: {
+  index: LeagueIndex;
+  races: LeagueRace[];
+  safety: SafetyData | null;
+  performance: PerfData | null;
+} | null = null;
 
 async function fetchLeague(): Promise<{
   index: LeagueIndex;
   races: LeagueRace[];
   safety: SafetyData | null;
+  performance: PerfData | null;
 }> {
   const source = await loadLeagueSource();
   const { index } = source;
@@ -111,7 +121,8 @@ async function fetchLeague(): Promise<{
   const safety = await loadLeagueJson<SafetyData>("safety.json", source)
     .then(applySafetyScale)
     .catch(() => null);
-  lastLeague = { index, races, safety };
+  const performance = await loadLeagueJson<PerfData>("performance.json", source).catch(() => null);
+  lastLeague = { index, races, safety, performance };
   return lastLeague;
 }
 
@@ -204,6 +215,8 @@ export function TelemetryProvider({ children }: { children: ReactNode }) {
   }, []);
   const safetyData = leagueQuery.data?.safety ?? null;
   const safety = useMemo(() => safetyByKey(safetyData), [safetyData]);
+  const performanceData = leagueQuery.data?.performance ?? null;
+  const performance = useMemo(() => performanceByKey(performanceData), [performanceData]);
   const streams = useMemo(
     () => (leagueQuery.data ? buildStreams(leagueQuery.data.races) : []),
     [leagueQuery.data],
@@ -284,6 +297,8 @@ export function TelemetryProvider({ children }: { children: ReactNode }) {
           streams,
           safety,
           safetyData,
+          performance,
+          performanceData,
           analysisPending: leagueQuery.data.index.pending === true,
         }
       : null;

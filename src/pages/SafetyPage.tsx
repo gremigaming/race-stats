@@ -8,6 +8,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useSearchParams } from "react-router-dom";
 import { cardClass, interactiveFocusClass } from "../components/Card";
 import { RankLegend, RankTile } from "../components/safety/RankTile";
+import { PrBadge } from "../components/performance/PrBadge";
 import {
   changeClass,
   SafetyPersonal,
@@ -447,7 +448,12 @@ export function SafetyPage() {
                         {i + 1}
                       </td>
                       <td className={tableCellClass()}>
-                        <RankTile sr={d.sr} />
+                        <span className="inline-flex items-center gap-1.5">
+                          {league.performance.get(key) && (
+                            <PrBadge pr={league.performance.get(key)!.pr} size={30} />
+                          )}
+                          <RankTile sr={d.sr} />
+                        </span>
                       </td>
                       <td
                         className={tableCellClass({

@@ -30,6 +30,8 @@ import {
   raceFormulaKey,
   teamLeaderboard,
 } from "../league/league";
+import { PrBadge } from "../components/performance/PrBadge";
+import { RankTile } from "../components/safety/RankTile";
 import { cn } from "../utils/cn";
 import { dashboardPath } from "../utils/routes";
 
@@ -325,6 +327,17 @@ export function DriversPage() {
                           ),
                         })}
                       >
+                        {activeMode === "drivers" && (() => {
+                          // PR first, then SR (both all time)
+                          const pr = league.performance.get(row.key);
+                          const sr = league.safety.get(row.key);
+                          return pr || (sr && !sr.banned) ? (
+                            <span className="mr-2 inline-flex translate-y-[3px] items-center gap-1">
+                              {pr && <PrBadge pr={pr.pr} size={20} />}
+                              {sr && !sr.banned && <RankTile sr={sr.sr} size={18} />}
+                            </span>
+                          ) : null;
+                        })()}
                         {canOpenDriver ? (
                           <button
                             type="button"

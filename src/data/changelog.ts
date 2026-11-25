@@ -12,6 +12,7 @@ export interface ChangelogEntry {
     | "drivers"
     | "driver-dna"
     | "safety"
+    | "performance"
     | "personal-safety"
     | "race"
     | "incidents";
@@ -20,6 +21,16 @@ export interface ChangelogEntry {
 // Curated site updates. Keep these focused on changes visitors can notice;
 // raw commit history also contains routine uploads and staff-only corrections.
 const changelog: ChangelogEntry[] = [
+  {
+    id: "performance-rating",
+    date: "2026-11-25",
+    type: "feat",
+    title: "New: Performance Rating",
+    message:
+      "Every driver now has a pace and racecraft score from 1.0 to 10.0 with a Bronze, Silver or Gold rank. See the ranking, your own profile with battle tells, and a battle preview against any rival. The new emblem sits before your SR on the home page, the leaderboards, the driver picker and the race viewer.",
+    milestone: true,
+    destination: "performance",
+  },
   {
     id: "faster-race-publish",
     date: "2026-11-25",

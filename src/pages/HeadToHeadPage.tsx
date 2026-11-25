@@ -1,5 +1,5 @@
 import { Swords } from "lucide-react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import {
   cardClass,
   cardClassFeature,
@@ -91,6 +91,15 @@ export function HeadToHeadPage() {
           ariaLabel="Second driver"
           className="w-56"
         />
+        {a !== b && league.performance.has(a) && league.performance.has(b) && (
+          <Link
+            to={`/${scopeKey ?? "all"}/performance?tab=battle&driver=${encodeURIComponent(a)}&vs=${encodeURIComponent(b)}`}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-white/[0.08] bg-white/[0.04] px-2.5 py-1.5 text-xs font-medium text-zinc-200 transition-colors hover:bg-white/[0.08]"
+          >
+            <Swords className="size-3.5" />
+            Battle preview
+          </Link>
+        )}
       </div>
 
       {a === b ? (

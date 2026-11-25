@@ -67,6 +67,14 @@ await page.waitForTimeout(2500);
 const raceRow = page.locator("section", { hasText: "How it adds up" }).locator("button:has(span:text-is('R'))").first();
 if (await raceRow.count()) { await raceRow.click(); await page.waitForTimeout(800); }
 await page.screenshot({ path: `${outDir}/safety-personal.jpg`, type: "jpeg", quality: 75, fullPage: true });
+// Performance Rating: ranking, one driver, battle preview
+await shoot("performance", "performance", true);
+await page.goto(`${base}${scope}/performance?tab=driver&driver=ddrk`);
+await page.waitForTimeout(2500);
+await page.screenshot({ path: `${outDir}/performance-driver.jpg`, type: "jpeg", quality: 75, fullPage: true });
+await page.goto(`${base}${scope}/performance?tab=battle&driver=ttv%2Fgremi_gaming&vs=ddrk`);
+await page.waitForTimeout(2500);
+await page.screenshot({ path: `${outDir}/performance-battle.jpg`, type: "jpeg", quality: 75, fullPage: true });
 // sorted by a column, with the highlights below
 await shoot("leaderboard-full", "drivers", true);
 await page.locator("#league-highlights").screenshot({ path: `${outDir}/leaderboard-highlights.jpg`, type: "jpeg", quality: 80 });
