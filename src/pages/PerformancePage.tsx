@@ -1,5 +1,5 @@
 import { Gauge, ListOrdered, Swords, UserRound } from "lucide-react";
-import { useEffect, useMemo, useRef, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { cardClass, interactiveFocusClass } from "../components/Card";
 import { DriverSearchSelect } from "../components/DriverSearchSelect";
@@ -23,6 +23,7 @@ import {
   type PerfDriver,
 } from "../league/performance";
 import { formatShortDate } from "../utils/format";
+import { isoDay } from "../league/filter";
 import { cn } from "../utils/cn";
 
 type Tab = "ranking" | "driver" | "battle";
@@ -109,6 +110,8 @@ export function PerformancePage() {
   const { league } = useTelemetry();
   const [params, setParams] = useSearchParams();
   const { sort, toggle } = useSort<SortKey>();
+  // Same switch as the Safety rating ranking: everyone, or only the drivers of the last stream
+  const [scope, setScope] = useState<"all" | "last-stream">("all");
   const highlightRef = useRef<HTMLTableRowElement>(null);
   const data = league?.performanceData ?? null;
   const tabParam = params.get("tab");
@@ -144,7 +147,23 @@ export function PerformancePage() {
     setParams(next);
     window.scrollTo({ top: 0 });
   };
-  const sorted = sortRows(drivers, sort, (d, k) =>
+  // Drivers of the last stream, from the safety rating's stream list (both ratings use the same races)
+  const streams = league.safetyData?.streams ?? [];
+  const lastStream = streams.length - 1;
+  const lastStreamDate = streams[lastStream]?.date;
+  const lastStreamIsToday = lastStreamDate === isoDay(new Date());
+  const lastStreamKeys = new Set(
+    (league.safetyData?.drivers ?? [])
+      .filter((x) => x.sessions.some((session) => session.stream === lastStream))
+      .map((x) => driverKey(x.name)),
+  );
+  const lastStreamRows = drivers.filter((d) => lastStreamKeys.has(driverKey(d.name)));
+  const lastStreamAvailable = lastStream >= 0;
+  const showingLastStream = scope === "last-stream" && lastStreamAvailable;
+  const lastStreamLabel = lastStreamIsToday
+    ? "today's stream"
+    : `the last stream (${lastStreamDate ? formatShortDate(lastStreamDate) : ""})`;
+  const sorted = sortRows(showingLastStream ? lastStreamRows : drivers, sort, (d, k) =>
     k === "pos" ? drivers.indexOf(d) : k === "name" ? d.name : k === "pr" ? d.pr : k === "trend" ? trendOf(d) : k === "races" ? d.races : d.cat[k],
   );
 
@@ -188,7 +207,29 @@ export function PerformancePage() {
         <section className={cardClass}>
           <SectionHeader
             title="Ranking"
-            hint="Select a driver to open their profile and battle tells · select a column name to sort"
+            hint={
+              showingLastStream
+                ? `${lastStreamRows.length} ${lastStreamRows.length === 1 ? "driver" : "drivers"} in ${lastStreamLabel} · # is the league position · select a driver to open their profile`
+                : "Select a driver to open their profile and battle tells · select a column name to sort"
+            }
+            action={
+              lastStreamAvailable ? (
+                <SegmentedControl
+                  size="sm"
+                  value={scope}
+                  onChange={setScope}
+                  ariaLabel="Drivers in ranking"
+                  options={[
+                    { value: "all", label: "All drivers", meta: drivers.length },
+                    {
+                      value: "last-stream",
+                      label: lastStreamIsToday ? "Today's stream" : "Last stream",
+                      meta: lastStreamRows.length,
+                    },
+                  ]}
+                />
+              ) : undefined
+            }
           />
           <div role="table" aria-label="Performance rating ranking" className="text-sm">
             <div role="row" className={cn(RANK_GRID, "border-b border-white/[0.06] pb-2 text-[11px] text-zinc-500")}>
@@ -202,6 +243,11 @@ export function PerformancePage() {
               ))}
               <SortButton k="pr" sort={sort} toggle={toggle} className="justify-end">PR</SortButton>
             </div>
+            {sorted.length === 0 && showingLastStream && (
+              <p className="px-3 py-8 text-center text-sm text-zinc-500">
+                No ranked drivers in {lastStreamLabel} yet.
+              </p>
+            )}
             {sorted.map((d) => {
               const key = driverKey(d.name);
               const isMe = key === me;
