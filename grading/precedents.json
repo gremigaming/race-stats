@@ -5206,14 +5206,14 @@
    ]
   },
   "s-61a54bfd": {
-   "key": "d33d28016aaa",
+   "key": "1bdd7f03003a",
    "by": "GreMi",
    "track": "Las Vegas Just in case",
    "date": "2026-11-13",
    "kind": "Late lunge / divebomb",
    "source": "staff change",
-   "verdict": "Racing incident",
-   "severity": 0,
+   "verdict": "Mercedes '26 #3 at fault",
+   "severity": 3,
    "note": "Car 3 was never gonna make the apex and fully rammed into nex ending his race, you should compair their braking to other drivers en always check if they would have made the turn if there was noone els",
    "who": [
     "319544045435224067"
@@ -5230,8 +5230,8 @@
     10
    ],
    "rulebook": {
-    "verdict": "Not an incident",
-    "rule": "R1"
+    "verdict": "10 at fault",
+    "rule": "V17"
    },
    "contacts": [
     {
@@ -5252,9 +5252,9 @@
       "reaction": 0.0,
       "aftermath": 0.0
      },
-     "label": "none",
-     "rulebook": "no",
-     "rule": "R1",
+     "label": "back",
+     "rulebook": "back",
+     "rule": "V17",
      "front": 1
     }
    ]
@@ -6374,6 +6374,17 @@
    "with_precedents": 60,
    "overrides": 7,
    "date": "2026-11-20",
+   "rules": "v1.6"
+  },
+  {
+   "incidents": 94,
+   "inc_rulebook": 35,
+   "inc_with_precedents": 34,
+   "contacts": 134,
+   "rulebook": 57,
+   "with_precedents": 59,
+   "overrides": 6,
+   "date": "2026-11-25",
    "rules": "v1.6"
   }
  ]
