@@ -656,6 +656,24 @@
   "rule_now": "R1"
  },
  {
+  "file": "Race_Austria_2026_11_15_16_18_11.json",
+  "t": 1794755399.75,
+  "lap": 1,
+  "cars": [
+   12,
+   2
+  ],
+  "frozen": "jasonri12 at fault",
+  "frozen_fault": [
+   12
+  ],
+  "now": "Stepino81 at fault",
+  "now_fault": [
+   0
+  ],
+  "rule_now": "V17"
+ },
+ {
   "file": "Race_Austria_Just_in_case_2026_11_07_00_07_11.json",
   "t": 1794003188.61,
   "lap": 1,
@@ -2428,6 +2446,27 @@
   "now": "Racing incident",
   "now_fault": [],
   "rule_now": "V16"
+ },
+ {
+  "file": "Race_Brazil_2026_11_15_16_35_22.json",
+  "t": 1794756495.35,
+  "lap": 1,
+  "cars": [
+   0,
+   12,
+   1,
+   8
+  ],
+  "frozen": "jasonri12 at fault",
+  "frozen_fault": [
+   12
+  ],
+  "now": "DevilDriver2396 + QDR_SHW1KS at fault",
+  "now_fault": [
+   7,
+   11
+  ],
+  "rule_now": "R8"
  },
  {
   "file": "Race_Brazil_Just_in_case_2026_10_23_20_38_23.json",
@@ -8424,6 +8463,24 @@
   "rule_now": "R1"
  },
  {
+  "file": "Race_Montreal_2026_11_20_16_41_59.json",
+  "t": 1795188874.64,
+  "lap": 1,
+  "cars": [
+   14,
+   2
+  ],
+  "frozen": "TTV/GreMi_Gaming at fault",
+  "frozen_fault": [
+   2
+  ],
+  "now": "EthanMoonski at fault",
+  "now_fault": [
+   6
+  ],
+  "rule_now": "V17"
+ },
+ {
   "file": "Race_Monza_2026_10_28_20_14_22.json",
   "t": 1793214417.21,
   "lap": 1,
@@ -11301,6 +11358,22 @@
   "now": "Not an incident",
   "now_fault": [],
   "rule_now": "R1"
+ },
+ {
+  "file": "Race_Spa_2026_11_18_20_02_41.json",
+  "t": 1795028286.66,
+  "lap": 4,
+  "cars": [
+   4,
+   8
+  ],
+  "frozen": "Not an incident",
+  "frozen_fault": [],
+  "now": "toni2608 at fault",
+  "now_fault": [
+   5
+  ],
+  "rule_now": "V17"
  },
  {
   "file": "Race_Suzuka_Just_in_case_2026_10_28_20_53_25.json",
