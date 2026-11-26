@@ -1,0 +1,252 @@
+{
+ "title": "Stream 25 Nov · 5 picks",
+ "stream": "1125b",
+ "made": "2026-11-26",
+ "rules": "v1.6",
+ "incidents": [
+  {
+   "id": "1125b-1",
+   "pick": "low",
+   "track": "Monza",
+   "date": "2026-11-25",
+   "type": "Racing incident",
+   "weather": "Light cloud",
+   "track_temp": 33,
+   "lap": 2,
+   "race_time": "1:38",
+   "replay": "https://gremigaming.github.io/race-stats/all/race/2026-11-25_20-01-53_Monza_Race?inc=98.2&car=13,2",
+   "race_file": "Race_Monza_2026_11_25_20_10_41.json",
+   "recording": "2026-11-25_20-01-53_Monza_Race.gmtel.gz",
+   "t0": 98.2,
+   "t1": 102.5,
+   "contacts": [
+    {
+     "t": 98.2,
+     "a": 2,
+     "b": 13
+    }
+   ],
+   "drivers": [
+    {
+     "car": 13,
+     "name": "#50 DevilDriver2396"
+    },
+    {
+     "car": 2,
+     "name": "#83 Outdoorflame83"
+    }
+   ],
+   "engine": {
+    "rules": "v1.6",
+    "verdict": "DevilDriver2396 at fault",
+    "rule": "V17",
+    "severity": 2,
+    "why": "DevilDriver2396 moved 2.4 m towards the other car before the touch; braked hard to avoid it",
+    "at_fault": [
+     "#50 DevilDriver2396"
+    ],
+    "contacts": 1,
+    "gray_score": -0.5
+   },
+   "claude": "Picked as the low-severity case. My call: DevilDriver2396 at fault (rule V17: V17), severity 2, blame on #50 DevilDriver2396. What I saw: DevilDriver2396 moved 2.4 m towards the other car before the touch; braked hard to avoid it. I'm fairly confident: the numbers are clear of every limit; this one is here for its severity."
+  },
+  {
+   "id": "1125b-2",
+   "pick": "high",
+   "track": "Monza",
+   "date": "2026-11-25",
+   "type": "Racing incident",
+   "weather": "Light cloud",
+   "track_temp": 33,
+   "lap": 4,
+   "race_time": "5:26",
+   "replay": "https://gremigaming.github.io/race-stats/all/race/2026-11-25_20-01-53_Monza_Race?inc=326.1&car=0,6",
+   "race_file": "Race_Monza_2026_11_25_20_10_41.json",
+   "recording": "2026-11-25_20-01-53_Monza_Race.gmtel.gz",
+   "t0": 326.1,
+   "t1": 332.0,
+   "contacts": [
+    {
+     "t": 326.1,
+     "a": 0,
+     "b": 6
+    }
+   ],
+   "drivers": [
+    {
+     "car": 0,
+     "name": "#8 Stepino81"
+    },
+    {
+     "car": 6,
+     "name": "#9 zynwav"
+    }
+   ],
+   "engine": {
+    "rules": "v1.6",
+    "verdict": "Stepino81 at fault",
+    "rule": "V17",
+    "severity": 9,
+    "why": "Stepino81 stayed on the throttle (no brake) into a braking car he had hit 6 s earlier: on purpose",
+    "at_fault": [
+     "#8 Stepino81"
+    ],
+    "contacts": 1,
+    "gray_score": -0.5
+   },
+   "claude": "Picked as the high-severity case. My call: Stepino81 at fault (rule V17: V17), severity 9, blame on #8 Stepino81. What I saw: Stepino81 stayed on the throttle (no brake) into a braking car he had hit 6 s earlier: on purpose. I'm fairly confident: the numbers are clear of every limit; this one is here for its severity."
+  },
+  {
+   "id": "1125b-3",
+   "pick": "gray",
+   "track": "Jeddah",
+   "date": "2026-11-25",
+   "type": "Racing incident",
+   "weather": "Overcast",
+   "track_temp": 25,
+   "lap": 1,
+   "race_time": "0:09",
+   "replay": "https://gremigaming.github.io/race-stats/all/race/2026-11-25_20-33-07_Jeddah_Race?inc=9.6&car=2,11,16",
+   "race_file": "Race_Jeddah_2026_11_25_20_41_45.json",
+   "recording": "2026-11-25_20-33-07_Jeddah_Race.gmtel.gz",
+   "t0": 9.6,
+   "t1": 16.0,
+   "contacts": [
+    {
+     "t": 9.7,
+     "a": 2,
+     "b": 11
+    },
+    {
+     "t": 11.7,
+     "a": 2,
+     "b": 16
+    }
+   ],
+   "drivers": [
+    {
+     "car": 2,
+     "name": "#58 NEX"
+    },
+    {
+     "car": 11,
+     "name": "#13 Jakubm18_F1"
+    },
+    {
+     "car": 16,
+     "name": "Hidden #28 (Aston Martin '26)"
+    }
+   ],
+   "engine": {
+    "rules": "v1.6",
+    "verdict": "Jakubm18_F1 at fault",
+    "rule": "V17",
+    "severity": 3,
+    "why": "Jakubm18_F1 moved 2.6 m towards the other car before the touch",
+    "at_fault": [
+     "#13 Jakubm18_F1"
+    ],
+    "contacts": 2,
+    "gray_score": 1.33
+   },
+   "claude": "Picked because it's a gray area for me. My call: Jakubm18_F1 at fault (rule V17: V17), severity 3, blame on #13 Jakubm18_F1. What I saw: Jakubm18_F1 moved 2.6 m towards the other car before the touch. Why I'm not sure: the cars were 3.9 m apart along the track, right at the 4 m line between 'side by side' (the car moving over is to blame) and 'one behind the other' (the car behind is to blame); the worst slide was 25°, near the 20° where I count it as harm done; its 2 contacts don't point the same way (Jakubm18_F1 at fault; Racing incident)."
+  },
+  {
+   "id": "1125b-4",
+   "pick": "gray",
+   "track": "Mexico",
+   "date": "2026-11-25",
+   "type": "Not an incident",
+   "weather": "Light cloud",
+   "track_temp": 34,
+   "lap": 1,
+   "race_time": "0:15",
+   "replay": "https://gremigaming.github.io/race-stats/all/race/2026-11-25_20-17-45_Mexico_Race?inc=15.5&car=3,12,6",
+   "race_file": "Race_Mexico_2026_11_25_20_26_24.json",
+   "recording": "2026-11-25_20-17-45_Mexico_Race.gmtel.gz",
+   "t0": 15.5,
+   "t1": 30.5,
+   "contacts": [
+    {
+     "t": 15.5,
+     "a": 3,
+     "b": 12
+    },
+    {
+     "t": 15.9,
+     "a": 3,
+     "b": 6
+    }
+   ],
+   "drivers": [
+    {
+     "car": 3,
+     "name": "#58 NEX"
+    },
+    {
+     "car": 12,
+     "name": "#2 jayferr1269"
+    },
+    {
+     "car": 6,
+     "name": "#21 Chushi"
+    }
+   ],
+   "engine": {
+    "rules": "v1.6",
+    "verdict": "Not an incident",
+    "rule": "R1",
+    "severity": 1,
+    "why": "nothing: nobody lost 1.0 s or was pushed off",
+    "at_fault": [],
+    "contacts": 2,
+    "gray_score": 1.08
+   },
+   "claude": "Picked because it's a gray area for me. My call: not an incident (rule R1: no incident (light tap or squeeze)), severity 1, blame on nobody. What I saw: nothing: nobody lost 1.0 s or was pushed off. Why I'm not sure: the cars were 3.9 m apart along the track, right at the 4 m line between 'side by side' (the car moving over is to blame) and 'one behind the other' (the car behind is to blame); the car behind was closing at only 8 km/h, near the 7 km/h where I stop calling it 'ran into the back'; 3 cars are involved, so the first move is hard to pick out."
+  },
+  {
+   "id": "1125b-5",
+   "pick": "gray",
+   "track": "Mexico",
+   "date": "2026-11-25",
+   "type": "Racing incident",
+   "weather": "Light cloud",
+   "track_temp": 34,
+   "lap": 1,
+   "race_time": "0:24",
+   "replay": "https://gremigaming.github.io/race-stats/all/race/2026-11-25_20-17-45_Mexico_Race?inc=24.5&car=19,2",
+   "race_file": "Race_Mexico_2026_11_25_20_26_24.json",
+   "recording": "2026-11-25_20-17-45_Mexico_Race.gmtel.gz",
+   "t0": 24.5,
+   "t1": 26.3,
+   "contacts": [
+    {
+     "t": 24.5,
+     "a": 2,
+     "b": 19
+    }
+   ],
+   "drivers": [
+    {
+     "car": 19,
+     "name": "#85 thomas_opjo"
+    },
+    {
+     "car": 2,
+     "name": "#83 Outdoorflame83"
+    }
+   ],
+   "engine": {
+    "rules": "v1.6",
+    "verdict": "Racing incident",
+    "rule": "P",
+    "severity": 3,
+    "why": "thomas_opjo moved 3.9 m towards the other car before the touch; but GreMi called a similar one (B1-05, Abu Dhabi 2026-10-20) a racing incident",
+    "at_fault": [],
+    "contacts": 1,
+    "gray_score": 0.8
+   },
+   "claude": "Picked because it's a gray area for me. My call: Racing incident (rule P: follows a similar graded incident), severity 3, blame on nobody. What I saw: thomas_opjo moved 3.9 m towards the other car before the touch; but GreMi called a similar one (B1-05, Abu Dhabi 2026-10-20) a racing incident. Why I'm not sure: the cars were 4.3 m apart along the track, right at the 4 m line between 'side by side' (the car moving over is to blame) and 'one behind the other' (the car behind is to blame)."
+  }
+ ]
+}
