@@ -348,7 +348,7 @@ for e, w in BATTLES:
     _won[bucket(e)][0] += w
     _won[bucket(e)][1] += 1
 PASS_RATE = {i: (w + 0.5) / (n + 1) for i, (w, n) in _won.items()}   # league: share of chances the quicker car takes
-BATTLE_PRIOR = 8   # few chances -> the score stays near the league middle (5.5)
+BATTLE_PRIOR = 15  # few chances -> the score stays near the league middle (5.5)
 
 
 def battles(lst, attacking):
