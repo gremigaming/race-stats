@@ -67,8 +67,9 @@ for f in files:
 
 RACEMEDS = []
 BATTLES = []          # (pace edge %, quicker car got past) for every chance in the league
-BATTLE_MIN = 0.3      # % quicker before a car that starts behind counts as a chance to pass
-BUCKETS = [0.3, 0.6, 1.0, 1.5, 2.5, 4.0]   # pace edge groups for the league's expected pass rate
+BATTLE_RANGE = 0.3    # overtaking: rivals up to this % slower or any amount quicker; defending: the mirror
+BATTLE_CLOSE_MS = 1000   # a pair only counts when it got this close at a lap line (or swapped places)
+BUCKETS = [-math.inf, -2.0, -1.0, -0.5, -0.2, 0.0, 0.3, 1.0, 2.0]   # pace edge groups for the league's pass rate
 D = collections.defaultdict(lambda: collections.defaultdict(list))
 last_seen = {}
 race_files = []       # (file, {car index: name}) for the telemetry tells
@@ -123,11 +124,13 @@ for f, d in loaded:
             made[nm(o.get("overtaking-driver-name"))] += 1
     ph = {nm(p["name"]): p["driver-position-history"] for p in d.get("position-history") or [] if p.get("name")}
     # Battles (GreMi, 26 Nov 2026: passes per race favour drivers who start at the back, and only
-    # drivers who start ahead ever need to defend). Only real chances count: a car that is at least
-    # BATTLE_MIN % quicker in this race but starts behind a slower one. Both must finish. The quicker
-    # car "wins" when it is ahead on track on the last lap (time penalties left out). Each chance is
-    # compared with how often the league wins one with the same pace edge (see BUCKETS).
-    quick, grid, fin = {}, {}, {}
+    # drivers who start ahead ever need to defend). A chance is a pair where one car starts behind
+    # the other, both finish, and they got within BATTLE_CLOSE_MS at a lap line (or swapped places).
+    # Overtaking counts rivals ahead that are up to BATTLE_RANGE % slower or any amount quicker;
+    # defending counts rivals behind that are up to BATTLE_RANGE % slower or any amount quicker.
+    # The car behind "wins" when it is ahead on track on the last lap (time penalties left out).
+    # Each chance is compared with how often the league wins one with the same pace edge (BUCKETS).
+    quick, grid, fin, cum, lpos = {}, {}, {}, {}, {}
     for c in cars:
         n = c["driver-name"]
         fc = c.get("final-classification") or {}
@@ -138,16 +141,29 @@ for f, d in loaded:
         quick[n] = ls[(len(ls) - 1) // 4]   # a quick-but-normal lap: traffic hides less of the real pace
         grid[n] = fc["grid-position"]
         fin[n] = max(h, key=lambda x: x.get("lap-number", 0)).get("position")
-    for a in quick:
+        lpos[n] = {x.get("lap-number"): x.get("position") for x in h}
+        t, run = [], 0
+        for lap in ((c.get("session-history") or {}).get("lap-history-data") or [])[:fc.get("num-laps") or 0]:
+            if not lap.get("lap-time-in-ms"):
+                break
+            run += lap["lap-time-in-ms"]
+            t.append(run)
+        cum[n] = t
+    for a in quick:          # a starts behind b
         for b in quick:
-            edge = (quick[b] - quick[a]) / quick[b] * 100   # how much quicker a is than b
-            if a == b or edge < BATTLE_MIN or grid[a] < grid[b] or not fin[a] or not fin[b]:
+            if a == b or grid[a] < grid[b] or not fin[a] or not fin[b]:
+                continue
+            edge = (quick[b] - quick[a]) / quick[b] * 100   # how much quicker a is than b (negative: slower)
+            k = min(len(cum[a]), len(cum[b]))
+            close = (k and min(abs(cum[a][i] - cum[b][i]) for i in range(k)) <= BATTLE_CLOSE_MS) or any(
+                p < lpos[b].get(lap, 0) for lap, p in lpos[a].items() if lap and p)
+            if not close:
                 continue
             won = fin[a] < fin[b]
             BATTLES.append((edge, won))
-            if not hidden(a):
+            if edge <= BATTLE_RANGE and not hidden(a):
                 D[a]["attack"].append((edge, won))
-            if not hidden(b):
+            if edge >= -BATTLE_RANGE and not hidden(b):
                 D[b]["defend"].append((edge, not won))
     traps = {nm(s["name"]): s["speed-trap-record-kmph"] for s in d.get("speed-trap-records") or [] if s.get("speed-trap-record-kmph")}
     trap_med = statistics.median(traps.values()) if len(traps) >= 5 else None
@@ -347,7 +363,7 @@ _won = collections.defaultdict(lambda: [0, 0])
 for e, w in BATTLES:
     _won[bucket(e)][0] += w
     _won[bucket(e)][1] += 1
-PASS_RATE = {i: (w + 0.5) / (n + 1) for i, (w, n) in _won.items()}   # league: share of chances the quicker car takes
+PASS_RATE = {i: (w + 0.5) / (n + 1) for i, (w, n) in _won.items()}   # league: share of close chances the car behind takes
 BATTLE_PRIOR = 15  # few chances -> the score stays near the league middle (5.5)
 
 
@@ -437,14 +453,15 @@ for r in rows:
             tells.append((-lap1 / 1.2, "start", f"Slow starter: loses {-lap1:.1f} places on lap 1",
                           "If you start behind them, lap 1 is your best chance to get past.", how_l))
     held, dn, dexp = r["dfn"]
-    how_d = (f"Quicker cars that started behind them: they kept {held} of {dn} behind to the flag. "
+    how_d = (f"Cars that started behind them, were at their pace or quicker and got within 1 second: "
+             f"they kept {held} of {dn} behind to the flag. "
              f"With the same pace gaps, the league average is {dexp:.0f}.")
     if dn >= 8 and held - dexp <= -0.15 * dn:
         tells.append(((dexp - held) / dn * 10, "defend", "Gives places away under pressure",
-                      "Quicker cars get past them more easily than usual. Stay in their mirrors; they may crack.", how_d))
+                      "Cars on their tail get past more easily than usual. Stay in their mirrors; they may crack.", how_d))
     elif dn >= 8 and held - dexp >= 0.15 * dn:
         tells.append(((held - dexp) / dn * 10, "defend", "Hard to get past",
-                      "They hold off quicker cars better than most. Don't waste laps behind them; set up one clean move.", how_d))
+                      "Once you're on their tail, they hold you off better than most. Don't waste laps behind them; set up one clean move.", how_d))
     if (o["cuts"] or 0) >= 2:
         tells.append((o["cuts"] / 1.2, "limits", f"Track limits: {o['cuts']:.1f} warnings a race",
                       "They are often close to a time penalty. Late in the race, they may have to back off or give a place back.",
@@ -483,8 +500,8 @@ os.makedirs(OUT, exist_ok=True)
 data = {"version": 2, "built": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "since": FIRST_DAY.strftime("%Y-%m-%d"), "races": nraces, "min_races": MIN_RACES, "active_days": ACTIVE_DAYS,
         "weights": WEIGHTS, "field": {k: r2(v, 3) for k, v in fm.items()},
-        "battle": {"min_edge": BATTLE_MIN, "prior": BATTLE_PRIOR,
-                   "pass_rate": [[BUCKETS[i], round(PASS_RATE.get(i, 0), 2), _won[i][1]] for i in range(len(BUCKETS))]},
+        "battle": {"range": BATTLE_RANGE, "close_ms": BATTLE_CLOSE_MS, "prior": BATTLE_PRIOR,
+                   "pass_rate": [[None if BUCKETS[i] == -math.inf else BUCKETS[i], round(PASS_RATE.get(i, 0), 2), _won[i][1]] for i in range(len(BUCKETS))]},
         "drivers": out, "pairs": {k: [round(statistics.median(v)), len(v)] for k, v in pairs.items()}}
 path = os.path.join(OUT, "performance.json")
 json.dump(data, open(path + ".tmp", "w", encoding="utf-8"), separators=(",", ":"))

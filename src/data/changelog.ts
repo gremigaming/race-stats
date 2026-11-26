@@ -36,7 +36,7 @@ const changelog: ChangelogEntry[] = [
     type: "feat",
     title: "New: Performance Rating",
     message:
-      "Every driver now has a pace and racecraft score from 1.0 to 10.0 with a Bronze, Silver or Gold rank. See the ranking, your own profile with battle tells, and a battle preview against any rival. Overtaking and defending only count real chances against cars with a different pace, so your grid spot doesn't help or hurt. The new emblem sits before your SR on the home page, the driver lists, the driver picker and the race viewer.",
+      "Every driver now has a pace and racecraft score from 1.0 to 10.0 with a Bronze, Silver or Gold rank. See the ranking, your own profile with battle tells, and a battle preview against any rival. Overtaking and defending only count close fights with cars at your pace or quicker, so your grid spot doesn't help or hurt. The new emblem sits before your SR on the home page, the driver lists, the driver picker and the race viewer.",
     milestone: true,
     destination: "performance",
   },

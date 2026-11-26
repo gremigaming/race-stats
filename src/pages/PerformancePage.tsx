@@ -505,9 +505,9 @@ function BattleView({
   const att: string[] = [];
   const def: string[] = [];
   if (a.name !== o.name) {
-    if (o.cat.overtaking >= 8 && o.att_n >= 5) att.push(`They turn pace into places: they got past ${o.att_won} of ${o.att_n} slower cars that started ahead. Once they're within a second, cover the inside.`);
-    if (o.cat.defending <= 3.6 && o.def_n >= 5) def.push("Quicker cars get past them more easily than usual, so keep the pressure on.");
-    if (o.cat.defending >= 7.4 && o.def_n >= 5) def.push("They hold off quicker cars better than most. You'll need a clear pace edge or a clean move.");
+    if (o.cat.overtaking >= 8 && o.att_n >= 5) att.push(`They get the job done: they passed ${o.att_won} of ${o.att_n} close cars at their pace or quicker. Once they're within a second, cover the inside.`);
+    if (o.cat.defending <= 3.6 && o.def_n >= 5) def.push("Once you're on their tail, they give the place away more easily than most, so keep the pressure on.");
+    if (o.cat.defending >= 7.4 && o.def_n >= 5) def.push("They hold off cars on their tail better than most. You'll need a clear pace edge or a clean move.");
     for (const t of o.tells) {
       if ((t.kind === "brake" && t.title.includes("later")) || (t.kind === "start" && t.title.startsWith("Strong"))) att.push(t.means);
       else def.push(t.means);
@@ -578,10 +578,11 @@ function HowItWorks() {
         <p>
           Race pace is your typical clean lap against the fastest car in the same race. One lap is your qualifying gap to pole
           (your best race lap when you have fewer than 2 qualifying sessions). Consistency is how much your clean laps differ.
-          Overtaking and defending only count real chances, so where you start doesn&apos;t matter. Overtaking: when you&apos;re
-          quicker than a car that started ahead of you, did you finish ahead of it? Defending: when a quicker car started behind
-          you, did you keep it behind? Both are compared with how often the league manages it with the same pace gap, and
-          drivers with few chances stay near the middle. Track discipline counts corner-cutting warnings, penalties and trips
+          Overtaking and defending only count real fights, so where you start doesn&apos;t matter. A fight is two cars that
+          got within 1 second of each other, both finished, and the car behind was at most 0.3% slower or any amount quicker.
+          Overtaking: did you finish ahead of the car that started ahead of you? Defending: did you keep the car that started
+          behind you behind? Both are compared with how often the league manages it with the same pace gap, so beating a
+          quicker car counts more, and drivers with few fights stay near the middle. Track discipline counts corner-cutting warnings, penalties and trips
           over the white line.
         </p>
         <p>
