@@ -163,7 +163,7 @@ export const PR_CATEGORIES: {
     raw: (d) =>
       d.att_n === 0
         ? "no chances yet"
-        : `passed ${d.att_won} of ${d.att_n} chances (league avg ${d.att_exp.toFixed(0)})`,
+        : `${d.att_won} of ${d.att_n} passed (avg ${d.att_exp.toFixed(0)})`,
   },
   {
     key: "defending",
@@ -171,7 +171,7 @@ export const PR_CATEGORIES: {
     raw: (d) =>
       d.def_n === 0
         ? "no chances yet"
-        : `held ${d.def_held} of ${d.def_n} chances (league avg ${d.def_exp.toFixed(0)})`,
+        : `${d.def_held} of ${d.def_n} held (avg ${d.def_exp.toFixed(0)})`,
   },
   { key: "awareness", label: "Track discipline", raw: (d) => `${d.cuts.toFixed(1)} cut warnings a race` },
 ];
