@@ -68,6 +68,7 @@ for f in files:
 RACEMEDS = []
 BATTLES = []          # (pace edge %, quicker car got past) for every chance in the league
 BATTLE_RANGE = 0.3    # overtaking: rivals up to this % slower or any amount quicker; defending: the mirror
+DEFEND_MAX = 2.0      # defending ignores cars more than this % quicker: they get past ~95%, a hold is luck
 BATTLE_CLOSE_MS = 1000   # a pair only counts when it got this close at a lap line (or swapped places)
 BUCKETS = [-math.inf, -2.0, -1.0, -0.5, -0.2, 0.0, 0.3, 1.0, 2.0]   # pace edge groups for the league's pass rate
 D = collections.defaultdict(lambda: collections.defaultdict(list))
@@ -127,7 +128,8 @@ for f, d in loaded:
     # drivers who start ahead ever need to defend). A chance is a pair where one car starts behind
     # the other, both finish, and they got within BATTLE_CLOSE_MS at a lap line (or swapped places).
     # Overtaking counts rivals ahead that are up to BATTLE_RANGE % slower or any amount quicker;
-    # defending counts rivals behind that are up to BATTLE_RANGE % slower or any amount quicker.
+    # defending counts rivals behind from BATTLE_RANGE % slower up to DEFEND_MAX % quicker
+    # (GreMi, 26 Nov: holds against much quicker cars were luck and gave very slow drivers a bonus).
     # The car behind "wins" when it is ahead on track on the last lap (time penalties left out).
     # Each chance is compared with how often the league wins one with the same pace edge (BUCKETS).
     quick, grid, fin, cum, lpos = {}, {}, {}, {}, {}
@@ -163,7 +165,7 @@ for f, d in loaded:
             BATTLES.append((edge, won))
             if edge <= BATTLE_RANGE and not hidden(a):
                 D[a]["attack"].append((edge, won))
-            if edge >= -BATTLE_RANGE and not hidden(b):
+            if -BATTLE_RANGE <= edge <= DEFEND_MAX and not hidden(b):
                 D[b]["defend"].append((edge, not won))
     traps = {nm(s["name"]): s["speed-trap-record-kmph"] for s in d.get("speed-trap-records") or [] if s.get("speed-trap-record-kmph")}
     trap_med = statistics.median(traps.values()) if len(traps) >= 5 else None
@@ -500,7 +502,7 @@ os.makedirs(OUT, exist_ok=True)
 data = {"version": 2, "built": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "since": FIRST_DAY.strftime("%Y-%m-%d"), "races": nraces, "min_races": MIN_RACES, "active_days": ACTIVE_DAYS,
         "weights": WEIGHTS, "field": {k: r2(v, 3) for k, v in fm.items()},
-        "battle": {"range": BATTLE_RANGE, "close_ms": BATTLE_CLOSE_MS, "prior": BATTLE_PRIOR,
+        "battle": {"range": BATTLE_RANGE, "defend_max": DEFEND_MAX, "close_ms": BATTLE_CLOSE_MS, "prior": BATTLE_PRIOR,
                    "pass_rate": [[None if BUCKETS[i] == -math.inf else BUCKETS[i], round(PASS_RATE.get(i, 0), 2), _won[i][1]] for i in range(len(BUCKETS))]},
         "drivers": out, "pairs": {k: [round(statistics.median(v)), len(v)] for k, v in pairs.items()}}
 path = os.path.join(OUT, "performance.json")

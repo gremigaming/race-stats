@@ -579,7 +579,8 @@ function HowItWorks() {
           Race pace is your typical clean lap against the fastest car in the same race. One lap is your qualifying gap to pole
           (your best race lap when you have fewer than 2 qualifying sessions). Consistency is how much your clean laps differ.
           Overtaking and defending only count real fights, so where you start doesn&apos;t matter. A fight is two cars that
-          got within 1 second of each other, both finished, and the car behind was at most 0.3% slower or any amount quicker.
+          got within 1 second of each other, both finished, and the car behind was at most 0.3% slower or any amount quicker
+          (for defending at most 2% quicker: against a much quicker car a hold is luck, not defending).
           Overtaking: did you finish ahead of the car that started ahead of you? Defending: did you keep the car that started
           behind you behind? Both are compared with how often the league manages it with the same pace gap, so beating a
           quicker car counts more, and drivers with few fights stay near the middle. Track discipline counts corner-cutting warnings, penalties and trips
