@@ -33,8 +33,14 @@ export interface PerfDriver {
   onelap_src: "quali" | "best lap";
   cv: number;
   made: number;
-  def_rate: number;
+  /** Quicker than a car that started ahead: chances, how many they got past, league-average expectation. */
+  att_won: number;
+  att_n: number;
+  att_exp: number;
+  /** Quicker car started behind them: chances, how many they kept behind, league-average expectation. */
+  def_held: number;
   def_n: number;
+  def_exp: number;
   cuts: number;
   lap1: number;
   trap: number;
@@ -60,7 +66,6 @@ export interface PerfData {
     offs_per_10km: number | null;
     cuts: number | null;
     cv: number | null;
-    def_rate: number;
   };
   drivers: PerfDriver[];
   /** "a|b" (sorted names) -> [median lap-time gap b minus a in ms, races both finished] */
@@ -155,15 +160,18 @@ export const PR_CATEGORIES: {
   {
     key: "overtaking",
     label: "Overtaking",
-    raw: (d) => `${d.made.toFixed(1)} passes a race, ${d.lap1 >= 0 ? "+" : ""}${d.lap1.toFixed(1)} on lap 1`,
+    raw: (d) =>
+      d.att_n === 0
+        ? "no chances yet"
+        : `got past ${d.att_won} of ${d.att_n} slower cars that started ahead (league average ${d.att_exp.toFixed(0)})`,
   },
   {
     key: "defending",
     label: "Defending",
     raw: (d) =>
-      d.def_n < 15
-        ? "not enough battles yet"
-        : `${Math.round(d.def_rate * 10)} of 10 slower cars got past`,
+      d.def_n === 0
+        ? "no chances yet"
+        : `kept ${d.def_held} of ${d.def_n} quicker cars that started behind (league average ${d.def_exp.toFixed(0)})`,
   },
   { key: "awareness", label: "Track discipline", raw: (d) => `${d.cuts.toFixed(1)} cut warnings a race` },
 ];

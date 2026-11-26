@@ -288,7 +288,7 @@ export function PerformancePage() {
                         key={c.key}
                         v={d.cat[c.key]}
                         label={CAT_SHORT[c.key]}
-                        dim={c.key === "defending" && d.def_n < 15}
+                        dim={(c.key === "defending" && d.def_n < 5) || (c.key === "overtaking" && d.att_n < 5)}
                         title={`${c.label}: ${d.cat[c.key].toFixed(1)} · ${c.raw(d)}`}
                       />
                     ))}
@@ -505,9 +505,9 @@ function BattleView({
   const att: string[] = [];
   const def: string[] = [];
   if (a.name !== o.name) {
-    if (o.cat.overtaking >= 8) att.push(`They pass a lot (${o.made.toFixed(1)} passes a race). Once they're within a second, cover the inside.`);
-    if (o.cat.defending <= 3.6 && o.def_n >= 15) def.push("Slower cars often get past them, so keep the pressure on.");
-    if (o.cat.defending >= 7.4 && o.def_n >= 15) def.push("They rarely lose places to slower cars. You'll need a clear pace edge or a clean move.");
+    if (o.cat.overtaking >= 8 && o.att_n >= 5) att.push(`They turn pace into places: they got past ${o.att_won} of ${o.att_n} slower cars that started ahead. Once they're within a second, cover the inside.`);
+    if (o.cat.defending <= 3.6 && o.def_n >= 5) def.push("Quicker cars get past them more easily than usual, so keep the pressure on.");
+    if (o.cat.defending >= 7.4 && o.def_n >= 5) def.push("They hold off quicker cars better than most. You'll need a clear pace edge or a clean move.");
     for (const t of o.tells) {
       if ((t.kind === "brake" && t.title.includes("later")) || (t.kind === "start" && t.title.startsWith("Strong"))) att.push(t.means);
       else def.push(t.means);
@@ -578,8 +578,11 @@ function HowItWorks() {
         <p>
           Race pace is your typical clean lap against the fastest car in the same race. One lap is your qualifying gap to pole
           (your best race lap when you have fewer than 2 qualifying sessions). Consistency is how much your clean laps differ.
-          Overtaking counts passes from lap 2 on plus places won on lap 1. Defending is how often slower cars get past you on
-          track. Track discipline counts corner-cutting warnings, penalties and trips over the white line.
+          Overtaking and defending only count real chances, so where you start doesn&apos;t matter. Overtaking: when you&apos;re
+          quicker than a car that started ahead of you, did you finish ahead of it? Defending: when a quicker car started behind
+          you, did you keep it behind? Both are compared with how often the league manages it with the same pace gap, and
+          drivers with few chances stay near the middle. Track discipline counts corner-cutting warnings, penalties and trips
+          over the white line.
         </p>
         <p>
           Stream races since 19 Oct 2026, drivers with 5 or more races who raced in the last 30 days. Battle tells from

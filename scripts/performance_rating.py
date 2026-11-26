@@ -66,6 +66,9 @@ for f in files:
             REAL.add(nm(c["driver-name"]))
 
 RACEMEDS = []
+BATTLES = []          # (pace edge %, quicker car got past) for every chance in the league
+BATTLE_MIN = 0.3      # % quicker before a car that starts behind counts as a chance to pass
+BUCKETS = [0.3, 0.6, 1.0, 1.5, 2.5, 4.0]   # pace edge groups for the league's expected pass rate
 D = collections.defaultdict(lambda: collections.defaultdict(list))
 last_seen = {}
 race_files = []       # (file, {car index: name}) for the telemetry tells
@@ -114,15 +117,38 @@ for f, d in loaded:
         D[n]["best_gap"].append((min(laps[n]) - fastest) / fastest * 100)
         if len(laps[n]) >= 3:
             D[n]["cv"].append(statistics.pstdev(laps[n]) / statistics.mean(laps[n]) * 100)
-    made, lost_slower = collections.Counter(), collections.Counter()
+    made = collections.Counter()
     for o in (d.get("overtakes") or {}).get("records") or []:
-        a, b = nm(o.get("overtaking-driver-name")), nm(o.get("overtaken-driver-name"))
-        if o.get("overtaking-driver-lap", 0) <= 1:
-            continue   # lap 1 counts as the start
-        made[a] += 1
-        if a in med and b in med and med[a] > med[b]:
-            lost_slower[b] += 1
+        if o.get("overtaking-driver-lap", 0) > 1:   # lap 1 counts as the start
+            made[nm(o.get("overtaking-driver-name"))] += 1
     ph = {nm(p["name"]): p["driver-position-history"] for p in d.get("position-history") or [] if p.get("name")}
+    # Battles (GreMi, 26 Nov 2026: passes per race favour drivers who start at the back, and only
+    # drivers who start ahead ever need to defend). Only real chances count: a car that is at least
+    # BATTLE_MIN % quicker in this race but starts behind a slower one. Both must finish. The quicker
+    # car "wins" when it is ahead on track on the last lap (time penalties left out). Each chance is
+    # compared with how often the league wins one with the same pace edge (see BUCKETS).
+    quick, grid, fin = {}, {}, {}
+    for c in cars:
+        n = c["driver-name"]
+        fc = c.get("final-classification") or {}
+        h = ph.get(n) or []
+        if n not in laps or fc.get("result-status") != "FINISHED" or not fc.get("grid-position") or not h:
+            continue
+        ls = sorted(laps[n])
+        quick[n] = ls[(len(ls) - 1) // 4]   # a quick-but-normal lap: traffic hides less of the real pace
+        grid[n] = fc["grid-position"]
+        fin[n] = max(h, key=lambda x: x.get("lap-number", 0)).get("position")
+    for a in quick:
+        for b in quick:
+            edge = (quick[b] - quick[a]) / quick[b] * 100   # how much quicker a is than b
+            if a == b or edge < BATTLE_MIN or grid[a] < grid[b] or not fin[a] or not fin[b]:
+                continue
+            won = fin[a] < fin[b]
+            BATTLES.append((edge, won))
+            if not hidden(a):
+                D[a]["attack"].append((edge, won))
+            if not hidden(b):
+                D[b]["defend"].append((edge, not won))
     traps = {nm(s["name"]): s["speed-trap-record-kmph"] for s in d.get("speed-trap-records") or [] if s.get("speed-trap-record-kmph")}
     trap_med = statistics.median(traps.values()) if len(traps) >= 5 else None
     for c in humans:
@@ -130,9 +156,7 @@ for f, d in loaded:
         fc = c.get("final-classification") or {}
         D[n]["races"].append(track)
         last_seen[n] = stamp(f)
-        D[n]["slower_cars"].append(sum(1 for v in med.values() if n in med and v > med[n]))
         D[n]["made"].append(made[n])
-        D[n]["lost_slower"].append(lost_slower[n])
         h = ph.get(n) or []
         p0 = next((x["position"] for x in h if x.get("lap-number") == 0), None)
         p1 = next((x["position"] for x in h if x.get("lap-number") == 1), None)
@@ -306,31 +330,54 @@ for n, o in D.items():
     P[n] = {"races": len(o["races"]), "last": last_seen[n],
             "pace_gap": median(o["pace_gap"]), "best_gap": median(o["best_gap"]),
             "quali_gap": median(o["quali_gap"]), "quali_n": len(o["quali_gap"]), "cv": median(o["cv"]),
-            "made": mean(o["made"]), "lost_slower_sum": sum(o["lost_slower"]), "slower_cars_sum": sum(o["slower_cars"]),
+            "made": mean(o["made"]), "attack": o["attack"], "defend": o["defend"],
             "lap1": mean(o["lap1"]), "cuts": mean(o["cuts"]), "pens": mean(o["pens"]), "trap": mean(o["trap"]),
             "recent": mean(o["pace_gap"][-6:]), "older": mean(o["pace_gap"][:-6]) if len(o["pace_gap"]) > 8 else None}
 newest = max((p["last"] for p in P.values()), default=datetime.datetime.now())
 P = {n: p for n, p in P.items() if p["pace_gap"] is not None and (newest - p["last"]).days <= ACTIVE_DAYS}
 cl = lambda x: max(0.0, min(1.0, x))        # noqa: E731
 sc = lambda q: round(1 + 9 * cl(q), 1)      # noqa: E731
-LEAGUE_DEF = sum(o["lost_slower_sum"] for o in P.values()) / max(1, sum(o["slower_cars_sum"] for o in P.values()))
-PRIOR = 20
+
+
+def bucket(edge):
+    return max(i for i, lo in enumerate(BUCKETS) if edge >= lo)
+
+
+_won = collections.defaultdict(lambda: [0, 0])
+for e, w in BATTLES:
+    _won[bucket(e)][0] += w
+    _won[bucket(e)][1] += 1
+PASS_RATE = {i: (w + 0.5) / (n + 1) for i, (w, n) in _won.items()}   # league: share of chances the quicker car takes
+BATTLE_PRIOR = 8   # few chances -> the score stays near the league middle (5.5)
+
+
+def battles(lst, attacking):
+    """(won, chances, expected) for a driver's attacks or defences."""
+    exp = sum(PASS_RATE[bucket(e)] if attacking else 1 - PASS_RATE[bucket(e)] for e, _ in lst)
+    return sum(1 for _, w in lst if w), len(lst), exp
+
+
+def battle_score(won, n, exp):
+    # +0.2 above the league per chance (after the prior) is 10.0, -0.2 is 1.0
+    return sc(0.5 + (won - exp) / (n + BATTLE_PRIOR) / 0.4)
+
+
 rows = []
 for n, o in P.items():
     t = tell_stats(n)
     onelap = o["quali_gap"] if o["quali_n"] >= 2 else o["best_gap"]
-    def_rate = (o["lost_slower_sum"] + LEAGUE_DEF * PRIOR) / (o["slower_cars_sum"] + PRIOR)
+    att, dfn = battles(o["attack"], True), battles(o["defend"], False)
     cat = {
         "pace": sc(math.exp(-o["pace_gap"] / 2.5)),
         "onelap": sc(math.exp(-(onelap or 0) / 2.5)),
         "consistency": sc(1 - ((o["cv"] or 1) - 0.4) / 1.2),
-        "overtaking": sc(((o["made"] or 0) + max(o["lap1"] or 0, 0) * 0.5) / 7),
-        "defending": sc(1 - def_rate / 0.6),
+        "overtaking": battle_score(*att),
+        "defending": battle_score(*dfn),
         "awareness": sc(1 - ((o["cuts"] or 0) * 0.18 + (o["pens"] or 0) * 0.15 + (t.get("offs_per_10km") or 0) * 0.04)),
     }
     pr = sum(cat[k] * WEIGHTS[k] for k in WEIGHTS)
     rows.append({"name": n, "pr": round(pr, 1), "prx": pr, "cat": cat, "o": o, "t": t, "onelap": onelap or 0,
-                 "def_rate": def_rate, "def_n": o["slower_cars_sum"]})
+                 "att": att, "dfn": dfn})
 rows.sort(key=lambda r: -r["prx"])
 
 
@@ -341,7 +388,7 @@ def fmed(vals):
 
 fm = {"steer_rev_km": fmed(r["t"].get("steer_rev_km") for r in rows),
       "offs_per_10km": fmed(r["t"].get("offs_per_10km") for r in rows),
-      "cuts": fmed(r["o"]["cuts"] for r in rows), "cv": fmed(r["o"]["cv"] for r in rows), "def_rate": LEAGUE_DEF}
+      "cuts": fmed(r["o"]["cuts"] for r in rows), "cv": fmed(r["o"]["cv"] for r in rows)}
 TEL = "Telemetry from {} races"
 for r in rows:
     o, t = r["o"], r["t"]
@@ -389,10 +436,15 @@ for r in rows:
         else:
             tells.append((-lap1 / 1.2, "start", f"Slow starter: loses {-lap1:.1f} places on lap 1",
                           "If you start behind them, lap 1 is your best chance to get past.", how_l))
-    if r["def_n"] >= 15 and r["def_rate"] >= 0.4:
-        tells.append((r["def_rate"] * 5, "defend", "Gives places away under pressure",
-                      "Slower cars get past them more often than usual. Stay in their mirrors; they may crack.",
-                      f"Out of every 10 slower cars in their races, {r['def_rate'] * 10:.0f} got past them on track (league: {LEAGUE_DEF * 10:.0f})."))
+    held, dn, dexp = r["dfn"]
+    how_d = (f"Quicker cars that started behind them: they kept {held} of {dn} behind to the flag. "
+             f"With the same pace gaps, the league average is {dexp:.0f}.")
+    if dn >= 8 and held - dexp <= -0.15 * dn:
+        tells.append(((dexp - held) / dn * 10, "defend", "Gives places away under pressure",
+                      "Quicker cars get past them more easily than usual. Stay in their mirrors; they may crack.", how_d))
+    elif dn >= 8 and held - dexp >= 0.15 * dn:
+        tells.append(((held - dexp) / dn * 10, "defend", "Hard to get past",
+                      "They hold off quicker cars better than most. Don't waste laps behind them; set up one clean move.", how_d))
     if (o["cuts"] or 0) >= 2:
         tells.append((o["cuts"] / 1.2, "limits", f"Track limits: {o['cuts']:.1f} warnings a race",
                       "They are often close to a time penalty. Late in the race, they may have to back off or give a place back.",
@@ -413,7 +465,9 @@ r2 = lambda x, n=2: None if x is None else round(x, n)   # noqa: E731
 out = [{"name": r["name"], "pr": r["pr"], "cat": r["cat"], "tells": r["tells"], "races": r["o"]["races"],
         "last": r["o"]["last"].strftime("%Y-%m-%d"),
         "pace_gap": r2(r["o"]["pace_gap"]), "onelap_gap": r2(r["onelap"]), "onelap_src": "quali" if r["o"]["quali_n"] >= 2 else "best lap",
-        "cv": r2(r["o"]["cv"] or 0), "made": r2(r["o"]["made"] or 0, 1), "def_rate": r2(r["def_rate"]), "def_n": r["def_n"],
+        "cv": r2(r["o"]["cv"] or 0), "made": r2(r["o"]["made"] or 0, 1),
+        "att_won": r["att"][0], "att_n": r["att"][1], "att_exp": r2(r["att"][2], 1),
+        "def_held": r["dfn"][0], "def_n": r["dfn"][1], "def_exp": r2(r["dfn"][2], 1),
         "cuts": r2(r["o"]["cuts"] or 0, 1), "lap1": r2(r["o"]["lap1"] or 0, 1), "trap": r2(r["o"]["trap"] or 0, 1),
         "brake": r["t"].get("brake_early_m"), "steer": r["t"].get("steer_rev_km"), "offs": r["t"].get("offs_per_10km"),
         "tel_races": r["t"].get("races", 0), "tel_km": r["t"].get("km", 0),
@@ -426,9 +480,11 @@ for rm in RACEMEDS:
             if a < b and a in names and b in names:
                 pairs[a + "|" + b].append(rm[b] - rm[a])
 os.makedirs(OUT, exist_ok=True)
-data = {"version": 1, "built": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+data = {"version": 2, "built": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "since": FIRST_DAY.strftime("%Y-%m-%d"), "races": nraces, "min_races": MIN_RACES, "active_days": ACTIVE_DAYS,
         "weights": WEIGHTS, "field": {k: r2(v, 3) for k, v in fm.items()},
+        "battle": {"min_edge": BATTLE_MIN, "prior": BATTLE_PRIOR,
+                   "pass_rate": [[BUCKETS[i], round(PASS_RATE.get(i, 0), 2), _won[i][1]] for i in range(len(BUCKETS))]},
         "drivers": out, "pairs": {k: [round(statistics.median(v)), len(v)] for k, v in pairs.items()}}
 path = os.path.join(OUT, "performance.json")
 json.dump(data, open(path + ".tmp", "w", encoding="utf-8"), separators=(",", ":"))
