@@ -163,7 +163,7 @@ export const PR_CATEGORIES: {
     raw: (d) =>
       d.att_n === 0
         ? "no chances yet"
-        : `got past ${d.att_won} of ${d.att_n} slower cars that started ahead (league average ${d.att_exp.toFixed(0)})`,
+        : `passed ${d.att_won} of ${d.att_n} chances (league avg ${d.att_exp.toFixed(0)})`,
   },
   {
     key: "defending",
@@ -171,7 +171,7 @@ export const PR_CATEGORIES: {
     raw: (d) =>
       d.def_n === 0
         ? "no chances yet"
-        : `kept ${d.def_held} of ${d.def_n} quicker cars that started behind (league average ${d.def_exp.toFixed(0)})`,
+        : `held ${d.def_held} of ${d.def_n} chances (league avg ${d.def_exp.toFixed(0)})`,
   },
   { key: "awareness", label: "Track discipline", raw: (d) => `${d.cuts.toFixed(1)} cut warnings a race` },
 ];
