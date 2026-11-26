@@ -8990,6 +8990,28 @@
   "rule_now": "V16"
  },
  {
+  "file": "Race_Monza_2026_11_25_20_10_41.json",
+  "t": 1795633367.66,
+  "lap": 1,
+  "cars": [
+   8,
+   1,
+   14,
+   13,
+   6,
+   10
+  ],
+  "frozen": "TTV/GreMi_Gaming at fault",
+  "frozen_fault": [
+   1
+  ],
+  "now": "Red Bull Racing '26 #9 at fault",
+  "now_fault": [
+   6
+  ],
+  "rule_now": "V17"
+ },
+ {
   "file": "Race_Sakhir_2026_10_25_16_22_33.json",
   "t": 1792941198.4,
   "lap": 1,
