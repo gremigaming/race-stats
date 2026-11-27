@@ -147,14 +147,14 @@ export const PR_CATEGORIES: {
   label: string;
   raw: (d: PerfDriver) => string;
 }[] = [
-  { key: "pace", label: "Race pace", raw: (d) => `+${d.pace_gap.toFixed(2)}% off the fastest` },
+  { key: "pace", label: "Race pace", raw: (d) => `+${d.pace_gap.toFixed(2)}% off the quickest driver` },
   {
     key: "onelap",
     label: "One lap",
     raw: (d) =>
       d.onelap_src === "quali"
-        ? `+${d.onelap_gap.toFixed(2)}% off pole`
-        : `+${d.onelap_gap.toFixed(2)}% off the fastest lap`,
+        ? `+${d.onelap_gap.toFixed(2)}% off the best qualifier`
+        : `+${d.onelap_gap.toFixed(2)}% off the best one-lap driver`,
   },
   { key: "consistency", label: "Consistency", raw: (d) => `${d.cv.toFixed(2)}% lap spread` },
   {

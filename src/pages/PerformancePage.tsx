@@ -569,15 +569,18 @@ function HowItWorks() {
       <div className="space-y-2 text-sm text-zinc-400">
         <p>
           <b className="font-medium text-zinc-200">PR</b> = race pace 35% + one lap 15% + consistency 15% + overtaking 15% +
-          defending 10% + track discipline 10%. Every part is a score from 1.0 to 10.0.
+          defending 10% + track discipline 10%. Every part is a score from 1.0 to 10.0, and only the best driver in the
+          league in that part gets 10.0; everyone else is scored against them.
         </p>
         <p>
           <b className="font-medium text-zinc-200">Ranks</b> run Bronze I (under 2), Bronze II (2+), Bronze III (3+), Silver I (4+),
           Silver II (5+), Silver III (6+), Gold I (7+), Gold II (8+) up to Gold III (9+).
         </p>
         <p>
-          Race pace is your typical clean lap against the fastest car in the same race. One lap is your qualifying gap to pole
-          (your best race lap when you have fewer than 2 qualifying sessions). Consistency is how much your clean laps differ.
+          Race pace is your typical clean lap and one lap is your qualifying lap (your best race lap with fewer than 2
+          qualifying sessions). Both are compared head to head with everyone you raced against, across all races, so a race
+          against a strong field counts the same as one against a weak field. The quickest driver gets 10.0 and the middle
+          of the ranking 5.5. Consistency is how much your clean laps differ.
           Overtaking and defending only count real fights, so where you start doesn&apos;t matter. A fight is two cars that
           got within 1 second of each other, both finished, and the car behind was at most 0.3% slower or any amount quicker
           (for defending at most 2% quicker: against a much quicker car a hold is luck, not defending).
@@ -587,7 +590,9 @@ function HowItWorks() {
           over the white line.
         </p>
         <p>
-          Stream races since 19 Oct 2026, drivers with 5 or more races who raced in the last 30 days. Battle tells from
+          Your last 40 races count, like the Safety Rating: the newest 8 count fully, then 80%, 60%, 40% and 20% for
+          each next 8, so your score follows your current form. Stream races since 19 Oct 2026, drivers with 5 or more
+          races who raced in the last 30 days. Battle tells from
           telemetry (braking, steering, off-tracks) need at least 80 km of recorded laps.
         </p>
       </div>

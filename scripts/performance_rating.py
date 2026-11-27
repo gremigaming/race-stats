@@ -66,6 +66,7 @@ for f in files:
             REAL.add(nm(c["driver-name"]))
 
 RACEMEDS = []
+GAPSETS = {"pace": [], "quali": [], "best": []}   # per session {driver: gap % to the session's best}
 BATTLES = []          # (pace edge %, quicker car got past) for every chance in the league
 BATTLE_RANGE = 0.3    # overtaking: rivals up to this % slower or any amount quicker; defending: the mirror
 DEFEND_MAX = 2.0      # defending ignores cars more than this % quicker: they get past ~95%, a hold is luck
@@ -89,6 +90,7 @@ for f, d in loaded:
         for n, t in best:
             if not hidden(n):
                 D[n]["quali_gap"].append((t - pole) / pole * 100)
+        GAPSETS["quali"].append({n: (t - pole) / pole * 100 for n, t in best if not hidden(n)})
         continue
     if st != "Race" or len(cars) < 6:
         continue
@@ -111,7 +113,9 @@ for f, d in loaded:
     race_files.append((os.path.basename(f), {c.get("index"): c["driver-name"] for c in humans if c.get("index") is not None}))
     ref = min(med.values())
     RACEMEDS.append({k: v for k, v in med.items() if not hidden(k)})
+    GAPSETS["pace"].append({k: (v - ref) / ref * 100 for k, v in med.items() if not hidden(k)})
     fastest = min(min(v) for v in laps.values())
+    GAPSETS["best"].append({k: (min(laps[k]) - fastest) / fastest * 100 for k in med if not hidden(k)})
     for n, m in med.items():
         if hidden(n):
             continue
@@ -164,9 +168,9 @@ for f, d in loaded:
             won = fin[a] < fin[b]
             BATTLES.append((edge, won))
             if edge <= BATTLE_RANGE and not hidden(a):
-                D[a]["attack"].append((edge, won))
+                D[a]["attack"].append((edge, won, len(D[a]["races"])))
             if -BATTLE_RANGE <= edge <= DEFEND_MAX and not hidden(b):
-                D[b]["defend"].append((edge, not won))
+                D[b]["defend"].append((edge, not won, len(D[b]["races"])))
     traps = {nm(s["name"]): s["speed-trap-record-kmph"] for s in d.get("speed-trap-records") or [] if s.get("speed-trap-record-kmph")}
     trap_med = statistics.median(traps.values()) if len(traps) >= 5 else None
     for c in humans:
@@ -341,18 +345,98 @@ def tell_stats(n):
 # ---- scores
 mean = lambda v: statistics.mean(v) if v else None      # noqa: E731
 median = lambda v: statistics.median(v) if v else None  # noqa: E731
+# Recent form (GreMi, 27 Nov 2026: "the last 40 races of the driver and have it drop off, basically
+# the same as the safety rating"): the driver's newest races count fully, then each step of
+# WINDOW_STEP older races counts less (WINDOW_WEIGHTS), and races past the window don't count.
+# Same numbers as the SR window (races/sr-settings.json window_step / window_weights).
+WINDOW_STEP, WINDOW_WEIGHTS = 8, [1.0, 0.8, 0.6, 0.4, 0.2]
+try:
+    _srs = json.load(open(os.path.join("races", "sr-settings.json"), encoding="utf-8"))
+    _srs = _srs.get("values", _srs)
+    if int(_srs.get("window_step", 0)) > 0 and _srs.get("window_weights"):
+        WINDOW_STEP, WINDOW_WEIGHTS = int(_srs["window_step"]), [float(x) for x in _srs["window_weights"]]
+except (OSError, ValueError, TypeError, AttributeError):
+    pass
+WINDOW = WINDOW_STEP * len(WINDOW_WEIGHTS)
+
+
+def _w(age):
+    """Weight of a race that has `age` newer races of the same driver after it."""
+    return WINDOW_WEIGHTS[age // WINDOW_STEP] if age < WINDOW else 0.0
+
+
+def wmedian(v):
+    """Weighted median of a chronological list (newest last)."""
+    if not v:
+        return None
+    pts = sorted((x, _w(len(v) - 1 - i)) for i, x in enumerate(v))
+    half, acc = sum(w for _, w in pts) / 2, 0.0
+    for x, w in pts:
+        acc += w
+        if acc >= half:
+            return x
+    return pts[-1][0]
+
+
+def wmean(v):
+    if not v:
+        return None
+    ws = [_w(len(v) - 1 - i) for i in range(len(v))]
+    return sum(x * w for x, w in zip(v, ws)) / sum(ws)
+
+
+def head_to_head(sessions, iters=400, clip=2.5):
+    """Fair pace across races (GreMi, 27 Nov 2026): a driver's gap in a session = their own level +
+    how hard that session's field was. Solved over all sessions at once (least squares, each
+    session's misfit clipped at `clip` % so one crash or bad lap can't drag a level), so beating a
+    strong field counts more than winning against a weak one. Recent sessions weigh more (the
+    SR-style window, _w). Returns {driver: level}, lower is quicker; only differences mean something."""
+    seen = collections.Counter()
+    rows_ = []
+    for sess in reversed(sessions):          # newest first so each driver's age counts up
+        rows_.append([(n, g, _w(seen[n])) for n, g in sess.items()])
+        for n in sess:
+            seen[n] += 1
+    lvl = collections.defaultdict(float)
+    off = [0.0] * len(rows_)
+    for _ in range(iters):
+        for i, r in enumerate(rows_):
+            if r:
+                off[i] = sum(max(-clip, min(clip, g - lvl[n] - off[i])) for n, g, _ in r) / len(r) + off[i]
+        num, den = collections.defaultdict(float), collections.defaultdict(float)
+        for i, r in enumerate(rows_):
+            for n, g, w in r:
+                num[n] += w * max(-clip, min(clip, g - off[i] - lvl[n]))
+                den[n] += w
+        for n in num:
+            if den[n] > 0:
+                lvl[n] += num[n] / den[n]
+    return dict(lvl)
+
+
+LEVEL = {k: head_to_head(v) for k, v in GAPSETS.items()}
+
 P = {}
 for n, o in D.items():
     if len(o["races"]) < MIN_RACES or n not in last_seen:
         continue
     P[n] = {"races": len(o["races"]), "last": last_seen[n],
-            "pace_gap": median(o["pace_gap"]), "best_gap": median(o["best_gap"]),
-            "quali_gap": median(o["quali_gap"]), "quali_n": len(o["quali_gap"]), "cv": median(o["cv"]),
-            "made": mean(o["made"]), "attack": o["attack"], "defend": o["defend"],
-            "lap1": mean(o["lap1"]), "cuts": mean(o["cuts"]), "pens": mean(o["pens"]), "trap": mean(o["trap"]),
+            "pace_gap": wmedian(o["pace_gap"]), "best_gap": wmedian(o["best_gap"]),
+            "quali_gap": wmedian(o["quali_gap"]), "quali_n": len(o["quali_gap"]), "cv": wmedian(o["cv"]),
+            "made": mean(o["made"]), "attack": o["attack"], "defend": o["defend"], "nr": len(o["races"]),
+            "lap1": mean(o["lap1"]), "cuts": wmean(o["cuts"]), "pens": wmean(o["pens"]), "trap": mean(o["trap"]),
             "recent": mean(o["pace_gap"][-6:]), "older": mean(o["pace_gap"][:-6]) if len(o["pace_gap"]) > 8 else None}
 newest = max((p["last"] for p in P.values()), default=datetime.datetime.now())
 P = {n: p for n, p in P.items() if p["pace_gap"] is not None and (newest - p["last"]).days <= ACTIVE_DAYS}
+# pace and one lap: gap to the quickest ranked driver on the head-to-head levels
+for key, src in (("pace_gap", "pace"), ("quali_gap", "quali"), ("best_gap", "best")):
+    lv = LEVEL[src]
+    have = [lv[n] for n in P if n in lv]
+    if have:
+        top = min(have)
+        for n, p in P.items():
+            if n in lv:
+                p[key] = lv[n] - top
 cl = lambda x: max(0.0, min(1.0, x))        # noqa: E731
 sc = lambda q: round(1 + 9 * cl(q), 1)      # noqa: E731
 
@@ -369,33 +453,54 @@ PASS_RATE = {i: (w + 0.5) / (n + 1) for i, (w, n) in _won.items()}   # league: s
 BATTLE_PRIOR = 15  # few chances -> the score stays near the league middle (5.5)
 
 
-def battles(lst, attacking):
-    """(won, chances, expected) for a driver's attacks or defences."""
-    exp = sum(PASS_RATE[bucket(e)] if attacking else 1 - PASS_RATE[bucket(e)] for e, _ in lst)
-    return sum(1 for _, w in lst if w), len(lst), exp
+def battles(lst, attacking, nraces):
+    """(won, chances, expected) for a driver's attacks or defences, plus the same three weighted
+    by race age (the score uses the weighted ones, the page shows the plain counts)."""
+    p = lambda e: PASS_RATE[bucket(e)] if attacking else 1 - PASS_RATE[bucket(e)]   # noqa: E731
+    lst = [b for b in lst if _w(nraces - 1 - b[2]) > 0]   # only fights inside the race window
+    w = [_w(nraces - 1 - ri) for _, _, ri in lst]
+    plain = (sum(1 for _, x, _ in lst if x), len(lst), sum(p(e) for e, _, _ in lst))
+    weighted = (sum(wi for wi, (_, x, _) in zip(w, lst) if x), sum(w), sum(wi * p(e) for wi, (e, _, _) in zip(w, lst)))
+    return plain, weighted
 
 
-def battle_score(won, n, exp):
-    # +0.2 above the league per chance (after the prior) is 10.0, -0.2 is 1.0
-    return sc(0.5 + (won - exp) / (n + BATTLE_PRIOR) / 0.4)
+def battle_q(won, n, exp):
+    # +0.2 above the league per chance (after the prior) is q 1, -0.2 is q 0
+    return 0.5 + (won - exp) / (n + BATTLE_PRIOR) / 0.4
 
 
+# Pace and one lap: 10.0 for the quickest, 5.5 for the middle driver of the ranking, the same curve
+# for everyone else (gaps are now to the single quickest driver, not to each race's winner).
+def _decay(gaps):
+    g = sorted(x for x in gaps if x is not None and x > 0)
+    return max(0.5, statistics.median(g) / math.log(2)) if g else 2.5
+
+
+DECAY_PACE = _decay(p["pace_gap"] for p in P.values())
+DECAY_ONELAP = _decay((p["quali_gap"] if p["quali_n"] >= 2 else p["best_gap"]) for p in P.values())
 rows = []
 for n, o in P.items():
     t = tell_stats(n)
     onelap = o["quali_gap"] if o["quali_n"] >= 2 else o["best_gap"]
-    att, dfn = battles(o["attack"], True), battles(o["defend"], False)
-    cat = {
-        "pace": sc(math.exp(-o["pace_gap"] / 2.5)),
-        "onelap": sc(math.exp(-(onelap or 0) / 2.5)),
-        "consistency": sc(1 - ((o["cv"] or 1) - 0.4) / 1.2),
-        "overtaking": battle_score(*att),
-        "defending": battle_score(*dfn),
-        "awareness": sc(1 - ((o["cuts"] or 0) * 0.18 + (o["pens"] or 0) * 0.15 + (t.get("offs_per_10km") or 0) * 0.04)),
+    (att, att_w), (dfn, dfn_w) = battles(o["attack"], True, o["nr"]), battles(o["defend"], False, o["nr"])
+    q = {   # raw quality, 1 = the old 10.0
+        "pace": math.exp(-o["pace_gap"] / DECAY_PACE),
+        "onelap": math.exp(-(onelap or 0) / DECAY_ONELAP),
+        "consistency": 1 - ((o["cv"] or 1) - 0.4) / 1.2,
+        "overtaking": battle_q(*att_w),
+        "defending": battle_q(*dfn_w),
+        "awareness": 1 - ((o["cuts"] or 0) * 0.18 + (o["pens"] or 0) * 0.15 + (t.get("offs_per_10km") or 0) * 0.04),
     }
-    pr = sum(cat[k] * WEIGHTS[k] for k in WEIGHTS)
-    rows.append({"name": n, "pr": round(pr, 1), "prx": pr, "cat": cat, "o": o, "t": t, "onelap": onelap or 0,
-                 "att": att, "dfn": dfn})
+    rows.append({"name": n, "q": q, "o": o, "t": t, "onelap": onelap or 0, "att": att, "dfn": dfn})
+# One 10 per stat (GreMi, 27 Nov 2026): the best ranked driver in each stat gets 10.0 and the
+# rest are scaled against them.
+QMAX = {k: max((r["q"][k] for r in rows), default=1) for k in WEIGHTS}
+for r in rows:
+    # only the best one shows 10.0; a close second is 9.9 at most
+    r["cat"] = {k: (sc(r["q"][k] / QMAX[k]) if r["q"][k] >= QMAX[k] else min(9.9, sc(r["q"][k] / QMAX[k])))
+                if QMAX[k] > 0 else 1.0 for k in WEIGHTS}
+    r["prx"] = sum(r["cat"][k] * WEIGHTS[k] for k in WEIGHTS)
+    r["pr"] = round(r["prx"], 1)
 rows.sort(key=lambda r: -r["prx"])
 
 
@@ -499,7 +604,8 @@ for rm in RACEMEDS:
             if a < b and a in names and b in names:
                 pairs[a + "|" + b].append(rm[b] - rm[a])
 os.makedirs(OUT, exist_ok=True)
-data = {"version": 2, "built": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+data = {"version": 3, "decay": {"pace": round(DECAY_PACE, 2), "onelap": round(DECAY_ONELAP, 2)},
+        "window": {"races": WINDOW, "step": WINDOW_STEP, "weights": WINDOW_WEIGHTS}, "built": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "since": FIRST_DAY.strftime("%Y-%m-%d"), "races": nraces, "min_races": MIN_RACES, "active_days": ACTIVE_DAYS,
         "weights": WEIGHTS, "field": {k: r2(v, 3) for k, v in fm.items()},
         "battle": {"range": BATTLE_RANGE, "defend_max": DEFEND_MAX, "close_ms": BATTLE_CLOSE_MS, "prior": BATTLE_PRIOR,
