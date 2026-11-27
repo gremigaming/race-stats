@@ -476,12 +476,20 @@ def _decay(gaps):
     return max(0.5, statistics.median(g) / math.log(2)) if g else 2.5
 
 
+# One lap uses qualifying for drivers with 2+ sessions and best race lap for the rest; measure both
+# from the best of the values actually used, so the 10.0 driver shows +0.00% (Shwiks, 27 Nov).
+for p in P.values():
+    p["onelap"] = p["quali_gap"] if p["quali_n"] >= 2 else p["best_gap"]
+_ol = [p["onelap"] for p in P.values() if p["onelap"] is not None]
+for p in P.values():
+    if p["onelap"] is not None and _ol:
+        p["onelap"] -= min(_ol)
 DECAY_PACE = _decay(p["pace_gap"] for p in P.values())
-DECAY_ONELAP = _decay((p["quali_gap"] if p["quali_n"] >= 2 else p["best_gap"]) for p in P.values())
+DECAY_ONELAP = _decay(p["onelap"] for p in P.values())
 rows = []
 for n, o in P.items():
     t = tell_stats(n)
-    onelap = o["quali_gap"] if o["quali_n"] >= 2 else o["best_gap"]
+    onelap = o["onelap"]
     (att, att_w), (dfn, dfn_w) = battles(o["attack"], True, o["nr"]), battles(o["defend"], False, o["nr"])
     q = {   # raw quality, 1 = the old 10.0
         "pace": math.exp(-o["pace_gap"] / DECAY_PACE),
