@@ -153,8 +153,8 @@ export const PR_CATEGORIES: {
     label: "One lap",
     raw: (d) =>
       d.onelap_src === "quali"
-        ? `+${d.onelap_gap.toFixed(2)}% off the best qualifier`
-        : `+${d.onelap_gap.toFixed(2)}% off the best one-lap driver`,
+        ? `+${d.onelap_gap.toFixed(2)}% off the best (qualifying)`
+        : `+${d.onelap_gap.toFixed(2)}% off the best (race laps)`,
   },
   { key: "consistency", label: "Consistency", raw: (d) => `${d.cv.toFixed(2)}% lap spread` },
   {
