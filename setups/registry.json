@@ -4162,6 +4162,19 @@
          "run": 1,
          "laps": 1,
          "bb": 59
+        },
+        {
+         "file": "2026-11-28_16-28-43_Spa_OSQ.gmtel.gz",
+         "date": "2026-11-28",
+         "session": "quali",
+         "osq": true,
+         "weather": 1,
+         "pace": 107079,
+         "best": 107079,
+         "mean": 107079,
+         "run": 1,
+         "laps": 1,
+         "bb": 55
         }
        ],
        "verdict": {
