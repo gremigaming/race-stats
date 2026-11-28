@@ -8472,12 +8472,25 @@
          "run": 5,
          "laps": 4,
          "bb": 60
+        },
+        {
+         "file": "2026-11-28_14-33-35_Abu_Dhabi_OSQ.gmtel.gz",
+         "date": "2026-11-28",
+         "session": "quali",
+         "osq": true,
+         "weather": 0,
+         "pace": 85955,
+         "best": 85955,
+         "mean": 85955,
+         "run": 1,
+         "laps": 1,
+         "bb": 60
         }
        ],
        "verdict": {
         "result": "better",
-        "delta": -1.03,
-        "text": "Better: quali lap 1:25.249 against 1:26.134 on V1 (0.885 s faster)."
+        "delta": -0.82,
+        "text": "Better: quali lap 1:25.426 against 1:26.134 on V1 (0.708 s faster)."
        },
        "slot": 69
       },
