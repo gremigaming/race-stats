@@ -28,6 +28,12 @@
   .chg { flex: none; font-size: calc(var(--fs) * .72); font-weight: 600; min-width: calc(var(--fs) * 1.6); text-align: right; color: var(--dim); }
   .chg.up { color: #4ade80; } .chg.down { color: #f87171; }
   .none .val, .none .name { color: var(--dim); }
+  /* Many drivers (4+ columns): drop the rank tag and SR change so the names stay readable (GreMi 2026-11-28). */
+  .compact .tag, .compact .chg { display: none; }
+  .compact.grid { column-gap: 8px; }
+  .compact .row { gap: 5px; padding-right: 6px; }
+  .compact .pos { width: calc(var(--fs) * 1.35); }
+  .compact .val { min-width: 0; }
   .pane { transition: opacity .6s; }
   .pane.hide { opacity: 0; }
 </style></head>
@@ -59,6 +65,8 @@ function render(p) {
   document.getElementById("title").textContent = p.title;
   document.getElementById("sub").textContent = p.sub;
   document.getElementById("dots").innerHTML = panels.length > 1 ? panels.map((x) => `<i class="${x === p ? "on" : ""}"></i>`).join("") : "";
+  const rows = +getComputedStyle(document.body).getPropertyValue("--rows") || 4;
+  grid.classList.toggle("compact", Math.ceil(p.rows.length / rows) >= 4);
   grid.innerHTML = p.rows.map((r, i) => `<div class="row ${r.me ? "me" : ""} ${r.value == null ? "none" : ""}">
       <span class="pos">${r.value == null ? "–" : i + 1}</span><span class="name">${esc(r.name)}</span>
       ${r.tag ? `<span class="tag" style="background:${r.color}">${r.tag}</span>` : ""}
