@@ -7294,12 +7294,25 @@
          "run": 18,
          "laps": 10,
          "bb": 59
+        },
+        {
+         "file": "2026-11-28_16-16-31_Brazil_Race.gmtel.gz",
+         "date": "2026-11-28",
+         "session": "race",
+         "osq": false,
+         "weather": 1,
+         "pace": 70754,
+         "best": 70754,
+         "mean": 71641,
+         "run": 5,
+         "laps": 4,
+         "bb": 58
         }
        ],
        "verdict": {
         "result": "better",
-        "delta": -0.78,
-        "text": "Better: quali lap 1:10.023 against 1:10.574 on V1 (0.550 s faster)."
+        "delta": -0.61,
+        "text": "Better: quali lap 1:10.145 against 1:10.574 on V1 (0.428 s faster)."
        },
        "slot": 60
       },
@@ -7499,12 +7512,25 @@
          "run": 18,
          "laps": 10,
          "bb": 59
+        },
+        {
+         "file": "2026-11-28_16-16-31_Brazil_Race.gmtel.gz",
+         "date": "2026-11-28",
+         "session": "race",
+         "osq": false,
+         "weather": 1,
+         "pace": 71641,
+         "best": 70754,
+         "mean": 71641,
+         "run": 5,
+         "laps": 4,
+         "bb": 58
         }
        ],
        "verdict": {
         "result": "worse",
-        "delta": 0.52,
-        "text": "Worse: average lap 1:11.303 against 1:10.935 on V1 (0.368 s slower)."
+        "delta": 0.64,
+        "text": "Worse: average lap 1:11.387 against 1:10.935 on V1 (0.453 s slower)."
        },
        "slot": 61
       },
