@@ -1,0 +1,429 @@
+{
+ "recording": "2026-11-28_16-16-31_Brazil",
+ "track": "Brazil",
+ "judged_at": "2026-11-28T15:34:13Z",
+ "steward": "AI steward trial",
+ "incidents": [
+  {
+   "n": 1,
+   "time": "0:08.2",
+   "lap": 1,
+   "cars": [
+    "#86 Overfast-_",
+    "#69 Ayrton_Senna109"
+   ],
+   "call": "fault",
+   "at_fault": [
+    {
+     "driver": "#86 Overfast-_",
+     "touches": [
+      {
+       "time": "0:09.2",
+       "sev": 2
+      }
+     ],
+     "sev": 2,
+     "points": 0
+    }
+   ],
+   "type": "Moved into a car while not alongside",
+   "sev": 2,
+   "confidence": "low",
+   "why": "At the T1 apex Overfast was barely alongside (overlap -1.3 -> 0.8 m) and moved 2.6 m beyond his line toward Senna, who moved away (-2.3 m); with Overfast on his line there is no touch (+1.86 m). Senna slid 23 deg but lost no time, so a small fault.",
+   "engine_agrees": false
+  },
+  {
+   "n": 2,
+   "time": "0:08.6",
+   "lap": 1,
+   "cars": [
+    "#3 TTV/GreMi_Gaming",
+    "Car #2 (hidden name, slot 7)",
+    "#2 Prijo_1926"
+   ],
+   "call": "fault",
+   "at_fault": [
+    {
+     "driver": "#2 Prijo_1926",
+     "touches": [
+      {
+       "time": "0:09.6",
+       "sev": 3
+      }
+     ],
+     "sev": 3,
+     "points": -0.5
+    }
+   ],
+   "type": "Moved into the car ahead into T1",
+   "sev": 3,
+   "confidence": "medium",
+   "why": "Into T1 Prijo was just behind Car #2 (slot 7) (overlap -0.9 -> 0.4 m), braked 15% later than on his own laps and moved 2.3 m beyond his line toward him; with Prijo on his line there is no touch (+1.57 m). Car #2 spun and lost 1.0 s and 3 places; Prijo's slide into GreMi 0.6 s later is the aftermath.",
+   "engine_agrees": false
+  },
+  {
+   "n": 3,
+   "time": "0:11.5",
+   "lap": 1,
+   "cars": [
+    "#8 Stepino81",
+    "#86 Overfast-_"
+   ],
+   "call": "none",
+   "at_fault": [],
+   "type": "Lap 1 exit touch",
+   "sev": 0,
+   "confidence": "high",
+   "why": "Touch on the T1 exit, losses 0.10 / 0.21 s; Overfast ran wide on his own side (-4.9 m).",
+   "engine_agrees": true
+  },
+  {
+   "n": 4,
+   "time": "0:12.5",
+   "lap": 1,
+   "cars": [
+    "Car #34 (hidden name, slot 5)",
+    "#8 niet_Lars123"
+   ],
+   "call": "none",
+   "at_fault": [],
+   "type": "Light tap",
+   "sev": 0,
+   "confidence": "high",
+   "why": "Light contact, nobody lost real time (Car #34 0.04 s, #8 niet_Lars123 0.18 s), no spin, no off, no place lost from it.",
+   "engine_agrees": true
+  },
+  {
+   "n": 5,
+   "time": "0:20.5",
+   "lap": 1,
+   "cars": [
+    "Car #2 (hidden name, slot 7)",
+    "#15 vanderdeured"
+   ],
+   "call": "none",
+   "at_fault": [],
+   "type": "Side touch at 300 km/h",
+   "sev": 0,
+   "confidence": "high",
+   "why": "Side touch on the straight, losses 0.14 / 0.0 s.",
+   "engine_agrees": true
+  },
+  {
+   "n": 6,
+   "time": "0:23.8",
+   "lap": 1,
+   "cars": [
+    "#8 Stepino81",
+    "#86 Overfast-_"
+   ],
+   "call": "none",
+   "at_fault": [],
+   "type": "Light tap",
+   "sev": 0,
+   "confidence": "high",
+   "why": "Light contact, nobody lost real time (#8 Stepino81 0.04 s, #86 Overfast-_ 0.22 s), no spin, no off, no place lost from it.",
+   "engine_agrees": true
+  },
+  {
+   "n": 7,
+   "time": "0:42.3",
+   "lap": 1,
+   "cars": [
+    "Car #2 (hidden name, slot 7)",
+    "#2 Prijo_1926"
+   ],
+   "call": "ri",
+   "at_fault": [],
+   "type": "Lap 1 apex tap, the closer lost time",
+   "sev": 0,
+   "confidence": "low",
+   "why": "Prijo tapped Car #2 (slot 7) from behind (overlap -1.1 m) at 4 km/h closing at the T5 apex; neither line alone avoids it. Car #2 lost 0.82 s, Prijo 1.39 s.",
+   "engine_agrees": false
+  },
+  {
+   "n": 8,
+   "time": "1:16.8",
+   "lap": 2,
+   "cars": [
+    "#25 EliasHIF2010",
+    "#69 Ayrton_Senna109"
+   ],
+   "call": "none",
+   "at_fault": [],
+   "type": "Light tap",
+   "sev": 0,
+   "confidence": "high",
+   "why": "Light contact, nobody lost real time (#25 EliasHIF2010 -0.17 s, #69 Ayrton_Senna109 -0.14 s), no spin, no off, no place lost from it.",
+   "engine_agrees": true
+  },
+  {
+   "n": 9,
+   "time": "1:32.9",
+   "lap": 2,
+   "cars": [
+    "#25 EliasHIF2010",
+    "#69 Ayrton_Senna109"
+   ],
+   "call": "ri",
+   "at_fault": [],
+   "type": "Side by side under braking, inside car slid",
+   "sev": 0,
+   "confidence": "medium",
+   "why": "Senna went round the outside of the leader into T2 (overlap 5.6-13.9 m, only 1.4 m room). Elias on the inside moved 0.6 m beyond his line toward Senna; neither line alone avoids it. Elias slid 43 deg, lost 1.4 s and P1 -> P3; Senna lost nothing.",
+   "engine_agrees": false
+  },
+  {
+   "n": 10,
+   "time": "1:47.6",
+   "lap": 2,
+   "cars": [
+    "#8 Stepino81",
+    "Car #34 (hidden name, slot 5)"
+   ],
+   "call": "ri",
+   "at_fault": [],
+   "type": "Tap while passing",
+   "sev": 0,
+   "confidence": "low",
+   "why": "Car #34 (slot 5) came alongside closing 20 km/h (overlap -2.3 -> 1.5 m), both near their lines (+0.11 / -0.73 m). Stepino lost 0.6 s and the place.",
+   "engine_agrees": false
+  },
+  {
+   "n": 11,
+   "time": "1:59.8",
+   "lap": 2,
+   "cars": [
+    "#8 Stepino81",
+    "Car #34 (hidden name, slot 5)"
+   ],
+   "call": "none",
+   "at_fault": [],
+   "type": "Light tap",
+   "sev": 0,
+   "confidence": "high",
+   "why": "Light contact, nobody lost real time (#8 Stepino81 None s, Car #34 0.03 s), no spin, no off, no place lost from it.",
+   "engine_agrees": true
+  },
+  {
+   "n": 12,
+   "time": "2:03.9",
+   "lap": 2,
+   "cars": [
+    "#86 Overfast-_",
+    "Car #69 (hidden name, slot 4)"
+   ],
+   "call": "none",
+   "at_fault": [],
+   "type": "Light tap",
+   "sev": 0,
+   "confidence": "high",
+   "why": "Light contact, nobody lost real time (#86 Overfast-_ -0.1 s, Car #69 0.06 s), no spin, no off, no place lost from it.",
+   "engine_agrees": true
+  },
+  {
+   "n": 13,
+   "time": "2:05.6",
+   "lap": 2,
+   "cars": [
+    "#8 Stepino81",
+    "#15 BestNoah2468"
+   ],
+   "call": "ri",
+   "at_fault": [],
+   "type": "Side by side crash, mover not visible",
+   "sev": 0,
+   "confidence": "low",
+   "why": "Side by side on the T7 exit (overlap 2.6-4.3 m for 2 s, 2.1 m apart, closing -3 km/h); neither car moved toward the other (+0.1 / -0.33 m raw) and neither line alone avoids it. Both slid 45-55 deg and went off; BestNoah lost 3.4 s, Stepino 4 places. The data cannot show who moved.",
+   "engine_agrees": false
+  },
+  {
+   "n": 14,
+   "time": "2:29.6",
+   "lap": 3,
+   "cars": [
+    "#69 Ayrton_Senna109",
+    "#2 Kegis"
+   ],
+   "call": "none",
+   "at_fault": [],
+   "type": "Apex tap in a pass",
+   "sev": 0,
+   "confidence": "medium",
+   "why": "Senna took the lead at the T1 apex with a light tap (11 km/h), losses 0.16 / 0.22 s.",
+   "engine_agrees": true
+  },
+  {
+   "n": 15,
+   "time": "2:46.0",
+   "lap": 3,
+   "cars": [
+    "#69 Ayrton_Senna109",
+    "#2 Kegis"
+   ],
+   "call": "ri",
+   "at_fault": [],
+   "type": "Side by side, both ran off",
+   "sev": 0,
+   "confidence": "low",
+   "why": "Side by side on the T2 exit (overlap 2.4-2.7 m), both went off (1.0 / 2.25 s) with small losses (0.21 / 0.19 s); Senna dropped from P1 to P3. Neither line alone avoids it.",
+   "engine_agrees": false
+  },
+  {
+   "n": 16,
+   "time": "2:48.3",
+   "lap": 3,
+   "cars": [
+    "Car #34 (hidden name, slot 5)",
+    "#8 niet_Lars123"
+   ],
+   "call": "none",
+   "at_fault": [],
+   "type": "Light tap",
+   "sev": 0,
+   "confidence": "high",
+   "why": "Light contact, nobody lost real time (Car #34 0.03 s, #8 niet_Lars123 0.09 s), no spin, no off, no place lost from it.",
+   "engine_agrees": true
+  },
+  {
+   "n": 17,
+   "time": "2:49.7",
+   "lap": 3,
+   "cars": [
+    "Car #2 (hidden name, slot 3)",
+    "#2 Prijo_1926"
+   ],
+   "call": "none",
+   "at_fault": [],
+   "type": "Light tap",
+   "sev": 0,
+   "confidence": "high",
+   "why": "Light contact, nobody lost real time (Car #2 0.19 s, #2 Prijo_1926 -0.18 s), no spin, no off, no place lost from it.",
+   "engine_agrees": true
+  },
+  {
+   "n": 18,
+   "time": "2:57.5",
+   "lap": 3,
+   "cars": [
+    "#69 Ayrton_Senna109",
+    "#2 Kegis"
+   ],
+   "call": "none",
+   "at_fault": [],
+   "type": "Light apex tap",
+   "sev": 0,
+   "confidence": "medium",
+   "why": "Tap at 8 km/h at the T4 apex, Kegis lost 0.57 s and put a wheel off for 0.25 s, no place lost.",
+   "engine_agrees": true
+  },
+  {
+   "n": 19,
+   "time": "3:21.8",
+   "lap": 3,
+   "cars": [
+    "Car #2 (hidden name, slot 3)",
+    "#15 BestNoah2468"
+   ],
+   "call": "none",
+   "at_fault": [],
+   "type": "Light tap",
+   "sev": 0,
+   "confidence": "high",
+   "why": "Light contact, nobody lost real time (Car #2 -0.04 s, #15 BestNoah2468 -0.29 s), no spin, no off, no place lost from it.",
+   "engine_agrees": true
+  },
+  {
+   "n": 20,
+   "time": "3:43.5",
+   "lap": 4,
+   "cars": [
+    "Car #34 (hidden name, slot 5)",
+    "#8 niet_Lars123"
+   ],
+   "call": "none",
+   "at_fault": [],
+   "type": "Light tap",
+   "sev": 0,
+   "confidence": "high",
+   "why": "Light contact, nobody lost real time (Car #34 -0.04 s, #8 niet_Lars123 0.35 s), no spin, no off, no place lost from it.",
+   "engine_agrees": true
+  },
+  {
+   "n": 21,
+   "time": "4:20.9",
+   "lap": 4,
+   "cars": [
+    "#69 Ayrton_Senna109",
+    "#2 Kegis"
+   ],
+   "call": "none",
+   "at_fault": [],
+   "type": "Light tap",
+   "sev": 0,
+   "confidence": "high",
+   "why": "Light contact, nobody lost real time (#69 Ayrton_Senna109 0.01 s, #2 Kegis -0.0 s), no spin, no off, no place lost from it.",
+   "engine_agrees": true
+  },
+  {
+   "n": 22,
+   "time": "4:54.5",
+   "lap": 5,
+   "cars": [
+    "Car #34 (hidden name, slot 5)",
+    "#8 niet_Lars123"
+   ],
+   "call": "none",
+   "at_fault": [],
+   "type": "Light apex tap",
+   "sev": 0,
+   "confidence": "high",
+   "why": "Tap from behind at 8 km/h, Car #34 lost 0.08 s; only niet_Lars lost a little (0.6 s).",
+   "engine_agrees": true
+  },
+  {
+   "n": 23,
+   "time": "5:46.9",
+   "lap": 5,
+   "cars": [
+    "#3 TTV/GreMi_Gaming",
+    "#15 vanderdeured"
+   ],
+   "call": "ri",
+   "at_fault": [],
+   "type": "Exit touch during a pass",
+   "sev": 0,
+   "confidence": "low",
+   "why": "GreMi came alongside on the inside on the T7 exit (overlap 1.7 -> 4.8 m); vanderdeured, with no room on his own side (0.0 m), moved 2.6 m toward him. Neither line alone avoids it; both lost about 0.7 s and GreMi took the place.",
+   "engine_agrees": false
+  },
+  {
+   "n": 24,
+   "time": "6:00.1",
+   "lap": 5,
+   "cars": [
+    "#86 Overfast-_",
+    "Car #69 (hidden name, slot 4)"
+   ],
+   "call": "none",
+   "at_fault": [],
+   "type": "Light tap",
+   "sev": 0,
+   "confidence": "high",
+   "why": "After the finish line.",
+   "engine_agrees": true
+  }
+ ],
+ "reckless": [],
+ "summary": {
+  "incidents": 24,
+  "faults": 2,
+  "ri": 6,
+  "none": 16,
+  "points": {
+   "#86 Overfast-_": 0,
+   "#2 Prijo_1926": -0.5
+  },
+  "engine_agreement": "16/24"
+ }
+}
