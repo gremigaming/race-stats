@@ -7662,12 +7662,25 @@
          "run": 1,
          "laps": 1,
          "bb": 57
+        },
+        {
+         "file": "2026-11-28_14-59-56_Las_Vegas_Race.gmtel.gz",
+         "date": "2026-11-28",
+         "session": "race",
+         "osq": false,
+         "weather": 0,
+         "pace": 95577,
+         "best": 95577,
+         "mean": 97180,
+         "run": 5,
+         "laps": 4,
+         "bb": 57
         }
        ],
        "verdict": {
         "result": "worse",
-        "delta": 0.52,
-        "text": "Worse: quali lap 1:35.103 against 1:34.616 on V1 (0.487 s slower)."
+        "delta": 0.59,
+        "text": "Worse: quali lap 1:35.171 against 1:34.616 on V1 (0.555 s slower)."
        },
        "slot": 63
       },
@@ -7854,12 +7867,25 @@
          "run": 5,
          "laps": 4,
          "bb": 58
+        },
+        {
+         "file": "2026-11-28_14-59-56_Las_Vegas_Race.gmtel.gz",
+         "date": "2026-11-28",
+         "session": "race",
+         "osq": false,
+         "weather": 0,
+         "pace": 97180,
+         "best": 95577,
+         "mean": 97180,
+         "run": 5,
+         "laps": 4,
+         "bb": 57
         }
        ],
        "verdict": {
-        "result": "same",
-        "delta": 0.01,
-        "text": "No clear difference: average lap 1:35.227 against 1:35.217 on V1."
+        "result": "worse",
+        "delta": 0.42,
+        "text": "Worse: average lap 1:35.618 against 1:35.217 on V1 (0.401 s slower)."
        },
        "slot": 64
       },
