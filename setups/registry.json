@@ -8113,12 +8113,25 @@
          "run": 5,
          "laps": 3,
          "bb": 57
+        },
+        {
+         "file": "2026-11-28_15-15-21_Losail_OSQ.gmtel.gz",
+         "date": "2026-11-28",
+         "session": "quali",
+         "osq": true,
+         "weather": 1,
+         "pace": 84017,
+         "best": 84017,
+         "mean": 84017,
+         "run": 1,
+         "laps": 1,
+         "bb": 57
         }
        ],
        "verdict": {
         "result": "better",
-        "delta": -1.66,
-        "text": "Better: quali lap 1:23.998 against 1:25.412 on V1 (1.414 s faster)."
+        "delta": -1.65,
+        "text": "Better: quali lap 1:24.003 against 1:25.412 on V1 (1.409 s faster)."
        },
        "slot": 66
       },
