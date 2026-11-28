@@ -1,0 +1,286 @@
+[
+{
+"q": "G1. A mistake that only hurts the driver who made it (no. 3): nothing, or a small incident (severity 1-2) on his record?",
+"answer": "If there is no contact it is nothing, if there is contact it doesnt not matter if they are the only ones hurt, it depends on what move was made and who was wrong."
+},
+{
+"q": "G2. Reckless but the victim was lucky (no. 4): where does \"too reckless\" start? My proposal: 75%+ late, or apex speed 20%+ over own, always counts, at the move's severity, whatever happened.",
+"answer": "Before we look at the, look at incident number 4 again cause you got it wrong."
+},
+{
+"q": "G3. Timing a late block (no. 6): I'll measure when the defender starts moving and when the attacker's front wing would reach the defender's rear wheel. Moving inside 0.5 s of that = late. Is the attacker's front wing at the defender's rear wheel the right point, or at his sidepod?",
+"answer": "Yeah that is good."
+},
+{
+"q": "G4. Crash or jam ahead out of view (no. 7): your answer was \"in the field of view, then 1 s to react\". The telemetry has no line of sight. My proposal: the slow car counts as seen once it's within 40° of your heading and no other car is between you. Then 1 s. OK?",
+"answer": "Yeah that sounds good."
+},
+{
+"q": "G5. Braking too softly (no. 5, braaf at Monza): braking in time but under 60% brake while the gap to the car ahead shrinks = at fault, a lower severity than a late dive. Is 60% right?",
+"answer": "Yeah late braking a a combination of praking point and brake pressure."
+},
+{
+"q": "G6. Defending mistake vs driving mistake (Q29 round 2): how do I tell \"defending\"? My proposal: a car within 0.5 s behind or alongside. Without that, a spin is your own problem, not an incident.",
+"answer": "I dont get this one, can you give me an example"
+},
+{
+"q": "G7. Being knocked into someone (Texas NEX): how long after being hit are you responsible again? My proposal: 0.5 s. After that, if you still run into someone, it's on you.",
+"answer": "Yeah that sounds about right. But in a big braking zone it might be that you get hit from behind and cant stop in time, so then the 0.5s would not be fair."
+},
+{
+"q": "G8. \"25% later than the average\": the average of the field at that corner (what I use now) or the driver's own braking point on his other laps?",
+"answer": "I think we should maybe make it 30% later then the fields average and 20% later then their own average."
+},
+{
+"q": "Q53. Overtaking off track: passing with all four wheels outside the white lines, without contact. Is that an incident for you, or only a matter for track limits?",
+"answer": "That is only tracklimits, and i think the game might even give an illegal overtake, no need to do something about that"
+},
+{
+"q": "Q54. Contact while a car is slowing with damage or for the pits (off line, slowing early): same as \"crashed car ahead\" (G4), or does a slow car have to stay off the racing line?",
+"answer": "No a car with damage is harder to judge, so  keep that in mind that they will brake earlier and slower apex."
+},
+{
+"q": "Q55. Overtaking under yellow flags or during a safety car / VSC: anything you want counted?",
+"answer": "No is done by the game"
+},
+{
+"q": "Q56. Lap 1, a car that gets a much better start and has nowhere to go: is going 3-wide into turn 1 fine as long as the dive rules hold?",
+"answer": "Yeah 3 wide can happen aslong as noone makes a mistake"
+},
+{
+"q": "Q57. Tapping a car in front on the exit (traction zone, both on throttle) at low speed with no time lost: always nothing, or is pushing someone wide on the exit a separate check?",
+"answer": "Pushing from behind and from the side is different. a tap from behind and both drivers can continue as normal is nothing, but forcing a driver of the track is."
+},
+{
+"q": "Q58. Hidden players (Car #N): do the same rules and severities apply in full, even if staff can't name them?",
+"answer": "Yeah they do."
+},
+{
+"q": "Q59. If two drivers have a clean side-by-side battle over 2+ corners with small touches but no time lost: one \"nothing\", or should the viewer show it as a battle without blame?",
+"answer": "It is probably nothing if they both dont lose time."
+},
+{
+"q": "Q60. For the staff page: show my measurements next to each call (late %, apex speed, room left, time lost) so you and the staff can check them?",
+"answer": "Yeah please"
+},
+{
+"q": "D1. \"Leave a car width\" against what actually happens. In Texas no. 9 and Silverstone no. 10, the inside car leaves more than 2 m to the white line, yet there's contact and the other car goes off or spins. My proposal: the car width rule only decides whether someone was forced onto the kerb. If one car moves towards the other under braking, the other held his line, and they touch, the car that moved is at fault, whatever room was left. Agree?",
+"answer": "Yeah i think that is correct"
+},
+{
+"q": "D2. Usable kerbs per corner. You said braking on the kerb is fine at some corners. My proposal: I count how often drivers in normal laps put wheels on that kerb. If more than 30% of laps do, the kerb counts as road for the car width rule. OK, or do you want to name the corners yourself?",
+"answer": "Yeah that is good"
+},
+{
+"q": "D3. Street circuits. At Monaco my white-line distances are wrong (they said sprintstar had 4.1 m). My proposal: at Monaco (and other walled tracks) the edge is the widest line the field uses on normal laps, not the white line. OK?",
+"answer": "Yeah that is good. can you check why your white line does not match?"
+},
+{
+"q": "D4. Two gap rules that point opposite ways. \"The defender must leave a car width\" (Texas, Monaco no. 3) against \"don't go for a gap that will close\" (Melbourne toni, Monaco NEX). My proposal: overlap decides. Before the attacker's front tyre is past the defender's rear tyre, a closing gap is the attacker's problem. After that, the defender has to leave a car width until the exit. Does that match how you see it?",
+"answer": "Yeah, but an attacking driver cant just brake so late he gets his front tire ahead of the defendings cars tire, this only works with a \"good\" dive"
+},
+{
+"q": "D5. What happens after the touch. Monza no. 10 showed that the fault can come after the first touch (cutting the kerb, then crossing). My proposal: everything in the 3 s after the first touch belongs to the same incident, and a new move in that window can change who is at fault. OK?",
+"answer": "No not neseccarely, if it is between the same 2 cars then yes, but if multiple cars are involved it could be 2 different one or 1 big incident."
+},
+{
+"q": "D6. Lap 1 chains. Bahrain and Spa have several touches in one corner, each under 1.0 s lost. Is each one judged on its own (so all nothing), or does a driver who touches 2+ cars in one corner get an incident?",
+"answer": "If it all very innocent no need."
+},
+{
+"q": "D7. Time lost against apex speed. At Silverstone no. 2, Stepino lost 0.1 s on the lap but was 46 km/h slower at the apex. For the \"nothing\" rule, should I also count a big apex speed drop (for example 20% under the driver's own laps)?",
+"answer": "No cause bit apex difference could just be a battle, which is the case there."
+},
+{
+"q": "D8. Starts. On the run to turn 1, cars move across from their grid slot. Is one move across allowed at the start, as long as you don't move again once someone is alongside?",
+"answer": "It is fine aslong as they dont touch, but if it causes an incident then it is probably on them."
+},
+{
+"q": "D9. Late braking as one number. You said late braking is the braking point and the pressure together. My proposal: at fault if 30% later than the field, or 20% later than your own laps, or under 60% brake while the gap to the car ahead keeps shrinking (DDRK at Shanghai). OK?",
+"answer": "Yeah sounds good."
+},
+{
+"q": "Outcome vs move. You said severity is only the move (Q18, Q31). But \"nothing\" depends on what happened (Q17: no time lost, no spin), and on the straight \"both at fault if it ends up being a crash\" (Q5). My reading: what happened decides whether it counts, the move decides how bad it is. Is that right? It means a reckless dive that gets away with a light tap is still nothing.",
+"answer": "Yeah that is right. but if it is too reckless then it might still be a big incident."
+},
+{
+"q": "Hard racing vs both at fault. Q5 says two cars drifting into each other = both at fault. But Brazil (Shwiks vs f7edd1e, 15 Nov) you called \"just hard racing\", and Melbourne (Shwiks vs gone-wildcat63) \"both should have left space\" = both at fault. Both were crashes with both cars moving in. What made Brazil hard racing?",
+"answer": "In Brazil they are battling in the corners, Melbourne was very easy for both to avoid."
+},
+{
+"q": "Own mistakes. Q29 says a mistake in a battle that hits someone is the mistake-maker's fault. Earlier you called your own grass spin at Monza a racing incident (\"just a mistake\"), and Shanghai (\"small brake error, huge incident, no one fully at fault\") too, while Jakub's wet slide at Miami was his fault. Old calls stay frozen, but which one should the engine learn from?",
+"answer": "I think it has to do with if the mistake was made because of going for a move or defending, or when you just make a driving mistake, like my one in monza i touched the grass and stun, the was my own fault. but if someone brakes too late cause they wanna defend and hit someone else, that could be their fault"
+},
+{
+"q": "AI takeover. Q25 says AI mode is the driver's own risk, but NEX's wheel disconnect at Catalunya you called a racing incident. Does the new rule replace that?",
+"answer": "So a wheel disconnect is valid, but drivers also go into ai mode when they need to do something quick, if that drivers does something wrong it is on them. But the moment no inputs are happening when they should and the fall away very sudden. it is probably a wheel disconnect."
+},
+{
+"q": "Q33. \"Too late\": I propose 25 m+ later than where the field usually brakes at that corner, and faster than the field at turn-in. Under 25 m is normal variation. Should slow hairpins and fast corners use the same number, or a percentage (say 15% of the braking zone)?",
+"answer": "I think a set number is gonna cause issues, i think too late is 25% later then the average. and i think the speed at the apex cant be more then 10% higher then their average apex speed in that corner."
+},
+{
+"q": "Q34. \"Moving while braking\": I propose more than 1.5 m off your own line towards a car while braking counts as moving. Smaller is just a different line. OK?",
+"answer": "Yeah but moving ounder braking only counts when they change direction during braking. And it is only really a problem when they dont leave a cars width inside the white line"
+},
+{
+"q": "Q35. Outside car \"2 tyres on the road\": do 2 tyres on the kerb count as on the road?",
+"answer": "No on the road means within the white lines"
+},
+{
+"q": "Q36. Three wide into a corner: what must the middle car leave, and who has to give way first?",
+"answer": "Yeah 3 way battles are more tricky, but the same rules aplly, but the inside driver needs to leave 2 car widths, but only if both cars are still next to the inside car. the outside car should also not turn in too early. Backing out is usually the best option on the outside, the middle driver is mostly not at fault unless they drive into someone else first."
+},
+{
+"q": "Q37. \"Last minute\" defending: I propose a move towards the attacker when he is within one car length behind, or after he has already pulled out. OK?",
+"answer": "Yeah if it happens within 0.5 sec of when the attacking driver whould have their wing next to that driver, it is too late defending."
+},
+{
+"q": "Q38. Moving back to the racing line before the corner after one defensive move: allowed, or a second move?",
+"answer": "That is fine but if the attacking drivers has his front tire infront of there rear tire they need to leave enough space"
+},
+{
+"q": "Q39. Numbers for \"nothing\": the hit car loses under 0.5 s compared with its normal time, no slide over 20°, and the closing speed is under 15 km/h. Lap 1: under 1.0 s. Too strict, or too loose?",
+"answer": "I think that sounds good for now."
+},
+{
+"q": "Q40. If you gain a place through contact and give it back, does that make it nothing, or just lower the severity?",
+"answer": "It lowers severity, but depends on the incident. A small tap of 3 sev could become nothing."
+},
+{
+"q": "Q41. \"Tried to avoid it = milder\": one severity step lower, or half?",
+"answer": "If a driver tries to avoid it it could go down by at most 3, depends on how good a job they do."
+},
+{
+"q": "Q42. Lift and coast \"more than double the average\": double the gap between lifting and braking (the field lifts 50 m before braking, so 100 m+ is too early)? And how close is \"someone close behind\": within 1 s or 20 m?",
+"answer": "No look at it per corner, some corners you lico more then others. Someone close behind is within 0.5s"
+},
+{
+"q": "Q43. Braking on a straight with a car close behind is always on the driver ahead, unless he had a problem (damage, a crash or yellow ahead)?",
+"answer": "No braking on the straight is always wrong when braking more then 50%, below that it depends the only reason i can think is if there is another driver that is rejoining or stationary, but then that driver might be at fault."
+},
+{
+"q": "Q44. A car hits a car that already crashed or spun ahead: always at fault, or only if it had time to see it (say 2 s)?",
+"answer": "This is a good one, i think we need an angle and a time, the monze incident is a good example, cause DDRK hit me cause i spun in the corner, and i think he had about 2 sec, but the first sec he couldnt even see me, so the should be in their field of view and then a sec is enough to react"
+},
+{
+"q": "Q45. A rejoiner who was pushed off by someone else: does the fault for the rejoin move to the pusher?",
+"answer": "No rejoining is the rejoining drivers responcebility."
+},
+{
+"q": "Q46. Lapped cars and blue flags: must the backmarker make room? And whose fault is it when a leader dives a backmarker?",
+"answer": "Yeah they need to give room. But the same divebomb rules apply. The leader cant go for a crazy move to overtake a lapped car"
+},
+{
+"q": "Q47. Pit exit and pit entry: is crossing the white line, or blocking a car coming out of the pits, an incident?",
+"answer": "No persee"
+},
+{
+"q": "Q48. Hitting the same car again on purpose (revenge) stays severity 10?",
+"answer": "Yeah if you are convinced by the line and input the show they do it on purpouse, then it is the highest penalty"
+},
+{
+"q": "Q49. Wet: one severity step lower, and a bigger \"too late\" margin (say 40 m)?",
+"answer": "Yeah that sounds good."
+},
+{
+"q": "Q50. Shared fault: does each driver get the severity of his own move? (In no. 9 above, Stepino would get 4 and toni 3.)",
+"answer": "Yeah but show the highest severity of the incident in the viewer and staff page"
+},
+{
+"q": "Q51. In move terms, is this your scale? 2 = small misjudgement, light touch. 5 = clearly late or clearly moved into someone. 8 = very late dive or big move into a car at speed. 10 = on purpose only.",
+"answer": "Yeah"
+},
+{
+"q": "Q52. When does chaos become a new incident? I propose: a driver who wasn't hit makes his own new mistake (late brake or move into a car) more than 1 s after the first contact. That counts as a new incident, even at the same corner.",
+"answer": "No it can happen at the same time, if none of the drivers from the 2 different incidents interact with eachother then it is to seperate incidents even if they happen at the same time in the same corner."
+},
+{
+"q": "I think it is very important to always look at a few key points, the raceline should be you point of reference, it is the ideal line and therefore where a car wants to be, another important thing to look at is the track lines, So i think when cars are already next to each other before braking (that is the fronttire infront of the rear tire of the other) the both drivers always need to leave enough room on the track. when they are not braking forcing off is when they push the other car with  all ",
+"answer": "During braking it is a bit different. An important rules is no moving while braking. When cars start braking you stick with the natural line you should take in that corner, so no changing direction exept for the corner itsself ofcouse. / What counts as a dive bomb and when is it good or bad, first of all from now on the input is gonna be way more. You should look where other drivers brake and judge if they go too late, ill let you decide what is too late, kinda depends on the corner, you need to check if they would even make the corner if there was no collision. To have a valid divebomb they need to have atleast their front tre infront of the other drivers rear tire, if not it is probably gonna be a bad divebomb, dont set that in stone cause maybe another rule will disagree with that, but most of the time if you just put you tire a bit in there it is gonna be that drivers fault. / At the apex if someone sends a good divebomb or the drivers are already side by side, the outside driver needs to leave atleast enough room that the other driver keeps atleast 2 tires on the road. on the exit the inside driver again cant push a driver over the line with all tire, also i forgot to say that only counts if there is runoff next to the line, if there is gravel or grass next to the line it is if the driver has no more room and has to drive onto the gravel or grass. / When should a driver around the outside back out. When a driver does not have atleast their front tire infront the rear tire at the apex the inside driver is allowed to drive towards the line, if they are the need to leave enough room on the exit."
+},
+{
+"q": "Q5. On a straight (no corner), is any move across into a car alongside always at fault? What about one move to defend vs moving twice?",
+"answer": "I hate crashes on the staight, you will probably see way more both at fault incidents on the straight. Defending last minute, that the driver infront has no time to react is the fault of the defender, defending twice is also not okey. If both cars drift towards eachother they are both at fault if it ends up being a crash, if both had clear room to avoid it and followed the direction of the track and racingline. On the straight you  are side by side if any point of the car is next to the other driver."
+},
+{
+"q": "Q10. Squeezing someone towards the wall or the grass on a straight with no contact: is that an incident for you?",
+"answer": "Could be if they close the room soo much the other driver has absolutly no space and crashes then that could be the other driver, depends on if the driver had enough room to leave space"
+},
+{
+"q": "Q12. Should lap 1 be judged softer? For example: lap 1 contacts at low closing speed = racing incident, but late brakers and divebombs still count fully.",
+"answer": "Yeah lap 1 should have a bit more buffer, small touches for sure, they happen alot in the first lap, you should look at the cars around the incident aswell, you dont have to include them as part of being in the incident but the front driver might be closing too fast to the car in front and might brake a bit more. There should not be hard rules, you need to look at the situations and check what is going on."
+},
+{
+"q": "Q13. A car that gets hit and is pushed into another car: always innocent? Even if it was also braking late?",
+"answer": "No could still be at fault, also the current rule you have with the collisions after the incident not counting because it is a chain reaction is not what i meant, there could be a chain reaction but that doesnt have to be the case."
+},
+{
+"q": "Q14. In a T1 brake zone, how much \"extra early braking\" do you expect from cars in the pack compared with a normal lap?",
+"answer": "I think that depends on the corner, i think it is more important drivers stay on the line they choose, lap 1 is busy and crosing on someones line can cause massive crashes"
+},
+{
+"q": "Q15. Your size cap is 6 drivers per incident. When 7+ cars are in a pile-up, should only the starter get a penalty and everyone else nothing?",
+"answer": "When 7 cars are involved it probably has multiple causes, i think an incident should have a single startpoint, everything that happens from that is part of it, other drivers could still act wrong and get a penalty for the same incident. But real crashes with more then 6 drivers almost never happens. and you were combining incidents way too often."
+},
+{
+"q": "Q16. H, I, J: incident or nothing?",
+"answer": "I is an incident, J not"
+},
+{
+"q": "Q17. What makes a contact \"nothing\" for you? Pick what matters: no one slows down, no one loses a place, no slide, no one goes off, the move itself was fair, it was low speed.",
+"answer": "First the touch should be not too hard. They should not lose alot of time compaired to their normal time, No spins, and they both seem to keep driving if they would have otherwise."
+},
+{
+"q": "Q18. A dangerous move that happens to cause no damage (the dive that only just works): count it as a small incident (severity 1-2), or only count it when something happens?",
+"answer": "No the same dive with different outcomes should have the same severity."
+},
+{
+"q": "Q19. A small contact where the victim loses one place but nothing else: incident?",
+"answer": "Probably but only loses that position cause they lost time, not because they whould ave overtaken that person anyway."
+},
+{
+"q": "Q21. Brake checking: if the car ahead brakes much earlier or harder than normal at that spot (or brakes on a straight) and gets hit, is it on him? How much earlier than normal is \"brake checking\" vs just a cautious line?",
+"answer": "Yeah then it is on them, if they brake on the straight is is always on them. Before a corner i think it also depends on the corner but if it is like too much from the average you need to check it."
+},
+{
+"q": "Q22. Lift and coast: where's the line? Lifting before the braking zone is fine, but you called \"off throttle halfway down the straight\" too early. Is it about lifting where nobody else does?",
+"answer": "Yeah if they lift far before the average check if it is too early, i would say if it is more then double the average it is too much. They can do that but not with someone close behind."
+},
+{
+"q": "Q23. Should the car behind get blamed less when he did react (braked or steered away) but couldn't avoid it, compared with a car that didn't react at all?",
+"answer": "Yeah trying to avoid is always the goal so that would make the penalty a bit milder."
+},
+{
+"q": "Q24. Steering into a car alongside (input to the steering wheel toward the other car while side by side, not following the corner): should that be the main \"who moved into who\" signal instead of the car's position?",
+"answer": "Yeah exactly. You do need to keep in mind people drive different kinds of lines, so there needs to be a margin, but if they turn when they shouldnt then that could be a big red flag"
+},
+{
+"q": "Q25. If a driver's inputs suddenly look like AI after a crash (wheel disconnect, AI takeover), ignore that driver's contacts after that point?",
+"answer": "No going in AI mode is their own risk"
+},
+{
+"q": "Q27. What counts as \"off the track\" for a rejoin: all four wheels off, two wheels, or just off the racing line?",
+"answer": "Yeah being so far of the racingline that you completly away from it, trying to get back to the racing line you need to avoid other drivers"
+},
+{
+"q": "Q28. A car that rejoins carefully and leaves room, and then gets hit by a car that went too wide: always the hitting car?",
+"answer": "If a car shows he is looking an another car drives into them off the racingline then it is the driver that hits them their fault"
+},
+{
+"q": "Q29. Losing the car on your own and sliding into someone: at fault (Ugzz in Vegas) or racing incident (your own grass spin at Monza)? Does it depend on how big the mistake was, or on wet/dry?",
+"answer": "We is always a little more trick so mistakes should be a little less harsh, but in general if you are in a battle and you make a mistake and hit another driver that leaves enough space, it the driver that make a mistake their fault, but again if they try to catch it it is less bad then when they just let it happen."
+},
+{
+"q": "Q30. Give me one sentence each for severity 2, 5 and 8 (or pick an incident above for each).",
+"answer": "Is is a small tap where someone loses traction a little bit or they go off track without losing alot of time. 5 is a bigger mistake that could give a driver damage or make them lose time. 8 is a crash that could take 1 or multiple drivers out."
+},
+{
+"q": "Q31. Should severity score the move (how late, how fast, how reckless) or what happened after (spins, lost places, cars off)? Or 50/50?",
+"answer": "I wanna say only the move, i wanna try that cause that is technicly what is the problem but if it gets less accurate we will add the result of the incident, but for now lets only do the move or mistake."
+},
+{
+"q": "Q32. In a chain, does the starter carry the damage of the whole chain, or only of his own first contact?",
+"answer": "Only their own mistake, and if another driver then could avoid the next one it is also partly on them."
+}
+]

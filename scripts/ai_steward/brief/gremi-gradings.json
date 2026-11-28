@@ -1,0 +1,3317 @@
+[
+{
+"code": "old-13",
+"track": "Monaco",
+"date": "2026-11-11",
+"clock": "0:06",
+"call": "Both / several at fault",
+"at_fault": "both drivers",
+"severity": 3,
+"reasons": [
+"Left no room / squeezed",
+"On purpose / revenge",
+"Racing line choice"
+],
+"gremi_notes": [
+"Yeah, he didnt need to squeeze toni there, the race line goes the other way, so he did that on purpose, sev 3 is fine",
+"Racing-line conflict: Both at fault (old call: #8 Stepino81)",
+"Stepino should have left more space, and toni, should have picked a side, or backed off."
+]
+},
+{
+"code": "old-20",
+"track": "Silverstone",
+"date": "2026-11-11",
+"clock": "0:10",
+"call": "Racing incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Dive into a closing gap / not far enough alongside"
+],
+"gremi_notes": [
+"This one is abit difficult cause alexo goes for a gap that was always gonna close, but im not sure if he is at fault let me know what you think, stepino should not get a 7 sev for that collision, you can group togheter multiple collisions togheter if they are kind part of the same incident, but that does not mean all drivers are equally at fault.",
+"Racing-line conflict: Racing incident (old call: #2 Alexowitsh77)"
+]
+},
+{
+"code": "INT2-4 / INT2-5 / INT1-G",
+"track": "Monza",
+"date": "2026-11-11",
+"clock": "0:12",
+"call": "No answer",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Shown to you, not answered"
+],
+"gremi_notes": [
+"I do think braaf olifant does not brake enough, he brakes intime, but pretty soft, he could atleast have hit sprintstar less hard.",
+"That is for you to decide. Look at the inputs and the average speed and braking points"
+]
+},
+{
+"code": "R20-14",
+"track": "Monaco",
+"date": "2026-11-11",
+"clock": "0:16",
+"call": "One driver at fault",
+"at_fault": "#2 braaf-olifant",
+"severity": 4,
+"reasons": [
+"Left no room / squeezed"
+],
+"gremi_notes": [
+"[x] Agree with: #2 braaf-olifant at fault (sev 4)"
+]
+},
+{
+"code": "old-11",
+"track": "Bahrain",
+"date": "2026-11-11",
+"clock": "0:18",
+"call": "Not an incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Light touch, no effect"
+],
+"gremi_notes": []
+},
+{
+"code": "INT1-K",
+"track": "Melbourne",
+"date": "2026-11-11",
+"clock": "0:22",
+"call": "One driver at fault",
+"at_fault": "",
+"severity": null,
+"reasons": [
+"Left no room / squeezed"
+],
+"gremi_notes": [
+"Yeah it is on toni, he is ahead at the apex but cant leave enough space to keep all cars on track and send it on the inside, But this incident is not with ethan but with niketys and vanderdeurend. Make sure you get that right. But the other cars leave enough space. For me it is also important that you check if one of the drivers seems to wanna avoid the incident, but it still ahppens it will probably be on the other."
+]
+},
+{
+"code": "R10-5",
+"track": "Monaco",
+"date": "2026-11-11",
+"clock": "0:32",
+"call": "Not visible in the viewer",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Not visible in the viewer"
+],
+"gremi_notes": [
+"[ ] Agree with v1.7",
+"Notes: Dont see it in the incident viewer"
+]
+},
+{
+"code": "R10-1",
+"track": "Bahrain",
+"date": "2026-11-11",
+"clock": "0:41",
+"call": "One driver at fault",
+"at_fault": "Alexowitsh",
+"severity": 3,
+"reasons": [
+"Throttle too early",
+"Braked too late / ran into the car ahead",
+"No car control at the apex / went too deep"
+],
+"gremi_notes": [
+"[ ] Agree with v1.7",
+"Who is at fault (if not v1.7's call): alexowitsh77",
+"Reason numbers (from the list at the top): 9",
+"Notes: I feel like this is a low severity for alexo, he just goes on the trottle a little too early and drives into rylan"
+]
+},
+{
+"code": "old-1",
+"track": "Bahrain",
+"date": "2026-11-11",
+"clock": "0:41",
+"call": "Racing incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Racing incident, nothing more said"
+],
+"gremi_notes": []
+},
+{
+"code": "R13-2",
+"track": "Silverstone",
+"date": "2026-11-11",
+"clock": "0:43",
+"call": "Both / several at fault",
+"at_fault": "toni, Pucky",
+"severity": 3,
+"reasons": [
+"Left no room / squeezed"
+],
+"gremi_notes": [
+"[ ] Agree",
+"Your call / note: The first part is correct, but the second is not on the straight toni leaves enough room for pucky, pucky then turns to the right at 0:45 an hits tonis car, in this incident they are both at fault."
+]
+},
+{
+"code": "old-15",
+"track": "Monza",
+"date": "2026-11-11",
+"clock": "0:47",
+"call": "One driver at fault",
+"at_fault": "#21",
+"severity": 2,
+"reasons": [
+"Braked too late / ran into the car ahead"
+],
+"gremi_notes": []
+},
+{
+"code": "old-7",
+"track": "Monaco",
+"date": "2026-11-11",
+"clock": "0:51",
+"call": "One driver at fault",
+"at_fault": "NEX",
+"severity": 2,
+"reasons": [
+"Dive into a closing gap / not far enough alongside"
+],
+"gremi_notes": [
+"Again something is going wrong here, They both brake at the average braking point, not far later. Also Nex does get up to 100% brake pressure, so check why you thought he only hit 56%. But it is Nex his fault, he did try to go for a gap that was not gonna happen."
+]
+},
+{
+"code": "R13-3",
+"track": "Monaco",
+"date": "2026-11-11",
+"clock": "1:25",
+"call": "Racing incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Left no room / squeezed"
+],
+"gremi_notes": [
+"[x] Agree"
+]
+},
+{
+"code": "R13-1",
+"track": "Melbourne",
+"date": "2026-11-11",
+"clock": "1:34",
+"call": "One driver at fault",
+"at_fault": "toni",
+"severity": 4,
+"reasons": [
+"Left no room / squeezed"
+],
+"gremi_notes": [
+"[x] Agree",
+"Racing-line conflict: Keep my old call (old call: #19 toni2608)"
+]
+},
+{
+"code": "old-21",
+"track": "Monza",
+"date": "2026-11-11",
+"clock": "1:44",
+"call": "One driver at fault",
+"at_fault": "#21",
+"severity": 3,
+"reasons": [
+"Left no room / squeezed"
+],
+"gremi_notes": [
+"Racing incident is okay",
+"No this is the fault of car 21, he didnt leave enough space for pucky on the exit."
+]
+},
+{
+"code": "R10-2",
+"track": "Bahrain",
+"date": "2026-11-11",
+"clock": "1:52",
+"call": "Not visible in the viewer",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Not visible in the viewer"
+],
+"gremi_notes": [
+"[ ] Agree with v1.7",
+"Notes: I dont see this incident on the incident viewer"
+]
+},
+{
+"code": "old-3",
+"track": "Monaco",
+"date": "2026-11-11",
+"clock": "2:07",
+"call": "One driver at fault",
+"at_fault": "#21",
+"severity": 1,
+"reasons": [
+"Left no room / squeezed",
+"Data or name problem"
+],
+"gremi_notes": [
+"I think that this is on MV, he doesnt leave a cars width, tell me why you think this is sprintstar his fault and what contradicts the rules",
+"Then we need to look if we can trust that, cause he was right up to the wall."
+]
+},
+{
+"code": "R10-3",
+"track": "Silverstone",
+"date": "2026-11-11",
+"clock": "2:20",
+"call": "Not visible in the viewer",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Not visible in the viewer"
+],
+"gremi_notes": [
+"[ ] Agree with v1.7",
+"Notes: Also dont see this one in the incident viewer."
+]
+},
+{
+"code": "R10-4",
+"track": "Silverstone",
+"date": "2026-11-11",
+"clock": "2:27",
+"call": "Racing incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Racing incident, nothing more said"
+],
+"gremi_notes": [
+"[x] Agree with v1.7",
+"Reason numbers (from the list at the top): 2"
+]
+},
+{
+"code": "R12-2",
+"track": "Monaco",
+"date": "2026-11-11",
+"clock": "2:41",
+"call": "Racing incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Left no room / squeezed",
+"Light touch, no effect",
+"Data or name problem"
+],
+"gremi_notes": [
+"Your call (racing incident, or who is at fault): Racing incident",
+"What made you decide: As you should be able to see hidde hits the wall 0.3s before the touch trying to leave space in that tight track, bounces off and we hae a slight touch."
+]
+},
+{
+"code": "R9-1",
+"track": "Bahrain",
+"date": "2026-11-11",
+"clock": "3:13",
+"call": "Racing incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Racing incident, nothing more said"
+],
+"gremi_notes": [
+"[x] Agree with v1.7"
+]
+},
+{
+"code": "R9-5",
+"track": "Monaco",
+"date": "2026-11-11",
+"clock": "3:22",
+"call": "Not visible in the viewer",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Not visible in the viewer"
+],
+"gremi_notes": [
+"[ ] Agree with v1.7",
+"Notes: This one in not showing up for me"
+]
+},
+{
+"code": "R12-3",
+"track": "Monza",
+"date": "2026-11-11",
+"clock": "3:48",
+"call": "Both / several at fault",
+"at_fault": "#69, #32",
+"severity": 1,
+"reasons": [
+"Turned in too early / cut across",
+"Left no room / squeezed",
+"Rejoin"
+],
+"gremi_notes": [
+"Your call (racing incident, or who is at fault): This is both at fault for reckless driving.",
+"What made you decide: Car 32 turns in too early at 3:48, leaving no space on the inside for car 69. But then at 3:51 car 69 does not leave a little space for car 32 to rejoin the track. And at 3:52 car 32 does not leave space and Car 69 cuts the  apex, it comes down to not leaving eachother enough space while battling"
+]
+},
+{
+"code": "R20-13",
+"track": "Monaco",
+"date": "2026-11-11",
+"clock": "4:06",
+"call": "Racing incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Racing incident, nothing more said"
+],
+"gremi_notes": [
+"[x] Agree with: Racing incident"
+]
+},
+{
+"code": "R20-16",
+"track": "Bahrain",
+"date": "2026-11-11",
+"clock": "4:45",
+"call": "Racing incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Racing incident, nothing more said"
+],
+"gremi_notes": [
+"[x] Agree with: Racing incident"
+]
+},
+{
+"code": "old-10",
+"track": "Monza",
+"date": "2026-11-11",
+"clock": "4:46",
+"call": "One driver at fault",
+"at_fault": "#21",
+"severity": 1,
+"reasons": [
+"Dive into a closing gap / not far enough alongside",
+"No car control at the apex / went too deep",
+"Light touch, no effect"
+],
+"gremi_notes": [
+"No Car 21 is at fault for this one. It was a good dive from car 32, he is at the apex at full control and deserves space, the touch they have is fine, just a nudge. Then after car 21 cut the curb and moves al the way over the track while he knows there is a car there, then they drive off togheter, let me know what rules we need to look at for this",
+"Why not look at the full incident, there is a reason that is the whole incident"
+]
+},
+{
+"code": "R9-2",
+"track": "Bahrain",
+"date": "2026-11-11",
+"clock": "4:50",
+"call": "Not an incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Light touch, no effect"
+],
+"gremi_notes": [
+"[x] Agree with v1.7"
+]
+},
+{
+"code": "R9-4",
+"track": "Silverstone",
+"date": "2026-11-11",
+"clock": "5:26",
+"call": "Racing incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Racing incident, nothing more said"
+],
+"gremi_notes": [
+"[x] Agree with v1.7"
+]
+},
+{
+"code": "old-12",
+"track": "Silverstone",
+"date": "2026-11-11",
+"clock": "5:56",
+"call": "One driver at fault",
+"at_fault": "SHW1KS",
+"severity": 2,
+"reasons": [
+"Left no room / squeezed"
+],
+"gremi_notes": []
+},
+{
+"code": "old-6",
+"track": "Melbourne",
+"date": "2026-11-11",
+"clock": "6:02",
+"call": "One driver at fault",
+"at_fault": "toni",
+"severity": 3,
+"reasons": [
+"Dive into a closing gap / not far enough alongside",
+"Racing line choice",
+"Data or name problem"
+],
+"gremi_notes": [
+"It is soo weird, it looks like you are combining Ethan en Niketys, they are not the smae driver, make sure you fix that, the incident was beteeen Niketys and toni. But this one is on toni, Niketys follows the racingline, toni goes for a gap that was always gonna close."
+]
+},
+{
+"code": "R9-3",
+"track": "Bahrain",
+"date": "2026-11-11",
+"clock": "6:13",
+"call": "One driver at fault",
+"at_fault": "ItzH1ddegam1ng",
+"severity": 2,
+"reasons": [
+"Late move / defending",
+"Light touch, no effect",
+"Racing line choice"
+],
+"gremi_notes": [
+"[ ] Agree with v1.7",
+"Notes: This it more on hidde for defending so last minute.",
+"Your call: ItzH1ddegam1ng at fault for defending at the last minute. The data: At 341 km/h, NEX was 7 m behind and 19 km/h faster. ItzH1ddegam1ng moved 0.2 m (vs the racing line) or 0.9 m (across the track). NEX moved 4.1 m out at the same time. Why I doubt it: From the numbers, NEX pulled out into a car that barely moved. If ItzH1ddegam1ng really made a late move, my move measure misses it at high speed, and I need to know. ⏎  ⏎ Yeah hidde starts to move to the right 0.6 seconds before the collision, there is no time for nex to react to that. and the touch in turn 1 is just a little tap."
+]
+},
+{
+"code": "R12-1",
+"track": "Silverstone",
+"date": "2026-11-11",
+"clock": "6:22",
+"call": "Racing incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Dive into a closing gap / not far enough alongside",
+"No car control at the apex / went too deep",
+"Racing line choice"
+],
+"gremi_notes": [
+"Your call (racing incident, or who is at fault): Racing incident",
+"What made you decide: Pucky goes for a good dive, he is in control and infront at the apex, nex doesnt see him and goes for the racingline, that is a racing incident."
+]
+},
+{
+"code": "old-14",
+"track": "Monza",
+"date": "2026-11-11",
+"clock": "6:47",
+"call": "Racing incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Turned in too early / cut across",
+"Left no room / squeezed",
+"Data or name problem"
+],
+"gremi_notes": [
+"The touch that elias does is almost nothing, and sprintstar cuts elias off into the grass.",
+"No this is a good call. right now it is 2 seperate incidents on the viewer tho, the touch in paribolica is nothing, it is about the squeeze on the grass that is bad, i would see that could be a 4 sev",
+"Racing-line conflict: Racing incident (old call: #88 sprintstar-1)",
+"The incident that happens here is fine, it is after where sprintstar pushes elias off the track, but i dont see that anymore."
+]
+},
+{
+"code": "R10-6",
+"track": "Texas",
+"date": "2026-11-13",
+"clock": "0:08",
+"call": "One driver at fault",
+"at_fault": "#3",
+"severity": 6,
+"reasons": [
+"Braked too late / ran into the car ahead"
+],
+"gremi_notes": [
+"[ ] Agree with v1.7",
+"Who is at fault (if not v1.7's call): Car 3",
+"Reason numbers (from the list at the top): 4",
+"Notes: He does not slow down enough and hits overfast pretty hard, who then hits sprintstar because of it."
+]
+},
+{
+"code": "R10-7",
+"track": "Texas",
+"date": "2026-11-13",
+"clock": "0:09",
+"call": "One driver at fault",
+"at_fault": "QDR",
+"severity": 3,
+"reasons": [
+"Braked too late / ran into the car ahead"
+],
+"gremi_notes": [
+"[x] Agree with v1.7",
+"Reason numbers (from the list at the top): 4"
+]
+},
+{
+"code": "INT2-3",
+"track": "Texas",
+"date": "2026-11-13",
+"clock": "0:16",
+"call": "One driver at fault",
+"at_fault": "",
+"severity": null,
+"reasons": [
+"Left no room / squeezed"
+],
+"gremi_notes": [
+"No nex is at fault here aswell, stijn leaves enough room and nex drives against the back of stijn."
+]
+},
+{
+"code": "INT4-6",
+"track": "Texas",
+"date": "2026-11-13",
+"clock": "1:03",
+"call": "No answer",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Shown to you, not answered"
+],
+"gremi_notes": [
+"The ferrari didnt go wide enough on the exit."
+]
+},
+{
+"code": "R20-2",
+"track": "Texas",
+"date": "2026-11-13",
+"clock": "1:55",
+"call": "One driver at fault",
+"at_fault": "#8 Stepino81",
+"severity": 3,
+"reasons": [
+"Left no room / squeezed"
+],
+"gremi_notes": [
+"[x] Agree with: #8 Stepino81 at fault (sev 3)"
+]
+},
+{
+"code": "old-9",
+"track": "Texas",
+"date": "2026-11-13",
+"clock": "2:20",
+"call": "One driver at fault",
+"at_fault": "#2",
+"severity": 1,
+"reasons": [
+"Left no room / squeezed",
+"Lost control / own mistake",
+"Data or name problem"
+],
+"gremi_notes": [
+"So what i meant with the cant be more then 10% apex speed is if they hit at the apex. Car 2 hits me way before so i spun, that is why my speed was higher, cause i couldnt brake. also how is 2.8 meter less then a cars width? I also need to add something. I said for braking the inside driver needs to leave a cars width to the white line so the other drivers doesnt have to brake on the curb. But some drivers and some corners you can brake on the curb so if the drivers drives onto the curb themselfs it is okay.",
+"Tell me what rules, cause that is wrong."
+]
+},
+{
+"code": "R9-6",
+"track": "Texas",
+"date": "2026-11-13",
+"clock": "3:07",
+"call": "One driver at fault",
+"at_fault": "GreMi",
+"severity": 3,
+"reasons": [
+"Braked too late / ran into the car ahead"
+],
+"gremi_notes": [
+"[x] Agree with v1.7"
+]
+},
+{
+"code": "INT1-L",
+"track": "Texas",
+"date": "2026-11-13",
+"clock": "4:18",
+"call": "One driver at fault",
+"at_fault": "",
+"severity": null,
+"reasons": [
+"Turned in too early / cut across",
+"Dive into a closing gap / not far enough alongside"
+],
+"gremi_notes": [
+"I think the ferrari is at fault here. The ferrari turns in too early at 4:26, the divebomb was good enough"
+]
+},
+{
+"code": "old-22",
+"track": "Brazil",
+"date": "2026-11-15",
+"clock": "0:08",
+"call": "Racing incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Left no room / squeezed"
+],
+"gremi_notes": [
+"Racing-line conflict: Racing incident (old call: #50 DevilDriver2396)"
+]
+},
+{
+"code": "old-23",
+"track": "Brazil",
+"date": "2026-11-15",
+"clock": "0:09",
+"call": "One driver at fault",
+"at_fault": "jason",
+"severity": 3,
+"reasons": [
+"Left no room / squeezed"
+],
+"gremi_notes": []
+},
+{
+"code": "R10-8",
+"track": "Brazil",
+"date": "2026-11-15",
+"clock": "0:28",
+"call": "Racing incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Light touch, no effect"
+],
+"gremi_notes": [
+"[x] Agree with v1.7",
+"Reason numbers (from the list at the top): 2",
+"This is a racing incident cause they both take a different line and hit on the exit, didnt really affect either driver."
+]
+},
+{
+"code": "old-16",
+"track": "Brazil",
+"date": "2026-11-15",
+"clock": "1:01",
+"call": "Both / several at fault",
+"at_fault": "#15, Hamish",
+"severity": 5,
+"reasons": [
+"Data or name problem"
+],
+"gremi_notes": [
+"What do you mean turn for, this incident is not in turn 4. The first touch is nothing, the second is both their faults, they both did nothing to prevent the incident."
+]
+},
+{
+"code": "old-24",
+"track": "Brazil",
+"date": "2026-11-15",
+"clock": "1:13",
+"call": "One driver at fault",
+"at_fault": "Stepino",
+"severity": 1,
+"reasons": [
+"Turned in too early / cut across"
+],
+"gremi_notes": [
+"The straight is fine, the turn one is more on stepino, he turns in a bit too early at the apex of turn 2."
+]
+},
+{
+"code": "R10-9",
+"track": "Brazil",
+"date": "2026-11-15",
+"clock": "1:26",
+"call": "Racing incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Brake check / slowing ahead"
+],
+"gremi_notes": [
+"[x] Agree with v1.7",
+"Who is at fault (if not v1.7's call): vanderdeured",
+"Reason numbers (from the list at the top): 12",
+"This is indeed a racing incident."
+]
+},
+{
+"code": "R7-1",
+"track": "Brazil",
+"date": "2026-11-15",
+"clock": "2:14",
+"call": "One driver at fault",
+"at_fault": "vanderdeured",
+"severity": 2,
+"reasons": [
+"Brake check / slowing ahead"
+],
+"gremi_notes": [
+"[x] Agree"
+]
+},
+{
+"code": "old-25",
+"track": "Brazil",
+"date": "2026-11-15",
+"clock": "2:22",
+"call": "One driver at fault",
+"at_fault": "#13 Player",
+"severity": 5,
+"reasons": [
+"Braked too late / ran into the car ahead",
+"Left no room / squeezed",
+"Racing line choice"
+],
+"gremi_notes": [
+"[ ] Not agreed with \"#8 Stepino81 at fault\". Your call: #13 Player at fault, sev 5",
+"This is also clearly on odeezy, stepino is following the racingline, and odeezy drives into the side of him, as the car behind it is your job to not hit the car infront, this would only have been stepino his fault if they were on the edge of the track and if stepino went more towards odeezy he would have pushed him off, but that is not the case.",
+"Racing-line conflict: Car behind at fault (old call: #8 Stepino81)",
+"From the 20-incident test (#11): odeezy drove into the side of Stepino; car behind must not hit the car ahead."
+]
+},
+{
+"code": "old-26",
+"track": "Brazil",
+"date": "2026-11-15",
+"clock": "3:21",
+"call": "Both / several at fault",
+"at_fault": "vanderdeured, #91",
+"severity": 4,
+"reasons": [
+"Braked too late / ran into the car ahead"
+],
+"gremi_notes": [
+"Plum was at fault for the second collision",
+"[x] Agree with: #15 vanderdeured + #91 Player at fault (sev 4)"
+]
+},
+{
+"code": "R7-2",
+"track": "Brazil",
+"date": "2026-11-15",
+"clock": "3:28",
+"call": "One driver at fault",
+"at_fault": "Senna",
+"severity": 2,
+"reasons": [
+"Left no room / squeezed"
+],
+"gremi_notes": [
+"[x] Agree"
+]
+},
+{
+"code": "R9-7",
+"track": "Brazil",
+"date": "2026-11-15",
+"clock": "4:02",
+"call": "One driver at fault",
+"at_fault": "niet_Lars",
+"severity": 5,
+"reasons": [
+"Left no room / squeezed"
+],
+"gremi_notes": [
+"[x] Agree with v1.7",
+"Racing-line conflict: Keep my old call (old call: #8 niet_Lars123)"
+]
+},
+{
+"code": "R7-3",
+"track": "Brazil",
+"date": "2026-11-15",
+"clock": "4:05",
+"call": "One driver at fault",
+"at_fault": "Stepino",
+"severity": 2,
+"reasons": [
+"Braked too late / ran into the car ahead"
+],
+"gremi_notes": [
+"[x] Agree"
+]
+},
+{
+"code": "R8-1",
+"track": "Brazil",
+"date": "2026-11-15",
+"clock": "4:51",
+"call": "Not an incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Left no room / squeezed",
+"Light touch, no effect"
+],
+"gremi_notes": [
+"[ ] Agree",
+"Your call: I would say this is a racing incident",
+"The difference is that i leave a cars width for overfast.",
+"We do have a little touch there but very slight, i leave room and he leaves room after, this is not an incident."
+]
+},
+{
+"code": "R13-4",
+"track": "Brazil",
+"date": "2026-11-15",
+"clock": "5:02",
+"call": "Racing incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Racing incident, nothing more said"
+],
+"gremi_notes": [
+"[x] Agree"
+]
+},
+{
+"code": "R10-12",
+"track": "Silverstone",
+"date": "2026-11-18",
+"clock": "0:06",
+"call": "One driver at fault",
+"at_fault": "braaf",
+"severity": 4,
+"reasons": [
+"Turned in too early / cut across",
+"Lost control / own mistake",
+"Left no room / squeezed"
+],
+"gremi_notes": [
+"[x] Agree with v1.7",
+"Who is at fault (if not v1.7's call): braaf-olifant",
+"Reason numbers (from the list at the top): 7 and 8",
+"His spin is not the result of that colission but it is his fault cause he turns in too early on vixo"
+]
+},
+{
+"code": "R7-4",
+"track": "Spa",
+"date": "2026-11-18",
+"clock": "0:08",
+"call": "Not visible in the viewer",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Not visible in the viewer"
+],
+"gremi_notes": [
+"[ ] Agree",
+"Your call: This one does not exist for me, the only one is see at that moment is between Stepino and Alexowitsh77"
+]
+},
+{
+"code": "old-5",
+"track": "Shanghai",
+"date": "2026-11-18",
+"clock": "0:09",
+"call": "One driver at fault",
+"at_fault": "DDRK",
+"severity": 3,
+"reasons": [
+"Brake check / slowing ahead"
+],
+"gremi_notes": [
+"Can you also check if stepino brakes to much for that corner, not only look at the braking point but the brake inputs, how much and how long and fast. DDRK complained stpino brakecheck him here. Also keep in mind this is turn 1 so the speed into the corner is lower then any other lap. See if you feel stepino braked too much or ddrk too little and late."
+]
+},
+{
+"code": "INT1-J",
+"track": "Shanghai",
+"date": "2026-11-18",
+"clock": "0:14",
+"call": "Not an incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Lap 1 / pack"
+],
+"gremi_notes": [
+"Yeah you are right that is nothing, especially those touches in lap 1 are gonna happen."
+]
+},
+{
+"code": "INT1-I",
+"track": "Catalunya",
+"date": "2026-11-18",
+"clock": "0:15",
+"call": "Racing incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Left no room / squeezed",
+"No car control at the apex / went too deep"
+],
+"gremi_notes": [
+"I would say this is a racing incident where they are both at fault cause sykalex does not leave alot of room and stepino went wide but still tries to retain the position."
+]
+},
+{
+"code": "R13-7",
+"track": "Silverstone",
+"date": "2026-11-18",
+"clock": "0:16",
+"call": "Not an incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Data or name problem"
+],
+"gremi_notes": [
+"[x] Agree",
+"Your call / note: The only thing you need to check is if the touches you record are real, because im not sure if rylan and stepino touch at 0:19, they might but it is not clear for me."
+]
+},
+{
+"code": "old-18",
+"track": "Shanghai",
+"date": "2026-11-18",
+"clock": "0:19",
+"call": "One driver at fault",
+"at_fault": "toni",
+"severity": 2,
+"reasons": [
+"Braked too late / ran into the car ahead"
+],
+"gremi_notes": [
+"4 is good"
+]
+},
+{
+"code": "R10-10",
+"track": "Spa",
+"date": "2026-11-18",
+"clock": "0:23",
+"call": "Racing incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Dive into a closing gap / not far enough alongside"
+],
+"gremi_notes": [
+"[x] Agree with v1.7",
+"Reason numbers (from the list at the top): 2",
+"This is a racing incident cause overfast goes for a gap that was gonna close and drives into Senna"
+]
+},
+{
+"code": "R9-8",
+"track": "Shanghai",
+"date": "2026-11-18",
+"clock": "0:28",
+"call": "Racing incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Racing incident, nothing more said"
+],
+"gremi_notes": [
+"[x] Agree with v1.7"
+]
+},
+{
+"code": "R5-3",
+"track": "Shanghai",
+"date": "2026-11-18",
+"clock": "0:34",
+"call": "Both / several at fault",
+"at_fault": "Stepino, braaf, toni",
+"severity": 1,
+"reasons": [
+"Left no room / squeezed",
+"Racing line choice"
+],
+"gremi_notes": [
+"[ ] Agree",
+"Your call: This was a racing incident with all of them to blame for not leaving enough room, also toni",
+"This was a good call, they are both soo far from their line that they should yield for other drivers."
+]
+},
+{
+"code": "R7-5",
+"track": "Spa",
+"date": "2026-11-18",
+"clock": "0:36",
+"call": "One driver at fault",
+"at_fault": "Senna",
+"severity": 1,
+"reasons": [
+"Turned in too early / cut across",
+"Late move / defending",
+"No car control at the apex / went too deep",
+"Racing line choice"
+],
+"gremi_notes": [
+"Like i said, this is on senna because he turns in too early",
+"The reason senna is at fault here is because he starts turning in way to early, it might be the right time when he is on the racingline, im not to sure, but on the line he is driving he starts to turn in too early and that causes the collission. you might need a way to check what lines the cars should drive in each battle and see if they dont follow that, lets see if we can make something for that.",
+"[ ] Agree",
+"Your call: I think this is on senna, he moves when stepino is next to him for no reason,stepino has full control the whole time"
+]
+},
+{
+"code": "R12-4",
+"track": "Shanghai",
+"date": "2026-11-18",
+"clock": "0:53",
+"call": "One driver at fault",
+"at_fault": "#3",
+"severity": 1,
+"reasons": [
+"Dive into a closing gap / not far enough alongside"
+],
+"gremi_notes": [
+"Your call (racing incident, or who is at fault): Jessey at fault",
+"What made you decide: Jessey gets overtaken by sprintstar and wants to get the position back but goes to the inside of a very fast corner, never has his wheel far enough and should have backed out there.",
+"This is on Jessey for sticking his nose in, no need in that kind of corner."
+]
+},
+{
+"code": "old-4",
+"track": "Shanghai",
+"date": "2026-11-18",
+"clock": "1:07",
+"call": "One driver at fault",
+"at_fault": "braaf",
+"severity": 3,
+"reasons": [
+"Lost control / own mistake",
+"Racing line choice"
+],
+"gremi_notes": [
+"Theregoes something really wrong here, that part is not a braking zone, he brakes a little to rotate his car, braaf is the one that loses traction and moves over the racing line to hit lucas. again tell me what rules i brake now so we can go over them."
+]
+},
+{
+"code": "old-27",
+"track": "Silverstone",
+"date": "2026-11-18",
+"clock": "1:26",
+"call": "Racing incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Racing incident, nothing more said"
+],
+"gremi_notes": []
+},
+{
+"code": "R13-5",
+"track": "Shanghai",
+"date": "2026-11-18",
+"clock": "1:31",
+"call": "Not an incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Left no room / squeezed",
+"Lost control / own mistake",
+"Brake check / slowing ahead"
+],
+"gremi_notes": [
+"[x] Agree",
+"Your call / note: True cause octopus makes a mistak and is slower at the apex, rylan then cant go anywhere."
+]
+},
+{
+"code": "old-17",
+"track": "Spa",
+"date": "2026-11-18",
+"clock": "1:43",
+"call": "One driver at fault",
+"at_fault": "toni",
+"severity": 1,
+"reasons": [
+"Braked too late / ran into the car ahead",
+"Racing line choice"
+],
+"gremi_notes": [
+"Toni sends it in quite hard, you have to keep in mind that braking away from the racingline slows less fast, so he brakes on the inside of the corner, but you can see he slows down less cause there is less grip, so look at braking point, braking pressure and speed while braking."
+]
+},
+{
+"code": "R5-6",
+"track": "Silverstone",
+"date": "2026-11-18",
+"clock": "2:19",
+"call": "Both / several at fault",
+"at_fault": "#2 Player, Hamish",
+"severity": 1,
+"reasons": [
+"Light touch, no effect"
+],
+"gremi_notes": [
+"[x] Agree"
+]
+},
+{
+"code": "R7-6",
+"track": "Spa",
+"date": "2026-11-18",
+"clock": "2:23",
+"call": "Not an incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Light touch, no effect",
+"Racing line choice"
+],
+"gremi_notes": [
+"This is barely a touch, just a wheel tap, didnt affect any driver at all",
+"[ ] Agree",
+"Your call: This is a racing incident, sennna has a really small tap with toni, but toni should not get the blame, he is nice on his line and cant do much more there"
+]
+},
+{
+"code": "R8-2",
+"track": "Shanghai",
+"date": "2026-11-18",
+"clock": "2:38",
+"call": "Racing incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Left no room / squeezed",
+"Dive into a closing gap / not far enough alongside",
+"Lost control / own mistake"
+],
+"gremi_notes": [
+"[ ] Agree",
+"Your call: I would probably say racing incident, sprintstar has a bit of a weird line but jakub goes for a gap that was gonna close",
+"You are right, the only difference here is that sprintstar make a mistake here slowing him, putting jakub in a situation where the move seems more realistic. he should still not have gone for it and sprintstar closes the door, so racing incident or both at fault."
+]
+},
+{
+"code": "R20-9",
+"track": "Spa",
+"date": "2026-11-18",
+"clock": "2:50",
+"call": "Racing incident",
+"at_fault": "",
+"severity": 2,
+"reasons": [
+"Light touch, no effect"
+],
+"gremi_notes": [
+"[ ] Not agreed with \"Not an incident\". Your call: Racing incident, sev 2"
+]
+},
+{
+"code": "R13-6",
+"track": "Shanghai",
+"date": "2026-11-18",
+"clock": "2:50",
+"call": "Racing incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Racing incident, nothing more said"
+],
+"gremi_notes": [
+"[x] Agree"
+]
+},
+{
+"code": "R5-4",
+"track": "Shanghai",
+"date": "2026-11-18",
+"clock": "2:54",
+"call": "One driver at fault",
+"at_fault": "toni",
+"severity": 1,
+"reasons": [
+"Left no room / squeezed",
+"Late move / defending"
+],
+"gremi_notes": [
+"This is indeed a racing incident, but it is more because toni just about leaves enough space for hamish, cause his tire is on the line and the still touch so toni does not leave enough space.",
+"[ ] Agree",
+"Your call: No toni moves last minute, hamish picks a good line and sticks with it."
+]
+},
+{
+"code": "R7-7",
+"track": "Shanghai",
+"date": "2026-11-18",
+"clock": "3:09",
+"call": "Racing incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Racing incident, nothing more said"
+],
+"gremi_notes": [
+"[x] Agree"
+]
+},
+{
+"code": "old-19",
+"track": "Silverstone",
+"date": "2026-11-18",
+"clock": "3:34",
+"call": "One driver at fault",
+"at_fault": "Jakub",
+"severity": 3,
+"reasons": [
+"Braked too late / ran into the car ahead"
+],
+"gremi_notes": [
+"Yeah again the brake at the same time, but he goes into the corner to quick so this is a good call"
+]
+},
+{
+"code": "R5-5",
+"track": "Shanghai",
+"date": "2026-11-18",
+"clock": "3:56",
+"call": "Not an incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Light touch, no effect"
+],
+"gremi_notes": [
+"[ ] Agree",
+"Your call: This is not an incident, such a small tap."
+]
+},
+{
+"code": "R12-5",
+"track": "Silverstone",
+"date": "2026-11-18",
+"clock": "4:11",
+"call": "Racing incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Left no room / squeezed",
+"Brake check / slowing ahead"
+],
+"gremi_notes": [
+"Your call (racing incident, or who is at fault): Racing incident",
+"What made you decide: At 4:09 Slywhite goes of trottle in a corner where you usually go full trottle, this causes Jakub to gain really quick. They are side by side when the collision happens. Slywhite could have left a little more space and Jakub could havebacked out."
+]
+},
+{
+"code": "R7-8",
+"track": "Shanghai",
+"date": "2026-11-18",
+"clock": "4:45",
+"call": "One driver at fault",
+"at_fault": "#3",
+"severity": 4,
+"reasons": [
+"No car control at the apex / went too deep",
+"Brake check / slowing ahead"
+],
+"gremi_notes": [
+"This is on Jessey casue the angle of his car at the apex is too far out, it is because he doesnt get his car slowed down enough so he is not in control at the apex and runs into lucas.",
+"[x] Agree",
+"Your call: Call it good, would give this one a 4"
+]
+},
+{
+"code": "R5-1",
+"track": "Spa",
+"date": "2026-11-18",
+"clock": "5:21",
+"call": "Racing incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Racing incident, nothing more said"
+],
+"gremi_notes": [
+"[ ] Agree",
+"Your call: I would probably say this is a racing incident, cause you cant fully blame hidde for braking a bit earlier, senna brakes pretty late."
+]
+},
+{
+"code": "R10-11",
+"track": "Shanghai",
+"date": "2026-11-18",
+"clock": "5:33",
+"call": "Not an incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Light touch, no effect"
+],
+"gremi_notes": [
+"[x] Agree with v1.7",
+"Reason numbers (from the list at the top): 1"
+]
+},
+{
+"code": "old-8",
+"track": "Spa",
+"date": "2026-11-18",
+"clock": "5:35",
+"call": "One driver at fault",
+"at_fault": "toni",
+"severity": 2,
+"reasons": [
+"Data or name problem"
+],
+"gremi_notes": [
+"No you really need to analyse better, cause in this incident Hidde and Senna didnt touch. The reason Hidde was slower there is because Alexo was thers, so he was trying a switchback. Toni should have braked a bit earlier, but it is not a really big incident cause if hidde went around the outside of alexo toni would have been fine. But because of the fact he couldnt slow it down intime to avoid him it is still his fault"
+]
+},
+{
+"code": "R7-9",
+"track": "Silverstone",
+"date": "2026-11-18",
+"clock": "5:47",
+"call": "Racing incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Lost control / own mistake",
+"Brake check / slowing ahead"
+],
+"gremi_notes": [
+"[ ] Agree",
+"Your call: Racing incident, jakub makes a mistake and is slower bacause of it, and car 2 could have slightly slowed down to not hit him."
+]
+},
+{
+"code": "R5-7",
+"track": "Silverstone",
+"date": "2026-11-18",
+"clock": "6:08",
+"call": "One driver at fault",
+"at_fault": "Jakub",
+"severity": 3,
+"reasons": [
+"Left no room / squeezed",
+"No car control at the apex / went too deep"
+],
+"gremi_notes": [
+"I blame jakub cause Slywhite leave enough room for jakub at all time, Jakub goes to deep and runs into slywhite, his fault.",
+"[x] Agree"
+]
+},
+{
+"code": "R5-2",
+"track": "Spa",
+"date": "2026-11-18",
+"clock": "6:40",
+"call": "One driver at fault",
+"at_fault": "DDRK",
+"severity": 3,
+"reasons": [
+"Braked too late / ran into the car ahead"
+],
+"gremi_notes": [
+"[x] Agree",
+"So i think DDRK had enough time to avoid the crash or atleast slow down a bit more, you should look if both drivers drive around the average speed into the corner, cause you see that Senna has a moment with alexo just before, that is why he is alot slower in the corner. Check later against the rules i said what you think."
+]
+},
+{
+"code": "old-2",
+"track": "Silverstone",
+"date": "2026-11-18",
+"clock": "6:49",
+"call": "Racing incident",
+"at_fault": "",
+"severity": 3,
+"reasons": [
+"Turned in too early / cut across"
+],
+"gremi_notes": [
+"[ ] Not agreed with \"#8 Stepino81 at fault\". Your call: Racing incident, sev 3",
+"Slywhite turns in a bit early with the fact that stepino is next to him and stepino doesnt turn in intime."
+]
+},
+{
+"code": "R8-3",
+"track": "Shanghai",
+"date": "2026-11-18",
+"clock": "7:52",
+"call": "One driver at fault",
+"at_fault": "RYLAN",
+"severity": 4,
+"reasons": [
+"No car control at the apex / went too deep",
+"Racing line choice"
+],
+"gremi_notes": [
+"[ ] Agree",
+"Your call: No this one if fully on Rylan, Slywhite does go wide, but rylan then also goes wide to hit slywhite.",
+"I blame Rylan there because he has so much room to not hit slywhite there, slywhite went too deep, but is fully of the racingline when they touch, rylan also sent it in too deep and does not have control or rotation at the apex."
+]
+},
+{
+"code": "R5-8",
+"track": "Silverstone",
+"date": "2026-11-18",
+"clock": "7:53",
+"call": "Not an incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"After the finish line"
+],
+"gremi_notes": [
+"[ ] Agree",
+"Your call: This is after the finish, never look at incidents after the drivers have finished, cause the ai takes over the second you cross the line."
+]
+},
+{
+"code": "R7-14",
+"track": "Suzuka",
+"date": "2026-11-22",
+"clock": "0:04",
+"call": "One driver at fault",
+"at_fault": "GreMi",
+"severity": 1,
+"reasons": [
+"Racing incident, nothing more said"
+],
+"gremi_notes": [
+"[x] Agree"
+]
+},
+{
+"code": "R1-9",
+"track": "Silverstone",
+"date": "2026-11-22",
+"clock": "0:05",
+"call": "One driver at fault",
+"at_fault": "toni",
+"severity": 1,
+"reasons": [
+"Racing line choice"
+],
+"gremi_notes": [
+"This is on toni, they move the same amount toward eachother but toni is moving away from the racing line and tm towards it, there is no reason why toni could have moved more towards the racingline.",
+"[x] Agree with: Racing incident"
+]
+},
+{
+"code": "R9-19",
+"track": "Silverstone",
+"date": "2026-11-22",
+"clock": "0:06",
+"call": "Not an incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Light touch, no effect"
+],
+"gremi_notes": [
+"[x] Agree with v1.7"
+]
+},
+{
+"code": "R1-2",
+"track": "Austria",
+"date": "2026-11-22",
+"clock": "0:08",
+"call": "Not an incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Brake check / slowing ahead",
+"Lap 1 / pack"
+],
+"gremi_notes": [
+"Okey so i think you should give each incident a code from now on, like maybe the date-short trackname-lapnumber-turnnumber-severity-time in minutes into the race. cause the incident you are refering to is severity 1 on my incident viewer, we reallyneed a system to make sure we are always talkinga bout the same incidents all across each platfrom. otherwise it is gonna cause confusion. If you are talking about the lap 1 turn 1 incident. i dont think i was atfault there. First it is classified as side contact even tho devil hits me on the back. And i brake a bit early but i do have alot of cars around me, this should either be no incident or the smallest possible racing incident."
+]
+},
+{
+"code": "R6-10",
+"track": "Miami",
+"date": "2026-11-22",
+"clock": "0:08",
+"call": "One driver at fault",
+"at_fault": "Jakub",
+"severity": 3,
+"reasons": [
+"Braked too late / ran into the car ahead"
+],
+"gremi_notes": [
+"[x] Agree"
+]
+},
+{
+"code": "R1-4",
+"track": "Imola",
+"date": "2026-11-22",
+"clock": "0:09",
+"call": "One driver at fault",
+"at_fault": "SHW1KS",
+"severity": 6,
+"reasons": [
+"Braked too late / ran into the car ahead"
+],
+"gremi_notes": [
+"This one is on Shwiks, TM is fully on the left side of the track, Shwiks drives into him, and they hook tires, they go off, Shwiks dnf's so only the first touch is his fault. Tm or toni are not at fault for that at all. This should probably be a 6 sev."
+]
+},
+{
+"code": "R3-4",
+"track": "Silverstone",
+"date": "2026-11-22",
+"clock": "0:09",
+"call": "Racing incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"No car control at the apex / went too deep"
+],
+"gremi_notes": [
+"Your call: Yeah good call, Toni coulnt go wider, and the ferrari goes for a move the is a bit tricky."
+]
+},
+{
+"code": "R20-4",
+"track": "Madrid",
+"date": "2026-11-22",
+"clock": "0:09",
+"call": "One driver at fault",
+"at_fault": "#8 tm swung u",
+"severity": 3,
+"reasons": [
+"Data or name problem"
+],
+"gremi_notes": [
+"[ ] Not agreed with \"#8 Stepino81 + #2 braaf-olifant at fault\". Your call: #8 tm swung u at fault, sev 3",
+"I feel something went wrong cause stepino and TM both have number 8, you say 4 s before the touch #8 Stepino81 was 23 m behind #86 Overfast-_, 3.6 m to the side (168 vs 192 km/h). But that sounds more like TM, cause stepino is infront of overfast before the first touch. If that is the case than that is also a very bif problem, why is that still possible. How can you still get the drivers wrong, give each driver an id or something so that cant happen again!"
+]
+},
+{
+"code": "R7-20",
+"track": "Madrid",
+"date": "2026-11-22",
+"clock": "0:11",
+"call": "Racing incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Lap 1 / pack"
+],
+"gremi_notes": [
+"[ ] Agree",
+"Your call: This is a lap 1 racing incident."
+]
+},
+{
+"code": "R9-10",
+"track": "Austria",
+"date": "2026-11-22",
+"clock": "0:11",
+"call": "Both / several at fault",
+"at_fault": "Senna, #29",
+"severity": 3,
+"reasons": [
+"Left no room / squeezed"
+],
+"gremi_notes": [
+"[x] Agree with v1.7"
+]
+},
+{
+"code": "R3-6",
+"track": "Suzuka",
+"date": "2026-11-22",
+"clock": "0:11",
+"call": "Racing incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Racing incident, nothing more said"
+],
+"gremi_notes": [
+"Your call: Yeah good call"
+]
+},
+{
+"code": "R1-x",
+"track": "Baku",
+"date": "2026-11-22",
+"clock": "0:15",
+"call": "One driver at fault",
+"at_fault": "GreMi",
+"severity": 3,
+"reasons": [
+"Braked too late / ran into the car ahead"
+],
+"gremi_notes": [
+"This one was on me, i just braked to little too late."
+]
+},
+{
+"code": "R20-12",
+"track": "Las Vegas",
+"date": "2026-11-22",
+"clock": "0:15",
+"call": "Both / several at fault",
+"at_fault": "",
+"severity": 4,
+"reasons": [
+"Left no room / squeezed"
+],
+"gremi_notes": [
+"[ ] Not agreed with \"#69 Ayrton_Senna109 at fault\". Your call: Both at fault, sev 4",
+"Senna did move over but Rawer had the room to move over, but he didnt. Both could have left more room."
+]
+},
+{
+"code": "R2-7",
+"track": "Baku",
+"date": "2026-11-22",
+"clock": "0:17",
+"call": "One driver at fault",
+"at_fault": "vanderdeured",
+"severity": 3,
+"reasons": [
+"Dive into a closing gap / not far enough alongside",
+"Racing line choice",
+"Data or name problem"
+],
+"gremi_notes": [
+"Overfast is definitly not at fault here, the only driver that would be a little at fault is vanderdeured for the hit with overfast, but there is something wrong with your moves over cause overfast drivers a good line with the cars around him, i think that is where you still make alot of mistakes. Maybe you need to simulate the line they should drive with the cars around them, and judge it from there, cause overfast couldnt drive a better line there, so see how you can fix that.",
+"You are correct that overfast moves over, but so does lenny, and the space it there for overfast to move closer to the raceline. they all brake pretty similar, they touch a little but that is mainly because it is too busy. The only reason i would say vanderdeurend is to blame a little here is because he comes from so far back and still hits them.",
+"[ ] Not agreed with \"#86 Overfast-_ + #15 vanderdeured at fault\". Your call: #15 vanderdeured at fault, sev 3",
+"This has been a problem for sucha long time, overfast moves to the best line for him, he couldnt have driven a better line there, so there is still a significant problem in the engine if it gets this wrong."
+]
+},
+{
+"code": "R9-14",
+"track": "Baku",
+"date": "2026-11-22",
+"clock": "0:18",
+"call": "Racing incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Lap 1 / pack"
+],
+"gremi_notes": [
+"[ ] Agree with v1.7",
+"Notes: Racing incident, Cause the aston could have done better, stepino also brakes pretty late."
+]
+},
+{
+"code": "R11-8",
+"track": "Silverstone",
+"date": "2026-11-22",
+"clock": "0:18",
+"call": "No answer",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Shown to you, not answered"
+],
+"gremi_notes": [
+"[ ] Agree"
+]
+},
+{
+"code": "R10-17",
+"track": "Suzuka",
+"date": "2026-11-22",
+"clock": "0:19",
+"call": "One driver at fault",
+"at_fault": "Banan",
+"severity": 1,
+"reasons": [
+"Dive into a closing gap / not far enough alongside",
+"Braked too late / ran into the car ahead"
+],
+"gremi_notes": [
+"[x] Agree with v1.7",
+"Who is at fault (if not v1.7's call): Bananensaus17",
+"Reason numbers (from the list at the top): 4",
+"Notes: He goes for a gap that was gonna close"
+]
+},
+{
+"code": "R20-8",
+"track": "Silverstone",
+"date": "2026-11-22",
+"clock": "0:20",
+"call": "Not an incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Light touch, no effect"
+],
+"gremi_notes": [
+"[x] Agree with: Not an incident"
+]
+},
+{
+"code": "R7-13",
+"track": "Baku",
+"date": "2026-11-22",
+"clock": "0:23",
+"call": "Both / several at fault",
+"at_fault": "K7, niet_Lars",
+"severity": 5,
+"reasons": [
+"Braked too late / ran into the car ahead",
+"Left no room / squeezed",
+"Light touch, no effect",
+"Lap 1 / pack",
+"Data or name problem"
+],
+"gremi_notes": [
+"Your call: K7HYRAX (no space) and niet_Lars123 (braked way too late). The data: At 0:23, K7HYRAX touches niet_Lars123 at 16 km/h on the straight and loses 0.5 s. Six seconds later, at 0:29, niet_Lars123 brakes 38% later than the field and hits car #3 at 84 km/h closing speed. Why I doubt it: These look like two separate incidents: a small tap (K7HYRAX into niet_Lars123) and a big hit (niet_Lars123 into #3). Should it be \"tap = nothing, niet_Lars123 at fault for hitting #3\"? This one also showed problem 1: the car that was hit has no lap 1 time loss. ⏎  ⏎ I think this is one incident, cause the first collision it on K7 cause there it no room for him to overtake lars cause there are cars next to him, so K& just goes full trottle into the back of Lars, he should have backed out a little so they dont touch. Then he keeps driving against Lars, which is not okey. he even tries to pass on the right side, where there is a wall. and they almost crash. Up until the brakingzone K7 is at fault for reckless driving. then at the braking lars brakes to late but seems destracted by K7, so i think they are both at fault here.",
+"[ ] Agree",
+"Your call: This is on K7 and Lars, K7 for not leaving any space for lars, and lars brakes way too late."
+]
+},
+{
+"code": "R9-9",
+"track": "Las Vegas",
+"date": "2026-11-22",
+"clock": "0:24",
+"call": "Not an incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Light touch, no effect",
+"Touch not visible in the viewer"
+],
+"gremi_notes": [
+"[ ] Agree with v1.7",
+"Notes: Cant see it. probably because it is not an incident"
+]
+},
+{
+"code": "R2-8",
+"track": "Miami",
+"date": "2026-11-22",
+"clock": "0:25",
+"call": "Both / several at fault",
+"at_fault": "Senna, #21",
+"severity": 2,
+"reasons": [
+"Braked too late / ran into the car ahead",
+"Light touch, no effect"
+],
+"gremi_notes": [
+"This is on Chushi and Senna, they both go in too quick. and i think even more on senna cause he stays on the trottle during the collision.",
+"It is just a little touch, but the audi gains too quick on jukub, it could be called a racing incident."
+]
+},
+{
+"code": "R1-3",
+"track": "Austria",
+"date": "2026-11-22",
+"clock": "0:26",
+"call": "One driver at fault",
+"at_fault": "toni",
+"severity": 3,
+"reasons": [
+"Light touch, no effect"
+],
+"gremi_notes": [
+"This one is only on Toni, he lets go off his brake too early and hits apple. But it was a pretty small hit, i think that sould be about a 3 sev"
+]
+},
+{
+"code": "R3-1",
+"track": "Madrid",
+"date": "2026-11-22",
+"clock": "0:28",
+"call": "One driver at fault",
+"at_fault": "Prijo",
+"severity": 4,
+"reasons": [
+"Late move / defending",
+"Racing line choice",
+"Data or name problem"
+],
+"gremi_notes": [
+"Your call: This is clearly on Prijo, so your call is a mistake, ToadMarc is follow his line, and Prijo swerves into Toad, the fact that you get this one wrong after so long of calibrating is a problem. If you need more data just ask but this is not even close.",
+"It is very clear that toad is following the racingline, prijo is too much on the inside and stops turning in a right turn which makes him hit toad.",
+"Your call: Prijo_1926 at fault. The data: Both cars are #2. ToadMarc moved 5.9 m towards Prijo_1926 by one measure (1.0 m by the other), and Prijo_1926 moved 1.8 m across the track. Both lost time. Why I doubt it: With two #2 cars it's easy to swap them in the replay. Could you check this was Prijo_1926 and not ToadMarc? ⏎  ⏎ This was 100% prijo, There is something wrong with your measuring, cause compaired to the raceline and the left wall toad stays nicly on his line. from 0:27.4 Prijo starts to move away from the right wall, towards the racingline where toad is. Prijo can open up the corner but he just drives into Toad, keep checking how correct your data is until you found what i just said, if you cant then we have a bigger problem",
+"Racing-line conflict: Keep my old call (old call: #2 Prijo_1926)"
+]
+},
+{
+"code": "R10-18",
+"track": "Imola",
+"date": "2026-11-22",
+"clock": "0:30",
+"call": "Not an incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Light touch, no effect"
+],
+"gremi_notes": [
+"[x] Agree with v1.7",
+"Reason numbers (from the list at the top): 2"
+]
+},
+{
+"code": "R1-1",
+"track": "Las Vegas",
+"date": "2026-11-22",
+"clock": "0:31",
+"call": "One driver at fault",
+"at_fault": "Jakub",
+"severity": 1,
+"reasons": [
+"Lap 1 / pack",
+"Racing line choice"
+],
+"gremi_notes": [
+"So this entire stream was pretty chaotic. This crash was initiated by Jakub going wide, i think that is the only mistake, one important rule that you need to keep in mind when creating the rules is that humans are not perfect. And in a battle lines can be different then usual, so the moved from racing line might not be the right way to judge incidents."
+]
+},
+{
+"code": "R7-15",
+"track": "Suzuka",
+"date": "2026-11-22",
+"clock": "0:31",
+"call": "Not an incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Light touch, no effect"
+],
+"gremi_notes": [
+"[x] Agree"
+]
+},
+{
+"code": "R9-17",
+"track": "Madrid",
+"date": "2026-11-22",
+"clock": "0:33",
+"call": "One driver at fault",
+"at_fault": "#29",
+"severity": 2,
+"reasons": [
+"Braked too late / ran into the car ahead"
+],
+"gremi_notes": [
+"[ ] Agree with v1.7",
+"Notes: This is fully on the ferrari, he just brakes to late or too soft and hits sab"
+]
+},
+{
+"code": "R9-11",
+"track": "Austria",
+"date": "2026-11-22",
+"clock": "0:35",
+"call": "Racing incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"No car control at the apex / went too deep",
+"Lost control / own mistake"
+],
+"gremi_notes": [
+"[ ] Agree with v1.7",
+"Notes: He was involved in a crash before that, since that crash he didnt regain control, so this is just a racing incident"
+]
+},
+{
+"code": "R20-1",
+"track": "Baku",
+"date": "2026-11-22",
+"clock": "0:36",
+"call": "Not an incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Light touch, no effect"
+],
+"gremi_notes": [
+"[x] Agree with: Not an incident"
+]
+},
+{
+"code": "R1-7",
+"track": "Madrid",
+"date": "2026-11-22",
+"clock": "0:37",
+"call": "One driver at fault",
+"at_fault": "niet_Lars",
+"severity": 2,
+"reasons": [
+"Braked too late / ran into the car ahead",
+"Light touch, no effect"
+],
+"gremi_notes": [
+"I think this judgement is perfect, lars outbrakes him self a little, hits NEH but they both continue so 2 sev seems right, this could have been a 3 but that depends on the speed."
+]
+},
+{
+"code": "R9-16",
+"track": "Imola",
+"date": "2026-11-22",
+"clock": "0:39",
+"call": "Not an incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Light touch, no effect"
+],
+"gremi_notes": [
+"[x] Agree with v1.7"
+]
+},
+{
+"code": "R8-9",
+"track": "Suzuka",
+"date": "2026-11-22",
+"clock": "0:48",
+"call": "Not visible in the viewer",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Not visible in the viewer"
+],
+"gremi_notes": [
+"[ ] Agree",
+"Your call: Does not show up for me"
+]
+},
+{
+"code": "R2-6",
+"track": "Austria",
+"date": "2026-11-22",
+"clock": "0:54",
+"call": "One driver at fault",
+"at_fault": "tm swung",
+"severity": 2,
+"reasons": [
+"Lost control / own mistake"
+],
+"gremi_notes": [
+"Good"
+]
+},
+{
+"code": "R5-12",
+"track": "Baku",
+"date": "2026-11-22",
+"clock": "0:56",
+"call": "Both / several at fault",
+"at_fault": "PMR, Devil",
+"severity": 3,
+"reasons": [
+"Braked too late / ran into the car ahead"
+],
+"gremi_notes": [
+"[x] Agree",
+"Your call: This incident is more than that moment you miss everything after with the left hander where everyone crashes."
+]
+},
+{
+"code": "R3-8",
+"track": "Baku",
+"date": "2026-11-22",
+"clock": "0:59",
+"call": "One driver at fault",
+"at_fault": "#3",
+"severity": 3,
+"reasons": [
+"Data or name problem"
+],
+"gremi_notes": [
+"Your call: Good call, but i only see car 3, not jessey, why is that?",
+"[x] Agree with: #3 Player at fault (sev 3)"
+]
+},
+{
+"code": "R9-20",
+"track": "Silverstone",
+"date": "2026-11-22",
+"clock": "1:02",
+"call": "Racing incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Racing incident, nothing more said"
+],
+"gremi_notes": [
+"[x] Agree with v1.7"
+]
+},
+{
+"code": "R8-10",
+"track": "Suzuka",
+"date": "2026-11-22",
+"clock": "1:10",
+"call": "Racing incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Braked too late / ran into the car ahead",
+"Left no room / squeezed"
+],
+"gremi_notes": [
+"[x] Agree",
+"This is a racing incident because prijo is alongside before the braking, but brakes to early, and just hits robin his rear, because prijo was already next to him just before braking robin should have left a bit more room, but prijo should have either gone for it or braked even more, so racing incident."
+]
+},
+{
+"code": "R7-16",
+"track": "Suzuka",
+"date": "2026-11-22",
+"clock": "1:19",
+"call": "One driver at fault",
+"at_fault": "Lenny",
+"severity": 1,
+"reasons": [
+"Turned in too early / cut across",
+"Data or name problem"
+],
+"gremi_notes": [
+"Again the reason lenny is at fault here is because he starts turning in way too early, he even turns in too early if he would be alone, but asian is on his inside and lenny hits him, they hook tires and to into the gravel. They indeed had their tires of the track but that was the result of the crash not the cause. You need to know the difference if you dont already.",
+"[ ] Agree",
+"Your call: No Lenny turns way too early into the corner, this is on him for sure."
+]
+},
+{
+"code": "R10-14",
+"track": "Austria",
+"date": "2026-11-22",
+"clock": "1:20",
+"call": "One driver at fault",
+"at_fault": "QDR",
+"severity": 2,
+"reasons": [
+"Dive into a closing gap / not far enough alongside",
+"Braked too late / ran into the car ahead"
+],
+"gremi_notes": [
+"[x] Agree with v1.7",
+"Who is at fault (if not v1.7's call): QDR_SHW1KS",
+"Reason numbers (from the list at the top): between 4 and 5, not really a dive but he was to far behind to get room."
+]
+},
+{
+"code": "R5-18",
+"track": "Silverstone",
+"date": "2026-11-22",
+"clock": "1:21",
+"call": "One driver at fault",
+"at_fault": "ToadMarc",
+"severity": 3,
+"reasons": [
+"Braked too late / ran into the car ahead"
+],
+"gremi_notes": [
+"[x] Agree",
+"[x] Agree with: #2 ToadMarc at fault (sev 3)"
+]
+},
+{
+"code": "R2-2",
+"track": "Baku",
+"date": "2026-11-22",
+"clock": "1:21",
+"call": "One driver at fault",
+"at_fault": "GreMi",
+"severity": 1,
+"reasons": [
+"Racing incident, nothing more said"
+],
+"gremi_notes": [
+"Good"
+]
+},
+{
+"code": "R5-20",
+"track": "Miami",
+"date": "2026-11-22",
+"clock": "1:26",
+"call": "Racing incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Left no room / squeezed"
+],
+"gremi_notes": [
+"[x] Agree"
+]
+},
+{
+"code": "R11-4",
+"track": "Madrid",
+"date": "2026-11-22",
+"clock": "1:31",
+"call": "One driver at fault",
+"at_fault": "#69 Ayrton_Senna109",
+"severity": null,
+"reasons": [
+"Agreed with the engine, no reason given"
+],
+"gremi_notes": [
+"[x] Agree"
+]
+},
+{
+"code": "R5-15",
+"track": "Imola",
+"date": "2026-11-22",
+"clock": "1:31",
+"call": "Racing incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Racing incident, nothing more said"
+],
+"gremi_notes": [
+"[x] Agree"
+]
+},
+{
+"code": "R10-16",
+"track": "Baku",
+"date": "2026-11-22",
+"clock": "1:33",
+"call": "Both / several at fault",
+"at_fault": "thomas, tm swung",
+"severity": 1,
+"reasons": [
+"Turned in too early / cut across",
+"Braked too late / ran into the car ahead",
+"No car control at the apex / went too deep"
+],
+"gremi_notes": [
+"[ ] Agree with v1.7",
+"Who is at fault (if not v1.7's call): thomas_opjo + tm swung u",
+"Reason numbers (from the list at the top): 4 and 8,",
+"Notes: thomas brakes too late, does not have his car in control at the apex, TM turns into thomas when he is still next to him."
+]
+},
+{
+"code": "R10-13",
+"track": "Las Vegas",
+"date": "2026-11-22",
+"clock": "1:40",
+"call": "Not an incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Light touch, no effect"
+],
+"gremi_notes": [
+"[x] Agree with v1.7",
+"Reason numbers (from the list at the top): 1"
+]
+},
+{
+"code": "R11-9",
+"track": "Madrid",
+"date": "2026-11-22",
+"clock": "1:42",
+"call": "No answer",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Shown to you, not answered"
+],
+"gremi_notes": [
+"[ ] Agree"
+]
+},
+{
+"code": "R5-10",
+"track": "Austria",
+"date": "2026-11-22",
+"clock": "1:46",
+"call": "Racing incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Left no room / squeezed"
+],
+"gremi_notes": [
+"[ ] Agree",
+"Your call: This is a racing incident. They could all leave a bit more space there"
+]
+},
+{
+"code": "R7-18",
+"track": "Imola",
+"date": "2026-11-22",
+"clock": "1:57",
+"call": "Not visible in the viewer",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Not visible in the viewer"
+],
+"gremi_notes": [
+"[ ] Agree",
+"Your call: I dont see this incident"
+]
+},
+{
+"code": "R7-11",
+"track": "Austria",
+"date": "2026-11-22",
+"clock": "1:57",
+"call": "One driver at fault",
+"at_fault": "SHW1KS",
+"severity": 2,
+"reasons": [
+"Braked too late / ran into the car ahead"
+],
+"gremi_notes": [
+"[x] Agree"
+]
+},
+{
+"code": "R5-13",
+"track": "Baku",
+"date": "2026-11-22",
+"clock": "2:02",
+"call": "Not an incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Light touch, no effect"
+],
+"gremi_notes": [
+"[x] Agree"
+]
+},
+{
+"code": "R6-1",
+"track": "Madrid",
+"date": "2026-11-22",
+"clock": "2:02",
+"call": "Racing incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Left no room / squeezed"
+],
+"gremi_notes": [
+"[x] Agree",
+"Racing-line conflict: Racing incident (old call: #3 LoloCraxtxt)"
+]
+},
+{
+"code": "R11-7",
+"track": "Silverstone",
+"date": "2026-11-22",
+"clock": "2:06",
+"call": "No answer",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Shown to you, not answered"
+],
+"gremi_notes": [
+"[ ] Agree"
+]
+},
+{
+"code": "R10-15",
+"track": "Austria",
+"date": "2026-11-22",
+"clock": "2:17",
+"call": "One driver at fault",
+"at_fault": "toni",
+"severity": 5,
+"reasons": [
+"Braked too late / ran into the car ahead"
+],
+"gremi_notes": [
+"[ ] Agree with v1.7",
+"Who is at fault (if not v1.7's call): toni2608",
+"Reason numbers (from the list at the top): 4",
+"Notes: The first part is just all racing incidents, but into turn one toni brakes too late."
+]
+},
+{
+"code": "R13-8",
+"track": "Las Vegas",
+"date": "2026-11-22",
+"clock": "2:19",
+"call": "Racing incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Racing incident, nothing more said"
+],
+"gremi_notes": [
+"[x] Agree"
+]
+},
+{
+"code": "R12-9",
+"track": "Madrid",
+"date": "2026-11-22",
+"clock": "2:26",
+"call": "One driver at fault",
+"at_fault": "K7",
+"severity": 1,
+"reasons": [
+"Left no room / squeezed"
+],
+"gremi_notes": [
+"Your call (racing incident, or who is at fault): K7HYRAX",
+"What made you decide: Where the collision happens it is just racing, but later at 2:30 K7 does not leave enough space for Lolo, so they hit."
+]
+},
+{
+"code": "R6-8",
+"track": "Baku",
+"date": "2026-11-22",
+"clock": "2:27",
+"call": "Racing incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Racing incident, nothing more said"
+],
+"gremi_notes": [
+"[x] Agree"
+]
+},
+{
+"code": "R11-2",
+"track": "Austria",
+"date": "2026-11-22",
+"clock": "2:30",
+"call": "One driver at fault",
+"at_fault": "#13 PMR-Sab872",
+"severity": null,
+"reasons": [
+"Agreed with the engine, no reason given"
+],
+"gremi_notes": [
+"[x] Agree"
+]
+},
+{
+"code": "R3-7",
+"track": "Miami",
+"date": "2026-11-22",
+"clock": "2:32",
+"call": "One driver at fault",
+"at_fault": "#21",
+"severity": 2,
+"reasons": [
+"Braked too late / ran into the car ahead"
+],
+"gremi_notes": [
+"Your call: Good call"
+]
+},
+{
+"code": "R6-7",
+"track": "Austria",
+"date": "2026-11-22",
+"clock": "2:33",
+"call": "Both / several at fault",
+"at_fault": "DevilDriver, #3",
+"severity": 2,
+"reasons": [
+"Late move / defending"
+],
+"gremi_notes": [
+"[ ] Agree",
+"Your call: This is on Car 3 and Devildriver, Car 3 should not defend there, and devildriver should have backed off a little."
+]
+},
+{
+"code": "R8-6",
+"track": "Austria",
+"date": "2026-11-22",
+"clock": "2:59",
+"call": "Racing incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Light touch, no effect"
+],
+"gremi_notes": [
+"[x] Agree",
+"This is a racing incident because the go side by side into the corner and the touch is just them driving a little to close togheter, but just a little tap."
+]
+},
+{
+"code": "R3-10",
+"track": "Imola",
+"date": "2026-11-22",
+"clock": "3:15",
+"call": "Both / several at fault",
+"at_fault": "Banan, tm swung",
+"severity": 4,
+"reasons": [
+"Left no room / squeezed"
+],
+"gremi_notes": [
+"Your call: Yeah bananensaus is atfault here, but mainly for not leaving space for TM at 3:18, they touch because of that and bananensaus comes back onto  pretty dangerous. I do wanna say that TM could have backed out there aswell, so that could maybe be a small sev for him.",
+"It is okey, is was mainly on bananensaus"
+]
+},
+{
+"code": "R9-12",
+"track": "Austria",
+"date": "2026-11-22",
+"clock": "3:23",
+"call": "One driver at fault",
+"at_fault": "QDR",
+"severity": 2,
+"reasons": [
+"Braked too late / ran into the car ahead"
+],
+"gremi_notes": [
+"[x] Agree with v1.7",
+"Notes: This could be a 1 or 2 sev"
+]
+},
+{
+"code": "R5-9",
+"track": "Las Vegas",
+"date": "2026-11-22",
+"clock": "3:30",
+"call": "One driver at fault",
+"at_fault": "Stepino",
+"severity": 2,
+"reasons": [
+"Brake check / slowing ahead"
+],
+"gremi_notes": [
+"[x] Agree"
+]
+},
+{
+"code": "R6-4",
+"track": "Suzuka",
+"date": "2026-11-22",
+"clock": "3:35",
+"call": "One driver at fault",
+"at_fault": "trex",
+"severity": 2,
+"reasons": [
+"Braked too late / ran into the car ahead"
+],
+"gremi_notes": [
+"[x] Agree"
+]
+},
+{
+"code": "R5-11",
+"track": "Austria",
+"date": "2026-11-22",
+"clock": "3:47",
+"call": "One driver at fault",
+"at_fault": "toni",
+"severity": 2,
+"reasons": [
+"Braked too late / ran into the car ahead",
+"Late move / defending",
+"Racing line choice"
+],
+"gremi_notes": [
+"What does track move mean. What happens is that venderdeured stays on his line, he picked the inside, toni tries to go even further inside while having plenty of space on the left side, vanderdeured does not make a defensive move and toni just hits his rear. I dont see how this could be vanderdeured his fault.",
+"[ ] Agree",
+"Your call: Toni drives into the back of vanderdeured, i dont get how this could be his fault, toni has so much space on the other side, and vanderdeured doesnt move last minute. probably should be on toni"
+]
+},
+{
+"code": "R3-9",
+"track": "Madrid",
+"date": "2026-11-22",
+"clock": "3:49",
+"call": "Not an incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Light touch, no effect"
+],
+"gremi_notes": [
+"Your call: Good call"
+]
+},
+{
+"code": "R11-6",
+"track": "Imola",
+"date": "2026-11-22",
+"clock": "3:52",
+"call": "No answer",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Shown to you, not answered"
+],
+"gremi_notes": [
+"[ ] Agree"
+]
+},
+{
+"code": "R5-14",
+"track": "Suzuka",
+"date": "2026-11-22",
+"clock": "3:56",
+"call": "One driver at fault",
+"at_fault": "jason",
+"severity": 4,
+"reasons": [
+"Braked too late / ran into the car ahead"
+],
+"gremi_notes": [
+"[x] Agree"
+]
+},
+{
+"code": "R7-12",
+"track": "Austria",
+"date": "2026-11-22",
+"clock": "3:59",
+"call": "One driver at fault",
+"at_fault": "#13",
+"severity": 3,
+"reasons": [
+"Left no room / squeezed"
+],
+"gremi_notes": [
+"[x] Agree",
+"Racing-line conflict: Keep my old call (old call: #13 Player)"
+]
+},
+{
+"code": "R2-3",
+"track": "Las Vegas",
+"date": "2026-11-22",
+"clock": "4:00",
+"call": "One driver at fault",
+"at_fault": "niet_Lars",
+"severity": 2,
+"reasons": [
+"Dive into a closing gap / not far enough alongside"
+],
+"gremi_notes": [
+"This one is on lars, he wants to go for a gap that doesnt exist, he never got far enough alongside",
+"This could be a racing incident, but i just think lars comes from so far back in that corner that it is kind of a dive."
+]
+},
+{
+"code": "R12-10",
+"track": "Silverstone",
+"date": "2026-11-22",
+"clock": "4:06",
+"call": "Racing incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Braked too late / ran into the car ahead"
+],
+"gremi_notes": [
+"Your call (racing incident, or who is at fault): Racing incident",
+"What made you decide: Jakub goes for the move, but he goes a bit to quick so hits the side of Senna"
+]
+},
+{
+"code": "R5-19",
+"track": "Silverstone",
+"date": "2026-11-22",
+"clock": "4:22",
+"call": "One driver at fault",
+"at_fault": "GreMi",
+"severity": 2,
+"reasons": [
+"Light touch, no effect",
+"Brake check / slowing ahead"
+],
+"gremi_notes": [
+"Your call: you agreed that you (TTV/GreMi_Gaming) were at fault for coming off the brake early. The data: You touched Stepino81 at 4 km/h closing speed. Nobody lost time or went off. Why I doubt it: At Baku (22NOV-BAK-L3, 5:14), tm swung u tapped you at 15 km/h with nothing lost, and you called it not an incident. By your own rule (\"taps without consequence are no incident\"), Silverstone should be not an incident too. Or, if Silverstone stands, the Baku tap is also an incident. ⏎  ⏎ Oh this should have been a no incident. such a small tap",
+"[x] Agree"
+]
+},
+{
+"code": "R1-5",
+"track": "Imola",
+"date": "2026-11-22",
+"clock": "4:26",
+"call": "One driver at fault",
+"at_fault": "Robin",
+"severity": 10,
+"reasons": [
+"On purpose / revenge"
+],
+"gremi_notes": [
+"This is a full on porpose straight line incident. this is a 10, and he is getting kicked from my lobbies for that, You should have seen that was on purpose."
+]
+},
+{
+"code": "R2-5",
+"track": "Imola",
+"date": "2026-11-22",
+"clock": "4:29",
+"call": "Racing incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"No car control at the apex / went too deep",
+"Lost control / own mistake"
+],
+"gremi_notes": [
+"No cause K7 only lost control because Robingames hits him before, this is part of that incident, which is full on robin, you should have seen that."
+]
+},
+{
+"code": "R7-17",
+"track": "Suzuka",
+"date": "2026-11-22",
+"clock": "4:32",
+"call": "Racing incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Racing incident, nothing more said"
+],
+"gremi_notes": [
+"[x] Agree"
+]
+},
+{
+"code": "R20-18",
+"track": "Silverstone",
+"date": "2026-11-22",
+"clock": "4:34",
+"call": "Racing incident",
+"at_fault": "",
+"severity": 3,
+"reasons": [
+"No car control at the apex / went too deep",
+"Lost control / own mistake"
+],
+"gremi_notes": [
+"[ ] Not agreed with \"#13 Jakubm18_F1 at fault\". Your call: Racing incident, sev 3",
+"He does lose control, but NEH doesnt try to avoid it at all"
+]
+},
+{
+"code": "R2-1",
+"track": "Silverstone",
+"date": "2026-11-22",
+"clock": "4:38",
+"call": "One driver at fault",
+"at_fault": "#21",
+"severity": 4,
+"reasons": [
+"Left no room / squeezed"
+],
+"gremi_notes": [
+"Good"
+]
+},
+{
+"code": "R8-4",
+"track": "Las Vegas",
+"date": "2026-11-22",
+"clock": "4:39",
+"call": "Not an incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Left no room / squeezed",
+"No car control at the apex / went too deep",
+"Light touch, no effect"
+],
+"gremi_notes": [
+"[ ] Agree",
+"Your call: Sorry how is this on apple, it is a great move, makes it apex with full controll, this is a racing incident",
+"This is not an incident, it is a little tap at the apex. which is just a little misjudgement. Rawer leaves enough space and apple has full control of his car."
+]
+},
+{
+"code": "R6-5",
+"track": "Imola",
+"date": "2026-11-22",
+"clock": "4:43",
+"call": "One driver at fault",
+"at_fault": "niet_Lars",
+"severity": 1,
+"reasons": [
+"Braked too late / ran into the car ahead"
+],
+"gremi_notes": [
+"[x] Agree"
+]
+},
+{
+"code": "R13-9",
+"track": "Madrid",
+"date": "2026-11-22",
+"clock": "4:50",
+"call": "One driver at fault",
+"at_fault": "tm",
+"severity": 1,
+"reasons": [
+"Left no room / squeezed"
+],
+"gremi_notes": [
+"[x] Agree",
+"On TM because Jakub had no where to go"
+]
+},
+{
+"code": "R9-13",
+"track": "Austria",
+"date": "2026-11-22",
+"clock": "4:54",
+"call": "One driver at fault",
+"at_fault": "Lenny",
+"severity": 3,
+"reasons": [
+"Braked too late / ran into the car ahead"
+],
+"gremi_notes": [
+"[x] Agree with v1.7"
+]
+},
+{
+"code": "R2-4",
+"track": "Silverstone",
+"date": "2026-11-22",
+"clock": "4:56",
+"call": "Not an incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Light touch, no effect"
+],
+"gremi_notes": [
+"This one is only on me but it is such a slight touch that i would say this is not an incident at all, especially not sev 5. That is really wrong."
+]
+},
+{
+"code": "R1-6",
+"track": "Baku",
+"date": "2026-11-22",
+"clock": "5:00",
+"call": "Both / several at fault",
+"at_fault": "vanderdeured, Lenny",
+"severity": 1,
+"reasons": [
+"Left no room / squeezed",
+"No car control at the apex / went too deep",
+"Light touch, no effect",
+"Data or name problem"
+],
+"gremi_notes": [
+"This is a racing inciden with both at fault, Lenny knows vanderdeured is there and does not leave alot of space, and vanderdeured turns in too late why they collide.",
+"I think you also need to know where the walls are, because venderdeured did indeed not go off track, but that is only because he hit a wall at high speed. And as i said before i think lenny could have left a little more space and vanderdeured could have turned in a bit more. But to be accurate with judging you also need to know where the walls are, and also things like grass and gravel, which you all can get from the track data, so that is really important. Also it is not just a small tap because vanderdeured is at a pretty sideways angle at some point."
+]
+},
+{
+"code": "R2-10",
+"track": "Austria",
+"date": "2026-11-22",
+"clock": "5:04",
+"call": "Racing incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Dive into a closing gap / not far enough alongside",
+"Racing line choice"
+],
+"gremi_notes": [
+"Good, vanderdeured his dive is fine but both their lines are not."
+]
+},
+{
+"code": "R1-10",
+"track": "Baku",
+"date": "2026-11-22",
+"clock": "5:14",
+"call": "Not an incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Light touch, no effect",
+"Touch not visible in the viewer"
+],
+"gremi_notes": [
+"I cant see it, so i believe you."
+]
+},
+{
+"code": "R6-2",
+"track": "Madrid",
+"date": "2026-11-22",
+"clock": "5:14",
+"call": "One driver at fault",
+"at_fault": "toni",
+"severity": 3,
+"reasons": [
+"Left no room / squeezed"
+],
+"gremi_notes": [
+"[x] Agree"
+]
+},
+{
+"code": "R6-6",
+"track": "Silverstone",
+"date": "2026-11-22",
+"clock": "5:15",
+"call": "Racing incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Braked too late / ran into the car ahead"
+],
+"gremi_notes": [
+"[x] Agree",
+"This is indeed a racing incident",
+"GreMi 25 Nov doc: 'This is indeed a racing incident' (light tap from behind)"
+]
+},
+{
+"code": "R7-19",
+"track": "Imola",
+"date": "2026-11-22",
+"clock": "5:17",
+"call": "Racing incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Racing incident, nothing more said"
+],
+"gremi_notes": [
+"[x] Agree"
+]
+},
+{
+"code": "R12-6",
+"track": "Las Vegas",
+"date": "2026-11-22",
+"clock": "5:19",
+"call": "One driver at fault",
+"at_fault": "#3",
+"severity": 1,
+"reasons": [
+"Racing line choice"
+],
+"gremi_notes": [
+"Your call (racing incident, or who is at fault): Jessey at fault",
+"What made you decide: Apple is on the inside, brakes a bit late but was probably gonna make the turn. Jessey turns in on the racingline, and hits apple."
+]
+},
+{
+"code": "R2-9",
+"track": "Suzuka",
+"date": "2026-11-22",
+"clock": "5:22",
+"call": "One driver at fault",
+"at_fault": "#21",
+"severity": 1,
+"reasons": [
+"Rejoin"
+],
+"gremi_notes": [
+"Good, robin did not accelerate at all when rejoining, that is on him"
+]
+},
+{
+"code": "R3-2",
+"track": "Suzuka",
+"date": "2026-11-22",
+"clock": "5:25",
+"call": "Racing incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Brake check / slowing ahead",
+"Racing line choice"
+],
+"gremi_notes": [
+"Your call: This is a racing incident, the redbull wants to move off the racing line, but that is the line stepino chooses, they hit. But stepino is not to blame for another driver driving so slowly close to the racingline.",
+"[x] Agree with: #21 Player at fault (sev 3)"
+]
+},
+{
+"code": "R13-10",
+"track": "Silverstone",
+"date": "2026-11-22",
+"clock": "5:29",
+"call": "Racing incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Left no room / squeezed"
+],
+"gremi_notes": [
+"[x] Agree",
+"Your call / note: Im also not sure about this one, this is really close but i do think they both could have done better there, NEH tries to go for a move that is really risky and jakub could have left a little space"
+]
+},
+{
+"code": "R10-19",
+"track": "Madrid",
+"date": "2026-11-22",
+"clock": "5:35",
+"call": "Racing incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Racing incident, nothing more said"
+],
+"gremi_notes": [
+"[x] Agree with v1.7",
+"Reason numbers (from the list at the top): 2"
+]
+},
+{
+"code": "R11-5",
+"track": "Silverstone",
+"date": "2026-11-22",
+"clock": "5:38",
+"call": "No answer",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Shown to you, not answered"
+],
+"gremi_notes": [
+"[ ] Agree"
+]
+},
+{
+"code": "R3-5",
+"track": "Imola",
+"date": "2026-11-22",
+"clock": "5:40",
+"call": "One driver at fault",
+"at_fault": "Jakub",
+"severity": 2,
+"reasons": [
+"Braked too late / ran into the car ahead"
+],
+"gremi_notes": [
+"Your call: good call"
+]
+},
+{
+"code": "R11-3",
+"track": "Austria",
+"date": "2026-11-22",
+"clock": "5:44",
+"call": "Racing incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Racing incident, nothing more said"
+],
+"gremi_notes": [
+"[x] Agree"
+]
+},
+{
+"code": "R10-20",
+"track": "Silverstone",
+"date": "2026-11-22",
+"clock": "5:47",
+"call": "Racing incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Left no room / squeezed"
+],
+"gremi_notes": [
+"[x] Agree with v1.7",
+"Reason numbers (from the list at the top): 2",
+"I would maybe say this is on both drivers, they both did not leave enough room, the place where they touched, asian had more room to go to the outside, and NEH should have left a little more space, if this incident happend a little later if NEH ran even more to the outside not leaving a cars width for asian then this would have been on NEH for cutting asian off, but that is not the case here."
+]
+},
+{
+"code": "R6-9",
+"track": "Austria",
+"date": "2026-11-22",
+"clock": "5:47",
+"call": "One driver at fault",
+"at_fault": "tm swung",
+"severity": 3,
+"reasons": [
+"Braked too late / ran into the car ahead"
+],
+"gremi_notes": [
+"[x] Agree"
+]
+},
+{
+"code": "R11-10",
+"track": "Madrid",
+"date": "2026-11-22",
+"clock": "6:32",
+"call": "No answer",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Shown to you, not answered"
+],
+"gremi_notes": [
+"[ ] Agree"
+]
+},
+{
+"code": "R1-8",
+"track": "Suzuka",
+"date": "2026-11-22",
+"clock": "6:38",
+"call": "One driver at fault",
+"at_fault": "Overfast",
+"severity": 3,
+"reasons": [
+"No car control at the apex / went too deep",
+"Lost control / own mistake"
+],
+"gremi_notes": [
+"So this is on overfast, but it should be a losing control incident, he does ruin sab his race because of this so it should give him a bit of a penalty, probably 3 sev, if it is clear the touch is after a full own mistake it should not go too high in severity."
+]
+},
+{
+"code": "R12-8",
+"track": "Suzuka",
+"date": "2026-11-22",
+"clock": "6:51",
+"call": "Racing incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Racing incident, nothing more said"
+],
+"gremi_notes": [
+"Your call (racing incident, or who is at fault): Racing incident",
+"What made you decide: Just some touches while battling."
+]
+},
+{
+"code": "R8-5",
+"track": "Las Vegas",
+"date": "2026-11-22",
+"clock": "6:53",
+"call": "One driver at fault",
+"at_fault": "DevilDriver",
+"severity": 1,
+"reasons": [
+"Racing incident, nothing more said"
+],
+"gremi_notes": [
+"[x] Agree"
+]
+},
+{
+"code": "R6-3",
+"track": "Madrid",
+"date": "2026-11-22",
+"clock": "6:59",
+"call": "Racing incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Racing incident, nothing more said"
+],
+"gremi_notes": [
+"[x] Agree"
+]
+},
+{
+"code": "R5-16",
+"track": "Imola",
+"date": "2026-11-22",
+"clock": "7:06",
+"call": "One driver at fault",
+"at_fault": "Senna",
+"severity": 4,
+"reasons": [
+"Left no room / squeezed"
+],
+"gremi_notes": [
+"[x] Agree"
+]
+},
+{
+"code": "R5-17",
+"track": "Madrid",
+"date": "2026-11-22",
+"clock": "7:29",
+"call": "Both / several at fault",
+"at_fault": "K7, Senna",
+"severity": 9,
+"reasons": [
+"Late move / defending",
+"On purpose / revenge"
+],
+"gremi_notes": [
+"[ ] Agree",
+"Your call: This is a 3 for K7 for moving to late in a defence, but an 9 for senna for trying to take K7 out at 7:40, the fact that you did not see that is kinda concerning."
+]
+},
+{
+"code": "R7-10",
+"track": "Las Vegas",
+"date": "2026-11-22",
+"clock": "7:30",
+"call": "One driver at fault",
+"at_fault": "niet_Lars",
+"severity": 1,
+"reasons": [
+"Racing incident, nothing more said"
+],
+"gremi_notes": [
+"[x] Agree"
+]
+},
+{
+"code": "R12-7",
+"track": "Baku",
+"date": "2026-11-22",
+"clock": "7:34",
+"call": "One driver at fault",
+"at_fault": "Sab",
+"severity": 1,
+"reasons": [
+"Left no room / squeezed",
+"Dive into a closing gap / not far enough alongside",
+"Light touch, no effect"
+],
+"gremi_notes": [
+"Your call (racing incident, or who is at fault): Sab at fault",
+"What made you decide: At 7:34 K7 leaves as much room as possible, sab turns in a bit too much and drives against him, that is just a little tap. But at 7:36 K7 turns in for the next turn. Sab is too far behind but stil tries to sqeeze in, he should have backed out."
+]
+},
+{
+"code": "R9-15",
+"track": "Suzuka",
+"date": "2026-11-22",
+"clock": "7:36",
+"call": "One driver at fault",
+"at_fault": "toni",
+"severity": 2,
+"reasons": [
+"Turned in too early / cut across"
+],
+"gremi_notes": [
+"[x] Agree with v1.7",
+"On toni because he turns in too early"
+]
+},
+{
+"code": "R3-3",
+"track": "Baku",
+"date": "2026-11-22",
+"clock": "7:49",
+"call": "Racing incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Racing incident, nothing more said"
+],
+"gremi_notes": [
+"Your call: Yeah this is a racing incident."
+]
+},
+{
+"code": "R11-1",
+"track": "Madrid",
+"date": "2026-11-22",
+"clock": "7:55",
+"call": "One driver at fault",
+"at_fault": "",
+"severity": null,
+"reasons": [
+"Turned in too early / cut across"
+],
+"gremi_notes": [
+"[ ] Agree",
+"Who is at fault (if you don't agree): Ayrton_Senna109",
+"Notes: Senna turns in too early."
+]
+},
+{
+"code": "R8-7",
+"track": "Baku",
+"date": "2026-11-22",
+"clock": "8:12",
+"call": "One driver at fault",
+"at_fault": "#29",
+"severity": 4,
+"reasons": [
+"Left no room / squeezed",
+"Light touch, no effect",
+"Data or name problem"
+],
+"gremi_notes": [
+"[ ] Agree",
+"Your call: This would have to be a 4",
+"This is on Car 29 cause that is a tricky corner with a wall next to it and he put overfast in the wall because of the tap"
+]
+},
+{
+"code": "R20-15",
+"track": "Madrid",
+"date": "2026-11-22",
+"clock": "8:21",
+"call": "One driver at fault",
+"at_fault": "#91 K7HYRAX",
+"severity": 9,
+"reasons": [
+"On purpose / revenge",
+"Racing line choice"
+],
+"gremi_notes": [
+"[ ] Not agreed with \"#91 K7HYRAX at fault\". Your call: #91 K7HYRAX at fault, sev 9",
+"This is in purpose, this is a 9 or a 10. Should have seen that from his line and input."
+]
+},
+{
+"code": "R9-18",
+"track": "Madrid",
+"date": "2026-11-22",
+"clock": "8:33",
+"call": "Not an incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"Light touch, no effect"
+],
+"gremi_notes": [
+"[ ] Agree with v1.7",
+"Notes: Not showing because not incident"
+]
+},
+{
+"code": "R8-8",
+"track": "Baku",
+"date": "2026-11-22",
+"clock": "8:44",
+"call": "Not an incident",
+"at_fault": "",
+"severity": 0,
+"reasons": [
+"After the finish line"
+],
+"gremi_notes": [
+"[ ] Agree",
+"Your call: No an incident, and i think it is after the line."
+]
+}
+]
