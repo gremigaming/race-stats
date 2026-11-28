@@ -3,7 +3,8 @@
      Performance Rating and the Safety Rating (GreMi 2026-11-25, Between races scene).
      Same data as the site's Performance and Safety pages. Fills the whole browser source.
      ?secs=20 time per rating, ?rows=4 rows per column, ?fs=19 font size, ?only=pr|sr one rating,
-     ?race=<file> a fixed race (testing). -->
+     ?race=<file> a fixed race, ?top the pre-race top list (testing). Before the first race of the
+     night it shows the highest-rated active drivers that fit (?rows x ?cols, default 4 x 5). -->
 <html><head><meta charset="utf-8"><title>Last race rankings</title>
 <link rel="stylesheet" href="brand.css">
 <style>
@@ -96,13 +97,33 @@ poll(async (src) => {
   const all = races(src.index);
   const race = all.find((r) => r.file === q.get("race")) || all[0];
   if (!race) return;
-  const [session, perf, safety] = await Promise.all([loadSession(src, race.file), loadPerformance(src), loadSafety(src)]);
+  // Before tonight's first race (a night runs until 06:00) there is no "last race" yet: show the
+  // highest-rated active drivers that fit instead (GreMi 2026-11-27). ?top forces it (testing).
+  const tonight = new Date(Date.now() - 6 * 3600e3).toDateString();
+  const pre = q.has("top") || (!q.get("race") && race.night !== tonight);
+  const [session, perf, safety] = await Promise.all([pre ? null : loadSession(src, race.file), loadPerformance(src), loadSafety(src)]);
+  const fit = (+q.get("rows") || 4) * (+q.get("cols") || 5);
+  const recent = (date) => date && Date.now() - Date.parse(date) < 45 * 864e5;
+  const next = [];
+  if (pre) {
+    const sub = "Top of the league · before tonight's first race";
+    if (ONLY !== "sr" && perf) next.push({ key: "pr", title: "Performance Rating", sub, rows: (perf.drivers || [])
+      .filter((d) => recent(d.last)).sort((a, b) => b.pr - a.pr).slice(0, fit).map((d) => {
+        const r = prRank(d.pr);
+        return { name: d.name, me: isMe(d.name), value: d.pr, text: d.pr.toFixed(1), color: r.color, tag: `${r.metal[0]}${r.numeral}` };
+      }) });
+    if (ONLY !== "pr" && safety) next.push({ key: "sr", title: "Safety Rating", sub, rows: (safety.drivers || [])
+      .filter((d) => !d.banned && !d.provisional && recent(d.history?.filter((h) => h.raced).at(-1)?.date))
+      .sort((a, b) => b.sr - a.sr).slice(0, fit).map((d) => {
+        const r = srRank(d.sr);
+        return { name: d.name, me: isMe(d.name), value: d.sr, text: String(+d.sr.toFixed(1)), color: r.color, tag: r.rank, chg: d.change };
+      }) });
+  } else {
   const drivers = classification(session).map((c) => c.name);
   if (!drivers.length) return;
   const sub = `Drivers of the last race · ${race.track}`;
   const pk = new Map((perf?.drivers || []).map((d) => [normName(d.name), d]));
   const sk = new Map((safety?.drivers || []).map((d) => [normName(d.name), d]));
-  const next = [];
   if (ONLY !== "sr" && perf) next.push({ key: "pr", title: "Performance Rating", sub, rows: sortRows(drivers.map((n) => {
     const d = pk.get(normName(n)), r = d ? prRank(d.pr) : null;
     return { name: n, me: isMe(n), value: d ? d.pr : null, text: d ? d.pr.toFixed(1) : "", color: r?.color, tag: r ? `${r.metal[0]}${r.numeral}` : "" };
@@ -111,6 +132,7 @@ poll(async (src) => {
     const d = sk.get(normName(n)), r = d && !d.banned ? srRank(d.sr) : null;
     return { name: n, me: isMe(n), value: r ? d.sr : null, text: r ? String(+d.sr.toFixed(1)) : "", color: r?.color, tag: r?.rank, chg: r ? d.change : null };
   })) });
+  }
   if (!next.length) return;
   const cur = panels[at]?.key;
   panels = next;
