@@ -4685,12 +4685,25 @@
          "run": 5,
          "laps": 4,
          "bb": 57
+        },
+        {
+         "file": "2026-11-28_15-58-29_Hungaroring_Race.gmtel.gz",
+         "date": "2026-11-28",
+         "session": "race",
+         "osq": false,
+         "weather": 1,
+         "pace": 80131,
+         "best": 79291,
+         "mean": 80131,
+         "run": 5,
+         "laps": 4,
+         "bb": 57
         }
        ],
        "verdict": {
-        "result": "same",
-        "delta": -0.06,
-        "text": "No clear difference: average lap 1:19.535 against 1:19.583 on V1."
+        "result": "worse",
+        "delta": 0.19,
+        "text": "Worse: average lap 1:19.734 against 1:19.583 on V1 (0.151 s slower)."
        },
        "slot": 37
       },
