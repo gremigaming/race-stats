@@ -12,15 +12,22 @@ change the live verdicts, the SR or any frozen past call. Never re-judge a race 
 - per touch: `where` (straight / braking into Tn / apex / exit), `front` / `behind`, `overlap_m`
   (how far the car behind has its nose past the front car's tail: 5.1 = level, 2.5 = front wheels at the
   other's rear wheels, below 1 = behind), `overlap_history_m` (2.0 / 1.5 / 1.0 / 0.5 / 0.2 s before),
-  `side_gap_m`, `closing_kmh`, `inside_car`, `hold_line_sim_min_gap_m` (min gap if a car had kept its
-  expected line: `a_holds` = first car of `cars` kept its line; > 0 means the touch would not have happened),
+  `side_gap_m`, `closing_kmh`, `inside_car`, `hold_line_sim_min_gap_m` (min gap between the car bodies if a car
+  had kept its expected line: `front_car_holds_line` = the `front` car kept its line, `behind_car_holds_line` = the
+  `behind` car kept its line; > 0 means the touch would not have happened),
   `per_car`: `moved_toward_other_last_1s_m`, `moved_vs_expected_line_toward_other_1s_m` (movement towards the
   other car beyond where drivers normally go from that spot = the expected line), `room_left_on_far_side_m`
   (space to the white line on the other side; under ~0.5 = nowhere to go), brake now vs normal (own / field),
   `brake_point_later_than_own_pct` (+ later, - earlier), `apex_speed_over_own_pct`, `off_track_before_s`
   (rejoining), `slip_before_deg` (already sliding), and `after` (slip, off track, speed drop).
 - `consequences[]`: per car time lost vs own laps (`lost_s`), places, spun, off track, retired.
-- `engine_call`: what the live engine said, for comparison only. Do not copy it; it is known to be ~70% right.
+- `after_finish` / `status_at_first_touch` / `status` / `status_after`: racing, finished (after the flag), retired.
+  A touch where a car had already finished = after the finish line: call `none`. A car that retired
+  after the incident: treat as a big consequence even when `lost_s` is missing.
+- Numbers that could not be measured are left out (missing key = unknown, not zero).
+- `engine_call`: what the live engine said for the same car pair (matched by pair and time), for comparison
+  only. Its `drivers` may show the real name of a hidden car (read from the results screen), e.g.
+  "alfredebbers" for "Car #25 (hidden name)". Use the fact-sheet names in your output. Do not copy it; it is known to be ~70% right.
 - `game_contact_severity_max`: the game's own 0-2 bump size.
 
 Use the numbers, not stories. If the data cannot show who moved (both small numbers, no clear overlap story),

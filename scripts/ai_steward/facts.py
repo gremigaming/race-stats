@@ -80,6 +80,20 @@ def recovered(R, c, t):
     return sl < 10 and ov < 4 and v >= 0.6 * ev
 
 
+STATUS = {2: 'racing', 3: 'finished (after the flag)', 4: 'retired (DNF)', 5: 'disqualified', 6: 'not classified', 7: 'retired'}
+
+
+def status(R, c, t):
+    C = R.cars[c]
+    v = int(round(float(np.interp(t, C['t'], C['res'])))) if 'res' in C else 2
+    return STATUS.get(v, 'racing')
+
+
+def clamp(v, lim):
+    # broken measures (lap wrap, missing own laps) come out huge: drop them instead of showing nonsense
+    return None if v is None or abs(v) > lim else v
+
+
 def touch_facts(R, N, a, b, t, t_end, game_only):
     nm = lambda c: N.get(c, f'car {c}')
     A = I.analyse_touch(R, a, b, t)
@@ -108,8 +122,9 @@ def touch_facts(R, N, a, b, t, t_end, game_only):
             room_left_on_far_side_m=w.get('room_away_m'),
             brake_now=w.get('brk'), brake_normal_own=w.get('own_brk'), brake_normal_field=w.get('field_brk'),
             off_track_before_s=w.get('off_before_s'), slip_before_deg=w.get('slip_max_before'),
-            brake_point_later_than_own_pct=cd[c].get('late_vs_own_pct'),
-            apex_speed_over_own_pct=cd[c].get('apex_over_own_pct'))
+            status=status(R, c, t),
+            brake_point_later_than_own_pct=clamp(cd[c].get('late_vs_own_pct'), 100),
+            apex_speed_over_own_pct=clamp(cd[c].get('apex_over_own_pct'), 40))
     return dict(
         t=round(float(t), 2), time=mmss(t), t_end=round(float(t_end), 2), cars=[nm(a), nm(b)],
         where=phase_txt(R, cx), lap=A['lap'], game_logged_only=game_only,
@@ -117,7 +132,7 @@ def touch_facts(R, N, a, b, t, t_end, game_only):
         overlap_m=A['overlap'], overlap_note='metres the car behind has its nose past the front car tail; 5.1 = level, <1 = behind',
         overlap_history_m=A['overlap_hist'], side_gap_m=A['lat_gap'], closing_kmh=A['closing_kmh'],
         inside_car=nm(A['inside']) if A['inside'] is not None else None,
-        hold_line_sim_min_gap_m=A['sim'], per_car=per, after=aft)
+        hold_line_sim_min_gap_m={'actual': A['sim']['actual'], 'front_car_holds_line': A['sim']['a_holds'], 'behind_car_holds_line': A['sim']['b_holds'], 'both_hold': A['sim']['both_hold']}, per_car=per, after=aft)
 
 
 def run(rec):
@@ -168,9 +183,11 @@ def run(rec):
             sl = int(np.max(np.abs(C['slip'][m]))) if m.any() else 0
             off = sum(0.25 for tt in np.arange(T[0][0], end + 1, 0.25) if (R.tyres_over(c, tt) or 0) >= 4)
             ret = bool(np.interp(end + 5, C['t'], C['res']) >= 4) if C['t'][-1] > end + 5 else bool(C['res'][-1] >= 4)
-            cons.append(dict(car=nm(c), lost_s=lt if lt is not None and lt < 29 else None, from_pos=p0, to_pos=p1,
+            cons.append(dict(car=nm(c), lost_s=lt if lt is not None and lt < 29 else None, status_after=status(R, c, min(float(end) + 5, float(C['t'][-1]))), from_pos=p0, to_pos=p1,
                              max_slip_deg=sl, spun=sl > 45, off_track_s=off, retired=ret))
-        out.append(dict(n=n, start=mmss(start), end=mmss(float(end)), t_start=round(float(start), 1),
+        st = [status(R, c, T[0][0]) for c in cars]
+        out.append(dict(n=n, car_ids=cars, after_finish=any(x.startswith('finished') for x in st),
+                        status_at_first_touch={nm(c): status(R, c, T[0][0]) for c in cars}, start=mmss(start), end=mmss(float(end)), t_start=round(float(start), 1),
                         lap=touches[0].get('lap') if touches else None, cars=[nm(c) for c in cars],
                         touch_count=len(T), game_contact_severity_max=max(e.get('severity', 0) for e in g),
                         touches=touches, consequences=cons))

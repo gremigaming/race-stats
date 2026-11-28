@@ -49,7 +49,7 @@ def engine_calls():
     for x in inc:
         m = re.search(r'/race/([^?]+)_Race\?inc=([\d.]+)', x.get('watch') or '')
         if m:
-            out.append(dict(rec=m.group(1), t=float(m.group(2)), sev=x.get('sev'), type=x.get('type'),
+            out.append(dict(rec=m.group(1), t=float(m.group(2)), pair=set((x.get('inc') or {}).get('pair') or []), names=x.get('names'), sev=x.get('sev'), type=x.get('type'),
                             steps=[dict(call=s.get('call'), why=s.get('why')) for s in x.get('steps', [])]))
     return out
 
@@ -96,8 +96,9 @@ def main():
             res = facts.run(rec)
             for x in res['incidents']:
                 t = x['t_start'] + 1.0
-                x['engine_call'] = [dict(sev=e['sev'], type=e['type'], steps=e['steps']) for e in eng
-                                    if e['rec'] == rec and abs(e['t'] - t) <= 3.0] or 'none (engine saw no incident here)'
+                ids = set(x['car_ids'])
+                x['engine_call'] = [dict(sev=e['sev'], type=e['type'], drivers=e['names'], steps=e['steps']) for e in eng
+                                    if e['rec'] == rec and abs(e['t'] - t) <= 4.0 and e['pair'] and e['pair'] <= ids] or 'none (engine saw no incident here)'
             json.dump(rnd(res), open(fp, 'w'), indent=0, ensure_ascii=False, separators=(',', ':'))
         todo.append(fp)
         print('FACTS', os.path.relpath(fp, ROOT), len(json.load(open(fp))['incidents']), 'incidents')

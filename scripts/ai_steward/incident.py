@@ -267,7 +267,7 @@ def sim_hold(R, a, b, tc, lead=1.5):
 
 def analyse_touch(R, a, b, tc):
     Sa, da, ja = track_pos(R, a, tc); Sb, db, jb = track_pos(R, b, tc)
-    ds = Sa - Sb
+    ds = wrap(Sa - Sb, R.L)
     front, back = (a, b) if ds >= 0 else (b, a)
     gap_long = abs(ds)
     overlap = round(2 * HALF_L - gap_long, 2)   # metres the back car's nose is past the front car's tail (5.1 = level)
@@ -277,7 +277,7 @@ def analyse_touch(R, a, b, tc):
     hist = {}
     for dt in (2.0, 1.5, 1.0, 0.5, 0.2):
         Sf = track_pos(R, front, tc - dt)[0]; Sk = track_pos(R, back, tc - dt)[0]
-        hist[str(dt)] = round(2 * HALF_L - (Sf - Sk), 1)
+        hist[str(dt)] = round(2 * HALF_L - wrap(Sf - Sk, R.L), 1)
     # alongside at turn-in: the moment the front car passed the field brake point -> or 1.0 s before for no corner
     lat = {}
     for c in (front, back):
