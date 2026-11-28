@@ -8485,12 +8485,25 @@
          "run": 1,
          "laps": 1,
          "bb": 60
+        },
+        {
+         "file": "2026-11-28_14-36-53_Abu_Dhabi_Race.gmtel.gz",
+         "date": "2026-11-28",
+         "session": "race",
+         "osq": false,
+         "weather": 0,
+         "pace": 85980,
+         "best": 85980,
+         "mean": 86389,
+         "run": 5,
+         "laps": 4,
+         "bb": 59
         }
        ],
        "verdict": {
         "result": "better",
-        "delta": -0.82,
-        "text": "Better: quali lap 1:25.426 against 1:26.134 on V1 (0.708 s faster)."
+        "delta": -0.69,
+        "text": "Better: quali lap 1:25.537 against 1:26.134 on V1 (0.597 s faster)."
        },
        "slot": 69
       },
@@ -8651,12 +8664,25 @@
          "run": 5,
          "laps": 4,
          "bb": 60
+        },
+        {
+         "file": "2026-11-28_14-36-53_Abu_Dhabi_Race.gmtel.gz",
+         "date": "2026-11-28",
+         "session": "race",
+         "osq": false,
+         "weather": 0,
+         "pace": 86389,
+         "best": 85980,
+         "mean": 86389,
+         "run": 5,
+         "laps": 4,
+         "bb": 59
         }
        ],
        "verdict": {
         "result": "better",
-        "delta": -0.24,
-        "text": "Better: average lap 1:26.542 against 1:26.752 on V1 (0.210 s faster)."
+        "delta": -0.3,
+        "text": "Better: average lap 1:26.491 against 1:26.752 on V1 (0.261 s faster)."
        },
        "slot": 70
       },
