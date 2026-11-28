@@ -8126,12 +8126,25 @@
          "run": 1,
          "laps": 1,
          "bb": 57
+        },
+        {
+         "file": "2026-11-28_15-18-50_Losail_Race.gmtel.gz",
+         "date": "2026-11-28",
+         "session": "race",
+         "osq": false,
+         "weather": 1,
+         "pace": 84354,
+         "best": 84354,
+         "mean": 84948,
+         "run": 5,
+         "laps": 4,
+         "bb": 57
         }
        ],
        "verdict": {
         "result": "better",
-        "delta": -1.65,
-        "text": "Better: quali lap 1:24.003 against 1:25.412 on V1 (1.409 s faster)."
+        "delta": -1.57,
+        "text": "Better: quali lap 1:24.073 against 1:25.412 on V1 (1.339 s faster)."
        },
        "slot": 66
       },
@@ -8292,12 +8305,25 @@
          "run": 5,
          "laps": 3,
          "bb": 57
+        },
+        {
+         "file": "2026-11-28_15-18-50_Losail_Race.gmtel.gz",
+         "date": "2026-11-28",
+         "session": "race",
+         "osq": false,
+         "weather": 1,
+         "pace": 84948,
+         "best": 84354,
+         "mean": 84948,
+         "run": 5,
+         "laps": 4,
+         "bb": 57
         }
        ],
        "verdict": {
         "result": "better",
         "delta": -2.36,
-        "text": "Better: average lap 1:24.953 against 1:27.006 on V1 (2.053 s faster)."
+        "text": "Better: average lap 1:24.952 against 1:27.006 on V1 (2.054 s faster)."
        },
        "slot": 67
       },
