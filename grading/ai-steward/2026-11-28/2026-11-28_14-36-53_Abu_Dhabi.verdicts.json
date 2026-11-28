@@ -1,0 +1,437 @@
+{
+ "recording": "2026-11-28_14-36-53_Abu_Dhabi",
+ "track": "Abu Dhabi",
+ "judged_at": "2026-11-28T14:29:52Z",
+ "steward": "AI steward trial",
+ "incidents": [
+  {
+   "n": 1,
+   "time": "0:11.1",
+   "lap": 1,
+   "cars": [
+    "#86 Overfast-_",
+    "#20 QDR_SHW1KS"
+   ],
+   "call": "none",
+   "at_fault": [],
+   "type": "Light tap",
+   "sev": 0,
+   "confidence": "high",
+   "why": "Straight tap, nobody lost time.",
+   "engine_agrees": true
+  },
+  {
+   "n": 2,
+   "time": "0:16.9",
+   "lap": 1,
+   "cars": [
+    "#15 vanderdeured",
+    "Car #13 (hidden name, slot 8)"
+   ],
+   "call": "none",
+   "at_fault": [],
+   "type": "Lap 1 side touch",
+   "sev": 0,
+   "confidence": "medium",
+   "why": "Lap 1 side touch, vanderdeured lost 0.58 s (under 1 s), the place went to the faster car.",
+   "engine_agrees": true
+  },
+  {
+   "n": 3,
+   "time": "0:23.7",
+   "lap": 1,
+   "cars": [
+    "#21 EthanMoonski",
+    "#3 TTV/GreMi_Gaming"
+   ],
+   "call": "ri",
+   "at_fault": [],
+   "type": "Lap 1 side touches at T2",
+   "sev": 0,
+   "confidence": "medium",
+   "why": "GreMi moved 2.5 m beyond his line toward Ethan (his line would have avoided it, +0.61 m), but only GreMi lost out (0.51 s, off 1 s, P6->P7); Ethan lost 0.11 s. Lap 1, only the car that closed lost time.",
+   "engine_agrees": false
+  },
+  {
+   "n": 4,
+   "time": "0:24.0",
+   "lap": 1,
+   "cars": [
+    "#15 vanderdeured",
+    "Car #13 (hidden name, slot 8)"
+   ],
+   "call": "none",
+   "at_fault": [],
+   "type": "Lap 1 tap",
+   "sev": 0,
+   "confidence": "high",
+   "why": "Lap 1 tap into T2, losses 0.43 / 0.0 s, no slide.",
+   "engine_agrees": true
+  },
+  {
+   "n": 5,
+   "time": "0:40.8",
+   "lap": 1,
+   "cars": [
+    "#8 Stepino81",
+    "#20 QDR_SHW1KS"
+   ],
+   "call": "none",
+   "at_fault": [],
+   "type": "Lap 1 side touch",
+   "sev": 0,
+   "confidence": "medium",
+   "why": "Stepino stayed on his expected line (+0.27 m vs line); losses 0.2 / 0.02 s, no slide over 20 degrees.",
+   "engine_agrees": false
+  },
+  {
+   "n": 6,
+   "time": "0:45.8",
+   "lap": 1,
+   "cars": [
+    "#15 vanderdeured",
+    "Car #13 (hidden name, slot 8)"
+   ],
+   "call": "fault",
+   "at_fault": [
+    {
+     "driver": "Car #13 (hidden name, slot 8)",
+     "touches": [
+      {
+       "time": "0:46.8",
+       "sev": 3
+      }
+     ],
+     "sev": 3,
+     "points": -0.5
+    }
+   ],
+   "type": "Pushed a car off on the exit",
+   "sev": 3,
+   "confidence": "medium",
+   "why": "On the T3 exit Car #13 (inside) moved 2.0 m beyond his line toward vanderdeured, who was fully alongside (overlap 4-15 m); with Car #13 on his line there is no touch (+0.32 m). vanderdeured was forced off for 1 s, lost 0.84 s and the place.",
+   "engine_agrees": false
+  },
+  {
+   "n": 7,
+   "time": "2:27.8",
+   "lap": 2,
+   "cars": [
+    "Car #2 (hidden name, slot 3)",
+    "Car #13 (hidden name, slot 8)"
+   ],
+   "call": "none",
+   "at_fault": [],
+   "type": "Light tap",
+   "sev": 0,
+   "confidence": "high",
+   "why": "No time lost (0.0 / -0.09 s).",
+   "engine_agrees": true
+  },
+  {
+   "n": 8,
+   "time": "2:45.4",
+   "lap": 2,
+   "cars": [
+    "Car #62 (hidden name, slot 4)",
+    "Car #13 (hidden name, slot 8)"
+   ],
+   "call": "none",
+   "at_fault": [],
+   "type": "Light side touch",
+   "sev": 0,
+   "confidence": "high",
+   "why": "No time lost (-0.97 / 0.02 s).",
+   "engine_agrees": false
+  },
+  {
+   "n": 9,
+   "time": "3:09.1",
+   "lap": 3,
+   "cars": [
+    "#20 QDR_SHW1KS",
+    "#83 Outdoorflame83"
+   ],
+   "call": "none",
+   "at_fault": [],
+   "type": "Side touch on the straight",
+   "sev": 0,
+   "confidence": "medium",
+   "why": "Losses 0.02 / 0.18 s, no slide.",
+   "engine_agrees": true
+  },
+  {
+   "n": 10,
+   "time": "3:39.7",
+   "lap": 3,
+   "cars": [
+    "Car #2 (hidden name, slot 3)",
+    "Car #62 (hidden name, slot 4)"
+   ],
+   "call": "none",
+   "at_fault": [],
+   "type": "Light tap",
+   "sev": 0,
+   "confidence": "high",
+   "why": "No time lost.",
+   "engine_agrees": true
+  },
+  {
+   "n": 11,
+   "time": "4:23.3",
+   "lap": 3,
+   "cars": [
+    "#15 vanderdeured",
+    "Car #62 (hidden name, slot 4)"
+   ],
+   "call": "none",
+   "at_fault": [],
+   "type": "Side touch under braking",
+   "sev": 0,
+   "confidence": "medium",
+   "why": "vanderdeured was passing and stayed near his line (+0.53 m); Car #62 lost 0.24 s.",
+   "engine_agrees": false
+  },
+  {
+   "n": 12,
+   "time": "4:56.6",
+   "lap": 4,
+   "cars": [
+    "#15 vanderdeured",
+    "Car #62 (hidden name, slot 4)"
+   ],
+   "call": "none",
+   "at_fault": [],
+   "type": "Light tap",
+   "sev": 0,
+   "confidence": "high",
+   "why": "No time lost (-0.1 / 0.17 s).",
+   "engine_agrees": true
+  },
+  {
+   "n": 13,
+   "time": "4:58.4",
+   "lap": 4,
+   "cars": [
+    "#20 QDR_SHW1KS",
+    "#83 Outdoorflame83"
+   ],
+   "call": "ri",
+   "at_fault": [],
+   "type": "Exit touch, attacker not alongside",
+   "sev": 0,
+   "confidence": "medium",
+   "why": "Outdoorflame stayed on his expected line (-0.48 m), QDR was barely alongside (0.5 m) and was the only one to lose out (0.81 s, off 0.75 s). Neither line alone avoids it.",
+   "engine_agrees": false
+  },
+  {
+   "n": 14,
+   "time": "5:02.6",
+   "lap": 4,
+   "cars": [
+    "#21 EthanMoonski",
+    "#3 TTV/GreMi_Gaming"
+   ],
+   "call": "none",
+   "at_fault": [],
+   "type": "Side by side touch",
+   "sev": 0,
+   "confidence": "medium",
+   "why": "Fully side by side through T3; GreMi on his expected line (+0.04 m), losses 0.34 / 0.23 s.",
+   "engine_agrees": false
+  },
+  {
+   "n": 15,
+   "time": "5:07.9",
+   "lap": 4,
+   "cars": [
+    "Car #2 (hidden name, slot 3)",
+    "Car #2 (hidden name, slot 10)"
+   ],
+   "call": "fault",
+   "at_fault": [
+    {
+     "driver": "Car #2 (hidden name, slot 10)",
+     "touches": [
+      {
+       "time": "5:08.9",
+       "sev": 4
+      }
+     ],
+     "sev": 4,
+     "points": -1
+    }
+   ],
+   "type": "Ran into the car ahead",
+   "sev": 4,
+   "confidence": "high",
+   "why": "Car #2 (slot 10) was 1.9 m behind, closing 28 km/h at the T3 apex, and hit Car #2 (slot 3), who spun, lost 3.4 s and P8->P11.",
+   "engine_agrees": true
+  },
+  {
+   "n": 16,
+   "time": "5:30.0",
+   "lap": 4,
+   "cars": [
+    "Car #62 (hidden name, slot 4)",
+    "Car #2 (hidden name, slot 10)"
+   ],
+   "call": "none",
+   "at_fault": [],
+   "type": "Light tap",
+   "sev": 0,
+   "confidence": "high",
+   "why": "No time lost.",
+   "engine_agrees": true
+  },
+  {
+   "n": 17,
+   "time": "5:33.9",
+   "lap": 4,
+   "cars": [
+    "#20 QDR_SHW1KS",
+    "#83 Outdoorflame83"
+   ],
+   "call": "none",
+   "at_fault": [],
+   "type": "Side touch",
+   "sev": 0,
+   "confidence": "medium",
+   "why": "Losses 0.48 / 0.40 s, no slide, no place change.",
+   "engine_agrees": false
+  },
+  {
+   "n": 18,
+   "time": "5:42.1",
+   "lap": 4,
+   "cars": [
+    "Car #62 (hidden name, slot 4)",
+    "Car #2 (hidden name, slot 10)"
+   ],
+   "call": "none",
+   "at_fault": [],
+   "type": "Light tap",
+   "sev": 0,
+   "confidence": "high",
+   "why": "No time lost.",
+   "engine_agrees": true
+  },
+  {
+   "n": 19,
+   "time": "6:18.7",
+   "lap": 5,
+   "cars": [
+    "#15 vanderdeured",
+    "Car #2 (hidden name, slot 10)"
+   ],
+   "call": "none",
+   "at_fault": [],
+   "type": "Squeeze under braking, no effect",
+   "sev": 0,
+   "confidence": "medium",
+   "why": "vanderdeured moved 1.6 m beyond his line toward Car #2 alongside, but Car #2 lost nothing (-0.02 s).",
+   "engine_agrees": false
+  },
+  {
+   "n": 20,
+   "time": "6:36.7",
+   "lap": 5,
+   "cars": [
+    "Car #62 (hidden name, slot 4)",
+    "Car #2 (hidden name, slot 10)"
+   ],
+   "call": "fault",
+   "at_fault": [
+    {
+     "driver": "Car #62 (hidden name, slot 4)",
+     "touches": [
+      {
+       "time": "6:37.7",
+       "sev": 3
+      }
+     ],
+     "sev": 3,
+     "points": -0.5
+    }
+   ],
+   "type": "Moved across under braking",
+   "sev": 3,
+   "confidence": "medium",
+   "why": "Car #62 moved 2.9 m beyond his line toward Car #2 (slot 10) in the T3 braking zone while Car #2 was still partly alongside; with Car #62 on his line there is no touch (+0.62 m). Car #2 lost 0.95 s and two places.",
+   "engine_agrees": true
+  },
+  {
+   "n": 21,
+   "time": "6:41.8",
+   "lap": 5,
+   "cars": [
+    "#15 vanderdeured",
+    "Car #62 (hidden name, slot 4)"
+   ],
+   "call": "ri",
+   "at_fault": [],
+   "type": "Exit touch",
+   "sev": 0,
+   "confidence": "low",
+   "why": "Both near or away from their lines (+0.03 / -2.26 m), neither line alone avoids it; both lost ~0.6 s.",
+   "engine_agrees": false
+  },
+  {
+   "n": 22,
+   "time": "6:51.4",
+   "lap": 5,
+   "cars": [
+    "Car #62 (hidden name, slot 4)",
+    "Car #2 (hidden name, slot 10)"
+   ],
+   "call": "none",
+   "at_fault": [],
+   "type": "Light touch on the straight",
+   "sev": 0,
+   "confidence": "high",
+   "why": "No time lost.",
+   "engine_agrees": true
+  },
+  {
+   "n": 23,
+   "time": "6:58.8",
+   "lap": 5,
+   "cars": [
+    "Car #62 (hidden name, slot 4)",
+    "Car #2 (hidden name, slot 10)"
+   ],
+   "call": "fault",
+   "at_fault": [
+    {
+     "driver": "Car #2 (hidden name, slot 10)",
+     "touches": [
+      {
+       "time": "6:59.8",
+       "sev": 4
+      }
+     ],
+     "sev": 4,
+     "points": -1
+    }
+   ],
+   "type": "Inside car ran wide into a car alongside on the exit",
+   "sev": 4,
+   "confidence": "medium",
+   "why": "Fully side by side out of T4 (overlap 4-11 m); Car #2 (inside) drifted 0.7 m beyond his line, and with him on his line there is no touch (+0.81 m) while Car #62 on his line still touches. Both lost ~10 s.",
+   "engine_agrees": false
+  }
+ ],
+ "reckless": [],
+ "summary": {
+  "incidents": 23,
+  "faults": 4,
+  "ri": 3,
+  "none": 16,
+  "points": {
+   "Car #13 (hidden name, slot 8)": -0.5,
+   "Car #2 (hidden name, slot 10)": -2,
+   "Car #62 (hidden name, slot 4)": -0.5
+  },
+  "engine_agreement": "12/23"
+ }
+}

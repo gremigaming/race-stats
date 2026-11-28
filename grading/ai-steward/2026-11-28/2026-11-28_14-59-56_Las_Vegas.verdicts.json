@@ -1,0 +1,574 @@
+{
+ "recording": "2026-11-28_14-59-56_Las_Vegas",
+ "track": "Las Vegas",
+ "judged_at": "2026-11-28T14:29:52Z",
+ "steward": "AI steward trial",
+ "incidents": [
+  {
+   "n": 1,
+   "time": "0:07.0",
+   "lap": 1,
+   "cars": [
+    "#8 Stepino81",
+    "Car #69 (hidden name, slot 14)"
+   ],
+   "call": "none",
+   "at_fault": [],
+   "type": "Lap 1 touches at T2",
+   "sev": 0,
+   "confidence": "medium",
+   "why": "Stepino braked 33% later than his own laps and moved 5 m beyond his line, but nobody lost time (-0.64 / -0.65 s).",
+   "engine_agrees": true
+  },
+  {
+   "n": 2,
+   "time": "0:07.9",
+   "lap": 1,
+   "cars": [
+    "#21 EthanMoonski",
+    "Car #13 (hidden name, slot 9)",
+    "#69 GodRichardfalamo"
+   ],
+   "call": "none",
+   "at_fault": [],
+   "type": "Lap 1 pack touches T2-T3",
+   "sev": 0,
+   "confidence": "medium",
+   "why": "Three lap-1 touches, all cars lost under 0.3 s or gained places.",
+   "engine_agrees": false
+  },
+  {
+   "n": 3,
+   "time": "0:12.9",
+   "lap": 1,
+   "cars": [
+    "#50 DevilDriver2396",
+    "#20 QDR_SHW1KS"
+   ],
+   "call": "none",
+   "at_fault": [],
+   "type": "Lap 1 side touch",
+   "sev": 0,
+   "confidence": "high",
+   "why": "No time lost.",
+   "engine_agrees": true
+  },
+  {
+   "n": 4,
+   "time": "0:13.3",
+   "lap": 1,
+   "cars": [
+    "#8 Stepino81",
+    "#69 GodRichardfalamo"
+   ],
+   "call": "none",
+   "at_fault": [],
+   "type": "Lap 1 tap",
+   "sev": 0,
+   "confidence": "medium",
+   "why": "GodRichard lost 0.47 s, no place lost.",
+   "engine_agrees": true
+  },
+  {
+   "n": 5,
+   "time": "0:27.9",
+   "lap": 1,
+   "cars": [
+    "#15 vanderdeured",
+    "#69 GodRichardfalamo",
+    "#38 NXS Senpaioza"
+   ],
+   "call": "ri",
+   "at_fault": [],
+   "type": "Lap 1 pack at T4",
+   "sev": 0,
+   "confidence": "low",
+   "why": "Into T4 NXS (inside) drifted 0.9 m beyond his line toward GodRichard, who had no room (0.8 m); neither line alone avoids it. vanderdeured then braked hard into the knock-on. GodRichard lost 4.7 s, NXS 1.3 s. Lap 1, small moves.",
+   "engine_agrees": true
+  },
+  {
+   "n": 6,
+   "time": "0:29.1",
+   "lap": 1,
+   "cars": [
+    "#3 TTV/GreMi_Gaming",
+    "Car #13 (hidden name, slot 9)"
+   ],
+   "call": "none",
+   "at_fault": [],
+   "type": "Lap 1 side touch",
+   "sev": 0,
+   "confidence": "medium",
+   "why": "GreMi dived and moved 3.1 m beyond his line, but Car #13 lost 0.01 s and gained places.",
+   "engine_agrees": false
+  },
+  {
+   "n": 7,
+   "time": "0:30.2",
+   "lap": 1,
+   "cars": [
+    "Car #62 (hidden name, slot 3)",
+    "Car #2 (hidden name, slot 11)"
+   ],
+   "call": "fault",
+   "at_fault": [
+    {
+     "driver": "Car #2 (hidden name, slot 11)",
+     "touches": [
+      {
+       "time": "0:31.2",
+       "sev": 3
+      }
+     ],
+     "sev": 3,
+     "points": -0.5
+    }
+   ],
+   "type": "Dive from behind at the apex",
+   "sev": 3,
+   "confidence": "medium",
+   "why": "Car #2 was never alongside (overlap -15 m at 2 s, -1.9 m at 0.2 s), closed 19 km/h into the T4 apex and moved 1.2 m beyond his line; with Car #2 on his line there is no touch (+2.46 m). Car #2 spun (11 s), Car #62 lost 0.75 s.",
+   "engine_agrees": true
+  },
+  {
+   "n": 8,
+   "time": "0:37.5",
+   "lap": 1,
+   "cars": [
+    "#8 Stepino81",
+    "Car #69 (hidden name, slot 14)"
+   ],
+   "call": "none",
+   "at_fault": [],
+   "type": "Lap 1 side touch",
+   "sev": 0,
+   "confidence": "high",
+   "why": "No time lost.",
+   "engine_agrees": true
+  },
+  {
+   "n": 9,
+   "time": "0:39.3",
+   "lap": 1,
+   "cars": [
+    "#15 vanderdeured",
+    "#38 NXS Senpaioza"
+   ],
+   "call": "none",
+   "at_fault": [],
+   "type": "Lap 1 side touch",
+   "sev": 0,
+   "confidence": "medium",
+   "why": "vanderdeured lost 0.72 s (under 1 s lap 1).",
+   "engine_agrees": true
+  },
+  {
+   "n": 10,
+   "time": "0:43.4",
+   "lap": 1,
+   "cars": [
+    "#8 Stepino81",
+    "Car #69 (hidden name, slot 14)"
+   ],
+   "call": "none",
+   "at_fault": [],
+   "type": "Lap 1 tap",
+   "sev": 0,
+   "confidence": "high",
+   "why": "No time lost.",
+   "engine_agrees": true
+  },
+  {
+   "n": 11,
+   "time": "0:46.5",
+   "lap": 1,
+   "cars": [
+    "Car #62 (hidden name, slot 3)",
+    "#15 vanderdeured",
+    "#38 NXS Senpaioza"
+   ],
+   "call": "none",
+   "at_fault": [],
+   "type": "Lap 1 taps at T6",
+   "sev": 0,
+   "confidence": "medium",
+   "why": "Losses under 0.6 s.",
+   "engine_agrees": true
+  },
+  {
+   "n": 12,
+   "time": "1:01.5",
+   "lap": 1,
+   "cars": [
+    "Car #62 (hidden name, slot 3)",
+    "#38 NXS Senpaioza"
+   ],
+   "call": "none",
+   "at_fault": [],
+   "type": "Lap 1 tap",
+   "sev": 0,
+   "confidence": "high",
+   "why": "Losses 0.23 s.",
+   "engine_agrees": true
+  },
+  {
+   "n": 13,
+   "time": "1:23.1",
+   "lap": 1,
+   "cars": [
+    "#83 Outdoorflame83",
+    "#20 QDR_SHW1KS"
+   ],
+   "call": "none",
+   "at_fault": [],
+   "type": "Lap 1 side touch",
+   "sev": 0,
+   "confidence": "high",
+   "why": "No time lost.",
+   "engine_agrees": true
+  },
+  {
+   "n": 14,
+   "time": "1:30.6",
+   "lap": 1,
+   "cars": [
+    "Car #62 (hidden name, slot 3)",
+    "#38 NXS Senpaioza"
+   ],
+   "call": "none",
+   "at_fault": [],
+   "type": "Lap 1 tap",
+   "sev": 0,
+   "confidence": "high",
+   "why": "No time lost.",
+   "engine_agrees": true
+  },
+  {
+   "n": 15,
+   "time": "2:53.4",
+   "lap": 2,
+   "cars": [
+    "#8 Stepino81",
+    "#21 EthanMoonski"
+   ],
+   "call": "none",
+   "at_fault": [],
+   "type": "Move on the straight, no effect",
+   "sev": 0,
+   "confidence": "medium",
+   "why": "Stepino moved 2.5 m across in front of Ethan at 326 km/h (late), but nobody lost time (0.02 / 0.14 s).",
+   "engine_agrees": true
+  },
+  {
+   "n": 16,
+   "time": "2:58.4",
+   "lap": 2,
+   "cars": [
+    "#8 Stepino81",
+    "Car #69 (hidden name, slot 14)"
+   ],
+   "call": "none",
+   "at_fault": [],
+   "type": "Light tap",
+   "sev": 0,
+   "confidence": "high",
+   "why": "No time lost (0.0 s).",
+   "engine_agrees": false
+  },
+  {
+   "n": 17,
+   "time": "3:18.0",
+   "lap": 3,
+   "cars": [
+    "#21 EthanMoonski",
+    "Car #69 (hidden name, slot 14)"
+   ],
+   "call": "none",
+   "at_fault": [],
+   "type": "Light touches",
+   "sev": 0,
+   "confidence": "high",
+   "why": "Losses 0.02 / 0.24 s.",
+   "engine_agrees": true
+  },
+  {
+   "n": 18,
+   "time": "3:37.6",
+   "lap": 3,
+   "cars": [
+    "#8 Stepino81",
+    "#21 EthanMoonski",
+    "Car #69 (hidden name, slot 14)"
+   ],
+   "call": "none",
+   "at_fault": [],
+   "type": "Battle taps over T4 and the straight",
+   "sev": 0,
+   "confidence": "medium",
+   "why": "Three small touches, losses 0.29-0.57 s, all within 1 m of their lines.",
+   "engine_agrees": false
+  },
+  {
+   "n": 19,
+   "time": "3:48.9",
+   "lap": 3,
+   "cars": [
+    "#8 Stepino81",
+    "#21 EthanMoonski",
+    "Car #69 (hidden name, slot 14)"
+   ],
+   "call": "none",
+   "at_fault": [],
+   "type": "Battle taps T5-T6",
+   "sev": 0,
+   "confidence": "low",
+   "why": "Close three-car battle, small moves, losses 0.57-0.67 s each (battle, not lost to the touch).",
+   "engine_agrees": true
+  },
+  {
+   "n": 20,
+   "time": "3:51.9",
+   "lap": 3,
+   "cars": [
+    "#50 DevilDriver2396",
+    "#83 Outdoorflame83"
+   ],
+   "call": "none",
+   "at_fault": [],
+   "type": "Exit touch, no effect",
+   "sev": 0,
+   "confidence": "high",
+   "why": "No time lost.",
+   "engine_agrees": false
+  },
+  {
+   "n": 21,
+   "time": "4:10.6",
+   "lap": 3,
+   "cars": [
+    "#8 Stepino81",
+    "Car #69 (hidden name, slot 14)"
+   ],
+   "call": "none",
+   "at_fault": [],
+   "type": "Side touch",
+   "sev": 0,
+   "confidence": "medium",
+   "why": "Losses 0.52 / 0.45 s, no slide, no place change.",
+   "engine_agrees": false
+  },
+  {
+   "n": 22,
+   "time": "4:14.3",
+   "lap": 3,
+   "cars": [
+    "#3 TTV/GreMi_Gaming",
+    "Car #13 (hidden name, slot 9)"
+   ],
+   "call": "none",
+   "at_fault": [],
+   "type": "Light tap",
+   "sev": 0,
+   "confidence": "high",
+   "why": "Closing 3 km/h, losses 0.27 / 0.36 s.",
+   "engine_agrees": false
+  },
+  {
+   "n": 23,
+   "time": "4:18.3",
+   "lap": 3,
+   "cars": [
+    "#8 Stepino81",
+    "#21 EthanMoonski"
+   ],
+   "call": "none",
+   "at_fault": [],
+   "type": "Side touch on the straight",
+   "sev": 0,
+   "confidence": "medium",
+   "why": "Losses 0.09 / 0.05 s.",
+   "engine_agrees": false
+  },
+  {
+   "n": 24,
+   "time": "4:49.1",
+   "lap": 3,
+   "cars": [
+    "#21 EthanMoonski",
+    "#38 NXS Senpaioza"
+   ],
+   "call": "fault",
+   "at_fault": [
+    {
+     "driver": "#21 EthanMoonski",
+     "touches": [
+      {
+       "time": "4:50.1",
+       "sev": 3
+      }
+     ],
+     "sev": 3,
+     "points": -0.5
+    }
+   ],
+   "type": "Late defending on the straight",
+   "sev": 3,
+   "confidence": "medium",
+   "why": "At 284 km/h Ethan moved 2.9 m beyond his line toward NXS, who had pulled out and was 1.4 m behind closing 17 km/h; with Ethan on his line there is no touch (+1.38 m). NXS was pushed past the track edge (-1.37 m).",
+   "engine_agrees": false
+  },
+  {
+   "n": 25,
+   "time": "5:00.4",
+   "lap": 4,
+   "cars": [
+    "Car #62 (hidden name, slot 3)",
+    "Car #13 (hidden name, slot 9)"
+   ],
+   "call": "none",
+   "at_fault": [],
+   "type": "Side touch under braking",
+   "sev": 0,
+   "confidence": "high",
+   "why": "Losses 0.24 / -0.22 s.",
+   "engine_agrees": false
+  },
+  {
+   "n": 26,
+   "time": "5:29.3",
+   "lap": 4,
+   "cars": [
+    "#21 EthanMoonski",
+    "Car #69 (hidden name, slot 14)"
+   ],
+   "call": "none",
+   "at_fault": [],
+   "type": "Light tap",
+   "sev": 0,
+   "confidence": "high",
+   "why": "No time lost.",
+   "engine_agrees": true
+  },
+  {
+   "n": 27,
+   "time": "5:31.4",
+   "lap": 4,
+   "cars": [
+    "Car #62 (hidden name, slot 3)",
+    "#15 vanderdeured"
+   ],
+   "call": "none",
+   "at_fault": [],
+   "type": "Side touch",
+   "sev": 0,
+   "confidence": "high",
+   "why": "No time lost.",
+   "engine_agrees": true
+  },
+  {
+   "n": 28,
+   "time": "6:04.1",
+   "lap": 4,
+   "cars": [
+    "#21 EthanMoonski",
+    "#38 NXS Senpaioza"
+   ],
+   "call": "none",
+   "at_fault": [],
+   "type": "Side touches on the straight",
+   "sev": 0,
+   "confidence": "high",
+   "why": "Losses 0.01 / 0.34 s.",
+   "engine_agrees": true
+  },
+  {
+   "n": 29,
+   "time": "6:42.7",
+   "lap": 5,
+   "cars": [
+    "#50 DevilDriver2396",
+    "#83 Outdoorflame83"
+   ],
+   "call": "none",
+   "at_fault": [],
+   "type": "Side touch at the apex",
+   "sev": 0,
+   "confidence": "medium",
+   "why": "DevilDriver lost 0.48 s, Outdoorflame nothing.",
+   "engine_agrees": false
+  },
+  {
+   "n": 30,
+   "time": "6:51.3",
+   "lap": 5,
+   "cars": [
+    "#50 DevilDriver2396",
+    "#83 Outdoorflame83"
+   ],
+   "call": "none",
+   "at_fault": [],
+   "type": "Side touch under braking",
+   "sev": 0,
+   "confidence": "medium",
+   "why": "Losses 0.3 / -0.27 s.",
+   "engine_agrees": true
+  },
+  {
+   "n": 31,
+   "time": "6:57.2",
+   "lap": 5,
+   "cars": [
+    "#38 NXS Senpaioza",
+    "Car #69 (hidden name, slot 14)"
+   ],
+   "call": "fault",
+   "at_fault": [
+    {
+     "driver": "Car #69 (hidden name, slot 14)",
+     "touches": [
+      {
+       "time": "6:58.2",
+       "sev": 3
+      }
+     ],
+     "sev": 3,
+     "points": -0.5
+    }
+   ],
+   "type": "Turned in on a car alongside",
+   "sev": 3,
+   "confidence": "medium",
+   "why": "NXS was alongside before braking for T5 (overlap 4-7.5 m) with no room left (-0.3 m); Car #69 turned in on his normal line and touched him twice. NXS lost 1.1 s and P5->P6.",
+   "engine_agrees": true
+  },
+  {
+   "n": 32,
+   "time": "7:44.0",
+   "lap": 5,
+   "cars": [
+    "#38 NXS Senpaioza",
+    "Car #69 (hidden name, slot 14)"
+   ],
+   "call": "none",
+   "at_fault": [],
+   "type": "Side touch under braking",
+   "sev": 0,
+   "confidence": "high",
+   "why": "Losses 0.07 / 0.12 s.",
+   "engine_agrees": false
+  }
+ ],
+ "reckless": [],
+ "summary": {
+  "incidents": 32,
+  "faults": 3,
+  "ri": 1,
+  "none": 28,
+  "points": {
+   "Car #2 (hidden name, slot 11)": -0.5,
+   "#21 EthanMoonski": -0.5,
+   "Car #69 (hidden name, slot 14)": -0.5
+  },
+  "engine_agreement": "20/32"
+ }
+}

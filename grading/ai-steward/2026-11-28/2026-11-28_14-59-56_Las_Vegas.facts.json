@@ -1,0 +1,5317 @@
+{
+"recording":"2026-11-28_14-59-56_Las_Vegas",
+"track":"Las Vegas",
+"info":{
+"weather":0,
+"track_temp":17,
+"air_temp":14,
+"total_laps":5,
+"track_length":6200,
+"session_type":"Race",
+"track":"Las Vegas"
+},
+"drivers":{
+"#50 DevilDriver2396":0,
+"#3 TTV/GreMi_Gaming":1,
+"#83 Outdoorflame83":2,
+"Car #62 (hidden name, slot 3)":3,
+"#8 Stepino81":4,
+"#20 QDR_SHW1KS":5,
+"#86 Overfast-_":6,
+"#21 EthanMoonski":7,
+"#2 Prijo_1926":8,
+"Car #13 (hidden name, slot 9)":9,
+"#15 vanderdeured":10,
+"Car #2 (hidden name, slot 11)":11,
+"#69 GodRichardfalamo":12,
+"#38 NXS Senpaioza":13,
+"Car #69 (hidden name, slot 14)":14
+},
+"incidents":[
+{
+"n":1,
+"car_ids":[
+4,
+14
+],
+"after_finish":false,
+"status_at_first_touch":{
+"#8 Stepino81":"racing",
+"Car #69 (hidden name, slot 14)":"racing"
+},
+"start":"0:07.0",
+"end":"0:08.7",
+"t_start":7.0,
+"lap":1,
+"cars":[
+"#8 Stepino81",
+"Car #69 (hidden name, slot 14)"
+],
+"touch_count":2,
+"game_contact_severity_max":2,
+"touches":[
+{
+"t":7.97,
+"time":"0:08.0",
+"t_end":8.07,
+"cars":[
+"#8 Stepino81",
+"Car #69 (hidden name, slot 14)"
+],
+"where":"braking into T2",
+"lap":1,
+"game_logged_only":false,
+"front":"Car #69 (hidden name, slot 14)",
+"behind":"#8 Stepino81",
+"overlap_m":4.97,
+"overlap_history_m":{
+"2.0":-9.2,
+"1.5":-10.2,
+"1.0":-11.3,
+"0.5":-3.1,
+"0.2":2.0
+},
+"side_gap_m":2.28,
+"closing_kmh":38,
+"inside_car":"#8 Stepino81",
+"hold_line_sim_min_gap_m":{
+"actual":-0.06,
+"front_car_holds_line":-2.09,
+"behind_car_holds_line":0.66,
+"both_hold":-2.01
+},
+"per_car":{
+"Car #69 (hidden name, slot 14)":{
+"role":"front",
+"speed_kmh":138,
+"moved_toward_other_last_1s_m":-3.59,
+"moved_vs_expected_line_toward_other_1s_m":-2.21,
+"deviation_from_expected_line_m":2.8,
+"room_left_on_far_side_m":3.81,
+"brake_now":0.25,
+"brake_normal_own":1.0,
+"brake_normal_field":0.31,
+"off_track_before_s":0,
+"slip_before_deg":3.0,
+"status":"racing",
+"brake_point_later_than_own_pct":22,
+"apex_speed_over_own_pct":-19
+},
+"#8 Stepino81":{
+"role":"behind",
+"speed_kmh":176,
+"moved_toward_other_last_1s_m":4.57,
+"moved_vs_expected_line_toward_other_1s_m":2.42,
+"deviation_from_expected_line_m":0.82,
+"room_left_on_far_side_m":8.07,
+"brake_now":0.62,
+"brake_normal_own":0.43,
+"brake_normal_field":0.31,
+"off_track_before_s":0,
+"slip_before_deg":1.7,
+"status":"racing",
+"brake_point_later_than_own_pct":33,
+"apex_speed_over_own_pct":-16
+}
+},
+"after":{
+"Car #69 (hidden name, slot 14)":{
+"max_slip_deg":8,
+"off_track_s":0,
+"speed_drop_kmh":56
+},
+"#8 Stepino81":{
+"max_slip_deg":4,
+"off_track_s":0.75,
+"speed_drop_kmh":102
+}
+}
+},
+{
+"t":8.52,
+"time":"0:08.5",
+"t_end":8.72,
+"cars":[
+"#8 Stepino81",
+"Car #69 (hidden name, slot 14)"
+],
+"where":"at the apex of T2",
+"lap":1,
+"game_logged_only":false,
+"front":"#8 Stepino81",
+"behind":"Car #69 (hidden name, slot 14)",
+"overlap_m":1.16,
+"overlap_history_m":{
+"2.0":20.7,
+"1.5":21.2,
+"1.0":12.4,
+"0.5":4.7,
+"0.2":2.7
+},
+"side_gap_m":1.48,
+"closing_kmh":-21,
+"inside_car":"#8 Stepino81",
+"hold_line_sim_min_gap_m":{
+"actual":-0.21,
+"front_car_holds_line":1.05,
+"behind_car_holds_line":-2.11,
+"both_hold":-1.65
+},
+"per_car":{
+"#8 Stepino81":{
+"role":"front",
+"speed_kmh":134,
+"moved_toward_other_last_1s_m":7.38,
+"moved_vs_expected_line_toward_other_1s_m":4.97,
+"deviation_from_expected_line_m":4.32,
+"room_left_on_far_side_m":4.27,
+"brake_now":0.0,
+"brake_normal_own":0.0,
+"brake_normal_field":0.0,
+"off_track_before_s":0,
+"slip_before_deg":4.0,
+"status":"racing",
+"brake_point_later_than_own_pct":33,
+"apex_speed_over_own_pct":-16
+},
+"Car #69 (hidden name, slot 14)":{
+"role":"behind",
+"speed_kmh":113,
+"moved_toward_other_last_1s_m":-5.24,
+"moved_vs_expected_line_toward_other_1s_m":-3.87,
+"deviation_from_expected_line_m":5.43,
+"room_left_on_far_side_m":7.0,
+"brake_now":1.0,
+"brake_normal_own":0.0,
+"brake_normal_field":0.0,
+"off_track_before_s":0,
+"slip_before_deg":8.2,
+"status":"racing",
+"brake_point_later_than_own_pct":22,
+"apex_speed_over_own_pct":-19
+}
+},
+"after":{
+"#8 Stepino81":{
+"max_slip_deg":3,
+"off_track_s":1.25,
+"speed_drop_kmh":49
+},
+"Car #69 (hidden name, slot 14)":{
+"max_slip_deg":3,
+"off_track_s":0,
+"speed_drop_kmh":32
+}
+}
+}
+],
+"consequences":[
+{
+"car":"#8 Stepino81",
+"lost_s":-0.64,
+"status_after":"racing",
+"from_pos":6,
+"to_pos":6,
+"max_slip_deg":3,
+"spun":false,
+"off_track_s":0,
+"retired":false
+},
+{
+"car":"Car #69 (hidden name, slot 14)",
+"lost_s":-0.65,
+"status_after":"racing",
+"from_pos":4,
+"to_pos":5,
+"max_slip_deg":8,
+"spun":false,
+"off_track_s":0,
+"retired":false
+}
+],
+"engine_call":"none (engine saw no incident here)"
+},
+{
+"n":2,
+"car_ids":[
+7,
+9,
+12
+],
+"after_finish":false,
+"status_at_first_touch":{
+"#21 EthanMoonski":"racing",
+"Car #13 (hidden name, slot 9)":"racing",
+"#69 GodRichardfalamo":"racing"
+},
+"start":"0:07.9",
+"end":"0:15.2",
+"t_start":7.9,
+"lap":1,
+"cars":[
+"#21 EthanMoonski",
+"Car #13 (hidden name, slot 9)",
+"#69 GodRichardfalamo"
+],
+"touch_count":3,
+"game_contact_severity_max":2,
+"touches":[
+{
+"t":8.9,
+"time":"0:08.9",
+"t_end":10.05,
+"cars":[
+"#21 EthanMoonski",
+"Car #13 (hidden name, slot 9)"
+],
+"where":"at the apex of T2",
+"lap":1,
+"game_logged_only":false,
+"front":"#21 EthanMoonski",
+"behind":"Car #13 (hidden name, slot 9)",
+"overlap_m":4.13,
+"overlap_history_m":{
+"2.0":-8.8,
+"1.5":-4.8,
+"1.0":0.1,
+"0.5":3.7,
+"0.2":3.9
+},
+"side_gap_m":2.21,
+"closing_kmh":-4,
+"inside_car":"Car #13 (hidden name, slot 9)",
+"hold_line_sim_min_gap_m":{
+"actual":-0.17,
+"front_car_holds_line":-1.88,
+"behind_car_holds_line":1.39,
+"both_hold":-1.3
+},
+"per_car":{
+"#21 EthanMoonski":{
+"role":"front",
+"speed_kmh":139,
+"moved_toward_other_last_1s_m":-3.59,
+"moved_vs_expected_line_toward_other_1s_m":-3.08,
+"deviation_from_expected_line_m":3.35,
+"room_left_on_far_side_m":7.32,
+"brake_now":0.11,
+"brake_normal_own":0.25,
+"brake_normal_field":0.06,
+"off_track_before_s":0,
+"slip_before_deg":4.8,
+"status":"racing",
+"brake_point_later_than_own_pct":17,
+"apex_speed_over_own_pct":-33
+},
+"Car #13 (hidden name, slot 9)":{
+"role":"behind",
+"speed_kmh":135,
+"moved_toward_other_last_1s_m":5.66,
+"moved_vs_expected_line_toward_other_1s_m":3.21,
+"deviation_from_expected_line_m":2.47,
+"room_left_on_far_side_m":4.53,
+"brake_now":1.0,
+"brake_normal_own":0.4,
+"brake_normal_field":0.06,
+"off_track_before_s":0,
+"slip_before_deg":6.5,
+"status":"racing",
+"brake_point_later_than_own_pct":-6,
+"apex_speed_over_own_pct":-26
+}
+},
+"after":{
+"#21 EthanMoonski":{
+"max_slip_deg":9,
+"off_track_s":0,
+"speed_drop_kmh":72
+},
+"Car #13 (hidden name, slot 9)":{
+"max_slip_deg":11,
+"off_track_s":0,
+"speed_drop_kmh":74
+}
+}
+},
+{
+"t":9.55,
+"time":"0:09.6",
+"t_end":9.9,
+"cars":[
+"#21 EthanMoonski",
+"#69 GodRichardfalamo"
+],
+"where":"at the apex of T2",
+"lap":1,
+"game_logged_only":false,
+"front":"#69 GodRichardfalamo",
+"behind":"#21 EthanMoonski",
+"overlap_m":-0.19,
+"overlap_history_m":{
+"2.0":-12.0,
+"1.5":-11.6,
+"1.0":-8.2,
+"0.5":-3.9,
+"0.2":-1.5
+},
+"side_gap_m":1.18,
+"closing_kmh":18,
+"inside_car":"#69 GodRichardfalamo",
+"hold_line_sim_min_gap_m":{
+"actual":-0.43,
+"front_car_holds_line":3.97,
+"behind_car_holds_line":1.72,
+"both_hold":-0.54
+},
+"per_car":{
+"#69 GodRichardfalamo":{
+"role":"front",
+"speed_kmh":86,
+"moved_toward_other_last_1s_m":5.12,
+"moved_vs_expected_line_toward_other_1s_m":4.5,
+"deviation_from_expected_line_m":6.16,
+"room_left_on_far_side_m":6.29,
+"brake_now":0.0,
+"brake_normal_own":0.0,
+"brake_normal_field":0.0,
+"off_track_before_s":0,
+"slip_before_deg":4.2,
+"status":"racing",
+"brake_point_later_than_own_pct":27,
+"apex_speed_over_own_pct":-26
+},
+"#21 EthanMoonski":{
+"role":"behind",
+"speed_kmh":104,
+"moved_toward_other_last_1s_m":-3.71,
+"moved_vs_expected_line_toward_other_1s_m":-3.98,
+"deviation_from_expected_line_m":5.73,
+"room_left_on_far_side_m":6.19,
+"brake_now":0.31,
+"brake_normal_own":0.0,
+"brake_normal_field":0.0,
+"off_track_before_s":0,
+"slip_before_deg":5.2,
+"status":"racing",
+"brake_point_later_than_own_pct":17,
+"apex_speed_over_own_pct":-33
+}
+},
+"after":{
+"#69 GodRichardfalamo":{
+"max_slip_deg":7,
+"off_track_s":0,
+"speed_drop_kmh":8
+},
+"#21 EthanMoonski":{
+"max_slip_deg":9,
+"off_track_s":0,
+"speed_drop_kmh":35
+}
+}
+},
+{
+"t":15.05,
+"time":"0:15.1",
+"t_end":15.15,
+"cars":[
+"#21 EthanMoonski",
+"#69 GodRichardfalamo"
+],
+"where":"at the apex of T3",
+"lap":1,
+"game_logged_only":false,
+"front":"#69 GodRichardfalamo",
+"behind":"#21 EthanMoonski",
+"overlap_m":-0.26,
+"overlap_history_m":{
+"2.0":-6.6,
+"1.5":-7.7,
+"1.0":-8.7,
+"0.5":-5.4,
+"0.2":-1.8
+},
+"side_gap_m":0.6,
+"closing_kmh":16,
+"inside_car":"#21 EthanMoonski",
+"hold_line_sim_min_gap_m":{
+"actual":-0.18,
+"front_car_holds_line":-0.15,
+"behind_car_holds_line":0.33,
+"both_hold":-0.24
+},
+"per_car":{
+"#69 GodRichardfalamo":{
+"role":"front",
+"speed_kmh":168,
+"moved_toward_other_last_1s_m":-1.72,
+"moved_vs_expected_line_toward_other_1s_m":-1.49,
+"deviation_from_expected_line_m":-0.91,
+"room_left_on_far_side_m":7.03,
+"brake_now":0.0,
+"brake_normal_own":0.0,
+"brake_normal_field":0.0,
+"off_track_before_s":0,
+"slip_before_deg":4.1,
+"status":"racing",
+"apex_speed_over_own_pct":-28
+},
+"#21 EthanMoonski":{
+"role":"behind",
+"speed_kmh":185,
+"moved_toward_other_last_1s_m":5.7,
+"moved_vs_expected_line_toward_other_1s_m":3.74,
+"deviation_from_expected_line_m":-1.66,
+"room_left_on_far_side_m":3.62,
+"brake_now":1.0,
+"brake_normal_own":0.0,
+"brake_normal_field":0.0,
+"off_track_before_s":0,
+"slip_before_deg":3.9,
+"status":"racing",
+"apex_speed_over_own_pct":-23
+}
+},
+"after":{
+"#69 GodRichardfalamo":{
+"max_slip_deg":21,
+"off_track_s":0,
+"speed_drop_kmh":27
+},
+"#21 EthanMoonski":{
+"max_slip_deg":22,
+"off_track_s":0,
+"speed_drop_kmh":65
+}
+}
+}
+],
+"consequences":[
+{
+"car":"#21 EthanMoonski",
+"lost_s":-0.01,
+"status_after":"racing",
+"from_pos":9,
+"to_pos":8,
+"max_slip_deg":21,
+"spun":false,
+"off_track_s":0,
+"retired":false
+},
+{
+"car":"Car #13 (hidden name, slot 9)",
+"lost_s":0.06,
+"status_after":"racing",
+"from_pos":11,
+"to_pos":9,
+"max_slip_deg":11,
+"spun":false,
+"off_track_s":0,
+"retired":false
+},
+{
+"car":"#69 GodRichardfalamo",
+"lost_s":0.29,
+"status_after":"racing",
+"from_pos":7,
+"to_pos":7,
+"max_slip_deg":20,
+"spun":false,
+"off_track_s":0,
+"retired":false
+}
+],
+"engine_call":[
+{
+"sev":"MEDIUM",
+"type":"Late lunge / divebomb",
+"drivers":[
+"EthanMoonski",
+"SRSRawer"
+],
+"steps":[
+{
+"call":"SRSRawer at fault",
+"why":"SRSRawer moved 5.0 m towards the other car before the touch"
+},
+{
+"call":"EthanMoonski at fault",
+"why":"GodRichardfalamo moved 8.4 m towards the other car before the touch (joined the chain); but GreMi called a similar one (1104B-5A, Spa 2026-11-04) the car behind at fault"
+}
+]
+}
+]
+},
+{
+"n":3,
+"car_ids":[
+0,
+5
+],
+"after_finish":false,
+"status_at_first_touch":{
+"#50 DevilDriver2396":"racing",
+"#20 QDR_SHW1KS":"racing"
+},
+"start":"0:12.9",
+"end":"0:14.3",
+"t_start":12.9,
+"lap":1,
+"cars":[
+"#50 DevilDriver2396",
+"#20 QDR_SHW1KS"
+],
+"touch_count":1,
+"game_contact_severity_max":0,
+"touches":[
+{
+"t":13.89,
+"time":"0:13.9",
+"t_end":14.34,
+"cars":[
+"#50 DevilDriver2396",
+"#20 QDR_SHW1KS"
+],
+"where":"at the apex of T3",
+"lap":1,
+"game_logged_only":false,
+"front":"#20 QDR_SHW1KS",
+"behind":"#50 DevilDriver2396",
+"overlap_m":2.26,
+"overlap_history_m":{
+"2.0":0.5,
+"1.5":0.5,
+"1.0":1.6,
+"0.5":2.5,
+"0.2":2.6
+},
+"side_gap_m":2.05,
+"closing_kmh":-14,
+"inside_car":"#50 DevilDriver2396",
+"hold_line_sim_min_gap_m":{
+"actual":-0.08,
+"front_car_holds_line":-1.9,
+"behind_car_holds_line":0.51,
+"both_hold":-1.27
+},
+"per_car":{
+"#20 QDR_SHW1KS":{
+"role":"front",
+"speed_kmh":206,
+"moved_toward_other_last_1s_m":-1.06,
+"moved_vs_expected_line_toward_other_1s_m":-1.38,
+"deviation_from_expected_line_m":-1.76,
+"room_left_on_far_side_m":7.37,
+"brake_now":0.0,
+"brake_normal_own":0.0,
+"brake_normal_field":0.0,
+"off_track_before_s":0,
+"slip_before_deg":3.1,
+"status":"racing",
+"apex_speed_over_own_pct":3
+},
+"#50 DevilDriver2396":{
+"role":"behind",
+"speed_kmh":192,
+"moved_toward_other_last_1s_m":3.12,
+"moved_vs_expected_line_toward_other_1s_m":1.94,
+"deviation_from_expected_line_m":-0.62,
+"room_left_on_far_side_m":0.83,
+"brake_now":0.0,
+"brake_normal_own":0.0,
+"brake_normal_field":0.0,
+"off_track_before_s":0,
+"slip_before_deg":3.0,
+"status":"racing",
+"apex_speed_over_own_pct":-6
+}
+},
+"after":{
+"#20 QDR_SHW1KS":{
+"max_slip_deg":3,
+"off_track_s":0,
+"speed_drop_kmh":3
+},
+"#50 DevilDriver2396":{
+"max_slip_deg":3,
+"off_track_s":0,
+"speed_drop_kmh":16
+}
+}
+}
+],
+"consequences":[
+{
+"car":"#50 DevilDriver2396",
+"lost_s":-0.27,
+"status_after":"racing",
+"from_pos":2,
+"to_pos":2,
+"max_slip_deg":2,
+"spun":false,
+"off_track_s":0,
+"retired":false
+},
+{
+"car":"#20 QDR_SHW1KS",
+"lost_s":-0.43,
+"status_after":"racing",
+"from_pos":1,
+"to_pos":1,
+"max_slip_deg":3,
+"spun":false,
+"off_track_s":0,
+"retired":false
+}
+],
+"engine_call":"none (engine saw no incident here)"
+},
+{
+"n":4,
+"car_ids":[
+4,
+12
+],
+"after_finish":false,
+"status_at_first_touch":{
+"#8 Stepino81":"racing",
+"#69 GodRichardfalamo":"racing"
+},
+"start":"0:13.3",
+"end":"0:14.6",
+"t_start":13.3,
+"lap":1,
+"cars":[
+"#8 Stepino81",
+"#69 GodRichardfalamo"
+],
+"touch_count":1,
+"game_contact_severity_max":1,
+"touches":[
+{
+"t":14.27,
+"time":"0:14.3",
+"t_end":14.62,
+"cars":[
+"#8 Stepino81",
+"#69 GodRichardfalamo"
+],
+"where":"on the run to T3",
+"lap":1,
+"game_logged_only":false,
+"front":"#8 Stepino81",
+"behind":"#69 GodRichardfalamo",
+"overlap_m":-0.19,
+"overlap_history_m":{
+"2.0":0.5,
+"1.5":0.4,
+"1.0":-0.1,
+"0.5":-1.5,
+"0.2":-0.8
+},
+"side_gap_m":1.16,
+"closing_kmh":16,
+"inside_car":"#8 Stepino81",
+"hold_line_sim_min_gap_m":{
+"actual":-0.36,
+"front_car_holds_line":-0.18,
+"behind_car_holds_line":-0.33,
+"both_hold":-0.2
+},
+"per_car":{
+"#8 Stepino81":{
+"role":"front",
+"speed_kmh":176,
+"moved_toward_other_last_1s_m":2.95,
+"moved_vs_expected_line_toward_other_1s_m":1.09,
+"deviation_from_expected_line_m":-0.38,
+"room_left_on_far_side_m":6.11,
+"brake_now":0.0,
+"brake_normal_own":0.0,
+"brake_normal_field":0.0,
+"off_track_before_s":0,
+"slip_before_deg":1.7,
+"status":"racing",
+"apex_speed_over_own_pct":-1
+},
+"#69 GodRichardfalamo":{
+"role":"behind",
+"speed_kmh":192,
+"moved_toward_other_last_1s_m":-0.32,
+"moved_vs_expected_line_toward_other_1s_m":0.83,
+"deviation_from_expected_line_m":0.6,
+"room_left_on_far_side_m":1.89,
+"brake_now":0.0,
+"brake_normal_own":0.0,
+"brake_normal_field":0.0,
+"off_track_before_s":0,
+"slip_before_deg":2.1,
+"status":"racing",
+"apex_speed_over_own_pct":-28
+}
+},
+"after":{
+"#8 Stepino81":{
+"max_slip_deg":3,
+"off_track_s":0,
+"speed_drop_kmh":2
+},
+"#69 GodRichardfalamo":{
+"max_slip_deg":21,
+"off_track_s":0,
+"speed_drop_kmh":55
+}
+}
+}
+],
+"consequences":[
+{
+"car":"#8 Stepino81",
+"lost_s":-0.51,
+"status_after":"racing",
+"from_pos":6,
+"to_pos":6,
+"max_slip_deg":3,
+"spun":false,
+"off_track_s":0,
+"retired":false
+},
+{
+"car":"#69 GodRichardfalamo",
+"lost_s":0.47,
+"status_after":"racing",
+"from_pos":7,
+"to_pos":7,
+"max_slip_deg":19,
+"spun":false,
+"off_track_s":0,
+"retired":false
+}
+],
+"engine_call":"none (engine saw no incident here)"
+},
+{
+"n":5,
+"car_ids":[
+10,
+12,
+13
+],
+"after_finish":false,
+"status_at_first_touch":{
+"#15 vanderdeured":"racing",
+"#69 GodRichardfalamo":"racing",
+"#38 NXS Senpaioza":"racing"
+},
+"start":"0:27.9",
+"end":"0:30.8",
+"t_start":27.9,
+"lap":1,
+"cars":[
+"#15 vanderdeured",
+"#69 GodRichardfalamo",
+"#38 NXS Senpaioza"
+],
+"touch_count":2,
+"game_contact_severity_max":2,
+"touches":[
+{
+"t":28.85,
+"time":"0:28.9",
+"t_end":29.4,
+"cars":[
+"#69 GodRichardfalamo",
+"#38 NXS Senpaioza"
+],
+"where":"braking into T4",
+"lap":1,
+"game_logged_only":false,
+"front":"#69 GodRichardfalamo",
+"behind":"#38 NXS Senpaioza",
+"overlap_m":2.86,
+"overlap_history_m":{
+"2.0":1.5,
+"1.5":1.5,
+"1.0":1.8,
+"0.5":1.4,
+"0.2":1.9
+},
+"side_gap_m":2.33,
+"closing_kmh":13,
+"inside_car":"#38 NXS Senpaioza",
+"hold_line_sim_min_gap_m":{
+"actual":-0.17,
+"front_car_holds_line":-1.63,
+"behind_car_holds_line":-0.35,
+"both_hold":-0.13
+},
+"per_car":{
+"#69 GodRichardfalamo":{
+"role":"front",
+"speed_kmh":151,
+"moved_toward_other_last_1s_m":-1.4,
+"moved_vs_expected_line_toward_other_1s_m":-0.62,
+"deviation_from_expected_line_m":-0.09,
+"room_left_on_far_side_m":0.81,
+"brake_now":1.0,
+"brake_normal_own":1.0,
+"brake_normal_field":1.0,
+"off_track_before_s":0,
+"slip_before_deg":0.4,
+"status":"racing",
+"brake_point_later_than_own_pct":-4
+},
+"#38 NXS Senpaioza":{
+"role":"behind",
+"speed_kmh":165,
+"moved_toward_other_last_1s_m":1.37,
+"moved_vs_expected_line_toward_other_1s_m":0.89,
+"deviation_from_expected_line_m":-0.48,
+"room_left_on_far_side_m":7.32,
+"brake_now":0.69,
+"brake_normal_own":0.5,
+"brake_normal_field":1.0,
+"off_track_before_s":0,
+"slip_before_deg":0.4,
+"status":"racing",
+"brake_point_later_than_own_pct":-33
+}
+},
+"after":{
+"#69 GodRichardfalamo":{
+"max_slip_deg":37,
+"off_track_s":0,
+"speed_drop_kmh":168
+},
+"#38 NXS Senpaioza":{
+"max_slip_deg":16,
+"off_track_s":0,
+"speed_drop_kmh":151
+}
+}
+},
+{
+"t":29.75,
+"time":"0:29.8",
+"t_end":30.75,
+"cars":[
+"#15 vanderdeured",
+"#38 NXS Senpaioza"
+],
+"where":"at the apex of T4",
+"lap":1,
+"game_logged_only":false,
+"front":"#38 NXS Senpaioza",
+"behind":"#15 vanderdeured",
+"overlap_m":4.73,
+"overlap_history_m":{
+"2.0":-26.5,
+"1.5":-17.3,
+"1.0":-9.2,
+"0.5":-2.0,
+"0.2":2.3
+},
+"side_gap_m":2.26,
+"closing_kmh":30,
+"inside_car":"#15 vanderdeured",
+"hold_line_sim_min_gap_m":{
+"actual":-0.31,
+"front_car_holds_line":-2.13,
+"behind_car_holds_line":-0.3,
+"both_hold":-2.15
+},
+"per_car":{
+"#38 NXS Senpaioza":{
+"role":"front",
+"speed_kmh":107,
+"moved_toward_other_last_1s_m":-4.82,
+"moved_vs_expected_line_toward_other_1s_m":-1.95,
+"deviation_from_expected_line_m":-2.19,
+"room_left_on_far_side_m":7.99,
+"brake_now":0.12,
+"brake_normal_own":0.0,
+"brake_normal_field":0.06,
+"off_track_before_s":0,
+"slip_before_deg":5.3,
+"status":"racing",
+"brake_point_later_than_own_pct":-33
+},
+"#15 vanderdeured":{
+"role":"behind",
+"speed_kmh":137,
+"moved_toward_other_last_1s_m":3.62,
+"moved_vs_expected_line_toward_other_1s_m":0.77,
+"deviation_from_expected_line_m":0.12,
+"room_left_on_far_side_m":0.4,
+"brake_now":1.0,
+"brake_normal_own":0.52,
+"brake_normal_field":0.06,
+"off_track_before_s":0,
+"slip_before_deg":1.7,
+"status":"racing",
+"brake_point_later_than_own_pct":-11
+}
+},
+"after":{
+"#38 NXS Senpaioza":{
+"max_slip_deg":16,
+"off_track_s":0,
+"speed_drop_kmh":89
+},
+"#15 vanderdeured":{
+"max_slip_deg":22,
+"off_track_s":0,
+"speed_drop_kmh":110
+}
+}
+}
+],
+"consequences":[
+{
+"car":"#15 vanderdeured",
+"lost_s":1.32,
+"status_after":"racing",
+"from_pos":11,
+"to_pos":11,
+"max_slip_deg":21,
+"spun":false,
+"off_track_s":0,
+"retired":false
+},
+{
+"car":"#69 GodRichardfalamo",
+"lost_s":4.73,
+"status_after":"racing",
+"from_pos":8,
+"to_pos":15,
+"max_slip_deg":37,
+"spun":false,
+"off_track_s":0,
+"retired":false
+},
+{
+"car":"#38 NXS Senpaioza",
+"lost_s":1.34,
+"status_after":"racing",
+"from_pos":9,
+"to_pos":12,
+"max_slip_deg":15,
+"spun":false,
+"off_track_s":0,
+"retired":false
+}
+],
+"engine_call":[
+{
+"sev":"LOW",
+"type":"Racing incident",
+"drivers":[
+"GodRichardfalamo",
+"NXS Senpaioza"
+],
+"steps":[
+{
+"call":"racing incident",
+"why":"racing incident"
+},
+{
+"call":"racing incident",
+"why":"aftermath of the first contact, it cost time"
+}
+]
+}
+]
+},
+{
+"n":6,
+"car_ids":[
+1,
+9
+],
+"after_finish":false,
+"status_at_first_touch":{
+"#3 TTV/GreMi_Gaming":"racing",
+"Car #13 (hidden name, slot 9)":"racing"
+},
+"start":"0:29.1",
+"end":"0:30.6",
+"t_start":29.1,
+"lap":1,
+"cars":[
+"#3 TTV/GreMi_Gaming",
+"Car #13 (hidden name, slot 9)"
+],
+"touch_count":1,
+"game_contact_severity_max":1,
+"touches":[
+{
+"t":30.1,
+"time":"0:30.1",
+"t_end":30.65,
+"cars":[
+"#3 TTV/GreMi_Gaming",
+"Car #13 (hidden name, slot 9)"
+],
+"where":"at the apex of T4",
+"lap":1,
+"game_logged_only":false,
+"front":"Car #13 (hidden name, slot 9)",
+"behind":"#3 TTV/GreMi_Gaming",
+"overlap_m":3.58,
+"overlap_history_m":{
+"2.0":-25.0,
+"1.5":-17.5,
+"1.0":-8.5,
+"0.5":-1.6,
+"0.2":2.0
+},
+"side_gap_m":2.02,
+"closing_kmh":17,
+"inside_car":"#3 TTV/GreMi_Gaming",
+"hold_line_sim_min_gap_m":{
+"actual":-0.36,
+"front_car_holds_line":-2.03,
+"behind_car_holds_line":1.13,
+"both_hold":-1.99
+},
+"per_car":{
+"Car #13 (hidden name, slot 9)":{
+"role":"front",
+"speed_kmh":91,
+"moved_toward_other_last_1s_m":-2.46,
+"moved_vs_expected_line_toward_other_1s_m":-2.5,
+"deviation_from_expected_line_m":-3.13,
+"room_left_on_far_side_m":6.74,
+"brake_now":0.0,
+"brake_normal_own":0.0,
+"brake_normal_field":0.06,
+"off_track_before_s":0,
+"slip_before_deg":3.1,
+"status":"racing",
+"brake_point_later_than_own_pct":-52,
+"apex_speed_over_own_pct":-8
+},
+"#3 TTV/GreMi_Gaming":{
+"role":"behind",
+"speed_kmh":108,
+"moved_toward_other_last_1s_m":6.29,
+"moved_vs_expected_line_toward_other_1s_m":3.13,
+"deviation_from_expected_line_m":-1.6,
+"room_left_on_far_side_m":3.0,
+"brake_now":0.16,
+"brake_normal_own":0.0,
+"brake_normal_field":0.0,
+"off_track_before_s":0,
+"slip_before_deg":8.1,
+"status":"racing",
+"brake_point_later_than_own_pct":-23,
+"apex_speed_over_own_pct":-32
+}
+},
+"after":{
+"Car #13 (hidden name, slot 9)":{
+"max_slip_deg":8,
+"off_track_s":0,
+"speed_drop_kmh":-2
+},
+"#3 TTV/GreMi_Gaming":{
+"max_slip_deg":12,
+"off_track_s":0,
+"speed_drop_kmh":40
+}
+}
+}
+],
+"consequences":[
+{
+"car":"#3 TTV/GreMi_Gaming",
+"lost_s":0.46,
+"status_after":"racing",
+"from_pos":12,
+"to_pos":9,
+"max_slip_deg":12,
+"spun":false,
+"off_track_s":0,
+"retired":false
+},
+{
+"car":"Car #13 (hidden name, slot 9)",
+"lost_s":0.01,
+"status_after":"racing",
+"from_pos":10,
+"to_pos":8,
+"max_slip_deg":8,
+"spun":false,
+"off_track_s":0,
+"retired":false
+}
+],
+"engine_call":[
+{
+"sev":"LOW",
+"type":"Racing incident",
+"drivers":[
+"TTV/GreMi_Gaming",
+"SRSRawer"
+],
+"steps":[
+{
+"call":"TTV/GreMi_Gaming at fault",
+"why":"TTV/GreMi_Gaming came off the brake early (4.1 m off the racing line, slowed 6 km/h in 40 m, own laps 42); moved 5.9 m towards the other car before the touch"
+}
+]
+}
+]
+},
+{
+"n":7,
+"car_ids":[
+3,
+11
+],
+"after_finish":false,
+"status_at_first_touch":{
+"Car #62 (hidden name, slot 3)":"racing",
+"Car #2 (hidden name, slot 11)":"racing"
+},
+"start":"0:30.2",
+"end":"0:37.9",
+"t_start":30.2,
+"lap":1,
+"cars":[
+"Car #62 (hidden name, slot 3)",
+"Car #2 (hidden name, slot 11)"
+],
+"touch_count":1,
+"game_contact_severity_max":1,
+"touches":[
+{
+"t":31.22,
+"time":"0:31.2",
+"t_end":31.92,
+"cars":[
+"Car #62 (hidden name, slot 3)",
+"Car #2 (hidden name, slot 11)"
+],
+"where":"at the apex of T4",
+"lap":1,
+"game_logged_only":false,
+"front":"Car #62 (hidden name, slot 3)",
+"behind":"Car #2 (hidden name, slot 11)",
+"overlap_m":-0.24,
+"overlap_history_m":{
+"2.0":-15.5,
+"1.5":-10.3,
+"1.0":-6.1,
+"0.5":-3.5,
+"0.2":-1.9
+},
+"side_gap_m":1.34,
+"closing_kmh":19,
+"inside_car":"Car #2 (hidden name, slot 11)",
+"hold_line_sim_min_gap_m":{
+"actual":-0.2,
+"front_car_holds_line":-1.34,
+"behind_car_holds_line":2.46,
+"both_hold":1.31
+},
+"per_car":{
+"Car #62 (hidden name, slot 3)":{
+"role":"front",
+"speed_kmh":79,
+"moved_toward_other_last_1s_m":0.03,
+"moved_vs_expected_line_toward_other_1s_m":0.41,
+"deviation_from_expected_line_m":-2.02,
+"room_left_on_far_side_m":5.31,
+"brake_now":0.0,
+"brake_normal_own":0.0,
+"brake_normal_field":0.0,
+"off_track_before_s":0,
+"slip_before_deg":2.6,
+"status":"racing",
+"brake_point_later_than_own_pct":-14,
+"apex_speed_over_own_pct":-15
+},
+"Car #2 (hidden name, slot 11)":{
+"role":"behind",
+"speed_kmh":98,
+"moved_toward_other_last_1s_m":0.87,
+"moved_vs_expected_line_toward_other_1s_m":1.2,
+"deviation_from_expected_line_m":-3.65,
+"room_left_on_far_side_m":3.11,
+"brake_now":0.0,
+"brake_normal_own":0.0,
+"brake_normal_field":0.0,
+"off_track_before_s":0,
+"slip_before_deg":3.8,
+"status":"racing",
+"brake_point_later_than_own_pct":-9
+}
+},
+"after":{
+"Car #62 (hidden name, slot 3)":{
+"max_slip_deg":2,
+"off_track_s":0,
+"speed_drop_kmh":2
+},
+"Car #2 (hidden name, slot 11)":{
+"max_slip_deg":172,
+"off_track_s":0,
+"speed_drop_kmh":95
+}
+}
+}
+],
+"consequences":[
+{
+"car":"Car #62 (hidden name, slot 3)",
+"lost_s":0.75,
+"status_after":"racing",
+"from_pos":13,
+"to_pos":9,
+"max_slip_deg":2,
+"spun":false,
+"off_track_s":0,
+"retired":false
+},
+{
+"car":"Car #2 (hidden name, slot 11)",
+"lost_s":11.37,
+"status_after":"racing",
+"from_pos":14,
+"to_pos":15,
+"max_slip_deg":171,
+"spun":true,
+"off_track_s":0,
+"retired":false
+}
+],
+"engine_call":[
+{
+"sev":"MEDIUM",
+"type":"Racing incident",
+"drivers":[
+"KLI_DAGOON",
+"jayferr1269"
+],
+"steps":[
+{
+"call":"jayferr1269 at fault",
+"why":"jayferr1269 braked 36% later than the field"
+}
+]
+}
+]
+},
+{
+"n":8,
+"car_ids":[
+4,
+14
+],
+"after_finish":false,
+"status_at_first_touch":{
+"#8 Stepino81":"racing",
+"Car #69 (hidden name, slot 14)":"racing"
+},
+"start":"0:37.5",
+"end":"0:39.0",
+"t_start":37.5,
+"lap":1,
+"cars":[
+"#8 Stepino81",
+"Car #69 (hidden name, slot 14)"
+],
+"touch_count":1,
+"game_contact_severity_max":1,
+"touches":[
+{
+"t":38.5,
+"time":"0:38.5",
+"t_end":38.95,
+"cars":[
+"#8 Stepino81",
+"Car #69 (hidden name, slot 14)"
+],
+"where":"braking into T5",
+"lap":1,
+"game_logged_only":false,
+"front":"#8 Stepino81",
+"behind":"Car #69 (hidden name, slot 14)",
+"overlap_m":3.8,
+"overlap_history_m":{
+"2.0":8.0,
+"1.5":8.3,
+"1.0":7.2,
+"0.5":5.2,
+"0.2":4.0
+},
+"side_gap_m":2.1,
+"closing_kmh":-2,
+"inside_car":"Car #69 (hidden name, slot 14)",
+"hold_line_sim_min_gap_m":{
+"actual":-0.18,
+"front_car_holds_line":-0.48,
+"behind_car_holds_line":-1.58,
+"both_hold":-1.89
+},
+"per_car":{
+"#8 Stepino81":{
+"role":"front",
+"speed_kmh":101,
+"moved_toward_other_last_1s_m":1.02,
+"moved_vs_expected_line_toward_other_1s_m":0.67,
+"deviation_from_expected_line_m":-0.32,
+"room_left_on_far_side_m":-0.71,
+"brake_now":0.0,
+"brake_normal_own":0.0,
+"brake_normal_field":0.0,
+"off_track_before_s":0,
+"slip_before_deg":4.7,
+"status":"racing",
+"brake_point_later_than_own_pct":-37,
+"apex_speed_over_own_pct":-10
+},
+"Car #69 (hidden name, slot 14)":{
+"role":"behind",
+"speed_kmh":99,
+"moved_toward_other_last_1s_m":0.72,
+"moved_vs_expected_line_toward_other_1s_m":-0.47,
+"deviation_from_expected_line_m":1.14,
+"room_left_on_far_side_m":9.68,
+"brake_now":0.0,
+"brake_normal_own":0.0,
+"brake_normal_field":0.0,
+"off_track_before_s":0,
+"slip_before_deg":4.6,
+"status":"racing",
+"brake_point_later_than_own_pct":-44,
+"apex_speed_over_own_pct":-10
+}
+},
+"after":{
+"#8 Stepino81":{
+"max_slip_deg":3,
+"off_track_s":0,
+"speed_drop_kmh":16
+},
+"Car #69 (hidden name, slot 14)":{
+"max_slip_deg":3,
+"off_track_s":0,
+"speed_drop_kmh":14
+}
+}
+}
+],
+"consequences":[
+{
+"car":"#8 Stepino81",
+"lost_s":-0.01,
+"status_after":"racing",
+"from_pos":6,
+"to_pos":6,
+"max_slip_deg":3,
+"spun":false,
+"off_track_s":0,
+"retired":false
+},
+{
+"car":"Car #69 (hidden name, slot 14)",
+"lost_s":0.44,
+"status_after":"racing",
+"from_pos":5,
+"to_pos":5,
+"max_slip_deg":2,
+"spun":false,
+"off_track_s":0,
+"retired":false
+}
+],
+"engine_call":"none (engine saw no incident here)"
+},
+{
+"n":9,
+"car_ids":[
+10,
+13
+],
+"after_finish":false,
+"status_at_first_touch":{
+"#15 vanderdeured":"racing",
+"#38 NXS Senpaioza":"racing"
+},
+"start":"0:39.3",
+"end":"0:40.6",
+"t_start":39.3,
+"lap":1,
+"cars":[
+"#15 vanderdeured",
+"#38 NXS Senpaioza"
+],
+"touch_count":1,
+"game_contact_severity_max":1,
+"touches":[
+{
+"t":40.26,
+"time":"0:40.3",
+"t_end":40.56,
+"cars":[
+"#15 vanderdeured",
+"#38 NXS Senpaioza"
+],
+"where":"braking into T5",
+"lap":1,
+"game_logged_only":false,
+"front":"#38 NXS Senpaioza",
+"behind":"#15 vanderdeured",
+"overlap_m":4.45,
+"overlap_history_m":{
+"2.0":7.0,
+"1.5":2.6,
+"1.0":1.2,
+"0.5":3.0,
+"0.2":3.8
+},
+"side_gap_m":1.97,
+"closing_kmh":3,
+"inside_car":"#38 NXS Senpaioza",
+"hold_line_sim_min_gap_m":{
+"actual":-0.07,
+"front_car_holds_line":-0.69,
+"behind_car_holds_line":-1.57,
+"both_hold":-1.95
+},
+"per_car":{
+"#38 NXS Senpaioza":{
+"role":"front",
+"speed_kmh":147,
+"moved_toward_other_last_1s_m":1.88,
+"moved_vs_expected_line_toward_other_1s_m":0.58,
+"deviation_from_expected_line_m":0.6,
+"room_left_on_far_side_m":-0.03,
+"brake_now":0.38,
+"brake_normal_own":0.31,
+"brake_normal_field":0.25,
+"off_track_before_s":0,
+"slip_before_deg":3.2,
+"status":"racing",
+"brake_point_later_than_own_pct":-5,
+"apex_speed_over_own_pct":-8
+},
+"#15 vanderdeured":{
+"role":"behind",
+"speed_kmh":150,
+"moved_toward_other_last_1s_m":1.11,
+"moved_vs_expected_line_toward_other_1s_m":-0.75,
+"deviation_from_expected_line_m":-1.27,
+"room_left_on_far_side_m":8.62,
+"brake_now":1.0,
+"brake_normal_own":1.0,
+"brake_normal_field":0.5,
+"off_track_before_s":0,
+"slip_before_deg":3.5,
+"status":"racing",
+"brake_point_later_than_own_pct":9,
+"apex_speed_over_own_pct":3
+}
+},
+"after":{
+"#38 NXS Senpaioza":{
+"max_slip_deg":3,
+"off_track_s":0.5,
+"speed_drop_kmh":67
+},
+"#15 vanderdeured":{
+"max_slip_deg":4,
+"off_track_s":0,
+"speed_drop_kmh":79
+}
+}
+}
+],
+"consequences":[
+{
+"car":"#15 vanderdeured",
+"lost_s":0.72,
+"status_after":"racing",
+"from_pos":11,
+"to_pos":12,
+"max_slip_deg":3,
+"spun":false,
+"off_track_s":0,
+"retired":false
+},
+{
+"car":"#38 NXS Senpaioza",
+"lost_s":0.04,
+"status_after":"racing",
+"from_pos":12,
+"to_pos":11,
+"max_slip_deg":3,
+"spun":false,
+"off_track_s":0,
+"retired":false
+}
+],
+"engine_call":"none (engine saw no incident here)"
+},
+{
+"n":10,
+"car_ids":[
+4,
+14
+],
+"after_finish":false,
+"status_at_first_touch":{
+"#8 Stepino81":"racing",
+"Car #69 (hidden name, slot 14)":"racing"
+},
+"start":"0:43.4",
+"end":"0:45.7",
+"t_start":43.4,
+"lap":1,
+"cars":[
+"#8 Stepino81",
+"Car #69 (hidden name, slot 14)"
+],
+"touch_count":1,
+"game_contact_severity_max":1,
+"touches":[
+{
+"t":44.42,
+"time":"0:44.4",
+"t_end":45.67,
+"cars":[
+"#8 Stepino81",
+"Car #69 (hidden name, slot 14)"
+],
+"where":"at the apex of T6",
+"lap":1,
+"game_logged_only":false,
+"front":"#8 Stepino81",
+"behind":"Car #69 (hidden name, slot 14)",
+"overlap_m":-1.28,
+"overlap_history_m":{
+"2.0":5.4,
+"1.5":2.9,
+"1.0":-0.1,
+"0.5":-1.1,
+"0.2":-1.1
+},
+"side_gap_m":1.08,
+"closing_kmh":8,
+"inside_car":"Car #69 (hidden name, slot 14)",
+"hold_line_sim_min_gap_m":{
+"actual":-0.13,
+"front_car_holds_line":-0.37,
+"behind_car_holds_line":-0.56,
+"both_hold":-0.57
+},
+"per_car":{
+"#8 Stepino81":{
+"role":"front",
+"speed_kmh":87,
+"moved_toward_other_last_1s_m":-1.27,
+"moved_vs_expected_line_toward_other_1s_m":-0.27,
+"deviation_from_expected_line_m":0.28,
+"room_left_on_far_side_m":9.17,
+"brake_now":0.0,
+"brake_normal_own":0.0,
+"brake_normal_field":0.0,
+"off_track_before_s":0,
+"slip_before_deg":5.6,
+"status":"racing",
+"brake_point_later_than_own_pct":-12,
+"apex_speed_over_own_pct":-16
+},
+"Car #69 (hidden name, slot 14)":{
+"role":"behind",
+"speed_kmh":95,
+"moved_toward_other_last_1s_m":-2.82,
+"moved_vs_expected_line_toward_other_1s_m":-2.1,
+"deviation_from_expected_line_m":-1.22,
+"room_left_on_far_side_m":-0.39,
+"brake_now":0.0,
+"brake_normal_own":0.0,
+"brake_normal_field":0.0,
+"off_track_before_s":0,
+"slip_before_deg":3.1,
+"status":"racing",
+"brake_point_later_than_own_pct":-13,
+"apex_speed_over_own_pct":-8
+}
+},
+"after":{
+"#8 Stepino81":{
+"max_slip_deg":3,
+"off_track_s":0,
+"speed_drop_kmh":-1
+},
+"Car #69 (hidden name, slot 14)":{
+"max_slip_deg":6,
+"off_track_s":0,
+"speed_drop_kmh":-4
+}
+}
+}
+],
+"consequences":[
+{
+"car":"#8 Stepino81",
+"lost_s":-0.2,
+"status_after":"racing",
+"from_pos":6,
+"to_pos":5,
+"max_slip_deg":3,
+"spun":false,
+"off_track_s":0,
+"retired":false
+},
+{
+"car":"Car #69 (hidden name, slot 14)",
+"lost_s":0.21,
+"status_after":"racing",
+"from_pos":5,
+"to_pos":6,
+"max_slip_deg":6,
+"spun":false,
+"off_track_s":0,
+"retired":false
+}
+],
+"engine_call":"none (engine saw no incident here)"
+},
+{
+"n":11,
+"car_ids":[
+3,
+10,
+13
+],
+"after_finish":false,
+"status_at_first_touch":{
+"Car #62 (hidden name, slot 3)":"racing",
+"#15 vanderdeured":"racing",
+"#38 NXS Senpaioza":"racing"
+},
+"start":"0:46.5",
+"end":"0:48.8",
+"t_start":46.5,
+"lap":1,
+"cars":[
+"Car #62 (hidden name, slot 3)",
+"#15 vanderdeured",
+"#38 NXS Senpaioza"
+],
+"touch_count":2,
+"game_contact_severity_max":1,
+"touches":[
+{
+"t":47.55,
+"time":"0:47.5",
+"t_end":47.7,
+"cars":[
+"Car #62 (hidden name, slot 3)",
+"#38 NXS Senpaioza"
+],
+"where":"at the apex of T6",
+"lap":1,
+"game_logged_only":false,
+"front":"Car #62 (hidden name, slot 3)",
+"behind":"#38 NXS Senpaioza",
+"overlap_m":-0.63,
+"overlap_history_m":{
+"2.0":-6.7,
+"1.5":-4.3,
+"1.0":-3.9,
+"0.5":-3.4,
+"0.2":-2.3
+},
+"side_gap_m":0.19,
+"closing_kmh":12,
+"inside_car":"#38 NXS Senpaioza",
+"hold_line_sim_min_gap_m":{
+"actual":-0.2,
+"front_car_holds_line":-0.2,
+"behind_car_holds_line":-0.05,
+"both_hold":-0.11
+},
+"per_car":{
+"Car #62 (hidden name, slot 3)":{
+"role":"front",
+"speed_kmh":75,
+"moved_toward_other_last_1s_m":0.84,
+"moved_vs_expected_line_toward_other_1s_m":0.52,
+"deviation_from_expected_line_m":-0.04,
+"room_left_on_far_side_m":9.67,
+"brake_now":0.0,
+"brake_normal_own":0.0,
+"brake_normal_field":0.0,
+"off_track_before_s":0,
+"slip_before_deg":2.4,
+"status":"racing",
+"brake_point_later_than_own_pct":-15,
+"apex_speed_over_own_pct":-14
+},
+"#38 NXS Senpaioza":{
+"role":"behind",
+"speed_kmh":87,
+"moved_toward_other_last_1s_m":-1.67,
+"moved_vs_expected_line_toward_other_1s_m":-1.1,
+"deviation_from_expected_line_m":-0.74,
+"room_left_on_far_side_m":-0.4,
+"brake_now":0.0,
+"brake_normal_own":0.0,
+"brake_normal_field":0.0,
+"off_track_before_s":0,
+"slip_before_deg":3.8,
+"status":"racing",
+"apex_speed_over_own_pct":-17
+}
+},
+"after":{
+"Car #62 (hidden name, slot 3)":{
+"max_slip_deg":3,
+"off_track_s":0,
+"speed_drop_kmh":-4
+},
+"#38 NXS Senpaioza":{
+"max_slip_deg":3,
+"off_track_s":0,
+"speed_drop_kmh":14
+}
+}
+},
+{
+"t":47.8,
+"time":"0:47.8",
+"t_end":48.25,
+"cars":[
+"#15 vanderdeured",
+"#38 NXS Senpaioza"
+],
+"where":"at the apex of T6",
+"lap":1,
+"game_logged_only":false,
+"front":"#38 NXS Senpaioza",
+"behind":"#15 vanderdeured",
+"overlap_m":-0.59,
+"overlap_history_m":{
+"2.0":-5.1,
+"1.5":-5.3,
+"1.0":-3.6,
+"0.5":-2.9,
+"0.2":-2.4
+},
+"side_gap_m":0.87,
+"closing_kmh":19,
+"inside_car":"#38 NXS Senpaioza",
+"hold_line_sim_min_gap_m":{
+"actual":-0.42,
+"front_car_holds_line":-0.87,
+"behind_car_holds_line":-0.35,
+"both_hold":-0.87
+},
+"per_car":{
+"#38 NXS Senpaioza":{
+"role":"front",
+"speed_kmh":74,
+"moved_toward_other_last_1s_m":-1.89,
+"moved_vs_expected_line_toward_other_1s_m":-1.82,
+"deviation_from_expected_line_m":-1.37,
+"room_left_on_far_side_m":-0.24,
+"brake_now":0.0,
+"brake_normal_own":0.0,
+"brake_normal_field":0.0,
+"off_track_before_s":0,
+"slip_before_deg":2.9,
+"status":"racing",
+"apex_speed_over_own_pct":-17
+},
+"#15 vanderdeured":{
+"role":"behind",
+"speed_kmh":93,
+"moved_toward_other_last_1s_m":-0.39,
+"moved_vs_expected_line_toward_other_1s_m":-0.42,
+"deviation_from_expected_line_m":-0.43,
+"room_left_on_far_side_m":9.92,
+"brake_now":0.0,
+"brake_normal_own":0.0,
+"brake_normal_field":0.0,
+"off_track_before_s":0,
+"slip_before_deg":1.3,
+"status":"racing",
+"brake_point_later_than_own_pct":-11,
+"apex_speed_over_own_pct":-7
+}
+},
+"after":{
+"#38 NXS Senpaioza":{
+"max_slip_deg":2,
+"off_track_s":0,
+"speed_drop_kmh":5
+},
+"#15 vanderdeured":{
+"max_slip_deg":16,
+"off_track_s":0,
+"speed_drop_kmh":25
+}
+}
+}
+],
+"consequences":[
+{
+"car":"Car #62 (hidden name, slot 3)",
+"lost_s":0.03,
+"status_after":"racing",
+"from_pos":10,
+"to_pos":10,
+"max_slip_deg":3,
+"spun":false,
+"off_track_s":0,
+"retired":false
+},
+{
+"car":"#15 vanderdeured",
+"lost_s":0.56,
+"status_after":"racing",
+"from_pos":12,
+"to_pos":12,
+"max_slip_deg":15,
+"spun":false,
+"off_track_s":0,
+"retired":false
+},
+{
+"car":"#38 NXS Senpaioza",
+"lost_s":0.08,
+"status_after":"racing",
+"from_pos":11,
+"to_pos":11,
+"max_slip_deg":2,
+"spun":false,
+"off_track_s":0,
+"retired":false
+}
+],
+"engine_call":"none (engine saw no incident here)"
+},
+{
+"n":12,
+"car_ids":[
+3,
+13
+],
+"after_finish":false,
+"status_at_first_touch":{
+"Car #62 (hidden name, slot 3)":"racing",
+"#38 NXS Senpaioza":"racing"
+},
+"start":"1:01.5",
+"end":"1:02.7",
+"t_start":61.5,
+"lap":1,
+"cars":[
+"Car #62 (hidden name, slot 3)",
+"#38 NXS Senpaioza"
+],
+"touch_count":1,
+"game_contact_severity_max":2,
+"touches":[
+{
+"t":62.53,
+"time":"1:02.5",
+"t_end":62.68,
+"cars":[
+"Car #62 (hidden name, slot 3)",
+"#38 NXS Senpaioza"
+],
+"where":"at the apex of T7",
+"lap":1,
+"game_logged_only":false,
+"front":"Car #62 (hidden name, slot 3)",
+"behind":"#38 NXS Senpaioza",
+"overlap_m":-0.86,
+"overlap_history_m":{
+"2.0":-26.0,
+"1.5":-20.8,
+"1.0":-13.7,
+"0.5":-6.4,
+"0.2":-2.5
+},
+"side_gap_m":0.75,
+"closing_kmh":12,
+"inside_car":"Car #62 (hidden name, slot 3)",
+"hold_line_sim_min_gap_m":{
+"actual":-0.09,
+"front_car_holds_line":-0.13,
+"behind_car_holds_line":-0.08,
+"both_hold":-0.13
+},
+"per_car":{
+"Car #62 (hidden name, slot 3)":{
+"role":"front",
+"speed_kmh":109,
+"moved_toward_other_last_1s_m":0.45,
+"moved_vs_expected_line_toward_other_1s_m":0.15,
+"deviation_from_expected_line_m":-0.89,
+"room_left_on_far_side_m":7.36,
+"brake_now":0.0,
+"brake_normal_own":0.0,
+"brake_normal_field":0.0,
+"off_track_before_s":0,
+"slip_before_deg":1.5,
+"status":"racing",
+"brake_point_later_than_own_pct":-19,
+"apex_speed_over_own_pct":5
+},
+"#38 NXS Senpaioza":{
+"role":"behind",
+"speed_kmh":121,
+"moved_toward_other_last_1s_m":0.09,
+"moved_vs_expected_line_toward_other_1s_m":0.38,
+"deviation_from_expected_line_m":-0.18,
+"room_left_on_far_side_m":3.54,
+"brake_now":0.12,
+"brake_normal_own":0.01,
+"brake_normal_field":0.06,
+"off_track_before_s":0,
+"slip_before_deg":4.2,
+"status":"racing",
+"brake_point_later_than_own_pct":-3,
+"apex_speed_over_own_pct":-27
+}
+},
+"after":{
+"Car #62 (hidden name, slot 3)":{
+"max_slip_deg":4,
+"off_track_s":0,
+"speed_drop_kmh":1
+},
+"#38 NXS Senpaioza":{
+"max_slip_deg":13,
+"off_track_s":0,
+"speed_drop_kmh":57
+}
+}
+}
+],
+"consequences":[
+{
+"car":"Car #62 (hidden name, slot 3)",
+"lost_s":-0.03,
+"status_after":"racing",
+"from_pos":10,
+"to_pos":10,
+"max_slip_deg":4,
+"spun":false,
+"off_track_s":0,
+"retired":false
+},
+{
+"car":"#38 NXS Senpaioza",
+"lost_s":0.23,
+"status_after":"racing",
+"from_pos":11,
+"to_pos":11,
+"max_slip_deg":12,
+"spun":false,
+"off_track_s":0,
+"retired":false
+}
+],
+"engine_call":"none (engine saw no incident here)"
+},
+{
+"n":13,
+"car_ids":[
+2,
+5
+],
+"after_finish":false,
+"status_at_first_touch":{
+"#83 Outdoorflame83":"racing",
+"#20 QDR_SHW1KS":"racing"
+},
+"start":"1:23.1",
+"end":"1:24.9",
+"t_start":83.1,
+"lap":1,
+"cars":[
+"#83 Outdoorflame83",
+"#20 QDR_SHW1KS"
+],
+"touch_count":1,
+"game_contact_severity_max":0,
+"touches":[
+{
+"t":84.1,
+"time":"1:24.1",
+"t_end":84.9,
+"cars":[
+"#83 Outdoorflame83",
+"#20 QDR_SHW1KS"
+],
+"where":"on the exit of T8",
+"lap":1,
+"game_logged_only":false,
+"front":"#83 Outdoorflame83",
+"behind":"#20 QDR_SHW1KS",
+"overlap_m":0.58,
+"overlap_history_m":{
+"2.0":0.9,
+"1.5":1.4,
+"1.0":1.4,
+"0.5":1.3,
+"0.2":0.7
+},
+"side_gap_m":1.13,
+"closing_kmh":-7,
+"inside_car":"#20 QDR_SHW1KS",
+"hold_line_sim_min_gap_m":{
+"actual":-0.15,
+"front_car_holds_line":0.21,
+"behind_car_holds_line":-0.82,
+"both_hold":-0.84
+},
+"per_car":{
+"#83 Outdoorflame83":{
+"role":"front",
+"speed_kmh":119,
+"moved_toward_other_last_1s_m":3.02,
+"moved_vs_expected_line_toward_other_1s_m":-0.33,
+"deviation_from_expected_line_m":-0.13,
+"room_left_on_far_side_m":-0.16,
+"brake_now":0.0,
+"brake_normal_own":0.0,
+"brake_normal_field":0.0,
+"off_track_before_s":0,
+"slip_before_deg":3.8,
+"status":"racing",
+"brake_point_later_than_own_pct":-29,
+"apex_speed_over_own_pct":-5
+},
+"#20 QDR_SHW1KS":{
+"role":"behind",
+"speed_kmh":112,
+"moved_toward_other_last_1s_m":-1.69,
+"moved_vs_expected_line_toward_other_1s_m":-2.54,
+"deviation_from_expected_line_m":-1.3,
+"room_left_on_far_side_m":9.39,
+"brake_now":0.0,
+"brake_normal_own":0.0,
+"brake_normal_field":0.0,
+"off_track_before_s":0,
+"slip_before_deg":2.7,
+"status":"racing",
+"brake_point_later_than_own_pct":1,
+"apex_speed_over_own_pct":-16
+}
+},
+"after":{
+"#83 Outdoorflame83":{
+"max_slip_deg":2,
+"off_track_s":0,
+"speed_drop_kmh":-7
+},
+"#20 QDR_SHW1KS":{
+"max_slip_deg":2,
+"off_track_s":0,
+"speed_drop_kmh":-8
+}
+}
+}
+],
+"consequences":[
+{
+"car":"#83 Outdoorflame83",
+"lost_s":0.11,
+"status_after":"racing",
+"from_pos":1,
+"to_pos":1,
+"max_slip_deg":2,
+"spun":false,
+"off_track_s":0,
+"retired":false
+},
+{
+"car":"#20 QDR_SHW1KS",
+"lost_s":0.04,
+"status_after":"racing",
+"from_pos":2,
+"to_pos":2,
+"max_slip_deg":2,
+"spun":false,
+"off_track_s":0,
+"retired":false
+}
+],
+"engine_call":"none (engine saw no incident here)"
+},
+{
+"n":14,
+"car_ids":[
+3,
+13
+],
+"after_finish":false,
+"status_at_first_touch":{
+"Car #62 (hidden name, slot 3)":"racing",
+"#38 NXS Senpaioza":"racing"
+},
+"start":"1:30.6",
+"end":"1:31.9",
+"t_start":90.6,
+"lap":1,
+"cars":[
+"Car #62 (hidden name, slot 3)",
+"#38 NXS Senpaioza"
+],
+"touch_count":1,
+"game_contact_severity_max":1,
+"touches":[
+{
+"t":91.63,
+"time":"1:31.6",
+"t_end":91.88,
+"cars":[
+"Car #62 (hidden name, slot 3)",
+"#38 NXS Senpaioza"
+],
+"where":"on the exit of T8",
+"lap":1,
+"game_logged_only":false,
+"front":"Car #62 (hidden name, slot 3)",
+"behind":"#38 NXS Senpaioza",
+"overlap_m":-0.22,
+"overlap_history_m":{
+"2.0":-3.8,
+"1.5":-1.8,
+"1.0":-0.8,
+"0.5":-1.0,
+"0.2":-1.1
+},
+"side_gap_m":0.62,
+"closing_kmh":10,
+"inside_car":"#38 NXS Senpaioza",
+"hold_line_sim_min_gap_m":{
+"actual":-0.29,
+"front_car_holds_line":-0.21,
+"behind_car_holds_line":-0.19,
+"both_hold":-0.2
+},
+"per_car":{
+"Car #62 (hidden name, slot 3)":{
+"role":"front",
+"speed_kmh":171,
+"moved_toward_other_last_1s_m":-0.32,
+"moved_vs_expected_line_toward_other_1s_m":0.22,
+"deviation_from_expected_line_m":-0.39,
+"room_left_on_far_side_m":7.11,
+"brake_now":0.0,
+"brake_normal_own":0.0,
+"brake_normal_field":0.0,
+"off_track_before_s":0,
+"slip_before_deg":2.6,
+"status":"racing",
+"brake_point_later_than_own_pct":0,
+"apex_speed_over_own_pct":-17
+},
+"#38 NXS Senpaioza":{
+"role":"behind",
+"speed_kmh":181,
+"moved_toward_other_last_1s_m":-3.16,
+"moved_vs_expected_line_toward_other_1s_m":-2.47,
+"deviation_from_expected_line_m":-0.94,
+"room_left_on_far_side_m":1.73,
+"brake_now":0.0,
+"brake_normal_own":0.0,
+"brake_normal_field":0.0,
+"off_track_before_s":0,
+"slip_before_deg":2.3,
+"status":"racing",
+"brake_point_later_than_own_pct":4,
+"apex_speed_over_own_pct":0
+}
+},
+"after":{
+"Car #62 (hidden name, slot 3)":{
+"max_slip_deg":1,
+"off_track_s":0,
+"speed_drop_kmh":-5
+},
+"#38 NXS Senpaioza":{
+"max_slip_deg":1,
+"off_track_s":0,
+"speed_drop_kmh":-5
+}
+}
+}
+],
+"consequences":[
+{
+"car":"Car #62 (hidden name, slot 3)",
+"lost_s":0.05,
+"status_after":"racing",
+"from_pos":10,
+"to_pos":10,
+"max_slip_deg":1,
+"spun":false,
+"off_track_s":0,
+"retired":false
+},
+{
+"car":"#38 NXS Senpaioza",
+"lost_s":-0.09,
+"status_after":"racing",
+"from_pos":11,
+"to_pos":11,
+"max_slip_deg":1,
+"spun":false,
+"off_track_s":0,
+"retired":false
+}
+],
+"engine_call":"none (engine saw no incident here)"
+},
+{
+"n":15,
+"car_ids":[
+4,
+7
+],
+"after_finish":false,
+"status_at_first_touch":{
+"#8 Stepino81":"racing",
+"#21 EthanMoonski":"racing"
+},
+"start":"2:53.4",
+"end":"2:54.7",
+"t_start":173.4,
+"lap":2,
+"cars":[
+"#8 Stepino81",
+"#21 EthanMoonski"
+],
+"touch_count":1,
+"game_contact_severity_max":1,
+"touches":[
+{
+"t":174.37,
+"time":"2:54.4",
+"t_end":174.67,
+"cars":[
+"#8 Stepino81",
+"#21 EthanMoonski"
+],
+"where":"on a straight",
+"lap":2,
+"game_logged_only":false,
+"front":"#8 Stepino81",
+"behind":"#21 EthanMoonski",
+"overlap_m":0.17,
+"overlap_history_m":{
+"2.0":-9.9,
+"1.5":-6.6,
+"1.0":-4.5,
+"0.5":-2.1,
+"0.2":-0.7
+},
+"side_gap_m":1.59,
+"closing_kmh":13,
+"hold_line_sim_min_gap_m":{
+"actual":-0.38,
+"front_car_holds_line":1.54,
+"behind_car_holds_line":-0.43,
+"both_hold":-0.58
+},
+"per_car":{
+"#8 Stepino81":{
+"role":"front",
+"speed_kmh":326,
+"moved_toward_other_last_1s_m":1.75,
+"moved_vs_expected_line_toward_other_1s_m":2.46,
+"deviation_from_expected_line_m":-2.08,
+"room_left_on_far_side_m":5.08,
+"brake_now":0.0,
+"brake_normal_own":0.0,
+"brake_normal_field":0.0,
+"off_track_before_s":0,
+"slip_before_deg":0.7,
+"status":"racing"
+},
+"#21 EthanMoonski":{
+"role":"behind",
+"speed_kmh":339,
+"moved_toward_other_last_1s_m":-1.2,
+"moved_vs_expected_line_toward_other_1s_m":-1.98,
+"deviation_from_expected_line_m":-2.99,
+"room_left_on_far_side_m":6.49,
+"brake_now":0.0,
+"brake_normal_own":0.0,
+"brake_normal_field":0.0,
+"off_track_before_s":0,
+"slip_before_deg":0.7,
+"status":"racing"
+}
+},
+"after":{
+"#8 Stepino81":{
+"max_slip_deg":1,
+"off_track_s":0,
+"speed_drop_kmh":0
+},
+"#21 EthanMoonski":{
+"max_slip_deg":1,
+"off_track_s":0,
+"speed_drop_kmh":18
+}
+}
+}
+],
+"consequences":[
+{
+"car":"#8 Stepino81",
+"lost_s":0.02,
+"status_after":"racing",
+"from_pos":6,
+"to_pos":6,
+"max_slip_deg":1,
+"spun":false,
+"off_track_s":0,
+"retired":false
+},
+{
+"car":"#21 EthanMoonski",
+"lost_s":0.14,
+"status_after":"racing",
+"from_pos":7,
+"to_pos":7,
+"max_slip_deg":1,
+"spun":false,
+"off_track_s":0,
+"retired":false
+}
+],
+"engine_call":"none (engine saw no incident here)"
+},
+{
+"n":16,
+"car_ids":[
+4,
+14
+],
+"after_finish":false,
+"status_at_first_touch":{
+"#8 Stepino81":"racing",
+"Car #69 (hidden name, slot 14)":"racing"
+},
+"start":"2:58.4",
+"end":"3:00.4",
+"t_start":178.4,
+"lap":2,
+"cars":[
+"#8 Stepino81",
+"Car #69 (hidden name, slot 14)"
+],
+"touch_count":1,
+"game_contact_severity_max":0,
+"touches":[
+{
+"t":179.37,
+"time":"2:59.4",
+"t_end":179.92,
+"cars":[
+"#8 Stepino81",
+"Car #69 (hidden name, slot 14)"
+],
+"where":"at the apex of T8",
+"lap":2,
+"game_logged_only":false,
+"front":"Car #69 (hidden name, slot 14)",
+"behind":"#8 Stepino81",
+"overlap_m":-0.61,
+"overlap_history_m":{
+"2.0":-17.8,
+"1.5":-13.9,
+"1.0":-7.7,
+"0.5":-3.7,
+"0.2":-1.6
+},
+"side_gap_m":1.4,
+"closing_kmh":11,
+"inside_car":"#8 Stepino81",
+"hold_line_sim_min_gap_m":{
+"actual":-0.18,
+"front_car_holds_line":-0.23,
+"behind_car_holds_line":-0.22,
+"both_hold":-0.23
+},
+"per_car":{
+"Car #69 (hidden name, slot 14)":{
+"role":"front",
+"speed_kmh":114,
+"moved_toward_other_last_1s_m":-1.13,
+"moved_vs_expected_line_toward_other_1s_m":0.03,
+"deviation_from_expected_line_m":0.14,
+"room_left_on_far_side_m":6.51,
+"brake_now":0.75,
+"brake_normal_own":0.44,
+"brake_normal_field":0.19,
+"off_track_before_s":0,
+"slip_before_deg":3.3,
+"status":"racing",
+"brake_point_later_than_own_pct":-2,
+"apex_speed_over_own_pct":-15
+},
+"#8 Stepino81":{
+"role":"behind",
+"speed_kmh":125,
+"moved_toward_other_last_1s_m":1.22,
+"moved_vs_expected_line_toward_other_1s_m":-0.26,
+"deviation_from_expected_line_m":-1.15,
+"room_left_on_far_side_m":8.35,
+"brake_now":0.62,
+"brake_normal_own":0.39,
+"brake_normal_field":0.37,
+"off_track_before_s":0,
+"slip_before_deg":2.6,
+"status":"racing",
+"brake_point_later_than_own_pct":-2,
+"apex_speed_over_own_pct":-15
+}
+},
+"after":{
+"Car #69 (hidden name, slot 14)":{
+"max_slip_deg":12,
+"off_track_s":0,
+"speed_drop_kmh":37
+},
+"#8 Stepino81":{
+"max_slip_deg":5,
+"off_track_s":0,
+"speed_drop_kmh":49
+}
+}
+}
+],
+"consequences":[
+{
+"car":"#8 Stepino81",
+"lost_s":-0.0,
+"status_after":"racing",
+"from_pos":6,
+"to_pos":6,
+"max_slip_deg":5,
+"spun":false,
+"off_track_s":0,
+"retired":false
+},
+{
+"car":"Car #69 (hidden name, slot 14)",
+"lost_s":-0.01,
+"status_after":"racing",
+"from_pos":5,
+"to_pos":5,
+"max_slip_deg":11,
+"spun":false,
+"off_track_s":0,
+"retired":false
+}
+],
+"engine_call":[
+{
+"sev":"LOW",
+"type":"Racing incident",
+"drivers":[
+"Stepino81",
+"Aston Martin '26 #69"
+],
+"steps":[
+{
+"call":"Stepino81 at fault",
+"why":"Stepino81 ran into the car ahead (closing 10 km/h)"
+}
+]
+}
+]
+},
+{
+"n":17,
+"car_ids":[
+7,
+14
+],
+"after_finish":false,
+"status_at_first_touch":{
+"#21 EthanMoonski":"racing",
+"Car #69 (hidden name, slot 14)":"racing"
+},
+"start":"3:18.0",
+"end":"3:25.3",
+"t_start":198.0,
+"lap":3,
+"cars":[
+"#21 EthanMoonski",
+"Car #69 (hidden name, slot 14)"
+],
+"touch_count":2,
+"game_contact_severity_max":1,
+"touches":[
+{
+"t":198.96,
+"time":"3:19.0",
+"t_end":199.26,
+"cars":[
+"#21 EthanMoonski",
+"Car #69 (hidden name, slot 14)"
+],
+"where":"at the apex of T2",
+"lap":3,
+"game_logged_only":false,
+"front":"Car #69 (hidden name, slot 14)",
+"behind":"#21 EthanMoonski",
+"overlap_m":-0.69,
+"overlap_history_m":{
+"2.0":-15.9,
+"1.5":-14.2,
+"1.0":-8.7,
+"0.5":-3.8,
+"0.2":-1.4
+},
+"side_gap_m":1.35,
+"closing_kmh":14,
+"inside_car":"#21 EthanMoonski",
+"hold_line_sim_min_gap_m":{
+"actual":-0.37,
+"front_car_holds_line":-0.36,
+"behind_car_holds_line":-0.0,
+"both_hold":-0.44
+},
+"per_car":{
+"Car #69 (hidden name, slot 14)":{
+"role":"front",
+"speed_kmh":113,
+"moved_toward_other_last_1s_m":-1.16,
+"moved_vs_expected_line_toward_other_1s_m":-1.68,
+"deviation_from_expected_line_m":2.27,
+"room_left_on_far_side_m":9.56,
+"brake_now":0.0,
+"brake_normal_own":0.0,
+"brake_normal_field":0.0,
+"off_track_before_s":0,
+"slip_before_deg":2.7,
+"status":"racing",
+"brake_point_later_than_own_pct":11,
+"apex_speed_over_own_pct":-3
+},
+"#21 EthanMoonski":{
+"role":"behind",
+"speed_kmh":127,
+"moved_toward_other_last_1s_m":0.49,
+"moved_vs_expected_line_toward_other_1s_m":-0.17,
+"deviation_from_expected_line_m":0.42,
+"room_left_on_far_side_m":5.64,
+"brake_now":0.16,
+"brake_normal_own":0.32,
+"brake_normal_field":0.06,
+"off_track_before_s":0,
+"slip_before_deg":4.8,
+"status":"racing",
+"brake_point_later_than_own_pct":2,
+"apex_speed_over_own_pct":-8
+}
+},
+"after":{
+"Car #69 (hidden name, slot 14)":{
+"max_slip_deg":3,
+"off_track_s":0,
+"speed_drop_kmh":3
+},
+"#21 EthanMoonski":{
+"max_slip_deg":5,
+"off_track_s":0,
+"speed_drop_kmh":31
+}
+}
+},
+{
+"t":204.31,
+"time":"3:24.3",
+"t_end":205.31,
+"cars":[
+"#21 EthanMoonski",
+"Car #69 (hidden name, slot 14)"
+],
+"where":"on the run to T3",
+"lap":3,
+"game_logged_only":false,
+"front":"#21 EthanMoonski",
+"behind":"Car #69 (hidden name, slot 14)",
+"overlap_m":5.0,
+"overlap_history_m":{
+"2.0":6.7,
+"1.5":5.4,
+"1.0":4.7,
+"0.5":4.6,
+"0.2":4.8
+},
+"side_gap_m":2.03,
+"closing_kmh":0,
+"inside_car":"Car #69 (hidden name, slot 14)",
+"hold_line_sim_min_gap_m":{
+"actual":-0.08,
+"front_car_holds_line":0.33,
+"behind_car_holds_line":-1.88,
+"both_hold":-1.66
+},
+"per_car":{
+"#21 EthanMoonski":{
+"role":"front",
+"speed_kmh":200,
+"moved_toward_other_last_1s_m":-0.79,
+"moved_vs_expected_line_toward_other_1s_m":1.07,
+"deviation_from_expected_line_m":1.26,
+"room_left_on_far_side_m":5.27,
+"brake_now":0.0,
+"brake_normal_own":0.0,
+"brake_normal_field":0.0,
+"off_track_before_s":0,
+"slip_before_deg":1.9,
+"status":"racing",
+"apex_speed_over_own_pct":-5
+},
+"Car #69 (hidden name, slot 14)":{
+"role":"behind",
+"speed_kmh":200,
+"moved_toward_other_last_1s_m":1.52,
+"moved_vs_expected_line_toward_other_1s_m":-1.17,
+"deviation_from_expected_line_m":1.41,
+"room_left_on_far_side_m":3.05,
+"brake_now":0.0,
+"brake_normal_own":0.0,
+"brake_normal_field":0.0,
+"off_track_before_s":0,
+"slip_before_deg":1.9,
+"status":"racing",
+"apex_speed_over_own_pct":2
+}
+},
+"after":{
+"#21 EthanMoonski":{
+"max_slip_deg":3,
+"off_track_s":0,
+"speed_drop_kmh":34
+},
+"Car #69 (hidden name, slot 14)":{
+"max_slip_deg":3,
+"off_track_s":0,
+"speed_drop_kmh":7
+}
+}
+}
+],
+"consequences":[
+{
+"car":"#21 EthanMoonski",
+"lost_s":0.02,
+"status_after":"racing",
+"from_pos":7,
+"to_pos":7,
+"max_slip_deg":4,
+"spun":false,
+"off_track_s":0,
+"retired":false
+},
+{
+"car":"Car #69 (hidden name, slot 14)",
+"lost_s":0.24,
+"status_after":"racing",
+"from_pos":6,
+"to_pos":6,
+"max_slip_deg":3,
+"spun":false,
+"off_track_s":0,
+"retired":false
+}
+],
+"engine_call":"none (engine saw no incident here)"
+},
+{
+"n":18,
+"car_ids":[
+4,
+7,
+14
+],
+"after_finish":false,
+"status_at_first_touch":{
+"#8 Stepino81":"racing",
+"#21 EthanMoonski":"racing",
+"Car #69 (hidden name, slot 14)":"racing"
+},
+"start":"3:37.6",
+"end":"3:44.7",
+"t_start":217.6,
+"lap":3,
+"cars":[
+"#8 Stepino81",
+"#21 EthanMoonski",
+"Car #69 (hidden name, slot 14)"
+],
+"touch_count":3,
+"game_contact_severity_max":2,
+"touches":[
+{
+"t":218.56,
+"time":"3:38.6",
+"t_end":218.86,
+"cars":[
+"#8 Stepino81",
+"Car #69 (hidden name, slot 14)"
+],
+"where":"at the apex of T4",
+"lap":3,
+"game_logged_only":false,
+"front":"Car #69 (hidden name, slot 14)",
+"behind":"#8 Stepino81",
+"overlap_m":0.01,
+"overlap_history_m":{
+"2.0":-2.0,
+"1.5":-0.6,
+"1.0":1.1,
+"0.5":0.5,
+"0.2":-0.2
+},
+"side_gap_m":1.71,
+"closing_kmh":9,
+"inside_car":"Car #69 (hidden name, slot 14)",
+"hold_line_sim_min_gap_m":{
+"actual":-0.33,
+"front_car_holds_line":0.07,
+"behind_car_holds_line":-0.61,
+"both_hold":-0.64
+},
+"per_car":{
+"Car #69 (hidden name, slot 14)":{
+"role":"front",
+"speed_kmh":124,
+"moved_toward_other_last_1s_m":2.46,
+"moved_vs_expected_line_toward_other_1s_m":0.27,
+"deviation_from_expected_line_m":-0.29,
+"room_left_on_far_side_m":4.26,
+"brake_now":1.0,
+"brake_normal_own":1.0,
+"brake_normal_field":0.72,
+"off_track_before_s":0,
+"slip_before_deg":1.7,
+"status":"racing",
+"brake_point_later_than_own_pct":1,
+"apex_speed_over_own_pct":-2
+},
+"#8 Stepino81":{
+"role":"behind",
+"speed_kmh":133,
+"moved_toward_other_last_1s_m":-1.96,
+"moved_vs_expected_line_toward_other_1s_m":-0.95,
+"deviation_from_expected_line_m":-0.78,
+"room_left_on_far_side_m":2.69,
+"brake_now":0.06,
+"brake_normal_own":0.06,
+"brake_normal_field":0.31,
+"off_track_before_s":0,
+"slip_before_deg":1.0,
+"status":"racing",
+"brake_point_later_than_own_pct":5,
+"apex_speed_over_own_pct":-8
+}
+},
+"after":{
+"Car #69 (hidden name, slot 14)":{
+"max_slip_deg":3,
+"off_track_s":0,
+"speed_drop_kmh":30
+},
+"#8 Stepino81":{
+"max_slip_deg":3,
+"off_track_s":0,
+"speed_drop_kmh":37
+}
+}
+},
+{
+"t":220.16,
+"time":"3:40.2",
+"t_end":220.91,
+"cars":[
+"#8 Stepino81",
+"#21 EthanMoonski"
+],
+"where":"at the apex of T4",
+"lap":3,
+"game_logged_only":false,
+"front":"#8 Stepino81",
+"behind":"#21 EthanMoonski",
+"overlap_m":-0.32,
+"overlap_history_m":{
+"2.0":-4.3,
+"1.5":-4.4,
+"1.0":-3.7,
+"0.5":-2.4,
+"0.2":-1.4
+},
+"side_gap_m":1.48,
+"closing_kmh":3,
+"inside_car":"#21 EthanMoonski",
+"hold_line_sim_min_gap_m":{
+"actual":-0.1,
+"front_car_holds_line":0.25,
+"behind_car_holds_line":-0.11,
+"both_hold":-0.31
+},
+"per_car":{
+"#8 Stepino81":{
+"role":"front",
+"speed_kmh":105,
+"moved_toward_other_last_1s_m":1.27,
+"moved_vs_expected_line_toward_other_1s_m":0.81,
+"deviation_from_expected_line_m":0.29,
+"room_left_on_far_side_m":5.4,
+"brake_now":0.0,
+"brake_normal_own":0.0,
+"brake_normal_field":0.0,
+"off_track_before_s":0,
+"slip_before_deg":2.1,
+"status":"racing",
+"brake_point_later_than_own_pct":5,
+"apex_speed_over_own_pct":-8
+},
+"#21 EthanMoonski":{
+"role":"behind",
+"speed_kmh":108,
+"moved_toward_other_last_1s_m":-2.25,
+"moved_vs_expected_line_toward_other_1s_m":-2.32,
+"deviation_from_expected_line_m":3.12,
+"room_left_on_far_side_m":1.38,
+"brake_now":0.0,
+"brake_normal_own":0.0,
+"brake_normal_field":0.0,
+"off_track_before_s":0,
+"slip_before_deg":3.6,
+"status":"racing",
+"brake_point_later_than_own_pct":-7,
+"apex_speed_over_own_pct":-3
+}
+},
+"after":{
+"#8 Stepino81":{
+"max_slip_deg":3,
+"off_track_s":0,
+"speed_drop_kmh":-3
+},
+"#21 EthanMoonski":{
+"max_slip_deg":5,
+"off_track_s":0,
+"speed_drop_kmh":-1
+}
+}
+},
+{
+"t":224.46,
+"time":"3:44.5",
+"t_end":224.66,
+"cars":[
+"#8 Stepino81",
+"Car #69 (hidden name, slot 14)"
+],
+"where":"on a straight",
+"lap":3,
+"game_logged_only":false,
+"front":"Car #69 (hidden name, slot 14)",
+"behind":"#8 Stepino81",
+"overlap_m":-0.24,
+"overlap_history_m":{
+"2.0":-7.4,
+"1.5":-6.9,
+"1.0":-5.6,
+"0.5":-3.3,
+"0.2":-1.3
+},
+"side_gap_m":1.36,
+"closing_kmh":25,
+"hold_line_sim_min_gap_m":{
+"actual":-0.24,
+"front_car_holds_line":-0.86,
+"behind_car_holds_line":-0.61,
+"both_hold":-1.29
+},
+"per_car":{
+"Car #69 (hidden name, slot 14)":{
+"role":"front",
+"speed_kmh":219,
+"moved_toward_other_last_1s_m":-0.69,
+"moved_vs_expected_line_toward_other_1s_m":-0.74,
+"deviation_from_expected_line_m":1.18,
+"room_left_on_far_side_m":7.2,
+"brake_now":0.0,
+"brake_normal_own":0.0,
+"brake_normal_field":0.0,
+"off_track_before_s":0,
+"slip_before_deg":1.6,
+"status":"racing"
+},
+"#8 Stepino81":{
+"role":"behind",
+"speed_kmh":244,
+"moved_toward_other_last_1s_m":1.29,
+"moved_vs_expected_line_toward_other_1s_m":0.01,
+"deviation_from_expected_line_m":0.93,
+"room_left_on_far_side_m":1.59,
+"brake_now":0.0,
+"brake_normal_own":0.0,
+"brake_normal_field":0.0,
+"off_track_before_s":0,
+"slip_before_deg":2.5,
+"status":"racing"
+}
+},
+"after":{
+"Car #69 (hidden name, slot 14)":{
+"max_slip_deg":2,
+"off_track_s":0,
+"speed_drop_kmh":46
+},
+"#8 Stepino81":{
+"max_slip_deg":2,
+"off_track_s":0,
+"speed_drop_kmh":76
+}
+}
+}
+],
+"consequences":[
+{
+"car":"#8 Stepino81",
+"lost_s":0.32,
+"status_after":"racing",
+"from_pos":6,
+"to_pos":5,
+"max_slip_deg":2,
+"spun":false,
+"off_track_s":0,
+"retired":false
+},
+{
+"car":"#21 EthanMoonski",
+"lost_s":0.57,
+"status_after":"racing",
+"from_pos":7,
+"to_pos":7,
+"max_slip_deg":4,
+"spun":false,
+"off_track_s":0,
+"retired":false
+},
+{
+"car":"Car #69 (hidden name, slot 14)",
+"lost_s":0.29,
+"status_after":"racing",
+"from_pos":5,
+"to_pos":6,
+"max_slip_deg":2,
+"spun":false,
+"off_track_s":0,
+"retired":false
+}
+],
+"engine_call":[
+{
+"sev":"LOW",
+"type":"Racing incident",
+"drivers":[
+"Stepino81",
+"Aston Martin '26 #69"
+],
+"steps":[
+{
+"call":"Aston Martin '26 #69 at fault",
+"why":"Aston Martin '26 #69 ran into the car ahead (closing 7 km/h) (second touch)"
+},
+{
+"call":"racing incident",
+"why":"aftermath of the first contact, it cost time"
+},
+{
+"call":"EthanMoonski at fault",
+"why":"EthanMoonski ran into the car ahead (closing 6 km/h)"
+}
+]
+}
+]
+},
+{
+"n":19,
+"car_ids":[
+4,
+7,
+14
+],
+"after_finish":false,
+"status_at_first_touch":{
+"#8 Stepino81":"racing",
+"#21 EthanMoonski":"racing",
+"Car #69 (hidden name, slot 14)":"racing"
+},
+"start":"3:48.9",
+"end":"3:56.6",
+"t_start":228.9,
+"lap":3,
+"cars":[
+"#8 Stepino81",
+"#21 EthanMoonski",
+"Car #69 (hidden name, slot 14)"
+],
+"touch_count":3,
+"game_contact_severity_max":1,
+"touches":[
+{
+"t":229.89,
+"time":"3:49.9",
+"t_end":230.19,
+"cars":[
+"#21 EthanMoonski",
+"Car #69 (hidden name, slot 14)"
+],
+"where":"at the apex of T5",
+"lap":3,
+"game_logged_only":false,
+"front":"Car #69 (hidden name, slot 14)",
+"behind":"#21 EthanMoonski",
+"overlap_m":-1.17,
+"overlap_history_m":{
+"2.0":-12.3,
+"1.5":-6.0,
+"1.0":-2.7,
+"0.5":-1.5,
+"0.2":-1.5
+},
+"side_gap_m":0.59,
+"closing_kmh":6,
+"inside_car":"#21 EthanMoonski",
+"hold_line_sim_min_gap_m":{
+"actual":-0.07,
+"front_car_holds_line":0.2,
+"behind_car_holds_line":0.15,
+"both_hold":-0.13
+},
+"per_car":{
+"Car #69 (hidden name, slot 14)":{
+"role":"front",
+"speed_kmh":91,
+"moved_toward_other_last_1s_m":-3.59,
+"moved_vs_expected_line_toward_other_1s_m":-1.63,
+"deviation_from_expected_line_m":-2.97,
+"room_left_on_far_side_m":6.54,
+"brake_now":0.0,
+"brake_normal_own":0.12,
+"brake_normal_field":0.0,
+"off_track_before_s":0,
+"slip_before_deg":2.0,
+"status":"racing",
+"brake_point_later_than_own_pct":0,
+"apex_speed_over_own_pct":0
+},
+"#21 EthanMoonski":{
+"role":"behind",
+"speed_kmh":97,
+"moved_toward_other_last_1s_m":0.96,
+"moved_vs_expected_line_toward_other_1s_m":0.72,
+"deviation_from_expected_line_m":-1.5,
+"room_left_on_far_side_m":7.44,
+"brake_now":0.0,
+"brake_normal_own":0.0,
+"brake_normal_field":0.0,
+"off_track_before_s":0,
+"slip_before_deg":4.9,
+"status":"racing",
+"brake_point_later_than_own_pct":2,
+"apex_speed_over_own_pct":-1
+}
+},
+"after":{
+"Car #69 (hidden name, slot 14)":{
+"max_slip_deg":6,
+"off_track_s":0,
+"speed_drop_kmh":4
+},
+"#21 EthanMoonski":{
+"max_slip_deg":5,
+"off_track_s":0,
+"speed_drop_kmh":6
+}
+}
+},
+{
+"t":230.74,
+"time":"3:50.7",
+"t_end":232.89,
+"cars":[
+"#8 Stepino81",
+"Car #69 (hidden name, slot 14)"
+],
+"where":"at the apex of T5",
+"lap":3,
+"game_logged_only":false,
+"front":"#8 Stepino81",
+"behind":"Car #69 (hidden name, slot 14)",
+"overlap_m":-0.68,
+"overlap_history_m":{
+"2.0":-2.6,
+"1.5":-2.0,
+"1.0":-1.9,
+"0.5":-1.5,
+"0.2":-1.8
+},
+"side_gap_m":1.85,
+"closing_kmh":6,
+"inside_car":"Car #69 (hidden name, slot 14)",
+"hold_line_sim_min_gap_m":{
+"actual":0.03,
+"front_car_holds_line":-0.6,
+"behind_car_holds_line":-1.0,
+"both_hold":-1.03
+},
+"per_car":{
+"#8 Stepino81":{
+"role":"front",
+"speed_kmh":95,
+"moved_toward_other_last_1s_m":-1.96,
+"moved_vs_expected_line_toward_other_1s_m":-0.35,
+"deviation_from_expected_line_m":-0.79,
+"room_left_on_far_side_m":9.89,
+"brake_now":0.0,
+"brake_normal_own":0.0,
+"brake_normal_field":0.0,
+"off_track_before_s":0,
+"slip_before_deg":0.9,
+"status":"racing",
+"brake_point_later_than_own_pct":-9,
+"apex_speed_over_own_pct":-7
+},
+"Car #69 (hidden name, slot 14)":{
+"role":"behind",
+"speed_kmh":101,
+"moved_toward_other_last_1s_m":-0.6,
+"moved_vs_expected_line_toward_other_1s_m":-1.8,
+"deviation_from_expected_line_m":0.73,
+"room_left_on_far_side_m":-1.78,
+"brake_now":0.0,
+"brake_normal_own":0.0,
+"brake_normal_field":0.0,
+"off_track_before_s":0,
+"slip_before_deg":2.9,
+"status":"racing",
+"brake_point_later_than_own_pct":0,
+"apex_speed_over_own_pct":0
+}
+},
+"after":{
+"#8 Stepino81":{
+"max_slip_deg":14,
+"off_track_s":0,
+"speed_drop_kmh":19
+},
+"Car #69 (hidden name, slot 14)":{
+"max_slip_deg":6,
+"off_track_s":0,
+"speed_drop_kmh":7
+}
+}
+},
+{
+"t":235.74,
+"time":"3:55.7",
+"t_end":236.59,
+"cars":[
+"#8 Stepino81",
+"Car #69 (hidden name, slot 14)"
+],
+"where":"at the apex of T6",
+"lap":3,
+"game_logged_only":false,
+"front":"#8 Stepino81",
+"behind":"Car #69 (hidden name, slot 14)",
+"overlap_m":3.7,
+"overlap_history_m":{
+"2.0":0.5,
+"1.5":-3.0,
+"1.0":-2.6,
+"0.5":0.3,
+"0.2":2.2
+},
+"side_gap_m":1.96,
+"closing_kmh":18,
+"inside_car":"Car #69 (hidden name, slot 14)",
+"hold_line_sim_min_gap_m":{
+"actual":-0.09,
+"front_car_holds_line":-2.02,
+"behind_car_holds_line":-0.2,
+"both_hold":-1.98
+},
+"per_car":{
+"#8 Stepino81":{
+"role":"front",
+"speed_kmh":79,
+"moved_toward_other_last_1s_m":0.26,
+"moved_vs_expected_line_toward_other_1s_m":-0.2,
+"deviation_from_expected_line_m":2.84,
+"room_left_on_far_side_m":3.98,
+"brake_now":0.0,
+"brake_normal_own":0.0,
+"brake_normal_field":0.0,
+"off_track_before_s":0,
+"slip_before_deg":9.3,
+"status":"racing",
+"brake_point_later_than_own_pct":34,
+"apex_speed_over_own_pct":-25
+},
+"Car #69 (hidden name, slot 14)":{
+"role":"behind",
+"speed_kmh":97,
+"moved_toward_other_last_1s_m":-1.16,
+"moved_vs_expected_line_toward_other_1s_m":0.3,
+"deviation_from_expected_line_m":0.62,
+"room_left_on_far_side_m":3.52,
+"brake_now":0.0,
+"brake_normal_own":0.0,
+"brake_normal_field":0.0,
+"off_track_before_s":0,
+"slip_before_deg":2.5,
+"status":"racing",
+"brake_point_later_than_own_pct":1,
+"apex_speed_over_own_pct":-5
+}
+},
+"after":{
+"#8 Stepino81":{
+"max_slip_deg":2,
+"off_track_s":0,
+"speed_drop_kmh":-4
+},
+"Car #69 (hidden name, slot 14)":{
+"max_slip_deg":2,
+"off_track_s":0,
+"speed_drop_kmh":-1
+}
+}
+}
+],
+"consequences":[
+{
+"car":"#8 Stepino81",
+"lost_s":0.63,
+"status_after":"racing",
+"from_pos":5,
+"to_pos":6,
+"max_slip_deg":13,
+"spun":false,
+"off_track_s":0,
+"retired":false
+},
+{
+"car":"#21 EthanMoonski",
+"lost_s":0.57,
+"status_after":"racing",
+"from_pos":7,
+"to_pos":7,
+"max_slip_deg":4,
+"spun":false,
+"off_track_s":0,
+"retired":false
+},
+{
+"car":"Car #69 (hidden name, slot 14)",
+"lost_s":0.67,
+"status_after":"racing",
+"from_pos":6,
+"to_pos":5,
+"max_slip_deg":6,
+"spun":false,
+"off_track_s":0,
+"retired":false
+}
+],
+"engine_call":"none (engine saw no incident here)"
+},
+{
+"n":20,
+"car_ids":[
+0,
+2
+],
+"after_finish":false,
+"status_at_first_touch":{
+"#50 DevilDriver2396":"racing",
+"#83 Outdoorflame83":"racing"
+},
+"start":"3:51.9",
+"end":"3:53.3",
+"t_start":231.9,
+"lap":3,
+"cars":[
+"#50 DevilDriver2396",
+"#83 Outdoorflame83"
+],
+"touch_count":1,
+"game_contact_severity_max":0,
+"touches":[
+{
+"t":232.87,
+"time":"3:52.9",
+"t_end":233.27,
+"cars":[
+"#50 DevilDriver2396",
+"#83 Outdoorflame83"
+],
+"where":"on the exit of T6",
+"lap":3,
+"game_logged_only":false,
+"front":"#83 Outdoorflame83",
+"behind":"#50 DevilDriver2396",
+"overlap_m":3.91,
+"overlap_history_m":{
+"2.0":5.7,
+"1.5":5.1,
+"1.0":4.2,
+"0.5":3.9,
+"0.2":3.9
+},
+"side_gap_m":2.06,
+"closing_kmh":-2,
+"inside_car":"#50 DevilDriver2396",
+"hold_line_sim_min_gap_m":{
+"actual":-0.08,
+"front_car_holds_line":-0.03,
+"behind_car_holds_line":-2.01,
+"both_hold":-1.88
+},
+"per_car":{
+"#83 Outdoorflame83":{
+"role":"front",
+"speed_kmh":125,
+"moved_toward_other_last_1s_m":2.31,
+"moved_vs_expected_line_toward_other_1s_m":0.45,
+"deviation_from_expected_line_m":-0.01,
+"room_left_on_far_side_m":0.42,
+"brake_now":0.0,
+"brake_normal_own":0.0,
+"brake_normal_field":0.0,
+"off_track_before_s":0,
+"slip_before_deg":2.2,
+"status":"racing",
+"apex_speed_over_own_pct":-1
+},
+"#50 DevilDriver2396":{
+"role":"behind",
+"speed_kmh":123,
+"moved_toward_other_last_1s_m":-1.72,
+"moved_vs_expected_line_toward_other_1s_m":-1.61,
+"deviation_from_expected_line_m":-1.7,
+"room_left_on_far_side_m":7.78,
+"brake_now":0.0,
+"brake_normal_own":0.0,
+"brake_normal_field":0.0,
+"off_track_before_s":0,
+"slip_before_deg":2.4,
+"status":"racing",
+"brake_point_later_than_own_pct":33,
+"apex_speed_over_own_pct":-8
+}
+},
+"after":{
+"#83 Outdoorflame83":{
+"max_slip_deg":1,
+"off_track_s":0,
+"speed_drop_kmh":-8
+},
+"#50 DevilDriver2396":{
+"max_slip_deg":1,
+"off_track_s":0,
+"speed_drop_kmh":-8
+}
+}
+}
+],
+"consequences":[
+{
+"car":"#50 DevilDriver2396",
+"lost_s":-0.0,
+"status_after":"racing",
+"from_pos":3,
+"to_pos":3,
+"max_slip_deg":1,
+"spun":false,
+"off_track_s":0,
+"retired":false
+},
+{
+"car":"#83 Outdoorflame83",
+"lost_s":-0.08,
+"status_after":"racing",
+"from_pos":2,
+"to_pos":2,
+"max_slip_deg":0,
+"spun":false,
+"off_track_s":0,
+"retired":false
+}
+],
+"engine_call":[
+{
+"sev":"LOW",
+"type":"Racing incident",
+"drivers":[
+"DevilDriver2396",
+"Outdoorflame83"
+],
+"steps":[
+{
+"call":"Outdoorflame83 at fault",
+"why":"Outdoorflame83 moved 1.6 m towards the other car before the touch"
+}
+]
+}
+]
+},
+{
+"n":21,
+"car_ids":[
+4,
+14
+],
+"after_finish":false,
+"status_at_first_touch":{
+"#8 Stepino81":"racing",
+"Car #69 (hidden name, slot 14)":"racing"
+},
+"start":"4:10.6",
+"end":"4:11.9",
+"t_start":250.6,
+"lap":3,
+"cars":[
+"#8 Stepino81",
+"Car #69 (hidden name, slot 14)"
+],
+"touch_count":1,
+"game_contact_severity_max":0,
+"touches":[
+{
+"t":251.62,
+"time":"4:11.6",
+"t_end":251.92,
+"cars":[
+"#8 Stepino81",
+"Car #69 (hidden name, slot 14)"
+],
+"where":"at the apex of T7",
+"lap":3,
+"game_logged_only":false,
+"front":"Car #69 (hidden name, slot 14)",
+"behind":"#8 Stepino81",
+"overlap_m":3.78,
+"overlap_history_m":{
+"2.0":0.9,
+"1.5":1.0,
+"1.0":2.1,
+"0.5":3.9,
+"0.2":4.2
+},
+"side_gap_m":2.12,
+"closing_kmh":-8,
+"inside_car":"#8 Stepino81",
+"hold_line_sim_min_gap_m":{
+"actual":-0.09,
+"front_car_holds_line":-1.99,
+"behind_car_holds_line":-0.85,
+"both_hold":-2.06
+},
+"per_car":{
+"Car #69 (hidden name, slot 14)":{
+"role":"front",
+"speed_kmh":107,
+"moved_toward_other_last_1s_m":-0.87,
+"moved_vs_expected_line_toward_other_1s_m":-1.44,
+"deviation_from_expected_line_m":2.14,
+"room_left_on_far_side_m":9.68,
+"brake_now":0.0,
+"brake_normal_own":0.0,
+"brake_normal_field":0.0,
+"off_track_before_s":0,
+"slip_before_deg":6.4,
+"status":"racing",
+"brake_point_later_than_own_pct":6,
+"apex_speed_over_own_pct":-8
+},
+"#8 Stepino81":{
+"role":"behind",
+"speed_kmh":99,
+"moved_toward_other_last_1s_m":1.56,
+"moved_vs_expected_line_toward_other_1s_m":1.7,
+"deviation_from_expected_line_m":-0.02,
+"room_left_on_far_side_m":-0.64,
+"brake_now":0.0,
+"brake_normal_own":0.0,
+"brake_normal_field":0.0,
+"off_track_before_s":0,
+"slip_before_deg":4.4,
+"status":"racing",
+"brake_point_later_than_own_pct":-10,
+"apex_speed_over_own_pct":-15
+}
+},
+"after":{
+"Car #69 (hidden name, slot 14)":{
+"max_slip_deg":5,
+"off_track_s":0,
+"speed_drop_kmh":15
+},
+"#8 Stepino81":{
+"max_slip_deg":2,
+"off_track_s":0,
+"speed_drop_kmh":11
+}
+}
+}
+],
+"consequences":[
+{
+"car":"#8 Stepino81",
+"lost_s":0.52,
+"status_after":"racing",
+"from_pos":6,
+"to_pos":6,
+"max_slip_deg":1,
+"spun":false,
+"off_track_s":0,
+"retired":false
+},
+{
+"car":"Car #69 (hidden name, slot 14)",
+"lost_s":0.45,
+"status_after":"racing",
+"from_pos":5,
+"to_pos":5,
+"max_slip_deg":4,
+"spun":false,
+"off_track_s":0,
+"retired":false
+}
+],
+"engine_call":[
+{
+"sev":"LOW",
+"type":"Racing incident",
+"drivers":[
+"Stepino81",
+"Aston Martin '26 #69"
+],
+"steps":[
+{
+"call":"Stepino81 at fault",
+"why":"Stepino81 moved 1.6 m towards the other car before the touch"
+}
+]
+}
+]
+},
+{
+"n":22,
+"car_ids":[
+1,
+9
+],
+"after_finish":false,
+"status_at_first_touch":{
+"#3 TTV/GreMi_Gaming":"racing",
+"Car #13 (hidden name, slot 9)":"racing"
+},
+"start":"4:14.3",
+"end":"4:15.6",
+"t_start":254.3,
+"lap":3,
+"cars":[
+"#3 TTV/GreMi_Gaming",
+"Car #13 (hidden name, slot 9)"
+],
+"touch_count":1,
+"game_contact_severity_max":1,
+"touches":[
+{
+"t":255.32,
+"time":"4:15.3",
+"t_end":255.57,
+"cars":[
+"#3 TTV/GreMi_Gaming",
+"Car #13 (hidden name, slot 9)"
+],
+"where":"braking into T7",
+"lap":3,
+"game_logged_only":false,
+"front":"Car #13 (hidden name, slot 9)",
+"behind":"#3 TTV/GreMi_Gaming",
+"overlap_m":-0.44,
+"overlap_history_m":{
+"2.0":-2.7,
+"1.5":-2.3,
+"1.0":-2.3,
+"0.5":-1.4,
+"0.2":-1.0
+},
+"side_gap_m":0.82,
+"closing_kmh":3,
+"inside_car":"Car #13 (hidden name, slot 9)",
+"hold_line_sim_min_gap_m":{
+"actual":-0.01,
+"front_car_holds_line":-0.01,
+"behind_car_holds_line":-0.01,
+"both_hold":-0.0
+},
+"per_car":{
+"Car #13 (hidden name, slot 9)":{
+"role":"front",
+"speed_kmh":143,
+"moved_toward_other_last_1s_m":0.04,
+"moved_vs_expected_line_toward_other_1s_m":0.22,
+"deviation_from_expected_line_m":-0.36,
+"room_left_on_far_side_m":11.93,
+"brake_now":0.92,
+"brake_normal_own":1.0,
+"brake_normal_field":0.69,
+"off_track_before_s":0,
+"slip_before_deg":2.3,
+"status":"racing",
+"brake_point_later_than_own_pct":0,
+"apex_speed_over_own_pct":-11
+},
+"#3 TTV/GreMi_Gaming":{
+"role":"behind",
+"speed_kmh":146,
+"moved_toward_other_last_1s_m":1.06,
+"moved_vs_expected_line_toward_other_1s_m":0.62,
+"deviation_from_expected_line_m":0.63,
+"room_left_on_far_side_m":-0.39,
+"brake_now":0.53,
+"brake_normal_own":0.77,
+"brake_normal_field":0.69,
+"off_track_before_s":0,
+"slip_before_deg":1.2,
+"status":"racing",
+"brake_point_later_than_own_pct":-17,
+"apex_speed_over_own_pct":0
+}
+},
+"after":{
+"Car #13 (hidden name, slot 9)":{
+"max_slip_deg":8,
+"off_track_s":0,
+"speed_drop_kmh":71
+},
+"#3 TTV/GreMi_Gaming":{
+"max_slip_deg":1,
+"off_track_s":0,
+"speed_drop_kmh":73
+}
+}
+}
+],
+"consequences":[
+{
+"car":"#3 TTV/GreMi_Gaming",
+"lost_s":0.27,
+"status_after":"racing",
+"from_pos":11,
+"to_pos":11,
+"max_slip_deg":0,
+"spun":false,
+"off_track_s":0,
+"retired":false
+},
+{
+"car":"Car #13 (hidden name, slot 9)",
+"lost_s":0.36,
+"status_after":"racing",
+"from_pos":10,
+"to_pos":10,
+"max_slip_deg":7,
+"spun":false,
+"off_track_s":0,
+"retired":false
+}
+],
+"engine_call":[
+{
+"sev":"LOW",
+"type":"Racing incident",
+"drivers":[
+"TTV/GreMi_Gaming",
+"SRSRawer"
+],
+"steps":[
+{
+"call":"racing incident",
+"why":"racing incident"
+}
+]
+}
+]
+},
+{
+"n":23,
+"car_ids":[
+4,
+7
+],
+"after_finish":false,
+"status_at_first_touch":{
+"#8 Stepino81":"racing",
+"#21 EthanMoonski":"racing"
+},
+"start":"4:18.3",
+"end":"4:19.5",
+"t_start":258.3,
+"lap":3,
+"cars":[
+"#8 Stepino81",
+"#21 EthanMoonski"
+],
+"touch_count":1,
+"game_contact_severity_max":2,
+"touches":[
+{
+"t":259.29,
+"time":"4:19.3",
+"t_end":259.49,
+"cars":[
+"#8 Stepino81",
+"#21 EthanMoonski"
+],
+"where":"on a straight",
+"lap":3,
+"game_logged_only":false,
+"front":"#21 EthanMoonski",
+"behind":"#8 Stepino81",
+"overlap_m":2.69,
+"overlap_history_m":{
+"2.0":6.7,
+"1.5":6.5,
+"1.0":5.9,
+"0.5":4.6,
+"0.2":3.4
+},
+"side_gap_m":1.92,
+"closing_kmh":-14,
+"hold_line_sim_min_gap_m":{
+"actual":-0.16,
+"front_car_holds_line":-1.97,
+"behind_car_holds_line":0.37,
+"both_hold":-2.01
+},
+"per_car":{
+"#21 EthanMoonski":{
+"role":"front",
+"speed_kmh":310,
+"moved_toward_other_last_1s_m":-1.6,
+"moved_vs_expected_line_toward_other_1s_m":-2.06,
+"deviation_from_expected_line_m":2.84,
+"room_left_on_far_side_m":5.13,
+"brake_now":0.0,
+"brake_normal_own":0.0,
+"brake_normal_field":0.0,
+"off_track_before_s":0,
+"slip_before_deg":0.6,
+"status":"racing"
+},
+"#8 Stepino81":{
+"role":"behind",
+"speed_kmh":296,
+"moved_toward_other_last_1s_m":2.2,
+"moved_vs_expected_line_toward_other_1s_m":1.58,
+"deviation_from_expected_line_m":1.06,
+"room_left_on_far_side_m":3.31,
+"brake_now":0.0,
+"brake_normal_own":0.0,
+"brake_normal_field":0.0,
+"off_track_before_s":0,
+"slip_before_deg":0.2,
+"status":"racing"
+}
+},
+"after":{
+"#21 EthanMoonski":{
+"max_slip_deg":1,
+"off_track_s":0,
+"speed_drop_kmh":1
+},
+"#8 Stepino81":{
+"max_slip_deg":4,
+"off_track_s":0,
+"speed_drop_kmh":2
+}
+}
+}
+],
+"consequences":[
+{
+"car":"#8 Stepino81",
+"lost_s":0.09,
+"status_after":"racing",
+"from_pos":6,
+"to_pos":8,
+"max_slip_deg":3,
+"spun":false,
+"off_track_s":0,
+"retired":false
+},
+{
+"car":"#21 EthanMoonski",
+"lost_s":0.05,
+"status_after":"racing",
+"from_pos":7,
+"to_pos":6,
+"max_slip_deg":0,
+"spun":false,
+"off_track_s":0,
+"retired":false
+}
+],
+"engine_call":[
+{
+"sev":"LOW",
+"type":"Racing incident",
+"drivers":[
+"Stepino81",
+"EthanMoonski"
+],
+"steps":[
+{
+"call":"racing incident",
+"why":"racing incident"
+}
+]
+}
+]
+},
+{
+"n":24,
+"car_ids":[
+7,
+13
+],
+"after_finish":false,
+"status_at_first_touch":{
+"#21 EthanMoonski":"racing",
+"#38 NXS Senpaioza":"racing"
+},
+"start":"4:49.1",
+"end":"4:50.6",
+"t_start":289.1,
+"lap":3,
+"cars":[
+"#21 EthanMoonski",
+"#38 NXS Senpaioza"
+],
+"touch_count":1,
+"game_contact_severity_max":1,
+"touches":[
+{
+"t":290.05,
+"time":"4:50.1",
+"t_end":290.65,
+"cars":[
+"#21 EthanMoonski",
+"#38 NXS Senpaioza"
+],
+"where":"on a straight",
+"lap":3,
+"game_logged_only":false,
+"front":"#21 EthanMoonski",
+"behind":"#38 NXS Senpaioza",
+"overlap_m":-0.06,
+"overlap_history_m":{
+"2.0":-14.5,
+"1.5":-11.4,
+"1.0":-6.3,
+"0.5":-3.3,
+"0.2":-1.4
+},
+"side_gap_m":0.66,
+"closing_kmh":17,
+"inside_car":"#38 NXS Senpaioza",
+"hold_line_sim_min_gap_m":{
+"actual":-0.44,
+"front_car_holds_line":1.38,
+"behind_car_holds_line":0.01,
+"both_hold":-0.3
+},
+"per_car":{
+"#21 EthanMoonski":{
+"role":"front",
+"speed_kmh":284,
+"moved_toward_other_last_1s_m":3.45,
+"moved_vs_expected_line_toward_other_1s_m":2.88,
+"deviation_from_expected_line_m":-2.77,
+"room_left_on_far_side_m":13.77,
+"brake_now":0.0,
+"brake_normal_own":0.0,
+"brake_normal_field":0.0,
+"off_track_before_s":0,
+"slip_before_deg":2.3,
+"status":"racing",
+"apex_speed_over_own_pct":0
+},
+"#38 NXS Senpaioza":{
+"role":"behind",
+"speed_kmh":301,
+"moved_toward_other_last_1s_m":-0.26,
+"moved_vs_expected_line_toward_other_1s_m":-3.4,
+"deviation_from_expected_line_m":-2.31,
+"room_left_on_far_side_m":-1.37,
+"brake_now":0.0,
+"brake_normal_own":0.0,
+"brake_normal_field":0.0,
+"off_track_before_s":0,
+"slip_before_deg":3.4,
+"status":"racing",
+"apex_speed_over_own_pct":-1
+}
+},
+"after":{
+"#21 EthanMoonski":{
+"max_slip_deg":2,
+"off_track_s":0,
+"speed_drop_kmh":2
+},
+"#38 NXS Senpaioza":{
+"max_slip_deg":4,
+"off_track_s":0,
+"speed_drop_kmh":17
+}
+}
+}
+],
+"consequences":[
+{
+"car":"#21 EthanMoonski",
+"lost_s":0.51,
+"status_after":"racing",
+"from_pos":5,
+"to_pos":5,
+"max_slip_deg":2,
+"spun":false,
+"off_track_s":0,
+"retired":false
+},
+{
+"car":"#38 NXS Senpaioza",
+"lost_s":0.24,
+"status_after":"racing",
+"from_pos":7,
+"to_pos":6,
+"max_slip_deg":3,
+"spun":false,
+"off_track_s":0,
+"retired":false
+}
+],
+"engine_call":"none (engine saw no incident here)"
+},
+{
+"n":25,
+"car_ids":[
+3,
+9
+],
+"after_finish":false,
+"status_at_first_touch":{
+"Car #62 (hidden name, slot 3)":"racing",
+"Car #13 (hidden name, slot 9)":"racing"
+},
+"start":"5:00.4",
+"end":"5:02.5",
+"t_start":300.4,
+"lap":4,
+"cars":[
+"Car #62 (hidden name, slot 3)",
+"Car #13 (hidden name, slot 9)"
+],
+"touch_count":1,
+"game_contact_severity_max":0,
+"touches":[
+{
+"t":301.39,
+"time":"5:01.4",
+"t_end":302.54,
+"cars":[
+"Car #62 (hidden name, slot 3)",
+"Car #13 (hidden name, slot 9)"
+],
+"where":"braking into T2",
+"lap":4,
+"game_logged_only":false,
+"front":"Car #13 (hidden name, slot 9)",
+"behind":"Car #62 (hidden name, slot 3)",
+"overlap_m":3.0,
+"overlap_history_m":{
+"2.0":-0.9,
+"1.5":2.7,
+"1.0":4.0,
+"0.5":3.3,
+"0.2":3.1
+},
+"side_gap_m":2.16,
+"closing_kmh":-4,
+"inside_car":"Car #62 (hidden name, slot 3)",
+"hold_line_sim_min_gap_m":{
+"actual":-0.2,
+"front_car_holds_line":-0.77,
+"behind_car_holds_line":0.19,
+"both_hold":-0.33
+},
+"per_car":{
+"Car #13 (hidden name, slot 9)":{
+"role":"front",
+"speed_kmh":146,
+"moved_toward_other_last_1s_m":-0.94,
+"moved_vs_expected_line_toward_other_1s_m":-0.75,
+"deviation_from_expected_line_m":0.4,
+"room_left_on_far_side_m":4.41,
+"brake_now":1.0,
+"brake_normal_own":1.0,
+"brake_normal_field":0.31,
+"off_track_before_s":0,
+"slip_before_deg":2.7,
+"status":"racing",
+"brake_point_later_than_own_pct":-26,
+"apex_speed_over_own_pct":2
+},
+"Car #62 (hidden name, slot 3)":{
+"role":"behind",
+"speed_kmh":142,
+"moved_toward_other_last_1s_m":2.47,
+"moved_vs_expected_line_toward_other_1s_m":0.75,
+"deviation_from_expected_line_m":0.37,
+"room_left_on_far_side_m":8.69,
+"brake_now":1.0,
+"brake_normal_own":0.8,
+"brake_normal_field":0.46,
+"off_track_before_s":0,
+"slip_before_deg":3.1,
+"status":"racing",
+"brake_point_later_than_own_pct":-2,
+"apex_speed_over_own_pct":-11
+}
+},
+"after":{
+"Car #13 (hidden name, slot 9)":{
+"max_slip_deg":6,
+"off_track_s":0,
+"speed_drop_kmh":46
+},
+"Car #62 (hidden name, slot 3)":{
+"max_slip_deg":10,
+"off_track_s":0,
+"speed_drop_kmh":49
+}
+}
+}
+],
+"consequences":[
+{
+"car":"Car #62 (hidden name, slot 3)",
+"lost_s":0.24,
+"status_after":"racing",
+"from_pos":11,
+"to_pos":11,
+"max_slip_deg":9,
+"spun":false,
+"off_track_s":0,
+"retired":false
+},
+{
+"car":"Car #13 (hidden name, slot 9)",
+"lost_s":-0.22,
+"status_after":"racing",
+"from_pos":10,
+"to_pos":10,
+"max_slip_deg":6,
+"spun":false,
+"off_track_s":0,
+"retired":false
+}
+],
+"engine_call":[
+{
+"sev":"LOW",
+"type":"Racing incident",
+"drivers":[
+"KLI_DAGOON",
+"SRSRawer"
+],
+"steps":[
+{
+"call":"racing incident",
+"why":"racing incident"
+}
+]
+}
+]
+},
+{
+"n":26,
+"car_ids":[
+7,
+14
+],
+"after_finish":false,
+"status_at_first_touch":{
+"#21 EthanMoonski":"racing",
+"Car #69 (hidden name, slot 14)":"racing"
+},
+"start":"5:29.3",
+"end":"5:30.9",
+"t_start":329.3,
+"lap":4,
+"cars":[
+"#21 EthanMoonski",
+"Car #69 (hidden name, slot 14)"
+],
+"touch_count":1,
+"game_contact_severity_max":1,
+"touches":[
+{
+"t":330.34,
+"time":"5:30.3",
+"t_end":330.94,
+"cars":[
+"#21 EthanMoonski",
+"Car #69 (hidden name, slot 14)"
+],
+"where":"at the apex of T6",
+"lap":4,
+"game_logged_only":false,
+"front":"Car #69 (hidden name, slot 14)",
+"behind":"#21 EthanMoonski",
+"overlap_m":-0.84,
+"overlap_history_m":{
+"2.0":-5.1,
+"1.5":-5.8,
+"1.0":-4.7,
+"0.5":-2.3,
+"0.2":-0.9
+},
+"side_gap_m":0.04,
+"closing_kmh":6,
+"inside_car":"Car #69 (hidden name, slot 14)",
+"hold_line_sim_min_gap_m":{
+"actual":-0.01,
+"front_car_holds_line":-0.01,
+"behind_car_holds_line":0.13,
+"both_hold":0.08
+},
+"per_car":{
+"Car #69 (hidden name, slot 14)":{
+"role":"front",
+"speed_kmh":99,
+"moved_toward_other_last_1s_m":-0.29,
+"moved_vs_expected_line_toward_other_1s_m":-0.39,
+"deviation_from_expected_line_m":-0.08,
+"room_left_on_far_side_m":2.43,
+"brake_now":0.0,
+"brake_normal_own":0.0,
+"brake_normal_field":0.0,
+"off_track_before_s":0,
+"slip_before_deg":2.8,
+"status":"racing",
+"brake_point_later_than_own_pct":-7,
+"apex_speed_over_own_pct":-3
+},
+"#21 EthanMoonski":{
+"role":"behind",
+"speed_kmh":105,
+"moved_toward_other_last_1s_m":-0.55,
+"moved_vs_expected_line_toward_other_1s_m":0.68,
+"deviation_from_expected_line_m":-0.8,
+"room_left_on_far_side_m":6.9,
+"brake_now":0.0,
+"brake_normal_own":0.0,
+"brake_normal_field":0.0,
+"off_track_before_s":0,
+"slip_before_deg":2.2,
+"status":"racing",
+"brake_point_later_than_own_pct":-6,
+"apex_speed_over_own_pct":-2
+}
+},
+"after":{
+"Car #69 (hidden name, slot 14)":{
+"max_slip_deg":6,
+"off_track_s":0,
+"speed_drop_kmh":5
+},
+"#21 EthanMoonski":{
+"max_slip_deg":5,
+"off_track_s":0,
+"speed_drop_kmh":19
+}
+}
+}
+],
+"consequences":[
+{
+"car":"#21 EthanMoonski",
+"lost_s":-0.05,
+"status_after":"racing",
+"from_pos":7,
+"to_pos":7,
+"max_slip_deg":4,
+"spun":false,
+"off_track_s":0,
+"retired":false
+},
+{
+"car":"Car #69 (hidden name, slot 14)",
+"lost_s":0.0,
+"status_after":"racing",
+"from_pos":6,
+"to_pos":6,
+"max_slip_deg":5,
+"spun":false,
+"off_track_s":0,
+"retired":false
+}
+],
+"engine_call":"none (engine saw no incident here)"
+},
+{
+"n":27,
+"car_ids":[
+3,
+10
+],
+"after_finish":false,
+"status_at_first_touch":{
+"Car #62 (hidden name, slot 3)":"racing",
+"#15 vanderdeured":"racing"
+},
+"start":"5:31.4",
+"end":"5:33.1",
+"t_start":331.4,
+"lap":4,
+"cars":[
+"Car #62 (hidden name, slot 3)",
+"#15 vanderdeured"
+],
+"touch_count":1,
+"game_contact_severity_max":1,
+"touches":[
+{
+"t":332.44,
+"time":"5:32.4",
+"t_end":332.89,
+"cars":[
+"Car #62 (hidden name, slot 3)",
+"#15 vanderdeured"
+],
+"where":"braking into T5",
+"lap":4,
+"game_logged_only":false,
+"front":"Car #62 (hidden name, slot 3)",
+"behind":"#15 vanderdeured",
+"overlap_m":4.91,
+"overlap_history_m":{
+"2.0":-2.6,
+"1.5":-0.3,
+"1.0":1.3,
+"0.5":3.3,
+"0.2":4.6
+},
+"side_gap_m":2.24,
+"closing_kmh":-2,
+"inside_car":"Car #62 (hidden name, slot 3)",
+"hold_line_sim_min_gap_m":{
+"actual":-0.18,
+"front_car_holds_line":-1.42,
+"behind_car_holds_line":-2.21,
+"both_hold":-2.03
+},
+"per_car":{
+"Car #62 (hidden name, slot 3)":{
+"role":"front",
+"speed_kmh":109,
+"moved_toward_other_last_1s_m":-1.71,
+"moved_vs_expected_line_toward_other_1s_m":-0.51,
+"deviation_from_expected_line_m":0.35,
+"room_left_on_far_side_m":3.12,
+"brake_now":0.0,
+"brake_normal_own":0.94,
+"brake_normal_field":0.12,
+"off_track_before_s":0,
+"slip_before_deg":2.4,
+"status":"racing",
+"brake_point_later_than_own_pct":-2,
+"apex_speed_over_own_pct":-3
+},
+"#15 vanderdeured":{
+"role":"behind",
+"speed_kmh":107,
+"moved_toward_other_last_1s_m":2.67,
+"moved_vs_expected_line_toward_other_1s_m":0.03,
+"deviation_from_expected_line_m":-2.15,
+"room_left_on_far_side_m":5.4,
+"brake_now":1.0,
+"brake_normal_own":1.0,
+"brake_normal_field":0.12,
+"off_track_before_s":0,
+"slip_before_deg":2.0,
+"status":"racing",
+"brake_point_later_than_own_pct":-2,
+"apex_speed_over_own_pct":5
+}
+},
+"after":{
+"Car #62 (hidden name, slot 3)":{
+"max_slip_deg":6,
+"off_track_s":1.5,
+"speed_drop_kmh":19
+},
+"#15 vanderdeured":{
+"max_slip_deg":11,
+"off_track_s":0,
+"speed_drop_kmh":51
+}
+}
+}
+],
+"consequences":[
+{
+"car":"Car #62 (hidden name, slot 3)",
+"lost_s":-0.3,
+"status_after":"racing",
+"from_pos":11,
+"to_pos":11,
+"max_slip_deg":2,
+"spun":false,
+"off_track_s":0.25,
+"retired":false
+},
+{
+"car":"#15 vanderdeured",
+"lost_s":0.13,
+"status_after":"racing",
+"from_pos":12,
+"to_pos":12,
+"max_slip_deg":10,
+"spun":false,
+"off_track_s":0,
+"retired":false
+}
+],
+"engine_call":"none (engine saw no incident here)"
+},
+{
+"n":28,
+"car_ids":[
+7,
+13
+],
+"after_finish":false,
+"status_at_first_touch":{
+"#21 EthanMoonski":"racing",
+"#38 NXS Senpaioza":"racing"
+},
+"start":"6:04.1",
+"end":"6:05.9",
+"t_start":364.1,
+"lap":4,
+"cars":[
+"#21 EthanMoonski",
+"#38 NXS Senpaioza"
+],
+"touch_count":2,
+"game_contact_severity_max":1,
+"touches":[
+{
+"t":365.13,
+"time":"6:05.1",
+"t_end":365.63,
+"cars":[
+"#21 EthanMoonski",
+"#38 NXS Senpaioza"
+],
+"where":"on a straight",
+"lap":4,
+"game_logged_only":false,
+"front":"#38 NXS Senpaioza",
+"behind":"#21 EthanMoonski",
+"overlap_m":3.8,
+"overlap_history_m":{
+"2.0":-4.2,
+"1.5":-2.2,
+"1.0":-0.2,
+"0.5":1.6,
+"0.2":2.6
+},
+"side_gap_m":2.28,
+"closing_kmh":12,
+"hold_line_sim_min_gap_m":{
+"actual":-0.01,
+"front_car_holds_line":-0.37,
+"behind_car_holds_line":-0.55,
+"both_hold":-0.78
+},
+"per_car":{
+"#38 NXS Senpaioza":{
+"role":"front",
+"speed_kmh":323,
+"moved_toward_other_last_1s_m":-0.25,
+"moved_vs_expected_line_toward_other_1s_m":0.03,
+"deviation_from_expected_line_m":0.44,
+"room_left_on_far_side_m":3.18,
+"brake_now":0.0,
+"brake_normal_own":0.0,
+"brake_normal_field":0.0,
+"off_track_before_s":0,
+"slip_before_deg":0.3,
+"status":"racing"
+},
+"#21 EthanMoonski":{
+"role":"behind",
+"speed_kmh":335,
+"moved_toward_other_last_1s_m":0.65,
+"moved_vs_expected_line_toward_other_1s_m":0.34,
+"deviation_from_expected_line_m":-0.41,
+"room_left_on_far_side_m":7.7,
+"brake_now":0.0,
+"brake_normal_own":0.0,
+"brake_normal_field":0.0,
+"off_track_before_s":0,
+"slip_before_deg":1.0,
+"status":"racing"
+}
+},
+"after":{
+"#38 NXS Senpaioza":{
+"max_slip_deg":1,
+"off_track_s":0,
+"speed_drop_kmh":0
+},
+"#21 EthanMoonski":{
+"max_slip_deg":1,
+"off_track_s":0,
+"speed_drop_kmh":3
+}
+}
+},
+{
+"t":365.93,
+"time":"6:05.9",
+"t_end":365.93,
+"cars":[
+"#21 EthanMoonski",
+"#38 NXS Senpaioza"
+],
+"where":"on a straight",
+"lap":4,
+"game_logged_only":false,
+"front":"#21 EthanMoonski",
+"behind":"#38 NXS Senpaioza",
+"overlap_m":4.23,
+"overlap_history_m":{
+"2.0":11.0,
+"1.5":9.2,
+"1.0":7.6,
+"0.5":5.5,
+"0.2":4.8
+},
+"side_gap_m":2.12,
+"closing_kmh":-12,
+"hold_line_sim_min_gap_m":{
+"actual":-0.04,
+"front_car_holds_line":0.45,
+"behind_car_holds_line":-0.61,
+"both_hold":-0.16
+},
+"per_car":{
+"#21 EthanMoonski":{
+"role":"front",
+"speed_kmh":335,
+"moved_toward_other_last_1s_m":0.84,
+"moved_vs_expected_line_toward_other_1s_m":0.44,
+"deviation_from_expected_line_m":0.45,
+"room_left_on_far_side_m":8.08,
+"brake_now":0.0,
+"brake_normal_own":0.0,
+"brake_normal_field":0.0,
+"off_track_before_s":0,
+"slip_before_deg":1.4,
+"status":"racing"
+},
+"#38 NXS Senpaioza":{
+"role":"behind",
+"speed_kmh":323,
+"moved_toward_other_last_1s_m":-0.74,
+"moved_vs_expected_line_toward_other_1s_m":-0.63,
+"deviation_from_expected_line_m":0.69,
+"room_left_on_far_side_m":3.06,
+"brake_now":0.0,
+"brake_normal_own":0.0,
+"brake_normal_field":0.0,
+"off_track_before_s":0,
+"slip_before_deg":0.6,
+"status":"racing"
+}
+},
+"after":{
+"#21 EthanMoonski":{
+"max_slip_deg":0,
+"off_track_s":0,
+"speed_drop_kmh":3
+},
+"#38 NXS Senpaioza":{
+"max_slip_deg":0,
+"off_track_s":0,
+"speed_drop_kmh":2
+}
+}
+}
+],
+"consequences":[
+{
+"car":"#21 EthanMoonski",
+"lost_s":0.01,
+"status_after":"racing",
+"from_pos":7,
+"to_pos":6,
+"max_slip_deg":1,
+"spun":false,
+"off_track_s":0,
+"retired":false
+},
+{
+"car":"#38 NXS Senpaioza",
+"lost_s":0.34,
+"status_after":"racing",
+"from_pos":6,
+"to_pos":7,
+"max_slip_deg":0,
+"spun":false,
+"off_track_s":0,
+"retired":false
+}
+],
+"engine_call":"none (engine saw no incident here)"
+},
+{
+"n":29,
+"car_ids":[
+0,
+2
+],
+"after_finish":false,
+"status_at_first_touch":{
+"#50 DevilDriver2396":"racing",
+"#83 Outdoorflame83":"racing"
+},
+"start":"6:42.7",
+"end":"6:44.5",
+"t_start":402.7,
+"lap":5,
+"cars":[
+"#50 DevilDriver2396",
+"#83 Outdoorflame83"
+],
+"touch_count":2,
+"game_contact_severity_max":1,
+"touches":[
+{
+"t":403.73,
+"time":"6:43.7",
+"t_end":403.83,
+"cars":[
+"#50 DevilDriver2396",
+"#83 Outdoorflame83"
+],
+"where":"at the apex of T4",
+"lap":5,
+"game_logged_only":false,
+"front":"#50 DevilDriver2396",
+"behind":"#83 Outdoorflame83",
+"overlap_m":4.73,
+"overlap_history_m":{
+"2.0":9.7,
+"1.5":8.8,
+"1.0":7.3,
+"0.5":5.3,
+"0.2":4.8
+},
+"side_gap_m":2.16,
+"closing_kmh":5,
+"inside_car":"#50 DevilDriver2396",
+"hold_line_sim_min_gap_m":{
+"actual":0.0,
+"front_car_holds_line":0.24,
+"behind_car_holds_line":-2.05,
+"both_hold":-1.99
+},
+"per_car":{
+"#50 DevilDriver2396":{
+"role":"front",
+"speed_kmh":112,
+"moved_toward_other_last_1s_m":2.75,
+"moved_vs_expected_line_toward_other_1s_m":-0.12,
+"deviation_from_expected_line_m":-0.28,
+"room_left_on_far_side_m":0.75,
+"brake_now":0.94,
+"brake_normal_own":0.0,
+"brake_normal_field":0.06,
+"off_track_before_s":0,
+"slip_before_deg":5.9,
+"status":"racing",
+"brake_point_later_than_own_pct":3,
+"apex_speed_over_own_pct":-14
+},
+"#83 Outdoorflame83":{
+"role":"behind",
+"speed_kmh":117,
+"moved_toward_other_last_1s_m":-2.05,
+"moved_vs_expected_line_toward_other_1s_m":-1.79,
+"deviation_from_expected_line_m":-2.12,
+"room_left_on_far_side_m":7.75,
+"brake_now":0.15,
+"brake_normal_own":0.0,
+"brake_normal_field":0.06,
+"off_track_before_s":0,
+"slip_before_deg":3.3,
+"status":"racing",
+"brake_point_later_than_own_pct":-5,
+"apex_speed_over_own_pct":-7
+}
+},
+"after":{
+"#50 DevilDriver2396":{
+"max_slip_deg":3,
+"off_track_s":0,
+"speed_drop_kmh":27
+},
+"#83 Outdoorflame83":{
+"max_slip_deg":4,
+"off_track_s":0,
+"speed_drop_kmh":20
+}
+}
+},
+{
+"t":404.18,
+"time":"6:44.2",
+"t_end":404.53,
+"cars":[
+"#50 DevilDriver2396",
+"#83 Outdoorflame83"
+],
+"where":"at the apex of T4",
+"lap":5,
+"game_logged_only":false,
+"front":"#50 DevilDriver2396",
+"behind":"#83 Outdoorflame83",
+"overlap_m":4.92,
+"overlap_history_m":{
+"2.0":8.6,
+"1.5":7.3,
+"1.0":5.7,
+"0.5":4.8,
+"0.2":4.8
+},
+"side_gap_m":2.04,
+"closing_kmh":8,
+"inside_car":"#50 DevilDriver2396",
+"hold_line_sim_min_gap_m":{
+"actual":0.0,
+"front_car_holds_line":0.14,
+"behind_car_holds_line":-2.09,
+"both_hold":-1.98
+},
+"per_car":{
+"#50 DevilDriver2396":{
+"role":"front",
+"speed_kmh":100,
+"moved_toward_other_last_1s_m":1.85,
+"moved_vs_expected_line_toward_other_1s_m":0.41,
+"deviation_from_expected_line_m":-0.73,
+"room_left_on_far_side_m":0.06,
+"brake_now":0.0,
+"brake_normal_own":0.0,
+"brake_normal_field":0.0,
+"off_track_before_s":0,
+"slip_before_deg":5.9,
+"status":"racing",
+"brake_point_later_than_own_pct":3,
+"apex_speed_over_own_pct":-14
+},
+"#83 Outdoorflame83":{
+"role":"behind",
+"speed_kmh":108,
+"moved_toward_other_last_1s_m":-1.22,
+"moved_vs_expected_line_toward_other_1s_m":-1.5,
+"deviation_from_expected_line_m":-2.59,
+"room_left_on_far_side_m":8.16,
+"brake_now":0.0,
+"brake_normal_own":0.0,
+"brake_normal_field":0.0,
+"off_track_before_s":0,
+"slip_before_deg":3.9,
+"status":"racing",
+"brake_point_later_than_own_pct":-5,
+"apex_speed_over_own_pct":-7
+}
+},
+"after":{
+"#50 DevilDriver2396":{
+"max_slip_deg":2,
+"off_track_s":0,
+"speed_drop_kmh":7
+},
+"#83 Outdoorflame83":{
+"max_slip_deg":2,
+"off_track_s":0,
+"speed_drop_kmh":5
+}
+}
+}
+],
+"consequences":[
+{
+"car":"#50 DevilDriver2396",
+"lost_s":0.48,
+"status_after":"racing",
+"from_pos":3,
+"to_pos":3,
+"max_slip_deg":2,
+"spun":false,
+"off_track_s":0,
+"retired":false
+},
+{
+"car":"#83 Outdoorflame83",
+"lost_s":-0.08,
+"status_after":"racing",
+"from_pos":2,
+"to_pos":2,
+"max_slip_deg":3,
+"spun":false,
+"off_track_s":0,
+"retired":false
+}
+],
+"engine_call":[
+{
+"sev":"LOW",
+"type":"Racing incident",
+"drivers":[
+"DevilDriver2396",
+"Outdoorflame83"
+],
+"steps":[
+{
+"call":"DevilDriver2396 at fault",
+"why":"DevilDriver2396 braked 24% later than on his own laps; moved 3.0 m towards the other car before the touch"
+}
+]
+}
+]
+},
+{
+"n":30,
+"car_ids":[
+0,
+2
+],
+"after_finish":false,
+"status_at_first_touch":{
+"#50 DevilDriver2396":"racing",
+"#83 Outdoorflame83":"racing"
+},
+"start":"6:51.3",
+"end":"6:53.7",
+"t_start":411.3,
+"lap":5,
+"cars":[
+"#50 DevilDriver2396",
+"#83 Outdoorflame83"
+],
+"touch_count":1,
+"game_contact_severity_max":0,
+"touches":[
+{
+"t":412.32,
+"time":"6:52.3",
+"t_end":413.47,
+"cars":[
+"#50 DevilDriver2396",
+"#83 Outdoorflame83"
+],
+"where":"braking into T5",
+"lap":5,
+"game_logged_only":false,
+"front":"#83 Outdoorflame83",
+"behind":"#50 DevilDriver2396",
+"overlap_m":0.62,
+"overlap_history_m":{
+"2.0":-2.3,
+"1.5":-3.0,
+"1.0":-2.0,
+"0.5":-0.3,
+"0.2":0.3
+},
+"side_gap_m":1.75,
+"closing_kmh":-1,
+"inside_car":"#83 Outdoorflame83",
+"hold_line_sim_min_gap_m":{
+"actual":-0.12,
+"front_car_holds_line":0.8,
+"behind_car_holds_line":-0.99,
+"both_hold":-1.36
+},
+"per_car":{
+"#83 Outdoorflame83":{
+"role":"front",
+"speed_kmh":143,
+"moved_toward_other_last_1s_m":0.47,
+"moved_vs_expected_line_toward_other_1s_m":1.19,
+"deviation_from_expected_line_m":-1.5,
+"room_left_on_far_side_m":3.33,
+"brake_now":0.19,
+"brake_normal_own":0.12,
+"brake_normal_field":0.44,
+"off_track_before_s":0,
+"slip_before_deg":4.9,
+"status":"racing",
+"brake_point_later_than_own_pct":-15,
+"apex_speed_over_own_pct":12
+},
+"#50 DevilDriver2396":{
+"role":"behind",
+"speed_kmh":142,
+"moved_toward_other_last_1s_m":0.12,
+"moved_vs_expected_line_toward_other_1s_m":-2.0,
+"deviation_from_expected_line_m":-3.09,
+"room_left_on_far_side_m":6.18,
+"brake_now":1.0,
+"brake_normal_own":0.71,
+"brake_normal_field":0.38,
+"off_track_before_s":0,
+"slip_before_deg":5.1,
+"status":"racing",
+"brake_point_later_than_own_pct":-6,
+"apex_speed_over_own_pct":-4
+}
+},
+"after":{
+"#83 Outdoorflame83":{
+"max_slip_deg":19,
+"off_track_s":1.75,
+"speed_drop_kmh":71
+},
+"#50 DevilDriver2396":{
+"max_slip_deg":5,
+"off_track_s":0,
+"speed_drop_kmh":81
+}
+}
+}
+],
+"consequences":[
+{
+"car":"#50 DevilDriver2396",
+"lost_s":0.3,
+"status_after":"racing",
+"from_pos":3,
+"to_pos":3,
+"max_slip_deg":5,
+"spun":false,
+"off_track_s":0,
+"retired":false
+},
+{
+"car":"#83 Outdoorflame83",
+"lost_s":-0.27,
+"status_after":"racing",
+"from_pos":2,
+"to_pos":2,
+"max_slip_deg":19,
+"spun":false,
+"off_track_s":0.5,
+"retired":false
+}
+],
+"engine_call":"none (engine saw no incident here)"
+},
+{
+"n":31,
+"car_ids":[
+13,
+14
+],
+"after_finish":false,
+"status_at_first_touch":{
+"#38 NXS Senpaioza":"racing",
+"Car #69 (hidden name, slot 14)":"racing"
+},
+"start":"6:57.2",
+"end":"7:03.8",
+"t_start":417.2,
+"lap":5,
+"cars":[
+"#38 NXS Senpaioza",
+"Car #69 (hidden name, slot 14)"
+],
+"touch_count":2,
+"game_contact_severity_max":0,
+"touches":[
+{
+"t":418.21,
+"time":"6:58.2",
+"t_end":420.56,
+"cars":[
+"#38 NXS Senpaioza",
+"Car #69 (hidden name, slot 14)"
+],
+"where":"braking into T5",
+"lap":5,
+"game_logged_only":false,
+"front":"Car #69 (hidden name, slot 14)",
+"behind":"#38 NXS Senpaioza",
+"overlap_m":2.69,
+"overlap_history_m":{
+"2.0":7.5,
+"1.5":8.4,
+"1.0":6.3,
+"0.5":4.0,
+"0.2":3.0
+},
+"side_gap_m":1.9,
+"closing_kmh":-3,
+"inside_car":"#38 NXS Senpaioza",
+"hold_line_sim_min_gap_m":{
+"actual":-0.03,
+"front_car_holds_line":-0.67,
+"behind_car_holds_line":-2.09,
+"both_hold":-2.06
+},
+"per_car":{
+"Car #69 (hidden name, slot 14)":{
+"role":"front",
+"speed_kmh":145,
+"moved_toward_other_last_1s_m":2.64,
+"moved_vs_expected_line_toward_other_1s_m":-0.14,
+"deviation_from_expected_line_m":-0.68,
+"room_left_on_far_side_m":8.46,
+"brake_now":1.0,
+"brake_normal_own":0.94,
+"brake_normal_field":0.38,
+"off_track_before_s":0,
+"slip_before_deg":2.4,
+"status":"racing",
+"brake_point_later_than_own_pct":12,
+"apex_speed_over_own_pct":-13
+},
+"#38 NXS Senpaioza":{
+"role":"behind",
+"speed_kmh":142,
+"moved_toward_other_last_1s_m":0.95,
+"moved_vs_expected_line_toward_other_1s_m":-0.14,
+"deviation_from_expected_line_m":0.93,
+"room_left_on_far_side_m":-0.3,
+"brake_now":0.44,
+"brake_normal_own":0.31,
+"brake_normal_field":0.25,
+"off_track_before_s":0,
+"slip_before_deg":1.6,
+"status":"racing",
+"brake_point_later_than_own_pct":-1,
+"apex_speed_over_own_pct":-16
+}
+},
+"after":{
+"Car #69 (hidden name, slot 14)":{
+"max_slip_deg":6,
+"off_track_s":0,
+"speed_drop_kmh":75
+},
+"#38 NXS Senpaioza":{
+"max_slip_deg":7,
+"off_track_s":0,
+"speed_drop_kmh":71
+}
+}
+},
+{
+"t":423.21,
+"time":"7:03.2",
+"t_end":423.76,
+"cars":[
+"#38 NXS Senpaioza",
+"Car #69 (hidden name, slot 14)"
+],
+"where":"on the run to T6",
+"lap":5,
+"game_logged_only":false,
+"front":"Car #69 (hidden name, slot 14)",
+"behind":"#38 NXS Senpaioza",
+"overlap_m":3.06,
+"overlap_history_m":{
+"2.0":2.4,
+"1.5":2.8,
+"1.0":4.0,
+"0.5":3.8,
+"0.2":3.2
+},
+"side_gap_m":2.24,
+"closing_kmh":-8,
+"inside_car":"Car #69 (hidden name, slot 14)",
+"hold_line_sim_min_gap_m":{
+"actual":-0.21,
+"front_car_holds_line":-0.31,
+"behind_car_holds_line":-1.39,
+"both_hold":-1.45
+},
+"per_car":{
+"Car #69 (hidden name, slot 14)":{
+"role":"front",
+"speed_kmh":127,
+"moved_toward_other_last_1s_m":1.41,
+"moved_vs_expected_line_toward_other_1s_m":-0.76,
+"deviation_from_expected_line_m":0.03,
+"room_left_on_far_side_m":5.3,
+"brake_now":0.0,
+"brake_normal_own":0.0,
+"brake_normal_field":0.0,
+"off_track_before_s":0,
+"slip_before_deg":2.2,
+"status":"racing",
+"brake_point_later_than_own_pct":24,
+"apex_speed_over_own_pct":-1
+},
+"#38 NXS Senpaioza":{
+"role":"behind",
+"speed_kmh":120,
+"moved_toward_other_last_1s_m":-0.75,
+"moved_vs_expected_line_toward_other_1s_m":-0.75,
+"deviation_from_expected_line_m":1.46,
+"room_left_on_far_side_m":2.53,
+"brake_now":0.0,
+"brake_normal_own":0.0,
+"brake_normal_field":0.0,
+"off_track_before_s":0,
+"slip_before_deg":6.8,
+"status":"racing",
+"apex_speed_over_own_pct":-22
+}
+},
+"after":{
+"Car #69 (hidden name, slot 14)":{
+"max_slip_deg":3,
+"off_track_s":0,
+"speed_drop_kmh":30
+},
+"#38 NXS Senpaioza":{
+"max_slip_deg":5,
+"off_track_s":0,
+"speed_drop_kmh":35
+}
+}
+}
+],
+"consequences":[
+{
+"car":"#38 NXS Senpaioza",
+"lost_s":1.09,
+"status_after":"racing",
+"from_pos":5,
+"to_pos":6,
+"max_slip_deg":6,
+"spun":false,
+"off_track_s":0,
+"retired":false
+},
+{
+"car":"Car #69 (hidden name, slot 14)",
+"lost_s":0.58,
+"status_after":"racing",
+"from_pos":6,
+"to_pos":5,
+"max_slip_deg":6,
+"spun":false,
+"off_track_s":0,
+"retired":false
+}
+],
+"engine_call":[
+{
+"sev":"MEDIUM",
+"type":"Racing incident",
+"drivers":[
+"NXS Senpaioza",
+"Aston Martin '26 #69"
+],
+"steps":[
+{
+"call":"Aston Martin '26 #69 at fault",
+"why":"Aston Martin '26 #69 moved 5.9 m towards the other car before the touch"
+}
+]
+}
+]
+},
+{
+"n":32,
+"car_ids":[
+13,
+14
+],
+"after_finish":false,
+"status_at_first_touch":{
+"#38 NXS Senpaioza":"racing",
+"Car #69 (hidden name, slot 14)":"racing"
+},
+"start":"7:44.0",
+"end":"7:45.8",
+"t_start":464.0,
+"lap":5,
+"cars":[
+"#38 NXS Senpaioza",
+"Car #69 (hidden name, slot 14)"
+],
+"touch_count":1,
+"game_contact_severity_max":0,
+"touches":[
+{
+"t":465.01,
+"time":"7:45.0",
+"t_end":465.76,
+"cars":[
+"#38 NXS Senpaioza",
+"Car #69 (hidden name, slot 14)"
+],
+"where":"braking into T8",
+"lap":5,
+"game_logged_only":false,
+"front":"#38 NXS Senpaioza",
+"behind":"Car #69 (hidden name, slot 14)",
+"overlap_m":3.92,
+"overlap_history_m":{
+"2.0":2.1,
+"1.5":1.7,
+"1.0":1.5,
+"0.5":2.1,
+"0.2":3.3
+},
+"side_gap_m":2.03,
+"closing_kmh":10,
+"inside_car":"#38 NXS Senpaioza",
+"hold_line_sim_min_gap_m":{
+"actual":-0.07,
+"front_car_holds_line":-1.51,
+"behind_car_holds_line":-0.35,
+"both_hold":-1.8
+},
+"per_car":{
+"#38 NXS Senpaioza":{
+"role":"front",
+"speed_kmh":200,
+"moved_toward_other_last_1s_m":1.03,
+"moved_vs_expected_line_toward_other_1s_m":-0.4,
+"deviation_from_expected_line_m":-1.32,
+"room_left_on_far_side_m":11.05,
+"brake_now":0.81,
+"brake_normal_own":0.65,
+"brake_normal_field":1.0,
+"off_track_before_s":0,
+"slip_before_deg":0.3,
+"status":"racing",
+"brake_point_later_than_own_pct":5,
+"apex_speed_over_own_pct":-4
+},
+"Car #69 (hidden name, slot 14)":{
+"role":"behind",
+"speed_kmh":210,
+"moved_toward_other_last_1s_m":0.44,
+"moved_vs_expected_line_toward_other_1s_m":0.09,
+"deviation_from_expected_line_m":0.23,
+"room_left_on_far_side_m":0.18,
+"brake_now":1.0,
+"brake_normal_own":1.0,
+"brake_normal_field":1.0,
+"off_track_before_s":0,
+"slip_before_deg":0.3,
+"status":"racing",
+"brake_point_later_than_own_pct":-1,
+"apex_speed_over_own_pct":-6
+}
+},
+"after":{
+"#38 NXS Senpaioza":{
+"max_slip_deg":3,
+"off_track_s":0,
+"speed_drop_kmh":118
+},
+"Car #69 (hidden name, slot 14)":{
+"max_slip_deg":4,
+"off_track_s":0,
+"speed_drop_kmh":141
+}
+}
+}
+],
+"consequences":[
+{
+"car":"#38 NXS Senpaioza",
+"lost_s":0.07,
+"status_after":"racing",
+"from_pos":5,
+"to_pos":5,
+"max_slip_deg":2,
+"spun":false,
+"off_track_s":0,
+"retired":false
+},
+{
+"car":"Car #69 (hidden name, slot 14)",
+"lost_s":0.12,
+"status_after":"racing",
+"from_pos":6,
+"to_pos":6,
+"max_slip_deg":3,
+"spun":false,
+"off_track_s":0,
+"retired":false
+}
+],
+"engine_call":[
+{
+"sev":"LOW",
+"type":"Racing incident",
+"drivers":[
+"NXS Senpaioza",
+"Aston Martin '26 #69"
+],
+"steps":[
+{
+"call":"racing incident",
+"why":"racing incident"
+}
+]
+}
+]
+}
+]
+}

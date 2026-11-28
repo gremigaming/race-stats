@@ -1,0 +1,138 @@
+{
+ "recording": "2026-11-28_14-19-06_Melbourne",
+ "track": "Melbourne",
+ "judged_at": "2026-11-28T14:29:52Z",
+ "steward": "AI steward trial",
+ "incidents": [
+  {
+   "n": 1,
+   "time": "0:07.2",
+   "lap": 1,
+   "cars": [
+    "#21 EthanMoonski",
+    "Car #2 (hidden name, slot 3)"
+   ],
+   "call": "none",
+   "at_fault": [],
+   "type": "Light tap",
+   "sev": 0,
+   "confidence": "high",
+   "why": "Lap 1 T1 tap, nobody lost time (-0.01 / -0.11 s), no slide.",
+   "engine_agrees": true
+  },
+  {
+   "n": 2,
+   "time": "1:02.7",
+   "lap": 1,
+   "cars": [
+    "#15 vanderdeured",
+    "Car #2 (hidden name, slot 3)",
+    "#3 TTV/GreMi_Gaming"
+   ],
+   "call": "none",
+   "at_fault": [],
+   "type": "Lap 1 pack touches",
+   "sev": 0,
+   "confidence": "medium",
+   "why": "Two light lap-1 touches into T12; losses 0.30 / 0.35 s (under the 1 s lap-1 line), no spin, no place lost.",
+   "engine_agrees": false
+  },
+  {
+   "n": 3,
+   "time": "1:45.7",
+   "lap": 2,
+   "cars": [
+    "#15 vanderdeured",
+    "Car #2 (hidden name, slot 3)"
+   ],
+   "call": "fault",
+   "at_fault": [
+    {
+     "driver": "#15 vanderdeured",
+     "touches": [
+      {
+       "time": "1:46.7",
+       "sev": 3
+      }
+     ],
+     "sev": 3,
+     "points": -0.5
+    }
+   ],
+   "type": "Braking on the straight in front of a close car",
+   "sev": 3,
+   "confidence": "medium",
+   "why": "vanderdeured braked 65% on the run to T6 where he and the field never brake (0%) and moved 1.26 m off his expected line toward Car #2; with vanderdeured on his line the gap stays open (+0.29 m). Car #2 spun and lost 3.0 s.",
+   "engine_agrees": false
+  },
+  {
+   "n": 4,
+   "time": "4:52.7",
+   "lap": 4,
+   "cars": [
+    "#8 Stepino81",
+    "#86 Overfast-_"
+   ],
+   "call": "fault",
+   "at_fault": [
+    {
+     "driver": "#86 Overfast-_",
+     "touches": [
+      {
+       "time": "4:53.7",
+       "sev": 4
+      }
+     ],
+     "sev": 4,
+     "points": -1
+    }
+   ],
+   "type": "Ran into the rear of the car ahead",
+   "sev": 4,
+   "confidence": "medium",
+   "why": "Overfast was never alongside (overlap -0.4 m, -1.9 m at 0.2 s), closed 10 km/h with no room left on his side (-0.33 m) and hit the leader Stepino; both spun, Stepino lost 7.4 s and P1->P4. Neither moved toward the other.",
+   "engine_agrees": true
+  },
+  {
+   "n": 5,
+   "time": "5:38.3",
+   "lap": 5,
+   "cars": [
+    "Car #62 (hidden name, slot 4)",
+    "#86 Overfast-_"
+   ],
+   "call": "fault",
+   "at_fault": [
+    {
+     "driver": "Car #62 (hidden name, slot 4)",
+     "touches": [
+      {
+       "time": "5:39.3",
+       "sev": 3
+      }
+     ],
+     "sev": 3,
+     "points": -0.5
+    }
+   ],
+   "type": "Ran into the car ahead under braking",
+   "sev": 3,
+   "confidence": "medium",
+   "why": "Car #62 was behind (overlap -0.25 m), closing 17 km/h into T1, moved 0.88 m beyond his line toward Overfast; Overfast braked normally (-5%), went off for 1.5 s and lost 2.9 s.",
+   "engine_agrees": true
+  }
+ ],
+ "reckless": [],
+ "summary": {
+  "incidents": 5,
+  "faults": 3,
+  "ri": 0,
+  "none": 2,
+  "points": {
+   "#15 vanderdeured": -0.5,
+   "#86 Overfast-_": -1,
+   "Car #62 (hidden name, slot 4)": -0.5
+  },
+  "engine_agreement": "3/5"
+ }
+}
