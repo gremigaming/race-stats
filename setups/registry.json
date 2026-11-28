@@ -1992,11 +1992,24 @@
          "run": 1,
          "laps": 1,
          "bb": 58
+        },
+        {
+         "file": "2026-11-28_15-37-25_Miami_Race.gmtel.gz",
+         "date": "2026-11-28",
+         "session": "race",
+         "osq": false,
+         "weather": 0,
+         "pace": 89537,
+         "best": 89537,
+         "mean": 92001,
+         "run": 5,
+         "laps": 4,
+         "bb": 58
         }
        ],
        "verdict": {
         "result": "baseline",
-        "text": "Starting point: 1:29.091 over 3 sessions."
+        "text": "Starting point: 1:29.203 over 4 sessions."
        }
       },
       {
@@ -2101,11 +2114,24 @@
          "run": 5,
          "laps": 4,
          "bb": 58
+        },
+        {
+         "file": "2026-11-28_15-37-25_Miami_Race.gmtel.gz",
+         "date": "2026-11-28",
+         "session": "race",
+         "osq": false,
+         "weather": 0,
+         "pace": 92001,
+         "best": 89537,
+         "mean": 92001,
+         "run": 5,
+         "laps": 4,
+         "bb": 58
         }
        ],
        "verdict": {
         "result": "baseline",
-        "text": "Starting point: 1:30.152 over 2 sessions."
+        "text": "Starting point: 1:30.769 over 3 sessions."
        }
       },
       {
